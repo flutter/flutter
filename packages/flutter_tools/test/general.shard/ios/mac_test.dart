@@ -8,9 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -18,18 +16,11 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
-final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorTerminalPlatform,
-};
-
-class MockProcessManager extends Mock implements ProcessManager {}
 class MockIosProject extends Mock implements IosProject {}
 
 void main() {
@@ -48,47 +39,62 @@ void main() {
       cache = Cache.test(
         artifacts: <ArtifactSet>[
           FakeDyldEnvironmentArtifact(),
-        ]);
+        ],
+        processManager: FakeProcessManager.any(),
+      );
     });
 
     group('screenshot', () {
-      MockProcessManager mockProcessManager;
+      FakeProcessManager fakeProcessManager;
       File outputFile;
 
       setUp(() {
-        mockProcessManager = MockProcessManager();
+        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
         outputFile = MemoryFileSystem.test().file('image.png');
       });
 
       testWithoutContext('error if idevicescreenshot is not installed', () async {
         // Let `idevicescreenshot` fail with exit code 1.
-        when(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': 'Artifact.idevicescreenshot.TargetPlatform.ios'},
-            workingDirectory: null,
-        )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
+        fakeProcessManager.addCommand(FakeCommand(
+          command: <String>[
+            'Artifact.idevicescreenshot.TargetPlatform.ios',
+            outputFile.path,
+            '--udid',
+            '1234',
+          ],
+          environment: const <String, String>{
+            'DYLD_LIBRARY_PATH': '/path/to/libraries',
+          },
+          exitCode: 1,
+        ));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
-          processManager: mockProcessManager,
+          processManager: fakeProcessManager,
           logger: logger,
         );
 
-        expect(() async => await iMobileDevice.takeScreenshot(
+        expect(() async => iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
           IOSDeviceInterface.usb,
         ), throwsA(anything));
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
 
       testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
-        when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
-            (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
+        fakeProcessManager.addCommand(FakeCommand(
+          command: <String>[
+            'Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234',
+          ],
+          environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+        ));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
-          processManager: mockProcessManager,
+          processManager: fakeProcessManager,
           logger: logger,
         );
 
@@ -97,20 +103,21 @@ void main() {
           '1234',
           IOSDeviceInterface.usb,
         );
-        verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234'],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
-            workingDirectory: null,
-        ));
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
 
       testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
-        when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
-            (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
+        fakeProcessManager.addCommand(FakeCommand(
+          command: <String>[
+            'Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234', '--network',
+          ],
+          environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+        ));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
-          processManager: mockProcessManager,
+          processManager: fakeProcessManager,
           logger: logger,
         );
 
@@ -119,10 +126,7 @@ void main() {
           '1234',
           IOSDeviceInterface.network,
         );
-        verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234', '--network'],
-          environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
-          workingDirectory: null,
-        ));
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
     });
   });
@@ -138,7 +142,7 @@ void main() {
       testUsage = TestUsage();
     });
 
-    testUsingContext('Sends analytics when bitcode fails', () async {
+    testWithoutContext('Sends analytics when bitcode fails', () async {
       const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
@@ -155,7 +159,7 @@ void main() {
       expect(testUsage.events, contains(
         TestUsageEvent(
           'build',
-          'unspecified',
+          'ios',
           label: 'xcode-bitcode-failure',
           parameters: <String, String>{
             cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
@@ -165,7 +169,7 @@ void main() {
       ));
     });
 
-    testUsingContext('No provisioning profile shows message', () async {
+    testWithoutContext('No provisioning profile shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -236,9 +240,9 @@ Error launching application on iPhone.''',
         logger.errorText,
         contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('No development team shows message', () async {
+    testWithoutContext('No development team shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -317,9 +321,9 @@ Could not build the precompiled application for the device.''',
         logger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('embedded and linked framework iOS mismatch shows message', () async {
+    testWithoutContext('embedded and linked framework iOS mismatch shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -354,9 +358,9 @@ Exited (sigterm)''',
         logger.errorText,
         contains('Your Xcode project requires migration.'),
       );
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('embedded and linked framework iOS simulator mismatch shows message', () async {
+    testWithoutContext('embedded and linked framework iOS simulator mismatch shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -391,7 +395,7 @@ Exited (sigterm)''',
         logger.errorText,
         contains('Your Xcode project requires migration.'),
       );
-    }, overrides: noColorTerminalOverride);
+    });
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
@@ -463,7 +467,7 @@ Exited (sigterm)''',
       ]);
 
       await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('ignores errors', () async {
@@ -480,7 +484,7 @@ Exited (sigterm)''',
 
       await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
       expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }

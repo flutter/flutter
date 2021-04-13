@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,7 +13,6 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -35,16 +33,10 @@ void main() {
     group('general', () {
       MemoryFileSystem fs;
       Directory buildDirectory;
-      FlutterProject projectUnderTest;
 
-      setUp(() {
-        fs = MemoryFileSystem.test();
-
-        final Directory currentDirectory = fs.currentDirectory;
-        buildDirectory = currentDirectory.childDirectory('build');
-        buildDirectory.createSync(recursive: true);
-
-        projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
+      FlutterProject setupProjectUnderTest(Directory currentDirectory) {
+        // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
+        final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
         projectUnderTest.ios.xcodeWorkspace.createSync(recursive: true);
         projectUnderTest.macos.xcodeWorkspace.createSync(recursive: true);
 
@@ -53,6 +45,7 @@ void main() {
         projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
 
         projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
+        projectUnderTest.ios.ephemeralModuleDirectory.createSync(recursive: true);
         projectUnderTest.ios.generatedXcodePropertiesFile.createSync(recursive: true);
         projectUnderTest.ios.generatedEnvironmentVariableExportScript.createSync(recursive: true);
         projectUnderTest.ios.deprecatedCompiledDartFramework.createSync(recursive: true);
@@ -64,9 +57,20 @@ void main() {
         projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.flutterPluginsFile.createSync(recursive: true);
         projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);
+
+        return projectUnderTest;
+      }
+
+      setUp(() {
+        fs = MemoryFileSystem.test();
+
+        final Directory currentDirectory = fs.currentDirectory;
+        buildDirectory = currentDirectory.childDirectory('build');
+        buildDirectory.createSync(recursive: true);
       });
 
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
@@ -77,6 +81,7 @@ void main() {
         expect(projectUnderTest.android.ephemeralDirectory.existsSync(), isFalse);
 
         expect(projectUnderTest.ios.ephemeralDirectory.existsSync(), isFalse);
+        expect(projectUnderTest.ios.ephemeralModuleDirectory.existsSync(), isFalse);
         expect(projectUnderTest.ios.generatedXcodePropertiesFile.existsSync(), isFalse);
         expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript.existsSync(), isFalse);
         expect(projectUnderTest.ios.deprecatedCompiledDartFramework.existsSync(), isFalse);
@@ -100,6 +105,7 @@ void main() {
       });
 
       testUsingContext('$CleanCommand cleans Xcode verbosely', () async {
+        setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
@@ -116,24 +122,32 @@ void main() {
 
     group('Windows', () {
       FakePlatform windowsPlatform;
+      MemoryFileSystem fileSystem;
+      FileExceptionHandler exceptionHandler;
       setUp(() {
         windowsPlatform = FakePlatform(operatingSystem: 'windows');
+        exceptionHandler = FileExceptionHandler();
+        fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
       });
 
       testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-        final MockFile mockFile = MockFile();
-        when(mockFile.existsSync()).thenReturn(true);
+        final File file = fileSystem.file('file')..createSync();
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.delete,
+          const FileSystemException('Deletion failed'),
+        );
 
-        when(mockFile.deleteSync(recursive: true)).thenThrow(const FileSystemException('Deletion failed'));
         final CleanCommand command = CleanCommand();
-        command.deleteFile(mockFile);
+        command.deleteFile(file);
         expect(testLogger.errorText, contains('A program may still be using a file'));
-        verify(mockFile.deleteSync(recursive: true)).called(1);
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
         Xcode: () => xcode,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('$CleanCommand handles missing permissions;', () async {

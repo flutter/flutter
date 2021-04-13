@@ -13,7 +13,7 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({this.name, this.canRequestFocus = true, this.autofocus = false});
+  const DemoButton({Key key, this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
 
   final String name;
   final bool canRequestFocus;

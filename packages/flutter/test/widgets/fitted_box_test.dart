@@ -13,11 +13,11 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           child: FittedBox(
             key: outside,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 100.0,
               height: 50.0,
@@ -48,12 +48,12 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
           child: FittedBox(
             key: outside,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 100.0,
               height: 50.0,
@@ -83,13 +83,13 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
           child: FittedBox(
             key: outside,
             fit: BoxFit.cover,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 100.0,
               height: 50.0,
@@ -139,14 +139,14 @@ void main() {
         Directionality(
           textDirection: TextDirection.rtl,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.bottomEnd,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -180,14 +180,14 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.bottomEnd,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -221,14 +221,14 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.center,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -262,14 +262,14 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.center,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 30.0,
                   height: 10.0,
@@ -303,14 +303,14 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.fill,
                 alignment: AlignmentDirectional.center,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 30.0,
                   height: 10.0,
@@ -493,12 +493,12 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           child: FittedBox(
             key: outside,
             fit: BoxFit.scaleDown,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 100.0,
               height: 50.0,
@@ -522,12 +522,12 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           child: FittedBox(
             key: outside,
             fit: BoxFit.scaleDown,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 400.0,
               height: 200.0,
@@ -550,12 +550,12 @@ void main() {
     final Key outside = UniqueKey();
 
     final Widget scaleDownWidget = Center(
-      child: Container(
+      child: SizedBox(
         width: 200.0,
         child: FittedBox(
           key: outside,
           fit: BoxFit.scaleDown,
-          child: Container(
+          child: const SizedBox(
             width: 100.0,
             height: 50.0,
           ),
@@ -564,11 +564,11 @@ void main() {
     );
 
     final Widget coverWidget = Center(
-      child: Container(
+      child: SizedBox(
         width: 200.0,
         child: FittedBox(
           key: outside,
-          child: Container(
+          child: const SizedBox(
             width: 100.0,
             height: 50.0,
           ),

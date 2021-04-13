@@ -40,6 +40,8 @@
   "previousMonthTooltip": "Prethodni mesec",
   "nextPageTooltip": "Sledeća stranica",
   "previousPageTooltip": "Prethodna stranica",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "Prikaži meni",
   "aboutListTileTitle": "O aplikaciji $applicationName",
   "licensesPageTitle": "Licence",

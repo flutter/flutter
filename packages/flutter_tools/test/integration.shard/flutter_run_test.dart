@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
@@ -49,12 +48,6 @@ void main() {
         && !_proc.stdout.toString().contains('No devices found with name or id matching')) {
       fail("'flutter run -d invalid-device-id' did not produce the expected error");
     }
-  });
-
-  testWithoutContext('flutter run writes pid-file', () async {
-    final File pidFile = tempDir.childFile('test.pid');
-    await _flutter.run(pidFile: pidFile);
-    expect(pidFile.existsSync(), isTrue);
   });
 
   testWithoutContext('sets activeDevToolsServerAddress extension', () async {

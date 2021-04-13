@@ -17,7 +17,9 @@ import 'disposable_build_context.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'placeholder.dart';
 import 'scroll_aware_image_provider.dart';
+import 'text.dart';
 import 'ticker_provider.dart';
 
 export 'package:flutter/painting.dart' show
@@ -471,7 +473,6 @@ class Image extends StatefulWidget {
        assert(isAntiAlias != null),
        super(key: key);
 
-
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
   //
   // * If [width] and [height] are both specified, and [scale] is not, then
@@ -623,9 +624,12 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, scale != null
-         ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package)
+  }) : image = ResizeImage.resizeIfNeeded(
+         cacheWidth,
+         cacheHeight,
+         scale != null
+           ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+           : AssetImage(name, bundle: bundle, package: package),
        ),
        loadingBuilder = null,
        assert(alignment != null),
@@ -767,8 +771,8 @@ class Image extends StatefulWidget {
   ///     ),
   ///     child: Image.network(
   ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
-  ///         if (wasSynchronouslyLoaded ?? false) {
+  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+  ///         if (wasSynchronouslyLoaded) {
   ///           return child;
   ///         }
   ///         return AnimatedOpacity(
@@ -830,8 +834,9 @@ class Image extends StatefulWidget {
   ///     child: Image.network(
   ///       'https://example.com/image.jpg',
   ///       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-  ///         if (loadingProgress == null)
+  ///         if (loadingProgress == null) {
   ///           return child;
+  ///         }
   ///         return Center(
   ///           child: CircularProgressIndicator(
   ///             value: loadingProgress.expectedTotalBytes != null
@@ -881,7 +886,7 @@ class Image extends StatefulWidget {
   ///         //   exception,
   ///         //   stackTrace,
   ///         // );
-  ///         return Text('😢');
+  ///         return const Text('😢');
   ///       },
   ///     ),
   ///   );
@@ -1176,12 +1181,17 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStreamListener = ImageStreamListener(
         _handleImageFrame,
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
-        onError: widget.errorBuilder != null
-            ? (dynamic error, StackTrace? stackTrace) {
+        onError: widget.errorBuilder != null || kDebugMode
+            ? (Object error, StackTrace? stackTrace) {
                 setState(() {
                   _lastException = error;
                   _lastStack = stackTrace;
                 });
+                assert(() {
+                  if (widget.errorBuilder == null)
+                    throw error; // Ensures the error message is printed to the console.
+                  return true;
+                }());
               }
             : null,
       );
@@ -1268,11 +1278,41 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _isListeningToStream = false;
   }
 
+  Widget _debugBuildErrorWidget(BuildContext context, Object error) {
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        const Positioned.fill(
+          child: Placeholder(
+            color: Color(0xCF8D021F),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: FittedBox(
+            child: Text(
+              '$error',
+              textAlign: TextAlign.center,
+              textDirection: TextDirection.ltr,
+              style: const TextStyle(
+                shadows: <Shadow>[
+                  Shadow(blurRadius: 1.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_lastException  != null) {
-      assert(widget.errorBuilder != null);
-      return widget.errorBuilder!(context, _lastException!, _lastStack);
+    if (_lastException != null) {
+      if (widget.errorBuilder != null)
+        return widget.errorBuilder!(context, _lastException!, _lastStack);
+      if (kDebugMode)
+        return _debugBuildErrorWidget(context, _lastException!);
     }
 
     Widget result = RawImage(

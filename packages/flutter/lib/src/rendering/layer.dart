@@ -505,8 +505,8 @@ class PictureLayer extends Layer {
     properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
     properties.add(DiagnosticsProperty<String>(
       'raster cache hints',
-      'isComplex = $isComplexHint, willChange = $willChangeHint'),
-    );
+      'isComplex = $isComplexHint, willChange = $willChangeHint',
+    ));
   }
 
   @override
@@ -559,9 +559,9 @@ class TextureLayer extends Layer {
   /// The identity of the backend texture.
   final int textureId;
 
-  /// When true the texture that will not be updated with new frames.
+  /// When true the texture will not be updated with new frames.
   ///
-  /// This is used when resizing an embedded  Android views: When resizing there
+  /// This is used for resizing embedded Android views: when resizing there
   /// is a short period during which the framework cannot tell if the newest
   /// texture frame has the previous or new size, to workaround this the
   /// framework "freezes" the texture just before resizing the Android view and
@@ -790,9 +790,11 @@ class ContainerLayer extends Layer {
 
   List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
     FlutterError.reportError(FlutterErrorDetails(
-      exception: FlutterError('Painting order is out of order with respect to elevation.\n'
-                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
-                              'for more details.'),
+      exception: FlutterError(
+        'Painting order is out of order with respect to elevation.\n'
+        'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
+        'for more details.',
+      ),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
       informationCollector: () {
@@ -1580,7 +1582,7 @@ class TransformLayer extends OffsetLayer {
   Offset? _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(
-        PointerEvent.removePerspectiveTransform(transform!)
+        PointerEvent.removePerspectiveTransform(transform!),
       );
       _inverseDirty = false;
     }

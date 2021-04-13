@@ -21,23 +21,23 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
-final Generator _kNoColorOutputPlatform = () => FakePlatform(
+FakePlatform _kNoColorOutputPlatform() => FakePlatform(
   localeName: 'en_US.UTF-8',
   environment: <String, String>{},
   stdoutSupportsAnsi: false,
@@ -53,12 +53,12 @@ final Platform macPlatform = FakePlatform(
 );
 
 void main() {
-  MockFlutterVersion mockFlutterVersion;
+  FakeFlutterVersion flutterVersion;
   BufferLogger logger;
   FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    mockFlutterVersion = MockFlutterVersion();
+    flutterVersion = FakeFlutterVersion();
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
   });
@@ -667,13 +667,12 @@ void main() {
 
     await commandRunner.run(<String>['doctor']);
 
-    verify(mockFlutterVersion.fetchTagsAndUpdate()).called(1);
-
+    expect(flutterVersion.didFetchTagsAndUpdate, true);
     Cache.enableLocking();
   }, overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.any(),
     FileSystem: () => MemoryFileSystem.test(),
-    FlutterVersion: () => mockFlutterVersion,
+    FlutterVersion: () => flutterVersion,
     Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);
 
@@ -1045,7 +1044,6 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String missingExtensions = globals.fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
 
-class MockPlistParser extends Mock implements PlistParser {}
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {
   MockDevice() {

@@ -59,20 +59,6 @@ class EnterText extends Command {
   });
 }
 
-/// The result of the [EnterText] command.
-class EnterTextResult extends Result {
-  /// Creates a successful result of entering the text.
-  const EnterTextResult();
-
-  /// Deserializes the result from JSON.
-  static EnterTextResult fromJson(Map<String, dynamic> json) {
-    return const EnterTextResult();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => const <String, String>{};
-}
-
 /// A Flutter Driver command that enables and disables text entry emulation.
 class SetTextEntryEmulation extends Command {
   /// Creates a command that enables and disables text entry emulation.
@@ -93,18 +79,4 @@ class SetTextEntryEmulation extends Command {
   Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'enabled': '$enabled',
   });
-}
-
-/// The result of the [SetTextEntryEmulation] command.
-class SetTextEntryEmulationResult extends Result {
-  /// Creates a successful result.
-  const SetTextEntryEmulationResult();
-
-  /// Deserializes the result from JSON.
-  static SetTextEntryEmulationResult fromJson(Map<String, dynamic> json) {
-    return const SetTextEntryEmulationResult();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => const <String, String>{};
 }

@@ -4,30 +4,26 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
-
-class MockPlistUtils extends Mock implements PlistParser {}
+import '../../src/fakes.dart';
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -485,13 +481,13 @@ void main() {
 
   group('log reader', () {
     FakeProcessManager fakeProcessManager;
-    MockIosProject mockIosProject;
+    FakeIosProject mockIosProject;
     MockSimControl mockSimControl;
     Xcode xcode;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockIosProject = MockIosProject();
+      mockIosProject = FakeIosProject();
       mockSimControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
@@ -800,73 +796,69 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.install() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'install',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
-        () async => await simControl.install(deviceId, appId),
+        () async => simControl.install(deviceId, appId),
         throwsToolExit(message: r'Unable to install'),
       );
     });
 
     testWithoutContext('.uninstall() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'uninstall',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
-        () async => await simControl.uninstall(deviceId, appId),
+        () async => simControl.uninstall(deviceId, appId),
         throwsToolExit(message: r'Unable to uninstall'),
       );
     });
 
     testWithoutContext('.launch() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'launch',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
-        () async => await simControl.launch(deviceId, appId),
+        () async => simControl.launch(deviceId, appId),
         throwsToolExit(message: r'Unable to launch'),
       );
     });
   });
 
   group('startApp', () {
+    FakePlistParser testPlistParser;
     SimControl simControl;
     Xcode xcode;
 
     setUp(() {
       simControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
+      testPlistParser = FakePlistParser();
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
@@ -876,7 +868,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      when(globals.plistParser.getValueFromFile(any, any)).thenReturn('correct');
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
@@ -887,7 +879,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       verify(simControl.launch(any, 'correct', any));
     }, overrides: <Type, Generator>{
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => xcode,
@@ -910,7 +902,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       verify(simControl.launch(any, any, captureAny)).captured.contains('--enable-software-rendering');
     }, overrides: <Type, Generator>{
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => xcode,
@@ -936,7 +928,7 @@ flutter:
   module: {}
 ''');
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -954,7 +946,7 @@ flutter:
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('ios').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -970,7 +962,7 @@ flutter:
     testUsingContext('is false with no host app and no module', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -994,4 +986,10 @@ flutter:
   });
 }
 
-class MockBuildSystem extends Mock implements BuildSystem {}
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => 'com.example.test';
+
+  @override
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'My Super Awesome App.app';
+}

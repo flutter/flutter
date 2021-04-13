@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -24,16 +23,16 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
-import 'shortcuts.dart';
 import 'text.dart';
+import 'text_editing_action.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/rendering.dart' show SelectionChangedCause;
-export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SelectionChangedCause, TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -54,17 +53,6 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
-
-/// A map used to disable scrolling shortcuts in text fields.
-///
-/// This is a temporary fix for: https://github.com/flutter/flutter/issues/74191
-final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Intent>{
-  LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
-  LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
-};
 
 /// A controller for an editable text field.
 ///
@@ -102,12 +90,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 /// cursor at the end of the input.
 ///
 /// ```dart
-/// final _controller = TextEditingController();
+/// final TextEditingController _controller = TextEditingController();
 ///
+/// @override
 /// void initState() {
 ///   super.initState();
 ///   _controller.addListener(() {
-///     final text = _controller.text.toLowerCase();
+///     final String text = _controller.text.toLowerCase();
 ///     _controller.value = _controller.value.copyWith(
 ///       text: text,
 ///       selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
@@ -116,11 +105,13 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///   });
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Container(
@@ -128,7 +119,7 @@ final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Inten
 ///       padding: const EdgeInsets.all(6),
 ///       child: TextFormField(
 ///         controller: _controller,
-///         decoration: InputDecoration(border: OutlineInputBorder()),
+///         decoration: const InputDecoration(border: OutlineInputBorder()),
 ///       ),
 ///     ),
 ///   );
@@ -218,7 +209,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
           text: value.composing.textInside(value.text),
         ),
         TextSpan(text: value.composing.textAfter(value.text)),
-    ]);
+      ],
+    );
   }
 
   /// The currently selected [text].
@@ -398,6 +390,18 @@ class ToolbarOptions {
 /// methods such as [RenderEditable.selectPosition],
 /// [RenderEditable.selectWord], etc. programmatically.
 ///
+/// {@template flutter.widgets.editableText.showCaretOnScreen}
+/// ## Keep the caret visisble when focused
+///
+/// When focused, this widget will make attempts to keep the text area and its
+/// caret (even when [showCursor] is `false`) visible, on these occasions:
+///
+///  * When the user focuses this text field and it is not [readOnly].
+///  * When the user changes the selection of the text field, or changes the
+///    text when the text field is not [readOnly].
+///  * When the virtual keyboard pops up.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [TextField], which is a full-featured, material-design text input field
@@ -490,6 +494,7 @@ class EditableText extends StatefulWidget {
     this.autofillHints,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -694,15 +699,6 @@ class EditableText extends StatefulWidget {
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
-  ///
-  /// When LTR text is entered into an RTL field, or RTL text is entered into an
-  /// LTR field, [LRM](https://en.wikipedia.org/wiki/Left-to-right_mark) or
-  /// [RLM](https://en.wikipedia.org/wiki/Right-to-left_mark) characters will be
-  /// inserted alongside whitespace characters, respectively. This is to
-  /// eliminate ambiguous directionality in whitespace and ensure proper caret
-  /// placement. These characters will affect the length of the string and may
-  /// need to be parsed out when doing things like string comparison with other
-  /// text.
   ///
   /// Defaults to the ambient [Directionality], if any.
   /// {@endtemplate}
@@ -946,11 +942,13 @@ class EditableText extends StatefulWidget {
   /// ```dart
   /// final TextEditingController _controller = TextEditingController();
   ///
+  /// @override
   /// void dispose() {
   ///   _controller.dispose();
   ///   super.dispose();
   /// }
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     body: Column(
@@ -969,7 +967,7 @@ class EditableText extends StatefulWidget {
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
   ///                   title: const Text('That is correct!'),
-  ///                   content: Text ('13 is the right answer.'),
+  ///                   content: const Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(
   ///                       onPressed: () { Navigator.pop(context); },
@@ -1205,6 +1203,10 @@ class EditableText extends StatefulWidget {
   ///
   /// See [Scrollable.physics].
   /// {@endtemplate}
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [scrollPhysics].
   final ScrollPhysics? scrollPhysics;
 
   /// {@template flutter.widgets.editableText.selectionEnabled}
@@ -1308,6 +1310,23 @@ class EditableText extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// {@template flutter.widgets.shadow.scrollBehavior}
+  /// A [ScrollBehavior] that will be applied to this widget individually.
+  ///
+  /// Defaults to null, wherein the inherited [ScrollBehavior] is copied and
+  /// modified to alter the viewport decoration, like [Scrollbar]s.
+  /// {@endtemplate}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [scrollPhysics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  ///
+  /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
+  /// modified by default to only apply a [Scrollbar] if [maxLines] is greater
+  /// than 1.
+  final ScrollBehavior? scrollBehavior;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -1480,7 +1499,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextSelectionDelegate, TextInputClient, AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient, TextEditingActionTarget {
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1715,22 +1734,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(value.selection, renderEditable, SelectionChangedCause.keyboard);
+      _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
     } else {
       hideToolbar();
       _currentPromptRectRange = null;
 
       if (_hasInputConnection) {
-        _showCaretOnScreen();
         if (widget.obscureText && value.text.length == _value.text.length + 1) {
           _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
           _obscureLatestCharIndex = _value.selection.baseOffset;
         }
       }
 
-      _formatAndSetValue(value);
+      _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
+    // Wherever the value is changed by the user, schedule a showCaretOnScreen
+    // to make sure the user can see the changes they just made. Programmatical
+    // changes to `textEditingValue` do not trigger the behavior even if the
+    // text field is focused.
+    _scheduleShowCaretOnScreen();
     if (_hasInputConnection) {
       // To keep the cursor from blinking while typing, we want to restart the
       // cursor timer every time a new character is typed.
@@ -1836,7 +1859,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
       if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset)
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), renderEditable, SelectionChangedCause.forcePress);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -2028,6 +2051,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.show();
       _updateSizeAndTransform();
       _updateComposingRectIfNeeded();
+      _updateCaretRectIfNeeded();
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
         // the platform text input plugin.
@@ -2102,7 +2126,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
@@ -2114,37 +2138,43 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // This will show the keyboard for all selection changes on the
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
-
-    _selectionOverlay?.hide();
-    _selectionOverlay = null;
-
-    if (widget.selectionControls != null) {
-      _selectionOverlay = TextSelectionOverlay(
-        clipboardStatus: _clipboardStatus,
-        context: context,
-        value: _value,
-        debugRequiredFor: widget,
-        toolbarLayerLink: _toolbarLayerLink,
-        startHandleLayerLink: _startHandleLayerLink,
-        endHandleLayerLink: _endHandleLayerLink,
-        renderObject: renderObject,
-        selectionControls: widget.selectionControls,
-        selectionDelegate: this,
-        dragStartBehavior: widget.dragStartBehavior,
-        onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      );
+    if (widget.selectionControls == null) {
+      _selectionOverlay?.dispose();
+      _selectionOverlay = null;
+    } else {
+      if (_selectionOverlay == null) {
+        _selectionOverlay = TextSelectionOverlay(
+          clipboardStatus: _clipboardStatus,
+          context: context,
+          value: _value,
+          debugRequiredFor: widget,
+          toolbarLayerLink: _toolbarLayerLink,
+          startHandleLayerLink: _startHandleLayerLink,
+          endHandleLayerLink: _endHandleLayerLink,
+          renderObject: renderEditable,
+          selectionControls: widget.selectionControls,
+          selectionDelegate: this,
+          dragStartBehavior: widget.dragStartBehavior,
+          onSelectionHandleTapped: widget.onSelectionHandleTapped,
+        );
+      } else {
+        _selectionOverlay!.update(_value);
+      }
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
       _selectionOverlay!.showHandles();
-      try {
-        widget.onSelectionChanged?.call(selection, cause);
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets',
-          context: ErrorDescription('while calling onSelectionChanged for $cause'),
-        ));
-      }
+    }
+    // TODO(chunhtai): we should make sure selection actually changed before
+    // we call the onSelectionChanged.
+    // https://github.com/flutter/flutter/issues/76349.
+    try {
+      widget.onSelectionChanged?.call(selection, cause);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while calling onSelectionChanged for $cause'),
+      ));
     }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
@@ -2154,17 +2184,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  bool _textChangedSinceLastCaretUpdate = false;
   Rect? _currentCaretRect;
-
   void _handleCaretChanged(Rect caretRect) {
     _currentCaretRect = caretRect;
-    // If the caret location has changed due to an update to the text or
-    // selection, then scroll the caret into view.
-    if (_textChangedSinceLastCaretUpdate) {
-      _textChangedSinceLastCaretUpdate = false;
-      _showCaretOnScreen();
-    }
   }
 
   // Animation configuration for scrolling the caret back on screen.
@@ -2173,7 +2195,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _showCaretOnScreenScheduled = false;
 
-  void _showCaretOnScreen() {
+  void _scheduleShowCaretOnScreen() {
     if (_showCaretOnScreenScheduled) {
       return;
     }
@@ -2232,14 +2254,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeMetrics() {
     if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
-      _showCaretOnScreen();
+      _scheduleShowCaretOnScreen();
     }
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
-  late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
-
-  void _formatAndSetValue(TextEditingValue value) {
+  void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommited
     // text in the composing region), or when the user committed the composing
     // text.
@@ -2257,20 +2277,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         value,
         (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
       ) ?? value;
-
-      // Always pass the text through the whitespace directionality formatter to
-      // maintain expected behavior with carets on trailing whitespace.
-      // TODO(LongCatIsLooong): The if statement here is for retaining the
-      // previous behavior. The input formatter logic will be updated in an
-      // upcoming PR.
-      if (widget.inputFormatters?.isNotEmpty ?? false)
-        value = _whitespaceFormatter.formatEditUpdate(_value, value);
     }
 
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
     _value = value;
+    // Changes made by the keyboard can sometimes be "out of band" for listening
+    // components, so always send those events, even if we didn't think it
+    // changed. Also, the user long pressing should always send a selection change
+    // as well.
+    if (selectionChanged ||
+        (userInteraction &&
+        (cause == SelectionChangedCause.longPress ||
+         cause == SelectionChangedCause.keyboard))) {
+      _handleSelectionChanged(value.selection, cause);
+    }
     if (textChanged) {
       try {
         widget.onChanged?.call(value.text);
@@ -2280,19 +2302,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           stack: stack,
           library: 'widgets',
           context: ErrorDescription('while calling onChanged'),
-        ));
-      }
-    }
-
-    if (selectionChanged) {
-      try {
-        widget.onSelectionChanged?.call(value.selection, null);
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets',
-          context: ErrorDescription('while calling onSelectionChanged'),
         ));
       }
     }
@@ -2390,7 +2399,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
-    _textChangedSinceLastCaretUpdate = true;
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() { /* We use widget.controller.value in build(). */ });
@@ -2404,10 +2412,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance!.addObserver(this);
       _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
-      _showCaretOnScreen();
+      if (!widget.readOnly) {
+        _scheduleShowCaretOnScreen();
+      }
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), renderEditable, null);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
@@ -2451,6 +2461,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  void _updateCaretRectIfNeeded() {
+    if (_hasInputConnection) {
+      if (renderEditable.selection != null && renderEditable.selection!.isValid &&
+          renderEditable.selection!.isCollapsed) {
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
+        final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+        _textInputConnection!.setCaretRect(caretRect);
+      }
+      SchedulerBinding.instance!
+          .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+    }
+  }
+
   TextDirection get _textDirection {
     final TextDirection result = widget.textDirection ?? Directionality.of(context);
     assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
@@ -2461,6 +2484,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
+  @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
@@ -2469,9 +2493,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
   @override
-  set textEditingValue(TextEditingValue value) {
-    _selectionOverlay?.update(value);
-    _formatAndSetValue(value);
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
+    // Compare the current TextEditingValue with the pre-format new
+    // TextEditingValue value, in case the formatter would reject the change.
+    final bool shouldShowCaret = widget.readOnly
+      ? _value.selection != value.selection
+      : _value != value;
+    if (shouldShowCaret) {
+      _scheduleShowCaretOnScreen();
+    }
+    _formatAndSetValue(value, cause, userInteraction: true);
   }
 
   @override
@@ -2505,8 +2536,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void hideToolbar() {
-    _selectionOverlay?.hide();
+  void hideToolbar([bool hideHandles = true]) {
+    if (hideHandles) {
+      // Hide the handles and the toolbar.
+      _selectionOverlay?.hide();
+    } else {
+      // Hide only the toolbar but not the handles.
+      _selectionOverlay?.hideToolbar();
+    }
   }
 
   /// Toggles the visibility of the toolbar.
@@ -2595,6 +2632,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
         restorationId: widget.restorationId,
+        scrollBehavior: widget.scrollBehavior ??
+            // Remove scrollbars if only single line
+            (_isMultiline ? null : ScrollConfiguration.of(context).copyWith(scrollbars: false)),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,
@@ -2634,13 +2674,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 smartQuotesType: widget.smartQuotesType,
                 enableSuggestions: widget.enableSuggestions,
                 offset: offset,
-                onSelectionChanged: _handleSelectionChanged,
                 onCaretChanged: _handleCaretChanged,
                 rendererIgnoresPointer: widget.rendererIgnoresPointer,
                 cursorWidth: widget.cursorWidth,
                 cursorHeight: widget.cursorHeight,
                 cursorRadius: widget.cursorRadius,
-                cursorOffset: widget.cursorOffset,
+                cursorOffset: widget.cursorOffset ?? Offset.zero,
                 selectionHeightStyle: widget.selectionHeightStyle,
                 selectionWidthStyle: widget.selectionWidthStyle,
                 paintCursorAboveText: widget.paintCursorAboveText,
@@ -2667,10 +2706,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      if ((defaultTargetPlatform == TargetPlatform.android ||
-              defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.fuchsia) &&
-          !kIsWeb) {
+      if (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.fuchsia) {
         final int? o =
             _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length)
@@ -2718,13 +2756,12 @@ class _Editable extends LeafRenderObjectWidget {
     required this.smartQuotesType,
     required this.enableSuggestions,
     required this.offset,
-    this.onSelectionChanged,
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
     this.cursorHeight,
     this.cursorRadius,
-    this.cursorOffset,
+    required this.cursorOffset,
     required this.paintCursorAboveText,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
@@ -2766,13 +2803,12 @@ class _Editable extends LeafRenderObjectWidget {
   final SmartQuotesType smartQuotesType;
   final bool enableSuggestions;
   final ViewportOffset offset;
-  final SelectionChangedHandler? onSelectionChanged;
   final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final double? cursorHeight;
   final Radius? cursorRadius;
-  final Offset? cursorOffset;
+  final Offset cursorOffset;
   final bool paintCursorAboveText;
   final ui.BoxHeightStyle selectionHeightStyle;
   final ui.BoxWidthStyle selectionWidthStyle;
@@ -2806,7 +2842,6 @@ class _Editable extends LeafRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
-      onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
@@ -2851,7 +2886,6 @@ class _Editable extends LeafRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
-      ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior
@@ -2870,186 +2904,5 @@ class _Editable extends LeafRenderObjectWidget {
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
-  }
-}
-
-// This formatter inserts [Unicode.RLM] and [Unicode.LRM] into the
-// string in order to preserve expected caret behavior when trailing
-// whitespace is inserted.
-//
-// When typing in a direction that opposes the base direction
-// of the paragraph, un-enclosed whitespace gets the directionality
-// of the paragraph. This is often at odds with what is immediately
-// being typed causing the caret to jump to the wrong side of the text.
-// This formatter makes use of the RLM and LRM to cause the text
-// shaper to inherently treat the whitespace as being surrounded
-// by the directionality of the previous non-whitespace codepoint.
-class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
-  // The [textDirection] should be the base directionality of the
-  // paragraph/editable.
-  _WhitespaceDirectionalityFormatter({TextDirection? textDirection})
-    : _baseDirection = textDirection,
-      _previousNonWhitespaceDirection = textDirection;
-
-  // Using regex here instead of ICU is suboptimal, but is enough
-  // to produce the correct results for any reasonable input where this
-  // is even relevant. Using full ICU would be a much heavier change,
-  // requiring exposure of the C++ ICU API.
-  //
-  // LTR covers most scripts and symbols, including but not limited to Latin,
-  // ideographic scripts (Chinese, Japanese, etc), Cyrilic, Indic, and
-  // SE Asian scripts.
-  final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
-  // RTL covers Arabic, Hebrew, and other RTL languages such as Urdu,
-  // Aramic, Farsi, Dhivehi.
-  final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
-  // Although whitespaces are not the only codepoints that have weak directionality,
-  // these are the primary cause of the caret being misplaced.
-  final RegExp _whitespaceRegExp = RegExp(r'\s');
-
-  final TextDirection? _baseDirection;
-  // Tracks the directionality of the most recently encountered
-  // codepoint that was not whitespace. This becomes the direction of
-  // marker inserted to fully surround ambiguous whitespace.
-  TextDirection? _previousNonWhitespaceDirection;
-
-  // Prevents the formatter from attempting more expensive formatting
-  // operations mixed directionality is found.
-  bool _hasOpposingDirection = false;
-
-  // See [Unicode.RLM] and [Unicode.LRM].
-  //
-  // We do not directly use the [Unicode] constants since they are strings.
-  static const int _rlm = 0x200F;
-  static const int _lrm = 0x200E;
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    // Skip formatting (which can be more expensive) if there are no cases of
-    // mixing directionality. Once a case of mixed directionality is found,
-    // always perform the formatting.
-    if (!_hasOpposingDirection) {
-      _hasOpposingDirection = _baseDirection == TextDirection.ltr ?
-        _rtlRegExp.hasMatch(newValue.text) : _ltrRegExp.hasMatch(newValue.text);
-    }
-
-    if (_hasOpposingDirection) {
-      _previousNonWhitespaceDirection = _baseDirection;
-
-      final List<int> outputCodepoints = <int>[];
-
-      // We add/subtract from these as we insert/remove markers.
-      int selectionBase = newValue.selection.baseOffset;
-      int selectionExtent = newValue.selection.extentOffset;
-      int composingStart = newValue.composing.start;
-      int composingEnd = newValue.composing.end;
-
-      void addToLength() {
-        selectionBase += outputCodepoints.length <= selectionBase ? 1 : 0;
-        selectionExtent += outputCodepoints.length <= selectionExtent ? 1 : 0;
-
-        composingStart += outputCodepoints.length <= composingStart ? 1 : 0;
-        composingEnd += outputCodepoints.length <= composingEnd ? 1 : 0;
-      }
-      void subtractFromLength() {
-        selectionBase -= outputCodepoints.length < selectionBase ? 1 : 0;
-        selectionExtent -= outputCodepoints.length < selectionExtent ? 1 : 0;
-
-        composingStart -= outputCodepoints.length < composingStart ? 1 : 0;
-        composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
-      }
-
-     final bool isBackspace = oldValue.text.runes.length - newValue.text.runes.length == 1 &&
-                              isDirectionalityMarker(oldValue.text.runes.last) &&
-                              oldValue.text.substring(0, oldValue.text.length - 1) == newValue.text;
-
-      bool previousWasWhitespace = false;
-      bool previousWasDirectionalityMarker = false;
-      int? previousNonWhitespaceCodepoint;
-      int index = 0;
-      for (final int codepoint in newValue.text.runes) {
-        if (isWhitespace(codepoint)) {
-          // Only compute the directionality of the non-whitespace
-          // when the value is needed.
-          if (!previousWasWhitespace && previousNonWhitespaceCodepoint != null) {
-            _previousNonWhitespaceDirection = getDirection(previousNonWhitespaceCodepoint);
-          }
-          // If we already added directionality for this run of whitespace,
-          // "shift" the marker added to the end of the whitespace run.
-          if (previousWasWhitespace) {
-            subtractFromLength();
-            outputCodepoints.removeLast();
-          }
-          // Handle trailing whitespace deleting the directionality char instead of the whitespace.
-          if (isBackspace && index == newValue.text.runes.length - 1) {
-            // Do not append the whitespace to the outputCodepoints.
-            subtractFromLength();
-          } else {
-            outputCodepoints.add(codepoint);
-            addToLength();
-            outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
-          }
-
-          previousWasWhitespace = true;
-          previousWasDirectionalityMarker = false;
-        } else if (isDirectionalityMarker(codepoint)) {
-          // Handle pre-existing directionality markers. Use pre-existing marker
-          // instead of the one we add.
-          if (previousWasWhitespace) {
-            subtractFromLength();
-            outputCodepoints.removeLast();
-          }
-          outputCodepoints.add(codepoint);
-
-          previousWasWhitespace = false;
-          previousWasDirectionalityMarker = true;
-        } else {
-          // If the whitespace was already enclosed by the same directionality,
-          // we can remove the artificially added marker.
-          if (!previousWasDirectionalityMarker &&
-              previousWasWhitespace &&
-              getDirection(codepoint) == _previousNonWhitespaceDirection) {
-            subtractFromLength();
-            outputCodepoints.removeLast();
-          }
-          // Normal character, track its codepoint add it to the string.
-          previousNonWhitespaceCodepoint = codepoint;
-          outputCodepoints.add(codepoint);
-
-          previousWasWhitespace = false;
-          previousWasDirectionalityMarker = false;
-        }
-        index++;
-      }
-      final String formatted = String.fromCharCodes(outputCodepoints);
-      return TextEditingValue(
-        text: formatted,
-        selection: TextSelection(
-          baseOffset: selectionBase,
-          extentOffset: selectionExtent,
-          affinity: newValue.selection.affinity,
-          isDirectional: newValue.selection.isDirectional
-        ),
-        composing: TextRange(start: composingStart, end: composingEnd),
-      );
-    }
-    return newValue;
-  }
-
-  bool isWhitespace(int value) {
-    return _whitespaceRegExp.hasMatch(String.fromCharCode(value));
-  }
-
-  bool isDirectionalityMarker(int value) {
-    return value == _rlm || value == _lrm;
-  }
-
-  TextDirection getDirection(int value) {
-    // Use the LTR version as short-circuiting will be more efficient since
-    // there are more LTR codepoints.
-    return _ltrRegExp.hasMatch(String.fromCharCode(value)) ? TextDirection.ltr : TextDirection.rtl;
   }
 }

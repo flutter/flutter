@@ -2,54 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
-
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/device.dart';
-
-/// A fake implementation of the [DeviceLogReader].
-class FakeDeviceLogReader extends DeviceLogReader {
-  @override
-  String get name => 'FakeLogReader';
-
-  StreamController<String> _cachedLinesController;
-
-  final List<String> _lineQueue = <String>[];
-  StreamController<String> get _linesController {
-    _cachedLinesController ??= StreamController<String>
-      .broadcast(onListen: () {
-        _lineQueue.forEach(_linesController.add);
-        _lineQueue.clear();
-     });
-    return _cachedLinesController;
-  }
-
-  @override
-  Stream<String> get logLines => _linesController.stream;
-
-  void addLine(String line) {
-    if (_linesController.hasListener) {
-      _linesController.add(line);
-    } else {
-      _lineQueue.add(line);
-    }
-  }
-
-  @override
-  Future<void> dispose() async {
-    _lineQueue.clear();
-    await _linesController.close();
-  }
-}
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/version.dart';
 
 /// Environment with DYLD_LIBRARY_PATH=/path/to/libraries
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -74,8 +39,8 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
 class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,
-    Future<int> exitCode,
-    IOSink stdin,
+    Future<int>? exitCode,
+    IOSink? stdin,
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
@@ -188,7 +153,7 @@ class MemoryIOSink implements IOSink {
   @override
   Future<void> addStream(Stream<List<int>> stream) {
     final Completer<void> completer = Completer<void>();
-    StreamSubscription<List<int>> sub;
+    late StreamSubscription<List<int>> sub;
     sub = stream.listen(
       (List<int> data) {
         try {
@@ -212,12 +177,12 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void write(Object obj) {
+  void write(Object? obj) {
     add(encoding.encode('$obj'));
   }
 
   @override
-  void writeln([ Object obj = '' ]) {
+  void writeln([ Object? obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
@@ -234,7 +199,7 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [ StackTrace stackTrace ]) {
+  void addError(dynamic error, [ StackTrace? stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -246,6 +211,16 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> flush() async { }
+
+  void clear() {
+    writes.clear();
+  }
+
+  String getAndClear() {
+    final String result = utf8.decode(writes.expand((List<int> l) => l).toList());
+    clear();
+    return result;
+  }
 }
 
 class MemoryStdout extends MemoryIOSink implements io.Stdout {
@@ -271,22 +246,22 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   int get terminalColumns {
     if (_terminalColumns != null) {
-      return _terminalColumns;
+      return _terminalColumns!;
     }
     throw const io.StdoutException('unspecified mock value');
   }
   set terminalColumns(int value) => _terminalColumns = value;
-  int _terminalColumns;
+  int? _terminalColumns;
 
   @override
   int get terminalLines {
     if (_terminalLines != null) {
-      return _terminalLines;
+      return _terminalLines!;
     }
     throw const io.StdoutException('unspecified mock value');
   }
   set terminalLines(int value) => _terminalLines = value;
-  int _terminalLines;
+  int? _terminalLines;
 }
 
 /// A Stdio that collects stdout and supports simulated stdin.
@@ -312,89 +287,209 @@ class FakeStdio extends Stdio {
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
-class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
-  FakePollingDeviceDiscovery() : super('mock');
+class FakePlistParser implements PlistParser {
+  final Map<String, dynamic> _underlyingValues = <String, String>{};
 
-  final List<Device> _devices = <Device>[];
-  final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
-  final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
-
-  @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    lastPollingTimeout = timeout;
-    return _devices;
+  void setProperty(String key, dynamic value) {
+    _underlyingValues[key] = value;
   }
 
-  Duration lastPollingTimeout;
-
   @override
-  bool get supportsPlatform => true;
-
-  @override
-  bool get canListAnything => true;
-
-  void addDevice(Device device) {
-    _devices.add(device);
-    _onAddedController.add(device);
+  Map<String, dynamic> parseFile(String plistFilePath) {
+    return _underlyingValues;
   }
 
-  void _removeDevice(Device device) {
-    _devices.remove(device);
-    _onRemovedController.add(device);
+  @override
+  String getValueFromFile(String plistFilePath, String key) {
+    return _underlyingValues[key] as String;
+  }
+}
+
+class FakeBotDetector implements BotDetector {
+  const FakeBotDetector(bool isRunningOnBot)
+      : _isRunningOnBot = isRunningOnBot;
+
+  @override
+  Future<bool> get isRunningOnBot async => _isRunningOnBot;
+
+  final bool _isRunningOnBot;
+}
+
+class FakeFlutterVersion implements FlutterVersion {
+  FakeFlutterVersion({
+    this.channel = 'unknown',
+    this.dartSdkVersion = '12',
+    this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
+    this.engineRevisionShort = 'abcde',
+    this.repositoryUrl = 'https://github.com/flutter/flutter.git',
+    this.frameworkVersion = '0.0.0',
+    this.frameworkRevision = '11111111111111111111',
+    this.frameworkRevisionShort = '11111',
+    this.frameworkAge = '0 hours ago',
+    this.frameworkCommitDate = '12/01/01',
+    this.gitTagVersion = const GitTagVersion.unknown(),
+  });
+
+  bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
+  bool _didFetchTagsAndUpdate = false;
+
+  bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
+  bool _didCheckFlutterVersionFreshness = false;
+
+  @override
+  final String channel;
+
+  @override
+  final String dartSdkVersion;
+
+  @override
+  final String engineRevision;
+
+  @override
+  final String engineRevisionShort;
+
+  @override
+  final String repositoryUrl;
+
+  @override
+  final String frameworkVersion;
+
+  @override
+  final String frameworkRevision;
+
+  @override
+  final String frameworkRevisionShort;
+
+  @override
+  final String frameworkAge;
+
+  @override
+  final String frameworkCommitDate;
+
+  @override
+  String get frameworkDate => frameworkCommitDate;
+
+  @override
+  final GitTagVersion gitTagVersion;
+
+  @override
+  void fetchTagsAndUpdate() {
+    _didFetchTagsAndUpdate = true;
   }
 
-  void setDevices(List<Device> devices) {
-    while(_devices.isNotEmpty) {
-      _removeDevice(_devices.first);
+  @override
+  Future<void> checkFlutterVersionFreshness() async {
+    _didCheckFlutterVersionFreshness = true;
+  }
+
+  @override
+  Future<void> ensureVersionFile() async { }
+
+  @override
+  String getBranchName({bool redactUnknownBranches = false}) {
+    return 'master';
+  }
+
+  @override
+  String getVersionString({bool redactUnknownBranches = false}) {
+    return 'v0.0.0';
+  }
+
+  @override
+  Map<String, Object> toJson() {
+    return <String, Object>{};
+  }
+}
+
+// A test implementation of [FeatureFlags] that allows enabling without reading
+// config. If not otherwise specified, all values default to false.
+class TestFeatureFlags implements FeatureFlags {
+  TestFeatureFlags({
+    this.isLinuxEnabled = false,
+    this.isMacOSEnabled = false,
+    this.isWebEnabled = false,
+    this.isWindowsEnabled = false,
+    this.isSingleWidgetReloadEnabled = false,
+    this.isAndroidEnabled = true,
+    this.isIOSEnabled = true,
+    this.isFuchsiaEnabled = false,
+    this.areCustomDevicesEnabled = false,
+    this.isExperimentalInvalidationStrategyEnabled = false,
+    this.isWindowsUwpEnabled = false,
+  });
+
+  @override
+  final bool isLinuxEnabled;
+
+  @override
+  final bool isMacOSEnabled;
+
+  @override
+  final bool isWebEnabled;
+
+  @override
+  final bool isWindowsEnabled;
+
+  @override
+  final bool isSingleWidgetReloadEnabled;
+
+  @override
+  final bool isAndroidEnabled;
+
+  @override
+  final bool isIOSEnabled;
+
+  @override
+  final bool isFuchsiaEnabled;
+
+  @override
+  final bool areCustomDevicesEnabled;
+
+  @override
+  final bool isExperimentalInvalidationStrategyEnabled;
+
+  @override
+  final bool isWindowsUwpEnabled;
+
+  @override
+  bool isEnabled(Feature feature) {
+    switch (feature) {
+      case flutterWebFeature:
+        return isWebEnabled;
+      case flutterLinuxDesktopFeature:
+        return isLinuxEnabled;
+      case flutterMacOSDesktopFeature:
+        return isMacOSEnabled;
+      case flutterWindowsDesktopFeature:
+        return isWindowsEnabled;
+      case singleWidgetReload:
+        return isSingleWidgetReloadEnabled;
+      case flutterAndroidFeature:
+        return isAndroidEnabled;
+      case flutterIOSFeature:
+        return isIOSEnabled;
+      case flutterFuchsiaFeature:
+        return isFuchsiaEnabled;
+      case flutterCustomDevicesFeature:
+        return areCustomDevicesEnabled;
+      case experimentalInvalidationStrategy:
+        return isExperimentalInvalidationStrategyEnabled;
+      case windowsUwpEmbedding:
+        return isWindowsUwpEnabled;
     }
-    devices.forEach(addDevice);
+    return false;
   }
-
-  @override
-  Stream<Device> get onAdded => _onAddedController.stream;
-
-  @override
-  Stream<Device> get onRemoved => _onRemovedController.stream;
 }
 
-class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  LongPollingDeviceDiscovery() : super('forever');
+class FakeStatusLogger extends DelegatingLogger {
+  FakeStatusLogger(Logger delegate) : super(delegate);
 
-  final Completer<List<Device>> _completer = Completer<List<Device>>();
-
-  @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    return _completer.future;
-  }
+  late Status status;
 
   @override
-  Future<void> stopPolling() async {
-    _completer.complete();
-  }
-
-  @override
-  Future<void> dispose() async {
-    _completer.complete();
-  }
-
-  @override
-  bool get supportsPlatform => true;
-
-  @override
-  bool get canListAnything => true;
-}
-
-class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  ThrowingPollingDeviceDiscovery() : super('throw');
-
-  @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    throw const ProcessException('fake-discovery', <String>[]);
-  }
-
-  @override
-  bool get supportsPlatform => true;
-
-  @override
-  bool get canListAnything => true;
+  Status startProgress(String message, {
+    String? progressId,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
+  }) => status;
 }

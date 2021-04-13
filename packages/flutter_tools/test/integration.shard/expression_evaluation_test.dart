@@ -4,10 +4,7 @@
 
 // @dart = 2.8
 
-import 'dart:io';
-
 import 'package:file/file.dart';
-import 'package:matcher/matcher.dart';
 
 import 'package:vm_service/vm_service.dart';
 

@@ -179,13 +179,14 @@ class _BackAppBar extends StatelessWidget {
 
 class Backdrop extends StatefulWidget {
   const Backdrop({
+    Key? key,
     this.frontAction,
     this.frontTitle,
     this.frontHeading,
     this.frontLayer,
     this.backTitle,
     this.backLayer,
-  });
+  }) : super(key: key);
 
   final Widget? frontAction;
   final Widget? frontTitle;

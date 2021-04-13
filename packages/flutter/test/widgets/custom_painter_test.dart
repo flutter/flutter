@@ -343,6 +343,7 @@ void _defineTests() {
             onMoveCursorForwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
             onMoveCursorBackwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
             onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+            onSetText: (String text) => performedActions.add(SemanticsAction.setText),
             onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
             onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
           ),
@@ -387,6 +388,9 @@ void _defineTests() {
             'extent': 5,
           });
           break;
+        case SemanticsAction.setText:
+          semanticsOwner.performAction(expectedId, action, 'text');
+          break;
         default:
           semanticsOwner.performAction(expectedId, action);
       }
@@ -413,6 +417,7 @@ void _defineTests() {
             hidden: true,
             button: true,
             slider: true,
+            keyboardKey: true,
             link: true,
             textField: true,
             readOnly: true,
@@ -464,6 +469,7 @@ void _defineTests() {
             hidden: true,
             button: true,
             slider: true,
+            keyboardKey: true,
             link: true,
             textField: true,
             readOnly: true,

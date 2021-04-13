@@ -335,6 +335,8 @@ class TravelDestinationContent extends StatelessWidget {
 }
 
 class CardsDemo extends StatefulWidget {
+  const CardsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/cards';
 
   @override

@@ -26,7 +26,6 @@ void main() {
         ],
       ),
     );
-
     await tester.tap(find.byType(GestureDetector));
     expect(tapped, true);
   });

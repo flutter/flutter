@@ -13,14 +13,16 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
-import '../src/testbed.dart';
+import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   BufferLogger logger;
@@ -79,7 +81,7 @@ void main() {
       fileSystem: fs,
       logger: logger,
       flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
-      client: FakeHttpClient(),
+      client: FakeHttpClient.any(),
     );
 
     final File file = fs.file('flutter_00.log');

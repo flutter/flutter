@@ -8,6 +8,8 @@
   "nextMonthTooltip": "Следващият месец",
   "previousMonthTooltip": "Предишният месец",
   "nextPageTooltip": "Следващата страница",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "previousPageTooltip": "Предишната страница",
   "showMenuTooltip": "Показване на менюто",
   "aboutListTileTitle": "Всичко за $applicationName",

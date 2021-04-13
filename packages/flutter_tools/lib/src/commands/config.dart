@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import '../android/android_studio.dart';
 import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
@@ -22,7 +21,7 @@ class ConfigCommand extends FlutterCommand {
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
-    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory',
+    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
     argParser.addFlag('machine',
       negatable: false,
@@ -176,11 +175,11 @@ class ConfigCommand extends FlutterCommand {
     }
 
     // Ensure we send any calculated ones, if overrides don't exist.
-    if (results['android-studio-dir'] == null && androidStudio != null) {
-      results['android-studio-dir'] = androidStudio.directory;
+    if (results['android-studio-dir'] == null && globals.androidStudio != null) {
+      results['android-studio-dir'] = globals.androidStudio.directory;
     }
     if (results['android-sdk'] == null && globals.androidSdk != null) {
-      results['android-sdk'] = globals.androidSdk.directory;
+      results['android-sdk'] = globals.androidSdk.directory.path;
     }
 
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));

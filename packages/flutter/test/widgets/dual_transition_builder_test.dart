@@ -4,9 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-import 'package:flutter/src/widgets/dual_transition_builder.dart';
 
 void main() {
   testWidgets('runs animations', (WidgetTester tester) async {

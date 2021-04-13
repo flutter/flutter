@@ -14,15 +14,33 @@ import 'text_form_field.dart';
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
 ///
-/// ```dart imports
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Autocomplete Basic'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteBasicExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
-///   final List<String> _kOptions = <String>[
+///   static const List<String> _kOptions = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -52,11 +70,30 @@ import 'text_form_field.dart';
 /// This example shows how to create an Autocomplete widget with a custom type.
 /// Try searching with text from the name or email field.
 ///
-/// ```dart imports
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Autocomplete Basic User'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteBasicUserExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// @immutable
 /// class User {
 ///   const User({
 ///     required this.email,
@@ -73,8 +110,9 @@ import 'text_form_field.dart';
 ///
 ///   @override
 ///   bool operator ==(Object other) {
-///     if (other.runtimeType != runtimeType)
+///     if (other.runtimeType != runtimeType) {
 ///       return false;
+///     }
 ///     return other is User
 ///         && other.name == name
 ///         && other.email == email;
@@ -85,9 +123,9 @@ import 'text_form_field.dart';
 /// }
 ///
 /// class AutocompleteBasicUserExample extends StatelessWidget {
-///   AutocompleteBasicUserExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicUserExample({Key? key}) : super(key: key);
 ///
-///   static final List<User> _userOptions = <User>[
+///   static const List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
 ///     User(name: 'Bob', email: 'bob@example.com'),
 ///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
@@ -228,7 +266,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         elevation: 4.0,
-        child: Container(
+        child: SizedBox(
           height: 200.0,
           child: ListView.builder(
             padding: EdgeInsets.zero,

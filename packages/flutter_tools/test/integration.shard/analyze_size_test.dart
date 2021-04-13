@@ -96,7 +96,7 @@ void main() {
 
     print(result.stdout);
     print(result.stderr);
-    expect(result.stderr.toString(), contains('--analyze-size can only be used on release builds'));
+    expect(result.stderr.toString(), contains('"--analyze-size" can only be used on release builds'));
 
     expect(result.exitCode, 1);
   });
@@ -113,7 +113,7 @@ void main() {
       '--split-debug-info=infos'
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
-    expect(result.stderr.toString(), contains('--analyze-size cannot be combined with --split-debug-info'));
+    expect(result.stderr.toString(), contains('"--analyze-size" cannot be combined with "--split-debug-info"'));
 
     expect(result.exitCode, 1);
   });

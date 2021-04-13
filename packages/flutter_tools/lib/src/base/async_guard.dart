@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 /// Runs [fn] with special handling of asynchronous errors.
@@ -82,7 +80,7 @@ import 'dart:async';
 /// [ArgumentError] will be thrown synchronously.
 Future<T> asyncGuard<T>(
   Future<T> Function() fn, {
-  Function onError,
+  Function? onError,
 }) {
   if (onError != null &&
       onError is! _UnaryOnError<T> &&

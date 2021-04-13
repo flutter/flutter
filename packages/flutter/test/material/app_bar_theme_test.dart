@@ -70,6 +70,51 @@ void main() {
     expect(text.style, appBarTheme.toolbarTextStyle);
   });
 
+  testWidgets('SliverAppBar allows AppBar to determine backwardsCompatibility', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/77016
+    const AppBarTheme appBarTheme = AppBarTheme(
+      backwardsCompatibility: false,
+      backgroundColor: Colors.lightBlue,
+      foregroundColor: Colors.black,
+    );
+
+    Widget _buildWithBackwardsCompatibility([bool? enabled]) => MaterialApp(
+      theme: ThemeData(appBarTheme: appBarTheme),
+      home: Scaffold(body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: const Text('App Bar Title'),
+            backwardsCompatibility: enabled,
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+            ],
+          ),
+        ],
+      )),
+    );
+
+    // Backwards compatibility enabled, AppBar should be built with true.
+    await tester.pumpWidget(_buildWithBackwardsCompatibility(true));
+    AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backwardsCompatibility, true);
+
+    // Backwards compatibility disabled, AppBar should be built with false.
+    await tester.pumpWidget(_buildWithBackwardsCompatibility(false));
+    appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backwardsCompatibility, false);
+
+    // Backwards compatibility unspecified, AppBar should be built with null.
+    await tester.pumpWidget(_buildWithBackwardsCompatibility());
+    appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backwardsCompatibility, null);
+
+    // AppBar should use the backwardsCompatibility of AppBarTheme.
+    // Since backwardsCompatibility is false, the text color should match the
+    // foreground color of the AppBarTheme.
+    final DefaultTextStyle text = _getAppBarText(tester);
+    expect(text.style.color, appBarTheme.foregroundColor);
+  });
+
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
     const Brightness brightness = Brightness.dark;
     const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light;

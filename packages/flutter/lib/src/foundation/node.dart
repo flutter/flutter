@@ -87,6 +87,9 @@ class AbstractNode {
   /// Subclasses with children should override this method to first call their
   /// inherited [attach] method, and then [attach] all their children to the
   /// same [owner].
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(covariant Object owner) {
     assert(owner != null);
@@ -101,6 +104,9 @@ class AbstractNode {
   ///
   /// Subclasses with children should override this method to first call their
   /// inherited [detach] method, and then [detach] all their children.
+  ///
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.detach()`.
   @mustCallSuper
   void detach() {
     assert(_owner != null);

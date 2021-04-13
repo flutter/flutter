@@ -72,10 +72,15 @@ class WebDriverService extends DriverService {
       stayResident: false,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
+      fileSystem: globals.fs,
+      usage: globals.flutterUsage,
+      logger: globals.logger,
+      systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final int result = await _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
+      enableDevTools: false,
       route: route,
     );
     _webUri = _residentRunner.uri;

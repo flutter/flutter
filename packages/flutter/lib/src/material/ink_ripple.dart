@@ -183,8 +183,8 @@ class InkRipple extends InteractiveInkFeature {
   late Animation<int> _fadeOut;
   late AnimationController _fadeOutController;
 
-  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
-  /// or material [Theme].
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
+  /// material [Theme], or [ButtonStyle].
   static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
 
   static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);

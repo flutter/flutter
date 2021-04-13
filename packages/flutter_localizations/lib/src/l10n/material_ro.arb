@@ -12,6 +12,8 @@
   "previousMonthTooltip": "Luna trecută",
   "nextPageTooltip": "Pagina următoare",
   "previousPageTooltip": "Pagina anterioară",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "Afișați meniul",
   "aboutListTileTitle": "Despre $applicationName",
   "licensesPageTitle": "Licențe",
