@@ -773,14 +773,45 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/78144
-  testWidgets('Leading and Actions widgets can be null', (WidgetTester tester) async {
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
-    await tester.pumpWidget(TestHomePage(delegate: delegate));
+  testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
+    // The search delegate page is displayed with no issues
+    // even with a null return values for [buildLeading] and [buildActions].
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
+      result: 'Result',
+      suggestions: 'Suggestions',
+    );
+    final List<String> selectedResults = <String>[];
 
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // We are on the homepage.
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open the search page.
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(selectedResults, hasLength(0));
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    // Close the search page.
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+    expect(selectedResults, <String>['Result']);
   });
 }
 
@@ -924,7 +955,13 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 }
 
 class _TestEmptySearchDelegate extends SearchDelegate<String> {
-  _TestEmptySearchDelegate() : super();
+  _TestEmptySearchDelegate({
+    this.suggestions = 'Suggestions',
+    this.result = 'Result',
+  }) : super();
+
+  final String suggestions;
+  final String result;
 
   @override
   Widget? buildLeading(BuildContext context) => null;
@@ -933,8 +970,31 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
   List<Widget>? buildActions(BuildContext context) => null;
 
   @override
-  Widget buildSuggestions(BuildContext context) => const SizedBox();
+  Widget buildSuggestions(BuildContext context) {
+    return MaterialButton(
+      onPressed: () {
+        showResults(context);
+      },
+      child: Text(suggestions),
+    );
+  }
 
   @override
-  Widget buildResults(BuildContext context) => const SizedBox();
+  Widget buildResults(BuildContext context) {
+    return const Text('Results');
+  }
+
+  @override
+  PreferredSizeWidget buildBottom(BuildContext context) {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(56.0),
+      child: IconButton(
+        tooltip: 'Close',
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          close(context, result);
+        },
+      ),
+    );
+  }
 }
