@@ -210,9 +210,8 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// height of the resulting [FlexibleSpaceBar] when fully expanded.
   /// `currentExtent` sets the scale of the [FlexibleSpaceBar.background] and
   /// [FlexibleSpaceBar.title] widgets of [FlexibleSpaceBar] upon
-  /// initialization. `scrolledUnder` is true if the the [FlexibleSpaceBar]
-  /// overlaps the app's primary scrollable, false if it does not, and null
-  /// if the caller has not determined as much.
+  /// initialization.
+  ///
   /// See also:
   ///
   ///  * [FlexibleSpaceBarSettings] which creates a settings object that can be
@@ -221,7 +220,6 @@ class FlexibleSpaceBar extends StatefulWidget {
     double? toolbarOpacity,
     double? minExtent,
     double? maxExtent,
-    bool? isScrolledUnder,
     required double currentExtent,
     required Widget child,
   }) {
@@ -230,7 +228,6 @@ class FlexibleSpaceBar extends StatefulWidget {
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
       maxExtent: maxExtent ?? currentExtent,
-      isScrolledUnder: isScrolledUnder,
       currentExtent: currentExtent,
       child: child,
     );
@@ -444,7 +441,6 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
     required this.maxExtent,
     required this.currentExtent,
     required Widget child,
-    this.isScrolledUnder,
   }) : assert(toolbarOpacity != null),
        assert(minExtent != null && minExtent >= 0),
        assert(maxExtent != null && maxExtent >= 0),
@@ -469,23 +465,11 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// these elements upon initialization.
   final double currentExtent;
 
-  /// True if the FlexibleSpaceBar overlaps the primary scrollable's contents.
-  ///
-  /// This value is used by the [AppBar] to resolve
-  /// [AppBar.backgroundColor] against [MaterialState.scrolledUnder],
-  /// i.e.  to enable apps to specify different colors when content
-  /// has been scrolled up and behind the app bar.
-  ///
-  /// Null if the caller hasn't determined if the FlexibleSpaceBar
-  /// overlaps the primary scrollable's contents.
-  final bool? isScrolledUnder;
-
   @override
   bool updateShouldNotify(FlexibleSpaceBarSettings oldWidget) {
     return toolbarOpacity != oldWidget.toolbarOpacity
         || minExtent != oldWidget.minExtent
         || maxExtent != oldWidget.maxExtent
-        || currentExtent != oldWidget.currentExtent
-        || isScrolledUnder != oldWidget.isScrolledUnder;
+        || currentExtent != oldWidget.currentExtent;
   }
 }
