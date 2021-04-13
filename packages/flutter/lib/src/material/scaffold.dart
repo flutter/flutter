@@ -3238,29 +3238,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
-      child: ScrollNotificationObserver(
-        child: Material(
-          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-            return CustomMultiChildLayout(
-              children: children,
-              delegate: _ScaffoldLayout(
-                extendBody: _extendBody,
-                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                minInsets: minInsets,
-                minViewPadding: minViewPadding,
-                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                textDirection: textDirection,
-                isSnackBarFloating: isSnackBarFloating,
-                snackBarWidth: snackBarWidth,
-              ),
-            );
-          }),
-        ),
+      child: Material(
+        color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+        child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+          return CustomMultiChildLayout(
+            children: children,
+            delegate: _ScaffoldLayout(
+              extendBody: _extendBody,
+              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+              minInsets: minInsets,
+              minViewPadding: minViewPadding,
+              currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+              floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+              floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+              geometryNotifier: _geometryNotifier,
+              previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+              textDirection: textDirection,
+              isSnackBarFloating: isSnackBarFloating,
+              snackBarWidth: snackBarWidth,
+            ),
+          );
+        }),
       ),
     );
   }
