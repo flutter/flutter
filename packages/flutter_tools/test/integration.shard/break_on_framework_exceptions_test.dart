@@ -650,14 +650,14 @@ void main() {
         class TestWidget extends StatelessWidget {
           @override
           StatelessElement createElement() => TestElement(this);
-        
+
           @override
           Widget build(BuildContext context) => Container();
         }
-        
+
         class TestElement extends StatelessElement {
           TestElement(StatelessWidget widget) : super(widget);
-        
+
           bool get throwOnRebuild => _throwOnRebuild;
           bool _throwOnRebuild = false;
           set throwOnRebuild(bool value) {
@@ -667,7 +667,7 @@ void main() {
             _throwOnRebuild = value;
             markNeedsBuild();
           }
-        
+
           @override
           void rebuild() {
             if (_throwOnRebuild) {
@@ -699,7 +699,7 @@ class TestProject extends Project {
     name: test
     environment:
       sdk: ">=2.12.0-0 <3.0.0"
-  
+
     dependencies:
       flutter:
         sdk: flutter
@@ -717,7 +717,7 @@ class TestProject extends Project {
   final String _test = r'''
     import 'dart:async';
     import 'dart:ui' as ui;
-  
+
     import 'package:flutter/animation.dart';
     import 'package:flutter/foundation.dart';
     import 'package:flutter/gestures.dart';
@@ -725,9 +725,9 @@ class TestProject extends Project {
     import 'package:flutter/scheduler.dart';
     import 'package:flutter/services.dart';
     import 'package:flutter_test/flutter_test.dart';
-  
+
     void main() {
-      // SETUP 
+      // SETUP
       testWidgets('test', (WidgetTester tester) async {
         // TEST_BODY
       });
