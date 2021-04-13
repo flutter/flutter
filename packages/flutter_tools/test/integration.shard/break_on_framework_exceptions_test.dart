@@ -37,7 +37,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'AnimationController listener';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'AnimationController listener';"));
   });
 
   testWithoutContext('breaks when AnimationController status listener throws', () async {
@@ -55,7 +56,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'AnimationController status listener';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'AnimationController status listener';"));
   });
 
   testWithoutContext('breaks when ChangeNotifier listener throws', () async {
@@ -73,7 +75,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'ValueNotifier listener';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'ValueNotifier listener';"));
   });
 
   testWithoutContext('breaks when handling a gesture throws', () async {
@@ -99,7 +102,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'while handling a gesture';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'while handling a gesture';"));
   });
 
   testWithoutContext('breaks when platform message callback throws', () async {
@@ -116,7 +120,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'platform message callback';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'platform message callback';"));
   }, skip: 'TODO(goderbauer): add pragma to _DefaultBinaryMessenger.handlePlatformMessage when async methods are supported (https://github.com/dart-lang/sdk/issues/45673) and enable this test');
 
   testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
@@ -136,7 +141,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'cannot build child';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'cannot build child';"));
   });
 
   testWithoutContext('breaks when EditableText.onChanged throws', () async {
@@ -159,7 +165,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'onChanged';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'onChanged';"));
   });
 
   testWithoutContext('breaks when EditableText.onEditingComplete throws', () async {
@@ -184,7 +191,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'onEditingComplete';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'onEditingComplete';"));
   });
 
   testWithoutContext('breaks when EditableText.onSelectionChanged throws', () async {
@@ -205,7 +213,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'onSelectionChanged';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'onSelectionChanged';"));
   });
 
   testWithoutContext('breaks when Action listener throws', () async {
@@ -223,7 +232,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'action listener';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'action listener';"));
   });
 
   testWithoutContext('breaks when pointer route throws', () async {
@@ -241,7 +251,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'pointer route';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'pointer route';"));
   });
 
   testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
@@ -260,7 +271,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'PointerSignalResolver callback';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'PointerSignalResolver callback';"));
   });
 
   testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
@@ -279,7 +291,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'highlight mode listener';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'highlight mode listener';"));
   });
 
   testWithoutContext('breaks when GestureBinding.dispatchEvent throws', () async {
@@ -305,7 +318,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'onHover';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'onHover';"));
   });
 
   testWithoutContext('breaks when ImageStreamListener.onImage throws', () async {
@@ -330,7 +344,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'setImage';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'setImage';"));
   });
 
   testWithoutContext('breaks when ImageStreamListener.onError throws', () async {
@@ -352,7 +367,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'onError';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'onError';"));
   });
 
   testWithoutContext('breaks when LayoutBuilder.builder throws', () async {
@@ -370,7 +386,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'LayoutBuilder.builder';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'LayoutBuilder.builder';"));
   }, skip: 'TODO(goderbauer): Figure out how to apply pragma to anonymous closure in _LayoutBuilderElement._layout, https://github.com/flutter/flutter/issues/17007#issuecomment-818952818');
 
   testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
@@ -388,7 +405,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw '_CallbackHookProvider.callback';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw '_CallbackHookProvider.callback';"));
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
@@ -405,7 +423,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'TimingsCallback';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'TimingsCallback';"));
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
@@ -425,7 +444,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'scheduled task';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'scheduled task';"));
   }, skip: 'TODO(goderbauer): add pragma to SchedulerBinding.handleEventLoopCallback when https://github.com/dart-lang/sdk/issues/45684 is fixed and enable this test');
 
   testWithoutContext('breaks when FrameCallback throws', () async {
@@ -442,7 +462,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'FrameCallback';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'FrameCallback';"));
   });
 
   testWithoutContext('breaks when attaching to render tree throws', () async {
@@ -467,7 +488,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'create element';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'create element';"));
   });
 
   testWithoutContext('breaks when RenderObject.performLayout throws', () async {
@@ -489,7 +511,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'performLayout';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'performLayout';"));
   });
 
   testWithoutContext('breaks when RenderObject.performResize throws', () async {
@@ -514,7 +537,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'performResize';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'performResize';"));
   });
 
   testWithoutContext('breaks when RenderObject.performLayout (without resize) throws', () async {
@@ -556,7 +580,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'performLayout without resize';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'performLayout without resize';"));
   });
 
   testWithoutContext('breaks when StatelessWidget.build throws', () async {
@@ -578,7 +603,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'StatelessWidget.build';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'StatelessWidget.build';"));
   });
 
   testWithoutContext('breaks when StatefulWidget.build throws', () async {
@@ -605,7 +631,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'StatefulWidget.build';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'StatefulWidget.build';"));
   });
 
   testWithoutContext('breaks when finalizing the tree throws', () async {
@@ -636,7 +663,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'dispose';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'dispose';"));
   }, skip: 'TODO(goderbauer): add pragma to BuildOwner.finalizeTree when https://github.com/dart-lang/sdk/issues/45684 is fixed and enable this test');
 
   testWithoutContext('breaks when rebuilding dirty elements throws', () async {
@@ -683,7 +711,8 @@ void main() {
     await flutter.test(withDebugger: true, pauseOnExceptions: true);
     await flutter.waitForPause();
 
-    expect((await flutter.getSourceLocation()).line, equals(project.lineContaining(project.test, "throw 'rebuild';")));
+    final int breakLine = (await flutter.getSourceLocation()).line;
+    expect(breakLine, project.lineContaining(project.test, "throw 'rebuild';"));
   });
 }
 
