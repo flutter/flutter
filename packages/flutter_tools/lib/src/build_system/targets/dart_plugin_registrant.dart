@@ -73,15 +73,15 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-        const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-      ];
+    const Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+  ];
 
   @override
   String get name => 'gen_dart_plugin_registrant';
 
   @override
   List<Source> get outputs => <Source>[
-        const Source.pattern(
-            '{PROJECT_DIR}/.dart_tool/flutter_build/generated_main.dart'),
-      ];
+    const Source.pattern(
+      '{PROJECT_DIR}/.dart_tool/flutter_build/generated_main.dart'),
+    ];
 }
