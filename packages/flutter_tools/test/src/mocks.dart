@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
@@ -155,24 +154,6 @@ _ProcessFactory flakyProcessFactory({
     );
   };
 }
-
-/// Creates a mock process that returns with the given [exitCode], [stdout] and [stderr].
-Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
-  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stdout),
-  ]);
-  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stderr),
-  ]);
-  final Process process = _MockBasicProcess();
-
-  when(process.stdout).thenAnswer((_) => stdoutStream);
-  when(process.stderr).thenAnswer((_) => stderrStream);
-  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
-  return process;
-}
-
-class _MockBasicProcess extends Mock implements Process {}
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
