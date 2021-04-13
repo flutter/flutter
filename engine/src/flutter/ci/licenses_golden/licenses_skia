@@ -1,4 +1,4 @@
-Signature: 9bf5b5d7a81c0d1a1e880755e4003ca9
+Signature: 3c58151d1140e520a369d6189af537ee
 
 UNUSED LICENSES:
 
@@ -724,29 +724,29 @@ FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientBase.h
 FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientPriv.h
 FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.h
-FILE: ../../../third_party/skia/src/sksl/SkSLCPPCodeGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.h
 FILE: ../../../third_party/skia/src/sksl/SkSLErrorReporter.h
-FILE: ../../../third_party/skia/src/sksl/SkSLGLSLCodeGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLGLSLCodeGenerator.h
-FILE: ../../../third_party/skia/src/sksl/SkSLHCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLIRGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLIRGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMain.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryLayout.h
-FILE: ../../../third_party/skia/src/sksl/SkSLMetalCodeGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLMetalCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPosition.h
 FILE: ../../../third_party/skia/src/sksl/SkSLProgramSettings.h
-FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVCodeGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLCPPCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLCodeGenerator.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLGLSLCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLGLSLCodeGenerator.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLHCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLMetalCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLMetalCodeGenerator.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBlock.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBoolLiteral.h
@@ -1823,7 +1823,6 @@ FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
 FILE: ../../../third_party/skia/include/private/GrResourceKey.h
 FILE: ../../../third_party/skia/include/private/SkHalf.h
-FILE: ../../../third_party/skia/samplecode/SampleHT.cpp
 FILE: ../../../third_party/skia/samplecode/SampleRectanizer.cpp
 FILE: ../../../third_party/skia/src/c/sk_surface.cpp
 FILE: ../../../third_party/skia/src/core/SkBBHFactory.cpp
@@ -2304,8 +2303,6 @@ FILE: ../../../third_party/skia/include/svg/SkSVGCanvas.h
 FILE: ../../../third_party/skia/include/utils/SkPaintFilterCanvas.h
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAtlas.cpp
-FILE: ../../../third_party/skia/samplecode/SampleClipDrawMatch.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFilterQuality.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleXfer.cpp
 FILE: ../../../third_party/skia/src/c/sk_c_from_to.h
@@ -2862,7 +2859,7 @@ FILE: ../../../third_party/skia/src/gpu/mock/GrMockTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLASTFile.h
 FILE: ../../../third_party/skia/src/sksl/SkSLASTNode.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLASTNode.h
-FILE: ../../../third_party/skia/src/sksl/SkSLExternalFunction.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunction.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionCall.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionReference.h
 ----------------------------------------------------------------------------------------------------
@@ -3182,7 +3179,7 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
 FILE: ../../../third_party/skia/src/utils/SkCallableTraits.h
@@ -3460,16 +3457,16 @@ FILE: ../../../third_party/skia/src/ports/SkOSFile_ios.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_fvar.h
 FILE: ../../../third_party/skia/src/shaders/SkShaderBase.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCPP.h
-FILE: ../../../third_party/skia/src/sksl/SkSLCPPCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLFileOutputStream.h
-FILE: ../../../third_party/skia/src/sksl/SkSLHCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLStringStream.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLCPPCodeGenerator.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLHCodeGenerator.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLEnum.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchCase.h
@@ -3677,11 +3674,11 @@ FILE: ../../../third_party/skia/src/sksl/SkSLInliner.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.h
-FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleUsage.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLVMGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLVMGenerator.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLCore.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLType.cpp
@@ -5686,7 +5683,9 @@ FILE: ../../../third_party/skia/gm/aarecteffect.cpp
 FILE: ../../../third_party/skia/gm/colorspace.cpp
 FILE: ../../../third_party/skia/gm/largeclippedpath.cpp
 FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
-FILE: ../../../third_party/skia/modules/androidkit/Canvas.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/Surface.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ThresholdEffect.cpp
@@ -6039,7 +6038,6 @@ FILE: ../../../third_party/skia/include/private/SkTDArray.h
 FILE: ../../../third_party/skia/include/private/SkTemplates.h
 FILE: ../../../third_party/skia/include/utils/SkBase64.h
 FILE: ../../../third_party/skia/include/utils/SkCamera.h
-FILE: ../../../third_party/skia/include/utils/SkInterpolator.h
 FILE: ../../../third_party/skia/include/utils/SkParse.h
 FILE: ../../../third_party/skia/include/utils/SkParsePath.h
 FILE: ../../../third_party/skia/include/utils/SkRandom.h
@@ -6240,7 +6238,6 @@ FILE: ../../../third_party/skia/src/core/SkStroke.cpp
 FILE: ../../../third_party/skia/src/core/SkWriter32.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_empty_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkImageEncoder_CG.cpp
-FILE: ../../../third_party/skia/src/utils/SkInterpolator.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2008 The Android Open Source Project
 
