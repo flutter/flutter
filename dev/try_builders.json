@@ -222,6 +222,12 @@
       "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
     },
     {
+      "name": "Linux validate_ci_config",
+      "repo": "flutter",
+      "task_name": "linux_validate_ci_config",
+      "enabled": true
+    },
+    {
       "name": "Linux web_tool_tests",
       "repo": "flutter",
       "task_name": "linux_web_tool_tests",
@@ -684,7 +690,7 @@
       "name": "Windows gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "win_gradle_plugin_light_apk_test",
-      "enabled": true,
+      "enabled": false,
       "run_if": ["dev/**", "bin/**"]
     },
     {

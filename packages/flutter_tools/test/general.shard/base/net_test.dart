@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -20,7 +18,7 @@ import '../../src/common.dart';
 import '../../src/fake_http_client.dart';
 
 void main() {
-  BufferLogger testLogger;
+  late BufferLogger testLogger;
 
   setUp(() {
     testLogger = BufferLogger.test();
@@ -36,7 +34,7 @@ void main() {
 
   group('successful fetch', () {
     const String responseString = 'response string';
-    List<int> responseData;
+    late List<int> responseData;
 
     setUp(() {
       responseData = utf8.encode(responseString);
@@ -51,7 +49,7 @@ void main() {
         ])
       );
 
-      final List<int> data = await net.fetchUrl(Uri.parse('http://example.invalid/'));
+      final List<int>? data = await net.fetchUrl(Uri.parse('http://example.invalid/'));
       expect(data, equals(responseData));
     });
 
@@ -65,7 +63,7 @@ void main() {
       );
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File destFile = fileSystem.file('dest_file')..createSync();
-      final List<int> data = await net.fetchUrl(
+      final List<int>? data = await net.fetchUrl(
         Uri.parse('http://example.invalid/'),
         destFile: destFile,
       );
@@ -127,9 +125,9 @@ void main() {
         FakeRequest(invalid, responseError: const io.SocketException('')),
       ])
     );
-    String error;
+    String? error;
     FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int> value) {
+      net.fetchUrl(invalid).then((List<int>? value) async {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -158,9 +156,9 @@ void main() {
         FakeRequest(invalid, responseError: const io.HandshakeException('')),
       ])
     );
-    String error;
+    String? error;
     FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int> value) {
+      net.fetchUrl(invalid).then((List<int>? value) async {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed: $exception';
@@ -188,9 +186,9 @@ void main() {
         },
       ),
     );
-    String error;
+    String? error;
     FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(Uri.parse('example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('example.invalid/')).then((List<int>? value) async {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed: $exception';
@@ -214,9 +212,9 @@ void main() {
         FakeRequest(invalid, responseError: const io.HttpException('')),
       ])
     );
-    String error;
+    String? error;
     FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int> value) {
+      net.fetchUrl(invalid).then((List<int>? value) async {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -245,9 +243,9 @@ void main() {
         FakeRequest(invalid, responseError: const io.HttpException('')),
       ])
     );
-    String error;
+    String? error;
     FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int> value) {
+      net.fetchUrl(invalid).then((List<int>? value) async {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -281,10 +279,10 @@ void main() {
         )),
       ])
     );
-    String error;
-    List<int> actualResult;
+    String? error;
+    List<int>? actualResult;
     FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid, maxAttempts: 3).then((List<int> value) {
+      net.fetchUrl(invalid, maxAttempts: 3).then((List<int>? value) async {
         actualResult = value;
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';

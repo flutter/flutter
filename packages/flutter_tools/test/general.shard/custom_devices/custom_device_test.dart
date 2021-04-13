@@ -10,6 +10,7 @@ import 'package:file/src/interface/directory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:file/memory.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -517,4 +519,23 @@ void main() {
       ProcessManager: () => FakeProcessManager.any()
     }
   );
+}
+
+class FakeBundleBuilder extends Fake implements BundleBuilder {
+  @override
+  Future<void> build({
+    TargetPlatform platform,
+    BuildInfo buildInfo,
+    String mainPath,
+    String manifestPath = defaultManifestPath,
+    String applicationKernelFilePath,
+    String depfilePath,
+    String assetDirPath,
+    bool trackWidgetCreation = false,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    bool treeShakeIcons
+  }) async {}
 }

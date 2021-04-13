@@ -255,6 +255,42 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('Chrome and Edge version check handles missing registry on Windows', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager.excludedExecutables.add('reg');
+
+    final Platform platform = FakePlatform(
+        operatingSystem: 'windows', environment: <String, String>{});
+    final ChromiumLauncher chromeLauncher = ChromiumLauncher(
+      fileSystem: MemoryFileSystem.test(),
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: null,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+    final MicrosoftEdgeDevice edgeDevice = MicrosoftEdgeDevice(
+      chromiumLauncher: chromeLauncher,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+    );
+
+    expect(edgeDevice.isSupported(), true);
+    expect(await edgeDevice.sdkNameAndVersion, '');
+
+    final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
+      chromiumLauncher: chromeLauncher,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      platform: platform,
+    );
+
+    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.sdkNameAndVersion, 'unknown');
+  });
+
   testWithoutContext('Edge is not supported on versions less than 73', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
