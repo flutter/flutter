@@ -224,13 +224,14 @@ void main() {
 
   testWithoutContext('flutter can report crashes', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'update-packages',
       '--crash',
-    ], workingDirectory: helloWorld);
+    ], environment: <String, String>{
+      'BOT': 'false',
+    });
 
     expect(result.exitCode, isNot(0));
     expect(result.stderr, contains(
