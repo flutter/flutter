@@ -309,12 +309,12 @@ class TestProject extends Project {
   String get test => _test.replaceFirst('// TEST_BODY', testBody);
 
   final String _test = r'''
-  import 'package:flutter_test/flutter_test.dart';
   import 'package:flutter/animation.dart';
   import 'package:flutter/foundation.dart';
+  import 'package:flutter/gestures.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter/services.dart';
-  import 'package:flutter/gestures.dart';
+  import 'package:flutter_test/flutter_test.dart';
 
   void main() {
     testWidgets('test', (WidgetTester tester) async {
