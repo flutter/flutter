@@ -774,6 +774,7 @@ class SkShaderNamespace {
     Uint32List colors,
     Float32List colorStops,
     SkTileMode tileMode,
+    Float32List? matrix,
   );
 
   external SkShader MakeRadialGradient(
