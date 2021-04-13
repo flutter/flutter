@@ -12,12 +12,10 @@ import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'globals_null_migrated.dart' as globals;
-import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
-import 'macos/xcode.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'runner/local_engine.dart';
@@ -44,8 +42,6 @@ LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
-IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
-Xcode get xcode => context.get<Xcode>();
 
 XCDevice get xcdevice => context.get<XCDevice>();
 
