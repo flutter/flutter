@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is experimental. Please do not ship production code using it.
+ * This class is available experimentally and the API may change. Use at your own risk.
  *
  * <p>Represents a collection of {@link io.flutter.embedding.engine.FlutterEngine}s who share
  * resources to allow them to be created faster and with less memory than calling the {@link
