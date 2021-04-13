@@ -49,6 +49,13 @@ void testMain() async {
     double yOffset = 0;
     for (double angle in angles) {
       final Rect shaderRect = Rect.fromLTWH(50, 50 + yOffset, 100, 100);
+      Matrix4 matrix = Matrix4.identity();
+      matrix.translate(shaderRect.left, shaderRect.top);
+      matrix.multiply(Matrix4
+          .rotationZ((angle / 180) * math.pi));
+      Matrix4 post = Matrix4.identity();
+      post.translate(-shaderRect.left, -shaderRect.top);
+      matrix.multiply(post);
       final Paint paint = Paint()
         ..shader = Gradient.linear(
             Offset(shaderRect.left, shaderRect.top),
@@ -56,9 +63,7 @@ void testMain() async {
             [Color(0xFFFF0000), Color(0xFF042a85)],
             null,
             TileMode.clamp,
-            Matrix4
-                .rotationZ((angle / 180) * math.pi)
-                .toFloat64());
+            matrix.toFloat64());
       rc.drawRect(shaderRect, Paint()
         ..color = Color(0xFF000000));
       rc.drawOval(shaderRect, paint);
