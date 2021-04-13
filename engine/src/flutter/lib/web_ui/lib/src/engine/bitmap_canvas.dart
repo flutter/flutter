@@ -574,10 +574,8 @@ class BitmapCanvas extends EngineCanvas {
   void _applyFilter(html.Element element, SurfacePaintData paint) {
     if (paint.maskFilter != null) {
       final bool isStroke = paint.style == ui.PaintingStyle.stroke;
-      String cssColor = paint.color == null
-          ? '#000000'
-          : colorToCssString(
-              paint.color)!;
+      String cssColor =
+          paint.color == null ? '#000000' : colorToCssString(paint.color)!;
       final double sigma = paint.maskFilter!.webOnlySigma;
       if (browserEngine == BrowserEngine.webkit && !isStroke) {
         // A bug in webkit leaves artifacts when this element is animated
@@ -1195,14 +1193,33 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
         ..height = '${roundRect.bottom - clipOffsetY}px';
       setElementTransform(curElement, newClipTransform.storage);
     } else if (entry.path != null) {
-      curElement.style
-        ..transform = matrix4ToCssTransform(newClipTransform)
-        ..transformOrigin = '0 0 0';
-      String svgClipPath =
-          createSvgClipDef(curElement as html.HtmlElement, entry.path!);
-      final html.Element clipElement =
-          html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
-      clipDefs.add(clipElement);
+      // Clipping optimization when we know that the path is an oval.
+      // We use a div with border-radius set to 50% with a size that is
+      // set to path bounds and set overflow to hidden.
+      final SurfacePath surfacePath = entry.path as SurfacePath;
+      if (surfacePath.pathRef.isOval != -1) {
+        final ui.Rect ovalBounds = surfacePath.getBounds();
+        final double clipOffsetX = ovalBounds.left;
+        final double clipOffsetY = ovalBounds.top;
+        newClipTransform = newClipTransform.clone()
+          ..translate(clipOffsetX, clipOffsetY);
+        curElement.style
+          ..overflow = 'hidden'
+          ..width = '${ovalBounds.width}px'
+          ..height = '${ovalBounds.height}px'
+          ..borderRadius = '50%';
+        setElementTransform(curElement, newClipTransform.storage);
+      } else {
+        // Abitrary path clipping.
+        curElement.style
+          ..transform = matrix4ToCssTransform(newClipTransform)
+          ..transformOrigin = '0 0 0';
+        String svgClipPath =
+            createSvgClipDef(curElement as html.HtmlElement, entry.path!);
+        final html.Element clipElement =
+            html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
+        clipDefs.add(clipElement);
+      }
     }
     // Reverse the transform of the clipping element so children can use
     // effective transform to render.
