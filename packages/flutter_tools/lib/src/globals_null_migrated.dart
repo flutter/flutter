@@ -26,7 +26,7 @@ import 'ios/plist_parser.dart';
 
 Cache get cache => context.get<Cache>()!;
 Config get config => context.get<Config>()!;
-HttpClientFactory get httpClientFactory => context.get<HttpClientFactory>()!;
+HttpClientFactory? get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>()!;
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>()!;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
