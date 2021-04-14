@@ -203,6 +203,12 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
   return isolate;
 }
 
+void DartIsolate::SpawnIsolateShutdownCallback(
+    std::shared_ptr<DartIsolateGroupData>* isolate_group_data,
+    std::shared_ptr<DartIsolate>* isolate_data) {
+  DartIsolate::DartIsolateShutdownCallback(isolate_group_data, isolate_data);
+}
+
 std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     const Settings& settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
@@ -267,7 +273,9 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
       return Dart_CreateIsolateInGroup(
           /*group_member=*/spawning_isolate->isolate(),
           /*name=*/(*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
-          /*shutdown_callback=*/nullptr,
+          /*shutdown_callback=*/
+          reinterpret_cast<Dart_IsolateShutdownCallback>(
+              DartIsolate::SpawnIsolateShutdownCallback),
           /*cleanup_callback=*/nullptr,
           /*child_isolate_data=*/isolate_data,
           /*error=*/error);

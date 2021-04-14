@@ -552,6 +552,10 @@ class DartIsolate : public UIDartState {
   // |Dart_DeferredLoadHandler|
   static Dart_Handle OnDartLoadLibrary(intptr_t loading_unit_id);
 
+  static void SpawnIsolateShutdownCallback(
+      std::shared_ptr<DartIsolateGroupData>* isolate_group_data,
+      std::shared_ptr<DartIsolate>* isolate_data);
+
   FML_DISALLOW_COPY_AND_ASSIGN(DartIsolate);
 };
 
