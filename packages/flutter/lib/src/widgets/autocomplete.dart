@@ -666,9 +666,14 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// If this parameter is not null, then [focusNode] must also be not null.
   final TextEditingController? textEditingController;
 
+  /// {@template flutter.widgets.RawAutocomplete.initialVAlue}
   /// The initial value to use for the text field.
   ///
+  /// Setting the initial value does not notify [textEditingController]'s
+  /// listeners, and thus will not cause the options UI to appear.
+  ///
   /// This parameter is ignored if [textEditingController] is defined.
+  /// {@endtemplate}
   final String? initialValue;
 
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the

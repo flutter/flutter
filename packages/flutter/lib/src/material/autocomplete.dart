@@ -193,9 +193,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
-  /// The initial value to use for the text field.
-  ///
-  /// This parameter is ignored if [textEditingController] is defined.
+  /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final String? initialValue;
 
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
