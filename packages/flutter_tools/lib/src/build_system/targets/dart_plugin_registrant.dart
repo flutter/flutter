@@ -9,7 +9,7 @@ import 'package:package_config/package_config.dart';
 
 import '../../base/file_system.dart';
 import '../../dart/package_map.dart';
-import '../../plugins.dart';
+import '../../flutter_plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import 'common.dart';

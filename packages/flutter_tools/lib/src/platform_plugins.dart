@@ -213,15 +213,15 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return MacOSPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
-      defaultPackage: yaml[kDefaultPackage] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
@@ -270,15 +270,15 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return WindowsPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
-      defaultPackage: yaml[kDefaultPackage] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
@@ -328,15 +328,15 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return LinuxPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
-      defaultPackage: yaml[kDefaultPackage] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
