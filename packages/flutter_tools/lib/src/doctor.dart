@@ -85,7 +85,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         userMessages: userMessages,
         plistParser: globals.plistParser,
       ),
-      ...VsCodeValidator.installedValidators(globals.fs, globals.platform),
+      ...VsCodeValidator.installedValidators(globals.fs, globals.platform, globals.processManager),
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: globals.platform);
     _validators = <DoctorValidator>[
