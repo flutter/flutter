@@ -356,17 +356,18 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     );
     final Intent? matchedIntent = _find(keysPressed: keysPressed);
     if (matchedIntent != null) {
-      final BuildContext primaryContext = primaryFocus!.context!;
-      assert (primaryContext != null);
-      final Action<Intent>? action = Actions.maybeFind<Intent>(
-        primaryContext,
-        intent: matchedIntent,
-      );
-      if (action != null && action.isEnabled(matchedIntent)) {
-        Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
-        return action.consumesKey(matchedIntent)
-            ? KeyEventResult.handled
-            : KeyEventResult.skipRemainingHandlers;
+      final BuildContext? primaryContext = primaryFocus?.context;
+      if (primaryContext != null) {
+        final Action<Intent>? action = Actions.maybeFind<Intent>(
+          primaryContext,
+          intent: matchedIntent,
+        );
+        if (action != null && action.isEnabled(matchedIntent)) {
+          Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
+          return action.consumesKey(matchedIntent)
+              ? KeyEventResult.handled
+              : KeyEventResult.skipRemainingHandlers;
+        }
       }
     }
     return modal ? KeyEventResult.skipRemainingHandlers : KeyEventResult.ignored;
