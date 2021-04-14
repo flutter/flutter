@@ -24,9 +24,6 @@ const FileSystem fs = LocalFileSystem();
 
 Future<void> main(List<String> args) async {
   final Options options = Options.fromArgs(args);
-
-  print('Using $tempDirectory for temporary files.');
-
   final String json = options.snapshot.readAsStringSync();
   final Snapshot snapshot = Snapshot.fromJson(jsonDecode(json) as Map<String, dynamic>);
   final ProgramInfo programInfo = toProgramInfo(snapshot);
@@ -109,7 +106,7 @@ Future<bool> validateType(String forbiddenType, File packageConfigFile) async {
 
 class Options {
   const Options({
-    @required this.snapshot
+    @required this.snapshot,
     @required this.packageConfig,
     @required this.forbiddenTypes,
   });

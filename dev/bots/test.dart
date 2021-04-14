@@ -639,7 +639,7 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runForbiddenFromReleaseTests() async {
     // Build a release APK to get the snapshot json.
-    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('forbidden_imports');
+    final Directory tempDirectory = Directory.systemTemp.createTempSync('forbidden_imports');
     final List<String> command = <String>[
       'build',
       'apk',
