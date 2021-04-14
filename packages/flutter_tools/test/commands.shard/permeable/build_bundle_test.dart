@@ -7,6 +7,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
@@ -227,6 +228,34 @@ void main() {
         kTargetPlatform: 'android-arm',
         kTrackWidgetCreation: 'true',
         kIconTreeShakerFlag: null,
+      });
+    }),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('passes dart-define through', () async {
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--dart-define=foo=bar'
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTrackWidgetCreation: 'true',
+        kIconTreeShakerFlag: null,
+        kDartDefines: 'Zm9vPWJhcg==',
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
