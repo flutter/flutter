@@ -413,140 +413,6 @@ class FlutterDevice {
     ];
   }
 
-  Future<String> debugDumpApp() async {
-    final StringBuffer buffer = StringBuffer();
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      final String data = await vmService.flutterDebugDumpApp(
-        isolateId: view.id,
-      );
-      buffer.writeln(data);
-    }
-    return buffer.toString();
-  }
-
-  Future<String> debugDumpRenderTree() async {
-    final StringBuffer buffer = StringBuffer();
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      final String data = await vmService.flutterDebugDumpRenderTree(
-        isolateId: view.id,
-      );
-      buffer.writeln(data);
-    }
-    return buffer.toString();
-  }
-
-  Future<String> debugDumpLayerTree() async {
-    final StringBuffer buffer = StringBuffer();
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      final String data = await vmService.flutterDebugDumpLayerTree(
-        isolateId: view.id,
-      );
-      buffer.writeln(data);
-    }
-    return buffer.toString();
-  }
-
-  Future<String> debugDumpSemanticsTreeInTraversalOrder() async {
-    final StringBuffer buffer = StringBuffer();
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      final String data = await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
-        isolateId: view.id,
-      );
-      buffer.writeln(data);
-    }
-    return buffer.toString();
-  }
-
-  Future<String> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    final StringBuffer buffer = StringBuffer();
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      final String data = await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
-        isolateId: view.id,
-      );
-      buffer.writeln(data);
-    }
-    return buffer.toString();
-  }
-
-  Future<void> toggleDebugPaintSizeEnabled() async {
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      await vmService.flutterToggleDebugPaintSizeEnabled(
-        isolateId: view.id,
-      );
-    }
-  }
-
-  Future<void> toggleDebugCheckElevationsEnabled() async {
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      await vmService.flutterToggleDebugCheckElevationsEnabled(
-        isolateId: view.id,
-      );
-    }
-  }
-
-  Future<void> debugTogglePerformanceOverlayOverride() async {
-    if (targetPlatform == TargetPlatform.web_javascript) {
-      return;
-    }
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      await vmService.flutterTogglePerformanceOverlayOverride(
-        isolateId: view.id,
-      );
-    }
-  }
-
-  Future<void> toggleWidgetInspector() async {
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      await vmService.flutterToggleWidgetInspector(
-        isolateId: view.id,
-      );
-    }
-  }
-
-  Future<void> toggleInvertOversizedImages() async {
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      await vmService.flutterToggleInvertOversizedImages(
-        isolateId: view.id,
-      );
-    }
-  }
-
-  Future<void> toggleProfileWidgetBuilds() async {
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      await vmService.flutterToggleProfileWidgetBuilds(
-        isolateId: view.id,
-      );
-    }
-  }
-
-  Future<Brightness> toggleBrightness({ Brightness current }) async {
-    Brightness next;
-    if (current == Brightness.light) {
-      next = Brightness.dark;
-    } else if (current == Brightness.dark) {
-      next = Brightness.light;
-    }
-
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      next = await vmService.flutterBrightnessOverride(
-        isolateId: view.id,
-        brightness: next,
-      );
-    }
-    return next;
-  }
-
-  Future<String> togglePlatform({ String from }) async {
-    final String to = nextPlatform(from);
-    for (final vm_service.IsolateRef view in await _getCurrentIsolates()) {
-      await vmService.flutterPlatformOverride(
-        platform: to,
-        isolateId: view.id,
-      );
-    }
-    return to;
-  }
-
   Future<void> startEchoingDeviceLog() async {
     if (_loggingSubscription != null) {
       return;
@@ -827,8 +693,12 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      final String data = await device.debugDumpApp();
-      logger.printStatus(data);
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpApp(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
     }
     return true;
   }
@@ -839,8 +709,12 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      final String data = await device.debugDumpRenderTree();
-      logger.printStatus(data);
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpRenderTree(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
     }
     return true;
   }
@@ -851,8 +725,12 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      final String data = await device.debugDumpLayerTree();
-      logger.printStatus(data);
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpLayerTree(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
     }
     return true;
   }
@@ -865,8 +743,12 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      final String data = await device.debugDumpSemanticsTreeInTraversalOrder();
-      logger.printStatus(data);
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
     }
     return true;
   }
@@ -879,8 +761,12 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      final String data = await device.debugDumpSemanticsTreeInInverseHitTestOrder();
-      logger.printStatus(data);
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
     }
     return true;
   }
@@ -891,7 +777,11 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      await device.toggleDebugPaintSizeEnabled();
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleDebugPaintSizeEnabled(
+          isolateId: view.id,
+        );
+      }
     }
     return true;
   }
@@ -902,7 +792,11 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      await device.toggleDebugCheckElevationsEnabled();
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleDebugCheckElevationsEnabled(
+          isolateId: view.id,
+        );
+      }
     }
     return true;
   }
@@ -915,7 +809,14 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      await device.debugTogglePerformanceOverlayOverride();
+      if (device.targetPlatform == TargetPlatform.web_javascript) {
+        continue;
+      }
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterTogglePerformanceOverlayOverride(
+          isolateId: view.id,
+        );
+      }
     }
     return true;
   }
@@ -926,7 +827,11 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      await device.toggleWidgetInspector();
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleWidgetInspector(
+          isolateId: view.id,
+        );
+      }
     }
     return true;
   }
@@ -937,7 +842,11 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      await device.toggleInvertOversizedImages();
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleInvertOversizedImages(
+          isolateId: view.id,
+        );
+      }
     }
     return true;
   }
@@ -948,7 +857,11 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      await device.toggleProfileWidgetBuilds();
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleProfileWidgetBuilds(
+          isolateId: view.id,
+        );
+      }
     }
     return true;
   }
@@ -958,12 +871,23 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    final Brightness brightness = await flutterDevices.first.toggleBrightness();
+    final List<vm_service.IsolateRef> views = await flutterDevices.first._getCurrentIsolates();
+    final Brightness current = await flutterDevices.first.vmService.flutterBrightnessOverride(
+      isolateId: views.first.id,
+    );
     Brightness next;
+    if (current == Brightness.light) {
+      next = Brightness.dark;
+    } else {
+      next = Brightness.light;
+    }
     for (final FlutterDevice device in flutterDevices) {
-      next = await device.toggleBrightness(
-        current: brightness,
-      );
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterBrightnessOverride(
+          isolateId: view.id,
+          brightness: next,
+        );
+      }
       logger.printStatus('Changed brightness to $next.');
     }
     return true;
@@ -979,9 +903,14 @@ abstract class ResidentHandlers {
       .first.vmService.flutterPlatformOverride(
         isolateId: views.first.id,
       );
-    String to;
+    final String to = nextPlatform(from);
     for (final FlutterDevice device in flutterDevices) {
-      to = await device.togglePlatform(from: from);
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterPlatformOverride(
+          platform: to,
+          isolateId: view.id,
+        );
+      }
     }
     logger.printStatus('Switched operating system to $to');
     return true;

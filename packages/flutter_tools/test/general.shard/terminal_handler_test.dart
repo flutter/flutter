@@ -222,13 +222,13 @@ void main() {
             'value': 'Brightness.dark',
           },
           jsonResponse: <String, Object>{
-            'value': 'Brightness.light',
+            'value': 'Brightness.dark',
           }
         ),
       ]);
       await terminalHandler.processTerminalInput('b');
 
-      expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.light'));
+      expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.dark'));
     });
 
     testWithoutContext('b - debugToggleBrightness with web target', () async {
@@ -251,13 +251,13 @@ void main() {
             'value': 'Brightness.dark',
           },
           jsonResponse: <String, Object>{
-            'value': 'Brightness.light',
+            'value': 'Brightness.dark',
           }
         ),
       ], web: true);
       await terminalHandler.processTerminalInput('b');
 
-      expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.light'));
+      expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.dark'));
     });
 
     testWithoutContext('b - debugToggleBrightness without service protocol is skipped', () async {
