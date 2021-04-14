@@ -18,14 +18,12 @@ It follows format:
             "name":"yyy",
             "repo":"flutter",
             "taskName":"zzz",
-            "enabled":true,
-            "run_if":["a/b/", "c/d/**"]
+            "enabled":true
         }
     ]
 }
 ```
 * enabled(optional): `true` is the default value if unspecified
-* run_if(optional): will always be triggered if unspecified
 ### `prod_builders.json`
 It follows format:
 ```json
