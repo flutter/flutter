@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -1146,20 +1147,41 @@ Future<void> _checkConsumerDependencies() async {
     print(result.stderr);
     exit(result.exitCode);
   }
-  final Set<String> dependencies = <String>{};
+  final Set<String> dependencySet = <String>{};
   for (final String line in result.stdout.toString().split('\n')) {
     if (!line.contains('->')) {
       continue;
     }
     final List<String> parts = line.split('->');
     final String name = parts[0].trim();
-    dependencies.add(name);
+    dependencySet.add(name);
   }
+  final List<String> dependencies = dependencySet.toList()
+    ..sort();
   final List<String> disallowed = <String>[];
+  final StreamController<Digest> controller = StreamController<Digest>();
+  final ByteConversionSink hasher = sha256.startChunkedConversion(controller.sink);
   for (final String dependency in dependencies) {
+    hasher.add(utf8.encode(dependency));
     if (!kCorePackageAllowList.contains(dependency)) {
       disallowed.add(dependency);
     }
+  }
+  hasher.close();
+  final Digest digest = await controller.stream.last;
+  final String signature = base64.encode(digest.bytes);
+
+  // Do not change this signature without following the directions in
+  // dev/bots/allowlist.dart
+  const String kExpected = 'I7oyhZIbNXC2vq7m+uE8BA5IXUgMy+RhnZAkjS+O+U8=';
+
+  if (signature != kExpected) {
+    print(
+      'Warning: transitive closure sha256 does not match expected signature.\n'
+      'See dev/bots/allowlist.dart for instructions on how to update the '
+      'package allowlist.\n'
+      '$signature != $kExpected',
+    );
   }
 
   if (disallowed.isEmpty) {
