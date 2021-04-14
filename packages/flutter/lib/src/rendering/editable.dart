@@ -2335,7 +2335,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(value != null);
     if (value != _editableTextId) {
       _editableTextId = value;
-      markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
   }

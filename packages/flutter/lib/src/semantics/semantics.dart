@@ -3896,12 +3896,15 @@ class SemanticsConfiguration {
   /// Two configurations are said to be compatible if they can be added to the
   /// same [SemanticsNode] without losing any semantics information.
   bool isCompatibleWith(SemanticsConfiguration? other) {
-    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
+    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated) {
       return true;
-    if (_actionsAsBits & other._actionsAsBits != 0)
+    }
+    if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
-    if ((_flags & other._flags) != 0)
+    }
+    if ((_flags & other._flags) != 0) {
       return false;
+    }
     if (_platformViewId != null && other._platformViewId != null) {
       return false;
     }
@@ -3911,8 +3914,12 @@ class SemanticsConfiguration {
     if (_currentValueLength != null && other._currentValueLength != null) {
       return false;
     }
-    if (_value != null && _value.isNotEmpty && other._value != null && other._value.isNotEmpty)
+    if (_value != null && _value.isNotEmpty && other._value != null && other._value.isNotEmpty) {
       return false;
+    }
+    if (isTextField && other.isTextField && (_editableTextId != other._editableTextId)) {
+      return false;
+    }
     return true;
   }
 
@@ -3929,11 +3936,6 @@ class SemanticsConfiguration {
   /// configurations as determined by [isCompatibleWith].
   void absorb(SemanticsConfiguration child) {
     assert(!explicitChildNodes);
-    assert(
-      !isTextField || !child.isTextField,
-      'Both parent and child semantics configurations cannot be text fields.\n'
-      'Parent editableTextId was $_editableTextId. Child editableTextId was ${child._editableTextId}.',
-    );
 
     if (!child.hasBeenAnnotated)
       return;
