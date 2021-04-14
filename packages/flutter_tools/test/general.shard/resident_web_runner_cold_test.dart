@@ -55,7 +55,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       urlTunneller: null,
-      featureFlags: TestFeatureFlags(),
       fileSystem: globals.fs,
       logger: globals.logger,
       systemClock: globals.systemClock,
