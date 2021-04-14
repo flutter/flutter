@@ -20,6 +20,21 @@ class User {
   }
 }
 
+/// given a string input this method enters the string in the autocomplete field
+/// and it returns the height of the resulting options
+Future<double> getOptionsHeight(WidgetTester tester, String text) async {
+  final listFinder = find.byType(ListView);
+  final inputFinder = find.byType(TextFormField);
+  final TextFormField field =
+      inputFinder.evaluate().first.widget as TextFormField;
+  field.controller!.clear();
+  await tester.tap(inputFinder);
+  await tester.enterText(inputFinder, text);
+  await tester.pump();
+  final baseSize = tester.getSize(listFinder);
+  return baseSize.height;
+}
+
 void main() {
   const List<String> kOptions = <String>[
     'aardvark',
@@ -252,5 +267,77 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byKey(optionsKey), findsOneWidget);
+  });
+
+  testWidgets('the options take maxSize as 200.0 if not specified', (WidgetTester tester) async {
+    const double defaultHeight = 200.0;
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      body: Autocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          return kOptions.where((String option) {
+            return option.contains(textEditingValue.text.toLowerCase());
+          });
+        },
+      ),
+    )));
+
+    final resultingHeight = await getOptionsHeight(tester, '');
+    expect(resultingHeight, equals(defaultHeight));
+  });
+
+  testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
+    const double desiredHeight = 150.0;
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+      body: Autocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          return kOptions.where((String option) {
+            return option.contains(textEditingValue.text.toLowerCase());
+          });
+        },
+        maxOptionsHeight: desiredHeight,
+      ),
+    )));
+
+    /// entering "a" returns 9 items from kOptions so basically the
+    /// height of 9 options would be beyond `desiredHeight=150`,
+    /// so height gets restricted to desiredHeight.
+    final resultingHeight = await getOptionsHeight(tester, 'a');
+
+    /// expected desired Height =150.0
+    expect(resultingHeight, equals(desiredHeight));
+  });
+
+  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
+    const double maxOptionsHeight = 250.0;
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+      body: Autocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          return kOptions.where((String option) {
+            return option.contains(textEditingValue.text.toLowerCase());
+          });
+        },
+        maxOptionsHeight: maxOptionsHeight,
+      ),
+    )));
+
+    final listFinder = find.byType(ListView);
+    expect(listFinder, findsNothing);
+
+    /// entering `a` returns 9 items(height > `maxOptionsheight`) from the kOptions
+    /// so height gets restricted to `maxOptionsheight =250`
+    double nineItemsHeight = await getOptionsHeight(tester, 'a');
+    expect(nineItemsHeight, equals(maxOptionsHeight));
+
+    /// returns 2 Items (height < `maxOptionsHeight`)
+    /// so options height shrinks to 2 Items combined height
+    final twoItemsHeight = await getOptionsHeight(tester, 'el');
+    expect(twoItemsHeight, lessThan(maxOptionsHeight));
+
+    /// returns 1 item (height < `maxOptionsHeight`) from `kOptions`
+    /// so options height shrinks to 1 items height
+    final oneItemsHeight = await getOptionsHeight(tester, 'elep');
+    expect(oneItemsHeight, lessThan(twoItemsHeight));
   });
 }
