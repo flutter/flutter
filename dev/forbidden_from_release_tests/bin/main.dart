@@ -112,8 +112,6 @@ class Options {
   });
 
   factory Options.fromArgs(List<String> args) {
-    final String bat = Platform.isWindows ? '.bat' : '';
-
     final ArgParser argParser = ArgParser();
     argParser.addOption(
       'snapshot',

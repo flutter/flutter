@@ -661,7 +661,7 @@ Future<void> _runFrameworkTests() async {
     // First, a smoke test.
     final List<String> smokeTestArgs = <String>[
       path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
-      '--snapshot', tempDirectory.childFile('snapshot.arm64-v8a.json').path,
+      '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
       '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
       '--forbidden-type', 'package:flutter/src/widgets/framework.dart::Widget',
     ];
@@ -675,7 +675,7 @@ Future<void> _runFrameworkTests() async {
     // Actual test.
     final List<String> args = <String>[
       path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
-      '--snapshot', tempDirectory.childFile('snapshot.arm64-v8a.json').path,
+      '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
       '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
       '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     ];
