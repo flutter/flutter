@@ -30,6 +30,7 @@ import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
+import '../flutter_plugins.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';

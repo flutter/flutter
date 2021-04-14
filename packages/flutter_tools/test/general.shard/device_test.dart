@@ -4,7 +4,10 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
@@ -18,7 +21,6 @@ import 'package:fake_async/fake_async.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
-import '../src/fakes.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -536,3 +538,45 @@ class TestDeviceManager extends DeviceManager {
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}
 class FakeFlutterProject extends Fake implements FlutterProject {}
+
+class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  LongPollingDeviceDiscovery() : super('forever');
+
+  final Completer<List<Device>> _completer = Completer<List<Device>>();
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    return _completer.future;
+  }
+
+  @override
+  Future<void> stopPolling() async {
+    _completer.complete();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _completer.complete();
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
+
+class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  ThrowingPollingDeviceDiscovery() : super('throw');
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    throw const ProcessException('fake-discovery', <String>[]);
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
