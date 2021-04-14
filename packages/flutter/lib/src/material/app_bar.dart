@@ -415,6 +415,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
   /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
   /// if the overall theme's [brightness] is [Brightness.dark].
+  ///
+  /// If this color is a [MaterialStateColor] it will be resolved against
+  /// [MaterialState.scrolledUnder] when the content of the app's
+  /// primary scrollable overlaps the app bar.
   /// {@endtemplate}
   ///
   /// See also:
@@ -736,12 +740,14 @@ class _AppBarState extends State<AppBar> {
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    final bool oldScrolledUnder = _scrolledUnder;
-    _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
-    if (_scrolledUnder != oldScrolledUnder) {
-      setState(() {
-        // React to a change in MaterialState.scrolledUnder
-      });
+    if (notification is ScrollUpdateNotification) {
+      final bool oldScrolledUnder = _scrolledUnder;
+      _scrolledUnder = notification.depth == 0 && notification.metrics.extentBefore > 0;
+      if (_scrolledUnder != oldScrolledUnder) {
+        setState(() {
+          // React to a change in MaterialState.scrolledUnder
+        });
+      }
     }
   }
 
@@ -1571,10 +1577,6 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.backgroundColor}
   ///
   /// This property is used to configure an [AppBar].
-  ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.scrolledUnder] when the content of the app's
-  /// primary scrollable overlaps the app bar.
   final Color? backgroundColor;
 
   /// {@macro flutter.material.appbar.foregroundColor}
