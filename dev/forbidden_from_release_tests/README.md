@@ -1,8 +1,9 @@
 # Forbidden from release tests
 
-This program compiles the Dart portions of some Flutter applications to the
+This program compiles the Dart portions of a Flutter application to the
 AOT format used for release builds, and verifies that debugging related types
-are not retained.
+are not retained. By default, it uses the `//examples/hello_world` application
+in this repository.
 
 This harness is invoked from `dev/bots/test.dart`. By default it uses the
 `examples/hello_world.dart` as if it were being compiled for Android arm64
