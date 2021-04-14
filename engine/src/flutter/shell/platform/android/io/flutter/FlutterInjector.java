@@ -7,6 +7,7 @@ package io.flutter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 
@@ -65,13 +66,17 @@ public final class FlutterInjector {
   }
 
   private FlutterInjector(
-      @NonNull FlutterLoader flutterLoader, DeferredComponentManager deferredComponentManager) {
+      @NonNull FlutterLoader flutterLoader,
+      @Nullable DeferredComponentManager deferredComponentManager,
+      @NonNull FlutterJNI.Factory flutterJniFactory) {
     this.flutterLoader = flutterLoader;
     this.deferredComponentManager = deferredComponentManager;
+    this.flutterJniFactory = flutterJniFactory;
   }
 
   private FlutterLoader flutterLoader;
   private DeferredComponentManager deferredComponentManager;
+  private FlutterJNI.Factory flutterJniFactory;
 
   /** Returns the {@link FlutterLoader} instance to use for the Flutter Android engine embedding. */
   @NonNull
@@ -88,6 +93,11 @@ public final class FlutterInjector {
     return deferredComponentManager;
   }
 
+  @NonNull
+  public FlutterJNI.Factory getFlutterJNIFactory() {
+    return flutterJniFactory;
+  }
+
   /**
    * Builder used to supply a custom FlutterInjector instance to {@link
    * FlutterInjector#setInstance(FlutterInjector)}.
@@ -97,6 +107,7 @@ public final class FlutterInjector {
   public static final class Builder {
     private FlutterLoader flutterLoader;
     private DeferredComponentManager deferredComponentManager;
+    private FlutterJNI.Factory flutterJniFactory;
     /**
      * Sets a {@link FlutterLoader} override.
      *
@@ -113,9 +124,18 @@ public final class FlutterInjector {
       return this;
     }
 
+    public Builder setFlutterJNIFactory(@NonNull FlutterJNI.Factory factory) {
+      this.flutterJniFactory = factory;
+      return this;
+    }
+
     private void fillDefaults() {
+      if (flutterJniFactory == null) {
+        flutterJniFactory = new FlutterJNI.Factory();
+      }
+
       if (flutterLoader == null) {
-        flutterLoader = new FlutterLoader();
+        flutterLoader = new FlutterLoader(flutterJniFactory.provideFlutterJNI());
       }
       // DeferredComponentManager's intended default is null.
     }
@@ -127,7 +147,7 @@ public final class FlutterInjector {
     public FlutterInjector build() {
       fillDefaults();
 
-      return new FlutterInjector(flutterLoader, deferredComponentManager);
+      return new FlutterInjector(flutterLoader, deferredComponentManager, flutterJniFactory);
     }
   }
 }

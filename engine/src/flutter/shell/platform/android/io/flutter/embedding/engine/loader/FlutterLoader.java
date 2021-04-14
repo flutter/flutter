@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
+import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.util.PathUtils;
@@ -70,7 +71,7 @@ public class FlutterLoader {
 
   /** Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI}. */
   public FlutterLoader() {
-    this(new FlutterJNI());
+    this(FlutterInjector.instance().getFlutterJNIFactory().provideFlutterJNI());
   }
 
   /**

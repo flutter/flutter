@@ -33,11 +33,12 @@ public class GeneratedPluginRegister {
           generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
       registrationMethod.invoke(null, flutterEngine);
     } catch (Exception e) {
-      Log.w(
+      Log.e(
           TAG,
           "Tried to automatically register plugins with FlutterEngine ("
               + flutterEngine
-              + ") but could not find and invoke the GeneratedPluginRegistrant.");
+              + ") but could not find or invoke the GeneratedPluginRegistrant.");
+      Log.e(TAG, "Received exception while registering", e);
     }
   }
 }

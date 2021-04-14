@@ -919,12 +919,21 @@ public class FlutterActivity extends Activity
    * <p>This method is called after {@link #provideFlutterEngine(Context)}.
    *
    * <p>All plugins listed in the app's pubspec are registered in the base implementation of this
-   * method. To avoid automatic plugin registration, override this method without invoking super().
-   * To keep automatic plugin registration and further configure the flutterEngine, override this
-   * method, invoke super(), and then configure the flutterEngine as desired.
+   * method unless the FlutterEngine for this activity was externally created. To avoid the
+   * automatic plugin registration for implicitly created FlutterEngines, override this method
+   * without invoking super(). To keep automatic plugin registration and further configure the
+   * FlutterEngine, override this method, invoke super(), and then configure the FlutterEngine as
+   * desired.
    */
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    if (delegate.isFlutterEngineFromHost()) {
+      // If the FlutterEngine was explicitly built and injected into this FlutterActivity, the
+      // builder should explicitly decide whether to automatically register plugins via the
+      // FlutterEngine's construction parameter or via the AndroidManifest metadata.
+      return;
+    }
+
     GeneratedPluginRegister.registerGeneratedPlugins(flutterEngine);
   }
 

@@ -20,6 +20,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.broadcastreceiver.BroadcastReceiverControlSurface;
 import io.flutter.embedding.engine.plugins.contentprovider.ContentProviderControlSurface;
 import io.flutter.embedding.engine.plugins.service.ServiceControlSurface;
+import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
@@ -36,7 +37,6 @@ import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -157,7 +157,7 @@ public class FlutterEngine {
    * <p>If the Dart VM has already started, the given arguments will have no effect.
    */
   public FlutterEngine(@NonNull Context context, @Nullable String[] dartVmArgs) {
-    this(context, /* flutterLoader */ null, new FlutterJNI(), dartVmArgs, true);
+    this(context, /* flutterLoader */ null, /* flutterJNI */ null, dartVmArgs, true);
   }
 
   /**
@@ -173,7 +173,7 @@ public class FlutterEngine {
     this(
         context,
         /* flutterLoader */ null,
-        new FlutterJNI(),
+        /* flutterJNI */ null,
         dartVmArgs,
         automaticallyRegisterPlugins);
   }
@@ -204,7 +204,7 @@ public class FlutterEngine {
     this(
         context,
         /* flutterLoader */ null,
-        new FlutterJNI(),
+        /* flutterJNI */ null,
         new PlatformViewsController(),
         dartVmArgs,
         automaticallyRegisterPlugins,
@@ -282,6 +282,14 @@ public class FlutterEngine {
     } catch (NameNotFoundException e) {
       assetManager = context.getAssets();
     }
+
+    FlutterInjector injector = FlutterInjector.instance();
+
+    if (flutterJNI == null) {
+      flutterJNI = injector.getFlutterJNIFactory().provideFlutterJNI();
+    }
+    this.flutterJNI = flutterJNI;
+
     this.dartExecutor = new DartExecutor(flutterJNI, assetManager);
     this.dartExecutor.onAttachedToJNI();
 
@@ -307,9 +315,8 @@ public class FlutterEngine {
 
     this.localizationPlugin = new LocalizationPlugin(context, localizationChannel);
 
-    this.flutterJNI = flutterJNI;
     if (flutterLoader == null) {
-      flutterLoader = FlutterInjector.instance().flutterLoader();
+      flutterLoader = injector.flutterLoader();
     }
 
     if (!flutterJNI.isAttached()) {
@@ -320,7 +327,7 @@ public class FlutterEngine {
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
-    flutterJNI.setDeferredComponentManager(FlutterInjector.instance().deferredComponentManager());
+    flutterJNI.setDeferredComponentManager(injector.deferredComponentManager());
 
     // It should typically be a fresh, unattached JNI. But on a spawned engine, the JNI instance
     // is already attached to a native shell. In that case, the Java FlutterEngine is created around
@@ -342,7 +349,7 @@ public class FlutterEngine {
     // Only automatically register plugins if both constructor parameter and
     // loaded AndroidManifest config turn this feature on.
     if (automaticallyRegisterPlugins && flutterLoader.automaticallyRegisterPlugins()) {
-      registerPlugins();
+      GeneratedPluginRegister.registerGeneratedPlugins(this);
     }
   }
 
@@ -389,36 +396,6 @@ public class FlutterEngine {
         null, // FlutterLoader. A null value passed here causes the constructor to get it from the
         // FlutterInjector.
         newFlutterJNI); // FlutterJNI.
-  }
-
-  /**
-   * Registers all plugins that an app lists in its pubspec.yaml.
-   *
-   * <p>The Flutter tool generates a class called GeneratedPluginRegistrant, which includes the code
-   * necessary to register every plugin in the pubspec.yaml with a given {@code FlutterEngine}. The
-   * GeneratedPluginRegistrant must be generated per app, because each app uses different sets of
-   * plugins. Therefore, the Android embedding cannot place a compile-time dependency on this
-   * generated class. This method uses reflection to attempt to locate the generated file and then
-   * use it at runtime.
-   *
-   * <p>This method fizzles if the GeneratedPluginRegistrant cannot be found or invoked. This
-   * situation should never occur, but if any eventuality comes up that prevents an app from using
-   * this behavior, that app can still write code that explicitly registers plugins.
-   */
-  private void registerPlugins() {
-    try {
-      Class<?> generatedPluginRegistrant =
-          Class.forName("io.flutter.plugins.GeneratedPluginRegistrant");
-      Method registrationMethod =
-          generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
-      registrationMethod.invoke(null, this);
-    } catch (Exception e) {
-      Log.w(
-          TAG,
-          "Tried to automatically register plugins with FlutterEngine ("
-              + this
-              + ") but could not find and invoke the GeneratedPluginRegistrant.");
-    }
   }
 
   /**

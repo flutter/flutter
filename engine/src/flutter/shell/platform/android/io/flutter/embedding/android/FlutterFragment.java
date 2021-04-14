@@ -911,6 +911,14 @@ public class FlutterFragment extends Fragment
   }
 
   /**
+   * Returns true a {@code FlutterEngine} was explicitly created and injected into the {@code
+   * FlutterFragment} rather than one that was created implicitly in the {@code FlutterFragment}.
+   */
+  /* package */ boolean isFlutterEngineInjected() {
+    return delegate.isFlutterEngineFromHost();
+  }
+
+  /**
    * Returns false if the {@link FlutterEngine} within this {@code FlutterFragment} should outlive
    * the {@code FlutterFragment}, itself.
    *
