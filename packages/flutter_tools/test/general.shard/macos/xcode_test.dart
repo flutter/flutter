@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 

@@ -18,12 +18,12 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'features.dart';
 import 'flutter_manifest.dart';
+import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart' as xcode;
 import 'ios/xcodeproj.dart';
 import 'platform_plugins.dart';
-import 'plugins.dart';
 import 'template.dart';
 
 class FlutterProjectFactory {

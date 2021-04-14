@@ -133,12 +133,10 @@ class UnpackWindowsUwp extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    // These artifact look ups need to modified to windows-x64-uwp once
-    // the cache updates have landed.
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
-        Artifact.windowsDesktopPath,
+        Artifact.windowsUwpDesktopPath,
         platform: TargetPlatform.windows_x64,
         mode: buildMode,
       );
@@ -338,7 +336,6 @@ class DebugBundleWindowsAssets extends BundleWindowsAssets {
   ];
 }
 
-
 class ReleaseBundleWindowsAssetsUwp extends BundleWindowsAssetsUwp {
   const ReleaseBundleWindowsAssetsUwp();
 
@@ -351,7 +348,7 @@ class ReleaseBundleWindowsAssetsUwp extends BundleWindowsAssetsUwp {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)),
+    const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_uwp_x64)),
   ];
 }
 
@@ -367,7 +364,7 @@ class ProfileBundleWindowsAssetsUwp extends BundleWindowsAssetsUwp {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)),
+    const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_uwp_x64)),
   ];
 }
 
