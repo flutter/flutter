@@ -153,6 +153,7 @@ TEST_F(DartIsolateTest, SpawnIsolate) {
   }
 
   ASSERT_TRUE(spawn->Shutdown());
+  ASSERT_TRUE(spawn->IsShuttingDown());
   ASSERT_TRUE(root_isolate->Shutdown());
 }
 

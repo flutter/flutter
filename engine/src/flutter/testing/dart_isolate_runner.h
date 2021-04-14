@@ -30,6 +30,8 @@ class AutoIsolateShutdown {
 
   [[nodiscard]] bool RunInIsolateScope(std::function<bool(void)> closure);
 
+  void Shutdown();
+
   DartIsolate* get() {
     FML_CHECK(isolate_);
     return isolate_.get();
