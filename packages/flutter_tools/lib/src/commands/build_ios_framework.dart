@@ -533,7 +533,7 @@ end
                 entity.basename.endsWith('dSYM'))
             .map((FileSystemEntity entity) =>
                 <String>['-debug-symbols', entity.path])
-            .expand((i) => i)
+            .expand<String>((List<String> parameter) => parameter
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
