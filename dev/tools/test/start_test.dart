@@ -12,7 +12,6 @@ import 'package:dev_tools/state.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
@@ -26,12 +25,7 @@ void main() {
     const String engineMirror = 'https://github.com/user/engine.git';
     const String candidateBranch = 'flutter-1.2-candidate.3';
     const String releaseChannel = 'stable';
-    //const String flutterCache =
-    //    '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache';
-    //const String flutterBin =
-    //    '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/flutter';
     const String revision = 'abcd1234';
-    CommandRunner<void> runner;
     Checkouts checkouts;
     MemoryFileSystem fileSystem;
     FakePlatform platform;
@@ -43,7 +37,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    void createRunner({
+    CommandRunner<void> createRunner({
       Map<String, String> environment,
       String operatingSystem,
       List<FakeCommand> commands,
@@ -71,11 +65,11 @@ void main() {
         processManager: processManager,
         stdio: stdio,
       );
-      final FakeStartCommand command = FakeStartCommand(
+      final StartCommand command = StartCommand(
         checkouts: checkouts,
         flutterRoot: fileSystem.directory(flutterRoot),
       );
-      runner = CommandRunner<void>('codesign-test', '')..addCommand(command);
+      return CommandRunner<void>('codesign-test', '')..addCommand(command);
     }
 
     tearDown(() {
@@ -83,11 +77,10 @@ void main() {
       processManager = null;
       checkouts = null;
       platform = null;
-      runner = null;
     });
 
     test('throws exception if run from Windows', () async {
-      createRunner(
+      final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -105,7 +98,7 @@ void main() {
     });
 
     test('throws if --$kFrameworkMirrorOption not provided', () async {
-      createRunner(
+      final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -212,7 +205,7 @@ void main() {
           stdout: revision3,
         ),
       ];
-      createRunner(
+      final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -228,7 +221,7 @@ void main() {
         kStateFileName,
       );
 
-      runner.run(<String>[
+      await runner.run(<String>[
         'start',
         '--$kFrameworkMirrorOption',
         frameworkMirror,
@@ -258,12 +251,7 @@ void main() {
       expect(state.lastPhase, ReleasePhase.INITIALIZE);
       expect(state.conductorVersion, revision);
     });
+  }, onPlatform: <String, dynamic>{
+    'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
-}
-
-class FakeStartCommand extends StartCommand {
-  FakeStartCommand({
-    @required Checkouts checkouts,
-    @required Directory flutterRoot,
-  }) : super(checkouts: checkouts, flutterRoot: flutterRoot);
 }
