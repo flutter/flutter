@@ -161,7 +161,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'appbundle',
+          'gradle',
           label: 'app-not-using-android-x',
           parameters: <String, String>{},
         ),
@@ -201,7 +201,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'appbundle',
+          'gradle',
           label: 'app-using-android-x',
           parameters: <String, String>{},
         ),

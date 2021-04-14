@@ -1248,6 +1248,21 @@ void main() {
     // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
     expect(paragraph.getMinIntrinsicWidth(0.0), 200);
   });
+
+  testWidgets('Text uses TextStyle.overflow', (WidgetTester tester) async {
+    const TextOverflow overflow = TextOverflow.fade;
+
+    await tester.pumpWidget( const Text(
+      'Hello World',
+      textDirection: TextDirection.ltr,
+      style: TextStyle(overflow: overflow),
+    ));
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+
+    expect(richText.overflow, overflow);
+    expect(richText.text.style!.overflow, overflow);
+  });
 }
 
 Future<void> _pumpTextWidget({

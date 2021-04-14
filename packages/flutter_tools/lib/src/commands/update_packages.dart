@@ -125,6 +125,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Use cached packages instead of accessing the network.',
         defaultsTo: false,
         negatable: false,
+      )
+      ..addFlag(
+        'crash',
+        help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
+        defaultsTo: false,
+        negatable: false,
       );
   }
 
@@ -179,6 +185,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
+    final bool crash = boolArg('crash');
+
+    if (crash) {
+      throw StateError('test crash please ignore.');
+    }
 
     if (upgrade && offline) {
       throwToolExit(

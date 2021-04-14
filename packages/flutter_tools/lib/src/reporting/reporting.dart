@@ -21,7 +21,6 @@ import '../dart/language_version.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'first_run.dart';
 
