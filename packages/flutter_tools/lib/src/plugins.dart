@@ -276,15 +276,15 @@ class Plugin {
         const String errorMessage = 'flutter.plugin.platforms should be a map with the platform name as the key';
         return <String>[errorMessage];
       }
-      return _validateMultiPlatformYaml(yaml['platforms'] as YamlMap);
+      return _validateMultiPlatformYaml(yaml['platforms'] as YamlMap?);
     } else {
       return _validateLegacyYaml(yaml);
     }
   }
 
-  static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
+  static List<String> _validateMultiPlatformYaml(YamlMap? yaml) {
     bool isInvalid(String key, bool Function(YamlMap) validate) {
-      if (!yaml.containsKey(key)) {
+      if (!yaml!.containsKey(key)) {
         return false;
       }
       final dynamic yamlValue = yaml[key];
