@@ -193,7 +193,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
-  /// defines the maximum height the [optionsViewBuilder] can take
+  /// defines the maximum height the options can take
+  /// if optionsViewBuilder is null
   ///
   /// defaults to 200.0
   final double maxOptionsHeight;
