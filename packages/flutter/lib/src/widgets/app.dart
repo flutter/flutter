@@ -1205,15 +1205,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         : widget.routes![name];
 
     if (pageContentBuilder != null) {
-      assert(widget.pageRouteBuilder != null,
+      assert(
+        widget.pageRouteBuilder != null,
         'The default onGenerateRoute handler for WidgetsApp must have a '
-        'pageRouteBuilder set if the home or routes properties are set.');
+        'pageRouteBuilder set if the home or routes properties are set.',
+      );
       final Route<dynamic> route = widget.pageRouteBuilder!<dynamic>(
         settings,
         pageContentBuilder,
       );
-      assert(route != null,
-        'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
+      assert(route != null, 'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
       return route;
     }
     if (widget.onGenerateRoute != null)

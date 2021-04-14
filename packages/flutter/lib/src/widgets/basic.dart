@@ -2336,7 +2336,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// When [child] is null, this widget becomes as small as possible and never
 /// overflows
 ///
-/// This widget can be used to ensure some of [child]'s natrual dimensions are
+/// This widget can be used to ensure some of [child]'s natural dimensions are
 /// honored, and get an early warning otherwise during development. For
 /// instance, if [child] requires a minimum height to fully display its content,
 /// [constraintsTransform] can be set to [maxHeightUnconstrained], so that if
@@ -2346,8 +2346,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///
 /// {@tool snippet}
 /// In the following snippet, the [Card] is guaranteed to be at least as tall as
-/// its "natrual" height. Unlike [UnconstrainedBox], it will become taller if
-/// its "natrual" height is smaller than 40 px. If the [Container] isn't high
+/// its "natural" height. Unlike [UnconstrainedBox], it will become taller if
+/// its "natural" height is smaller than 40 px. If the [Container] isn't high
 /// enough to show the full content of the [Card], in debug mode a warning will
 /// be given.
 ///

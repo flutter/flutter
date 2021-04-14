@@ -22,7 +22,7 @@ class DepfileService {
   /// Given an [depfile] File, write the depfile contents.
   ///
   /// If both [inputs] and [outputs] are empty, ensures the file does not
-  /// exist. This can be overriden with the [writeEmpty] parameter when
+  /// exist. This can be overridden with the [writeEmpty] parameter when
   /// both static and runtime dependencies exist and it is not desired
   /// to force a rerun due to no depfile.
   void writeToFile(Depfile depfile, File output, {bool writeEmpty = false}) {

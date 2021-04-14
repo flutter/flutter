@@ -2,27 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_features.dart';
 
 import '../src/common.dart';
 import '../src/fakes.dart';
 
 void main() {
   group('Features', () {
-    Config testConfig;
-    FakePlatform platform;
-    FlutterFeatureFlags featureFlags;
+    late Config testConfig;
+    late FakePlatform platform;
+    late FlutterFeatureFlags featureFlags;
 
     setUp(() {
       testConfig = Config.test();
       platform = FakePlatform(environment: <String, String>{});
 
       for (final Feature feature in allFeatures) {
-        testConfig.setValue(feature.configSetting, false);
+        testConfig.setValue(feature.configSetting!, false);
       }
 
       featureFlags = FlutterFeatureFlags(

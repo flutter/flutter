@@ -20,7 +20,7 @@ void main() {
     fileSystem.file('inputs/a.txt').createSync();
     fileSystem.file('inputs/b.txt').createSync();
     fileSystem.file('foo/c.txt').createSync(recursive: true);
-    // Sould not be copied.
+    // Should not be copied.
     fileSystem.file('inputs/d.txt').createSync();
 
     final Depfile depfile = unpackDesktopArtifacts(

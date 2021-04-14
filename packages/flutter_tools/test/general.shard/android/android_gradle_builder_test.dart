@@ -120,7 +120,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
           parameters: <String, String>{},
         ),
@@ -222,7 +222,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
           parameters: <String, String>{},
         ),
@@ -309,7 +309,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
           parameters: <String, String>{},
         ),
@@ -466,7 +466,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-success',
           parameters: <String, String>{},
         ),
@@ -674,7 +674,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
           parameters: <String, String>{},
         ),

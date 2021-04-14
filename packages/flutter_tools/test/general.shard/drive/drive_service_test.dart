@@ -23,6 +23,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 
 
@@ -389,6 +390,7 @@ FlutterDriverService setUpDriverService({
       PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       Object compression,
       Device device,
+      Logger logger,
     }) async {
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');

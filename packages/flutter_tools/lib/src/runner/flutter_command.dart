@@ -19,7 +19,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for "useLegacyNames" only
-import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
@@ -116,6 +115,7 @@ class FlutterOptions {
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
+  static const String kCodeSizeDirectory = 'code-size-directory';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
@@ -283,6 +283,11 @@ abstract class FlutterCommand extends Command<void> {
     }
     return bundle.defaultMainPath;
   }
+
+  /// Path to the Dart's package config file.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get packagesPath => globalResults['packages'] as String;
 
   void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
@@ -827,7 +832,15 @@ abstract class FlutterCommand extends Command<void> {
             'This flag is only supported on "--release" builds. When building for Android, a single '
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
+            'By default, the intermediate output files will be placed in a transient directory in the '
+            'build directory. This can be overriden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
+    );
+
+    argParser.addOption(
+      FlutterOptions.kCodeSizeDirectory,
+      help: 'The location to write code size analysis files. If this is not specified, files '
+            'are written to a temporary directory under the build directory.'
     );
   }
 
@@ -837,7 +850,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode }) async {
+  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode, File forcedTargetFile }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -846,7 +859,7 @@ abstract class FlutterCommand extends Command<void> {
       : null;
 
     final File packagesFile = globals.fs.file(
-      globalResults['packages'] as String ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packagesFile, logger: globals.logger, throwOnError: false);
 
@@ -873,10 +886,13 @@ abstract class FlutterCommand extends Command<void> {
 
     String codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
-      final Directory directory = globals.fsUtils.getUniqueDirectory(
+      Directory directory = globals.fsUtils.getUniqueDirectory(
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
+      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
+        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
+      }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
@@ -887,8 +903,8 @@ abstract class FlutterCommand extends Command<void> {
       // passing a flag. Examine the entrypoint file to determine if it
       // is opted in or out.
       final bool wasNullSafetyFlagParsed = argResults.wasParsed(FlutterOptions.kNullSafety);
-      if (!wasNullSafetyFlagParsed && argParser.options.containsKey('target')) {
-        final File entrypointFile = globals.fs.file(targetFile);
+      if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
+        final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
         final LanguageVersion languageVersion = determineLanguageVersion(
           entrypointFile,
           packageConfig.packageOf(entrypointFile.absolute.uri),
@@ -990,8 +1006,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: globalResults['packages'] as String
-        ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
@@ -1102,7 +1117,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     assert(commandResult != null);
     // Send command result.
-    CommandResultEvent(commandPath, commandResult).send();
+    CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String> labels = <String>[

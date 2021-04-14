@@ -121,6 +121,44 @@ class ReorderableListView extends StatefulWidget {
   /// constructor. Even more efficient, however, is to create the instances
   /// on demand using this constructor's `itemBuilder` callback.
   ///
+  /// This example creates a list using the
+  /// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
+  /// list items are built lazily on demand.
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// ```dart
+  /// final List<int> _items = List<int>.generate(50, (int index) => index);
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
+  ///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+  ///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+  ///
+  ///   return ReorderableListView.builder(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 40),
+  ///     itemCount:_items.length,
+  ///     itemBuilder: (BuildContext context, int index) {
+  ///       return ListTile(
+  ///         key: Key('$index'),
+  ///         tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+  ///         title: Text('Item ${_items[index]}'),
+  ///         );
+  ///     },
+  ///     onReorder: (int oldIndex, int newIndex) {
+  ///       setState(() {
+  ///         if (oldIndex < newIndex) {
+  ///           newIndex -= 1;
+  ///         }
+  ///         final int item = _items.removeAt(oldIndex);
+  ///         _items.insert(newIndex, item);
+  ///       });
+  ///     },
+  ///   );
+  /// }
+  ///
+  /// ```
+  /// {@end-tool}
   /// See also:
   ///
   ///   * [ReorderableListView], which allows you to build a reorderable
@@ -449,63 +487,70 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     assert(debugCheckHasOverlay(context));
 
     // If there is a header we can't just apply the padding to the list,
-    // so we wrap the CustomScrollView in the padding for the top, left and right
-    // and only add the padding from the bottom to the sliver list (or the equivalent
-    // for other axis directions).
+    // so we break it up into padding for the header and padding for the list.
     final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
-    late EdgeInsets outerPadding;
-    late EdgeInsets listPadding;
-    switch (widget.scrollDirection) {
+    late final EdgeInsets headerPadding;
+    late final EdgeInsets listPadding;
 
-      case Axis.horizontal:
-        if (widget.reverse) {
-          outerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
-          listPadding = EdgeInsets.fromLTRB(padding.left, 0, 0, 0);
-        } else {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
-          listPadding = EdgeInsets.fromLTRB(0, 0, padding.right, 0);
-        }
-        break;
-      case Axis.vertical:
-        if (widget.reverse) {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
-          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, 0);
-        } else {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
-          listPadding = EdgeInsets.fromLTRB(0, 0, 0, padding.bottom);
-        }
-        break;
+    if (widget.header == null) {
+      headerPadding = EdgeInsets.zero;
+      listPadding = padding;
+    } else {
+      switch (widget.scrollDirection) {
+        case Axis.horizontal:
+          if (widget.reverse) {
+            // Header on the right
+            headerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
+          } else {
+            // Header on the left
+            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
+          }
+          break;
+        case Axis.vertical:
+          if (widget.reverse) {
+            // Header on the bottom
+            headerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
+          } else {
+            // Header on the top
+            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
+            listPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
+          }
+          break;
+      }
     }
 
-    return Padding(
-      padding: outerPadding,
-      child: CustomScrollView(
-        scrollDirection: widget.scrollDirection,
-        reverse: widget.reverse,
-        controller: widget.scrollController,
-        primary: widget.primary,
-        physics: widget.physics,
-        shrinkWrap: widget.shrinkWrap,
-        anchor: widget.anchor,
-        cacheExtent: widget.cacheExtent,
-        dragStartBehavior: widget.dragStartBehavior,
-        keyboardDismissBehavior: widget.keyboardDismissBehavior,
-        restorationId: widget.restorationId,
-        clipBehavior: widget.clipBehavior,
-        slivers: <Widget>[
-          if (widget.header != null)
-            SliverToBoxAdapter(child: widget.header!),
+    return CustomScrollView(
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
+      controller: widget.scrollController,
+      primary: widget.primary,
+      physics: widget.physics,
+      shrinkWrap: widget.shrinkWrap,
+      anchor: widget.anchor,
+      cacheExtent: widget.cacheExtent,
+      dragStartBehavior: widget.dragStartBehavior,
+      keyboardDismissBehavior: widget.keyboardDismissBehavior,
+      restorationId: widget.restorationId,
+      clipBehavior: widget.clipBehavior,
+      slivers: <Widget>[
+        if (widget.header != null)
           SliverPadding(
-            padding: listPadding,
-            sliver: SliverReorderableList(
-              itemBuilder: _itemBuilder,
-              itemCount: widget.itemCount,
-              onReorder: widget.onReorder,
-              proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
-            ),
+            padding: headerPadding,
+            sliver: SliverToBoxAdapter(child: widget.header!),
           ),
-        ],
-      ),
+        SliverPadding(
+          padding: listPadding,
+          sliver: SliverReorderableList(
+            itemBuilder: _itemBuilder,
+            itemCount: widget.itemCount,
+            onReorder: widget.onReorder,
+            proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
+          ),
+        ),
+      ],
     );
   }
 }

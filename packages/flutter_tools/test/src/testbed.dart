@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:process/process.dart';
 
 import 'context.dart';
 import 'fake_http_client.dart';

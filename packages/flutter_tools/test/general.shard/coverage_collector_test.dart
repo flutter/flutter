@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
+import '../src/fake_vm_services.dart';
 
 void main() {
   testWithoutContext('Coverage collector Can handle coverage SentinelException', () async {

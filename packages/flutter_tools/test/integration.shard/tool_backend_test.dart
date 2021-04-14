@@ -7,6 +7,7 @@
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import 'test_utils.dart';
 
 final String toolBackend = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'bin', 'tool_backend.dart');
@@ -14,7 +15,7 @@ final String examplePath = fileSystem.path.join(getFlutterRoot(), 'examples', 'h
 final String dart = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
 void main() {
-  testWithoutContext('tool_backend.dart exits if PROJECT_DIR is not set', () async {
+  testUsingContext('tool_backend.dart exits if PROJECT_DIR is not set', () async {
     final ProcessResult result = await processManager.run(<String>[
       dart,
       toolBackend,
@@ -23,10 +24,10 @@ void main() {
     ]);
 
     expect(result.exitCode, 1);
-    expect(result.stderr, 'PROJECT_DIR environment variable must be set to the location of Flutter project to be built.');
+    expect(result.stderr, contains('PROJECT_DIR environment variable must be set to the location of Flutter project to be built.'));
   });
 
-  testWithoutContext('tool_backend.dart exits if FLUTTER_ROOT is not set', () async {
+  testUsingContext('tool_backend.dart exits if FLUTTER_ROOT is not set', () async {
     // Removing parent environment means that batch script cannot be run.
     final String dart = fileSystem.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk', 'bin', platform.isWindows ? 'dart.exe' : 'dart');
 
@@ -40,10 +41,10 @@ void main() {
     }, includeParentEnvironment: false); // Prevent FLUTTER_ROOT set by test environment from leaking
 
     expect(result.exitCode, 1);
-    expect(result.stderr, 'FLUTTER_ROOT environment variable must be set to the location of the Flutter SDK.');
+    expect(result.stderr, contains('FLUTTER_ROOT environment variable must be set to the location of the Flutter SDK.'));
   });
 
-  testWithoutContext('tool_backend.dart exits if local engine does not match build mode', () async {
+  testUsingContext('tool_backend.dart exits if local engine does not match build mode', () async {
     final ProcessResult result = await processManager.run(<String>[
       dart,
       toolBackend,

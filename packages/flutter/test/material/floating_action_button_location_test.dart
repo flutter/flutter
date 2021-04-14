@@ -148,11 +148,13 @@ void main() {
             }
 
             if (deltas.where((double delta) => delta < maxDeltaRotation).isEmpty) {
-              fail("The Floating Action Button's rotation should not change "
-                  'faster than $maxDeltaRotation per animation step.\n'
-                  'Detected deltas were: $deltas\n'
-                  'Previous values: $previousRotations, current values: $currentRotations\n'
-                  'Previous rect: $previousRect, current rect: $currentRect',);
+              fail(
+                "The Floating Action Button's rotation should not change "
+                'faster than $maxDeltaRotation per animation step.\n'
+                'Detected deltas were: $deltas\n'
+                'Previous values: $previousRotations, current values: $currentRotations\n'
+                'Previous rect: $previousRect, current rect: $currentRect',
+              );
             }
           }
           previousRotations = currentRotations;

@@ -713,7 +713,7 @@ void main() {
                 },
               ),
               bottomNavigationBar: const BottomAppBar(
-                child: SizedBox(height: 48.0,),
+                child: SizedBox(height: 48.0),
               ),
             ),
           ),
@@ -1854,7 +1854,7 @@ void main() {
                 ),
               ),
             );
-          },);
+          });
         } on FlutterError catch (e) {
           error = e;
         } finally {
