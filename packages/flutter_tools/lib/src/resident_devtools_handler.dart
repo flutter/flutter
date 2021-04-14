@@ -144,22 +144,13 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       return;
     }
     try {
-      if (device.targetPlatform == TargetPlatform.web_javascript) {
-        await device.vmService.callMethodWrapper(
-          'ext.flutter.connectedVmServiceUri',
-          args: <String, dynamic>{
-            'value': uri.toString(),
-          },
-        );
-      } else {
-        await _invokeRpcOnFirstView(
-          'ext.flutter.connectedVmServiceUri',
-          device: device,
-          params: <String, dynamic>{
-            'value': uri.toString(),
-          },
-        );
-      }
+      await _invokeRpcOnFirstView(
+        'ext.flutter.connectedVmServiceUri',
+        device: device,
+        params: <String, dynamic>{
+          'value': uri.toString(),
+        },
+      );
     } on Exception catch (e) {
       _logger.printError(e.toString());
       _logger.printError(
