@@ -114,11 +114,11 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.unmount();
   }
 
-  // TODO(goderbauer): Figure out how to apply the pragma to the closure passed
-  //   to buildScope below (and enable test in break_on_framework_exceptions_test.dart),
-  //   https://github.com/flutter/flutter/issues/17007#issuecomment-818952818
-  // @pragma('vm:notify-debugger-on-exception')
   void _layout(ConstraintType constraints) {
+    // TODO(goderbauer): When https://github.com/dart-lang/sdk/issues/45710 is
+    //   fixed: refactor the anonymous closure below into a named one, apply the
+    //   @pragma('vm:notify-debugger-on-exception') to it and enable the
+    //   corresponding test in break_on_framework_exceptions_test.dart.
     owner!.buildScope(this, () {
       Widget built;
       try {
