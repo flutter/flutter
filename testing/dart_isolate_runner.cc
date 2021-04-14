@@ -13,12 +13,25 @@ AutoIsolateShutdown::AutoIsolateShutdown(std::shared_ptr<DartIsolate> isolate,
     : isolate_(std::move(isolate)), runner_(std::move(runner)) {}
 
 AutoIsolateShutdown::~AutoIsolateShutdown() {
+  if (!isolate_->IsShuttingDown()) {
+    Shutdown();
+  }
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(runner_,
+                                    [isolate = std::move(isolate_), &latch]() {
+                                      // Delete isolate on thread.
+                                      latch.Signal();
+                                    });
+  latch.Wait();
+}
+
+void AutoIsolateShutdown::Shutdown() {
   if (!IsValid()) {
     return;
   }
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
-      runner_, [isolate = std::move(isolate_), &latch]() {
+      runner_, [isolate = isolate_.get(), &latch]() {
         if (!isolate->Shutdown()) {
           FML_LOG(ERROR) << "Could not shutdown isolate.";
           FML_CHECK(false);

@@ -8,6 +8,10 @@
 namespace flutter {
 namespace testing {
 
+namespace {
+void NopFinalizer(void* isolate_callback_data, void* peer) {}
+}  // namespace
+
 class DartWeakPersistentHandle : public FixtureTest {
  public:
   DartWeakPersistentHandle()
@@ -44,8 +48,6 @@ class DartWeakPersistentHandle : public FixtureTest {
   std::unique_ptr<AutoIsolateShutdown> running_isolate_;
   FML_DISALLOW_COPY_AND_ASSIGN(DartWeakPersistentHandle);
 };
-
-void NopFinalizer(void* isolate_callback_data, void* peer) {}
 
 TEST_F(DartWeakPersistentHandle, ClearImmediately) {
   auto weak_persistent_value = tonic::DartWeakPersistentValue();
