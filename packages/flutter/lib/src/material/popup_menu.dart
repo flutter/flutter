@@ -1123,7 +1123,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     );
   }
 
-  void _updateButtonPosition() {
+  void _maybeUpdateMenuPosition() {
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
       final RelativeRect newPosition = _calculateButtonPosition();
       if (newPosition != _buttonPosition) {
@@ -1132,6 +1132,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       }
     });
   }
+
   /// A method to show a popup menu with the items supplied to
   /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
   ///
@@ -1185,13 +1186,13 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   void didUpdateWidget(PopupMenuButton<T> oldWidget) {
-    _updateButtonPosition();
+    _maybeUpdateMenuPosition();
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void didChangeDependencies() {
-    _updateButtonPosition();
+    _maybeUpdateMenuPosition();
     super.didChangeDependencies();
   }
 
