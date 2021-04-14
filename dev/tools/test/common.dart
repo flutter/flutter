@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:dev_tools/stdio.dart';
 import 'package:file/file.dart';
+import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
 export 'package:test/test.dart' hide isInstanceOf;

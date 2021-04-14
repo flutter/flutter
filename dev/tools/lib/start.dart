@@ -116,6 +116,12 @@ class StartCommand extends Command<void> {
 
   @override
   void run() {
+    if (!platform.isMacOS && !platform.isLinux) {
+      throw ConductorException(
+        'Error! This tool is only supported on macOS and Linux',
+      );
+    }
+
     final File stateFile = checkouts.fileSystem.file(
       getValueFromEnvOrArgs(kStateOption, argResults, platform.environment),
     );
