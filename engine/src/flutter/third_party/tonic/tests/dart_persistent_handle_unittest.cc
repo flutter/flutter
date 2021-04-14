@@ -26,8 +26,9 @@ class DartPersistentHandleTest : public FixtureTest {
     if (running_isolate_) {
       return false;
     }
-    auto isolate = RunDartCodeInIsolate(vm_, settings_, task_runners_,
-                                        entrypoint, {}, GetFixturesPath());
+    auto isolate =
+        RunDartCodeInIsolate(vm_, settings_, task_runners_, entrypoint, {},
+                             GetDefaultKernelFilePath());
     if (!isolate || isolate->get()->GetPhase() != DartIsolate::Phase::Running) {
       return false;
     }
