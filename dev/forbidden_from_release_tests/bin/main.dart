@@ -25,26 +25,9 @@ const FileSystem fs = LocalFileSystem();
 Future<void> main(List<String> args) async {
   final Options options = Options.fromArgs(args);
 
-  final Directory tempDirectory = fs.systemTempDirectory.createTempSync('forbidden_imports');
   print('Using $tempDirectory for temporary files.');
 
-  final List<String> command = <String>[
-    options.flutter.path,
-    'build',
-    'apk',
-    '--target-platform',
-    'android-arm64',
-    '--release',
-    '--analyze-size',
-    '--code-size-directory',
-    tempDirectory.path,
-    '-v',
-  ];
-
-  await _runStreamed(command, workingDirectory: options.target.parent.path);
-
-  final File v8SnapshotInfo = tempDirectory.childFile('snapshot.arm64-v8a.json');
-  final String json = v8SnapshotInfo.readAsStringSync();
+  final String json = options.snapshot.readAsStringSync();
   final Snapshot snapshot = Snapshot.fromJson(jsonDecode(json) as Map<String, dynamic>);
   final ProgramInfo programInfo = toProgramInfo(snapshot);
 
@@ -84,7 +67,6 @@ Future<void> main(List<String> args) async {
   }
 
   print('No forbidden types found.');
-  tempDirectory.deleteSync(recursive: true);
 }
 
 Future<bool> validateType(String forbiddenType, File packageConfigFile) async {
@@ -127,8 +109,7 @@ Future<bool> validateType(String forbiddenType, File packageConfigFile) async {
 
 class Options {
   const Options({
-    @required this.flutter,
-    @required this.target,
+    @required this.snapshot
     @required this.packageConfig,
     @required this.forbiddenTypes,
   });
@@ -138,17 +119,9 @@ class Options {
 
     final ArgParser argParser = ArgParser();
     argParser.addOption(
-      'flutter',
-      help: 'The path to the flutter binary.',
-      valueHelp: path.join(r'$FLUTTER_ROOT', 'bin', 'flutter$bat'),
-      defaultsTo: path.join(fs.currentDirectory.path, 'bin', 'flutter$bat'),
-    );
-    argParser.addOption(
-      'target',
-      abbr: 't',
-      help: 'The Dart entrypoint file.',
-      valueHelp: path.join(r'$FLUTTER_ROOT', 'examples', 'hello_world', 'lib', 'main.dart'),
-      defaultsTo: path.join(fs.currentDirectory.path, 'examples', 'hello_world', 'lib', 'main.dart'),
+      'snapshot',
+      help: 'The path V8 snapshot file.',
+      valueHelp: '/tmp/snapshot.arm64-v8a.json',
     );
     argParser.addOption(
       'package-config',
@@ -171,15 +144,13 @@ class Options {
     }
 
     return Options(
-      flutter: _getFileArg(argResults, 'flutter'),
-      target: _getFileArg(argResults, 'target'),
+      snapshot: _getFileArg(argResults, 'snapshot'),
       packageConfig: _getFileArg(argResults, 'package-config'),
       forbiddenTypes: Set<String>.from(argResults['forbidden-type'] as List<String>),
     );
   }
 
-  final File flutter;
-  final File target;
+  final File snapshot;
   final File packageConfig;
   final Set<String> forbiddenTypes;
 
@@ -190,19 +161,5 @@ class Options {
       exit(-1);
     }
     return result;
-  }
-}
-
-Future<void> _runStreamed(List<String> command, {String/*?*/ workingDirectory}) async {
-  final String workingDirectoryInstruction = workingDirectory != null ? ' in directory $workingDirectory' : '';
-
-  print('Running command ${command.join(' ')}$workingDirectoryInstruction');
-  final Process process = await processManager.start(command, workingDirectory: workingDirectory);
-  stdout.addStream(process.stdout);
-  stderr.addStream(process.stderr);
-
-  final int exitCode = await process.exitCode;
-  if (exitCode != 0) {
-    exit(exitCode);
   }
 }

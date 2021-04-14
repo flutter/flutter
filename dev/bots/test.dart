@@ -638,9 +638,31 @@ Future<void> _runFrameworkTests() async {
   }
 
   Future<void> runForbiddenFromReleaseTests() async {
+    // Build a release APK to get the snapshot json.
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('forbidden_imports');
+    final List<String> command = <String>[
+      'build',
+      'apk',
+      '--target-platform',
+      'android-arm64',
+      '--release',
+      '--analyze-size',
+      '--code-size-directory',
+      tempDirectory.path,
+      '-v',
+    ];
+
+    await runCommand(
+      flutter,
+      command,
+      workingDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
+    );
+
     // First, a smoke test.
     final List<String> smokeTestArgs = <String>[
       path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+      '--snapshot', tempDirectory.childFile('snapshot.arm64-v8a.json').path,
+      '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
       '--forbidden-type', 'package:flutter/src/widgets/framework.dart::Widget',
     ];
     await runCommand(
@@ -653,6 +675,8 @@ Future<void> _runFrameworkTests() async {
     // Actual test.
     final List<String> args = <String>[
       path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+      '--snapshot', tempDirectory.childFile('snapshot.arm64-v8a.json').path,
+      '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
       '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     ];
     await runCommand(
