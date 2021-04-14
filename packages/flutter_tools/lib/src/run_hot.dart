@@ -599,9 +599,6 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  bool get supportsRestart => true;
-
-  @override
   Future<OperationResult> restart({
     bool fullRestart = false,
     String reason,
