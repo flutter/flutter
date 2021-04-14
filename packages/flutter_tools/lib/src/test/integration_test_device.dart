@@ -14,7 +14,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../vmservice.dart';
 import 'test_device.dart';
 
@@ -70,7 +70,7 @@ class IntegrationTestTestDevice implements TestDevice {
     _gotProcessObservatoryUri.complete(launchResult.observatoryUri);
 
     globals.printTrace('test $id: Connecting to vm service');
-    final FlutterVmService vmService = await connectToVmService(launchResult.observatoryUri).timeout(
+    final FlutterVmService vmService = await connectToVmService(launchResult.observatoryUri, logger: globals.logger).timeout(
       const Duration(seconds: 5),
       onTimeout: () => throw TimeoutException('Connecting to the VM Service timed out.'),
     );

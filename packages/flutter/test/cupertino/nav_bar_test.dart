@@ -17,7 +17,10 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
-          leading: CupertinoButton(child: Text('Something'), onPressed: null,),
+          leading: CupertinoButton(
+            child: Text('Something'),
+            onPressed: null,
+          ),
           middle: Text('Title'),
         ),
       ),
@@ -952,7 +955,6 @@ void main() {
       );
     },
   );
-
 
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/commands/generate_localizations.dart';
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   testUsingContext('default l10n settings', () async {

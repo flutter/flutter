@@ -1,0 +1,31 @@
+# Describes the targets run in continuous integration environment.
+#
+# Cocoon[1] uses this file to generate a checklist of tasks to be performed for
+# every commit.
+#
+# [1] github.com/flutter/cocoon
+#
+# Required properties:
+# * name: human readable, unique string identifier that describes the target
+# * builder: name of the LUCI builder to run the target on
+#       See https://cs.opensource.google/flutter/infra/+/master:config/
+#
+# Optional properties:
+# * bringup: boolean hether the target can block the tree.
+#       Targets should be marked as bringup when newly added, until they have
+#       soaked for a 25 runs. Tragets that are flaky but not being actively worked
+#       on should be hidden because they just cause confusion otherwise.
+# * dependencies: List<String> of target names this target is dependent on.
+#       This only supports one parent target, and when that target completes
+#       successfully, this target will be started.
+#       Child targets can reuse artifacts from parent targets.
+# * properties: Map<String, String> of properties to pass to recipe
+enabled_branches:
+  - master
+targets:
+  - name: analyze_linux
+    bringup: true
+    builder: Linux analyze
+    properties:
+      validation: analyze
+      validation_name: Analyze

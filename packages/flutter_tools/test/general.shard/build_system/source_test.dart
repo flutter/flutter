@@ -44,7 +44,7 @@ void main() {
     });
   });
 
-  test('configures implicit vs explict correctly', () => testbed.run(() {
+  test('configures implicit vs explicit correctly', () => testbed.run(() {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
   }));

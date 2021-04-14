@@ -1067,7 +1067,7 @@ void main() {
     const Key key2 = GlobalObjectKey('key2');
     late StateSetter setState;
     int tabBarViewCnt = 2;
-    TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+    TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1077,8 +1077,8 @@ void main() {
           return TabBarView(
             controller: tabController,
             children: <Widget>[
-              if (tabBarViewCnt > 0) const Text('key1', key: key1,),
-              if (tabBarViewCnt > 1) const Text('key2', key: key2,),
+              if (tabBarViewCnt > 0) const Text('key1', key: key1),
+              if (tabBarViewCnt > 1) const Text('key2', key: key2),
             ],
           );
         },
@@ -1099,7 +1099,7 @@ void main() {
     // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
     setState((){
       tabBarViewCnt = 1;
-      tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync(),);
+      tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
     });
 
     await tester.pump(const Duration(seconds: 1)); // finish the animation
@@ -1572,6 +1572,22 @@ void main() {
     await tester.pumpWidget(Container());
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
   });
+
+  testWidgets('Widget and State properties are nulled out when unmounted', (WidgetTester tester) async {
+    await tester.pumpWidget(const _StatefulLeaf());
+    final StatefulElement element = tester.element<StatefulElement>(find.byType(_StatefulLeaf));
+    expect(element.state, isA<State<_StatefulLeaf>>());
+    expect(element.widget, isA<_StatefulLeaf>());
+    // Replace the widget tree to unmount the element.
+    await tester.pumpWidget(Container());
+    // Accessing state/widget now throws a CastError because they have been
+    // nulled out to reduce severity of memory leaks when an Element (e.g. in
+    // the form of a BuildContext) is retained past its useful life. See also
+    // https://github.com/flutter/flutter/issues/79605 for examples why this may
+    // occur.
+    expect(() => element.state, throwsA(isA<TypeError>()));
+    expect(() => element.widget, throwsA(isA<TypeError>()));
+  }, skip: kIsWeb);
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {

@@ -47,7 +47,7 @@ class VisualStudio {
   /// The name of the Visual Studio install.
   ///
   /// For instance: "Visual Studio Community 2019".
-  String get displayName => _bestVisualStudioDetails[_displayNameKey] as String;
+  String? get displayName => _bestVisualStudioDetails[_displayNameKey] as String?;
 
   /// The user-friendly version number of the Visual Studio install.
   ///
@@ -56,16 +56,16 @@ class VisualStudio {
     if (_bestVisualStudioDetails[_catalogKey] == null) {
       return null;
     }
-    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey] as String;
+    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey] as String?;
   }
 
   /// The directory where Visual Studio is installed.
-  String get installLocation => _bestVisualStudioDetails[_installationPathKey] as String;
+  String? get installLocation => _bestVisualStudioDetails[_installationPathKey] as String?;
 
   /// The full version of the Visual Studio install.
   ///
   /// For instance: "15.4.27004.2002".
-  String get fullVersion => _bestVisualStudioDetails[_fullVersionKey] as String;
+  String? get fullVersion => _bestVisualStudioDetails[_fullVersionKey] as String?;
 
   // Properties that determine the status of the installation. There might be
   // Visual Studio versions that don't include them, so default to a "valid" value to
@@ -151,7 +151,7 @@ class VisualStudio {
   /// the components necessary to build.
   String? get cmakePath {
     final Map<String, dynamic> details = _usableVisualStudioDetails;
-    if (details.isEmpty) {
+    if (details.isEmpty || _usableVisualStudioDetails[_installationPathKey] == null) {
       return null;
     }
     return _fileSystem.path.joinAll(<String>[
@@ -168,7 +168,7 @@ class VisualStudio {
   }
 
   /// The major version of the Visual Studio install, as an integer.
-  int? get _majorVersion => fullVersion != null ? int.tryParse(fullVersion.split('.')[0]) : null;
+  int? get _majorVersion => fullVersion != null ? int.tryParse(fullVersion!.split('.')[0]) : null;
 
   /// The path to vswhere.exe.
   ///

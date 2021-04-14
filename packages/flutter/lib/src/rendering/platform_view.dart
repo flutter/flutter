@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
-import 'mouse_tracker.dart';
 import 'object.dart';
 
 
@@ -210,8 +209,14 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     // Clip the texture if it's going to paint out of the bounds of the renter box
     // (see comment in _paintTexture for an explanation of when this happens).
     if ((size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(true, offset, offset & size, _paintTexture, clipBehavior: clipBehavior,
-          oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        true,
+        offset,
+        offset & size,
+        _paintTexture,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
       return;
     }
     _clipRectLayer = null;

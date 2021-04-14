@@ -183,9 +183,7 @@ class ClampingScrollSimulation extends Simulation {
 
   // See getSplineDeceleration().
   double _splineDeceleration(double velocity) {
-    return math.log(_inflexion *
-        velocity.abs() /
-        (friction * _decelerationForFriction(0.84)));
+    return math.log(_inflexion * velocity.abs() / (friction * _decelerationForFriction(0.84)));
   }
 
   // See getSplineFlingDuration().

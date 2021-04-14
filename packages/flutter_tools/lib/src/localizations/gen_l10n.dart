@@ -6,6 +6,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
@@ -32,7 +33,7 @@ void generateLocalizations({
     logger: logger,
   );
   if (options.useSyntheticPackage && !flutterManifest.generateSyntheticPackage) {
-    logger.printError(
+    throwToolExit(
       'Attempted to generate localizations code without having '
       'the flutter: generate flag turned on.'
       '\n'
@@ -40,7 +41,6 @@ void generateLocalizations({
       'been added and rebuild the project. Otherwise, the localizations '
       'source code will not be importable.'
     );
-    throw Exception();
   }
 
   precacheLanguageAndRegionTags();
@@ -71,8 +71,7 @@ void generateLocalizations({
       ..loadResources()
       ..writeOutputFiles(logger, isFromYaml: true);
   } on L10nException catch (e) {
-    logger.printError(e.message);
-    throw Exception();
+    throwToolExit(e.message);
   }
 }
 
