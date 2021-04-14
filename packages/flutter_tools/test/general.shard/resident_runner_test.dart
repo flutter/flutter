@@ -2449,7 +2449,7 @@ void main() {
     expect(nextPlatform('android'), 'iOS');
     expect(nextPlatform('iOS'), 'fuchsia');
     expect(nextPlatform('fuchsia'), 'macOS');
-    expect(nextPlatform('macOS',), 'android');
+    expect(nextPlatform('macOS'), 'android');
     expect(() => nextPlatform('unknown'), throwsAssertionError);
   });
 }
