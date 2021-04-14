@@ -16,6 +16,7 @@ import 'box.dart';
 import 'custom_paint.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'paragraph.dart' show kDefaultEllipsis;
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
@@ -236,6 +237,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          locale: locale,
+         ellipsis: text?.style?.overflow == TextOverflow.ellipsis ? kDefaultEllipsis : null,
          strutStyle: strutStyle,
          textHeightBehavior: textHeightBehavior,
          textWidthBasis: textWidthBasis,

@@ -16,7 +16,8 @@ import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 
-const String _kEllipsis = '\u2026';
+/// The default value to display as ellipsis.
+const String kDefaultEllipsis = '\u2026';
 
 /// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
@@ -101,7 +102,7 @@ class RenderParagraph extends RenderBox
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         ellipsis: overflow == TextOverflow.ellipsis ? kDefaultEllipsis : null,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -210,7 +211,7 @@ class RenderParagraph extends RenderBox
     if (_overflow == value)
       return;
     _overflow = value;
-    _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
+    _textPainter.ellipsis = value == TextOverflow.ellipsis ? kDefaultEllipsis : null;
     markNeedsLayout();
   }
 
