@@ -525,7 +525,15 @@ end
       '-create-xcframework',
       for (Directory framework in frameworks) ...<String>[
         '-framework',
-        framework.path
+        framework.path,
+        ...framework.parent
+            .listSync()
+            .where((FileSystemEntity entity) =>
+                entity.basename.endsWith('bcsymbolmap') ||
+                entity.basename.endsWith('dSYM'))
+            .map((FileSystemEntity entity) =>
+                <String>['-debug-symbols', entity.path])
+            .expand<String>((List<String> parameter) => parameter)
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
