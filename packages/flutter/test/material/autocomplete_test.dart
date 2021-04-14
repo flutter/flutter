@@ -260,7 +260,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<String>(
-            initialValue: 'lem',
+            initialValue: const TextEditingValue(text: 'lem'),
             onSelected: (String selection) {
               lastSelection = selection;
             },
@@ -286,7 +286,7 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
     // Displays just one option ('lemur').
     expect(list.semanticChildCount, 1);
 

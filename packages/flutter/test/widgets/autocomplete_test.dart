@@ -567,7 +567,7 @@ void main() {
         home: Scaffold(
           body: RawAutocomplete<String>(
             // Should initialize text field with 'lem'.
-            initialValue: 'lem',
+            initialValue: const TextEditingValue(text: 'lem'),
             optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptions.where((String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
@@ -624,7 +624,7 @@ void main() {
           focusNode: focusNode,
           // Both [initialValue] and [textEditingController] cannot be
           // simultaneously defined.
-          initialValue: 'lemur',
+          initialValue: const TextEditingValue(text: 'lemur'),
           textEditingController: textEditingController,
           optionsBuilder: (TextEditingValue textEditingValue) {
             return kOptions.where((String option) {
