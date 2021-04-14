@@ -641,7 +641,7 @@ Future<void> _runFrameworkTests() async {
     // First, a smoke test.
     final List<String> smokeTestArgs = <String>[
       path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
-      '--forbidden-type', 'Widget',
+      '--forbidden-type', 'package:flutter/src/widgets/framework.dart::Widget',
     ];
     await runCommand(
       dart,
@@ -653,7 +653,7 @@ Future<void> _runFrameworkTests() async {
     // Actual test.
     final List<String> args = <String>[
       path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
-      '--forbidden-type', 'WidgetInspectorService',
+      '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     ];
     await runCommand(
       dart,
