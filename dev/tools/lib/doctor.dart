@@ -13,7 +13,7 @@ import './repository.dart';
 import './state.dart';
 import './stdio.dart';
 
-/// Command to print the logs from the current Flutter release.
+/// Verify the local system is has pre-requisites for conducting a release.
 class DoctorCommand extends Command<void> {
   DoctorCommand({
     @required this.checkouts,
@@ -37,8 +37,7 @@ class DoctorCommand extends Command<void> {
   String get name => 'doctor';
 
   @override
-  String get description =>
-      'Verify the host computer is set up to conduct a release';
+  String get description => 'Verify the host computer is set up to conduct a release';
 
   @override
   void run() {
