@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
@@ -48,11 +49,18 @@ public class FlutterActivityTest {
   @Before
   public void setUp() {
     GeneratedPluginRegistrant.clearRegisteredEngines();
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.isAttached()).thenReturn(true);
+    FlutterJNI.Factory mockFlutterJNIFactory = mock(FlutterJNI.Factory.class);
+    when(mockFlutterJNIFactory.provideFlutterJNI()).thenReturn(mockFlutterJNI);
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterJNIFactory(mockFlutterJNIFactory).build());
   }
 
   @After
   public void tearDown() {
     GeneratedPluginRegistrant.clearRegisteredEngines();
+    FlutterInjector.reset();
   }
 
   @Test
@@ -211,12 +219,14 @@ public class FlutterActivityTest {
 
   @Test
   public void itRegistersPluginsAtConfigurationTime() {
-    FlutterActivity activity =
-        Robolectric.buildActivity(FlutterActivityWithProvidedEngine.class).get();
-    activity.onCreate(null);
+    Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity activity = activityController.get();
 
-    assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
-    activity.configureFlutterEngine(activity.getFlutterEngine());
+    // This calls onAttach on FlutterActivityAndFragmentDelegate and subsequently
+    // configureFlutterEngine which registers the plugins.
+    activity.onCreate(null);
 
     List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
     assertEquals(1, registeredEngines.size());
@@ -282,6 +292,23 @@ public class FlutterActivityTest {
         "Expected FakeFlutterPlugin onCreateCalled to be true", fakeFlutterPlugin.onCreateCalled);
   }
 
+  @Test
+  public void itDoesNotRegisterPluginsTwiceWhenUsingACachedEngine() {
+    Intent intent =
+        new Intent(RuntimeEnvironment.application, FlutterActivityWithProvidedEngine.class);
+    ActivityController<FlutterActivityWithProvidedEngine> activityController =
+        Robolectric.buildActivity(FlutterActivityWithProvidedEngine.class, intent);
+    activityController.create();
+    FlutterActivityWithProvidedEngine flutterActivity = activityController.get();
+    flutterActivity.configureFlutterEngine(flutterActivity.getFlutterEngine());
+
+    List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
+    // This might cause the plugins to be registered twice, once by the FlutterEngine constructor,
+    // and once by the default FlutterActivity.configureFlutterEngine implementation.
+    // Test that it doesn't happen.
+    assertEquals(1, registeredEngines.size());
+  }
+
   static class FlutterActivityWithProvidedEngine extends FlutterActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -293,10 +320,11 @@ public class FlutterActivityTest {
     @Override
     public FlutterEngine provideFlutterEngine(@NonNull Context context) {
       FlutterJNI flutterJNI = mock(FlutterJNI.class);
+      FlutterLoader flutterLoader = mock(FlutterLoader.class);
       when(flutterJNI.isAttached()).thenReturn(true);
+      when(flutterLoader.automaticallyRegisterPlugins()).thenReturn(true);
 
-      return new FlutterEngine(
-          context, mock(FlutterLoader.class), flutterJNI, new String[] {}, false);
+      return new FlutterEngine(context, flutterLoader, flutterJNI, new String[] {}, true);
     }
   }
 
