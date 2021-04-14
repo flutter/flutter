@@ -306,7 +306,7 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [maybeOf], which is a similar function, but it will return null instead
   ///    of throwing an exception if no [Router] ancestor exists.
-  static Router<T> of <T extends Object?>(BuildContext context) {
+  static Router<T> of<T extends Object?>(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     assert(() {
       if (scope == null) {
@@ -334,7 +334,7 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [of], a similar method that returns a non-nullable value, and will
   ///    throw if no [Router] ancestor exists.
-  static Router<T>? maybeOf <T extends Object?> (BuildContext context) {
+  static Router<T>? maybeOf<T extends Object?>(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     return scope?.routerState.widget as Router<T>?;
   }
@@ -619,7 +619,7 @@ class _RouterState<T> extends State<Router<T>> {
       });
   }
 
-  static final Future<void> _never = Completer<void>().future; // won't ever complete
+  static final Future<dynamic> _never = Completer<dynamic>().future; // won't ever complete
 
   _AsyncPassthrough<T> _verifyRouteInformationParserStillCurrent(Object? transaction, Router<T> originalWidget) {
     return (T data) {
