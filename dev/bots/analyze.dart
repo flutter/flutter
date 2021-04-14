@@ -1175,25 +1175,21 @@ Future<void> _checkConsumerDependencies() async {
   // dev/bots/allowlist.dart
   const String kExpected = 'I7oyhZIbNXC2vq7m+uE8BA5IXUgMy+RhnZAkjS+O+U8=';
 
-  if (signature != kExpected) {
-    print(
-      'Warning: transitive closure sha256 does not match expected signature.\n'
-      'See dev/bots/allowlist.dart for instructions on how to update the '
-      'package allowlist.\n'
-      '$signature != $kExpected',
-    );
+  if (disallowed.isNotEmpty) {
+    exitWithError(<String>[
+      'Warning: transitive closure contained non-allowlisted packages:',
+      '${disallowed..join(', ')}',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+    ]);
   }
 
-  if (disallowed.isEmpty) {
-    exit(0);
+  if (signature != kExpected) {
+    exitWithError(<String>[
+      'Warning: transitive closure sha256 does not match expected signature.',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+      '$signature != $kExpected',
+    ]);
   }
-  print(
-    'Warning: transitive closure contained non-allowlisted packages:\n'
-    '${disallowed..join(', ')}\n'
-    'See dev/bots/allowlist.dart for instructions on how to update the '
-    'package allowlist.',
-  );
-  exit(1);
 }
 
 Future<void> _runFlutterAnalyze(String workingDirectory, {
