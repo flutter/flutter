@@ -1173,7 +1173,7 @@ Future<void> _checkConsumerDependencies() async {
 
   // Do not change this signature without following the directions in
   // dev/bots/allowlist.dart
-  const String kExpected = 'I7oyhZIbNXC2vq7m+uE8BA5IXUgMy+RhnZAkjS+O+U8=';
+  const String kExpected = '3S20q38QbN+dDAp+jApXiTRaDgVGGBZ0t4bMJgD3AUY=';
 
   if (disallowed.isNotEmpty) {
     exitWithError(<String>[
