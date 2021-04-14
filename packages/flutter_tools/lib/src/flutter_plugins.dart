@@ -641,6 +641,7 @@ const String _dartPluginRegisterWith = r'''
 ''';
 
 // TODO(egarciad): Evaluate merging the web and desktop plugin registry templates.
+// https://github.com/flutter/flutter/issues/80406
 const String _dartPluginRegistryForDesktopTemplate = '''
 //
 // Generated file. Do not edit.
