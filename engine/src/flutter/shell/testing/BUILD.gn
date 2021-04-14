@@ -28,6 +28,7 @@ executable("testing") {
     "//flutter/fml",
     "//flutter/lib/snapshot",
     "//flutter/shell/common",
+    "//flutter/shell/gpu:gpu_surface_software",
     "//flutter/third_party/tonic",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:dart_io_api",
