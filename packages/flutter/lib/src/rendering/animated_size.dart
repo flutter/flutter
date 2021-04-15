@@ -88,24 +88,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
        assert(curve != null),
        assert(clipBehavior != null),
        _vsync = vsync,
+       _duration = duration,
+       _reverseDuration = reverseDuration,
+       _curve = curve,
        _clipBehavior = clipBehavior,
-       super(child: child, alignment: alignment, textDirection: textDirection) {
-    _controller = AnimationController(
-      vsync: vsync,
-      duration: duration,
-      reverseDuration: reverseDuration,
-    )..addListener(() {
-      if (_controller.value != _lastValue)
-        markNeedsLayout();
-    });
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: curve,
-    );
-  }
+       super(child: child, alignment: alignment, textDirection: textDirection);
 
-  late final AnimationController _controller;
-  late final CurvedAnimation _animation;
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
   double? _lastValue;
@@ -117,30 +105,58 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   RenderAnimatedSizeState get state => _state;
   RenderAnimatedSizeState _state = RenderAnimatedSizeState.start;
 
+  AnimationController? _activeController;
+  AnimationController get _controller {
+    _activeController ??= AnimationController(
+      vsync: _vsync,
+      duration: _duration,
+      reverseDuration: _reverseDuration,
+    )..addListener(() {
+      if (_controller.value != _lastValue)
+          markNeedsLayout();
+    });
+    return _activeController!;
+  }
+
+  CurvedAnimation? _activeAnimation;
+  CurvedAnimation get _animation {
+    _activeAnimation ??= CurvedAnimation(
+      parent: _controller,
+      curve: _curve,
+    );
+    return _activeAnimation!;
+  }
+
   /// The duration of the animation.
-  Duration get duration => _controller.duration!;
+  Duration get duration => _duration;
+  Duration _duration;
   set duration(Duration value) {
     assert(value != null);
-    if (value == _controller.duration)
+    if (value == _duration)
       return;
-    _controller.duration = value;
+    _duration = value;
+    _controller.duration = duration;
   }
 
   /// The duration of the animation when running in reverse.
   Duration? get reverseDuration => _controller.reverseDuration;
+  Duration? _reverseDuration;
   set reverseDuration(Duration? value) {
-    if (value == _controller.reverseDuration)
+    if (value == _reverseDuration)
       return;
-    _controller.reverseDuration = value;
+    _reverseDuration = value;
+    _controller.reverseDuration = reverseDuration;
   }
 
   /// The curve of the animation.
-  Curve get curve => _animation.curve;
+  Curve get curve => _curve;
+  Curve _curve;
   set curve(Curve value) {
     assert(value != null);
-    if (value == _animation.curve)
+    if (value == _curve)
       return;
-    _animation.curve = value;
+    _curve = value;
+    _animation.curve = curve;
   }
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -176,7 +192,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   @override
   void detach() {
-    _controller.stop();
+    if (_activeController != null) {
+      _activeController!.stop();
+      _activeController!.dispose();
+      _activeController = null;
+      _activeAnimation = null;
+    }
     super.detach();
   }
 

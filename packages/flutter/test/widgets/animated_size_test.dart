@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 class TestPaintingContext implements PaintingContext {
@@ -12,6 +13,29 @@ class TestPaintingContext implements PaintingContext {
   @override
   void noSuchMethod(Invocation invocation) {
     invocations.add(invocation);
+  }
+}
+
+class DisposeCheckTicker extends Ticker {
+  DisposeCheckTicker(TickerCallback onTick)
+      : disposed = false, super(onTick);
+
+  bool disposed;
+
+  @override
+  void dispose() {
+    super.dispose();
+    disposed = true;
+  }
+}
+class DisposeCheckVSync implements TickerProvider {
+  DisposeCheckTicker? ticker;
+
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    assert(ticker == null);
+    ticker = DisposeCheckTicker(onTick);
+    return ticker!;
   }
 }
 
@@ -362,6 +386,27 @@ void main() {
 
       await pumpWidget(const Size(222, 222), const Duration(milliseconds: 10));
       expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(222, 222));
+    });
+
+    testWidgets('disposes its animation controller', (WidgetTester tester) async {
+      final DisposeCheckVSync vsync = DisposeCheckVSync();
+
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            vsync: vsync,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(Container());
+
+      expect(vsync.ticker!.disposed, true);
     });
   });
 }
