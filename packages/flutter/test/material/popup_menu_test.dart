@@ -2230,8 +2230,8 @@ void main() {
                   ),
                 ),
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                  const PopupMenuItem<int>(child: Text('-1-'), value: 1,),
-                  const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
+                  const PopupMenuItem<int>(child: Text('-1-'), value: 1),
+                  const PopupMenuItem<int>(child: Text('-2-'), value: 2),
                 ],
               ),
             ),
@@ -2246,22 +2246,48 @@ void main() {
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
 
-    Offset button = tester.getTopLeft(find.byKey(buttonKey));
-    expect(button, const Offset(45.0, 45.0));
+    //                 +-----------------+ 100
+    //                 |        |        |
+    //                 |        | (50,50)|
+    //                 +--------+--------+
+    //                 |        |        |
+    //                 |        |        |
+    //             100 +-----------------+
+    //
+    // The button is a rectangle of 10 * 10 size and is centered,
+    // so its top-left offset should be (45.0, 45.0).
+    Offset buttonOffset = tester.getTopLeft(find.byKey(buttonKey));
+    expect(buttonOffset, const Offset(45.0, 45.0));
 
-    Offset popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView));
-    expect(popupMenu, button);
+    Offset popupMenuOffset = tester.getTopLeft(find.byType(SingleChildScrollView));
+    expect(popupMenuOffset, buttonOffset);
 
     // Keep the menu opened and re-layout the screen.
     await tester.pumpWidget(buildFrame(200.0, 300.0));
 
+    //                 +-----------------------+ 200
+    //                 |           |           |
+    //                 |           |           |
+    //                 |           |           |
+    //                 |           |           |
+    //                 |           | (100,150) |
+    //                 +-----------+-----------|
+    //                 |           |           |
+    //                 |           |           |
+    //                 |           |           |
+    //                 |           |           |
+    //                 |           |           |
+    //             300 +-----------------------+
+    //
+    // The button is a rectangle of 10 * 10 size and is centered,
+    // so its top-left offset should be (95.0, 145.0).
     await tester.pump(); // Need a frame to update the menu.
-    button = tester.getTopLeft(find.byKey(buttonKey));
-    expect(button, const Offset(95.0, 145.0));
+    buttonOffset = tester.getTopLeft(find.byKey(buttonKey));
+    expect(buttonOffset, const Offset(95.0, 145.0));
 
     // The popup menu should follow the button.
-    popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView));
-    expect(popupMenu, button);
+    popupMenuOffset = tester.getTopLeft(find.byType(SingleChildScrollView));
+    expect(popupMenuOffset, buttonOffset);
   });
 }
 
