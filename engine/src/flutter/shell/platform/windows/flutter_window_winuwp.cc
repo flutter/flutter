@@ -126,9 +126,11 @@ void FlutterWindowWinUWP::OnPointerPressed(
     winrt::Windows::UI::Core::PointerEventArgs const& args) {
   double x = GetPosX(args);
   double y = GetPosY(args);
+  FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
 
   binding_handler_delegate_->OnPointerDown(
-      x, y, FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
+      x, y, device_kind,
+      FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
 }
 
 void FlutterWindowWinUWP::OnPointerReleased(
@@ -136,9 +138,11 @@ void FlutterWindowWinUWP::OnPointerReleased(
     winrt::Windows::UI::Core::PointerEventArgs const& args) {
   double x = GetPosX(args);
   double y = GetPosY(args);
+  FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
 
   binding_handler_delegate_->OnPointerUp(
-      x, y, FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
+      x, y, device_kind,
+      FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
 }
 
 void FlutterWindowWinUWP::OnPointerMoved(
@@ -146,8 +150,9 @@ void FlutterWindowWinUWP::OnPointerMoved(
     winrt::Windows::UI::Core::PointerEventArgs const& args) {
   double x = GetPosX(args);
   double y = GetPosY(args);
+  FlutterPointerDeviceKind device_kind = GetPointerDeviceKind(args);
 
-  binding_handler_delegate_->OnPointerMove(x, y);
+  binding_handler_delegate_->OnPointerMove(x, y, device_kind);
 }
 
 void FlutterWindowWinUWP::OnPointerWheelChanged(
@@ -174,6 +179,19 @@ double FlutterWindowWinUWP::GetPosY(
   return static_cast<double>((args.CurrentPoint().Position().Y -
                               display_helper_->GetRenderTargetYOffset()) *
                              inverse_dpi_scale);
+}
+
+FlutterPointerDeviceKind FlutterWindowWinUWP::GetPointerDeviceKind(
+    winrt::Windows::UI::Core::PointerEventArgs const& args) {
+  switch (args.CurrentPoint().PointerDevice().PointerDeviceType()) {
+    case winrt::Windows::Devices::Input::PointerDeviceType::Mouse:
+      return kFlutterPointerDeviceKindMouse;
+    case winrt::Windows::Devices::Input::PointerDeviceType::Pen:
+      return kFlutterPointerDeviceKindStylus;
+    case winrt::Windows::Devices::Input::PointerDeviceType::Touch:
+      return kFlutterPointerDeviceKindTouch;
+  }
+  return kFlutterPointerDeviceKindMouse;
 }
 
 void FlutterWindowWinUWP::OnBoundsChanged(

@@ -1390,6 +1390,8 @@ inline flutter::PointerData::DeviceKind ToPointerDataKind(
       return flutter::PointerData::DeviceKind::kMouse;
     case kFlutterPointerDeviceKindTouch:
       return flutter::PointerData::DeviceKind::kTouch;
+    case kFlutterPointerDeviceKindStylus:
+      return flutter::PointerData::DeviceKind::kStylus;
   }
   return flutter::PointerData::DeviceKind::kMouse;
 }

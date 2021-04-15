@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_UWP_FLUTTER_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_UWP_FLUTTER_WINDOW_H_
 
+#include <winrt/Windows.Devices.Input.h>
 #include <winrt/Windows.UI.Composition.h>
 #include <winrt/Windows.UI.Input.h>
 #include <winrt/Windows.UI.Text.Core.h>
@@ -110,6 +111,10 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
 
   // Converts from logical point to physical Y value.
   double GetPosY(winrt::Windows::UI::Core::PointerEventArgs const& args);
+
+  // Gets the pointer kind.
+  FlutterPointerDeviceKind GetPointerDeviceKind(
+      winrt::Windows::UI::Core::PointerEventArgs const& args);
 
   // Backing CoreWindow. nullptr if not set.
   winrt::Windows::UI::Core::CoreWindow window_{nullptr};
