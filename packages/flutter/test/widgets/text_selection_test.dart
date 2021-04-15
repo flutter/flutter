@@ -487,7 +487,8 @@ void main() {
     expect(renderEditable.selectPositionAtCalled, isTrue);
   });
 
-    testWidgets('TextSelectionGestureDetectorBuilder right click', (WidgetTester tester) async {
+  testWidgets('TextSelectionGestureDetectorBuilder right click', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/80119
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
