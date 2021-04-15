@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:csslib/visitor.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -63,7 +62,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addOption('base-href',
     defaultsTo: '/',
-      help: 'The base url to set in index.html'
+      help: 'The base url to set in index.html.'
     );
 
   }

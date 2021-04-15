@@ -327,8 +327,7 @@ class WebReleaseBundle extends Target {
     environment.outputDir
         .childFile('version.json')
         .writeAsStringSync(versionInfo);
-    await  addBaseHrefToIndexPage(environment);
-
+    addBaseHrefToIndexPage(environment);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -388,23 +387,6 @@ class WebReleaseBundle extends Target {
       resourceFile,
       environment.buildDir.childFile('web_resources.d'),
     );
-  }
-  Future<void> addBaseHrefToIndexPage(Environment environment) async {
-    final File indexFile = environment.projectDir.childFile('web/index.html');
-    final String indexFileContent  =await indexFile.readAsString();
-    final Document parsedContent = parse(indexFileContent);
-    if(indexFileContent =='') {
-      return ;
-    }
-    if(parsedContent.head.getElementsByTagName('base').isEmpty)
-    {
-      parsedContent.head.append(Element.tag('base')..attributes['href'] = environment.defines[kBaseHref],);
-    }
-    else
-      {
-        parsedContent.head.getElementsByTagName('base').first.attributes['href'] = environment.defines[kBaseHref];
-    }
-    await environment.projectDir.childDirectory('web').childFile('index.html').writeAsString(parsedContent.outerHtml);
   }
 }
 
@@ -683,4 +665,26 @@ function onlineFirst(event) {
   );
 }
 ''';
+}
+
+///Adds base tag to index.html
+void addBaseHrefToIndexPage(Environment environment) {
+  final File indexFile = environment.projectDir.childFile('web/index.html');
+  final String indexFileContent = indexFile.readAsStringSync();
+  final Document parsedContent = parse(indexFileContent);
+  if (indexFileContent == '') {
+    return;
+  }
+  if (parsedContent.head.getElementsByTagName('base').isEmpty) {
+    parsedContent.head.append(
+      Element.tag('base')..attributes['href'] = environment.defines[kBaseHref],
+    );
+  } else {
+    parsedContent.head.getElementsByTagName('base').first.attributes['href'] =
+    environment.defines[kBaseHref];
+  }
+  environment.projectDir
+      .childDirectory('web')
+      .childFile('index.html')
+      .writeAsStringSync(parsedContent.outerHtml);
 }

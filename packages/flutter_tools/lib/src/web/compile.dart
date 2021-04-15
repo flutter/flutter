@@ -55,7 +55,6 @@ Future<void> buildWeb(
         kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kBaseHref : baseHref,
-
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
