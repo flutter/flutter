@@ -24,6 +24,7 @@ class CoverageCollector extends TestWatcher {
 
   final bool verbose;
   final String packagesPath;
+  final Map<String, vm_service.Obj> _coverageRefCache = <String, vm_service.Obj>{};
   Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
@@ -61,7 +62,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
     _logMessage('collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
+    final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate, coverageRefCache: _coverageRefCache);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
@@ -97,7 +98,7 @@ class CoverageCollector extends TestWatcher {
     final Future<void> collectionComplete = testDevice.observatoryUri
       .then((Uri observatoryUri) {
         _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri, libraryPredicate)
+        return collect(observatoryUri, libraryPredicate, coverageRefCache: _coverageRefCache)
           .then<void>((Map<String, dynamic> result) {
             if (result == null) {
               throw Exception('Failed to collect coverage.');
@@ -211,17 +212,25 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
   bool waitPaused = false,
   String debugName,
   Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
+  @required Map<String, vm_service.Obj> coverageRefCache,
 }) async {
   final FlutterVmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate, coverageRefCache);
   await vmService.dispose();
   return result;
 }
 
-Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool Function(String) libraryPredicate) async {
+Future<Map<String, dynamic>> _getAllCoverage(
+  vm_service.VmService service,
+  bool Function(String) libraryPredicate,
+  Map<String, vm_service.Obj> coverageRefCache,
+) async {
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {
+    if (isolateRef.isSystemIsolate) {
+      continue;
+    }
     Map<String, Object> scriptList;
     try {
       final vm_service.ScriptList actualScriptList = await service.getScripts(isolateRef.id);
@@ -237,7 +246,8 @@ Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool 
     // SourceReport object.
 
     for (final Map<String, dynamic> script in (scriptList['scripts'] as List<dynamic>).cast<Map<String, dynamic>>()) {
-      if (!libraryPredicate(script['uri'] as String)) {
+      final String libraryUri = script['uri'] as String;
+      if (!libraryPredicate(libraryUri)) {
         continue;
       }
       final String scriptId = script['id'] as String;
@@ -252,13 +262,18 @@ Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool 
           sourceReports[scriptId] = report.json;
         })
       );
-      futures.add(
-        service
-          .getObject(isolateRef.id, scriptId)
-          .then((vm_service.Obj script) {
-            scripts[scriptId] = script.json;
-          })
-      );
+      if (coverageRefCache.containsKey(libraryUri)) {
+        scripts[scriptId] = coverageRefCache[libraryUri].json;
+      } else {
+        futures.add(
+          service
+            .getObject(isolateRef.id, scriptId)
+            .then((vm_service.Obj script) {
+              scripts[scriptId] = script.json;
+              coverageRefCache[libraryUri] = script;
+            })
+        );
+      }
     }
     await Future.wait(futures);
     _buildCoverageMap(scripts, sourceReports, coverage);

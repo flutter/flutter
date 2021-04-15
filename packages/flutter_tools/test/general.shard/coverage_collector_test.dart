@@ -35,6 +35,7 @@ void main() {
         )
       ],
     );
+    final Map<String, vm_service.Obj> coverageRefCache = <String, vm_service.Obj>{};
 
     final Map<String, Object> result = await collect(
       null,
@@ -42,9 +43,11 @@ void main() {
       connector: (Uri uri) async {
         return fakeVmServiceHost.vmService;
       },
+      coverageRefCache: coverageRefCache,
     );
 
     expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(coverageRefCache, isEmpty);
   });
 }
