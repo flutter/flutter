@@ -7,6 +7,8 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -35,6 +37,9 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
+
+/// Base href to set in index.html in flutter build command
+const String kBaseHref = '/';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
@@ -161,6 +166,8 @@ Future<void> main() async {
     environment.buildDir.childFile('main.dart')
       .writeAsStringSync(contents);
   }
+
+
 }
 
 /// Compiles a web entry point with dart2js.
@@ -316,9 +323,12 @@ class WebReleaseBundle extends Target {
     }
 
     final String versionInfo = FlutterProject.current().getVersionInfo();
+
     environment.outputDir
         .childFile('version.json')
         .writeAsStringSync(versionInfo);
+    await  addBaseHrefToIndexPage(environment);
+
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -378,6 +388,27 @@ class WebReleaseBundle extends Target {
       resourceFile,
       environment.buildDir.childFile('web_resources.d'),
     );
+  }
+  Future<void> addBaseHrefToIndexPage(Environment environment) async {
+    final File indexFile = environment.projectDir.childFile('web/index.html');
+    final String indexFileContent  =await indexFile.readAsString();
+    final Document parsedContent = parse(indexFileContent);
+    if(indexFileContent =='') {
+      return ;
+    }
+    if(parsedContent.outerHtml == null) {
+      return;
+    }
+
+    if(parsedContent.head.getElementsByTagName('base').isEmpty)
+    {
+      parsedContent.head.append(Element.tag('base')..attributes['href'] = environment.defines[kBaseHref],);
+    }
+    else
+      {
+        parsedContent.head.getElementsByTagName('base').first.attributes['href'] = environment.defines[kBaseHref];
+    }
+    await environment.projectDir.childDirectory('web').childFile('index.html').writeAsString(parsedContent.outerHtml);
   }
 }
 

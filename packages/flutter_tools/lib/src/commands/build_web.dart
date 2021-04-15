@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:csslib/visitor.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -42,6 +43,7 @@ class BuildWebCommand extends BuildSubCommand {
             'to view and debug the original source code of a compiled and minified Dart '
             'application.'
     );
+
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
       help: 'The caching strategy to be used by the PWA service worker.',
@@ -59,6 +61,11 @@ class BuildWebCommand extends BuildSubCommand {
                        'is not desirable',
       },
     );
+    argParser.addOption('base-href',
+    defaultsTo: '/',
+      help: 'The base url to set in index.html'
+    );
+
   }
 
   @override
@@ -87,6 +94,10 @@ class BuildWebCommand extends BuildSubCommand {
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
+    if(!(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/')))
+    {
+       throwToolExit('base-href should start and end with /');
+    }
     displayNullSafetyMode(buildInfo);
     await buildWeb(
       flutterProject,
@@ -96,6 +107,8 @@ class BuildWebCommand extends BuildSubCommand {
       stringArg('pwa-strategy'),
       boolArg('source-maps'),
       boolArg('native-null-assertions'),
+      stringArg('base-href'),
+
     );
     return FlutterCommandResult.success();
   }

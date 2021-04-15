@@ -14,6 +14,8 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -100,6 +102,64 @@ void main() {
     await const WebReleaseBundle().build(environment);
 
     expect(environment.outputDir.childFile('version.json'), exists);
+  }));
+
+  test('Base href is created in index.html with given baseHref after release build', () => testbed.run(() async  {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kBaseHref] ='/basehreftest/';
+
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html')
+        .createSync(recursive: true);
+  await   webResources.childFile('index.html').writeAsString('''
+    <!DOCTYPE html><html><head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    Fore more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+  -->
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter application.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="kids_app">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <title>test</title>
+  <link rel="manifest" href="manifest.json">
+<body>
+  <!-- This script installs service_worker.js to provide PWA functionality to
+       application. For more information, see:
+       https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('flutter-first-frame', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
+    }
+  </script>
+  <script src="main.dart.js" type="application/javascript"></script>
+
+
+</body></html>
+    ''');
+    environment.buildDir.childFile('main.dart.js').createSync();
+    await const WebReleaseBundle().build(environment);
+    final Document parsedIndexFileContent  = parse(await environment.outputDir.childFile('index.html').readAsString());
+    expect(parsedIndexFileContent.head.getElementsByTagName('base').isNotEmpty,true);
+    expect(parsedIndexFileContent.head.getElementsByTagName('base').first.attributes['href'],'/basehreftest/');
   }));
 
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
