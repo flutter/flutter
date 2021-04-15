@@ -35,6 +35,7 @@ import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../resident_devtools_handler.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../vmservice.dart';
@@ -97,6 +98,7 @@ class ResidentWebRunner extends ResidentRunner {
     @required SystemClock systemClock,
     @required Usage usage,
     @required UrlTunneller urlTunneller,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
@@ -109,6 +111,7 @@ class ResidentWebRunner extends ResidentRunner {
           ipv6: ipv6,
           stayResident: stayResident,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final FileSystem _fileSystem;
@@ -176,6 +179,7 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
+    await residentDevtoolsHandler.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
     await _extensionEventSub?.cancel();
@@ -211,6 +215,8 @@ class ResidentWebRunner extends ResidentRunner {
     _logger.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
     _logger.printStatus('For a more detailed help message, press "h". $quitMessage');
+    _logger.printStatus('');
+    printDebuggerList();
   }
 
   @override
@@ -615,6 +621,7 @@ class ResidentWebRunner extends ResidentRunner {
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
     _logger.printStatus('Restarted application in $elapsedMS.');
+    unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
@@ -826,6 +833,13 @@ class ResidentWebRunner extends ResidentRunner {
             resumeSub.cancel();
           }
         });
+      }
+      if (enableDevTools) {
+        // The method below is guaranteed never to return a failing future.
+        unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          flutterDevices: flutterDevices,
+        ));
       }
     }
     if (websocketUri != null) {
