@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
@@ -23,7 +22,7 @@ Future<void> canvasScreenshot(RecordingCanvas rc, String fileName,
   final html.Element sceneElement = html.Element.tag('flt-scene');
   try {
     sceneElement.append(engineCanvas.rootElement);
-    html.document.body.append(sceneElement);
+    html.document.body!.append(sceneElement);
     await matchGoldenFile('$fileName.png',
         region: region, maxDiffRatePercent: maxDiffRatePercent, write: write);
   } finally {

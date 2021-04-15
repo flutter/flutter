@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:math' as math;
 import 'package:test/bootstrap/browser.dart';
@@ -19,7 +18,7 @@ void main() {
 void testMain() async {
   final Rect region = Rect.fromLTWH(0, 0, 400, 600);
 
-  BitmapCanvas canvas;
+  late BitmapCanvas canvas;
 
   setUp(() {
     canvas = BitmapCanvas(region, RenderStrategy());
@@ -48,7 +47,7 @@ void testMain() async {
         largeArc: true, clockwise: true, distance: -20);
 
 
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_arc_to_point.png', region: region);
   });
 
@@ -63,7 +62,7 @@ void testMain() async {
       ..color = Color(0xFFFF9800) // orange
       ..style = PaintingStyle.fill);
 
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_addarc.png', region: region);
   });
 
@@ -81,7 +80,7 @@ void testMain() async {
       ..color = Color(0xFFFF9800) // orange
       ..style = PaintingStyle.fill);
 
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_addarc_ccw.png', region: region);
   });
 }
