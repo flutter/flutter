@@ -79,7 +79,9 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
 ///     thickness: 6.0,
+///     thicknessWhileDragging: 10,
 ///     radius: const Radius.circular(34),
+///     radiusWhileDragging: Radius.circular(0),
 ///     controller: _controllerOne,
 ///     isAlwaysShown: true,
 ///     child: ListView.builder(
