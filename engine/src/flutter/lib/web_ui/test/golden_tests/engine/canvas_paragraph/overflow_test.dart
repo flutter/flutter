@@ -15,8 +15,6 @@ import 'helper.dart';
 
 typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
 
-const Rect bounds = Rect.fromLTWH(0, 0, 800, 600);
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -24,26 +22,28 @@ void main() {
 void testMain() async {
   setUpStableTestFonts();
 
-  test('ellipsis', () {
-    final canvas = BitmapCanvas(bounds, RenderStrategy());
-
+  void testEllipsis(EngineCanvas canvas) {
     Offset offset = Offset.zero;
     CanvasParagraph paragraph;
 
+    final double fontSize = 22.0;
+    final double width = 126.0;
+    final double padding = 20.0;
+
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', ellipsis: '...'),
+      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem ');
         builder.pushStyle(EngineTextStyle.only(color: green));
         builder.addText('ipsum');
       },
-    )..layout(constrain(80.0));
+    )..layout(constrain(width));
     canvas.drawParagraph(paragraph, offset);
-    offset = offset.translate(0, paragraph.height + 10);
+    offset = offset.translate(0, paragraph.height + padding);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', ellipsis: '...'),
+      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem\n');
@@ -52,12 +52,12 @@ void testMain() async {
         builder.pushStyle(EngineTextStyle.only(color: red));
         builder.addText('dolor sit');
       },
-    )..layout(constrain(80.0));
+    )..layout(constrain(width));
     canvas.drawParagraph(paragraph, offset);
-    offset = offset.translate(0, paragraph.height + 10);
+    offset = offset.translate(0, paragraph.height + padding);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', ellipsis: '...'),
+      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem\n');
@@ -82,12 +82,12 @@ void testMain() async {
         builder.pushStyle(EngineTextStyle.only(color: red));
         builder.addText('t');
       },
-    )..layout(constrain(80.0));
+    )..layout(constrain(width));
     canvas.drawParagraph(paragraph, offset);
-    offset = offset.translate(0, paragraph.height + 10);
+    offset = offset.translate(0, paragraph.height + padding);
 
     paragraph = rich(
-      ParagraphStyle(fontFamily: 'Roboto', maxLines: 2, ellipsis: '...'),
+      ParagraphStyle(fontFamily: 'Roboto', fontSize: fontSize, maxLines: 2, ellipsis: '...'),
       (builder) {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('Lorem');
@@ -102,10 +102,22 @@ void testMain() async {
         builder.pushStyle(EngineTextStyle.only(color: blue));
         builder.addText('consectetur');
       },
-    )..layout(constrain(80.0));
+    )..layout(constrain(width));
     canvas.drawParagraph(paragraph, offset);
-    offset = offset.translate(0, paragraph.height + 10);
+    offset = offset.translate(0, paragraph.height + padding);
+  }
 
+  test('ellipsis', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 300);
+    final EngineCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
+    testEllipsis(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_ellipsis');
+  });
+
+  test('ellipsis (dom)', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 300);
+    final EngineCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    testEllipsis(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_ellipsis_dom');
   });
 }
