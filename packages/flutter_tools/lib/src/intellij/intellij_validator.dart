@@ -435,12 +435,25 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
         }
       }
 
-      final ProcessResult ceQueryResult = processManager.runSync(<String>[
-        'mdfind',
-        'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
-      ]);
+      // Query Spotlight for unexpected installation locations.
+      String ceSpotlightResult = '';
+      String ultimateSpotlightResult = '';
+      try {
+        final ProcessResult ceQueryResult = processManager.runSync(<String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+        ]);
+        ceSpotlightResult = ceQueryResult.stdout as String;
+        final ProcessResult ultimateQueryResult = processManager.runSync(<String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+        ]);
+        ultimateSpotlightResult = ultimateQueryResult.stdout as String;
+      } on ProcessException {
+        // The Spotlight query is a nice-to-have, continue checking known installation locations.
+      }
 
-      for (final String installPath in LineSplitter.split(ceQueryResult.stdout as String)) {
+      for (final String installPath in LineSplitter.split(ceSpotlightResult)) {
         if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
           validators.add(IntelliJValidatorOnMac(
             _communityEditionTitle,
@@ -454,11 +467,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
         }
       }
 
-      final ProcessResult ultimateQueryResult = processManager.runSync(<String>[
-        'mdfind',
-        'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
-      ]);
-      for (final String installPath in LineSplitter.split(ultimateQueryResult.stdout as String)) {
+      for (final String installPath in LineSplitter.split(ultimateSpotlightResult)) {
         if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
           validators.add(IntelliJValidatorOnMac(
             _ultimateEditionTitle,
