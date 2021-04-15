@@ -163,8 +163,6 @@ class BottomSheet extends StatefulWidget {
   /// will be [Clip.none].
   final Clip? clipBehavior;
 
-  /// {@macro flutter.material.BottomSheet.constraints}
-  ///
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
