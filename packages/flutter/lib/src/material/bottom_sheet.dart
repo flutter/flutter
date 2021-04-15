@@ -78,6 +78,7 @@ class BottomSheet extends StatefulWidget {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
     required this.onClosing,
     required this.builder,
   }) : assert(enableDrag != null),
@@ -162,6 +163,15 @@ class BottomSheet extends StatefulWidget {
   /// will be [Clip.none].
   final Clip? clipBehavior;
 
+  /// {@macro flutter.material.BottomSheet.constraints}
+  ///
+  /// Defines minimum and maximum sizes for a [BottomSheet].
+  ///
+  /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
+  /// [BottomSheetThemeData.constraints] will be used. If that
+  /// is null then the bottom sheet's size will be unconstrained.
+  final BoxConstraints? constraints;
+
   @override
   _BottomSheetState createState() => _BottomSheetState();
 
@@ -244,12 +254,13 @@ class _BottomSheetState extends State<BottomSheet> {
   @override
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
+    final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
 
-    final Widget bottomSheet = Material(
+    Widget bottomSheet = Material(
       key: _childKey,
       color: color,
       elevation: elevation,
@@ -260,6 +271,17 @@ class _BottomSheetState extends State<BottomSheet> {
         child: widget.builder(context),
       ),
     );
+
+    if (constraints != null) {
+      bottomSheet = Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: constraints,
+          child: bottomSheet,
+        ),
+      );
+    }
+
     return !widget.enableDrag ? bottomSheet : GestureDetector(
       onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
@@ -313,6 +335,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
     this.isScrollControlled = false,
     this.enableDrag = true,
   }) : assert(isScrollControlled != null),
@@ -325,6 +348,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final double? elevation;
   final ShapeBorder? shape;
   final Clip? clipBehavior;
+  final BoxConstraints? constraints;
   final bool enableDrag;
 
   @override
@@ -382,6 +406,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         elevation: widget.elevation,
         shape: widget.shape,
         clipBehavior: widget.clipBehavior,
+        constraints: widget.constraints,
         enableDrag: widget.enableDrag,
         onDragStart: handleDragStart,
         onDragEnd: handleDragEnd,
@@ -418,6 +443,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
     this.modalBarrierColor,
     this.isDismissible = true,
     this.enableDrag = true,
@@ -436,6 +462,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double? elevation;
   final ShapeBorder? shape;
   final Clip? clipBehavior;
+  final BoxConstraints? constraints;
   final Color? modalBarrierColor;
   final bool isDismissible;
   final bool enableDrag;
@@ -481,6 +508,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
             elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
             shape: shape,
             clipBehavior: clipBehavior,
+            constraints: constraints,
             isScrollControlled: isScrollControlled,
             enableDrag: enableDrag,
           );
@@ -653,6 +681,7 @@ Future<T?> showModalBottomSheet<T>({
   double? elevation,
   ShapeBorder? shape,
   Clip? clipBehavior,
+  BoxConstraints? constraints,
   Color? barrierColor,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
@@ -680,6 +709,7 @@ Future<T?> showModalBottomSheet<T>({
     elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
+    constraints: constraints,
     isDismissible: isDismissible,
     modalBarrierColor: barrierColor,
     enableDrag: enableDrag,
@@ -734,6 +764,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   double? elevation,
   ShapeBorder? shape,
   Clip? clipBehavior,
+  BoxConstraints? constraints,
   AnimationController? transitionAnimationController,
 }) {
   assert(context != null);
@@ -746,6 +777,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
+    constraints: constraints,
     transitionAnimationController: transitionAnimationController,
   );
 }
