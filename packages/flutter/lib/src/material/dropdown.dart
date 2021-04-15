@@ -684,8 +684,6 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   /// Creates an item for a dropdown menu.
   ///
   /// The [child] argument is required.
-  ///
-  /// If [enabled] is `false`, [value] and [onTap] should be null.
   const DropdownMenuItem({
     Key? key,
     this.onTap,
@@ -693,28 +691,17 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     this.enabled = true,
     required Widget child,
   }) : assert(child != null),
-       assert(enabled || (!enabled && value == null), 'if enabled is false, value should be null'),
-       assert(enabled || (!enabled && onTap == null), 'if enabled is false, onTap should be null'),
        super(key: key, child: child);
 
   /// Called when the dropdown menu item is tapped.
-  ///
-  /// If [enabled] is `false`, this property should be `null`.
   final VoidCallback? onTap;
 
   /// The value to return if the user selects this menu item.
   ///
   /// Eventually returned in a call to [DropdownButton.onChanged].
-  ///
-  /// If [enabled] is `false`, this property should be `null`.
   final T? value;
 
   /// Whether or not a user can select this menu item.
-  ///
-  /// If `false`, the user will be unable to select this item,
-  /// and since [value] and [onTap] are redundant for a disabled
-  /// and unselectable menu item, both should be `null`.
-  /// If `true`, the user will be able to select this item.
   ///
   /// Defaults to `true`.
   final bool enabled;

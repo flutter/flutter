@@ -3238,80 +3238,8 @@ void main() {
     await tester.tap(find.text('enabled').hitTestable());
     await tester.pumpAndSettle();
 
-    // The value of [disabled] should be `null` as disabled item is not supposed to have a FocusNode
-    final FocusNode? disabled = Focus.maybeOf(tester.element(find.text('disabled').hitTestable()));
-    expect(disabled, null, reason: 'Disabled menu item should not be able to request focus');
-  });
-
-  testWidgets('value should be null if enabled is false', (WidgetTester tester) async {
-    try {
-      // Try to assign [value] and [onTap] non-null values irrespective of
-      // if the menu item is disabled for now
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: DropdownButton<String>(
-              value: 'enabled',
-              onChanged: onChanged,
-              items: <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(
-                  value: 'disabled',
-                  enabled: false,
-                  child: const Text('disabled'),
-                ),
-                const DropdownMenuItem<String>(
-                  value: 'enabled',
-                  child: Text('enabled'),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // disabled item should not be allowed to have non-null values for [value] and [onTap]
-      fail('for disabled menu item, value should be null');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
-        contains('if enabled is false, value should be null'),
-      );
-    }
-  });
-
-  testWidgets('onTap should be null if enabled is false', (WidgetTester tester) async {
-    try {
-      // Try to assign [value] and [onTap] non-null values irrespective of
-      // if the menu item is disabled for now
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: DropdownButton<String>(
-              value: 'enabled',
-              onChanged: onChanged,
-              items: <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(
-                  enabled: false,
-                  child: const Text('disabled'),
-                  onTap: () {},
-                ),
-                const DropdownMenuItem<String>(
-                  value: 'enabled',
-                  child: Text('enabled'),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // disabled item should not be allowed to have non-null values for [value] and [onTap]
-      fail('for disabled menu item, onTap should be null');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
-        contains('if enabled is false, onTap should be null'),
-      );
-    }
+    // The `FocusNode` of [disabledItem] should be `null` as enabled is false.
+    final Element disabledItem = tester.element(find.text('disabled').hitTestable());
+    expect(Focus.maybeOf(disabledItem), null, reason: 'Disabled menu item should not be able to request focus');
   });
 }
