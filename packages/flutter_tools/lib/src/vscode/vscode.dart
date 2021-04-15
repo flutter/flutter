@@ -117,15 +117,24 @@ class VsCode {
   //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedMacOS(FileSystem fileSystem, Platform platform, ProcessManager processManager) {
     final String? homeDirPath = FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+
+    String vsCodeSpotlightResult = '';
+    String vsCodeInsiderSpotlightResult = '';
     // Query Spotlight for unexpected installation locations.
-    final ProcessResult vsCodeSpotlightQueryResult = processManager.runSync(<String>[
-      'mdfind',
-      'kMDItemCFBundleIdentifier="com.microsoft.VSCode"',
-    ]);
-    final ProcessResult vsCodeInsidersSpotlightQueryResult = processManager.runSync(<String>[
-      'mdfind',
-      'kMDItemCFBundleIdentifier="com.microsoft.VSCodeInsiders"',
-    ]);
+    try {
+      final ProcessResult vsCodeSpotlightQueryResult = processManager.runSync(<String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.microsoft.VSCode"',
+      ]);
+      vsCodeSpotlightResult = vsCodeSpotlightQueryResult.stdout as String;
+      final ProcessResult vsCodeInsidersSpotlightQueryResult = processManager.runSync(<String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.microsoft.VSCodeInsiders"',
+      ]);
+      vsCodeInsiderSpotlightResult = vsCodeInsidersSpotlightQueryResult.stdout as String;
+    } on ProcessException {
+      // The Spotlight query is a nice-to-have, continue checking known installation locations.
+    }
 
     // De-duplicated set.
     return _findInstalled(<VsCodeInstallLocation>{
@@ -159,12 +168,12 @@ class VsCode {
           '.vscode-insiders',
           isInsiders: true,
         ),
-      for (final String vsCodePath in LineSplitter.split(vsCodeSpotlightQueryResult.stdout as String))
+      for (final String vsCodePath in LineSplitter.split(vsCodeSpotlightResult))
         VsCodeInstallLocation(
           fileSystem.path.join(vsCodePath, 'Contents'),
           '.vscode',
         ),
-      for (final String vsCodeInsidersPath in LineSplitter.split(vsCodeInsidersSpotlightQueryResult.stdout as String))
+      for (final String vsCodeInsidersPath in LineSplitter.split(vsCodeInsiderSpotlightResult))
         VsCodeInstallLocation(
           fileSystem.path.join(vsCodeInsidersPath, 'Contents'),
           '.vscode-insiders',
