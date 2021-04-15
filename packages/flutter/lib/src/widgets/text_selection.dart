@@ -1302,6 +1302,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleLongTapMoveUpdate,
     this.onSingleLongTapEnd,
     this.onDoubleTapDown,
+    this.onTripleTapDown,
     this.onDragSelectionStart,
     this.onDragSelectionUpdate,
     this.onDragSelectionEnd,
@@ -1355,6 +1356,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDownCallback? onDoubleTapDown;
 
+  final GestureTapDownCallback? onTripleTapDown;
+
   /// Called when a mouse starts dragging to select text.
   final GestureDragStartCallback? onDragSelectionStart;
 
@@ -1388,9 +1391,13 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   // subsequent tap up / tap hold of the same tap.
   bool _isDoubleTap = false;
 
+  Timer? _tripleTapTimer;
+  bool _isTripleTap = false;
+
   @override
   void dispose() {
     _doubleTapTimer?.cancel();
+    _tripleTapTimer?.cancel();
     _dragUpdateThrottleTimer?.cancel();
     super.dispose();
   }
@@ -1403,7 +1410,13 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
+    if (_tripleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
+      widget.onTripleTapDown?.call(details);
+
+      _tripleTapTimer!.cancel();
+      _tripleTapTimeout();
+      _isTripleTap = true;
+    } else if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
       // If there was already a previous tap, the second down hold/tap is a
       // double tap down.
       widget.onDoubleTapDown?.call(details);
@@ -1415,12 +1428,18 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleTapUp(TapUpDetails details) {
-    if (!_isDoubleTap) {
+    if (_isTripleTap) {
+      _isTripleTap = false;
+    } else if (_isDoubleTap) {
+      _isDoubleTap = false;
+      _lastTapOffset = details.globalPosition;
+      _tripleTapTimer = Timer(kDoubleTapTimeout, _tripleTapTimeout);
+    } else {
+      // single tap up
       widget.onSingleTapUp?.call(details);
       _lastTapOffset = details.globalPosition;
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
     }
-    _isDoubleTap = false;
   }
 
   void _handleTapCancel() {
@@ -1502,6 +1521,11 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _doubleTapTimeout() {
     _doubleTapTimer = null;
+    _lastTapOffset = null;
+  }
+
+  void _tripleTapTimeout() {
+    _tripleTapTimer = null;
     _lastTapOffset = null;
   }
 

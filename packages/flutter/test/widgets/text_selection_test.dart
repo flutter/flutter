@@ -38,6 +38,7 @@ void main() {
   late int singleTapCancelCount;
   late int singleLongTapStartCount;
   late int doubleTapDownCount;
+  late int tripleTapDownCount;
   late int forcePressStartCount;
   late int forcePressEndCount;
   late int dragStartCount;
@@ -50,6 +51,7 @@ void main() {
   void _handleSingleTapCancel() { singleTapCancelCount++; }
   void _handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
   void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
+  void _handleTripleTapDown(TapDownDetails details) { tripleTapDownCount++; }
   void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void _handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
   void _handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
@@ -62,6 +64,7 @@ void main() {
     singleTapCancelCount = 0;
     singleLongTapStartCount = 0;
     doubleTapDownCount = 0;
+    tripleTapDownCount = 0;
     forcePressStartCount = 0;
     forcePressEndCount = 0;
     dragStartCount = 0;
@@ -78,6 +81,7 @@ void main() {
         onSingleTapCancel: _handleSingleTapCancel,
         onSingleLongTapStart: _handleSingleLongTapStart,
         onDoubleTapDown: _handleDoubleTapDown,
+        onTripleTapDown: _handleTripleTapDown,
         onForcePressStart: _handleForcePressStart,
         onForcePressEnd: _handleForcePressEnd,
         onDragSelectionStart: _handleDragSelectionStart,
@@ -178,6 +182,38 @@ void main() {
     expect(tapCount, 2);
     expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 1);
+    expect(singleLongTapStartCount, 0);
+  });
+
+  testWidgets('quick tap-tap-tap-hold is a triple tap down', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 1);
+
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(singleTapUpCount, 1);
+    // Every down is counted.
+    expect(tapCount, 3);
+    // No cancels because the second tap of the double tap is a second successful
+    // single tap behind the scene.
+    expect(singleTapCancelCount, 0);
+    expect(doubleTapDownCount, 1);
+    expect(tripleTapDownCount, 1);
+    // The double tap down hold supersedes the single tap down.
+    expect(singleLongTapStartCount, 0);
+
+    await gesture.up();
+    // Nothing else happens on up.
+    expect(singleTapUpCount, 1);
+    expect(tapCount, 3);
+    expect(singleTapCancelCount, 0);
+    expect(doubleTapDownCount, 1);
+    expect(tripleTapDownCount, 1);
     expect(singleLongTapStartCount, 0);
   });
 
