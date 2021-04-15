@@ -1008,7 +1008,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///
 /// {@tool snippet}
 /// ```dart
-/// ExactAssetImage('icons/heart.png', scale: 1.5)
+/// const ExactAssetImage('icons/heart.png', scale: 1.5)
 /// ```
 /// {@end-tool}
 ///
@@ -1020,7 +1020,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///
 /// {@tool snippet}
 /// ```dart
-/// ExactAssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
+/// const ExactAssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
 /// ```
 /// {@end-tool}
 ///
