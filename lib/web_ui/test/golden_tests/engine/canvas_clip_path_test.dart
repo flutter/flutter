@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
@@ -42,7 +41,7 @@ void testMain() async {
     path.addOval(Rect.fromLTWH(100, 30, testWidth, testHeight));
     rc.clipPath(path);
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
-        Rect.fromLTWH(100, 30, testWidth, testHeight), Paint());
+        Rect.fromLTWH(100, 30, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
     await canvasScreenshot(rc, 'image_clipped_by_oval',
       region: screenRect);
@@ -65,7 +64,7 @@ void testMain() async {
     paintPath.close();
     rc.drawPath(
         paintPath,
-        Paint()
+        engine.SurfacePaint()
           ..color = Color(0xFF00FF00)
           ..style = PaintingStyle.fill);
     rc.restore();
@@ -85,7 +84,7 @@ void testMain() async {
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
     paintPath.close();
     rc.drawPath(paintPath,
-        Paint()
+        engine.SurfacePaint()
           ..color = Color(0xFF000000)
           ..style = PaintingStyle.stroke);
 
@@ -96,7 +95,7 @@ void testMain() async {
     path.close();
     rc.clipPath(path);
     rc.drawImageRect(createTestImage(), Rect.fromLTRB(0, 0, testWidth, testHeight),
-        Rect.fromLTWH(-50, 0, testWidth, testHeight), Paint());
+        Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
     await canvasScreenshot(rc, 'image_clipped_by_triangle_off_screen');
   });
@@ -113,7 +112,7 @@ void testMain() async {
     paintPath.addRect(Rect.fromLTWH(-50, 0, testWidth, testHeight));
     paintPath.close();
     rc.drawPath(paintPath,
-        Paint()
+        engine.SurfacePaint()
           ..color = Color(0xFF000000)
           ..style = PaintingStyle.stroke);
 
@@ -121,7 +120,7 @@ void testMain() async {
     path.addOval(Rect.fromLTRB(-200, 0, 100, 150));
     rc.clipPath(path);
     rc.drawImageRect(createTestImage(), Rect.fromLTRB(0, 0, testWidth, testHeight),
-        Rect.fromLTWH(-50, 0, testWidth, testHeight), Paint());
+        Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
     await canvasScreenshot(rc, 'image_clipped_by_oval_path');
   });
