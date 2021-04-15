@@ -1206,7 +1206,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         || widget.items!.isEmpty
         || (widget.value == null &&
             widget.items!
-                .where((DropdownMenuItem<T> item) => item.value == widget.value)
+                .where((DropdownMenuItem<T> item) => item.enabled && item.value == widget.value)
                 .isEmpty)) {
       _selectedIndex = null;
       return;
