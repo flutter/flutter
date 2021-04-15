@@ -2259,6 +2259,7 @@ void main() {
     Offset buttonOffset = tester.getTopLeft(find.byKey(buttonKey));
     expect(buttonOffset, const Offset(45.0, 45.0));
 
+    // The top-left corner of the menu and button should be aligned.
     Offset popupMenuOffset = tester.getTopLeft(find.byType(SingleChildScrollView));
     expect(popupMenuOffset, buttonOffset);
 
