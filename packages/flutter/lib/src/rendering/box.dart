@@ -1779,6 +1779,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
+  bool _parentUsedDryLayout = false;
   bool _computingThisDryLayout = false;
 
   /// Returns the [Size] that this [RenderBox] would like to be given the
@@ -1809,6 +1810,11 @@ abstract class RenderBox extends RenderObject {
         shouldCache = false;
       return true;
     }());
+    _parentUsedDryLayout = shouldCache;
+    return _getDryLayout(constraints, shouldCache: shouldCache);
+  }
+
+  Size _getDryLayout(BoxConstraints constraints, {bool shouldCache = true}) {
     if (shouldCache) {
       _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
       return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
@@ -2302,34 +2308,37 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void markNeedsLayout() {
-    if ((_cachedBaselines != null && _cachedBaselines!.isNotEmpty) ||
-        (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty) ||
-        (_cachedDryLayoutSizes != null && _cachedDryLayoutSizes!.isNotEmpty)) {
+    if ((_cachedBaselines?.isNotEmpty ?? false) ||
+        (_cachedIntrinsicDimensions?.isNotEmpty ?? false) ||
+        _parentUsedDryLayout) {
       // If we have cached data, then someone must have used our data.
       // Since the parent will shortly be marked dirty, we can forget that they
       // used the baseline and/or intrinsic dimensions. If they use them again,
       // then we'll fill the cache again, and if we get dirty again, we'll
       // notify them again.
+      // The dryLayoutSize cache may have been filled by this object's
+      // performResize and not necessarily because a parent used it.
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
-      _cachedDryLayoutSizes?.clear();
+      _parentUsedDryLayout = false;
       if (parent is RenderObject) {
         markParentNeedsLayout();
         return;
       }
     }
+    _cachedDryLayoutSizes?.clear();
     super.markNeedsLayout();
   }
 
   /// {@macro flutter.rendering.RenderObject.performResize}
   ///
-  /// By default this method calls [getDryLayout] with the current
-  /// [constraints]. Instead of overriding this method, consider overriding
-  /// [computeDryLayout] (the backend implementation of [getDryLayout]).
+  /// By default this method sets [size] to the result of [computeDryLayout]
+  /// called with the current [constraints]. Instead of overriding this method,
+  /// consider overriding [computeDryLayout].
   @override
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true
-    size = computeDryLayout(constraints);
+    size = _getDryLayout(constraints);
     assert(size.isFinite);
   }
 
