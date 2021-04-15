@@ -159,7 +159,10 @@ void GamepadCursorWinUWP::OnGamepadLeftStickMoved(double x, double y) {
 
     winrt::Windows::Foundation::Numerics::float3 scaled =
         GetScaledInput(cursor_visual_.Offset());
-    binding_handler_delegate_->OnPointerMove(scaled.x, scaled.y);
+    // TODO(dnfield): Support for gamepad as a distinct device type?
+    // https://github.com/flutter/flutter/issues/80472
+    binding_handler_delegate_->OnPointerMove(scaled.x, scaled.y,
+                                             kFlutterPointerDeviceKindMouse);
   }
 }
 
@@ -183,8 +186,10 @@ void GamepadCursorWinUWP::OnGamepadButtonPressed(
     // handling defered delivery, remove the need for action value.
     // https://github.com/flutter/flutter/issues/70202
 
+    // TODO(dnfield): Support for gamepad as a distinct device type?
+    // https://github.com/flutter/flutter/issues/80472
     binding_handler_delegate_->OnPointerDown(
-        scaled.x, scaled.y,
+        scaled.x, scaled.y, kFlutterPointerDeviceKindMouse,
         FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadLeft) ==
@@ -225,8 +230,10 @@ void GamepadCursorWinUWP::OnGamepadButtonReleased(
     // handling defered delivery, remove the need for action value.
     // https://github.com/flutter/flutter/issues/70202
 
+    // TODO(dnfield): Support for gamepad as a distinct device type?
+    // https://github.com/flutter/flutter/issues/80472
     binding_handler_delegate_->OnPointerUp(
-        scaled.x, scaled.y,
+        scaled.x, scaled.y, kFlutterPointerDeviceKindMouse,
         FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadLeft) ==

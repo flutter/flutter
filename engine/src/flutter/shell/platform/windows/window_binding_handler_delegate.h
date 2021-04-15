@@ -19,23 +19,27 @@ class WindowBindingHandlerDelegate {
 
   // Notifies delegate that backing window mouse has moved.
   // Typically called by currently configured WindowBindingHandler
-  virtual void OnPointerMove(double x, double y) = 0;
+  virtual void OnPointerMove(double x,
+                             double y,
+                             FlutterPointerDeviceKind device_kind) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
   // pressed. Typically called by currently configured WindowBindingHandler
   virtual void OnPointerDown(double x,
                              double y,
+                             FlutterPointerDeviceKind device_kind,
                              FlutterPointerMouseButtons button) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
   // released. Typically called by currently configured WindowBindingHandler
   virtual void OnPointerUp(double x,
                            double y,
+                           FlutterPointerDeviceKind device_kind,
                            FlutterPointerMouseButtons button) = 0;
 
   // Notifies delegate that backing window mouse pointer has left the window.
   // Typically called by currently configured WindowBindingHandler
-  virtual void OnPointerLeave() = 0;
+  virtual void OnPointerLeave(FlutterPointerDeviceKind device_kind) = 0;
 
   // Notifies delegate that backing window has received text.
   // Typically called by currently configured WindowBindingHandler
