@@ -290,6 +290,37 @@ void main() {
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
+    testWidgets('ShortcutManager ignores keypresses with no primary focus', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
+      final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
+      bool invoked = false;
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
+                invoked = true;
+                return true;
+              },
+            ),
+          },
+          child: Shortcuts(
+            manager: testManager,
+            shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
+            },
+            child: SizedBox(key: containerKey, width: 100, height: 100),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(primaryFocus, isNull);
+      expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, isFalse);
+      expect(pressedKeys, isEmpty);
+    });
     testWidgets("Shortcuts passes to the next Shortcuts widget if it doesn't map the key", (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
