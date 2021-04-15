@@ -21,6 +21,7 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
+    usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     argParser
       ..addOption('depfile',

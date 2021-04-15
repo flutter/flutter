@@ -115,6 +115,7 @@ class FlutterOptions {
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
+  static const String kCodeSizeDirectory = 'code-size-directory';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
@@ -831,7 +832,15 @@ abstract class FlutterCommand extends Command<void> {
             'This flag is only supported on "--release" builds. When building for Android, a single '
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
+            'By default, the intermediate output files will be placed in a transient directory in the '
+            'build directory. This can be overriden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
+    );
+
+    argParser.addOption(
+      FlutterOptions.kCodeSizeDirectory,
+      help: 'The location to write code size analysis files. If this is not specified, files '
+            'are written to a temporary directory under the build directory.'
     );
   }
 
@@ -877,10 +886,13 @@ abstract class FlutterCommand extends Command<void> {
 
     String codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
-      final Directory directory = globals.fsUtils.getUniqueDirectory(
+      Directory directory = globals.fsUtils.getUniqueDirectory(
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
+      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
+        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
+      }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }

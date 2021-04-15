@@ -14,6 +14,7 @@ import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
