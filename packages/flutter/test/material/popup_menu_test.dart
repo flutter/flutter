@@ -2246,13 +2246,13 @@ void main() {
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
 
-    //                 +-----------------+ 100
+    //                 +--------+--------+ 100
     //                 |        |        |
     //                 |        | (50,50)|
     //                 +--------+--------+
     //                 |        |        |
     //                 |        |        |
-    //             100 +-----------------+
+    //             100 +--------+--------+
     //
     // The button is a rectangle of 10 * 10 size and is centered,
     // so its top-left offset should be (45.0, 45.0).
@@ -2266,19 +2266,19 @@ void main() {
     // Keep the menu opened and re-layout the screen.
     await tester.pumpWidget(buildFrame(200.0, 300.0));
 
-    //                 +-----------------------+ 200
+    //                 +-----------+-----------+ 200
     //                 |           |           |
     //                 |           |           |
     //                 |           |           |
     //                 |           |           |
     //                 |           | (100,150) |
-    //                 +-----------+-----------|
+    //                 +-----------+-----------+
     //                 |           |           |
     //                 |           |           |
     //                 |           |           |
     //                 |           |           |
     //                 |           |           |
-    //             300 +-----------------------+
+    //             300 +-----------+-----------+
     //
     // The button is a rectangle of 10 * 10 size and is centered,
     // so its top-left offset should be (95.0, 145.0).
