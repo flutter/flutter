@@ -178,7 +178,18 @@ class _WebGlRenderer implements _GlRenderer {
         <dynamic>[colorLoc, 4, gl.kUnsignedByte, true, 0, 0]);
     gl.enableVertexAttribArray(1);
     gl.clear();
-    gl.drawTriangles(vertexCount, vertices._mode);
+    final Uint16List ?indices = vertices._indices;
+    if (indices == null) {
+      gl.drawTriangles(vertexCount, vertices._mode);
+    } else {
+      /// If indices are specified to use shared vertices to reduce vertex
+      /// data transfer, use drawElements to map from vertex indices to
+      /// triangles.
+      Object? indexBuffer = gl.createBuffer();
+      gl.bindElementArrayBuffer(indexBuffer);
+      gl.bufferElementData(indices, gl.kStaticDraw);
+      gl.drawElements(gl.kTriangles, indices.length, gl.kUnsignedShort);
+    }
 
     context!.save();
     context.resetTransform();
