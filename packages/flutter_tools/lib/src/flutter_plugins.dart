@@ -637,7 +637,7 @@ const String _dartPluginRegisterWith = r'''
           '`{{pluginName}}` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
-        rethrown;
+        rethrow;
       }
 ''';
 
