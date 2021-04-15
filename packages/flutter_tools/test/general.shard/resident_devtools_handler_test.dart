@@ -100,7 +100,7 @@ void main() {
 
   testWithoutContext('Can use devtools with existing devtools URI', () async {
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       pubExecutable: 'pub',
       logger: BufferLogger.test(),
       platform: FakePlatform(),

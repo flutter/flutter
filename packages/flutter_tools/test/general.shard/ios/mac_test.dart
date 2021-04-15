@@ -49,7 +49,7 @@ void main() {
       File outputFile;
 
       setUp(() {
-        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+        fakeProcessManager = FakeProcessManager.empty();
         outputFile = MemoryFileSystem.test().file('image.png');
       });
 
