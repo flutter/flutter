@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:typed_data';
 
@@ -35,7 +34,7 @@ void testMain() async {
     final html.Element sceneElement = html.Element.tag('flt-scene');
     try {
       sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
+      html.document.body!.append(sceneElement);
       await matchGoldenFile(
         '$fileName.png',
         region: region,
@@ -62,7 +61,8 @@ void testMain() async {
       Paint paint, {bool write: false}) async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
-    rc.drawVertices(vertices, blendMode, paint);
+    rc.drawVertices(vertices as SurfaceVertices, blendMode,
+        paint as SurfacePaint);
     await _checkScreenshot(rc, fileName, write: write);
   }
 
@@ -171,6 +171,30 @@ void testMain() async {
         vertices,
         BlendMode.srcOver,
         Paint()..color = Color.fromARGB(255, 0, 128, 0));
+  });
+
+  test('Should draw triangles with colors and indices.', () async {
+    final Int32List colors = Int32List.fromList(<int>[
+      0xFFFF0000, 0xFF00FF00, 0xFF0000FF,
+      0xFFFF0000, 0xFF0000FF]);
+    final Uint16List indices = Uint16List.fromList(<int>[
+      0, 1, 2, 3, 4, 0
+    ]);
+
+    final RecordingCanvas rc =
+    RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
+
+    final Vertices vertices = Vertices.raw(VertexMode.triangles,
+        Float32List.fromList([
+          210.0, 150.0, 30.0, 110.0, 80.0, 30.0,
+          220.0, 15.0, 280.0, 30.0,
+        ]), colors: colors,
+        indices: indices);
+
+    rc.drawVertices(vertices as SurfaceVertices, BlendMode.srcOver,
+        SurfacePaint());
+
+    await _checkScreenshot(rc, 'draw_vertices_triangles_indexed');
   });
 
   test('Should draw triangleFan with colors.',
