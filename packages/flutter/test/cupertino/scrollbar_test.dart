@@ -889,4 +889,43 @@ void main() {
       ),
     );
   });
+
+  testWidgets('CupertinoScrollbar scrollOrientation works correctly', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: CupertinoScrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            scrollbarOrientation: ScrollbarOrientation.left,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 9.0, 594.0),
+        )
+        ..line(
+          p1: const Offset(0.0, 0.0),
+          p2: const Offset(0.0, 594.0),
+          strokeWidth: 1.0,
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(3.0, 3.0, 6.0, 92.1), const Radius.circular(1.5)),
+          color: _kScrollbarColor.color,
+        ),
+    );
+  });
 }

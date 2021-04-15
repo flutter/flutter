@@ -62,6 +62,7 @@ class CupertinoScrollbar extends RawScrollbar {
     Radius radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
+    ScrollbarOrientation? scrollbarOrientation,
   }) : assert(thickness != null),
        assert(thickness < double.infinity),
        assert(thicknessWhileDragging != null),
@@ -79,6 +80,7 @@ class CupertinoScrollbar extends RawScrollbar {
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+         scrollbarOrientation: scrollbarOrientation,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
@@ -148,7 +150,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..radius = _radius
       ..padding = MediaQuery.of(context).padding
       ..minLength = _kScrollbarMinLength
-      ..minOverscrollLength = _kScrollbarMinOverscrollLength;
+      ..minOverscrollLength = _kScrollbarMinOverscrollLength
+      ..scrollbarOrientation = widget.scrollbarOrientation;
   }
 
   double _pressStartAxisPosition = 0.0;
