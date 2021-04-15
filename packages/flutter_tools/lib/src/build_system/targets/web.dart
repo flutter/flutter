@@ -396,10 +396,6 @@ class WebReleaseBundle extends Target {
     if(indexFileContent =='') {
       return ;
     }
-    if(parsedContent.outerHtml == null) {
-      return;
-    }
-
     if(parsedContent.head.getElementsByTagName('base').isEmpty)
     {
       parsedContent.head.append(Element.tag('base')..attributes['href'] = environment.defines[kBaseHref],);
