@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
@@ -35,7 +34,7 @@ void testMain() async {
     final html.Element sceneElement = html.Element.tag('flt-scene');
     try {
       sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
+      html.document.body!.append(sceneElement);
       await matchGoldenFile('$fileName.png', region: region,
           maxDiffRatePercent: maxDiffRatePercent, write: write);
     } finally {
@@ -58,13 +57,13 @@ void testMain() async {
     rc.save();
     rc.drawRect(
         Rect.fromLTRB(0, 0, 400, 400),
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(255, 255, 255, 255));
     rc.drawCircle(
         Offset(100, 100),
         80.0,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0)
           ..blendMode = BlendMode.difference);
@@ -72,7 +71,7 @@ void testMain() async {
     rc.drawCircle(
         Offset(170, 100),
         80.0,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..blendMode = BlendMode.color
           ..color = const Color.fromARGB(128, 0, 255, 0));
@@ -80,7 +79,7 @@ void testMain() async {
     rc.drawCircle(
         Offset(135, 170),
         80.0,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0));
     rc.restore();
@@ -95,20 +94,20 @@ void testMain() async {
     rc.save();
     rc.drawRect(
         Rect.fromLTRB(0, 0, 400, 400),
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(255, 255, 255, 255));
     rc.drawCircle(
         Offset(100, 100),
         80.0,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0)
           ..blendMode = BlendMode.difference);
     rc.drawCircle(
         Offset(170, 100),
         80.0,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..blendMode = BlendMode.color
           ..color = const Color.fromARGB(128, 0, 255, 0));
@@ -116,11 +115,11 @@ void testMain() async {
     rc.drawCircle(
         Offset(135, 170),
         80.0,
-        Paint()
+        SurfacePaint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0));
     rc.drawImage(createTestImage(), Offset(135.0, 130.0),
-        Paint()..blendMode = BlendMode.multiply);
+        SurfacePaint()..blendMode = BlendMode.multiply);
     rc.restore();
     await _checkScreenshot(rc, 'canvas_blend_image_multiply',
         maxDiffRatePercent: operatingSystem == OperatingSystem.macOs ? 2.95 :
