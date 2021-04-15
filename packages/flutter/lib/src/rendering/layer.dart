@@ -1803,7 +1803,13 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The [filter] property must be non-null before the compositing phase of the
   /// pipeline.
-  BackdropFilterLayer({ ui.ImageFilter? filter }) : _filter = filter;
+  /// The [blendMode] property will be defaulted to [BlendMode.srcOver] if it is
+  /// not set to a non-null value before the compositing phase of the pipeline.
+  BackdropFilterLayer({
+    ui.ImageFilter? filter,
+    BlendMode? blendMode,
+  }) : _filter = filter,
+       _blendMode = blendMode;
 
   /// The filter to apply to the existing contents of the scene.
   ///
@@ -1821,12 +1827,8 @@ class BackdropFilterLayer extends ContainerLayer {
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
   ///
-  /// The default mode is [BlendMode.srcOver] which is the most compatible mode, but
-  /// using this widget inside of a parent that uses a saveLayer may produce surprising
-  /// results. When rendering inside a saveLayer which implicitly presents a transparent
-  /// background, the results would look better with a [BlendMode.src] mode. Note that
-  /// the DOM-html renderer on web does not support this parameter so using any mode
-  /// but the default may produce different results.
+  /// The default mode if this property is not set will be [BlendMode.srcOver].
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -1844,7 +1846,7 @@ class BackdropFilterLayer extends ContainerLayer {
     assert(filter != null);
     engineLayer = builder.pushBackdropFilter(
       filter!,
-      blendMode: blendMode!,
+      blendMode: blendMode ?? BlendMode.srcOver,
       oldLayer: _engineLayer as ui.BackdropFilterEngineLayer?,
     );
     addChildrenToScene(builder, layerOffset);

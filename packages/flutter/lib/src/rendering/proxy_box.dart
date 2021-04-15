@@ -1141,6 +1141,8 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
+  /// The [blendMode] argument, if provided, must not be null
+  /// and will default to [BlendMode.srcOver].
   RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter, BlendMode blendMode = BlendMode.srcOver })
     : assert(filter != null),
       assert(blendMode != null),
@@ -1169,12 +1171,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
   ///
-  /// The default mode is [BlendMode.srcOver] which is the most compatible mode, but
-  /// using this widget inside of a parent that uses a saveLayer may produce surprising
-  /// results. When rendering inside a saveLayer which implicitly presents a transparent
-  /// background, the results would look better with a [BlendMode.src] mode. Note that
-  /// the DOM-html renderer on web does not support this parameter so using any mode
-  /// but the default may produce different results.
+  /// {@template flutter.widgets.BackdropFilter.blendMode}
   BlendMode get blendMode => _blendMode;
   BlendMode _blendMode;
   set blendMode(BlendMode value) {

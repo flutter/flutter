@@ -166,6 +166,12 @@ class Directionality extends InheritedWidget {
 /// buffer. For the value 0.0, the child is simply not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 ///
+/// The presence of the intermediate buffer which has a transparent background
+/// by default may cause some child widgets to behave differently. For example
+/// a [BackdropFilter] child will only be able to apply its filter to the content
+/// between this widget and the backdrop child and may require adjusting the
+/// [BackdropFilter.blendMode] property to produce the desired results.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9hltevOHQBw}
 ///
 /// {@tool snippet}
@@ -377,11 +383,17 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// widget's clip. If there's no clip, the filter will be applied to the full
 /// screen.
 ///
-/// The results of the filter will be blended back into the background
-/// using the [blendMode] parameter. This parameter is not supported on all
-/// platforms, notably the html DOM renderer on the web platform, so using
-/// any blend mode except for the default [BlendMode.srcOver] is not portable
-/// at this time.
+/// The results of the filter will be blended back into the background using
+/// the [blendMode] parameter.
+/// {@template flutter.widgets.BackdropFilter.blendMode}
+/// The only value for [blendMode] that is supported on all platforms is
+/// [BlendMode.srcOver] which works well for most scenes. But that value may
+/// produce surprising results when a parent of the [BackdropFilter] uses a
+/// temporary buffer, or save layer, as does an [Opacity] widget. In that
+/// situation, a value of [BlendMode.src] can produce more pleasing results,
+/// but at the cost of incompatibility with some platforms, most notably the
+/// html renderer for web applications.
+/// {@endtemplate}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
@@ -433,6 +445,8 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
+  /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
+  /// null if provided.
   const BackdropFilter({
     Key? key,
     required this.filter,
@@ -450,12 +464,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
   ///
-  /// The default mode is [BlendMode.srcOver] which is the most compatible mode, but
-  /// using this widget inside of a parent that uses a saveLayer may produce surprising
-  /// results. When rendering inside a saveLayer which implicitly presents a transparent
-  /// background, the results would look better with a [BlendMode.src] mode. Note that
-  /// the DOM-html renderer on web does not support this parameter so using any mode
-  /// but the default may produce different results.
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
   final BlendMode blendMode;
 
   @override
