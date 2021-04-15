@@ -9,10 +9,7 @@ import 'dart:io' as io;
 import 'package:args/command_runner.dart';
 import 'package:dev_tools/clean.dart';
 import 'package:dev_tools/codesign.dart';
-import 'package:dev_tools/doctor.dart';
 import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/logs.dart';
-import 'package:dev_tools/next.dart';
 import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:dev_tools/start.dart';
@@ -66,16 +63,6 @@ Future<void> main(List<String> args) async {
     ),
     CleanCommand(
       checkouts: checkouts,
-    ),
-    LogsCommand(
-      fileSystem: fileSystem,
-      platform: platform,
-      stdio: stdio,
-    ),
-    DoctorCommand(checkouts: checkouts),
-    NextCommand(
-      checkouts: checkouts,
-      flutterRoot: localFlutterRoot,
     ),
   ].forEach(runner.addCommand);
 
