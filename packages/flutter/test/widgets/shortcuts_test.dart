@@ -41,12 +41,33 @@ class TestShortcutManager extends ShortcutManager {
   List<LogicalKeyboardKey> keys;
 
   @override
-  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event, {LogicalKeySet? keysPressed}) {
+  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       keys.add(event.logicalKey);
     }
-    return super.handleKeypress(context, event, keysPressed: keysPressed);
+    return super.handleKeypress(context, event);
   }
+}
+
+Widget activatorTester(ShortcutActivator activator, ValueSetter<Intent> onInvoke) {
+  return Actions(
+    key: GlobalKey(),
+    actions: <Type, Action<Intent>>{
+      TestIntent: TestAction(onInvoke: (Intent intent) {
+        onInvoke(intent);
+        return true;
+      }),
+    },
+    child: Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+        activator: const TestIntent(),
+      },
+      child: const Focus(
+        autofocus: true,
+        child: SizedBox(width: 100, height: 100),
+      ),
+    ),
+  );
 }
 
 void main() {
@@ -146,6 +167,71 @@ void main() {
           })),
       );
     });
+    testWidgets('handles two keys', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        LogicalKeySet(
+          LogicalKeyboardKey.keyC,
+          LogicalKeyboardKey.control,
+        ),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // LCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // KeyC -> LCtrl: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // RCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // LCtrl -> LShift -> KeyC: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 0);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 0);
+      invoked = 0;
+
+      // LCtrl -> KeyA -> KeyC: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 0);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invoked, 0);
+      invoked = 0;
+
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    });
 
     test('LogicalKeySet.hashCode is stable', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
@@ -196,6 +282,194 @@ void main() {
       expect(description[0], equals('keys: Key A + Key B'));
     });
   });
+
+  group(SingleActivator, () {
+    testWidgets('handles Ctrl-C', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const SingleActivator(
+          LogicalKeyboardKey.keyC,
+          control: true,
+        ),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // LCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // KeyC -> LCtrl: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      invoked = 0;
+
+      // LShift -> LCtrl -> KeyC: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 0);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      invoked = 0;
+
+      // With Ctrl-C pressed, KeyA -> Release KeyA: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      invoked = 0;
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invoked, 0);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      invoked = 0;
+
+      // LCtrl -> KeyA -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      invoked = 0;
+
+      // RCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // LCtrl -> RCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // While holding Ctrl-C, press KeyA: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    });
+
+    testWidgets('handles Shift-Ctrl-C', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const SingleActivator(
+          LogicalKeyboardKey.keyC,
+          shift: true,
+          control: true,
+        ),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // LShift -> LCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // LCtrl -> LShift -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // LCtrl -> KeyC -> LShift: Reject
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 0);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 0);
+      invoked = 0;
+
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    });
+
+    test('diagnostics.', () {
+      {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const SingleActivator(
+          LogicalKeyboardKey.keyA,
+        ).debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(1));
+        expect(description[0], equals('keys: Key A'));
+      }
+
+      {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const SingleActivator(
+          LogicalKeyboardKey.keyA,
+          control: true,
+          shift: true,
+          alt: true,
+          meta: true,
+        ).debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(1));
+        expect(description[0], equals('keys: Control + Alt + Meta + Shift + Key A'));
+      }
+    });
+  });
+
   group(Shortcuts, () {
     testWidgets('Default constructed Shortcuts has empty shortcuts', (WidgetTester tester) async {
       final ShortcutManager manager = ShortcutManager();

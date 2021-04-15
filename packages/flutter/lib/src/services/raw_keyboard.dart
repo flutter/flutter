@@ -132,8 +132,8 @@ abstract class RawKeyEventData {
   ///
   /// If the modifier key wasn't pressed at the time of this event, returns
   /// null. If the given key only appears in one place on the keyboard, returns
-  /// [KeyboardSide.all] if pressed. Never returns [KeyboardSide.any], because
-  /// that doesn't make sense in this context.
+  /// [KeyboardSide.all] if pressed. If the given platform does not specify
+  /// the side, return [KeyboardSide.any].
   KeyboardSide? getModifierSide(ModifierKey key);
 
   /// Returns true if a CTRL modifier key was pressed at the time of this event,
@@ -734,15 +734,38 @@ class RawKeyboard {
   };
 
   void _synchronizeModifiers(RawKeyEvent event) {
-    // Don't send any key events for these changes, since there *should* be
-    // separate events for each modifier key down/up that occurs while the app
-    // has focus. This is just to synchronize the modifier keys when they are
-    // pressed/released while the app doesn't have focus, to make sure that
-    // _keysPressed reflects reality at all times.
+    // Compare modifier states to the ground truth as specified by
+    // [RawKeyEvent.data.modifiersPressed] and update unsynchronized ones.
+    //
+    // This function will update the state of modifier keys in `_keysPressed` so
+    // that they match the ones given by [RawKeyEvent.data.modifiersPressed].
+    // For a `modifiersPressed` result of anything but [KeyboardSide.any], the
+    // states in `_keysPressed` will be updated to exactly match the result,
+    // i.e. exactly one of "no down", "left down", "right down" or "both down".
+    //
+    // If `modifiersPressed` returns [KeyboardSide.any], the states in
+    // `_keysPressed` will be updated to a rough match, i.e. "either side down"
+    // or "no down". If `_keysPressed` has no modifier down, a
+    // [KeyboardSide.any] will synchronize by forcing the left modifier down. If
+    // `_keysPressed` has any modifier down, a [KeyboardSide.any] will not cause
+    // a state change.
 
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+    // Physical keys that whose modifiers are pressed at any side.
+    final Set<PhysicalKeyboardKey> anySideKeys = <PhysicalKeyboardKey>{};
+    final Set<PhysicalKeyboardKey> keysPressedAfterEvent = <PhysicalKeyboardKey>{
+      ..._keysPressed.keys,
+      if (event is RawKeyDownEvent) event.physicalKey,
+    };
     for (final ModifierKey key in modifiersPressed.keys) {
+      if (modifiersPressed[key] == KeyboardSide.any) {
+        final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
+        anySideKeys.addAll(thisModifierKeys!);
+        if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
+          continue;
+        }
+      }
       final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert((){
         if (mappedKeys == null) {
@@ -764,7 +787,9 @@ class RawKeyboard {
         modifierKeys[physicalModifier] = _allModifiers[physicalModifier]!;
       }
     }
-    _allModifiersExceptFn.keys.forEach(_keysPressed.remove);
+    _allModifiersExceptFn.keys
+      .where((PhysicalKeyboardKey key) => !anySideKeys.contains(key))
+      .forEach(_keysPressed.remove);
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
       _keysPressed.remove(PhysicalKeyboardKey.fn);
