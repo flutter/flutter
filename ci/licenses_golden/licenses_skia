@@ -1,4 +1,4 @@
-Signature: 894b4d2f97615c3dcf3f90b929c044b8
+Signature: 824cbcfa47cf8f90a5868f36c68ac7e5
 
 UNUSED LICENSES:
 
@@ -1424,6 +1424,8 @@ FILE: ../../../third_party/skia/src/sksl/generated/sksl_geom.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_interp.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_public.dehydrated.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_rt_colorfilter.dehydrated.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_rt_shader.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_runtime.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
@@ -1432,6 +1434,8 @@ FILE: ../../../third_party/skia/src/sksl/sksl_frag.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_public.sksl
+FILE: ../../../third_party/skia/src/sksl/sksl_rt_colorfilter.sksl
+FILE: ../../../third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_runtime.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
 ----------------------------------------------------------------------------------------------------
