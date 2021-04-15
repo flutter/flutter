@@ -672,9 +672,11 @@ void addBaseHrefToIndexPage(Environment environment) {
   final File indexFile = environment.projectDir.childFile('web/index.html');
   final String indexFileContent = indexFile.readAsStringSync();
   final Document parsedContent = parse(indexFileContent);
-  if (indexFileContent == '') {
-    return;
+
+  if(!indexFileContent.contains('<head>')) {
+    return ;
   }
+
   if (parsedContent.head.getElementsByTagName('base').isEmpty) {
     parsedContent.head.append(
       Element.tag('base')..attributes['href'] = environment.defines[kBaseHref],

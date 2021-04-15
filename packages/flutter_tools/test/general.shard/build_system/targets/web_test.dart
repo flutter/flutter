@@ -104,7 +104,7 @@ void main() {
     expect(environment.outputDir.childFile('version.json'), exists);
   }));
 
-  test('Base href is created in index.html with given baseHref after release build', () => testbed.run(() async {
+  test('Base href is created in index.html with given base-href after release build', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kBaseHref] = '/basehreftest/';
     final Directory webResources = environment.projectDir.childDirectory('web');
