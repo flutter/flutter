@@ -87,7 +87,7 @@ class _ConstVisitor extends RecursiveVisitor<void> {
         continue;
       }
       final PrimitiveConstant<dynamic> value = kvp.value as PrimitiveConstant<dynamic>;
-      instance[kvp.key.asField.name.name] = value.value;
+      instance[kvp.key.asField.name.text] = value.value;
     }
     if (_visitedInstances.add(instance.toString())) {
       constantInstances.add(instance);
