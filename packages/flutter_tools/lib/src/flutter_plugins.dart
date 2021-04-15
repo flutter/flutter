@@ -1201,10 +1201,11 @@ Future<void> generateMainDartWithPluginRegistrant(
         newMainDart.deleteSync();
       }
     } on FileSystemException catch (error) {
-      throwToolExit(
+      print(
         'Unable to remove ${newMainDart.path}, received error: $error.\n'
         'You might need to run flutter clean.'
       );
+      rethrow;
     }
     return;
   }
@@ -1220,6 +1221,7 @@ Future<void> generateMainDartWithPluginRegistrant(
       globals.templateRenderer,
     );
   } on FileSystemException catch (error) {
-    throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
+    print('Unable to write ${newMainDart.path}, received error: $error');
+    rethrow;
   }
 }
