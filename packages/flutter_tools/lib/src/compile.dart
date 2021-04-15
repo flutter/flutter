@@ -469,6 +469,8 @@ abstract class ResidentCompiler {
     List<Uri> invalidatedFiles, {
     @required String outputPath,
     @required PackageConfig packageConfig,
+    @required String projectRootPath,
+    @required FileSystem fs,
     bool suppressErrors = false,
   });
 
@@ -608,10 +610,26 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @required String outputPath,
     @required PackageConfig packageConfig,
     bool suppressErrors = false,
+    String projectRootPath,
+    FileSystem fs,
   }) async {
     assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
+    }
+    // `generated_main.dart` contains the Dart plugin registry.
+    if (projectRootPath != null && fs != null) {
+      final File generatedMainDart = fs.file(
+        fs.path.join(
+          projectRootPath,
+          '.dart_tool',
+          'flutter_build',
+          'generated_main.dart',
+        ),
+      );
+      if (generatedMainDart != null && generatedMainDart.existsSync()) {
+        mainUri = generatedMainDart.uri;
+      }
     }
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(

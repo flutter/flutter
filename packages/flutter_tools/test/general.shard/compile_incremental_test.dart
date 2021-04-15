@@ -92,6 +92,8 @@ void main() {
         null /* invalidatedFiles */,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
@@ -117,6 +119,8 @@ void main() {
         null /* invalidatedFiles */,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
@@ -135,6 +139,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     )), throwsToolExit());
   });
 
@@ -150,6 +156,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     )), throwsToolExit(message: 'the Dart compiler exited unexpectedly.'));
   });
 
@@ -167,6 +175,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      projectRootPath: '',
+      fs: MemoryFileSystem(),
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -213,6 +223,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
 
@@ -274,6 +286,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
 
@@ -323,6 +337,8 @@ void main() {
       <Uri>[],
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -359,6 +375,8 @@ void main() {
       null /* invalidatedFiles */,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
     );
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -398,6 +416,8 @@ Future<void> _recompile(
     outputPath: '/build/',
     packageConfig: PackageConfig.empty,
     suppressErrors: suppressErrors,
+    fs: MemoryFileSystem(),
+    projectRootPath: '',
   );
 
   // Put content into the output stream after generator.recompile gets

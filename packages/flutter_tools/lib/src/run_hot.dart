@@ -315,15 +315,7 @@ class HotRunner extends ResidentRunner {
     bool enableDevTools = false,
     String route,
   }) async {
-    File mainFile = globals.fs.file(mainPath);
-    // `generated_main.dart` contains the Dart plugin registry.
-    final Directory buildDir = FlutterProject.current()
-        .directory
-        .childDirectory(globals.fs.path.join('.dart_tool', 'flutter_build'));
-    final File newMainDart = buildDir?.childFile('generated_main.dart');
-    if (newMainDart != null && newMainDart.existsSync()) {
-      mainFile = newMainDart;
-    }
+    final File mainFile = globals.fs.file(mainPath);
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
@@ -348,6 +340,8 @@ class HotRunner extends ResidentRunner {
                 trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
               ),
             packageConfig: debuggingOptions.buildInfo.packageConfig,
+            projectRootPath: FlutterProject.current().directory.absolute.path,
+            fs: globals.fs,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
       }
