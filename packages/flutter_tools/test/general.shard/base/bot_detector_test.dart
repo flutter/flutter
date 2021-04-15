@@ -47,6 +47,24 @@ void main() {
         expect(persistentToolState.isRunningOnBot, isFalse);
       });
 
+      testWithoutContext('does not cache BOT environment variable', () async {
+        fakePlatform.environment['BOT'] = 'true';
+
+        final BotDetector botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.any(),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isTrue);
+
+        fakePlatform.environment['BOT'] = 'false';
+
+        expect(await botDetector.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isFalse);
+      });
+
       testWithoutContext('returns false unconditionally if FLUTTER_HOST is set', () async {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
