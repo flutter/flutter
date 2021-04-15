@@ -15,14 +15,18 @@ void main() {
   });
 
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
-        actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
-        ],
-      )),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+            ],
+          ),
+        ),
+      ),
+    );
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
@@ -38,21 +42,27 @@ void main() {
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style!.color, Colors.white);
     expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
+    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
     final AppBarTheme appBarTheme = _appBarTheme();
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: appBarTheme),
-      home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
-        title: const Text('App Bar Title'),
-        actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
-        ],
-      )),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: appBarTheme),
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            title: const Text('App Bar Title'),
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+            ],
+          ),
+        ),
+      ),
+    );
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
@@ -68,6 +78,8 @@ void main() {
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
     expect(text.style, appBarTheme.toolbarTextStyle);
+    expect(tester.getSize(find.byType(AppBar)).height, appBarTheme.toolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
   testWidgets('SliverAppBar allows AppBar to determine backwardsCompatibility', (WidgetTester tester) async {
@@ -531,6 +543,7 @@ AppBarTheme _appBarTheme() {
     elevation: elevation,
     shadowColor: shadowColor,
     iconTheme: iconThemeData,
+    toolbarHeight: 96,
     toolbarTextStyle: TextStyle(color: Colors.yellow),
     titleTextStyle: TextStyle(color: Colors.pink),
   );

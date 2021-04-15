@@ -2822,4 +2822,57 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {
+    late double preferredHeight;
+    late Size preferredSize;
+
+    Widget buildFrame({ double? themeToolbarHeight, double? appBarToolbarHeight }) {
+      final AppBar appBar = AppBar(
+        toolbarHeight: appBarToolbarHeight,
+      );
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          appBarTheme: AppBarTheme(
+            toolbarHeight: themeToolbarHeight,
+          ),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            preferredHeight = AppBar.preferredHeightFor(context, appBar.preferredSize);
+            preferredSize = appBar.preferredSize;
+            return Scaffold(
+              appBar: appBar,
+              body: const Placeholder(),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+    expect(preferredHeight, kToolbarHeight);
+    expect(preferredSize.height, kToolbarHeight);
+
+    await tester.pumpWidget(buildFrame(themeToolbarHeight: 96));
+    await tester.pumpAndSettle(); // Animate MaterialApp theme change.
+    expect(tester.getSize(find.byType(AppBar)).height, 96);
+    expect(preferredHeight, 96);
+    // Special case: AppBarTheme.toolbarHeight specified,
+    // AppBar.theme.toolbarHeight is null.
+    expect(preferredSize.height, kToolbarHeight);
+
+    await tester.pumpWidget(buildFrame(appBarToolbarHeight: 64));
+    await tester.pumpAndSettle(); // Animate MaterialApp theme change.
+    expect(tester.getSize(find.byType(AppBar)).height, 64);
+    expect(preferredHeight, 64);
+    expect(preferredSize.height, 64);
+
+    await tester.pumpWidget(buildFrame(appBarToolbarHeight: 64, themeToolbarHeight: 96));
+    await tester.pumpAndSettle(); // Animate MaterialApp theme change.
+    expect(tester.getSize(find.byType(AppBar)).height, 64);
+    expect(preferredHeight, 64);
+    expect(preferredSize.height, 64);
+  });
 }
