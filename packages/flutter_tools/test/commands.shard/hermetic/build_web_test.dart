@@ -61,7 +61,7 @@ void main() {
       null,
       true,
       true,
-      kBaseHref
+      null
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,

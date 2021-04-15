@@ -39,7 +39,7 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// Base href to set in index.html in flutter build command
-const String kBaseHref = '/';
+const String kBaseHref = 'baseHref';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
@@ -327,7 +327,9 @@ class WebReleaseBundle extends Target {
     environment.outputDir
         .childFile('version.json')
         .writeAsStringSync(versionInfo);
-    addBaseHrefToIndexPage(environment);
+    if(environment.defines[kBaseHref]!=null) {
+      addBaseHrefToIndexPage(environment);
+    }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
