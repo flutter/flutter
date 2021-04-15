@@ -2111,7 +2111,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       _openInputConnection();
     } else {
-      widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
+      widget.focusNode.requestFocus();
     }
   }
 
@@ -2139,7 +2139,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
     if (widget.selectionControls == null) {
-      _selectionOverlay?.hide();
+      _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else {
       if (_selectionOverlay == null) {
@@ -2706,10 +2706,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      if ((defaultTargetPlatform == TargetPlatform.android ||
-              defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.fuchsia) &&
-          !kIsWeb) {
+      if (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.fuchsia) {
         final int? o =
             _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length)

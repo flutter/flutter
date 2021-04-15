@@ -18,7 +18,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
