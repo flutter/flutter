@@ -43,7 +43,7 @@ void main() {
   FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   Cache createCache(Platform platform) {
@@ -907,7 +907,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.empty(),
       AndroidSdk: () => null // Android SDK was not located.
     });
   });

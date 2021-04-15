@@ -88,7 +88,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
 
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);

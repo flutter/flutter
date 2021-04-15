@@ -90,7 +90,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       flutterRoot: () => 'sdk/flutter',
     );
 
@@ -111,7 +111,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       flutterRoot: () => 'sdk/flutter',
     );
 

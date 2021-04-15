@@ -46,7 +46,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:foo/lib/\n');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
 
       environment = Environment.test(
         globals.fs.currentDirectory,
