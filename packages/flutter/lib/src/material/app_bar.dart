@@ -54,6 +54,14 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
       toolbarHeight != oldDelegate.toolbarHeight;
 }
 
+class _PreferredAppBarSize extends Size {
+  _PreferredAppBarSize(this.toolbarHeight, this.bottomHeight)
+    : super.fromHeight((toolbarHeight ?? kToolbarHeight) + (bottomHeight ?? 0));
+
+  final double? toolbarHeight;
+  final double? bottomHeight;
+}
+
 /// A material design app bar.
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
@@ -202,8 +210,20 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       preferredSize = Size.fromHeight(toolbarHeight ?? kToolbarHeight + (bottom?.preferredSize.height ?? 0.0)),
+       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height),
        super(key: key);
+
+  /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
+  /// the same `preferredSize.height` unless [AppBar.toolbarHeight] was null and
+  /// `AppBarTheme.of(context).toolbarHeight` is non-null. In that case the
+  /// return value is the sum of the theme's toolbar height and the height of
+  /// the app bar's [AppBar.bottom] widget.
+  static double preferredHeightFor(BuildContext context, Size preferredSize) {
+    if (preferredSize is _PreferredAppBarSize && preferredSize.toolbarHeight == null) {
+      return (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + (preferredSize.bottomHeight ?? 0);
+    }
+    return preferredSize.height;
+  }
 
   /// {@template flutter.material.appbar.leading}
   /// A widget to display before the toolbar's [title].
@@ -781,7 +801,7 @@ class _AppBarState extends State<AppBar> {
     final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
-    final double toolbarHeight = widget.toolbarHeight ?? kToolbarHeight;
+    final double toolbarHeight = widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
     final bool backwardsCompatibility = widget.backwardsCompatibility ?? appBarTheme.backwardsCompatibility ?? true;
 
     final Color backgroundColor = backwardsCompatibility
