@@ -197,7 +197,6 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
-  final TargetPlatform targetPlatform;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
