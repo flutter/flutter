@@ -9,7 +9,6 @@
 // Edit the template dev/tools/gen_keycodes/data/web_key_map_dart.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
-// @dart = 2.12
 part of engine;
 
 /// Maps Web KeyboardEvent codes to the matching LogicalKeyboardKey id.
