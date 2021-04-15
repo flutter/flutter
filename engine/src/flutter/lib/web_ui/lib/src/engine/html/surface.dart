@@ -4,7 +4,6 @@
 
 /// When `true` prints statistics about what happened to the surface tree when
 
-// @dart = 2.12
 part of engine;
 /// it was composited.
 ///
