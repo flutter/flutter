@@ -2209,6 +2209,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('foo'), findsOneWidget);
   });
+
+  testWidgets('The opened menu should follow if the button\'s position changed', (WidgetTester tester) async {
+    final GlobalKey buttonKey = GlobalKey();
+
+    Widget buildFrame(double width, double height) {
+      return MaterialApp(
+        home: Scaffold(
+          body:  SizedBox(
+            height: height,
+            width: width,
+            child: Center(
+              child: PopupMenuButton<int>(
+                child: SizedBox(
+                  key: buttonKey,
+                  height: 10.0,
+                  width: 10.0,
+                  child: const ColoredBox(
+                    color: Colors.pink,
+                  ),
+                ),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                  const PopupMenuItem<int>(child: Text('-1-'), value: 1,),
+                  const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(100.0, 100.0));
+
+    // Open the menu.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    Offset button = tester.getTopLeft(find.byKey(buttonKey));
+    expect(button, const Offset(45.0, 45.0));
+
+    Offset popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView));
+    expect(popupMenu, button);
+
+    // Keep the menu opened and re-layout the screen.
+    await tester.pumpWidget(buildFrame(200.0, 300.0));
+
+    await tester.pump(); // Need a frame to update the menu.
+    button = tester.getTopLeft(find.byKey(buttonKey));
+    expect(button, const Offset(95.0, 145.0));
+
+    // The popup menu should follow the button.
+    popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView));
+    expect(popupMenu, button);
+  });
 }
 
 class TestApp extends StatefulWidget {

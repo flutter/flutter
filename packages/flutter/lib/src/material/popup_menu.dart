@@ -806,6 +806,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///
 /// `items` should be non-null and not empty.
 ///
+/// Prefer to use `positionCallback` to obtain position instead of 'position'
+/// when `positionCallback` is non-null.
+///
 /// If `initialValue` is specified then the first item with a matching value
 /// will be highlighted and the value of `position` gives the rectangle whose
 /// vertical center will be aligned with the vertical center of the highlighted
@@ -1099,6 +1102,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
 
+/// Signature for the callback used by [showMenu] to obtain the position of the
+/// [PopupMenuButton].
+///
+/// Used by [showMenu].
 typedef PopupMenuButtonPositionCallback = RelativeRect Function();
 
 /// The [State] for a [PopupMenuButton].
