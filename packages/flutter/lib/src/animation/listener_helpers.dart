@@ -135,6 +135,7 @@ mixin AnimationLocalListenersMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
     for (final VoidCallback listener in localListeners) {
@@ -223,6 +224,7 @@ mixin AnimationLocalStatusListenersMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
     final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.from(_statusListeners);
     for (final AnimationStatusListener listener in localListeners) {

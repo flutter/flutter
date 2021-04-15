@@ -614,6 +614,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
   /// Calls all the registered listeners to notify them of a new image.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   void setImage(ImageInfo image) {
     _checkDisposed();
     _currentImage?.dispose();
@@ -668,6 +669,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///
   /// See [FlutterErrorDetails] for further details on these values.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   void reportError({
     DiagnosticsNode? context,
     required Object exception,

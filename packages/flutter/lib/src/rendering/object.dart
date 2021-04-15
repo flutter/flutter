@@ -1617,6 +1617,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     owner!._nodesNeedingLayout.add(this);
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_relayoutBoundary == this);
     RenderObject? debugPreviousActiveLayout;
@@ -1671,6 +1672,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// children unconditionally. It is the [layout] method's responsibility (as
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
+  @pragma('vm:notify-debugger-on-exception')
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     if (!kReleaseMode && debugProfileLayoutsEnabled)
       Timeline.startSync('$runtimeType',  arguments: timelineArgumentsIndicatingLandmarkEvent);

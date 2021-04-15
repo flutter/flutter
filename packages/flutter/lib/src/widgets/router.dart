@@ -760,6 +760,7 @@ class _CallbackHookProvider<T> {
   /// Exceptions thrown by callbacks will be caught and reported using
   /// [FlutterError.reportError].
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   T invokeCallback(T defaultValue) {
     if (_callbacks.isEmpty)
       return defaultValue;
@@ -773,7 +774,7 @@ class _CallbackHookProvider<T> {
         context: ErrorDescription('while invoking the callback for $runtimeType'),
         informationCollector: () sync* {
           yield DiagnosticsProperty<_CallbackHookProvider<T>>(
-            'The $runtimeType that invoked the callback was:',
+            'The $runtimeType that invoked the callback was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
           );
