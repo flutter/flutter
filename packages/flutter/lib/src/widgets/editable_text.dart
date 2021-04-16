@@ -291,19 +291,35 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   }
 }
 
+/// A [TextEditingController] that contains a list of [TextEditingInlineSpanReplacement]s that
+/// insert custom [InlineSpans] in place of matched [Pattern]s.
+///
+/// This controller should be passed [TextEditingInlineSpanReplacement], each of which contains a
+/// a pattern to match with and a generator function to generate the [InlineSpan] to replace
+/// the matched [Pattern] with based on the matched string.
+///
+/// 
 class ReplacementTextEditingController extends TextEditingController {
 
-  ReplacementTextEditingController({ String? text, this.textEditingInlineSpanReplacements = const <TextEditingInlineSpanReplacement>[] })
+  ReplacementTextEditingController({
+    String? text,
+    required this.textEditingInlineSpanReplacements,
+    this.composingRegionPrioritized = false,
+  })
     : super(text: text);
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
-  ReplacementTextEditingController.fromValue(TextEditingValue? value, { this.textEditingInlineSpanReplacements = const <TextEditingInlineSpanReplacement>[] })
-    : super.fromValue(value);
+  ReplacementTextEditingController.fromValue(TextEditingValue? value, {
+    required this.textEditingInlineSpanReplacements,
+    this.composingRegionPrioritized = false
+  }) : super.fromValue(value);
 
-  List<TextEditingInlineSpanReplacement> textEditingInlineSpanReplacements;
+  final List<TextEditingInlineSpanReplacement> textEditingInlineSpanReplacements;
+
+  final bool composingRegionPrioritized;
 
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
@@ -311,26 +327,28 @@ class ReplacementTextEditingController extends TextEditingController {
 
     // Keep a mapping of TextRanges to the InlineSpan to replace it with.
     final Map<TextRange, InlineSpan> rangeSpanMapping= <TextRange, InlineSpan>{};
+
+    // If the composing range is out of range for the current text, ignore it to
+    // preserve the tree integrity, otherwise in release mode a RangeError will
+    // be thrown and this EditableText will be built with a broken subtree.
+    //
+    // Add composing region as a replacement to a TextSpan with underline.
+    if (composingRegionPrioritized && value.isComposingRangeValid && withComposing) {
+      _addToMappingWithoutOverlap((String value, TextRange range) {
+        final TextStyle composingStyle = style!.merge(
+          const TextStyle(decoration: TextDecoration.underline),
+        );
+        return TextSpan(
+          style: composingStyle,
+          text: value,
+        );
+      } , value.composing, rangeSpanMapping, value.text);
+    }
     // Iterate through TextEditingInlineSpanReplacements, adding non overlapping
     // to the mapping pointing towards the generated InlineSpan.
     for (final TextEditingInlineSpanReplacement replacement in textEditingInlineSpanReplacements) {
       for (final Match match in replacement.pattern.allMatches(value.text)) {
-        bool overlap = false;
-        for (final TextRange range in rangeSpanMapping.keys) {
-          // Only the first match for a given text range is replaced.
-          // Overlapping matches are ignored.
-          if (match.start >= range.start &&
-              match.start < range.end ||
-              match.end > range.start &&
-              match.end < range.end) {
-            overlap = true;
-            break;
-          }
-        }
-        if (!overlap) {
-          final TextRange range = TextRange(start: match.start, end: match.end);
-          rangeSpanMapping[range] = replacement.generator(range.textInside(value.text), range);
-        }
+        _addToMappingWithoutOverlap(replacement.generator, TextRange(start: match.start, end: match.end), rangeSpanMapping, value.text);
       }
     }
     // If the composing range is out of range for the current text, ignore it to
@@ -338,29 +356,16 @@ class ReplacementTextEditingController extends TextEditingController {
     // be thrown and this EditableText will be built with a broken subtree.
     //
     // Add composing region as a replacement to a TextSpan with underline.
-    if (value.isComposingRangeValid && withComposing) {
-      // return TextSpan(style: style, text: text);
-      bool overlap = false;
-      for (final TextRange range in rangeSpanMapping.keys) {
-        // Only the first match for a given text range is replaced.
-        // Overlapping matches are ignored.
-        if (value.composing.start >= range.start &&
-            value.composing.start < range.end ||
-            value.composing.end > range.start &&
-            value.composing.end < range.end) {
-          overlap = true;
-          break;
-        }
-      }
-      if (!overlap) {
+    if (!composingRegionPrioritized && value.isComposingRangeValid && withComposing) {
+      _addToMappingWithoutOverlap((String value, TextRange range) {
         final TextStyle composingStyle = style!.merge(
           const TextStyle(decoration: TextDecoration.underline),
         );
-        rangeSpanMapping[value.composing] = TextSpan(
+        return TextSpan(
           style: composingStyle,
-          text: value.composing.textInside(value.text),
+          text: value,
         );
-      }
+      } , value.composing, rangeSpanMapping, value.text);
     }
     // Sort the matches by start index. Since no overlapping exists, this is safe.
     List<TextRange> sortedRanges = rangeSpanMapping.keys.toList();
@@ -385,6 +390,24 @@ class ReplacementTextEditingController extends TextEditingController {
       style: style,
       children: spans,
     );
+  }
+}
+
+void _addToMappingWithoutOverlap(InlineSpanGenerator generator, TextRange matchedRange, Map<TextRange, InlineSpan> rangeSpanMapping, String text) {
+  bool overlap = false;
+  for (final TextRange range in rangeSpanMapping.keys) {
+    // Only the first match for a given text range is replaced.
+    // Overlapping matches are ignored.
+    if (matchedRange.start >= range.start &&
+        matchedRange.start < range.end ||
+        matchedRange.end > range.start &&
+        matchedRange.end < range.end) {
+      overlap = true;
+      break;
+    }
+  }
+  if (!overlap) {
+    rangeSpanMapping[matchedRange] = generator(matchedRange.textInside(text), matchedRange);
   }
 }
 
