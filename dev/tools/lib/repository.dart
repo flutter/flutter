@@ -49,12 +49,12 @@ abstract class Repository {
   Repository({
     @required this.name,
     @required this.fetchRemote,
-    @required this.initialRef,
     @required this.processManager,
     @required this.stdio,
     @required this.platform,
     @required this.fileSystem,
     @required this.parentDirectory,
+    this.initialRef,
     this.localUpstream = false,
     this.useExistingCheckout = false,
     this.pushRemote,
@@ -113,7 +113,6 @@ abstract class Repository {
       git.run(
         <String>[
           'clone',
-          '--no-checkout', // We will explicitly check out [initialRef] later
           '--origin',
           fetchRemote.name,
           '--',
@@ -148,11 +147,13 @@ abstract class Repository {
       }
     }
 
-    git.run(
-      <String>['checkout', '${fetchRemote.name}/$initialRef'],
-      'Checking out initialRef $initialRef',
-      workingDirectory: _checkoutDirectory.path,
-    );
+    if (initialRef != null) {
+      git.run(
+        <String>['checkout', '${fetchRemote.name}/$initialRef'],
+        'Checking out initialRef $initialRef',
+        workingDirectory: _checkoutDirectory.path,
+      );
+    }
     final String revision = reverseParse('HEAD');
     stdio.printTrace(
       'Repository $name is checked out at revision "$revision".',
@@ -403,7 +404,7 @@ class FrameworkRepository extends Repository {
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
-    String initialRef = FrameworkRepository.defaultBranch,
+    String initialRef,
     Remote pushRemote,
   }) : super(
           name: name,
@@ -432,8 +433,10 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      fetchRemote:
-          Remote(name: RemoteName.upstream, url: 'file://$upstreamPath/'),
+      fetchRemote: Remote(
+        name: RemoteName.upstream,
+        url: 'file://$upstreamPath/',
+      ),
       localUpstream: false,
       useExistingCheckout: useExistingCheckout,
     );
