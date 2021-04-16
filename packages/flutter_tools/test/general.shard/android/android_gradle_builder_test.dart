@@ -33,7 +33,7 @@ void main() {
     FakeProcessManager processManager;
 
     setUp(() {
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();

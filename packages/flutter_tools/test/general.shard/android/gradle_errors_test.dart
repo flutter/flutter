@@ -527,7 +527,7 @@ Command: /home/android/gradlew assembleRelease
     FakeProcessManager fakeProcessManager;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
     });
 
     testWithoutContext('pattern', () {

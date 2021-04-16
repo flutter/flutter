@@ -49,7 +49,7 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
-    TargetPlatform targetPlatform,
+    this.targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
   }) : assert(buildInfo.trackWidgetCreation != null),
@@ -197,6 +197,7 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+  final TargetPlatform targetPlatform;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;

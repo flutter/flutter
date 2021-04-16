@@ -51,7 +51,7 @@ void main() {
     testLogger = BufferLogger.test();
     frontendServerStdIn = MemoryIOSink();
 
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     generatorStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: MemoryFileSystem.test());
     generatorWithSchemeStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: MemoryFileSystem.test());
     generator = DefaultResidentCompiler(

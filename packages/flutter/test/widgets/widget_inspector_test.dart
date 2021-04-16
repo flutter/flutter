@@ -1018,7 +1018,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', null));
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 5);
       expect(nodes[0].runtimeType, StringProperty);
       expect(nodes[0].name, 'dummy1');
@@ -1080,7 +1080,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(StringProperty('dummy2', 'value'));
       builder.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', null));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 5);
       expect(nodes[0].runtimeType, StringProperty);
       expect(nodes[0].name, 'dummy1');
@@ -1128,7 +1128,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
       builder.add(StringProperty('dummy2', 'value'));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 6);
       expect(nodes[0].runtimeType, ErrorSummary);
       expect(nodes[1].runtimeType, DiagnosticsBlock);
@@ -1162,7 +1162,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
       builder.add(StringProperty('dummy2', 'value'));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 4);
       expect(nodes[0].runtimeType, ErrorSummary);
       expect(nodes[1].runtimeType, DiagnosticsBlock);
@@ -1194,7 +1194,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
       builder.add(StringProperty('dummy2', 'value'));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 4);
       expect(nodes[0].runtimeType, ErrorSummary);
       expect(nodes[1].runtimeType, DiagnosticsBlock);
