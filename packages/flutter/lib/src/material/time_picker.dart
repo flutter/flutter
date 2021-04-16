@@ -1730,7 +1730,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
-          restorationId: 'text_form_field',
+          restorationId: 'hour_minute_text_form_field',
           autofocus: widget.autofocus ?? false,
           expands: true,
           maxLines: null,
