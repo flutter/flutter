@@ -1466,6 +1466,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                         children: <Widget>[
                           const SizedBox(height: 8.0),
                           _HourTextField(
+                            restorationId: 'hour_text_field',
                             selectedTime: _selectedTime.value,
                             style: hourMinuteStyle,
                             autofocus: widget.autofocusHour,
@@ -1551,6 +1552,7 @@ class _HourTextField extends StatelessWidget {
     required this.validator,
     required this.onSavedSubmitted,
     required this.onChanged,
+    this.restorationId,
   }) : super(key: key);
 
   final TimeOfDay selectedTime;
@@ -1559,10 +1561,12 @@ class _HourTextField extends StatelessWidget {
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String> onChanged;
+  final String? restorationId;
 
   @override
   Widget build(BuildContext context) {
     return _HourMinuteTextField(
+      restorationId: restorationId,
       selectedTime: selectedTime,
       isHour: true,
       autofocus: autofocus,
@@ -1615,6 +1619,7 @@ class _HourMinuteTextField extends StatefulWidget {
     required this.semanticHintText,
     required this.validator,
     required this.onSavedSubmitted,
+    this.restorationId,
     this.onChanged,
   }) : super(key: key);
 
@@ -1626,13 +1631,22 @@ class _HourMinuteTextField extends StatefulWidget {
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String>? onChanged;
+  final String? restorationId;
 
   @override
   _HourMinuteTextFieldState createState() => _HourMinuteTextFieldState();
 }
 
-class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
-  TextEditingController? controller;
+class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(controller, 'text_editing_controller');
+  }
+
+  final RestorableTextEditingController controller = RestorableTextEditingController();
   late FocusNode focusNode;
 
   @override
@@ -1646,7 +1660,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller ??= TextEditingController(text: _formattedValue);
+    controller.value.text = _formattedValue;
   }
 
   String get _formattedValue {
@@ -1719,10 +1733,10 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
           textAlign: TextAlign.center,
           keyboardType: TextInputType.number,
           style: widget.style.copyWith(color: timePickerTheme.hourMinuteTextColor ?? colorScheme.onSurface),
-          controller: controller,
+          controller: controller.value,
           decoration: inputDecoration,
           validator: widget.validator,
-          onEditingComplete: () => widget.onSavedSubmitted(controller!.text),
+          onEditingComplete: () => widget.onSavedSubmitted(controller.value.text),
           onSaved: widget.onSavedSubmitted,
           onFieldSubmitted: widget.onSavedSubmitted,
           onChanged: widget.onChanged,
@@ -2177,6 +2191,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
           key: _formKey,
           autovalidate: _autoValidate.value,
           child: SingleChildScrollView(
+            restorationId: 'time_picker_scroll_view',
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -2186,6 +2201,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                   autofocusHour: _autofocusHour.value,
                   autofocusMinute: _autofocusMinute.value,
                   onChanged: _handleTimeChanged,
+                  restorationId: 'time_picker_input',
                 ),
                 actions,
               ],
