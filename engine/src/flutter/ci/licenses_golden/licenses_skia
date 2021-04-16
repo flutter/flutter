@@ -1,4 +1,4 @@
-Signature: 63d618c8655d2e5c89ba2dfa1114bfdc
+Signature: 5617bf255d5bb177c53651ea6ddf5908
 
 UNUSED LICENSES:
 
@@ -5685,6 +5685,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzDDLThreading.cpp
 FILE: ../../../third_party/skia/gm/aarecteffect.cpp
 FILE: ../../../third_party/skia/gm/colorspace.cpp
+FILE: ../../../third_party/skia/gm/drawglyphs.cpp
 FILE: ../../../third_party/skia/gm/largeclippedpath.cpp
 FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
 FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
