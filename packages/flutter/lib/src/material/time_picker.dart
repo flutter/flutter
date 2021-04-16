@@ -1772,7 +1772,18 @@ class TimePickerDialog extends StatefulWidget {
   /// Optionally provide your own help text to the header of the time picker.
   final String? helpText;
 
-  /// TODO(shihaohong): documentation
+  /// Restoration ID to save and restore the state of the [TimePickerDialog].
+  ///
+  /// If it is non-null, the time picker will persist and restore the
+  /// dialog's state.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
   final String? restorationId;
 
   @override
