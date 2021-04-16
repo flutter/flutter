@@ -16,85 +16,101 @@ class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
   WriteBuffer()
     : _buffer = Uint8Buffer(),
+      _isDone = false,
       _eightBytes = ByteData(8) {
     _eightBytesAsList = _eightBytes.buffer.asUint8List();
   }
 
-  Uint8Buffer? _buffer;
+  Uint8Buffer _buffer;
+  bool _isDone;
   final ByteData _eightBytes;
   late Uint8List _eightBytesAsList;
 
   /// Write a Uint8 into the buffer.
   void putUint8(int byte) {
-    _buffer!.add(byte);
+    assert(!_isDone);
+    _buffer.add(byte);
   }
 
   /// Write a Uint16 into the buffer.
   void putUint16(int value, {Endian? endian}) {
+    assert(!_isDone);
     _eightBytes.setUint16(0, value, endian ?? Endian.host);
-    _buffer!.addAll(_eightBytesAsList, 0, 2);
+    _buffer.addAll(_eightBytesAsList, 0, 2);
   }
 
   /// Write a Uint32 into the buffer.
   void putUint32(int value, {Endian? endian}) {
+    assert(!_isDone);
     _eightBytes.setUint32(0, value, endian ?? Endian.host);
-    _buffer!.addAll(_eightBytesAsList, 0, 4);
+    _buffer.addAll(_eightBytesAsList, 0, 4);
   }
 
   /// Write an Int32 into the buffer.
   void putInt32(int value, {Endian? endian}) {
+    assert(!_isDone);
     _eightBytes.setInt32(0, value, endian ?? Endian.host);
-    _buffer!.addAll(_eightBytesAsList, 0, 4);
+    _buffer.addAll(_eightBytesAsList, 0, 4);
   }
 
   /// Write an Int64 into the buffer.
   void putInt64(int value, {Endian? endian}) {
+    assert(!_isDone);
     _eightBytes.setInt64(0, value, endian ?? Endian.host);
-    _buffer!.addAll(_eightBytesAsList, 0, 8);
+    _buffer.addAll(_eightBytesAsList, 0, 8);
   }
 
   /// Write an Float64 into the buffer.
   void putFloat64(double value, {Endian? endian}) {
+    assert(!_isDone);
     _alignTo(8);
     _eightBytes.setFloat64(0, value, endian ?? Endian.host);
-    _buffer!.addAll(_eightBytesAsList);
+    _buffer.addAll(_eightBytesAsList);
   }
 
   /// Write all the values from a [Uint8List] into the buffer.
   void putUint8List(Uint8List list) {
-    _buffer!.addAll(list);
+    assert(!_isDone);
+    _buffer.addAll(list);
   }
 
   /// Write all the values from an [Int32List] into the buffer.
   void putInt32List(Int32List list) {
+    assert(!_isDone);
     _alignTo(4);
-    _buffer!.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
+    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
   }
 
   /// Write all the values from an [Int64List] into the buffer.
   void putInt64List(Int64List list) {
+    assert(!_isDone);
     _alignTo(8);
-    _buffer!.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
+    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
   }
 
   /// Write all the values from a [Float64List] into the buffer.
   void putFloat64List(Float64List list) {
+    assert(!_isDone);
     _alignTo(8);
-    _buffer!.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
+    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
   }
 
   void _alignTo(int alignment) {
-    final int mod = _buffer!.length % alignment;
+    assert(!_isDone);
+    final int mod = _buffer.length % alignment;
     if (mod != 0) {
-      for (int i = 0; i < alignment - mod; i++)
-        _buffer!.add(0);
+      _eightBytes.setInt64(0, 0);
+      _buffer.addAll(_eightBytesAsList, 0, alignment - mod);
     }
   }
 
   /// Finalize and return the written [ByteData].
   ByteData done() {
-    final ByteData result = _buffer!.buffer.asByteData(0, _buffer!.lengthInBytes);
-    _buffer = null;
+    if (_isDone) {
+      throw StateError("Calling done() twice on the same object isn't supported.");
+    }
+    final ByteData result = _buffer.buffer.asByteData(0, _buffer.lengthInBytes);
+    _isDone = true;
     return result;
   }
 }
