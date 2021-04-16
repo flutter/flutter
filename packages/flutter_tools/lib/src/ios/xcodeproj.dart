@@ -15,6 +15,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../reporting/reporting.dart';
 
@@ -45,9 +46,7 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required Usage usage,
-    int? majorVersion,
-    int? minorVersion,
-    int? patchVersion,
+    Version? version,
   }) : _platform = platform,
         _fileSystem = fileSystem,
         _logger = logger,
@@ -58,9 +57,7 @@ class XcodeProjectInterpreter {
           platform: platform,
           processManager: processManager,
         ),
-        _majorVersion = majorVersion,
-        _minorVersion = minorVersion,
-        _patchVersion = patchVersion,
+        _version = version,
         _usage = usage;
 
   /// Create an [XcodeProjectInterpreter] for testing.
@@ -68,12 +65,10 @@ class XcodeProjectInterpreter {
   /// Defaults to installed with sufficient version,
   /// a memory file system, fake platform, buffer logger,
   /// test [Usage], and test [Terminal].
-  /// Set [majorVersion] to null to simulate Xcode not being installed.
+  /// Set [version] to null to simulate Xcode not being installed.
   factory XcodeProjectInterpreter.test({
     required ProcessManager processManager,
-    int majorVersion = 1000,
-    int minorVersion = 0,
-    int patchVersion = 0,
+    Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -85,9 +80,7 @@ class XcodeProjectInterpreter {
       processManager: processManager,
       usage: TestUsage(),
       logger: BufferLogger.test(),
-      majorVersion: majorVersion,
-      minorVersion: minorVersion,
-      patchVersion: patchVersion,
+      version: version,
     );
   }
 
@@ -120,15 +113,16 @@ class XcodeProjectInterpreter {
       }
       final String version = match.group(1)!;
       final List<String> components = version.split('.');
-      _majorVersion = int.parse(components[0]);
-      _minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
-      _patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
+      final int majorVersion = int.parse(components[0]);
+      final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
+      final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
+      _version = Version(majorVersion, minorVersion, patchVersion);
     } on ProcessException {
       // Ignored, leave values null.
     }
   }
 
-  bool get isInstalled => majorVersion != null;
+  bool get isInstalled => version != null;
 
   String? _versionText;
   String? get versionText {
@@ -138,28 +132,12 @@ class XcodeProjectInterpreter {
     return _versionText;
   }
 
-  int? _majorVersion;
-  int? get majorVersion {
-    if (_majorVersion == null) {
+  Version? _version;
+  Version? get version {
+    if (_version == null) {
       _updateVersion();
     }
-    return _majorVersion;
-  }
-
-  int? _minorVersion;
-  int? get minorVersion {
-    if (_minorVersion == null) {
-      _updateVersion();
-    }
-    return _minorVersion;
-  }
-
-  int? _patchVersion;
-  int? get patchVersion {
-    if (_patchVersion == null) {
-      _updateVersion();
-    }
-    return _patchVersion;
+    return _version;
   }
 
   /// The `xcrun` Xcode command to run or locate development
