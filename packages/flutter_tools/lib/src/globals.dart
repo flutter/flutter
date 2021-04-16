@@ -21,7 +21,6 @@ import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
-import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 
 export 'globals_null_migrated.dart';
@@ -30,7 +29,6 @@ Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
-Usage get flutterUsage => context.get<Usage>();
 DeviceManager get deviceManager => context.get<DeviceManager>();
 
 FlutterProjectFactory get projectFactory {
