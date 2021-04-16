@@ -2817,6 +2817,21 @@ void main() {
     expect(nextPlatform('fuchsia', TestFeatureFlags(isMacOSEnabled: true)), 'macOS');
     expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsAssertionError);
   });
+
+  testUsingContext('cleanupAtFinish shuts down resident devtools handler', () => testbed.run(() async {
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+    await residentRunner.cleanupAtFinish();
+
+    expect((residentRunner.residentDevtoolsHandler as NoOpDevtoolsHandler).wasShutdown, true);
+  }));
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}

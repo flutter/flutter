@@ -200,6 +200,7 @@ class ColdRunner extends ResidentRunner {
       await flutterDevice.device.dispose();
     }
 
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
   }
 

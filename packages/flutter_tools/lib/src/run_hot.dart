@@ -1166,6 +1166,7 @@ class HotRunner extends ResidentRunner {
       await flutterDevice.device.dispose();
     }
     await _cleanupDevFS();
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
   }
 }
