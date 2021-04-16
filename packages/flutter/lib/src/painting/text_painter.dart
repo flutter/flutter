@@ -460,18 +460,22 @@ class TextPainter {
     if (_placeholderDimensions == null) {
       return offset;
     }
+    print('GET RAW: $offset');
     for (final PlaceholderDimensions dims in _placeholderDimensions!) {
       if (dims.range != null) {
-        if (dims.range!.end <= offset) {
+        if (dims.range!.end < offset) {
+          print('1');
           // placeholders are represented as a single replacement character,
           // so we subtract 1 from the length to account for it.
           offset += dims.range!.end - dims.range!.start - 1;
-        } else if (dims.range!.end > offset && dims.range!.start <= offset) {
+        } else if (offset < dims.range!.end && dims.range!.start <= offset) {
+          print('2');
           // Within the range
           // place offset at beginning or end of placeholder depending on
           // which half it is in.
-          offset += dims.range!.start - dims.range!.start;
+          offset += offset - dims.range!.start;
           if (offset > dims.range!.start + dims.range!.end / 2) {
+            print('2.5');
             offset++;
           }
         } else  {
@@ -479,6 +483,7 @@ class TextPainter {
         }
       }
     }
+    print('    result: $offset');
     return offset;
   }
 

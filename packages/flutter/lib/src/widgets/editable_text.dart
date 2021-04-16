@@ -340,13 +340,27 @@ class ReplacementTextEditingController extends TextEditingController {
     // Add composing region as a replacement to a TextSpan with underline.
     if (value.isComposingRangeValid && withComposing) {
       // return TextSpan(style: style, text: text);
-      final TextStyle composingStyle = style!.merge(
-        const TextStyle(decoration: TextDecoration.underline),
-      );
-      rangeSpanMapping[value.composing] = TextSpan(
-        style: composingStyle,
-        text: value.composing.textInside(value.text),
-      );
+      bool overlap = false;
+      for (final TextRange range in rangeSpanMapping.keys) {
+        // Only the first match for a given text range is replaced.
+        // Overlapping matches are ignored.
+        if (value.composing.start >= range.start &&
+            value.composing.start < range.end ||
+            value.composing.end > range.start &&
+            value.composing.end < range.end) {
+          overlap = true;
+          break;
+        }
+      }
+      if (!overlap) {
+        final TextStyle composingStyle = style!.merge(
+          const TextStyle(decoration: TextDecoration.underline),
+        );
+        rangeSpanMapping[value.composing] = TextSpan(
+          style: composingStyle,
+          text: value.composing.textInside(value.text),
+        );
+      }
     }
     // Sort the matches by start index. Since no overlapping exists, this is safe.
     List<TextRange> sortedRanges = rangeSpanMapping.keys.toList();
