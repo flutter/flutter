@@ -606,7 +606,7 @@ class ResidentWebRunner extends ResidentRunner {
           kNoneWorker,
           true,
           debuggingOptions.nativeNullAssertions,
-          kBaseHref
+          kBaseHref,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

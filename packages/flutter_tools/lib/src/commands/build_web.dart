@@ -92,7 +92,7 @@ class BuildWebCommand extends BuildSubCommand {
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    if (stringArg('base-href')!=null && !(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/'))) {
+    if (stringArg('base-href') != null && !(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/'))) {
      throwToolExit('base-href should start and end with /');
     }
     displayNullSafetyMode(buildInfo);

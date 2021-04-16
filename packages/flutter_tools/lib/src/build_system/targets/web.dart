@@ -166,8 +166,6 @@ Future<void> main() async {
     environment.buildDir.childFile('main.dart')
       .writeAsStringSync(contents);
   }
-
-
 }
 
 /// Compiles a web entry point with dart2js.
@@ -327,7 +325,7 @@ class WebReleaseBundle extends Target {
     environment.outputDir
         .childFile('version.json')
         .writeAsStringSync(versionInfo);
-    if(environment.defines[kBaseHref]!=null) {
+    if (environment.defines[kBaseHref] != null) {
       addBaseHrefToIndexPage(environment);
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
@@ -675,8 +673,8 @@ void addBaseHrefToIndexPage(Environment environment) {
   final String indexFileContent = indexFile.readAsStringSync();
   final Document parsedContent = parse(indexFileContent);
 
-  if(!indexFileContent.contains('<head>')) {
-    return ;
+  if (!indexFileContent.contains('<head>')) {
+    return;
   }
 
   if (parsedContent.head.getElementsByTagName('base').isEmpty) {
@@ -685,7 +683,7 @@ void addBaseHrefToIndexPage(Environment environment) {
     );
   } else {
     parsedContent.head.getElementsByTagName('base').first.attributes['href'] =
-    environment.defines[kBaseHref];
+        environment.defines[kBaseHref];
   }
   environment.projectDir
       .childDirectory('web')

@@ -117,7 +117,22 @@ void main() {
     await const WebReleaseBundle().build(environment);
     final Document parsedIndexFileContent = parse(await environment.outputDir.childFile('index.html').readAsString());
     expect(parsedIndexFileContent.head.getElementsByTagName('base').isNotEmpty, true);
-    expect(parsedIndexFileContent.head.getElementsByTagName('base').first.attributes['href'],'/basehreftest/');
+    expect(parsedIndexFileContent.head.getElementsByTagName('base').first.attributes['href'], '/basehreftest/');
+  }));
+
+  test('null base href does not override existing base href in index.html', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html')
+        .createSync(recursive: true);
+    webResources.childFile('index.html').writeAsStringSync('''
+    <!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
+    ''');
+    environment.buildDir.childFile('main.dart.js').createSync();
+    await const WebReleaseBundle().build(environment);
+    final Document parsedIndexFileContent = parse(await environment.outputDir.childFile('index.html').readAsString());
+    expect(parsedIndexFileContent.head.getElementsByTagName('base').isNotEmpty, true);
+    expect(parsedIndexFileContent.head.getElementsByTagName('base').first.attributes['href'], '/basehreftest/');
   }));
 
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
