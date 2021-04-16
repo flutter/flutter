@@ -21,10 +21,7 @@ namespace flutter {
 
 FlutterGLCompositor::FlutterGLCompositor(FlutterViewController* view_controller,
                                          NSOpenGLContext* opengl_context)
-    : open_gl_context_(opengl_context) {
-  FML_CHECK(view_controller != nullptr) << "FlutterViewController* cannot be nullptr";
-  view_controller_ = view_controller;
-}
+    : FlutterCompositor(view_controller), open_gl_context_(opengl_context) {}
 
 bool FlutterGLCompositor::CreateBackingStore(const FlutterBackingStoreConfig* config,
                                              FlutterBackingStore* backing_store_out) {
@@ -115,11 +112,6 @@ bool FlutterGLCompositor::Present(const FlutterLayer** layers, size_t layers_cou
   // render a new frame.
   frame_started_ = false;
   return present_callback_();
-}
-
-void FlutterGLCompositor::SetPresentCallback(
-    const FlutterGLCompositor::PresentCallback& present_callback) {
-  present_callback_ = present_callback;
 }
 
 void FlutterGLCompositor::StartFrame() {
