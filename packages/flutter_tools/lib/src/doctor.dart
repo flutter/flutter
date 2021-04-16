@@ -84,6 +84,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         platform: globals.platform,
         userMessages: userMessages,
         plistParser: globals.plistParser,
+        processManager: globals.processManager,
       ),
       ...VsCodeValidator.installedValidators(globals.fs, globals.platform),
     ];
