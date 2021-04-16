@@ -1179,6 +1179,25 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
+  /// Handler for [TextSelectionGestureDetector.onTripleTapDown].
+  ///
+  /// By default, it selects a paragraph through [RenderEditable.selectParagraph] if
+  /// selectionEnabled and shows toolbar if necessary.
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onTripleTapDown], which triggers this
+  ///    callback.
+  @protected
+  void onTripleTapDown(TapDownDetails details) {
+    if (delegate.selectionEnabled) {
+      renderEditable.selectParagraph(cause: SelectionChangedCause.tripleTap);
+      if (shouldShowSelectionToolbar)
+        editableText.showToolbar();
+    }
+  }
+
+
   /// Handler for [TextSelectionGestureDetector.onDragSelectionStart].
   ///
   /// By default, it selects a text position specified in [details].
@@ -1263,6 +1282,7 @@ class TextSelectionGestureDetectorBuilder {
       onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
       onSingleLongTapEnd: onSingleLongTapEnd,
       onDoubleTapDown: onDoubleTapDown,
+      onTripleTapDown: onTripleTapDown,
       onDragSelectionStart: onDragSelectionStart,
       onDragSelectionUpdate: onDragSelectionUpdate,
       onDragSelectionEnd: onDragSelectionEnd,
@@ -1356,6 +1376,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDownCallback? onDoubleTapDown;
 
+  /// Called after a 3 taps that are close in space and within [kDoubleTapTimeout]
+  /// to a previous short tap.
   final GestureTapDownCallback? onTripleTapDown;
 
   /// Called when a mouse starts dragging to select text.

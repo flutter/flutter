@@ -765,6 +765,10 @@ enum SelectionChangedCause {
   /// the selection (or the location of the cursor) to change.
   doubleTap,
 
+  /// The user tapped three times in quick succession on the text and that caused
+  /// the selection to change.
+  tripleTap,
+
   /// The user long-pressed the text and that caused the selection (or the
   /// location of the cursor) to change.
   longPress,

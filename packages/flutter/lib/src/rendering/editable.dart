@@ -116,6 +116,8 @@ bool _isWhitespace(int codeUnit) {
   return true;
 }
 
+bool _isLineFeed(int codeUnit) => codeUnit == 0xA;
+
 /// Displays some text in a scrollable container with a potentially blinking
 /// cursor and with gesture recognizers.
 ///
@@ -2911,6 +2913,40 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return null;
   }
 
+  TextRange _getParagraphBoundary(TextPosition position) {
+    return TextRange(start: _getParagraphStartOffset(position), end: _getParagraphEndOffset(position));
+  }
+
+  int _getParagraphStartOffset(TextPosition position) {
+    int offset = position.offset;
+    int? codeUnit = text!.codeUnitAt(offset);
+
+    while (codeUnit != null) {
+      if (_isLineFeed(codeUnit))
+        return offset;
+
+      offset--;
+      codeUnit = text!.codeUnitAt(offset);
+    }
+
+    return 0;
+  }
+
+  int _getParagraphEndOffset(TextPosition position) {
+    int offset = position.offset;
+    int? codeUnit = text!.codeUnitAt(offset);
+
+    while (codeUnit != null) {
+      if (_isLineFeed(codeUnit))
+        return offset;
+
+      offset++;
+      codeUnit = text!.codeUnitAt(offset);
+    }
+
+    return offset;
+  }
+
   // Check if the given text range only contains white space or separator
   // characters.
   //
@@ -3368,6 +3404,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
     _setSelection(newSelection, cause);
+  }
+
+  /// Select a paragraph around the location of the last tap down.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
+  void selectParagraph({ required SelectionChangedCause cause }) {
+    selectParagraphAt(from: _lastTapDownPosition!, cause: cause);
+  }
+
+  /// Selects the paragraph at a given offset
+  ///
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
+  void selectParagraphAt({ required Offset from, required SelectionChangedCause cause }) {
+    assert(from != null);
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextRange boundary = _getParagraphBoundary(firstPosition);
+
+    _setSelection(
+      TextSelection(
+        baseOffset: boundary.start,
+        extentOffset: boundary.end,
+        affinity: firstPosition.affinity,
+      ),
+      cause,
+    );
   }
 
   TextSelection _getWordAtOffset(TextPosition position) {
