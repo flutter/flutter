@@ -103,15 +103,24 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
 VulkanSurface::VulkanSurface(
     vulkan::VulkanProvider& vulkan_provider,
     fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    fuchsia::scenic::allocation::AllocatorPtr& scenic_allocator,
     sk_sp<GrDirectContext> context,
     scenic::Session* session,
-    const SkISize& size,
-    uint32_t buffer_id)
+    const SkISize& size)
     : vulkan_provider_(vulkan_provider), session_(session), wait_(this) {
   FML_DCHECK(session_);
 
-  if (!AllocateDeviceMemory(sysmem_allocator, std::move(context), size,
-                            buffer_id)) {
+  fuchsia::scenic::allocation::BufferCollectionExportToken export_token;
+  fuchsia::scenic::allocation::BufferCollectionImportToken import_token;
+  if (zx::eventpair::create(0, &export_token.value, &import_token.value) !=
+      ZX_OK) {
+    FML_DLOG(INFO) << "Failed to create event pair";
+    return;
+  }
+
+  if (!AllocateDeviceMemory(sysmem_allocator, scenic_allocator,
+                            std::move(export_token), std::move(context),
+                            size)) {
     FML_DLOG(INFO) << "Could not allocate device memory.";
     return;
   }
@@ -121,7 +130,7 @@ VulkanSurface::VulkanSurface(
     return;
   }
 
-  PushSessionImageSetupOps(session);
+  PushSessionImageSetupOps(session, std::move(import_token));
 
   std::fill(size_history_.begin(), size_history_.end(), SkISize::MakeEmpty());
 
@@ -135,9 +144,6 @@ VulkanSurface::VulkanSurface(
 VulkanSurface::~VulkanSurface() {
   if (image_id_) {
     session_->Enqueue(scenic::NewReleaseResourceCmd(image_id_));
-  }
-  if (buffer_id_) {
-    session_->DeregisterBufferCollection(buffer_id_);
   }
   wait_.Cancel();
   wait_.set_object(ZX_HANDLE_INVALID);
@@ -224,9 +230,10 @@ bool VulkanSurface::CreateFences() {
 
 bool VulkanSurface::AllocateDeviceMemory(
     fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    fuchsia::scenic::allocation::AllocatorPtr& scenic_allocator,
+    fuchsia::scenic::allocation::BufferCollectionExportToken export_token,
     sk_sp<GrDirectContext> context,
-    const SkISize& size,
-    uint32_t buffer_id) {
+    const SkISize& size) {
   if (size.isEmpty()) {
     return false;
   }
@@ -242,8 +249,14 @@ bool VulkanSurface::AllocateDeviceMemory(
   status = vulkan_token->Sync();
   LOG_AND_RETURN(status != ZX_OK, "Failed to sync token");
 
-  session_->RegisterBufferCollection(buffer_id, std::move(scenic_token));
-  buffer_id_ = buffer_id;
+  scenic_allocator->RegisterBufferCollection(
+      std::move(export_token), std::move(scenic_token),
+      [](fuchsia::scenic::allocation::Allocator_RegisterBufferCollection_Result
+             result) {
+        if (result.is_err()) {
+          FML_DLOG(ERROR) << "RegisterBufferCollection failed";
+        }
+      });
 
   VkBufferCollectionCreateInfoFUCHSIA import_info;
   import_info.collectionToken = vulkan_token.Unbind().TakeChannel().release();
@@ -370,11 +383,14 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
   return true;
 }
 
-void VulkanSurface::PushSessionImageSetupOps(scenic::Session* session) {
+void VulkanSurface::PushSessionImageSetupOps(
+    scenic::Session* session,
+    fuchsia::scenic::allocation::BufferCollectionImportToken import_token) {
   if (image_id_ == 0)
     image_id_ = session->AllocResourceId();
-  session->Enqueue(scenic::NewCreateImage2Cmd(
-      image_id_, sk_surface_->width(), sk_surface_->height(), buffer_id_, 0));
+  session->Enqueue(scenic::NewCreateImage3Cmd(image_id_, sk_surface_->width(),
+                                              sk_surface_->height(),
+                                              std::move(import_token), 0));
 }
 
 uint32_t VulkanSurface::GetImageId() {
