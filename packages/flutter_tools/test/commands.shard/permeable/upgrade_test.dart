@@ -243,69 +243,114 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchLatestVersion throws toolExit on nonstandard upstream remote with FLUTTER_GIT_URL unset', () async {
-      realCommandRunner.workingDirectory = '/src/flutter';
-      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-        channel: 'dev',
-        repositoryUrl: 'https://githubmirror.com/flutter',
-      );
+    group('verifyStandardRemote', () {
+      const String flutterDefaultUrlDotGit = 'https://github.com/flutter/flutter.git';
+      const String flutterMirrorUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
+      const String flutterDefaultUrl = 'https://github.com/flutter/flutter';
 
-      processManager.addCommands(const <FakeCommand>[
-        FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
-        ]),
-        FakeCommand(command: <String>[
-          'git', 'rev-parse', '--verify', '@{u}',
-        ],
-        stdout: ''),
-      ]);
+      testUsingContext('does not throw toolExit at standard remote url with .git suffix and FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterDefaultUrlDotGit,
+        );
 
-      ToolExit err;
-      try {
-       await realCommandRunner.fetchLatestVersion(localVersion: flutterVersion);
-      } on ToolExit catch (e) {
-        err = e;
-      }
-      expect(err, isNotNull);
-      expect(err.toString(), contains('Your local copy of Flutter is tracking an unsupported remote'));
-      expect(err.toString(), contains('"FLUTTER_GIT_URL" to "https://githubmirror.com/flutter"'));
-      expect(err.toString(), contains('git branch --set-upstream-to=origin/dev'));
-      expect(err.toString(), contains('if remote "origin" exists in /src/flutter'));
-      expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator> {
-      ProcessManager: () => processManager,
-      Platform: () => fakePlatform,
-    });
+        ToolExit err;
+        try {
+         realCommandRunner.verifyStandardRemote(flutterVersion);
+        } on ToolExit catch (e) {
+          err = e;
+        }
+        expect(err, isNull);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
 
-    testUsingContext('fetchLatestVersion does not throw on unsupported upstream remote with FLUTTER_GIT_URL set', () async {
-      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(repositoryUrl: 'https://githubmirror.com/flutter');
-      const String upstreamRevision = '22222222222222222222';
+      testUsingContext('does not throw toolExit at standard remote url without .git suffix and FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterDefaultUrl,
+        );
 
-      processManager.addCommands(const <FakeCommand>[
-        FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
-        ]),
-        FakeCommand(command: <String>[
-          'git', 'rev-parse', '--verify', '@{u}',
-        ],
-        stdout: upstreamRevision),
-        FakeCommand(command: <String>[
-          'git', 'tag', '--points-at', upstreamRevision,
-        ],
-        stdout: ''),
-        FakeCommand(command: <String>[
-          'git', 'describe', '--match', '*.*.*', '--long', '--tags', upstreamRevision,
-        ],
-        stdout: ''),
-      ]);
+        ToolExit err;
+        try {
+         realCommandRunner.verifyStandardRemote(flutterVersion);
+        } on ToolExit catch (e) {
+          err = e;
+        }
+        expect(err, isNull);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
 
-      await realCommandRunner.fetchLatestVersion(localVersion: flutterVersion);
-      expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator> {
-      ProcessManager: () => processManager,
-      Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
-        'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter',
-      }),
+      testUsingContext('throws toolExit at non-standard remote url with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterMirrorUrlDotGit,
+        );
+
+        ToolExit err;
+        try {
+         realCommandRunner.verifyStandardRemote(flutterVersion);
+        } on ToolExit catch (e) {
+          err = e;
+        }
+        expect(err, isNotNull);
+        expect(err.toString(), contains('The Flutter SDK is tracking a non-standard remote "$flutterMirrorUrlDotGit"'));
+        expect(err.toString(), contains('"FLUTTER_GIT_URL" to "$flutterMirrorUrlDotGit"'));
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
+
+      testUsingContext('does not throw toolExit at non-standard remote url with FLUTTER_GIT_URL set', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterMirrorUrlDotGit,
+        );
+
+        ToolExit err;
+        try {
+         realCommandRunner.verifyStandardRemote(flutterVersion);
+        } on ToolExit catch (e) {
+          err = e;
+        }
+        expect(err, isNull);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
+          'FLUTTER_GIT_URL': flutterMirrorUrlDotGit,
+        }),
+      });
+
+      testUsingContext('throws toolExit at non-standard remote url with FLUTTER_GIT_URL set to different url', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterMirrorUrlDotGit,
+        );
+
+        ToolExit err;
+        try {
+         realCommandRunner.verifyStandardRemote(flutterVersion);
+        } on ToolExit catch (e) {
+          err = e;
+        }
+        expect(err, isNotNull);
+        expect(err.toString(), contains('The Flutter SDK is tracking "$flutterMirrorUrlDotGit"'));
+        expect(err.toString(), contains('but "FLUTTER_GIT_URL" is set to "$flutterDefaultUrl"'));
+        expect(err.toString(), contains('set "FLUTTER_GIT_URL" to "$flutterMirrorUrlDotGit"'));
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
+          'FLUTTER_GIT_URL': flutterDefaultUrl,
+        }),
+      });
     });
 
     testUsingContext('git exception during attemptReset throwsToolExit', () async {
