@@ -163,6 +163,7 @@ void main() {
         )
     ));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
