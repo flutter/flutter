@@ -57,13 +57,14 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldHintText,
     this.fieldLabelText,
     this.autofocus = false,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       assert(autofocus != null),
-       initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate),
-       super(key: key) {
+  })  : assert(firstDate != null),
+        assert(lastDate != null),
+        assert(autofocus != null),
+        initialDate =
+            initialDate != null ? DateUtils.dateOnly(initialDate) : null,
+        firstDate = DateUtils.dateOnly(firstDate),
+        lastDate = DateUtils.dateOnly(lastDate),
+        super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -77,7 +78,9 @@ class InputDatePickerFormField extends StatefulWidget {
       'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.',
     );
     assert(
-      selectableDayPredicate == null || initialDate == null || selectableDayPredicate!(this.initialDate!),
+      selectableDayPredicate == null ||
+          initialDate == null ||
+          selectableDayPredicate!(this.initialDate!),
       'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.',
     );
   }
@@ -129,7 +132,8 @@ class InputDatePickerFormField extends StatefulWidget {
   final bool autofocus;
 
   @override
-  _InputDatePickerFormFieldState createState() => _InputDatePickerFormFieldState();
+  _InputDatePickerFormFieldState createState() =>
+      _InputDatePickerFormFieldState();
 }
 
 class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
@@ -172,12 +176,16 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
-      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+      final MaterialLocalizations localizations =
+          MaterialLocalizations.of(context);
       _inputText = localizations.formatCompactDate(_selectedDate!);
-      TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
+      TextEditingValue textEditingValue = _controller.value.copyWith(
+          text: _inputText,
+          selection: TextSelection.collapsed(offset: _inputText!.length));
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
-        textEditingValue = textEditingValue.copyWith(selection: TextSelection(
+        textEditingValue = textEditingValue.copyWith(
+            selection: TextSelection(
           baseOffset: 0,
           extentOffset: _inputText!.length,
         ));
@@ -191,24 +199,27 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   }
 
   DateTime? _parseDate(String? text) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
     return localizations.parseCompactDate(text);
   }
 
   bool _isValidAcceptableDate(DateTime? date) {
-    return
-      date != null &&
-      !date.isBefore(widget.firstDate) &&
-      !date.isAfter(widget.lastDate) &&
-      (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
+    return date != null &&
+        !date.isBefore(widget.firstDate) &&
+        !date.isAfter(widget.lastDate) &&
+        (widget.selectableDayPredicate == null ||
+            widget.selectableDayPredicate!(date));
   }
 
   String? _validateDate(String? text) {
     final DateTime? date = _parseDate(text);
     if (date == null) {
-      return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
+      return widget.errorFormatText ??
+          MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (!_isValidAcceptableDate(date)) {
-      return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
+      return widget.errorInvalidText ??
+          MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
   }
@@ -232,8 +243,10 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
+    final InputDecorationTheme inputTheme =
+        Theme.of(context).inputDecorationTheme;
     return TextFormField(
       decoration: InputDecoration(
         border: inputTheme.border ?? const UnderlineInputBorder(),
