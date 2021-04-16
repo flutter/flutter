@@ -233,7 +233,11 @@ class UpgradeCommandRunner {
   ///
   /// Exits tool if the tracking remote is not standard.
   void verifyStandardRemote(FlutterVersion localVersion) {
-    if (localVersion.repositoryUrl != _flutterGit) {
+    // Strip `.git` suffix from repository url and _flutterGit
+    final String trackingUrl = _stripDotGit(localVersion.repositoryUrl);
+    final String flutterGitUrl = _stripDotGit(_flutterGit);
+
+    if (trackingUrl != flutterGitUrl) {
       throwToolExit(
         'Unable to upgrade Flutter: Your local copy of Flutter is tracking a '
         'nonstandard remote "${localVersion.repositoryUrl}".\n'
@@ -247,6 +251,15 @@ class UpgradeCommandRunner {
         'Flutter by going to https://flutter.dev/docs/get-started/install.'
       );
     }
+  }
+
+  String _stripDotGit(String url) {
+    final RegExp pattern = RegExp(r'(.*)(\.git)$');
+    final RegExpMatch match = pattern.firstMatch(url);
+    if (match == null) {
+      return url;
+    }
+    return match.group(1);
   }
 
   /// Returns the remote HEAD flutter version.
