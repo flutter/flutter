@@ -21,7 +21,7 @@ class WriteBuffer {
     _eightBytesAsList = _eightBytes.buffer.asUint8List();
   }
 
-  Uint8Buffer _buffer;
+  final Uint8Buffer _buffer;
   bool _isDone;
   final ByteData _eightBytes;
   late Uint8List _eightBytesAsList;
