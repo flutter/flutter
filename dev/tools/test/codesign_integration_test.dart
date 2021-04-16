@@ -34,6 +34,16 @@ void main() {
       stdio: stdio,
     );
 
+    // Ensure the containing Flutter repo has a master branch.
+    processManager.runSync(
+      <String>[
+        'git',
+        'fetch',
+        '--all',
+      ],
+      workingDirectory: localFlutterRoot.path,
+    );
+
     final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '')
       ..addCommand(
           CodesignCommand(checkouts: checkouts, flutterRoot: localFlutterRoot));
