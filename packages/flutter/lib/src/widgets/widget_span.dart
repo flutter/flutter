@@ -73,6 +73,7 @@ class WidgetSpan extends PlaceholderSpan {
     required this.child,
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline? baseline,
+    TextRange? range,
     TextStyle? style,
   }) : assert(child != null),
        assert(
@@ -85,6 +86,7 @@ class WidgetSpan extends PlaceholderSpan {
        super(
          alignment: alignment,
          baseline: baseline,
+         range: range,
          style: style,
        );
 
@@ -140,6 +142,10 @@ class WidgetSpan extends PlaceholderSpan {
 
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
+    if (index - offset.value == 0) {
+      return 0xFFFC;
+    }
+    offset.increment(1);
     return null;
   }
 

@@ -64,6 +64,7 @@ class PlaceholderDimensions {
     required this.alignment,
     this.baseline,
     this.baselineOffset,
+    this.range,
   }) : assert(size != null),
        assert(alignment != null);
 
@@ -98,9 +99,11 @@ class PlaceholderDimensions {
   ///  * [ui.PlaceholderAlignment.middle]
   final TextBaseline? baseline;
 
+  final TextRange? range;
+
   @override
   String toString() {
-    return 'PlaceholderDimensions($size, $baseline)';
+    return 'PlaceholderDimensions($size, $baseline, $range)';
   }
 }
 
@@ -421,11 +424,109 @@ class TextPainter {
       });
       return placeholderCount;
     }() == value.length);
-    print('set dims in textPainter');
     _placeholderDimensions = value;
     markNeedsLayout();
   }
   List<PlaceholderDimensions>? _placeholderDimensions;
+
+  int _getPlaceholderAdjustedOffset(int offset) {
+    if (_placeholderDimensions == null) {
+      return offset;
+    }
+    int adjustment = 0;
+    for (final PlaceholderDimensions dims in _placeholderDimensions!) {
+      if (dims.range != null) {
+        if (dims.range!.end <= offset) {
+          // placeholders are represented as a single replacement character,
+          // so we subtract 1 from the length to account for it.
+          adjustment += dims.range!.end - dims.range!.start - 1;
+        } else if (dims.range!.end > offset && dims.range!.start <= offset) {
+          // Within the range
+          // place offset at beginning or end of placeholder depending on
+          // which half it is in.
+          adjustment += offset - dims.range!.start;
+          if (offset > dims.range!.start + dims.range!.end / 2) {
+            adjustment--;
+          }
+        } else  {
+          break;
+        }
+      }
+    }
+    return offset - adjustment;
+  }
+
+  int _getRawOffset(int offset) {
+    if (_placeholderDimensions == null) {
+      return offset;
+    }
+    for (final PlaceholderDimensions dims in _placeholderDimensions!) {
+      if (dims.range != null) {
+        if (dims.range!.end <= offset) {
+          // placeholders are represented as a single replacement character,
+          // so we subtract 1 from the length to account for it.
+          offset += dims.range!.end - dims.range!.start - 1;
+        } else if (dims.range!.end > offset && dims.range!.start <= offset) {
+          // Within the range
+          // place offset at beginning or end of placeholder depending on
+          // which half it is in.
+          offset += dims.range!.start - dims.range!.start;
+          if (offset > dims.range!.start + dims.range!.end / 2) {
+            offset++;
+          }
+        } else  {
+          break;
+        }
+      }
+    }
+    return offset;
+  }
+
+  TextPosition _getPlaceholderAdjustedPosition(TextPosition position) {
+    return TextPosition(
+      offset: _getPlaceholderAdjustedOffset(position.offset),
+      affinity: position.affinity
+    );
+  }
+
+  TextSelection? _getPlaceholderAdjustedSelection(TextSelection? selection) {
+    return selection == null ? null : TextSelection(
+      baseOffset: _getPlaceholderAdjustedOffset(selection.baseOffset),
+      extentOffset: _getPlaceholderAdjustedOffset(selection.extentOffset),
+      affinity: selection.affinity,
+      isDirectional: selection.isDirectional,
+    );
+  }
+
+  TextRange _getPlaceholderAdjustedRange(TextRange range) {
+    return TextRange(
+      start: _getPlaceholderAdjustedOffset(range.start),
+      end: _getPlaceholderAdjustedOffset(range.end),
+    );
+  }
+
+  TextPosition _getRawPosition(TextPosition position) {
+    return TextPosition(
+      offset: _getRawOffset(position.offset),
+      affinity: position.affinity
+    );
+  }
+
+  TextSelection? _getRawSelection(TextSelection? selection) {
+    return selection == null ? null : TextSelection(
+      baseOffset: _getRawOffset(selection.baseOffset),
+      extentOffset: _getRawOffset(selection.extentOffset),
+      affinity: selection.affinity,
+      isDirectional: selection.isDirectional,
+    );
+  }
+
+  TextRange _getRawRange(TextRange range) {
+    return TextRange(
+      start: _getRawOffset(range.start),
+      end: _getRawOffset(range.end),
+    );
+  }
 
   ui.ParagraphStyle _createParagraphStyle([ TextDirection? defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
@@ -663,6 +764,7 @@ class TextPainter {
   /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
   int? getOffsetAfter(int offset) {
+    offset = _getPlaceholderAdjustedOffset(offset);
     final int? nextCodeUnit = _text!.codeUnitAt(offset);
     if (nextCodeUnit == null)
       return null;
@@ -673,6 +775,7 @@ class TextPainter {
   /// Returns the closest offset before `offset` at which the input cursor can
   /// be positioned.
   int? getOffsetBefore(int offset) {
+    offset = _getPlaceholderAdjustedOffset(offset);
     final int? prevCodeUnit = _text!.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
@@ -839,7 +942,7 @@ class TextPainter {
     assert(!_needsLayout);
     if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype)
       return;
-    final int offset = position.offset;
+    final int offset = _getPlaceholderAdjustedOffset(position.offset);
     assert(position.affinity != null);
     Rect? rect;
     switch (position.affinity) {
@@ -887,6 +990,7 @@ class TextPainter {
     assert(!_needsLayout);
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
+    selection = _getPlaceholderAdjustedSelection(selection)!;
     return _paragraph!.getBoxesForRange(
       selection.start,
       selection.end,
@@ -898,7 +1002,7 @@ class TextPainter {
   /// Returns the position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {
     assert(!_needsLayout);
-    return _paragraph!.getPositionForOffset(offset);
+    return _getRawPosition(_paragraph!.getPositionForOffset(offset));
   }
 
   /// Returns the text range of the word at the given offset. Characters not
@@ -910,7 +1014,7 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
-    return _paragraph!.getWordBoundary(position);
+    return _getRawRange(_paragraph!.getWordBoundary(_getPlaceholderAdjustedPosition(position)));
   }
 
   /// Returns the text range of the line at the given offset.
@@ -918,7 +1022,8 @@ class TextPainter {
   /// The newline, if any, is included in the range.
   TextRange getLineBoundary(TextPosition position) {
     assert(!_needsLayout);
-    return _paragraph!.getLineBoundary(position);
+    position = _getPlaceholderAdjustedPosition(position);
+    return _getRawRange(_paragraph!.getLineBoundary(_getPlaceholderAdjustedPosition(position)));
   }
 
   /// Returns the full list of [LineMetrics] that describe in detail the various

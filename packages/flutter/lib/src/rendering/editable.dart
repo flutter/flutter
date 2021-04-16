@@ -3562,6 +3562,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // specified.
   List<PlaceholderDimensions> _layoutChildren(BoxConstraints constraints, {bool dry = false}) {
     if (childCount == 0) {
+      _textPainter.setPlaceholderDimensions(<PlaceholderDimensions>[]);
       return <PlaceholderDimensions>[];
     }
     RenderBox? child = firstChild;
@@ -3604,10 +3605,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
         baselineOffset: baselineOffset,
+        range: _placeholderSpans[childIndex].range,
       );
       child = childAfter(child);
       childIndex += 1;
     }
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
     return placeholderDimensions;
   }
 
@@ -3630,7 +3633,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(maxWidth != null && minWidth != null);
     if (_textLayoutLastMaxWidth == maxWidth && _textLayoutLastMinWidth == minWidth)
       return;
-    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
     final double availableMinWidth = math.min(minWidth, availableMaxWidth);
     final double textMaxWidth = _isMultiline ? availableMaxWidth : double.infinity;
@@ -3843,7 +3845,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // it until we finish layout, and RenderObject is in immutable state at
     // this point.
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      print('PAINTING CHILD! $childIndex');
       final TextParentData textParentData = child.parentData! as TextParentData;
 
       final double scale = textParentData.scale!;
