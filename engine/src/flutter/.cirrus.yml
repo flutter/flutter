@@ -50,7 +50,7 @@ task:
         mkdir -p bin/cache/pkg/
         cp -r $ENGINE_PATH/src/out/host_debug_unopt/gen/dart-pkg/sky_engine bin/cache/pkg/
         bin/flutter update-packages --local-engine=host_debug_unopt
-        bin/flutter analyze --dartdocs --flutter-repo --local-engine=host_debug_unopt
+        bin/flutter analyze --flutter-repo --local-engine=host_debug_unopt
       test_framework_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
         ../../bin/flutter test --local-engine=host_debug_unopt --null-assertions --sound-null-safety
