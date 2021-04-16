@@ -5,8 +5,9 @@
 #include <map>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.h"
+#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #include "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
@@ -16,10 +17,12 @@ namespace flutter {
 // rendering Flutter content and presents Flutter content and Platform views.
 // Platform views are not yet supported.
 // FlutterGLCompositor is created and destroyed by FlutterEngine.
-class FlutterGLCompositor {
+class FlutterGLCompositor : public FlutterCompositor {
  public:
   FlutterGLCompositor(FlutterViewController* view_controller,
                       NSOpenGLContext* opengl_context);
+
+  virtual ~FlutterGLCompositor() = default;
 
   // Creates a BackingStore and saves updates the backing_store_out
   // data with the new BackingStore data.
@@ -33,25 +36,18 @@ class FlutterGLCompositor {
   // in the backing_store's destruction_callback field which will
   // be called when the embedder collects the backing store.
   bool CreateBackingStore(const FlutterBackingStoreConfig* config,
-                          FlutterBackingStore* backing_store_out);
+                          FlutterBackingStore* backing_store_out) override;
 
   // Releases the memory for any state used by the backing store.
-  bool CollectBackingStore(const FlutterBackingStore* backing_store);
+  bool CollectBackingStore(const FlutterBackingStore* backing_store) override;
 
   // Presents the FlutterLayers by updating FlutterView(s) using the
   // layer content.
   // Present sets frame_started_ to false.
-  bool Present(const FlutterLayer** layers, size_t layers_count);
-
-  using PresentCallback = std::function<bool()>;
-
-  // PresentCallback is called at the end of the Present function.
-  void SetPresentCallback(const PresentCallback& present_callback);
+  bool Present(const FlutterLayer** layers, size_t layers_count) override;
 
  private:
-  __weak const FlutterViewController* view_controller_;
   const NSOpenGLContext* open_gl_context_;
-  PresentCallback present_callback_;
 
   // Count for how many CALayers have been created for a frame.
   // Resets when a frame is finished.

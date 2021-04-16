@@ -1110,6 +1110,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBacki
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponderUnittests.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderExternalTextureUnittests.mm
