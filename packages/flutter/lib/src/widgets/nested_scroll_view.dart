@@ -1317,6 +1317,7 @@ class _NestedScrollController extends ScrollController {
   @override
   void detach(ScrollPosition position) {
     assert(position is _NestedScrollPosition);
+    (position as _NestedScrollPosition).detachFromParent();
     position.removeListener(_scheduleUpdateShadow);
     super.detach(position);
     _scheduleUpdateShadow();
@@ -1622,10 +1623,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     return coordinator.drag(details, dragCancelCallback);
   }
 
-  @override
-  void dispose() {
+  void detachFromParent() {
     _parent?.detach(this);
-    super.dispose();
   }
 }
 

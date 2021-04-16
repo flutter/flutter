@@ -163,7 +163,6 @@ void main() {
         )
     ));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
-
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
@@ -2341,6 +2340,53 @@ void main() {
     await tester.pumpWidget(myApp, Duration.zero, EnginePhase.build);
     expect(isScrolled, false);
     expect(tester.takeException(), isNull);
+  });
+
+  // Regression test of https://github.com/flutter/flutter/issues/74372
+  testWidgets('ScrollPosition can be accessed during `_updatePosition()`', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    late ScrollPosition position;
+
+    Widget buildFrame({ScrollPhysics? physics}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: NestedScrollView(
+              controller: controller,
+              physics: physics,
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  Builder(
+                    builder: (BuildContext context) {
+                      position = controller.position;
+                      return const SliverAppBar(
+                        floating: true,
+                        title: Text('AA'),
+                      );
+                    },
+                  ),
+                ];
+              },
+              body: Container(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(position.pixels, 0.0);
+
+    //Trigger `_updatePosition()`.
+    await tester.pumpWidget(buildFrame(physics: const _CustomPhysics()));
+    expect(position.pixels, 0.0);
   });
 }
 
