@@ -12,7 +12,7 @@ import 'feedback_tester.dart';
 
 final Finder _hourControl = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
 final Finder _minuteControl = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
-final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TimePickerDialog');
+final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == 'TimePickerDialog');
 
 class _TimePickerLauncher extends StatelessWidget {
   const _TimePickerLauncher({
@@ -428,7 +428,7 @@ void _tests() {
 
     // Ensure we preserve day period as we roll over.
     final dynamic pickerState = tester.state(_timePickerDialog);
-    expect(pickerState.selectedTime, const TimeOfDay(hour: 1, minute: 0));
+    expect(pickerState.selectedTime.value, const TimeOfDay(hour: 1, minute: 0));
 
     await actAndExpect(
       initialValue: '1',
@@ -493,7 +493,7 @@ void _tests() {
 
     // Ensure we preserve hour period as we roll over.
     final dynamic pickerState = tester.state(_timePickerDialog);
-    expect(pickerState.selectedTime, const TimeOfDay(hour: 11, minute: 0));
+    expect(pickerState.selectedTime.value, const TimeOfDay(hour: 11, minute: 0));
 
     await actAndExpect(
       initialValue: '00',
