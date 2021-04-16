@@ -129,7 +129,7 @@ List<String> getValuesFromEnvOrArgs(
   Map<String, String> env,
 ) {
   final String envName = fromArgToEnvName(name);
-  if (env[envName] != null ) {
+  if (env[envName] != null && env[envName] != '') {
     return env[envName].split(',');
   }
   final List<String> argValues = argResults[name] as List<String>;
