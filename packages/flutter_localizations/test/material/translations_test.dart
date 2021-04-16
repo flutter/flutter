@@ -100,6 +100,21 @@ void main() {
     });
   }
 
+  testWidgets('translations spot check', (WidgetTester tester) async {
+    Locale locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: null);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations.firstPageTooltip, '第一页');
+    expect(localizations.lastPageTooltip, '最后一页');
+
+    locale = const Locale.fromSubtags(languageCode: 'zu', scriptCode: null, countryCode: null);
+    localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    expect(localizations.firstPageTooltip, 'Ikhasi lokuqala');
+    expect(localizations.lastPageTooltip, 'Ikhasi lokugcina');
+  });
+
   testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
     expect(localizations.selectedRowCountTitle(0), 'No items selected');
