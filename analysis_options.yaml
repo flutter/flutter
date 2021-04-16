@@ -102,7 +102,7 @@ linter:
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     # - curly_braces_in_flow_control_structures # not required by flutter style
-    # - deprecated_consistency # not yet tested
+    - deprecated_consistency
     # - diagnostic_describe_all_properties # not yet tested
     - directives_ordering
     # - do_not_use_environment # we do this commonly
@@ -219,7 +219,7 @@ linter:
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables
-    # - use_named_constants # not yet yested
+    # - use_named_constants # not yet tested
     - use_raw_strings
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested

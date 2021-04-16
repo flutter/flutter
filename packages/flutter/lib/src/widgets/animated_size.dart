@@ -36,7 +36,7 @@ import 'framework.dart';
 ///         child: AnimatedSize(
 ///           curve: Curves.easeIn,
 ///           vsync: this,
-///           duration: Duration(seconds: 1),
+///           duration: const Duration(seconds: 1),
 ///           child: FlutterLogo(size: _size),
 ///         ),
 ///       ),

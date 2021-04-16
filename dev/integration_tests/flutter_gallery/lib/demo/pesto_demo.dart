@@ -25,7 +25,6 @@ final Set<Recipe?> _favoriteRecipes = <Recipe?>{};
 final ThemeData _kTheme = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
-  accentColor: Colors.redAccent,
 );
 
 class PestoHome extends StatelessWidget {
@@ -84,12 +83,13 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       data: _kTheme.copyWith(platform: Theme.of(context).platform),
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.edit),
+          backgroundColor: Colors.redAccent,
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Not supported.'),
             ));
           },
+          child: const Icon(Icons.edit),
         ),
         body: CustomScrollView(
           semanticChildCount: widget.recipes!.length,
@@ -392,8 +392,9 @@ class _RecipePageState extends State<RecipePage> {
                     Positioned(
                       right: 16.0,
                       child: FloatingActionButton(
-                        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                        backgroundColor: Colors.redAccent,
                         onPressed: _toggleFavorite,
+                        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                       ),
                     ),
                   ],

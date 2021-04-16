@@ -127,12 +127,14 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
+  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();
   /// }
   ///
   /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
-  ///   final Map<int, Widget> children = const {
+  ///   final Map<int, Widget> children = const <int, Widget>{
   ///     0: Text('Child 1'),
   ///     1: Text('Child 2'),
   ///   };
@@ -141,16 +143,14 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Container(
-  ///       child: CupertinoSegmentedControl<int>(
-  ///         children: children,
-  ///         onValueChanged: (int newValue) {
-  ///           setState(() {
-  ///             currentValue = newValue;
-  ///           });
-  ///         },
-  ///         groupValue: currentValue,
-  ///       ),
+  ///     return CupertinoSegmentedControl<int>(
+  ///       children: children,
+  ///       onValueChanged: (int newValue) {
+  ///         setState(() {
+  ///           currentValue = newValue;
+  ///         });
+  ///       },
+  ///       groupValue: currentValue,
   ///     );
   ///   }
   /// }
@@ -612,11 +612,17 @@ class _RenderSegmentedControl<T> extends RenderBox
       final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
       final RRect rChildRect;
       if (child == leftChild) {
-        rChildRect = RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
-            bottomLeft: const Radius.circular(3.0));
+        rChildRect = RRect.fromRectAndCorners(
+          childRect,
+          topLeft: const Radius.circular(3.0),
+          bottomLeft: const Radius.circular(3.0),
+        );
       } else if (child == rightChild) {
-        rChildRect = RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0),
-            bottomRight: const Radius.circular(3.0));
+        rChildRect = RRect.fromRectAndCorners(
+          childRect,
+          topRight: const Radius.circular(3.0),
+          bottomRight: const Radius.circular(3.0),
+        );
       } else {
         rChildRect = RRect.fromRectAndCorners(childRect);
       }

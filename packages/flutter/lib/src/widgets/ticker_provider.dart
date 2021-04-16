@@ -122,8 +122,8 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
         ErrorHint(
           'If a State is used for multiple AnimationController objects, or if it is passed to other '
           'objects and those objects might use it more than one time in total, then instead of '
-          'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
-        )
+          'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.',
+        ),
       ]);
     }());
     _ticker = Ticker(onTick, debugLabel: kDebugMode ? 'created by $this' : null);
@@ -144,14 +144,14 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
         ErrorDescription(
           '$runtimeType created a Ticker via its SingleTickerProviderStateMixin, but at the time '
           'dispose() was called on the mixin, that Ticker was still active. The Ticker must '
-          'be disposed before calling super.dispose().'
+          'be disposed before calling super.dispose().',
         ),
         ErrorHint(
           'Tickers used by AnimationControllers '
           'should be disposed by calling dispose() on the AnimationController itself. '
-          'Otherwise, the ticker will leak.'
+          'Otherwise, the ticker will leak.',
         ),
-        _ticker!.describeForError('The offending ticker was')
+        _ticker!.describeForError('The offending ticker was'),
       ]);
     }());
     super.dispose();
@@ -221,12 +221,12 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
               ErrorDescription(
                 '$runtimeType created a Ticker via its TickerProviderStateMixin, but at the time '
                 'dispose() was called on the mixin, that Ticker was still active. All Tickers must '
-                'be disposed before calling super.dispose().'
+                'be disposed before calling super.dispose().',
               ),
               ErrorHint(
                 'Tickers used by AnimationControllers '
                 'should be disposed by calling dispose() on the AnimationController itself. '
-                'Otherwise, the ticker will leak.'
+                'Otherwise, the ticker will leak.',
               ),
               ticker.describeForError('The offending ticker was'),
             ]);

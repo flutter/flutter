@@ -11,6 +11,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/symbolize.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -20,11 +21,11 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   MemoryFileSystem fileSystem;
   FakeStdio stdio;
-  SymbolizeCommand command;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -33,11 +34,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     stdio = FakeStdio();
-    command = SymbolizeCommand(
-      stdio: stdio,
-      fileSystem: fileSystem,
-      dwarfSymbolizationService: DwarfSymbolizationService.test(),
-    );
   });
 
   testUsingContext('Regression test for type error in codec', () async {
@@ -60,28 +56,54 @@ void main() {
 
 
   testUsingContext('symbolize exits when --debug-info argument is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
     final Future<void> result = createTestCommandRunner(command)
       .run(const <String>['symbolize']);
 
     expect(result, throwsToolExit(message: '"--debug-info" is required to symbolize stack traces.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits when --debug-info file is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
     final Future<void> result = createTestCommandRunner(command)
       .run(const <String>['symbolize', '--debug-info=app.debug']);
 
     expect(result, throwsToolExit(message: 'app.debug does not exist.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize exits when --input file is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
     fileSystem.file('app.debug').createSync();
     final Future<void> result = createTestCommandRunner(command)
       .run(const <String>['symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']);
 
     expect(result, throwsToolExit(message: ''));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize succeeds when DwarfSymbolizationService does not throw', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
     fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
     fileSystem.file('foo.stack').writeAsStringSync('hello');
 
@@ -90,10 +112,12 @@ void main() {
 
     expect(fileSystem.file('results/foo.result'), exists);
     expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
   });
 
   testUsingContext('symbolize throws when DwarfSymbolizationService throws', () async {
-    command = SymbolizeCommand(
+    final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
       dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
@@ -107,6 +131,8 @@ void main() {
         'symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']),
       throwsToolExit(message: 'test'),
     );
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
   });
 }
 

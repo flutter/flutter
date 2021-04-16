@@ -57,26 +57,6 @@ void main() {
         File outputAppFrameworkBinary;
 
         setUpAll(() {
-          flutterRoot = getFlutterRoot();
-          tempDir = createResolvedTempDirectorySync('ios_content_validation.');
-          flutterBin = fileSystem.path.join(
-            flutterRoot,
-            'bin',
-            'flutter',
-          );
-
-          processManager.runSync(<String>[
-            flutterBin,
-            ...getLocalEngineArguments(),
-            'create',
-            '--platforms=ios',
-            '-i',
-            'objc',
-            'hello',
-          ], workingDirectory: tempDir.path);
-
-          projectRoot = tempDir.childDirectory('hello').path;
-
           processManager.runSync(<String>[
             flutterBin,
             ...getLocalEngineArguments(),
@@ -118,9 +98,6 @@ void main() {
           ));
 
           expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
-
-          expect(outputFlutterFramework.childDirectory('Headers'), isNot(exists));
-          expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
 
           // Archiving should contain a bitcode blob, but not building.
           // This mimics Xcode behavior and prevents a developer from having to install a

@@ -5,12 +5,14 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_tools/src/version.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 const String _kFlutterRoot = '/flutter/flutter';
@@ -27,7 +30,6 @@ void main() {
   group('FlutterCommandRunner', () {
     MemoryFileSystem fileSystem;
     Platform platform;
-    FlutterCommandRunner runner;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -45,12 +47,11 @@ void main() {
         },
         version: '1 2 3 4 5',
       );
-
-      runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
     });
 
     group('run', () {
       testUsingContext('checks that Flutter installation is up-to-date', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
         await runner.run(<String>['dummy']);
@@ -61,9 +62,12 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
+        OutputPreferences: () => OutputPreferences.test(),
       });
 
       testUsingContext('does not check that Flutter installation is up-to-date with --machine flag', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
         await runner.run(<String>['dummy', '--machine', '--version']);
@@ -74,9 +78,73 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
+        OutputPreferences: () => OutputPreferences.test(),
+      });
+
+      testUsingContext('does not check that Flutter installation is up-to-date with CI=true in environment', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['dummy', '--version']);
+
+        expect(version.didCheckFlutterVersionFreshness, false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        BotDetector: () => const FakeBotDetector(true),
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
+
+         expect(version.didCheckFlutterVersionFreshness, true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        BotDetector: () => const FakeBotDetector(true),
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('checks that Flutter installation is up-to-date if shell completion to terminal', () async {
+        final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
+        final FlutterCommandRunner runner = createTestCommandRunner(command) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['bash-completion']);
+
+        expect(version.didCheckFlutterVersionFreshness, true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
+        Stdio: () => FakeStdio(hasFakeTerminal: true),
+      });
+
+      testUsingContext('does not check that Flutter installation is up-to-date if redirecting shell completion', () async {
+        final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
+        final FlutterCommandRunner runner = createTestCommandRunner(command) as FlutterCommandRunner;
+        final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+
+        await runner.run(<String>['bash-completion']);
+
+        expect(version.didCheckFlutterVersionFreshness, false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FlutterVersion: () => FakeFlutterVersion(),
+        BotDetector: () => const FakeBotDetector(false),
+        Stdio: () => FakeStdio(hasFakeTerminal: false),
       });
 
       testUsingContext('Fetches tags when --version is used', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
         await runner.run(<String>['--version']);
@@ -87,9 +155,11 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
+        OutputPreferences: () => OutputPreferences.test(),
       });
 
     testUsingContext('Doesnt crash on invalid .packages file', () async {
+      final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('.packages')
         ..createSync()
@@ -101,6 +171,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Platform: () => platform,
+      OutputPreferences: () => OutputPreferences.test(),
     });
 
     group('getRepoPackages', () {
@@ -127,6 +198,7 @@ void main() {
       });
 
       testUsingContext('', () {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final List<String> packagePaths = runner.getRepoPackages()
           .map((Directory d) => d.path).toList();
         expect(packagePaths, <String>[
@@ -138,11 +210,13 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
+        OutputPreferences: () => OutputPreferences.test(),
       });
     });
 
     group('wrapping', () {
       testUsingContext('checks that output wrapping is turned on when writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['fake']);
@@ -151,9 +225,11 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: true),
+        OutputPreferences: () => OutputPreferences.test(),
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned off when not writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['fake']);
@@ -162,9 +238,11 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: false),
+        OutputPreferences: () => OutputPreferences.test(),
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned off when set on the command line and writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['--no-wrap', 'fake']);
@@ -173,9 +251,11 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: true),
+        OutputPreferences: () => OutputPreferences.test(),
       }, initializeFlutterRoot: false);
 
       testUsingContext('checks that output wrapping is turned on when set on the command line, but not writing to a terminal', () async {
+        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
         runner.addCommand(fakeCommand);
         await runner.run(<String>['--wrap', 'fake']);
@@ -184,6 +264,7 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(hasFakeTerminal: false),
+        OutputPreferences: () => OutputPreferences.test(),
       }, initializeFlutterRoot: false);
     });
   });
