@@ -105,7 +105,6 @@ class BuildWebCommand extends BuildSubCommand {
       boolArg('source-maps'),
       boolArg('native-null-assertions'),
       stringArg('base-href'),
-
     );
     return FlutterCommandResult.success();
   }
