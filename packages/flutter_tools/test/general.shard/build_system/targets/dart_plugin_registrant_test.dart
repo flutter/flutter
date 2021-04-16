@@ -127,8 +127,15 @@ const String _kLinuxRegistrant =
 '\n'
 '}\n'
 '\n'
-'void main() {\n'
-'  entrypoint.main();\n'
+'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
+'typedef _NullaryFunction = dynamic Function();\n'
+'\n'
+'void main(List<String> args) {\n'
+'  if (entrypoint.main is _UnaryFunction) {\n'
+'    (entrypoint.main as _UnaryFunction)(args);\n'
+'  } else {\n'
+'    (entrypoint.main as _NullaryFunction)();\n'
+'  }\n'
 '}\n'
 '';
 

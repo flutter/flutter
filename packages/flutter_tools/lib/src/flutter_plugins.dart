@@ -684,8 +684,15 @@ $_dartPluginRegisterWith
 
 }
 
-void main() {
-  entrypoint.main();
+typedef _UnaryFunction = dynamic Function(List<String> args);
+typedef _NullaryFunction = dynamic Function();
+
+void main(List<String> args) {
+  if (entrypoint.main is _UnaryFunction) {
+    (entrypoint.main as _UnaryFunction)(args);
+  } else {
+    (entrypoint.main as _NullaryFunction)();
+  }
 }
 ''';
 
