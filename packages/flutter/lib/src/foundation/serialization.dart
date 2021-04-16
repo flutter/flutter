@@ -107,7 +107,7 @@ class WriteBuffer {
   /// Finalize and return the written [ByteData].
   ByteData done() {
     if (_isDone) {
-      throw StateError("Calling done() twice on the same object isn't supported.");
+      throw StateError('done() must not be called more than once on the same $runtimeType.');
     }
     final ByteData result = _buffer.buffer.asByteData(0, _buffer.lengthInBytes);
     _isDone = true;
