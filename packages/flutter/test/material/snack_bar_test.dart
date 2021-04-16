@@ -425,7 +425,7 @@ void main() {
     late DismissDirection dismissDirection;
     late double width;
     int snackBarCount = 0;
-    
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -2413,7 +2413,7 @@ void main() {
 /// Create drag gestures for DismissDirections.
 Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double scaffoldWidth) {
   final Map<DismissDirection, List<Offset>> dragGestures = <DismissDirection, List<Offset>>{};
-  
+
   for (final DismissDirection val in DismissDirection.values) {
     switch (val) {
       case DismissDirection.down:
