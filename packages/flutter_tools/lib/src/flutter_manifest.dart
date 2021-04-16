@@ -78,7 +78,7 @@ class FlutterManifest {
   /// Contains the name of the dependencies.
   /// These are the keys specified in the `dependency` map.
   Set<String> get dependencies {
-    final YamlMap dependencies = _descriptor['dependencies'] as YamlMap;
+    final YamlMap? dependencies = _descriptor['dependencies'] as YamlMap?;
     return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
   }
 
