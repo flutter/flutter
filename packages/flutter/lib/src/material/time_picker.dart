@@ -1644,9 +1644,11 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(controller, 'text_editing_controller');
+    registerForRestoration(controllerHasBeenSet, 'has_controller_been_set');
   }
 
   final RestorableTextEditingController controller = RestorableTextEditingController();
+  final RestorableBool controllerHasBeenSet = RestorableBool(false);
   late FocusNode focusNode;
 
   @override
@@ -1660,7 +1662,12 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller.value.text = _formattedValue;
+    // Only set the text value if it has not been populated with a localized
+    // version yet.
+    if (!controllerHasBeenSet.value) {
+      controllerHasBeenSet.value = true;
+      controller.value.text = _formattedValue;
+    }
   }
 
   String get _formattedValue {
@@ -1723,6 +1730,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
+          restorationId: 'text_form_field',
           autofocus: widget.autofocus ?? false,
           expands: true,
           maxLines: null,
