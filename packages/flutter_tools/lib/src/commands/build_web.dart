@@ -61,7 +61,9 @@ class BuildWebCommand extends BuildSubCommand {
       },
     );
     argParser.addOption('base-href',
-      help: 'The base url to set in index.html.'
+      help: 'Overrides the href attribute of base tag found in head tag of index.html. '
+          'No change is done to the index.html file if this flag is not provided. '
+          'base-href flag\'s value should start and end with /.'
     );
 
   }
