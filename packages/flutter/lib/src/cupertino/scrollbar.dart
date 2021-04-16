@@ -81,7 +81,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///     thickness: 6.0,
 ///     thicknessWhileDragging: 10,
 ///     radius: const Radius.circular(34),
-///     radiusWhileDragging: Radius.circular(0),
+///     radiusWhileDragging: const Radius.circular(0),
 ///     controller: _controllerOne,
 ///     isAlwaysShown: true,
 ///     child: ListView.builder(
