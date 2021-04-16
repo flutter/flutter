@@ -238,18 +238,35 @@ class UpgradeCommandRunner {
     final String flutterGitUrl = _stripDotGit(_flutterGit);
 
     if (trackingUrl != flutterGitUrl) {
-      throwToolExit(
-        'Unable to upgrade Flutter: Your local copy of Flutter is tracking a '
-        'nonstandard remote "${localVersion.repositoryUrl}".\n'
-        'To use the unofficial remote, set the environment variable '
-        '"FLUTTER_GIT_URL" to "${localVersion.repositoryUrl}",\n'
-        'or to use the official remote, run '
-        '"git remote add origin https://github.com/flutter/flutter" and '
-        '"git branch --set-upstream-to=origin/${localVersion.channel}" if remote "origin" '
-        'exists in $workingDirectory.\n\n'
-        'If you are okay with losing local changes you made to the SDK, re-install '
-        'Flutter by going to https://flutter.dev/docs/get-started/install.'
-      );
+      if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
+        // If `FLUTTER_GIT_URL` is set, inform the user to either remove the
+        // `FLUTTER_GIT_URL` environment variable or set it to the current
+        // tracking remote to continue.
+        throwToolExit(
+          'Unable to upgrade Flutter: The Flutter SDK is tracking '
+          '"${localVersion.repositoryUrl}" but "FLUTTER_GIT_URL" is set to "$_flutterGit."\n'
+          'Either remove "FLUTTER_GIT_URL from the environment or set "FLUTTER_GIT_URL" '
+          'to "${localVersion.repositoryUrl}", and retry.\n\n'
+          'If you are okay with losing local changes you made to the SDK, re-install '
+          'Flutter by going to https://flutter.dev/docs/get-started/install.'
+        );
+      } else {
+        // Inform that the user has to either set the environment variable, or
+        // change the url of the tracking remote to the Flutter GitHub repository
+        // to continue.
+        throwToolExit(
+          'Unable to upgrade Flutter: The Flutter SDK is tracking a non-standard '
+          'remote "${localVersion.repositoryUrl}".\n'
+          '  - To use the current remote, set the environment variable "FLUTTER_GIT_URL" '
+          'to "${localVersion.repositoryUrl}", and retry.\n'
+          '  - To use the standard remote, change the url of the tracking remote to '
+          '"https://github.com/flutter/flutter.git", and retry, for example, to change '
+          'the url of the remote "origin", run:\n\n'
+          '      git remote set-url origin https://github.com/flutter/flutter.git\n\n'
+          'If you are okay with losing local changes you made to the SDK, re-install '
+          'Flutter by going to https://flutter.dev/docs/get-started/install.'
+        );
+      }
     }
   }
 
