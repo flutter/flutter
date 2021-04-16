@@ -648,6 +648,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     Completer<void> appStartedCompleter,
     bool enableDevTools = false,
     String route,
+    bool allowExistingDdsInstance = false,
   }) async {
     await null;
     if (rpcError != null) {

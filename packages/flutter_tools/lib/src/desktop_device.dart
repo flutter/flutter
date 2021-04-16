@@ -100,6 +100,9 @@ abstract class DesktopDevice extends Device {
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
+  bool get supportsColdRestart => true;
+
+  @override
   DeviceLogReader getLogReader({
     ApplicationPackage app,
     bool includePastLogs = false,
@@ -122,6 +125,7 @@ abstract class DesktopDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
+    _deviceLogReader.reset();
     if (!prebuiltApplication) {
       await buildForDevice(
         package,
@@ -301,7 +305,7 @@ abstract class DesktopDevice extends Device {
 /// A log reader for desktop applications that delegates to a [Process] stdout
 /// and stderr streams.
 class DesktopLogReader extends DeviceLogReader {
-  final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
+  StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
@@ -323,5 +327,9 @@ class DesktopLogReader extends DeviceLogReader {
   @override
   void dispose() {
     // Nothing to dispose.
+  }
+
+  void reset() {
+    _inputController = StreamController<List<int>>.broadcast();
   }
 }

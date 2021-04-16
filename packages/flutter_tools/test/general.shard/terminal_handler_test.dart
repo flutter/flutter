@@ -385,6 +385,7 @@ class TestRunner extends Fake implements ResidentRunner {
     Completer<void> appStartedCompleter,
     bool enableDevTools = false,
     String route,
+    bool allowExistingDdsInstance = false,
   }) async => null;
 
   @override

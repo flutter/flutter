@@ -811,7 +811,11 @@ abstract class ResidentRunner {
   ResidentDevtoolsHandler _residentDevtoolsHandler;
 
   bool _exited = false;
-  Completer<int> _finished = Completer<int>();
+
+  /// Whether the application is in the middle of performing a cold restart and
+  /// expects a VM Service disconnection.
+  bool _performingColdRestart = false;
+  final Completer<int> _finished = Completer<int>();
   bool hotMode;
 
   /// Returns true if every device is streaming observatory URIs.
@@ -910,6 +914,25 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
+  Future<OperationResult> coldRestart() async {
+    for (final FlutterDevice device in flutterDevices) {
+      if (!device.device.supportsColdRestart) {
+        return OperationResult(1, 'Cold restart not supported.', fatal: false);
+      }
+    }
+    _performingColdRestart = true;
+    for (final FlutterDevice device in flutterDevices) {
+      await device.exitApps();
+      await device.device.dds.shutdown();
+      await device.device.dds.done;
+    }
+    final Completer<DebugConnectionInfo> connectionInfo = Completer<DebugConnectionInfo>();
+    unawaited(run(connectionInfoCompleter: connectionInfo));
+    await connectionInfo.future;
+    _performingColdRestart = false;
+    printHelp(details: true);
+    return OperationResult(0, '', fatal: false);
+  }
 
   BuildResult _lastBuild;
   Environment _environment;
@@ -1258,7 +1281,6 @@ abstract class ResidentRunner {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
     }
-    _finished = Completer<int>();
     // Listen for service protocol connection to close.
     for (final FlutterDevice device in flutterDevices) {
       await device.connect(
@@ -1296,7 +1318,7 @@ abstract class ResidentRunner {
   }
 
   void _serviceDisconnected() {
-    if (_exited) {
+    if (_exited || _performingColdRestart) {
       // User requested the application exit.
       return;
     }
@@ -1628,6 +1650,11 @@ class TerminalHandler {
       case 'z':
       case 'Z':
         return residentRunner.debugToggleDebugCheckElevationsEnabled();
+      case 'Y':
+        final OperationResult result = await residentRunner.coldRestart();
+        if (result.fatal) {
+          throwToolExit(result.message);
+        }
     }
     return false;
   }
