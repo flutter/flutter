@@ -124,7 +124,6 @@ void main() {
           command: <String>[
             'git',
             'clone',
-            '--no-checkout',
             '--origin',
             'upstream',
             '--',
@@ -167,7 +166,6 @@ void main() {
           command: <String>[
             'git',
             'clone',
-            '--no-checkout',
             '--origin',
             'upstream',
             '--',
