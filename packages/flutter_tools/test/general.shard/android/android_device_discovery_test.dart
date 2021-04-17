@@ -16,7 +16,6 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
@@ -39,7 +38,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
       platform: FakePlatform(),
       userMessages: UserMessages(),
@@ -50,7 +49,7 @@ void main() {
   });
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics when adb cannot be run', () async {
-    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
     fakeProcessManager.excludedExecutables.add('adb');
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: FakeAndroidSdk(),
@@ -80,7 +79,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
       platform: FakePlatform(),
       userMessages: UserMessages(),

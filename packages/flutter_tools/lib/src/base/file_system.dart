@@ -41,18 +41,7 @@ class FileSystemUtils {
   /// Appends a number to a filename in order to make it unique under a
   /// directory.
   File getUniqueFile(Directory dir, String baseName, String ext) {
-    final FileSystem fs = dir.fileSystem;
-    int i = 1;
-
-    while (true) {
-      final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
-      final File file = fs.file(_fileSystem.path.join(dir.path, name));
-      if (!file.existsSync()) {
-        file.createSync(recursive: true);
-        return file;
-      }
-      i += 1;
-    }
+    return _getUniqueFile(dir, baseName, ext);
   }
 
   /// Appends a number to a directory name in order to make it unique under a
@@ -155,6 +144,27 @@ void copyDirectory(
       throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
     }
   }
+}
+
+File _getUniqueFile(Directory dir, String baseName, String ext) {
+  final FileSystem fs = dir.fileSystem;
+  int i = 1;
+
+  while (true) {
+    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    final File file = fs.file(dir.fileSystem.path.join(dir.path, name));
+    if (!file.existsSync()) {
+      file.createSync(recursive: true);
+      return file;
+    }
+    i += 1;
+  }
+}
+
+/// Appends a number to a filename in order to make it unique under a
+/// directory.
+File getUniqueFile(Directory dir, String baseName, String ext) {
+  return _getUniqueFile(dir, baseName, ext);
 }
 
 /// This class extends [local_fs.LocalFileSystem] in order to clean up

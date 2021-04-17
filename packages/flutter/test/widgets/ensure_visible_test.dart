@@ -232,7 +232,7 @@ void main() {
         (int y) => Row(
           children: List<SizedBox>.generate(
             7,
-            (int x) => SizedBox(key: ValueKey<String>('$x, $y'), width: 200.0, height: 200.0,),
+            (int x) => SizedBox(key: ValueKey<String>('$x, $y'), width: 200.0, height: 200.0),
           ),
         ),
       );

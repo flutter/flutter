@@ -801,6 +801,8 @@ class AnimationController extends Animation<double>
     }());
     _ticker!.dispose();
     _ticker = null;
+    clearStatusListeners();
+    clearListeners();
     super.dispose();
   }
 

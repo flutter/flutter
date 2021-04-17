@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -88,11 +89,11 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
 
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
+      when(mockXcodeProjectInterpreter.version).thenReturn(Version(1000, 0, 0));
       when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
       when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer(
           (_) {
@@ -351,6 +352,7 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
 
   logger ??= BufferLogger.test();

@@ -16,24 +16,6 @@ import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 
-/// How overflowing text should be handled.
-///
-/// A [TextOverflow] can be passed to [Text] and [RichText] via their
-/// [Text.overflow] and [RichText.overflow] properties respectively.
-enum TextOverflow {
-  /// Clip the overflowing text to fix its container.
-  clip,
-
-  /// Fade the overflowing text to transparent.
-  fade,
-
-  /// Use an ellipsis to indicate that the text has overflowed.
-  ellipsis,
-
-  /// Render overflowing text outside of its container.
-  visible,
-}
-
 const String _kEllipsis = '\u2026';
 
 /// Parent data for use with [RenderParagraph].
@@ -373,9 +355,11 @@ class RenderParagraph extends RenderBox
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
         case ui.PlaceholderAlignment.belowBaseline: {
-          assert(RenderObject.debugCheckingIntrinsics,
+          assert(
+            RenderObject.debugCheckingIntrinsics,
             'Intrinsics are not available for PlaceholderAlignment.baseline, '
-            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.');
+            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
+          );
           return false;
         }
         case ui.PlaceholderAlignment.top:

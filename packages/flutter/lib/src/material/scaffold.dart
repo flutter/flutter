@@ -457,8 +457,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
           _snackBarTimer = Timer(snackBar.duration, () {
-            assert(_snackBarController!.status == AnimationStatus.forward ||
-                   _snackBarController!.status == AnimationStatus.completed);
+            assert(
+              _snackBarController!.status == AnimationStatus.forward ||
+                _snackBarController!.status == AnimationStatus.completed,
+            );
             // Look up MediaQuery again in case the setting changed.
             final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
@@ -2984,8 +2986,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
           _snackBarTimer = Timer(snackBar.duration, () {
-            assert(_snackBarController!.status == AnimationStatus.forward ||
-                   _snackBarController!.status == AnimationStatus.completed);
+            assert(
+              _snackBarController!.status == AnimationStatus.forward ||
+                _snackBarController!.status == AnimationStatus.completed,
+            );
             // Look up MediaQuery again in case the setting changed.
             final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
@@ -3031,7 +3035,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
-      _appBarMaxHeight = widget.appBar!.preferredSize.height + topPadding;
+      _appBarMaxHeight = AppBar.preferredHeightFor(context, widget.appBar!.preferredSize) + topPadding;
       assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
       _addIfNonNull(
         children,
@@ -3234,27 +3238,29 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
-      child: Material(
-        color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-        child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-          return CustomMultiChildLayout(
-            children: children,
-            delegate: _ScaffoldLayout(
-              extendBody: _extendBody,
-              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-              minInsets: minInsets,
-              minViewPadding: minViewPadding,
-              currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-              floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-              floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-              geometryNotifier: _geometryNotifier,
-              previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-              textDirection: textDirection,
-              isSnackBarFloating: isSnackBarFloating,
-              snackBarWidth: snackBarWidth,
-            ),
-          );
-        }),
+      child: ScrollNotificationObserver(
+        child: Material(
+          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+          child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+            return CustomMultiChildLayout(
+              children: children,
+              delegate: _ScaffoldLayout(
+                extendBody: _extendBody,
+                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                minInsets: minInsets,
+                minViewPadding: minViewPadding,
+                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                geometryNotifier: _geometryNotifier,
+                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                textDirection: textDirection,
+                isSnackBarFloating: isSnackBarFloating,
+                snackBarWidth: snackBarWidth,
+              ),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -3374,8 +3380,10 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   void initState() {
     super.initState();
     assert(widget.animationController != null);
-    assert(widget.animationController.status == AnimationStatus.forward
-        || widget.animationController.status == AnimationStatus.completed);
+    assert(
+      widget.animationController.status == AnimationStatus.forward
+        || widget.animationController.status == AnimationStatus.completed,
+    );
     widget.animationController.addStatusListener(_handleStatusChange);
   }
 

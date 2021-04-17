@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -34,9 +34,8 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_process_manager.dart';
+import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
-import '../src/testbed.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
@@ -130,7 +129,11 @@ void main() {
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockWebDevFS.connect(any)).thenAnswer((Invocation invocation) async {
-      return ConnectionResult(mockAppConnection, mockDebugConnection);
+      return ConnectionResult(
+        mockAppConnection,
+        mockDebugConnection,
+        mockDebugConnection.vmService,
+      );
     });
     fileSystem.file('.packages').writeAsStringSync('\n');
   });
@@ -192,7 +195,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -226,7 +228,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
+
       systemClock: globals.systemClock,
     );
 
@@ -250,7 +252,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -265,7 +266,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -370,7 +370,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -395,7 +394,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -514,7 +512,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -1436,7 +1433,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1484,7 +1480,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1603,7 +1598,6 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
-    featureFlags: TestFeatureFlags(),
   );
 }
 
