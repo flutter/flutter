@@ -37,7 +37,7 @@ Future<void> main() async {
         }
 
         section('add java 8 feature');
-        pluginMainKotlinFile.writeAsStringSync('''
+        pluginMainKotlinFile.writeAsStringSync(r'''
 package com.example.aaa
 
 import android.util.Log
@@ -71,7 +71,7 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "getPlatformVersion") {
-      result.success("Android \${android.os.Build.VERSION.RELEASE}")
+      result.success("Android ${android.os.Build.VERSION.RELEASE}")
     } else {
       result.notImplemented()
     }
