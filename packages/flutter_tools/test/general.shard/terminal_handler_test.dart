@@ -941,6 +941,18 @@ void main() {
     });
   });
 
+  testWithoutContext('ResidentRunner clears the screen when it should', () async {
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], reloadExitCode: 1, fatalReloadError: true);
+    const String message = 'This should be cleared';
+
+    expect(terminalHandler.logger.statusText, equals(''));
+    terminalHandler.logger.printStatus(message);
+    expect(terminalHandler.logger.statusText, equals(message + '\n'));  // printStatus makes a newline
+
+    await terminalHandler.processTerminalInput('c');
+    expect(terminalHandler.logger.statusText, equals(''));
+  });
+
   testWithoutContext('pidfile creation', () {
     final BufferLogger testLogger = BufferLogger.test();
     final Signals signals = _TestSignals(Signals.defaultExitSignals);
