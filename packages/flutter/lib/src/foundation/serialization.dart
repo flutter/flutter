@@ -25,7 +25,7 @@ class WriteBuffer {
   bool _isDone;
   final ByteData _eightBytes;
   late Uint8List _eightBytesAsList;
-  static final Uint8List _zeroBuffer = Uint8List.fromList([0, 0, 0, 0, 0, 0, 0, 0]);
+  static final Uint8List _zeroBuffer = Uint8List.fromList(<int>[0, 0, 0, 0, 0, 0, 0, 0]);
 
   /// Write a Uint8 into the buffer.
   void putUint8(int byte) {
