@@ -213,6 +213,79 @@ enum BottomNavigationBarType {
 /// }
 /// ```
 /// {@end-tool}
+/// 
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows [BottomNavigationBar] used in a [Scaffold] Widget with
+/// different interaction patterns. Tapping on the first [BottomNavigationBarItem]
+/// uses the [ScrollController] to animate the [ListView] to the top. The second
+/// [BottomNavigationBarItem] opens a [DropdownButton].
+///
+///```dart
+/// int _selectedIndex = 1;
+/// final ScrollController _homeController = ScrollController();
+///
+/// void _onItemTapped(int index) {
+///   if (index == 0) {
+///     _homeController.animateTo(
+///        0.0,
+///        duration: Duration(milliseconds: 500),
+///        curve: Curves.easeOut,
+///     );
+///   } else {
+///     setState(() {
+///       _selectedIndex = index;
+///     });
+///   }
+/// }
+///
+/// Widget _listViewBody() {
+///   return ListView.separated(
+///       controller: _homeController,
+///       itemBuilder: (context, index) {
+///         return Center(
+///             child: Text(
+///               "Item $index",
+///               style: TextStyle(
+///                 fontWeight: _selectedIndex == 1? FontWeight.bold : FontWeight.normal,
+///             ),
+///           ),
+///         );
+///       },
+///       separatorBuilder: (context, index) => Divider(thickness: 1,),
+///       itemCount: 50
+///   );
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('BottomNavigationBar Sample'),
+///     ),
+///     body: _listViewBody(),
+///     bottomNavigationBar: BottomNavigationBar(
+///       items: <BottomNavigationBarItem>[
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.arrow_circle_up),
+///           label: 'Back top',
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.arrow_circle_up),
+///           label: 'Bold Fonts',
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.arrow_circle_up),
+///           label: 'Normalize Fonts',
+///         ),
+///       ],
+///       currentIndex: _selectedIndex,
+///       selectedItemColor: Colors.amber[800],
+///       onTap: _onItemTapped,
+///     ),
+///   );
+/// }
+///```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomNavigationBarItem]
