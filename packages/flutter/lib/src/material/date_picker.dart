@@ -790,6 +790,7 @@ Future<DateTimeRange?> showDateRangePicker({
   RouteSettings? routeSettings,
   TextDirection? textDirection,
   TransitionBuilder? builder,
+  int validRangeDays = 0,
 }) async {
   assert(context != null);
   assert(
@@ -822,6 +823,10 @@ Future<DateTimeRange?> showDateRangePicker({
     'initialDateRange\'s start date must be on or before lastDate $lastDate.'
   );
   assert(
+    validRangeDays > 0,
+    'validRangeDays must be a valid range of days.'
+  );
+  assert(
     initialDateRange == null || !initialDateRange.end.isAfter(lastDate),
     'initialDateRange\'s end date must be on or before lastDate $lastDate.'
   );
@@ -847,6 +852,7 @@ Future<DateTimeRange?> showDateRangePicker({
     fieldEndHintText: fieldEndHintText,
     fieldStartLabelText: fieldStartLabelText,
     fieldEndLabelText: fieldEndLabelText,
+    validRangeDays: validRangeDays,
   );
 
   if (textDirection != null) {
@@ -904,7 +910,7 @@ String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startD
 }
 
 class _DateRangePickerDialog extends StatefulWidget {
-  const _DateRangePickerDialog({
+  _DateRangePickerDialog({
     Key? key,
     this.initialDateRange,
     required this.firstDate,
@@ -922,11 +928,12 @@ class _DateRangePickerDialog extends StatefulWidget {
     this.fieldEndHintText,
     this.fieldStartLabelText,
     this.fieldEndLabelText,
+    this.validRangeDays,
   }) : super(key: key);
 
   final DateTimeRange? initialDateRange;
-  final DateTime firstDate;
-  final DateTime lastDate;
+  DateTime firstDate;
+  DateTime lastDate;
   final DateTime? currentDate;
   final DatePickerEntryMode initialEntryMode;
   final String? cancelText;
@@ -940,6 +947,7 @@ class _DateRangePickerDialog extends StatefulWidget {
   final String? fieldEndHintText;
   final String? fieldStartLabelText;
   final String? fieldEndLabelText;
+  final int? validRangeDays;
 
   @override
   _DateRangePickerDialogState createState() => _DateRangePickerDialogState();
@@ -1014,7 +1022,15 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
   }
 
   void _handleStartDateChanged(DateTime? date) {
-    setState(() => _selectedStart = date);
+    setState(() {
+      int rangeDays = widget.validRangeDays as int;
+      if (rangeDays > 0){
+        DateTime initialDate = date as DateTime;
+        widget.firstDate = initialDate;
+        widget.lastDate = initialDate.add(Duration(days: rangeDays));
+      }      
+      _selectedStart = date;
+      });
   }
 
   void _handleEndDateChanged(DateTime? date) {
