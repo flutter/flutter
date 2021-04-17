@@ -868,40 +868,6 @@ void main() {
       expect(runner.calledExit, true);
     });
 
-    // testWithoutContext('r - hotReload supported and succeeds', () async {
-    //   when(mockResidentRunner.canHotReload).thenReturn(true);
-    //   when(mockResidentRunner.restart(fullRestart: false))
-    //       .thenAnswer((Invocation invocation) async {
-    //         return OperationResult(0, '');
-    //       });
-    //   await terminalHandler.processTerminalInput('r');
-
-    //   verify(mockResidentRunner.restart(fullRestart: false)).called(1);
-    // });
-
-    // testWithoutContext('r - hotReload supported and fails', () async {
-    //   when(mockResidentRunner.canHotReload).thenReturn(true);
-    //   when(mockResidentRunner.restart(fullRestart: false))
-    //       .thenAnswer((Invocation invocation) async {
-    //         return OperationResult(1, '');
-    //       });
-    //   await terminalHandler.processTerminalInput('r');
-
-    //   verify(mockResidentRunner.restart(fullRestart: false)).called(1);
-
-    //   expect(testLogger.statusText, contains('Try again after fixing the above error(s).'));
-    // });
-
-    // testWithoutContext('r - hotReload supported and fails fatally', () async {
-    //   when(mockResidentRunner.canHotReload).thenReturn(true);
-    //   when(mockResidentRunner.hotMode).thenReturn(true);
-    //   when(mockResidentRunner.restart(fullRestart: false))
-    //     .thenAnswer((Invocation invocation) async {
-    //       return OperationResult(1, 'fail', fatal: true);
-    //     });
-    //   expect(terminalHandler.processTerminalInput('r'), throwsToolExit());
-    // });
-
     testWithoutContext('r - hotReload unsupported', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsHotReload: false);
       await terminalHandler.processTerminalInput('r');

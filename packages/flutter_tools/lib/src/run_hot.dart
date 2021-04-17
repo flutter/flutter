@@ -25,7 +25,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 import 'reporting/reporting.dart';
 import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
@@ -597,9 +597,6 @@ class HotRunner extends ResidentRunner {
     }
     return true;
   }
-
-  @override
-  bool get supportsRestart => true;
 
   @override
   Future<OperationResult> restart({

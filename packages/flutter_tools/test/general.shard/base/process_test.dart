@@ -25,7 +25,7 @@ void main() {
     ProcessUtils processUtils;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       processUtils = ProcessUtils(
         processManager: fakeProcessManager,
         logger: BufferLogger.test(),
@@ -114,7 +114,7 @@ void main() {
       // MockProcessManager has an implementation of start() that returns the
       // result of processFactory.
       flakyProcessManager = MockProcessManager();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       processUtils = ProcessUtils(
         processManager: fakeProcessManager,
         logger: BufferLogger.test(),
@@ -258,7 +258,7 @@ void main() {
     BufferLogger testLogger;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),

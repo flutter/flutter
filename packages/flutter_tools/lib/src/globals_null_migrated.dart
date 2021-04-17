@@ -24,7 +24,9 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
 import 'ios/plist_parser.dart';
+import 'ios/xcodeproj.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/reporting.dart';
 import 'version.dart';
 
 Cache get cache => context.get<Cache>()!;
@@ -36,6 +38,8 @@ Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
+Usage get flutterUsage => context.get<Usage>()!;
+XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 

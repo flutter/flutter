@@ -246,7 +246,7 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
     ]);
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.succeeded(
       observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
@@ -278,7 +278,7 @@ void main() {
         }
       ),
     ]);
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.succeeded(
       observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
@@ -312,7 +312,7 @@ void main() {
         }
       )
     ]);
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.failed());
 
@@ -336,7 +336,7 @@ void main() {
         }
       )
     ]);
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.failed());
 
@@ -354,7 +354,7 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
     ]);
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.failed(), supportsFlutterExit: false);
 

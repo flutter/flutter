@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('VsCode search locations on windows supports an empty environment', () {
@@ -17,6 +18,6 @@ void main() {
       environment: <String, String>{},
     );
 
-    expect(VsCode.allInstalled(fileSystem, platform), isEmpty);
+    expect(VsCode.allInstalled(fileSystem, platform, FakeProcessManager.any()), isEmpty);
   });
 }
