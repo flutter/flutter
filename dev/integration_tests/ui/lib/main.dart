@@ -18,7 +18,7 @@ void main() {
               textDirection: TextDirection.ltr,
             ),
             onPressed: () {
-              Navigator.push<Object>(
+              Navigator.push<dynamic>(
                 context,
                 MaterialPageRoute<dynamic>(
                   builder: (BuildContext context) {
