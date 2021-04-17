@@ -52,6 +52,7 @@ import java.util.HashMap
 class AaaPlugin: FlutterPlugin, MethodCallHandler {
   init {
     val map: HashMap<String, String> = HashMap<String, String>()
+    // getOrDefault is a JAVA8 feature.
     Log.d("AaaPlugin", map.getOrDefault("foo", "baz"))
   }
   /// The MethodChannel that will the communication between Flutter and native Android
