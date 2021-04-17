@@ -1492,7 +1492,7 @@ void main() {
     expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
-  
+
   testWidgets('ExpansionPanelRadio.backgroundColor test', (WidgetTester tester) async {
     const Color firstPanelColor = Colors.red;
     const Color secondPanelColor = Colors.brown;
