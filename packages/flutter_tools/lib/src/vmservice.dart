@@ -326,6 +326,22 @@ Future<FlutterVmService> connectToVmService(
   );
 }
 
+Future<vm_service.VmService> createVmServiceDelegate(
+  Uri wsUri, {
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    @required Logger logger,
+  }) async {
+  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
+  return vm_service.VmService(
+    channel,
+    channel.add,
+    log: null,
+    disposeHandler: () async {
+      await channel.close();
+    },
+  );
+}
+
 Future<FlutterVmService> _connect(
   Uri httpUri, {
   ReloadSources reloadSources,
@@ -338,14 +354,8 @@ Future<FlutterVmService> _connect(
   @required Logger logger,
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: urlContext.join(httpUri.path, 'ws'));
-  final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
-  final vm_service.VmService delegateService = vm_service.VmService(
-    channel,
-    channel.add,
-    log: null,
-    disposeHandler: () async {
-      await channel.close();
-    },
+  final vm_service.VmService delegateService = await createVmServiceDelegate(
+    wsUri, compression: compression, logger: logger,
   );
 
   final vm_service.VmService service = await setUpVmService(
@@ -819,9 +829,12 @@ class FlutterVmService {
   /// Looks at the list of loaded extensions for first Flutter view, as well as
   /// the stream of added extensions to avoid races.
   ///
+  /// If [webIsolate] is true, this uses the VM Service isolate list instead of
+  /// the `_flutter.listViews` method, which is not implemented by DWDS.
+  ///
   /// Throws a [VmServiceDisappearedException] should the VM Service disappear
   /// while making calls to it.
-  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
+  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName, {bool webIsolate = false}) async {
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
@@ -839,20 +852,11 @@ class FlutterVmService {
     });
 
     try {
-      final List<FlutterView> flutterViews = await getFlutterViews();
-      if (flutterViews.isEmpty) {
-        throw VmServiceDisappearedException();
-      }
-
-      for (final FlutterView flutterView in flutterViews) {
-        final vm_service.IsolateRef isolateRef = flutterView.uiIsolate;
-        if (isolateRef == null) {
-          continue;
-        }
-
-        final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
+      final List<vm_service.IsolateRef> refs = await _getIsolateRefs(webIsolate);
+      for (final vm_service.IsolateRef ref in refs) {
+        final vm_service.Isolate isolate = await service.getIsolate(ref.id);
         if (isolate.extensionRPCs.contains(extensionName)) {
-          return isolateRef;
+          return ref;
         }
       }
       return await extensionAdded.future;
@@ -864,6 +868,28 @@ class FlutterVmService {
         // It's ok for cleanup to fail, such as when the service disappears.
       }
     }
+  }
+
+  Future<List<vm_service.IsolateRef>> _getIsolateRefs(bool webIsolate) async {
+    if (webIsolate) {
+      final List<vm_service.IsolateRef> refs = (await service.getVM()).isolates;
+      if (refs.isEmpty) {
+        throw VmServiceDisappearedException();
+      }
+      return refs;
+    }
+    final List<FlutterView> flutterViews = await getFlutterViews();
+    if (flutterViews.isEmpty) {
+      throw VmServiceDisappearedException();
+    }
+
+    final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
+    for (final FlutterView flutterView in flutterViews) {
+      if (flutterView.uiIsolate != null) {
+        refs.add(flutterView.uiIsolate);
+      }
+    }
+    return refs;
   }
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has

@@ -23,6 +23,7 @@ mixin AnimationLazyListenerMixin {
   ///  * [didUnregisterListener], which may cause the listener list to
   ///    become empty again, and in turn cause this method to call
   ///    [didStartListening] again.
+  @protected
   void didRegisterListener() {
     assert(_listenerCounter >= 0);
     if (_listenerCounter == 0)
@@ -36,6 +37,7 @@ mixin AnimationLazyListenerMixin {
   /// See also:
   ///
   ///  * [didRegisterListener], which causes the listener list to become non-empty.
+  @protected
   void didUnregisterListener() {
     assert(_listenerCounter >= 1);
     _listenerCounter -= 1;
@@ -63,9 +65,11 @@ mixin AnimationLazyListenerMixin {
 /// [AnimationLocalListenersMixin] and [AnimationLocalStatusListenersMixin].
 mixin AnimationEagerListenerMixin {
   /// This implementation ignores listener registrations.
+  @protected
   void didRegisterListener() { }
 
   /// This implementation ignores listener registrations.
+  @protected
   void didUnregisterListener() { }
 
   /// Release the resources used by this object. The object is no longer usable
@@ -87,12 +91,14 @@ mixin AnimationLocalListenersMixin {
   ///
   /// At the time this method is called the registered listener is not yet
   /// notified by [notifyListeners].
+  @protected
   void didRegisterListener();
 
   /// Called immediately after a listener is removed via [removeListener].
   ///
   /// At the time this method is called the removed listener is no longer
   /// notified by [notifyListeners].
+  @protected
   void didUnregisterListener();
 
   /// Calls the listener every time the value of the animation changes.
@@ -113,10 +119,23 @@ mixin AnimationLocalListenersMixin {
     }
   }
 
+  /// Removes all listeners added with [addListener].
+  ///
+  /// This method is typically called from the `dispose` method of the class
+  /// using this mixin if the class also uses the [AnimationEagerListenerMixin].
+  ///
+  /// Calling this method will not trigger [didUnregisterListener].
+  @protected
+  void clearListeners() {
+    _listeners.clear();
+  }
+
   /// Calls all the listeners.
   ///
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
+  @protected
+  @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
     for (final VoidCallback listener in localListeners) {
@@ -161,12 +180,14 @@ mixin AnimationLocalStatusListenersMixin {
   ///
   /// At the time this method is called the registered listener is not yet
   /// notified by [notifyStatusListeners].
+  @protected
   void didRegisterListener();
 
   /// Called immediately after a status listener is removed via [removeStatusListener].
   ///
   /// At the time this method is called the removed listener is no longer
   /// notified by [notifyStatusListeners].
+  @protected
   void didUnregisterListener();
 
   /// Calls listener every time the status of the animation changes.
@@ -187,10 +208,23 @@ mixin AnimationLocalStatusListenersMixin {
     }
   }
 
+  /// Removes all listeners added with [addStatusListener].
+  ///
+  /// This method is typically called from the `dispose` method of the class
+  /// using this mixin if the class also uses the [AnimationEagerListenerMixin].
+  ///
+  /// Calling this method will not trigger [didUnregisterListener].
+  @protected
+  void clearStatusListeners() {
+    _statusListeners.clear();
+  }
+
   /// Calls all the status listeners.
   ///
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
+  @protected
+  @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
     final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.from(_statusListeners);
     for (final AnimationStatusListener listener in localListeners) {

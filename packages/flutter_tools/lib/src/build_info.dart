@@ -600,6 +600,8 @@ TargetPlatform? getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
+    case 'windows-uwp-x64':
+      return TargetPlatform.windows_uwp_x64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
@@ -739,6 +741,11 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
 /// Returns the Windows build output directory.
 String getWindowsBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'windows');
+}
+
+/// Returns the Windows UWP build output directory.
+String getWindowsBuildUwpDirectory() {
+  return globals.fs.path.join(getBuildDirectory(), 'winuwp');
 }
 
 /// Returns the Fuchsia build output directory.

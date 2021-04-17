@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
@@ -27,7 +28,6 @@ import '../src/common.dart';
 import '../src/context.dart' hide FakeOperatingSystemUtils;
 import '../src/fakes.dart';
 import '../src/pubspec_schema.dart';
-import '../src/testbed.dart';
 
 void main() {
   group('plugins', () {
@@ -818,6 +818,32 @@ dependencies:
           contains('plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
         expect(testLogger.statusText, contains('The plugin `plugin3` is built using an older version of the Android plugin API'));
         expect(testLogger.statusText, contains('The plugin `plugin4` is built using an older version of the Android plugin API'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('Module using multiple old and new plugins should be wrapped with try catch', () async {
+        when(flutterProject.isModule).thenReturn(true);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+
+        createOldJavaPlugin('abcplugin1');
+        createNewJavaPlugin1();
+
+        await injectPlugins(flutterProject, androidPlatform: true);
+
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+        const String newPluginName = 'flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());';
+        const String oldPluginName = 'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
+        final String content = registrant.readAsStringSync();
+        for(final String plugin in <String>[newPluginName,oldPluginName]){
+          expect(content, contains(plugin));
+          expect(content.split(plugin).first.trim().endsWith('try {'), isTrue);
+          expect(content.split(plugin).last.trim().startsWith('} catch(Exception e) {'), isTrue);
+        }
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

@@ -229,10 +229,8 @@ class ChipThemeData with Diagnosticable {
     required Color secondaryColor,
     required TextStyle labelStyle,
   }) {
-    assert(primaryColor != null || brightness != null,
-      'One of primaryColor or brightness must be specified');
-    assert(primaryColor == null || brightness == null,
-      'Only one of primaryColor or brightness may be specified');
+    assert(primaryColor != null || brightness != null, 'One of primaryColor or brightness must be specified');
+    assert(primaryColor == null || brightness == null, 'Only one of primaryColor or brightness may be specified');
     assert(secondaryColor != null);
     assert(labelStyle != null);
 

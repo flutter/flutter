@@ -16,8 +16,8 @@ import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   BufferLogger logger;
@@ -48,7 +48,7 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -70,7 +70,7 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -86,7 +86,7 @@ void main() {
       }),
       persistentToolState: persistentToolState,
       httpClient: FakeHttpClient.list(<FakeRequest>[]),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -235,7 +235,7 @@ void main() {
   });
 
   testWithoutContext('DevtoolsLauncher does not activate DevTools if it was recently activated', () async {
-    persistentToolState.lastDevToolsActivationTime = DateTime.now();
+    persistentToolState.lastDevToolsActivation = DateTime.now();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,

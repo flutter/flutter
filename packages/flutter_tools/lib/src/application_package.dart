@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 
 abstract class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
+  static ApplicationPackageFactory? get instance => context.get<ApplicationPackageFactory>();
 
   /// Create an [ApplicationPackage] for the given platform.
   Future<ApplicationPackage> getPackageForPlatform(
@@ -22,17 +18,17 @@ abstract class ApplicationPackageFactory {
 }
 
 abstract class ApplicationPackage {
-  ApplicationPackage({ @required this.id })
+  ApplicationPackage({ required this.id })
     : assert(id != null);
 
   /// Package ID from the Android Manifest or equivalent.
   final String id;
 
-  String get name;
+  String? get name;
 
-  String get displayName => name;
+  String? get displayName => name;
 
-  File get packagesFile => null;
+  File? get packagesFile => null;
 
   @override
   String toString() => displayName ?? id;

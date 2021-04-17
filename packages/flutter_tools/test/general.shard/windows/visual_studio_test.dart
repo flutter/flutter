@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
@@ -13,7 +11,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const String programFilesPath = r'C:\Program Files (x86)';
 const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
@@ -102,17 +100,17 @@ const List<String> _requirementsBuildTools = <String>[
 void setMockVswhereResponse(
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  List<String> requiredComponents,
-  List<String> additionalArguments,
-  Map<String, dynamic> response,
-  String responseOverride,
-  int exitCode,
-  Exception exception,
+  List<String>? requiredComponents,
+  List<String>? additionalArguments,
+  Map<String, dynamic>? response,
+  String? responseOverride,
+  int? exitCode,
+  Exception? exception,
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
   final String finalResponse = responseOverride
-    ?? json.encode(<Map<String, dynamic>>[response]);
+    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '');
   final List<String> requirementArguments = requiredComponents == null
     ? <String>[]
     : <String>['-requires', ...requiredComponents];
@@ -127,7 +125,7 @@ void setMockVswhereResponse(
       '-utf8',
       '-latest',
       ...?additionalArguments,
-      ...?requirementArguments,
+      ...requirementArguments,
     ],
     stdout: finalResponse,
     exception: exception,
@@ -138,11 +136,11 @@ void setMockVswhereResponse(
 // Sets whether or not a vswhere query with the required components will
 // return an installation.
 void setMockCompatibleVisualStudioInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -159,11 +157,11 @@ void setMockCompatibleVisualStudioInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return a pre-release installation.
 void setMockPrereleaseVisualStudioInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -180,11 +178,11 @@ void setMockPrereleaseVisualStudioInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return an Build Tools installation.
 void setMockCompatibleVisualStudioBuildToolsInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -201,11 +199,11 @@ void setMockCompatibleVisualStudioBuildToolsInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return a pre-release Build Tools installation.
 void setMockPrereleaseVisualStudioBuildToolsInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -222,11 +220,11 @@ void setMockPrereleaseVisualStudioBuildToolsInstallation(
 // Sets whether or not a vswhere query searching for 'all' and 'prerelease'
 // versions will return an installation.
 void setMockAnyVisualStudioInstallation(
-  Map<String, dynamic> response,
+  Map<String, dynamic>? response,
   FileSystem fileSystem,
   FakeProcessManager processManager, [
-  int exitCode,
-  Exception exception,
+  int? exitCode,
+  Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -302,7 +300,7 @@ ERROR: The system was unable to find the specified registry key or value.
 
 // Create a visual studio instance with a FakeProcessManager.
 VisualStudioFixture setUpVisualStudio() {
-  final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+  final FakeProcessManager processManager = FakeProcessManager.empty();
   final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
   final BufferLogger logger = BufferLogger.test();
   final VisualStudio visualStudio = VisualStudio(
@@ -357,7 +355,7 @@ void main() {
     testWithoutContext('isInstalled and cmakePath correct when vswhere is missing', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       const Exception exception = ProcessException('vswhere', <String>[]);
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
 
       setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
       setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, null, exception);
@@ -379,7 +377,7 @@ void main() {
     testWithoutContext(
         'isInstalled returns false when vswhere returns non-zero', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
 
       setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
       setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);

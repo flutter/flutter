@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 const FakeCommand kAdbVersionCommand = FakeCommand(
@@ -48,7 +47,7 @@ void main() {
   AndroidSdk androidSdk;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     fileSystem = MemoryFileSystem.test();
     androidSdk = FakeAndroidSdk();
   });

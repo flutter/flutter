@@ -99,10 +99,12 @@ class InteractiveViewer extends StatefulWidget {
        assert(scaleEnabled != null),
        // boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
-       assert((boundaryMargin.horizontal.isInfinite
+       assert(
+         (boundaryMargin.horizontal.isInfinite
            && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
-           && boundaryMargin.left.isFinite)),
+           && boundaryMargin.left.isFinite),
+       ),
        super(key: key);
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
@@ -582,11 +584,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
-    assert(boundaryRect.isFinite ||
+    assert(
+      boundaryRect.isFinite ||
         (boundaryRect.left.isInfinite
         && boundaryRect.top.isInfinite
         && boundaryRect.right.isInfinite
-        && boundaryRect.bottom.isInfinite), 'boundaryRect must either be infinite in all directions or finite in all directions.');
+        && boundaryRect.bottom.isInfinite),
+      'boundaryRect must either be infinite in all directions or finite in all directions.',
+    );
     return boundaryRect;
   }
 
