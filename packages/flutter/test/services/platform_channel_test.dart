@@ -75,9 +75,9 @@ void main() {
 
       expect(error, isNotNull);
       expect(error!.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
-        'Cannot return a typed List from MethodChannel.invokeMethod.',
-        'The MethodChannel can only return Lists of type `dynamic` or `Object` but a List of type List<String> was expected.',
-        'use MethodChannel.invokeListMethod to create typed lists.'
+        'Cannot return type List<String> from MethodChannel.invokeMethod.',
+        'The MethodChannel can only return Lists of type `dynamic` or `Object`.',
+        'Use MethodChannel.invokeListMethod to create typed lists.'
       ]);
     });
 
@@ -98,9 +98,9 @@ void main() {
 
       expect(error, isNotNull);
       expect(error!.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
-        'Cannot return a typed Map from MethodChannel.invokeMethod.',
-        'The MethodChannel can only return Maps of type `dynamic` or `Object` but a Map of type Map<String, String> was expected.',
-        'use MethodChannel.invokeMapMethod to create typed maps.'
+        'Cannot return type Map<String, String> from MethodChannel.invokeMethod.',
+        'The MethodChannel can only return Maps with a key type of `dynamic`, `Object?` and a value type of `dynamic` or `Object`. MethodChannels that delegate to the JSON codec may additionally use a key type of `String`.',
+        'Use MethodChannel.invokeMapMethod to create typed maps.'
       ]);
     });
 
@@ -139,6 +139,10 @@ void main() {
       expect(await channel.invokeMethod<Map<dynamic, Object?>?>('sayHello', 'hello'), <String, String>{'hello': 'world'});
       expect(await channel.invokeMethod<Map<Object?, dynamic>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
       expect(await channel.invokeMethod<Map<dynamic, Object?>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<String, dynamic>?>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<String, Object?>?>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<String, dynamic>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<String, Object?>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
 
       // Cause TypeError due to lack of nullability.
       await expectLater(() => channel.invokeMethod<Map<Object, Object>?>('sayHello', 'hello'), throwsFlutterError);

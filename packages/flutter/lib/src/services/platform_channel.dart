@@ -158,18 +158,26 @@ class MethodChannel {
     final Object? resultData = codec.decodeEnvelope(result);
     assert(() {
       if (resultData is List<Object?>
+        && T != _debugGetTypeOf<void>()
+        && T != _debugGetTypeOf<Object>()
+        && T != _debugGetTypeOf<Object?>()
+        && T != _debugGetTypeOf<dynamic>()
         && T != _debugGetTypeOf<List<Object?>>()
         && T != _debugGetTypeOf<List<Object?>?>()
         && T != _debugGetTypeOf<List<dynamic>?>()
         && T != _debugGetTypeOf<List<dynamic>>()) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot return a typed List from MethodChannel.invokeMethod.'),
+          ErrorSummary('Cannot return type $T from MethodChannel.invokeMethod.'),
           ErrorDescription(
-            'The MethodChannel can only return Lists of type `dynamic` or `Object` but a List of type $T was expected.'
+            'The MethodChannel can only return Lists of type `dynamic` or `Object`.'
           ),
-          ErrorHint('use MethodChannel.invokeListMethod to create typed lists.')
+          ErrorHint('Use MethodChannel.invokeListMethod to create typed lists.')
         ]);
       } else if (resultData is Map<Object?, Object?>
+        && T != _debugGetTypeOf<void>()
+        && T != _debugGetTypeOf<Object>()
+        && T != _debugGetTypeOf<Object?>()
+        && T != _debugGetTypeOf<dynamic>()
         && T != _debugGetTypeOf<Map<Object?, Object?>>()
         && T != _debugGetTypeOf<Map<Object?, Object?>?>()
         && T != _debugGetTypeOf<Map<dynamic, dynamic>>()
@@ -177,13 +185,19 @@ class MethodChannel {
         && T != _debugGetTypeOf<Map<Object?, dynamic>?>()
         && T != _debugGetTypeOf<Map<dynamic, Object?>?>()
         && T != _debugGetTypeOf<Map<Object?, dynamic>>()
-        && T != _debugGetTypeOf<Map<dynamic, Object?>>()) {
+        && T != _debugGetTypeOf<Map<dynamic, Object?>>()
+        && T != _debugGetTypeOf<Map<String, dynamic>?>()
+        && T != _debugGetTypeOf<Map<String, Object?>?>()
+        && T != _debugGetTypeOf<Map<String, dynamic>>()
+        && T != _debugGetTypeOf<Map<String, Object?>>()) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot return a typed Map from MethodChannel.invokeMethod.'),
+          ErrorSummary('Cannot return type $T from MethodChannel.invokeMethod.'),
           ErrorDescription(
-            'The MethodChannel can only return Maps of type `dynamic` or `Object` but a Map of type $T was expected.'
+            'The MethodChannel can only return Maps with a key type of `dynamic`, `Object?` and a '
+            'value type of `dynamic` or `Object`. MethodChannels that delegate to the JSON codec may '
+            'additionally use a key type of `String`.'
           ),
-          ErrorHint('use MethodChannel.invokeMapMethod to create typed maps.')
+          ErrorHint('Use MethodChannel.invokeMapMethod to create typed maps.')
         ]);
       }
       return true;
@@ -202,7 +216,9 @@ class MethodChannel {
   /// context, or provided explicitly. If it does not match the returned type of
   /// the channel, a [TypeError] will be thrown at runtime. `T` cannot be a class
   /// with generics other than `dynamic` or `Object?`. For example, `Map<String, String>`
-  /// is not supported but `Map<dynamic, dynamic>` or `Map` is.
+  /// is not supported but `Map<dynamic, dynamic>` or `Map` is. On MethodChannels
+  /// that use the JSON codec, `Map<String, Object?>` or `Map<String, dynamic>` can
+  /// be used in addition.
   ///
   /// Returns a [Future] which completes to one of the following:
   ///
