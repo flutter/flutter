@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -17,6 +15,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../reporting/reporting.dart';
 
@@ -26,11 +25,11 @@ final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
   factory XcodeProjectInterpreter({
-    @required Platform platform,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Usage usage,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Usage usage,
   }) {
     return XcodeProjectInterpreter._(
       platform: platform,
@@ -42,14 +41,12 @@ class XcodeProjectInterpreter {
   }
 
   XcodeProjectInterpreter._({
-    @required Platform platform,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Usage usage,
-    int majorVersion,
-    int minorVersion,
-    int patchVersion,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Usage usage,
+    Version? version,
   }) : _platform = platform,
         _fileSystem = fileSystem,
         _logger = logger,
@@ -60,9 +57,7 @@ class XcodeProjectInterpreter {
           platform: platform,
           processManager: processManager,
         ),
-        _majorVersion = majorVersion,
-        _minorVersion = minorVersion,
-        _patchVersion = patchVersion,
+        _version = version,
         _usage = usage;
 
   /// Create an [XcodeProjectInterpreter] for testing.
@@ -70,12 +65,10 @@ class XcodeProjectInterpreter {
   /// Defaults to installed with sufficient version,
   /// a memory file system, fake platform, buffer logger,
   /// test [Usage], and test [Terminal].
-  /// Set [majorVersion] to null to simulate Xcode not being installed.
+  /// Set [version] to null to simulate Xcode not being installed.
   factory XcodeProjectInterpreter.test({
-    @required ProcessManager processManager,
-    int majorVersion = 1000,
-    int minorVersion = 0,
-    int patchVersion = 0,
+    required ProcessManager processManager,
+    Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -87,9 +80,7 @@ class XcodeProjectInterpreter {
       processManager: processManager,
       usage: TestUsage(),
       logger: BufferLogger.test(),
-      majorVersion: majorVersion,
-      minorVersion: minorVersion,
-      patchVersion: patchVersion,
+      version: version,
     );
   }
 
@@ -116,52 +107,37 @@ class XcodeProjectInterpreter {
         }
         _versionText = result.stdout.trim().replaceAll('\n', ', ');
       }
-      final Match match = _versionRegex.firstMatch(versionText);
+      final Match? match = _versionRegex.firstMatch(versionText!);
       if (match == null) {
         return;
       }
-      final String version = match.group(1);
+      final String version = match.group(1)!;
       final List<String> components = version.split('.');
-      _majorVersion = int.parse(components[0]);
-      _minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
-      _patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
+      final int majorVersion = int.parse(components[0]);
+      final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
+      final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
+      _version = Version(majorVersion, minorVersion, patchVersion);
     } on ProcessException {
       // Ignored, leave values null.
     }
   }
 
-  bool get isInstalled => majorVersion != null;
+  bool get isInstalled => version != null;
 
-  String _versionText;
-  String get versionText {
+  String? _versionText;
+  String? get versionText {
     if (_versionText == null) {
       _updateVersion();
     }
     return _versionText;
   }
 
-  int _majorVersion;
-  int get majorVersion {
-    if (_majorVersion == null) {
+  Version? _version;
+  Version? get version {
+    if (_version == null) {
       _updateVersion();
     }
-    return _majorVersion;
-  }
-
-  int _minorVersion;
-  int get minorVersion {
-    if (_minorVersion == null) {
-      _updateVersion();
-    }
-    return _minorVersion;
-  }
-
-  int _patchVersion;
-  int get patchVersion {
-    if (_patchVersion == null) {
-      _updateVersion();
-    }
-    return _patchVersion;
+    return _version;
   }
 
   /// The `xcrun` Xcode command to run or locate development
@@ -190,7 +166,7 @@ class XcodeProjectInterpreter {
   /// target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    String scheme,
+    String? scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = _logger.startSpinner();
@@ -247,7 +223,7 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -287,9 +263,9 @@ List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
-  for (final Match match in showBuildSettingsOutput.split('\n').map<Match>(_settingExpr.firstMatch)) {
+  for (final Match? match in showBuildSettingsOutput.split('\n').map<Match?>(_settingExpr.firstMatch)) {
     if (match != null) {
-      settings[match[1]] = match[2];
+      settings[match[1]!] = match[2]!;
     }
   }
   return settings;
@@ -303,7 +279,7 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
     return str;
   }
 
-  return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]] ?? m[0]);
+  return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]!] ?? m[0]!);
 }
 
 /// Information about an Xcode project.
@@ -321,7 +297,7 @@ class XcodeProjectInfo {
     final List<String> targets = <String>[];
     final List<String> buildConfigurations = <String>[];
     final List<String> schemes = <String>[];
-    List<String> collector;
+    List<String>? collector;
     for (final String line in output.split('\n')) {
       if (line.isEmpty) {
         collector = null;
@@ -353,7 +329,7 @@ class XcodeProjectInfo {
 
   /// The expected scheme for [buildInfo].
   @visibleForTesting
-  static String expectedSchemeFor(BuildInfo buildInfo) {
+  static String expectedSchemeFor(BuildInfo? buildInfo) {
     return toTitleCase(buildInfo?.flavor ?? 'runner');
   }
 
@@ -379,7 +355,7 @@ class XcodeProjectInfo {
   }
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
-  String schemeFor(BuildInfo buildInfo) {
+  String? schemeFor(BuildInfo buildInfo) {
     final String expectedScheme = expectedSchemeFor(buildInfo);
     if (schemes.contains(expectedScheme)) {
       return expectedScheme;
@@ -401,7 +377,7 @@ class XcodeProjectInfo {
 
   /// Returns unique build configuration matching [buildInfo] and [scheme], or
   /// null, if there is no unique best match.
-  String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
+  String? buildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
     if (hasBuildConfigurationForBuildMode(expectedConfiguration)) {
       return expectedConfiguration;
@@ -426,7 +402,7 @@ class XcodeProjectInfo {
     return 'Release';
   }
 
-  static String _uniqueMatch(Iterable<String> strings, bool Function(String s) matches) {
+  static String? _uniqueMatch(Iterable<String> strings, bool Function(String s) matches) {
     final List<String> options = strings.where(matches).toList();
     if (options.length == 1) {
       return options.first;

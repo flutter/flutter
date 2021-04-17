@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
@@ -172,9 +173,7 @@ void main() {
       ),
     ]);
 
-    expect(xcodeProjectInterpreter.majorVersion, 11);
-    expect(xcodeProjectInterpreter.minorVersion, 4);
-    expect(xcodeProjectInterpreter.patchVersion, 1);
+    expect(xcodeProjectInterpreter.version, Version(11, 4, 1));
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -188,9 +187,7 @@ void main() {
       ),
     ]);
 
-    expect(xcodeProjectInterpreter.majorVersion, 11);
-    expect(xcodeProjectInterpreter.minorVersion, 0);
-    expect(xcodeProjectInterpreter.patchVersion, 0);
+    expect(xcodeProjectInterpreter.version, Version(11, 0, 0));
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -203,9 +200,7 @@ void main() {
         stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
       ),
     ]);
-    expect(xcodeProjectInterpreter.majorVersion, isNull);
-    expect(xcodeProjectInterpreter.minorVersion, isNull);
-    expect(xcodeProjectInterpreter.patchVersion, isNull);
+    expect(xcodeProjectInterpreter.version, isNull);
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 

@@ -76,7 +76,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       systemClock: systemClock,
       fileSystem: fileSystem,
       logger: logger,
-      featureFlags: featureFlags,
     );
   }
 }
@@ -99,14 +98,12 @@ class ResidentWebRunner extends ResidentRunner {
     @required SystemClock systemClock,
     @required Usage usage,
     @required UrlTunneller urlTunneller,
-    @required FeatureFlags featureFlags,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
        _usage = usage,
        _urlTunneller = urlTunneller,
-       _featureFlags = featureFlags,
        super(
           <FlutterDevice>[device],
           target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -122,7 +119,6 @@ class ResidentWebRunner extends ResidentRunner {
   final SystemClock _systemClock;
   final Usage _usage;
   final UrlTunneller _urlTunneller;
-  final FeatureFlags _featureFlags;
 
   FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
@@ -167,20 +163,7 @@ class ResidentWebRunner extends ResidentRunner {
   FlutterVmService _instance;
 
   @override
-  bool get canHotRestart {
-    return true;
-  }
-
-  @override
-  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
-    String method, {
-    FlutterDevice device,
-    Map<String, dynamic> params,
-  }) async {
-    final vmservice.Response response =
-        await _vmService.service.callServiceExtension(method, args: params);
-    return response.toJson();
-  }
+  bool get supportsRestart => true;
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -313,7 +296,7 @@ class ResidentWebRunner extends ResidentRunner {
         ?.flutterPlatformOverride(
           isolateId: null,
         );
-      final String platform = nextPlatform(currentPlatform, _featureFlags);
+      final String platform = nextPlatform(currentPlatform);
       await _vmService
         ?.flutterPlatformOverride(
             platform: platform,

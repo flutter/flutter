@@ -195,7 +195,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -229,7 +228,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
+
       systemClock: globals.systemClock,
     );
 
@@ -253,7 +252,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -268,7 +266,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -373,7 +370,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -398,7 +394,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -517,7 +512,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -1439,7 +1433,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1487,7 +1480,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1606,7 +1598,6 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
-    featureFlags: TestFeatureFlags(),
   );
 }
 

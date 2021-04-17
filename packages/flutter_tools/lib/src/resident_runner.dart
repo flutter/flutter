@@ -192,11 +192,11 @@ class FlutterDevice {
     );
   }
 
+  final TargetPlatform targetPlatform;
   final Device device;
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
-  final TargetPlatform targetPlatform;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
@@ -401,138 +401,16 @@ class FlutterDevice {
     return devFS.create();
   }
 
-  Future<void> debugDumpApp() async {
+  Future<List<vm_service.IsolateRef>> _getCurrentIsolates() async {
+    if (targetPlatform == TargetPlatform.web_javascript) {
+      final vm_service.VM vm = await vmService.service.getVM();
+      return vm.isolates;
+    }
     final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      final String data = await vmService.flutterDebugDumpApp(
-        isolateId: view.uiIsolate.id,
-      );
-      globals.printStatus(data);
-    }
-  }
-
-  Future<void> debugDumpRenderTree() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      final String data = await vmService.flutterDebugDumpRenderTree(
-        isolateId: view.uiIsolate.id,
-      );
-      globals.printStatus(data);
-    }
-  }
-
-  Future<void> debugDumpLayerTree() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      final String data = await vmService.flutterDebugDumpLayerTree(
-        isolateId: view.uiIsolate.id,
-      );
-      globals.printStatus(data);
-    }
-  }
-
-  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      final String data = await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
-        isolateId: view.uiIsolate.id,
-      );
-      globals.printStatus(data);
-    }
-  }
-
-  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      final String data = await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
-        isolateId: view.uiIsolate.id,
-      );
-      globals.printStatus(data);
-    }
-  }
-
-  Future<void> toggleDebugPaintSizeEnabled() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      await vmService.flutterToggleDebugPaintSizeEnabled(
-        isolateId: view.uiIsolate.id,
-      );
-    }
-  }
-
-  Future<void> toggleDebugCheckElevationsEnabled() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      await vmService.flutterToggleDebugCheckElevationsEnabled(
-        isolateId: view.uiIsolate.id,
-      );
-    }
-  }
-
-  Future<void> debugTogglePerformanceOverlayOverride() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      await vmService.flutterTogglePerformanceOverlayOverride(
-        isolateId: view.uiIsolate.id,
-      );
-    }
-  }
-
-  Future<void> toggleWidgetInspector() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      await vmService.flutterToggleWidgetInspector(
-        isolateId: view.uiIsolate.id,
-      );
-    }
-  }
-
-  Future<void> toggleInvertOversizedImages() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      await vmService.flutterToggleInvertOversizedImages(
-        isolateId: view.uiIsolate.id,
-      );
-    }
-  }
-
-  Future<void> toggleProfileWidgetBuilds() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    for (final FlutterView view in views) {
-      await vmService.flutterToggleProfileWidgetBuilds(
-        isolateId: view.uiIsolate.id,
-      );
-    }
-  }
-
-  Future<Brightness> toggleBrightness({ Brightness current }) async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    Brightness next;
-    if (current == Brightness.light) {
-      next = Brightness.dark;
-    } else if (current == Brightness.dark) {
-      next = Brightness.light;
-    }
-
-    for (final FlutterView view in views) {
-      next = await vmService.flutterBrightnessOverride(
-        isolateId: view.uiIsolate.id,
-        brightness: next,
-      );
-    }
-    return next;
-  }
-
-  Future<String> togglePlatform({ String from }) async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    final String to = nextPlatform(from, featureFlags);
-    for (final FlutterView view in views) {
-      await vmService.flutterPlatformOverride(
-        platform: to,
-        isolateId: view.uiIsolate.id,
-      );
-    }
-    return to;
+    return <vm_service.IsolateRef>[
+      for (FlutterView view in views)
+        view.uiIsolate,
+    ];
   }
 
   Future<void> startEchoingDeviceLog() async {
@@ -628,7 +506,6 @@ class FlutterDevice {
     }
     return 0;
   }
-
 
   Future<int> runCold({
     ColdRunner coldRunner,
@@ -755,8 +632,389 @@ class FlutterDevice {
   }
 }
 
+/// A subset of the [ResidentRunner] for delegating to attached flutter devices.
+abstract class ResidentHandlers {
+  List<FlutterDevice> get flutterDevices;
+
+  /// Whether the resident runner has hot reload and restart enabled.
+  bool get hotMode;
+
+  /// Whether the resident runner is connect to the device's VM Service.
+  bool get supportsServiceProtocol;
+
+  /// The application is running in debug mode.
+  bool get isRunningDebug;
+
+  /// The application is running in profile mode.
+  bool get isRunningProfile;
+
+  /// The application is running in release mode.
+  bool get isRunningRelease;
+
+  /// The resident runner should stay resident after establishing a connection with the
+  /// application.
+  bool get stayResident;
+
+  /// Whether all of the connected devices support hot restart.
+  ///
+  /// To prevent scenarios where only a subset of devices are hot restarted,
+  /// the runner requires that all attached devices can support hot restart
+  /// before enabling it.
+  bool get supportsRestart;
+
+  /// Whether all of the connected devices support gathering SkSL.
+  bool get supportsWriteSkSL;
+
+  /// Whether all of the connected devices support hot reload.
+  bool get canHotReload;
+
+  @protected
+  Logger get logger;
+
+  @protected
+  FileSystem get fileSystem;
+
+  /// Called to print help to the terminal.
+  void printHelp({ @required bool details });
+
+  /// Perfor a hot reload or hot restart of all attached applications.
+  ///
+  /// If [fullRestart] is true, a hot restart is performed. Otherwise a hot reload
+  /// is run instead. On web devices, this only performs a hot restart regardless of
+  /// the value of [fullRestart].
+  Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
+    final String mode = isRunningProfile ? 'profile' :isRunningRelease ? 'release' : 'this';
+    throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+  }
+
+  /// Dump the application's current widget tree to the terminal.
+  Future<bool> debugDumpApp() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpApp(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  /// Dump the application's current render tree to the terminal.
+  Future<bool> debugDumpRenderTree() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpRenderTree(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  /// Dump the application's current layer tree to the terminal.
+  Future<bool> debugDumpLayerTree() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpLayerTree(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  /// Dump the application's current semantics tree to the terminal.
+  ///
+  /// If semantics are not enabled, nothing is returned.
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  /// Dump the application's current semantics tree to the terminal.
+  ///
+  /// If semantics are not enabled, nothing is returned.
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        final String data = await device.vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+          isolateId: view.id,
+        );
+        logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  /// Toggle the "paint size" debugging feature.
+  Future<bool> debugToggleDebugPaintSizeEnabled() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleDebugPaintSizeEnabled(
+          isolateId: view.id,
+        );
+      }
+    }
+    return true;
+  }
+
+  /// Toggle the "elevation check" debugging feature.
+  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleDebugCheckElevationsEnabled(
+          isolateId: view.id,
+        );
+      }
+    }
+    return true;
+  }
+
+  /// Toggle the performance overlay.
+  ///
+  /// This is not supported in web mode.
+  Future<bool> debugTogglePerformanceOverlayOverride() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.targetPlatform == TargetPlatform.web_javascript) {
+        continue;
+      }
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterTogglePerformanceOverlayOverride(
+          isolateId: view.id,
+        );
+      }
+    }
+    return true;
+  }
+
+  /// Toggle the widget inspector.
+  Future<bool> debugToggleWidgetInspector() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleWidgetInspector(
+          isolateId: view.id,
+        );
+      }
+    }
+    return true;
+  }
+
+  /// Toggle the "invert images" debugging feature.
+  Future<bool> debugToggleInvertOversizedImages() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleInvertOversizedImages(
+          isolateId: view.id,
+        );
+      }
+    }
+    return true;
+  }
+
+  /// Toggle the "profile widget builds" debugging feature.
+  Future<bool> debugToggleProfileWidgetBuilds() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterToggleProfileWidgetBuilds(
+          isolateId: view.id,
+        );
+      }
+    }
+    return true;
+  }
+
+  /// Toggle the operating system brightness (light or dart).
+  Future<bool> debugToggleBrightness() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    final List<vm_service.IsolateRef> views = await flutterDevices.first._getCurrentIsolates();
+    final Brightness current = await flutterDevices.first.vmService.flutterBrightnessOverride(
+      isolateId: views.first.id,
+    );
+    Brightness next;
+    if (current == Brightness.light) {
+      next = Brightness.dark;
+    } else {
+      next = Brightness.light;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterBrightnessOverride(
+          isolateId: view.id,
+          brightness: next,
+        );
+      }
+      logger.printStatus('Changed brightness to $next.');
+    }
+    return true;
+  }
+
+  /// Rotate the application through different `defaultTargetPlatform` values.
+  Future<bool> debugTogglePlatform() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    final List<vm_service.IsolateRef> views = await flutterDevices.first._getCurrentIsolates();
+    final String from = await flutterDevices
+      .first.vmService.flutterPlatformOverride(
+        isolateId: views.first.id,
+      );
+    final String to = nextPlatform(from);
+    for (final FlutterDevice device in flutterDevices) {
+      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+        await device.vmService.flutterPlatformOverride(
+          platform: to,
+          isolateId: view.id,
+        );
+      }
+    }
+    logger.printStatus('Switched operating system to $to');
+    return true;
+  }
+
+  /// Write the SkSL shaders to a zip file in build directory.
+  ///
+  /// Returns the name of the file, or `null` on failures.
+  Future<String> writeSkSL() async {
+    if (!supportsWriteSkSL) {
+      throw Exception('writeSkSL is not supported by this runner.');
+    }
+    final List<FlutterView> views = await flutterDevices
+      .first
+      .vmService.getFlutterViews();
+    final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
+      viewId: views.first.id,
+    );
+    final Device device = flutterDevices.first.device;
+    return sharedSkSlWriter(device, data);
+  }
+
+  /// Take a screenshot on the provided [device].
+  ///
+  /// If the device has a connected vmservice, this method will attempt to hide
+  /// and restore the debug banner before taking the screenshot.
+  ///
+  /// Throws an [AssertionError] if [Device.supportsScreenshot] is not true.
+  Future<void> screenshot(FlutterDevice device) async {
+    assert(device.device.supportsScreenshot);
+
+    final Status status = logger.startProgress(
+      'Taking screenshot for ${device.device.name}...',
+    );
+    final File outputFile = getUniqueFile(
+      fileSystem.currentDirectory,
+      'flutter',
+      'png',
+    );
+    List<FlutterView> views = <FlutterView>[];
+    Future<bool> setDebugBanner(bool value) async {
+      try {
+        for (final FlutterView view in views) {
+          await device.vmService.flutterDebugAllowBanner(
+            value,
+            isolateId: view.uiIsolate.id,
+          );
+        }
+        return true;
+      } on Exception catch (error) {
+        status.cancel();
+        logger.printError('Error communicating with Flutter on the device: $error');
+        return false;
+      }
+    }
+
+    try {
+      if (supportsServiceProtocol && isRunningDebug) {
+        // Ensure that the vmService access is guarded by supportsServiceProtocol, it
+        // will be null in release mode.
+        views = await device.vmService.getFlutterViews();
+        if (!await setDebugBanner(false)) {
+          return;
+        }
+      }
+      try {
+        await device.device.takeScreenshot(outputFile);
+      } finally {
+        if (supportsServiceProtocol && isRunningDebug) {
+          await setDebugBanner(true);
+        }
+      }
+      final int sizeKB = outputFile.lengthSync() ~/ 1024;
+      status.stop();
+      logger.printStatus(
+        'Screenshot written to ${fileSystem.path.relative(outputFile.path)} (${sizeKB}kB).',
+      );
+    } on Exception catch (error) {
+      status.cancel();
+      logger.printError('Error taking screenshot: $error');
+    }
+  }
+
+  /// Remove sigusr signal handlers.
+  Future<void> cleanupAfterSignal();
+
+  /// Tear down the runner and leave the application running.
+  ///
+  /// This is not supported on web devices where the runner is running
+  /// the application server as well.
+  Future<void> detach();
+
+  /// Tear down the runner and exit the application.
+  Future<void> exit();
+
+  /// Run any source generators, such as localizations.
+  ///
+  /// These are automatically run during hot restart, but can be
+  /// triggered manually to see the updated generated code.
+  Future<void> runSourceGenerators();
+}
+
 // Shared code between different resident application runners.
-abstract class ResidentRunner {
+abstract class ResidentRunner extends ResidentHandlers {
   ResidentRunner(
     this.flutterDevices, {
     @required this.target,
@@ -788,12 +1046,19 @@ abstract class ResidentRunner {
     _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
   }
 
-  @protected
-  @visibleForTesting
+  @override
+  Logger get logger => globals.logger;
+
+  @override
+  FileSystem get fileSystem => globals.fs;
+
+  @override
   final List<FlutterDevice> flutterDevices;
 
   final String target;
   final DebuggingOptions debuggingOptions;
+
+  @override
   final bool stayResident;
   final bool ipv6;
   final String _dillOutputPath;
@@ -812,6 +1077,10 @@ abstract class ResidentRunner {
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
+  BuildResult _lastBuild;
+  Environment _environment;
+
+  @override
   bool hotMode;
 
   /// Returns true if every device is streaming observatory URIs.
@@ -833,11 +1102,22 @@ abstract class ResidentRunner {
   }
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
+
+  @override
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
+
+  @override
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
+
+  @override
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
+
+  @override
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+
+  @override
   bool get supportsWriteSkSL => supportsServiceProtocol;
+
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
   // Returns the Uri of the first connected device for mobile,
@@ -850,38 +1130,14 @@ abstract class ResidentRunner {
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;
 
-  /// Whether this runner can hot restart.
-  ///
-  /// To prevent scenarios where only a subset of devices are hot restarted,
-  /// the runner requires that all attached devices can support hot restart
-  /// before enabling it.
-  bool get canHotRestart {
-    return flutterDevices.every((FlutterDevice device) {
+  @override
+  bool get supportsRestart {
+    return isRunningDebug && flutterDevices.every((FlutterDevice device) {
       return device.device.supportsHotRestart;
     });
   }
 
-  /// Invoke an RPC extension method on the first attached ui isolate of the first device.
-  // TODO(jonahwilliams): Update/Remove this method when refactoring the resident
-  // runner to support a single flutter device.
-  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
-    String method, {
-    FlutterDevice device,
-    Map<String, dynamic> params,
-  }) async {
-    device ??= flutterDevices.first;
-    final List<FlutterView> views = await device.vmService.getFlutterViews();
-    return device
-      .vmService
-      .invokeFlutterExtensionRpcRaw(
-        method,
-        args: params,
-        isolateId: views
-          .first.uiIsolate.id
-      );
-  }
-
-  /// Whether this runner can hot reload.
+  @override
   bool get canHotReload => hotMode;
 
   /// Start the app and keep the process running during its lifetime.
@@ -902,17 +1158,7 @@ abstract class ResidentRunner {
     bool enableDevTools = false,
   });
 
-  bool get supportsRestart => false;
-
-  Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
-    final String mode = isRunningProfile ? 'profile' :
-        isRunningRelease ? 'release' : 'this';
-    throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
-  }
-
-
-  BuildResult _lastBuild;
-  Environment _environment;
+  @override
   Future<void> runSourceGenerators() async {
     _environment ??= Environment(
       artifacts: globals.artifacts,
@@ -944,23 +1190,6 @@ abstract class ResidentRunner {
     globals.logger.printTrace('complete');
   }
 
-  /// Write the SkSL shaders to a zip file in build directory.
-  ///
-  /// Returns the name of the file, or `null` on failures.
-  Future<String> writeSkSL() async {
-    if (!supportsWriteSkSL) {
-      throw Exception('writeSkSL is not supported by this runner.');
-    }
-    final List<FlutterView> views = await flutterDevices
-      .first
-      .vmService.getFlutterViews();
-    final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
-      viewId: views.first.id,
-    );
-    final Device device = flutterDevices.first.device;
-    return sharedSkSlWriter(device, data);
-  }
-
   @protected
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
@@ -975,6 +1204,7 @@ abstract class ResidentRunner {
     }
   }
 
+  @override
   Future<void> exit() async {
     _exited = true;
     await residentDevtoolsHandler.shutdown();
@@ -984,218 +1214,13 @@ abstract class ResidentRunner {
     await shutdownDartDevelopmentService();
   }
 
+  @override
   Future<void> detach() async {
     await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
     await shutdownDartDevelopmentService();
     appFinished();
-  }
-
-  Future<bool> debugDumpApp() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.debugDumpApp();
-    }
-    return true;
-  }
-
-  Future<bool> debugDumpRenderTree() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.debugDumpRenderTree();
-    }
-    return true;
-  }
-
-  Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.debugDumpLayerTree();
-    }
-    return true;
-  }
-
-  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.debugDumpSemanticsTreeInTraversalOrder();
-    }
-    return true;
-  }
-
-  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.debugDumpSemanticsTreeInInverseHitTestOrder();
-    }
-    return true;
-  }
-
-  Future<bool> debugToggleDebugPaintSizeEnabled() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.toggleDebugPaintSizeEnabled();
-    }
-    return true;
-  }
-
-  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.toggleDebugCheckElevationsEnabled();
-    }
-    return true;
-  }
-
-  Future<bool> debugTogglePerformanceOverlayOverride() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.debugTogglePerformanceOverlayOverride();
-    }
-    return true;
-  }
-
-  Future<bool> debugToggleWidgetInspector() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.toggleWidgetInspector();
-    }
-    return true;
-  }
-
-  Future<bool> debugToggleInvertOversizedImages() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.toggleInvertOversizedImages();
-    }
-    return true;
-  }
-
-  Future<bool> debugToggleProfileWidgetBuilds() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      await device.toggleProfileWidgetBuilds();
-    }
-    return true;
-  }
-
-  Future<bool> debugToggleBrightness() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    final Brightness brightness = await flutterDevices.first.toggleBrightness();
-    Brightness next;
-    for (final FlutterDevice device in flutterDevices) {
-      next = await device.toggleBrightness(
-        current: brightness,
-      );
-      globals.logger.printStatus('Changed brightness to $next.');
-    }
-    return true;
-  }
-
-  /// Take a screenshot on the provided [device].
-  ///
-  /// If the device has a connected vmservice, this method will attempt to hide
-  /// and restore the debug banner before taking the screenshot.
-  ///
-  /// Throws an [AssertionError] if [Device.supportsScreenshot] is not true.
-  Future<void> screenshot(FlutterDevice device) async {
-    assert(device.device.supportsScreenshot);
-
-    final Status status = globals.logger.startProgress(
-      'Taking screenshot for ${device.device.name}...',
-    );
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'png',
-    );
-    List<FlutterView> views = <FlutterView>[];
-    Future<bool> setDebugBanner(bool value) async {
-      try {
-        for (final FlutterView view in views) {
-          await device.vmService.flutterDebugAllowBanner(
-            value,
-            isolateId: view.uiIsolate.id,
-          );
-        }
-        return true;
-      } on Exception catch (error) {
-        status.cancel();
-        globals.printError('Error communicating with Flutter on the device: $error');
-        return false;
-      }
-    }
-
-    try {
-      if (supportsServiceProtocol && isRunningDebug) {
-        // Ensure that the vmService access is guarded by supportsServiceProtocol, it
-        // will be null in release mode.
-        views = await device.vmService.getFlutterViews();
-        if (!await setDebugBanner(false)) {
-          return;
-        }
-      }
-      try {
-        await device.device.takeScreenshot(outputFile);
-      } finally {
-        if (supportsServiceProtocol && isRunningDebug) {
-          await setDebugBanner(true);
-        }
-      }
-      final int sizeKB = outputFile.lengthSync() ~/ 1024;
-      status.stop();
-      globals.printStatus(
-        'Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).',
-      );
-    } on Exception catch (error) {
-      status.cancel();
-      globals.printError('Error taking screenshot: $error');
-    }
-  }
-
-  Future<bool> debugTogglePlatform() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
-      return false;
-    }
-    final List<FlutterView> views = await flutterDevices
-      .first
-      .vmService.getFlutterViews();
-    final String isolateId = views.first.uiIsolate.id;
-    final String from = await flutterDevices
-      .first.vmService.flutterPlatformOverride(
-        isolateId: isolateId,
-      );
-    String to;
-    for (final FlutterDevice device in flutterDevices) {
-      to = await device.togglePlatform(from: from);
-    }
-    globals.printStatus('Switched operating system to $to');
-    return true;
   }
 
   Future<void> stopEchoingDeviceLog() async {
@@ -1379,9 +1404,6 @@ abstract class ResidentRunner {
     _reportedDebuggers = true;
   }
 
-  /// Called to print help to the terminal.
-  void printHelp({ @required bool details });
-
   void printHelpDetails() {
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       commandHelp.s.print();
@@ -1413,14 +1435,11 @@ abstract class ResidentRunner {
     }
   }
 
-  /// Called when a signal has requested we exit.
+  @override
   Future<void> cleanupAfterSignal();
 
   /// Called right before we exit.
   Future<void> cleanupAtFinish();
-
-  // Clears the screen.
-  void clearScreen() => globals.logger.clear();
 }
 
 class OperationResult {
@@ -1479,13 +1498,17 @@ class TerminalHandler {
   final bool _reportReady;
   final String _pidFile;
 
-  final ResidentRunner residentRunner;
+  final ResidentHandlers residentRunner;
   bool _processingUserRequest = false;
   StreamSubscription<void> subscription;
   File _actualPidFile;
 
   @visibleForTesting
   String lastReceivedCommand;
+
+  /// This is only a buffer logger in unit tests
+  @visibleForTesting
+  BufferLogger get logger => _logger as BufferLogger;
 
   void setupTerminal() {
     if (!_logger.quiet) {
@@ -1544,7 +1567,7 @@ class TerminalHandler {
       case 'b':
         return residentRunner.debugToggleBrightness();
       case 'c':
-        residentRunner.clearScreen();
+        _logger.clear();
         return true;
       case 'd':
       case 'D':
@@ -1597,7 +1620,7 @@ class TerminalHandler {
         return true;
       case 'R':
         // If hot restart is not supported for all devices, ignore the command.
-        if (!residentRunner.canHotRestart || !residentRunner.hotMode) {
+        if (!residentRunner.supportsRestart || !residentRunner.hotMode) {
           return false;
         }
         final OperationResult result = await residentRunner.restart(fullRestart: true);
@@ -1694,17 +1717,14 @@ class DebugConnectionInfo {
 ///
 /// These values must match what is available in
 /// `packages/flutter/lib/src/foundation/binding.dart`.
-String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
+String nextPlatform(String currentPlatform) {
   switch (currentPlatform) {
     case 'android':
       return 'iOS';
     case 'iOS':
       return 'fuchsia';
     case 'fuchsia':
-      if (featureFlags.isMacOSEnabled) {
-        return 'macOS';
-      }
-      return 'android';
+      return 'macOS';
     case 'macOS':
       return 'android';
     default:
