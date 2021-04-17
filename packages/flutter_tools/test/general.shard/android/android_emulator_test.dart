@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/device_categories.dart';
+import 'package:test/fake.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/mocks.dart' show MockAndroidSdk;
 
 const String emulatorID = 'i1234';
 const String errorText = '[Android emulator test error]';
@@ -32,7 +30,7 @@ void main() {
         emulatorID,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, false);
@@ -45,7 +43,7 @@ void main() {
         properties: const <String, String>{'name': 'test'},
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.id, emulatorID);
@@ -65,7 +63,7 @@ void main() {
         properties: properties,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.id, emulatorID);
@@ -86,7 +84,7 @@ void main() {
         properties: properties,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.name, displayName);
@@ -104,7 +102,7 @@ void main() {
         properties: properties,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
-        androidSdk: MockAndroidSdk(),
+        androidSdk: FakeAndroidSdk(),
       );
 
       expect(emulator.name, 'This is my ID');
@@ -127,11 +125,10 @@ void main() {
   });
 
   group('Android emulator launch ', () {
-    MockAndroidSdk mockSdk;
+    late FakeAndroidSdk fakeSdk;
 
     setUp(() {
-      mockSdk = MockAndroidSdk();
-      when(mockSdk.emulatorPath).thenReturn('emulator');
+      fakeSdk = FakeAndroidSdk();
     });
 
     testWithoutContext('succeeds', () async {
@@ -139,7 +136,7 @@ void main() {
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: kEmulatorLaunchCommand),
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         logger: BufferLogger.test(),
       );
 
@@ -164,7 +161,7 @@ void main() {
             duration: Duration(seconds: 1),
           ),
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         logger: logger,
       );
 
@@ -191,7 +188,7 @@ void main() {
             duration: Duration(seconds: 4),
           ),
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         logger: logger,
       );
       final Completer<void> completer = Completer<void>();
@@ -205,4 +202,9 @@ void main() {
       expect(logger.errorText, isEmpty);
     }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
   });
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String get emulatorPath => 'emulator';
 }

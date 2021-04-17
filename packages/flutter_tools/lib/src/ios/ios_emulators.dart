@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/process.dart';
-import '../device.dart';
+import '../device_categories.dart';
 import '../emulator.dart';
 import '../globals_null_migrated.dart' as globals;
-import 'simulators.dart';
+
+const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSEmulators extends EmulatorDiscovery {
   @override
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => globals.iosWorkflow.canListEmulators;
+  bool get canListAnything => globals.iosWorkflow?.canListEmulators ?? false;
 
   @override
   Future<List<Emulator>> get emulators async => getEmulators();
@@ -42,11 +41,15 @@ class IOSEmulator extends Emulator {
   @override
   Future<void> launch() async {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
+      final String? simulatorPath = globals.xcode?.getSimulatorPath();
+      if (simulatorPath == null) {
+        return false;
+      }
       final List<String> args = <String>[
         'open',
         ...additionalArgs,
         '-a',
-        globals.xcode.getSimulatorPath(),
+        simulatorPath,
       ];
 
       final RunResult launchResult = await globals.processUtils.run(args);
@@ -70,7 +73,7 @@ class IOSEmulator extends Emulator {
 
 /// Return the list of iOS Simulators (there can only be zero or one).
 List<IOSEmulator> getEmulators() {
-  final String simulatorPath = globals.xcode.getSimulatorPath();
+  final String? simulatorPath = globals.xcode?.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }

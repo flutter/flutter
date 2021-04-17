@@ -27,10 +27,9 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'application_package.dart';
+import 'ios_emulators.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
-
-const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators({

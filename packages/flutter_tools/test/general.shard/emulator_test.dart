@@ -6,18 +6,18 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_categories.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
-import '../src/mocks.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
 const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
@@ -45,20 +45,15 @@ const FakeCommand kListEmulatorsCommand = FakeCommand(
 
 void main() {
   FakeProcessManager fakeProcessManager;
-  MockAndroidSdk mockSdk;
+  FakeAndroidSdk fakeSdk;
   FileSystem fileSystem;
   Xcode xcode;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
-    mockSdk = MockAndroidSdk();
+    fakeSdk = FakeAndroidSdk();
     xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
-
-    when(mockSdk.avdManagerPath).thenReturn('avdmanager');
-    when(mockSdk.getAvdManagerPath()).thenReturn('avdmanager');
-    when(mockSdk.emulatorPath).thenReturn('emulator');
-    when(mockSdk.adbPath).thenReturn('adb');
   });
 
   group('EmulatorManager', () {
@@ -74,9 +69,9 @@ void main() {
             stdout: 'existing-avd-1',
           ),
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: mockSdk,
+          androidSdk: fakeSdk,
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
@@ -121,8 +116,7 @@ void main() {
     });
 
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
-      when(mockSdk.avdManagerPath).thenReturn(null);
-      when(mockSdk.getAvdManagerPath()).thenReturn(null);
+      final FakeAndroidSdk fakeSdk = FakeAndroidSdk(avdManagerPath: null);
       final EmulatorManager emulatorManager = EmulatorManager(
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -132,9 +126,9 @@ void main() {
             stdout: 'existing-avd-1',
           ),
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: mockSdk,
+          androidSdk: fakeSdk,
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
@@ -174,9 +168,9 @@ void main() {
             ],
           )
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: mockSdk,
+          androidSdk: fakeSdk,
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
@@ -211,9 +205,9 @@ void main() {
             ],
           )
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: mockSdk,
+          androidSdk: fakeSdk,
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
@@ -250,9 +244,9 @@ void main() {
               'Use --force if you want to replace it.'
           )
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: mockSdk,
+          androidSdk: fakeSdk,
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
@@ -292,9 +286,9 @@ void main() {
             ],
           )
         ]),
-        androidSdk: mockSdk,
+        androidSdk: fakeSdk,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: mockSdk,
+          androidSdk: fakeSdk,
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
@@ -371,4 +365,26 @@ class FakeEmulator extends Emulator {
   Future<void> launch() {
     throw UnimplementedError('Not implemented in Mock');
   }
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  FakeAndroidSdk({this.avdManagerPath = 'avdmanager'});
+
+  @override
+  String get emulatorPath => 'emulator';
+
+  @override
+  String get adbPath => 'adb';
+
+  @override
+  Map<String, String> get sdkManagerEnv => <String, String>{};
+
+  @override
+  String getAvdPath() => 'avd';
+
+  @override
+  String avdManagerPath;
+
+  @override
+  String getAvdManagerPath() => avdManagerPath;
 }
