@@ -70,7 +70,7 @@ class Visibility extends StatelessWidget {
        assert(maintainSize != null),
        assert(
          maintainState == true || maintainAnimation == false,
-         'Cannot maintain animations if the state is not also maintained.'
+         'Cannot maintain animations if the state is not also maintained.',
        ),
        assert(
          maintainAnimation == true || maintainSize == false,

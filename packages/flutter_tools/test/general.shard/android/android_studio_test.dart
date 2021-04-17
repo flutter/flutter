@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:test/fake.dart';
 
@@ -170,6 +170,39 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('finds latest valid install', () {
+      final String applicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(applicationPlistFolder).createSync(recursive: true);
+
+      final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist;
+
+      final String homeDirectoryPlistFolder = globals.fs.path.join(
+        globals.fsUtils.homeDirPath,
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
+
+      final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
+      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
+
+      expect(AndroidStudio.allInstalled().length, 2);
+      expect(AndroidStudio.latestValid().version, Version(4, 1, 0));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
       Platform: () => platform,
       PlistParser: () => plistUtils,
     });

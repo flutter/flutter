@@ -22,7 +22,7 @@ import 'tween.dart';
 /// for the next 20%, and then returns to 5.0 for the final 40%.
 ///
 /// ```dart
-/// final Animation<double> animation = TweenSequence(
+/// final Animation<double> animation = TweenSequence<double>(
 ///   <TweenSequenceItem<double>>[
 ///     TweenSequenceItem<double>(
 ///       tween: Tween<double>(begin: 5.0, end: 10.0)

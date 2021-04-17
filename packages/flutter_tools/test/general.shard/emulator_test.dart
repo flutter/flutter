@@ -18,7 +18,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 import '../src/mocks.dart';
-import '../src/testbed.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
 const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
@@ -52,7 +51,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     mockSdk = MockAndroidSdk();
     xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
 

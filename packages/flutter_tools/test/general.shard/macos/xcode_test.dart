@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 
@@ -32,7 +33,7 @@ void main() {
     FakeProcessManager fakeProcessManager;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
     });
 
     group('Xcode', () {
@@ -354,7 +355,7 @@ void main() {
           xcode: xcode,
           platform: null,
           artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });
@@ -382,7 +383,7 @@ void main() {
           xcode: xcode,
           platform: null,
           artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });

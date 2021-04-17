@@ -10,9 +10,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
@@ -41,7 +41,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
-        terminal: Terminal.test(),
         usage: null,
       );
     });
@@ -91,7 +90,7 @@ void main() {
   BufferLogger logger;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
@@ -101,7 +100,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: null,
     );
   });
@@ -218,7 +216,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
@@ -422,7 +419,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
@@ -449,7 +445,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 

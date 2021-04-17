@@ -39,13 +39,15 @@ class AppBarTheme with Diagnosticable {
     this.textTheme,
     this.centerTitle,
     this.titleSpacing,
+    this.toolbarHeight,
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.backwardsCompatibility,
   }) : assert(
          color == null || backgroundColor == null,
-         'The color and backgroundColor parameters mean the same thing. Only specify one.'),
+         'The color and backgroundColor parameters mean the same thing. Only specify one.',
+       ),
        backgroundColor = backgroundColor ?? color;
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
@@ -143,6 +145,15 @@ class AppBarTheme with Diagnosticable {
   /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
   final double? titleSpacing;
 
+  /// Overrides the default value for the [AppBar.toolbarHeight]
+  /// property in all descendant [AppBar] widgets.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.preferredHeightFor], which computes the overall
+  ///    height of an AppBar widget, taking this value into account.
+  final double? toolbarHeight;
+
   /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
@@ -183,6 +194,7 @@ class AppBarTheme with Diagnosticable {
     TextTheme? textTheme,
     bool? centerTitle,
     double? titleSpacing,
+    double? toolbarHeight,
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
@@ -190,7 +202,8 @@ class AppBarTheme with Diagnosticable {
   }) {
     assert(
       color == null || backgroundColor == null,
-      'The color and backgroundColor parameters mean the same thing. Only specify one.');
+      'The color and backgroundColor parameters mean the same thing. Only specify one.',
+    );
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
       backgroundColor: backgroundColor ?? color ?? this.backgroundColor,
@@ -202,6 +215,7 @@ class AppBarTheme with Diagnosticable {
       textTheme: textTheme ?? this.textTheme,
       centerTitle: centerTitle ?? this.centerTitle,
       titleSpacing: titleSpacing ?? this.titleSpacing,
+      toolbarHeight: toolbarHeight ?? this.toolbarHeight,
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       systemOverlayStyle: systemOverlayStyle ?? this.systemOverlayStyle,
@@ -232,6 +246,7 @@ class AppBarTheme with Diagnosticable {
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
       titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
+      toolbarHeight: lerpDouble(a?.toolbarHeight, b?.toolbarHeight, t),
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
@@ -252,6 +267,7 @@ class AppBarTheme with Diagnosticable {
       textTheme,
       centerTitle,
       titleSpacing,
+      toolbarHeight,
       toolbarTextStyle,
       titleTextStyle,
       systemOverlayStyle,
@@ -276,6 +292,7 @@ class AppBarTheme with Diagnosticable {
         && other.textTheme == textTheme
         && other.centerTitle == centerTitle
         && other.titleSpacing == titleSpacing
+        && other.toolbarHeight == toolbarHeight
         && other.toolbarTextStyle == toolbarTextStyle
         && other.titleTextStyle == titleTextStyle
         && other.systemOverlayStyle == systemOverlayStyle
@@ -295,6 +312,7 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('backwardsCompatibility', backwardsCompatibility, defaultValue: null));

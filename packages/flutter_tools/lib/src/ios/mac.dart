@@ -7,7 +7,6 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -24,12 +23,14 @@ import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import 'application_package.dart';
 import 'code_signing.dart';
 import 'devices.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
+import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -177,10 +178,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
-      iosApp: app,
+      buildSettings: await app.project.buildSettingsForBuildInfo(buildInfo),
       processManager: globals.processManager,
       logger: globals.logger,
-      buildInfo: buildInfo,
+      config: globals.config,
+      terminal: globals.terminal,
     );
   }
 
@@ -382,6 +384,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   } on ProcessException catch (e) {
     if (e.toString().contains('timed out')) {
       BuildEvent('xcode-show-build-settings-timeout',
+        type: 'ios',
         command: showBuildSettingsCommand.join(' '),
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -426,18 +429,24 @@ Future<XcodeBuildResult> buildXcodeProject({
         targetBuildDir,
         buildSettings['WRAPPER_NAME'],
       );
-      if (globals.fs.isDirectorySync(expectedOutputDirectory)) {
+      if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
         // the BuildInfo.
-        outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
-        if (globals.fs.isDirectorySync(outputDir)) {
-          // Previous output directory might have incompatible artifacts
-          // (for example, kernel binary files produced from previous run).
-          globals.fs.directory(outputDir).deleteSync(recursive: true);
-        }
-        copyDirectory(
-          globals.fs.directory(expectedOutputDirectory),
-          globals.fs.directory(outputDir),
+        outputDir = targetBuildDir.replaceFirst('/$configuration-', '/');
+        globals.fs.directory(outputDir).createSync(recursive: true);
+
+        // rsync instead of copy to maintain timestamps to support incremental
+        // app install deltas. Use --delete to remove incompatible artifacts
+        // (for example, kernel binary files produced from previous run).
+        await globals.processUtils.run(
+          <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            expectedOutputDirectory,
+            outputDir,
+          ],
+          throwOnError: true,
         );
       } else {
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
@@ -528,6 +537,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
     BuildEvent('xcode-bitcode-failure',
+      type: 'ios',
       command: result.xcodeBuildExecution.buildCommands.toString(),
       settings: result.xcodeBuildExecution.buildSettings.toString(),
       flutterUsage: flutterUsage,

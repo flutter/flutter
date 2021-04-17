@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 const Map<String, String> kDyLdLibEntry = <String, String>{
@@ -64,7 +64,7 @@ void main() {
     final bool wasInstalled = await device.installApp(iosApp);
 
     expect(wasInstalled, true);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with network', () async {
@@ -94,7 +94,7 @@ void main() {
     final bool wasInstalled = await device.installApp(iosApp);
 
     expect(wasInstalled, true);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('IOSDevice.uninstallApp calls ios-deploy correctly', () async {
@@ -116,7 +116,7 @@ void main() {
     final bool wasUninstalled = await device.uninstallApp(iosApp);
 
     expect(wasUninstalled, true);
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   group('isAppInstalled', () {
@@ -141,7 +141,7 @@ void main() {
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, false);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('returns true when app is installed', () async {
@@ -165,7 +165,7 @@ void main() {
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, isTrue);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('returns false when app is not installed', () async {
@@ -190,7 +190,7 @@ void main() {
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, isFalse);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
       expect(logger.traceText, contains('${iosApp.id} not installed on ${device.id}'));
     });
 
@@ -218,7 +218,7 @@ void main() {
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
       expect(isAppInstalled, isFalse);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
       expect(logger.traceText, contains(stderr));
     });
   });
@@ -288,6 +288,7 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
   return IOSDevice(
     '1234',

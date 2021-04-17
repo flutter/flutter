@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -355,7 +355,7 @@ Command: /home/android/gradlew assembleRelease
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-android-x-failure',
           parameters: <String, String>{
             'cd43': 'app-not-using-plugins',
@@ -390,7 +390,7 @@ Command: /home/android/gradlew assembleRelease
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-android-x-failure',
           parameters: <String, String>{
             'cd43': 'app-not-using-androidx',
@@ -418,7 +418,7 @@ Command: /home/android/gradlew assembleRelease
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-android-x-failure',
           parameters: <String, String>{
             'cd43': 'using-jetifier',
@@ -453,7 +453,7 @@ Command: /home/android/gradlew assembleRelease
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-android-x-failure',
           parameters: <String, String>{
             'cd43': 'not-using-jetifier',
@@ -527,7 +527,7 @@ Command: /home/android/gradlew assembleRelease
     FakeProcessManager fakeProcessManager;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
     });
 
     testWithoutContext('pattern', () {

@@ -17,7 +17,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/web_runner.dart';
@@ -72,6 +72,10 @@ class WebDriverService extends DriverService {
       stayResident: false,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
+      fileSystem: globals.fs,
+      usage: globals.flutterUsage,
+      logger: globals.logger,
+      systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final int result = await _residentRunner.run(

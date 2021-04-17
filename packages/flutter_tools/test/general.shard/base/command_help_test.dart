@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputPreferences;
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 CommandHelp _createCommandHelp({
-  @required bool ansi,
-  @required int wrapColumn,
+  required bool ansi,
+  required int wrapColumn,
 }) {
   final Platform platform = FakePlatform(
     stdoutSupportsAnsi: ansi,
@@ -36,9 +33,9 @@ CommandHelp _createCommandHelp({
 
 // Used to use the message length in different scenarios in a DRY way
 void _testMessageLength({
-  @required bool stdoutSupportsAnsi,
-  @required int maxTestLineLength,
-  @required int wrapColumn,
+  required bool stdoutSupportsAnsi,
+  required int maxTestLineLength,
+  required int wrapColumn,
 }) {
   final CommandHelp commandHelp = _createCommandHelp(
     ansi: stdoutSupportsAnsi,
@@ -73,7 +70,6 @@ void _testMessageLength({
   expect(commandHelp.r.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.s.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.t.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.v.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.w.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.z.toString().length, lessThanOrEqualTo(expectedWidth));
 }
@@ -83,7 +79,7 @@ void main() {
     group('toString', () {
       testWithoutContext('ends with a resetBold when it has parenthetical text', () {
         final Platform platform = FakePlatform(stdoutSupportsAnsi: true);
-        final AnsiTerminal terminal = AnsiTerminal(stdio: null, platform: platform);
+        final AnsiTerminal terminal = AnsiTerminal(stdio: FakeStdio(), platform: platform);
 
         final CommandHelpOption commandHelpOption = CommandHelpOption(
           'tester',
@@ -119,7 +115,6 @@ void main() {
         expect(commandHelp.r.toString(), startsWith('\x1B[1mr\x1B[22m'));
         expect(commandHelp.s.toString(), startsWith('\x1B[1ms\x1B[22m'));
         expect(commandHelp.t.toString(), startsWith('\x1B[1mt\x1B[22m'));
-        expect(commandHelp.v.toString(), startsWith('\x1B[1mv\x1B[22m'));
         expect(commandHelp.w.toString(), startsWith('\x1B[1mw\x1B[22m'));
         expect(commandHelp.z.toString(), startsWith('\x1B[1mz\x1B[22m'));
       });
@@ -196,7 +191,6 @@ void main() {
         expect(commandHelp.r.toString(), equals('\x1B[1mr\x1B[22m Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('\x1B[1ms\x1B[22m Save a screenshot to flutter.png.'));
         expect(commandHelp.t.toString(), equals('\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[90m(debugDumpRenderTree)\x1B[39m\x1b[22m'));
-        expect(commandHelp.v.toString(), equals('\x1B[1mv\x1B[22m Launch DevTools.'));
         expect(commandHelp.w.toString(), equals('\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[90m(debugDumpApp)\x1B[39m\x1b[22m'));
         expect(commandHelp.z.toString(), equals('\x1B[1mz\x1B[22m Toggle elevation checker.'));
       });
@@ -223,7 +217,6 @@ void main() {
         expect(commandHelp.r.toString(), equals('r Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('s Save a screenshot to flutter.png.'));
         expect(commandHelp.t.toString(), equals('t Dump rendering tree to the console.                          (debugDumpRenderTree)'));
-        expect(commandHelp.v.toString(), equals('v Launch DevTools.'));
         expect(commandHelp.w.toString(), equals('w Dump widget hierarchy to the console.                               (debugDumpApp)'));
         expect(commandHelp.z.toString(), equals('z Toggle elevation checker.'));
       });

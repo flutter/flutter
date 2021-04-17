@@ -21,7 +21,7 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
 final Platform kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
@@ -71,7 +71,7 @@ void main() {
     @required CompleterIOSink stdinSink,
   }) {
     assert(stdinSink != null);
-    stdinSink.writes.clear();
+    stdinSink.clear();
     when(fontSubsetProcess.exitCode).thenAnswer((_) async => exitCode);
     when(fontSubsetProcess.stdout).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stdout)]));
     when(fontSubsetProcess.stderr).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stderr)]));
@@ -257,7 +257,7 @@ void main() {
       outputPath: outputPath,
       relativePath: relativePath,
     );
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
+    expect(stdinSink.getAndClear(), '59470\n');
     _resetFontSubsetInvocation(stdinSink: stdinSink);
 
     expect(subsetted, true);
@@ -267,7 +267,7 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsetted, true);
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
+    expect(stdinSink.getAndClear(), '59470\n');
 
     verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
     verify(mockProcessManager.start(fontSubsetArgs)).called(2);

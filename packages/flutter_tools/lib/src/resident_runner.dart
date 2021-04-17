@@ -38,6 +38,7 @@ import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
+import 'sksl_writer.dart';
 import 'vmservice.dart';
 
 class FlutterDevice {
@@ -47,7 +48,7 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
-    TargetPlatform targetPlatform,
+    this.targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
   }) : assert(buildInfo.trackWidgetCreation != null),
@@ -69,6 +70,7 @@ class FlutterDevice {
          processManager: globals.processManager,
          logger: globals.logger,
          platform: globals.platform,
+         fileSystem: globals.fs,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -138,6 +140,7 @@ class FlutterDevice {
         artifacts: globals.artifacts,
         processManager: globals.processManager,
         logger: globals.logger,
+        fileSystem: globals.fs,
         platform: platform,
       );
     } else {
@@ -173,6 +176,7 @@ class FlutterDevice {
         processManager: globals.processManager,
         logger: globals.logger,
         platform: platform,
+        fileSystem: globals.fs,
       );
     }
 
@@ -192,6 +196,7 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
+  final TargetPlatform targetPlatform;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
@@ -249,7 +254,7 @@ class FlutterDevice {
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(observatoryUri);
+          service = await connectToVmService(observatoryUri, logger: globals.logger);
           await service.dispose();
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
@@ -268,6 +273,7 @@ class FlutterDevice {
             ddsPort,
             ipv6,
             disableServiceAuthCodes,
+            logger: globals.logger,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
@@ -299,6 +305,7 @@ class FlutterDevice {
               getSkSLMethod: getSkSLMethod,
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
+              logger: globals.logger,
             ),
             if (!existingDds)
               device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
@@ -565,7 +572,7 @@ class FlutterDevice {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${globals.fsUtils.getDisplayPath(hotRunner.mainPath)} '
+      'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
       'on ${device.name} in $modeName mode...',
     );
 
@@ -645,7 +652,7 @@ class FlutterDevice {
       );
     } else {
       globals.printStatus(
-        'Launching ${globals.fsUtils.getDisplayPath(coldRunner.mainPath)} '
+        'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
         'on ${device.name} in $modeName mode...',
       );
     }
@@ -916,8 +923,8 @@ abstract class ResidentRunner {
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
+      platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
@@ -1006,7 +1013,7 @@ abstract class ResidentRunner {
   }
 
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol) {
+    if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
@@ -1400,7 +1407,6 @@ abstract class ResidentRunner {
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();
@@ -1498,11 +1504,11 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-    _addSignalHandler(io.ProcessSignal.SIGINT, _cleanUp);
-    _addSignalHandler(io.ProcessSignal.SIGTERM, _cleanUp);
+    _addSignalHandler(io.ProcessSignal.sigint, _cleanUp);
+    _addSignalHandler(io.ProcessSignal.sigterm, _cleanUp);
     if (residentRunner.supportsServiceProtocol && residentRunner.supportsRestart) {
-      _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
-      _addSignalHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.sigusr1, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
         _logger.printTrace('Writing pid to: $_pidFile');
         _actualPidFile = _processInfo.writePidFile(_pidFile);
@@ -1660,7 +1666,7 @@ class TerminalHandler {
     }
     _processingUserRequest = true;
 
-    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
+    final bool fullRestart = signal == io.ProcessSignal.sigusr2;
 
     try {
       await residentRunner.restart(fullRestart: fullRestart);

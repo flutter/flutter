@@ -451,6 +451,7 @@ void main() {
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+        onSetText: (String _) => performedActions.add(SemanticsAction.setText),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
       ),
@@ -489,6 +490,9 @@ void main() {
             'extent': 5,
           });
           break;
+        case SemanticsAction.setText:
+          semanticsOwner.performAction(expectedId, action, 'text');
+          break;
         default:
           semanticsOwner.performAction(expectedId, action);
       }
@@ -498,7 +502,7 @@ void main() {
     }
 
     semantics.dispose();
-  }, skip: true); // disable for soft transition https://github.com/flutter/flutter/issues/77271
+  });
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -515,6 +519,7 @@ void main() {
           selected: true,
           button: true,
           slider: true,
+          keyboardKey: true,
           link: true,
           textField: true,
           readOnly: true,

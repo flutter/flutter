@@ -54,7 +54,7 @@ class _GestureBindingSpy extends AutomatedTestWidgetsFlutterBinding {
   PointerRouter get pointerRouter => _testPointerRouter;
 }
 
-class FakeEditableTextState extends TextSelectionDelegate with Fake { }
+class FakeEditableTextState extends Fake implements TextSelectionDelegate  { }
 
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;

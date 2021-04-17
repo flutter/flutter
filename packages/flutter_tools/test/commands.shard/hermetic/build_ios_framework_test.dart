@@ -12,17 +12,15 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 void main() {
   group('build ios-framework', () {
     MemoryFileSystem memoryFileSystem;
-    MockFlutterVersion mockFlutterVersion;
-    MockGitTagVersion mockGitTagVersion;
     Directory outputDirectory;
     FakePlatform fakePlatform;
 
@@ -33,8 +31,6 @@ void main() {
     const String storageBaseUrl = 'https://fake.googleapis.com';
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      mockFlutterVersion = MockFlutterVersion();
-      mockGitTagVersion = MockGitTagVersion();
       fakePlatform = FakePlatform(
         operatingSystem: 'macos',
         environment: <String, String>{
@@ -42,7 +38,6 @@ void main() {
         },
       );
 
-      when(mockFlutterVersion.gitTagVersion).thenReturn(mockGitTagVersion);
       outputDirectory = memoryFileSystem.systemTempDirectory
           .createTempSync('flutter_build_ios_framework_test_output.')
           .childDirectory('Debug')
@@ -59,21 +54,21 @@ void main() {
           rootOverride: rootOverride,
           platform: fakePlatform,
           fileSystem: memoryFileSystem,
+          processManager: FakeProcessManager.any(),
         );
         rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
           ..createSync(recursive: true)
           ..writeAsStringSync(engineRevision);
-        when(mockFlutterVersion.gitTagVersion).thenReturn(mockGitTagVersion);
       });
 
       testUsingContext('version unknown', () async {
         const String frameworkVersion = '0.0.0-unknown';
-        when(mockFlutterVersion.frameworkVersion).thenReturn(frameworkVersion);
+        final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
-          flutterVersion: mockFlutterVersion,
+          flutterVersion: fakeFlutterVersion,
           cache: cache,
           verboseHelp: false,
         );
@@ -87,18 +82,22 @@ void main() {
 
       testUsingContext('throws when not on a released version', () async {
         const String frameworkVersion = 'v1.13.10+hotfix-pre.2';
-        when(mockFlutterVersion.frameworkVersion).thenReturn(frameworkVersion);
-
-        when(mockGitTagVersion.x).thenReturn(1);
-        when(mockGitTagVersion.y).thenReturn(13);
-        when(mockGitTagVersion.z).thenReturn(10);
-        when(mockGitTagVersion.hotfix).thenReturn(13);
-        when(mockGitTagVersion.commits).thenReturn(2);
+        const GitTagVersion gitTagVersion = GitTagVersion(
+          x: 1,
+          y: 13,
+          z: 10,
+          hotfix: 13,
+          commits: 2,
+        );
+        final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: gitTagVersion,
+          frameworkVersion: frameworkVersion,
+        );
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
-          flutterVersion: mockFlutterVersion,
+          flutterVersion: fakeFlutterVersion,
           cache: cache,
           verboseHelp: false,
         );
@@ -111,16 +110,20 @@ void main() {
       });
 
       testUsingContext('throws when license not found', () async {
-        when(mockGitTagVersion.x).thenReturn(1);
-        when(mockGitTagVersion.y).thenReturn(13);
-        when(mockGitTagVersion.z).thenReturn(10);
-        when(mockGitTagVersion.hotfix).thenReturn(13);
-        when(mockGitTagVersion.commits).thenReturn(0);
+        final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: const GitTagVersion(
+            x: 1,
+            y: 13,
+            z: 10,
+            hotfix: 13,
+            commits: 0,
+          ),
+        );
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
-          flutterVersion: mockFlutterVersion,
+          flutterVersion: fakeFlutterVersion,
           cache: cache,
           verboseHelp: false,
         );
@@ -137,28 +140,29 @@ void main() {
         const String licenseText = 'This is the license!';
 
         setUp(() {
-          when(mockGitTagVersion.x).thenReturn(1);
-          when(mockGitTagVersion.y).thenReturn(13);
-          when(mockGitTagVersion.z).thenReturn(11);
-          when(mockGitTagVersion.hotfix).thenReturn(13);
-
-          when(mockFlutterVersion.frameworkVersion).thenReturn(frameworkVersion);
-
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
         });
 
         group('on master channel', () {
-          setUp(() {
-            when(mockGitTagVersion.commits).thenReturn(100);
-          });
-
           testUsingContext('created when forced', () async {
+            const GitTagVersion gitTagVersion = GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 11,
+              hotfix: 13,
+              commits: 100,
+            );
+            final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+              gitTagVersion: gitTagVersion,
+              frameworkVersion: frameworkVersion,
+            );
+
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
-              flutterVersion: mockFlutterVersion,
+              flutterVersion: fakeFlutterVersion,
               cache: cache,
               verboseHelp: false,
             );
@@ -173,15 +177,26 @@ void main() {
         });
 
         group('not on master channel', () {
+          FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
-            when(mockGitTagVersion.commits).thenReturn(0);
+            const GitTagVersion gitTagVersion = GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 11,
+              hotfix: 13,
+              commits: 0,
+            );
+            fakeFlutterVersion = FakeFlutterVersion(
+              gitTagVersion: gitTagVersion,
+              frameworkVersion: frameworkVersion,
+            );
           });
 
           testUsingContext('contains license and version', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
-              flutterVersion: mockFlutterVersion,
+              flutterVersion: fakeFlutterVersion,
               cache: cache,
               verboseHelp: false,
             );
@@ -201,7 +216,7 @@ void main() {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
-              flutterVersion: mockFlutterVersion,
+              flutterVersion: fakeFlutterVersion,
               cache: cache,
               verboseHelp: false,
             );
@@ -219,7 +234,7 @@ void main() {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
-              flutterVersion: mockFlutterVersion,
+              flutterVersion: fakeFlutterVersion,
               cache: cache,
               verboseHelp: false,
             );
@@ -237,7 +252,7 @@ void main() {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
-              flutterVersion: mockFlutterVersion,
+              flutterVersion: fakeFlutterVersion,
               cache: cache,
               verboseHelp: false,
             );
@@ -255,6 +270,3 @@ void main() {
     });
   });
 }
-
-class MockFlutterVersion extends Mock implements FlutterVersion {}
-class MockGitTagVersion extends Mock implements GitTagVersion {}

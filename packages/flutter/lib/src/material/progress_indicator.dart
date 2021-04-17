@@ -43,6 +43,7 @@ abstract class ProgressIndicator extends StatefulWidget {
     Key? key,
     this.value,
     this.backgroundColor,
+    this.color,
     this.valueColor,
     this.semanticsLabel,
     this.semanticsValue,
@@ -62,18 +63,25 @@ abstract class ProgressIndicator extends StatefulWidget {
 
   /// The progress indicator's background color.
   ///
-  /// The current theme's [ThemeData.backgroundColor] by default.
+  /// The current theme's [ColorScheme.background] by default.
   ///
   /// This property is ignored if used in an adaptive constructor inside an iOS
   /// environment.
   final Color? backgroundColor;
 
+  /// The progress indicator's color.
+  ///
+  /// This is only used if [valueColor] is null. If [color] is also null,
+  /// then it defaults to the current theme's [ColorScheme.primary] by default.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
+  final Color? color;
+
   /// The progress indicator's color as an animated value.
   ///
-  /// To specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
-  ///
-  /// If null, the progress indicator is rendered with the current theme's
-  /// [ThemeData.accentColor].
+  /// If null, the progress indicator is rendered with [color], or if that is
+  /// also null then with the current theme's [ColorScheme.primary].
   ///
   /// This property is ignored if used in an adaptive constructor inside an iOS
   /// environment.
@@ -108,8 +116,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticsValue;
 
-  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
-  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
+  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).colorScheme.background;
+  Color _getValueColor(BuildContext context) => valueColor?.value ?? color ?? Theme.of(context).colorScheme.primary;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -267,14 +275,15 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Padding(
 ///       padding: const EdgeInsets.all(20.0),
 ///       child: Column(
 ///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///         children: [
-///           Text(
+///         children: <Widget>[
+///           const Text(
 ///             'Linear progress indicator with a fixed color',
 ///             style: const TextStyle(fontSize: 20),
 ///           ),
@@ -304,6 +313,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     Key? key,
     double? value,
     Color? backgroundColor,
+    Color? color,
     Animation<Color?>? valueColor,
     this.minHeight,
     String? semanticsLabel,
@@ -313,6 +323,7 @@ class LinearProgressIndicator extends ProgressIndicator {
         key: key,
         value: value,
         backgroundColor: backgroundColor,
+        color: color,
         valueColor: valueColor,
         semanticsLabel: semanticsLabel,
         semanticsValue: semanticsValue,
@@ -505,13 +516,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Padding(
 ///       padding: const EdgeInsets.all(20.0),
 ///       child: Column(
 ///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///         children: [
+///         children: <Widget>[
 ///           Text(
 ///             'Linear progress indicator with a fixed color',
 ///             style: Theme.of(context).textTheme.headline6,
@@ -542,6 +554,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     Key? key,
     double? value,
     Color? backgroundColor,
+    Color? color,
     Animation<Color?>? valueColor,
     this.strokeWidth = 4.0,
     String? semanticsLabel,
@@ -551,6 +564,7 @@ class CircularProgressIndicator extends ProgressIndicator {
          key: key,
          value: value,
          backgroundColor: backgroundColor,
+         color: color,
          valueColor: valueColor,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,

@@ -44,13 +44,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.0,)
-        )
-      )
+          child: Container(height: 600.0)
+        ),
+      ),
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
@@ -64,9 +64,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.1,)
-        )
-      )
+          child: Container(height: 600.1),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
@@ -79,9 +79,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.0,)
-        )
-      )
+          child: Container(width: 800.0),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
@@ -92,9 +92,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(width: 800.1,)
-        )
-      )
+          child: Container(width: 800.1),
+        ),
+      ),
     );
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
@@ -104,7 +104,7 @@ void main() {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.

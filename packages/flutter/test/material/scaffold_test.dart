@@ -713,7 +713,7 @@ void main() {
                 },
               ),
               bottomNavigationBar: const BottomAppBar(
-                child: SizedBox(height: 48.0,),
+                child: SizedBox(height: 48.0),
               ),
             ),
           ),
@@ -1848,13 +1848,13 @@ void main() {
                 child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: themeData.accentColor,
+                    color: themeData.colorScheme.secondary,
                     fontSize: 24.0,
                   ),
                 ),
               ),
             );
-          },);
+          });
         } on FlutterError catch (e) {
           error = e;
         } finally {
@@ -2190,6 +2190,9 @@ void main() {
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
+      '     _ScrollNotificationObserverScope\n'
+      '     NotificationListener<ScrollNotification>\n'
+      '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
       '     MediaQuery\n'
