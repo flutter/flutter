@@ -244,14 +244,14 @@ enum BottomNavigationBarType {
 ///       itemBuilder: (context, index) {
 ///         return Center(
 ///             child: Text(
-///               "Item $index",
+///               'Item $index',
 ///               style: TextStyle(
 ///                 fontWeight: _selectedIndex == 1? FontWeight.bold : FontWeight.normal,
 ///             ),
 ///           ),
 ///         );
 ///       },
-///       separatorBuilder: (context, index) => Divider(thickness: 1,),
+///       separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
 ///       itemCount: 50
 ///   );
 /// }
@@ -264,7 +264,7 @@ enum BottomNavigationBarType {
 ///     ),
 ///     body: _listViewBody(),
 ///     bottomNavigationBar: BottomNavigationBar(
-///       items: <BottomNavigationBarItem>[
+///       items: const <BottomNavigationBarItem>[
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.arrow_circle_up),
 ///           label: 'Back top',
