@@ -1492,7 +1492,6 @@ void main() {
     expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
-
   
   testWidgets('ExpansionPanelRadio.backgroundColor test', (WidgetTester tester) async {
     const Color firstPanelColor = Colors.red;
@@ -1553,7 +1552,7 @@ void main() {
     ));
 
     final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
-    
+
     expect(expandIcon.color, firstIconColor);
     expect(expandIcon.expandedColor, expandedIconColor);
     expect(expandIcon.disabledColor, disabledIconColor);
@@ -1584,7 +1583,7 @@ void main() {
     ));
 
     final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
-    
+
     expect(expandIcon.color, firstIconColor);
     expect(expandIcon.expandedColor, expandedIconColor);
     expect(expandIcon.disabledColor, disabledIconColor);
