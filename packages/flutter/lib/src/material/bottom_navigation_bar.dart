@@ -228,7 +228,7 @@ enum BottomNavigationBarType {
 ///   if (index == 0) {
 ///     _homeController.animateTo(
 ///        0.0,
-///        duration: Duration(milliseconds: 500),
+///        duration: const Duration(milliseconds: 500),
 ///        curve: Curves.easeOut,
 ///     );
 ///   } else {
@@ -251,7 +251,7 @@ enum BottomNavigationBarType {
 ///           ),
 ///         );
 ///       },
-///       separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1,),
+///       separatorBuilder: (BuildContext context, int index) => const Divider(thickness: 1,),
 ///       itemCount: 50
 ///   );
 /// }
