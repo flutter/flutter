@@ -440,15 +440,15 @@ class TextPainter {
           // placeholders are represented as a single replacement character,
           // so we subtract 1 from the length to account for it.
           adjustment += dims.range!.end - dims.range!.start - 1;
-        } else if (dims.range!.end > offset && dims.range!.start <= offset) {
-          // Within the range
+        } else if (dims.range!.end > offset && offset >= dims.range!.start) {
+          // Within the range.
           // place offset at beginning or end of placeholder depending on
           // which half it is in.
           adjustment += offset - dims.range!.start;
           if (offset > dims.range!.start + dims.range!.end / 2) {
             adjustment--;
           }
-        } else  {
+        } else {
           break;
         }
       }
@@ -460,30 +460,17 @@ class TextPainter {
     if (_placeholderDimensions == null) {
       return offset;
     }
-    print('GET RAW: $offset');
     for (final PlaceholderDimensions dims in _placeholderDimensions!) {
       if (dims.range != null) {
-        if (dims.range!.end < offset) {
-          print('1');
-          // placeholders are represented as a single replacement character,
-          // so we subtract 1 from the length to account for it.
+        if (offset > dims.range!.end) {
           offset += dims.range!.end - dims.range!.start - 1;
-        } else if (offset < dims.range!.end && dims.range!.start <= offset) {
-          print('2');
-          // Within the range
-          // place offset at beginning or end of placeholder depending on
-          // which half it is in.
-          offset += offset - dims.range!.start;
-          if (offset > dims.range!.start + dims.range!.end / 2) {
-            print('2.5');
-            offset++;
-          }
+        } else if (offset > dims.range!.start && offset <= dims.range!.end) {
+          offset += dims.range!.end - dims.range!.start - 1;
         } else  {
           break;
         }
       }
     }
-    print('    result: $offset');
     return offset;
   }
 
@@ -514,15 +501,6 @@ class TextPainter {
     return TextPosition(
       offset: _getRawOffset(position.offset),
       affinity: position.affinity
-    );
-  }
-
-  TextSelection? _getRawSelection(TextSelection? selection) {
-    return selection == null ? null : TextSelection(
-      baseOffset: _getRawOffset(selection.baseOffset),
-      extentOffset: _getRawOffset(selection.extentOffset),
-      affinity: selection.affinity,
-      isDirectional: selection.isDirectional,
     );
   }
 
