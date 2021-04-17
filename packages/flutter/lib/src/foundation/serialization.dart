@@ -25,6 +25,7 @@ class WriteBuffer {
   bool _isDone;
   final ByteData _eightBytes;
   late Uint8List _eightBytesAsList;
+  static final Uint8List _zeroBuffer = Uint8List.fromList([0, 0, 0, 0, 0, 0, 0, 0]);
 
   /// Write a Uint8 into the buffer.
   void putUint8(int byte) {
@@ -99,8 +100,7 @@ class WriteBuffer {
     assert(!_isDone);
     final int mod = _buffer.length % alignment;
     if (mod != 0) {
-      _eightBytes.setInt64(0, 0);
-      _buffer.addAll(_eightBytesAsList, 0, alignment - mod);
+      _buffer.addAll(_zeroBuffer, 0, alignment - mod);
     }
   }
 
