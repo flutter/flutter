@@ -25,6 +25,7 @@ class ColorScheme with Diagnosticable {
     required this.surface,
     required this.background,
     required this.error,
+    required this.success,
     required this.onPrimary,
     required this.onSecondary,
     required this.onSurface,
@@ -38,6 +39,7 @@ class ColorScheme with Diagnosticable {
        assert(surface != null),
        assert(background != null),
        assert(error != null),
+       assert(success != null),
        assert(onPrimary != null),
        assert(onSecondary != null),
        assert(onSurface != null),
@@ -55,6 +57,7 @@ class ColorScheme with Diagnosticable {
     this.surface = Colors.white,
     this.background = Colors.white,
     this.error = const Color(0xffb00020),
+    this.success = Colors.green,
     this.onPrimary = Colors.white,
     this.onSecondary = Colors.black,
     this.onSurface = Colors.black,
@@ -68,6 +71,7 @@ class ColorScheme with Diagnosticable {
        assert(surface != null),
        assert(background != null),
        assert(error != null),
+       assert(success != null),
        assert(onPrimary != null),
        assert(onSecondary != null),
        assert(onSurface != null),
@@ -85,6 +89,7 @@ class ColorScheme with Diagnosticable {
     this.surface = const Color(0xff121212),
     this.background = const Color(0xff121212),
     this.error = const Color(0xffcf6679),
+    this.success = Colors.green,
     this.onPrimary = Colors.black,
     this.onSecondary = Colors.black,
     this.onSurface = Colors.white,
@@ -116,6 +121,7 @@ class ColorScheme with Diagnosticable {
     this.surface = Colors.white,
     this.background = Colors.white,
     this.error = const Color(0xff790000),
+    this.success = Colors.green,
     this.onPrimary = Colors.white,
     this.onSecondary = Colors.black,
     this.onSurface = Colors.black,
@@ -146,6 +152,7 @@ class ColorScheme with Diagnosticable {
     this.surface = const Color(0xff121212),
     this.background = const Color(0xff121212),
     this.error = const Color(0xff9b374d),
+    this.success = Colors.green,
     this.onPrimary = Colors.black,
     this.onSecondary = Colors.black,
     this.onSurface = Colors.white,
@@ -177,6 +184,7 @@ class ColorScheme with Diagnosticable {
     Color? cardColor,
     Color? backgroundColor,
     Color? errorColor,
+    Color? successColor,
     Brightness brightness = Brightness.light,
   }) {
     assert(primarySwatch != null);
@@ -195,6 +203,7 @@ class ColorScheme with Diagnosticable {
       surface: cardColor ?? (isDark ? Colors.grey[800]! : Colors.white),
       background: backgroundColor ?? (isDark ? Colors.grey[700]! : primarySwatch[200]!),
       error: errorColor ?? Colors.red[700]!,
+      success: successColor ?? Colors.green!,
       onPrimary: primaryIsDark ? Colors.white : Colors.black,
       onSecondary: secondaryIsDark ? Colors.white : Colors.black,
       onSurface: isDark ? Colors.white : Colors.black,
@@ -228,6 +237,9 @@ class ColorScheme with Diagnosticable {
   /// The color to use for input validation errors, e.g. for
   /// [InputDecoration.errorText].
   final Color error;
+
+  /// The color to use for input validation success
+  final Color success;
 
   /// A color that's clearly legible when drawn on [primary].
   ///
@@ -277,6 +289,7 @@ class ColorScheme with Diagnosticable {
     Color? surface,
     Color? background,
     Color? error,
+    Color? success,
     Color? onPrimary,
     Color? onSecondary,
     Color? onSurface,
@@ -292,6 +305,7 @@ class ColorScheme with Diagnosticable {
       surface: surface ?? this.surface,
       background: background ?? this.background,
       error: error ?? this.error,
+      success: success ?? this.success,
       onPrimary: onPrimary ?? this.onPrimary,
       onSecondary: onSecondary ?? this.onSecondary,
       onSurface: onSurface ?? this.onSurface,
@@ -313,6 +327,7 @@ class ColorScheme with Diagnosticable {
       surface: Color.lerp(a.surface, b.surface, t)!,
       background: Color.lerp(a.background, b.background, t)!,
       error: Color.lerp(a.error, b.error, t)!,
+      success: Color.lerp(a.success, b.success, t)!,
       onPrimary: Color.lerp(a.onPrimary, b.onPrimary, t)!,
       onSecondary: Color.lerp(a.onSecondary, b.onSecondary, t)!,
       onSurface: Color.lerp(a.onSurface, b.onSurface, t)!,
@@ -336,6 +351,7 @@ class ColorScheme with Diagnosticable {
         && other.surface == surface
         && other.background == background
         && other.error == error
+        && other.success == success
         && other.onPrimary == onPrimary
         && other.onSecondary == onSecondary
         && other.onSurface == onSurface
@@ -354,6 +370,7 @@ class ColorScheme with Diagnosticable {
       surface,
       background,
       error,
+      success,
       onPrimary,
       onSecondary,
       onSurface,
@@ -374,6 +391,7 @@ class ColorScheme with Diagnosticable {
     properties.add(ColorProperty('surface', surface, defaultValue: defaultScheme.surface));
     properties.add(ColorProperty('background', background, defaultValue: defaultScheme.background));
     properties.add(ColorProperty('error', error, defaultValue: defaultScheme.error));
+    properties.add(ColorProperty('success', success, defaultValue: defaultScheme.success));
     properties.add(ColorProperty('onPrimary', onPrimary, defaultValue: defaultScheme.onPrimary));
     properties.add(ColorProperty('onSecondary', onSecondary, defaultValue: defaultScheme.onSecondary));
     properties.add(ColorProperty('onSurface', onSurface, defaultValue: defaultScheme.onSurface));
