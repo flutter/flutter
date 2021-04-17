@@ -1171,7 +1171,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
   ///
-  /// {@template flutter.widgets.BackdropFilter.blendMode}
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
   BlendMode get blendMode => _blendMode;
   BlendMode _blendMode;
   set blendMode(BlendMode value) {

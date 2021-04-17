@@ -1803,6 +1803,7 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The [filter] property must be non-null before the compositing phase of the
   /// pipeline.
+  ///
   /// The [blendMode] property will be defaulted to [BlendMode.srcOver] if it is
   /// not set to a non-null value before the compositing phase of the pipeline.
   BackdropFilterLayer({
