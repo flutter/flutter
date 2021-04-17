@@ -155,7 +155,40 @@ class MethodChannel {
       }
       throw MissingPluginException('No implementation found for method $method on channel $name');
     }
-    return codec.decodeEnvelope(result) as T?;
+    final Object? resultData = codec.decodeEnvelope(result);
+    assert(() {
+      if (resultData is List<Object?>
+        && T != _debugGetTypeOf<List<Object?>>()
+        && T != _debugGetTypeOf<List<Object?>?>()
+        && T != _debugGetTypeOf<List<dynamic>?>()
+        && T != _debugGetTypeOf<List<dynamic>>()) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot return a typed List from MethodChannel.invokeMethod.'),
+          ErrorDescription(
+            'The MethodChannel can only return Lists of type `dynamic` or `Object` but a List of type $T was expected.'
+          ),
+          ErrorHint('use MethodChannel.invokeListMethod to create typed lists.')
+        ]);
+      } else if (resultData is Map<Object?, Object?>
+        && T != _debugGetTypeOf<Map<Object?, Object?>>()
+        && T != _debugGetTypeOf<Map<Object?, Object?>?>()
+        && T != _debugGetTypeOf<Map<dynamic, dynamic>>()
+        && T != _debugGetTypeOf<Map<dynamic, dynamic>?>()
+        && T != _debugGetTypeOf<Map<Object?, dynamic>?>()
+        && T != _debugGetTypeOf<Map<dynamic, Object?>?>()
+        && T != _debugGetTypeOf<Map<Object?, dynamic>>()
+        && T != _debugGetTypeOf<Map<dynamic, Object?>>()) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot return a typed Map from MethodChannel.invokeMethod.'),
+          ErrorDescription(
+            'The MethodChannel can only return Maps of type `dynamic` or `Object` but a Map of type $T was expected.'
+          ),
+          ErrorHint('use MethodChannel.invokeMapMethod to create typed maps.')
+        ]);
+      }
+      return true;
+    }());
+    return resultData as T?;
   }
 
   /// Invokes a [method] on this channel with the specified [arguments].
@@ -168,7 +201,7 @@ class MethodChannel {
   /// The generic argument `T` of the method can be inferred by the surrounding
   /// context, or provided explicitly. If it does not match the returned type of
   /// the channel, a [TypeError] will be thrown at runtime. `T` cannot be a class
-  /// with generics other than `dynamic`. For example, `Map<String, String>`
+  /// with generics other than `dynamic` or `Object?`. For example, `Map<String, String>`
   /// is not supported but `Map<dynamic, dynamic>` or `Map` is.
   ///
   /// Returns a [Future] which completes to one of the following:
@@ -567,3 +600,5 @@ class EventChannel {
     return controller.stream;
   }
 }
+
+Type _debugGetTypeOf<T>() => T;

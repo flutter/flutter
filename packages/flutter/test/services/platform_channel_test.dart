@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/rendering_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +58,93 @@ void main() {
       expect(result, equals('hello world'));
     });
 
+    test('asserts when invokeMethod is used with typed List', () async {
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+        'ch7',
+        (ByteData? message) async {
+          jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          return jsonMessage.encodeMessage(<dynamic>[<String>['hello world']]);
+        },
+      );
+      FlutterError? error;
+      try {
+        await channel.invokeMethod<List<String>>('sayHello', 'hello');
+      } on FlutterError catch (err) {
+        error = err;
+      }
+
+      expect(error, isNotNull);
+      expect(error!.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+        'Cannot return a typed List from MethodChannel.invokeMethod.',
+        'The MethodChannel can only return Lists of type `dynamic` or `Object` but a List of type List<String> was expected.',
+        'use MethodChannel.invokeListMethod to create typed lists.'
+      ]);
+    });
+
+    test('asserts when invokeMethod is used with typed Map', () async {
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+        'ch7',
+        (ByteData? message) async {
+          jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          return jsonMessage.encodeMessage(<dynamic>[<dynamic, dynamic>{'A': 'B'}]);
+        },
+      );
+      FlutterError? error;
+      try {
+        await channel.invokeMethod<Map<String, String>>('sayHello', 'hello');
+      } on FlutterError catch (err) {
+        error = err;
+      }
+
+      expect(error, isNotNull);
+      expect(error!.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+        'Cannot return a typed Map from MethodChannel.invokeMethod.',
+        'The MethodChannel can only return Maps of type `dynamic` or `Object` but a Map of type Map<String, String> was expected.',
+        'use MethodChannel.invokeMapMethod to create typed maps.'
+      ]);
+    });
+
+    test('Does/does not assert for all combinations of List dynamic typing', () async {
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+        'ch7',
+        (ByteData? message) async {
+          jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          return jsonMessage.encodeMessage(<dynamic>[<String>['hello world']]);
+        },
+      );
+
+      expect(await channel.invokeMethod<List<dynamic>>('sayHello', 'hello'), <String>['hello world']);
+      expect(await channel.invokeMethod<List<Object?>>('sayHello', 'hello'), <String>['hello world']);
+      expect(await channel.invokeMethod<List<dynamic>?>('sayHello', 'hello'), <String>['hello world']);
+
+      // Cause TypeError due to lack of nullability.
+      await expectLater(() => channel.invokeMethod<List<Object>?>('sayHello', 'hello'), throwsFlutterError);
+      await expectLater(() => channel.invokeMethod<List<Object>>('sayHello', 'hello'), throwsFlutterError);
+    });
+
+    test('Does/does not assert for all combinations of Map dynamic typing', () async {
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
+        'ch7',
+        (ByteData? message) async {
+          jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          return jsonMessage.encodeMessage(<dynamic>[<String, String>{'hello': 'world'}]);
+        },
+      );
+
+      expect(await channel.invokeMethod<Map<dynamic, dynamic>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<Object?, Object?>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<Object?, Object?>?>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<dynamic, dynamic>?>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<Object?, dynamic>?>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<dynamic, Object?>?>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<Object?, dynamic>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+      expect(await channel.invokeMethod<Map<dynamic, Object?>>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+
+      // Cause TypeError due to lack of nullability.
+      await expectLater(() => channel.invokeMethod<Map<Object, Object>?>('sayHello', 'hello'), throwsFlutterError);
+      await expectLater(() => channel.invokeMethod<Map<Object, Object>>('sayHello', 'hello'), throwsFlutterError);
+    });
+
     test('can invoke list method and get result', () async {
       ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
@@ -67,7 +157,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isA<TypeError>()));
+      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isA<AssertionError>()));
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), <String>['hello', 'world']);
     });
 
@@ -98,7 +188,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isA<TypeError>()));
+      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isA<AssertionError>()));
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), <String, String>{'hello': 'world'});
     });
 
