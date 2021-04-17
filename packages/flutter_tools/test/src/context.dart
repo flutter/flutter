@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -342,13 +343,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   String get versionText => 'Xcode 12.0.1';
 
   @override
-  int get majorVersion => 12;
-
-  @override
-  int get minorVersion => 0;
-
-  @override
-  int get patchVersion => 1;
+  Version get version => Version(12, 0, 1);
 
   @override
   Future<Map<String, String>> getBuildSettings(

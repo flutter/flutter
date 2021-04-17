@@ -14,7 +14,6 @@ import 'fuchsia/fuchsia_sdk.dart';
 import 'globals_null_migrated.dart' as globals;
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
-import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
@@ -47,7 +46,6 @@ FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 Xcode get xcode => context.get<Xcode>();
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 XCDevice get xcdevice => context.get<XCDevice>();
 
