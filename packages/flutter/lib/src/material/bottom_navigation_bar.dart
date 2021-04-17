@@ -241,7 +241,7 @@ enum BottomNavigationBarType {
 /// Widget _listViewBody() {
 ///   return ListView.separated(
 ///       controller: _homeController,
-///       itemBuilder: (context, index) {
+///       itemBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///             child: Text(
 ///               'Item $index',
