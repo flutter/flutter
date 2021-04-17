@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -60,9 +61,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
         processManager: FakeProcessManager.any(),
-        majorVersion: 1000,
-        minorVersion: 0,
-        patchVersion: 0,
+        version: Version(1000, 0, 0)
       ),
     );
 

@@ -31,7 +31,7 @@ void main() {
   String ideviceSyslogPath;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     fakeCache = Cache.test(processManager: FakeProcessManager.any());
     artifacts = Artifacts.test();
     logger = BufferLogger.test();

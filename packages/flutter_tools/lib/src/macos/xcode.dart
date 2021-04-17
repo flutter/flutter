@@ -101,13 +101,7 @@ class Xcode {
 
   bool get isInstalled => _xcodeProjectInterpreter.isInstalled;
 
-  Version get currentVersion => Version(
-        _xcodeProjectInterpreter.majorVersion,
-        _xcodeProjectInterpreter.minorVersion,
-        _xcodeProjectInterpreter.patchVersion,
-        text:
-            '${_xcodeProjectInterpreter.majorVersion}.${_xcodeProjectInterpreter.minorVersion}.${_xcodeProjectInterpreter.patchVersion}',
-      );
+  Version get currentVersion => _xcodeProjectInterpreter.version;
 
   String get versionText => _xcodeProjectInterpreter.versionText;
 

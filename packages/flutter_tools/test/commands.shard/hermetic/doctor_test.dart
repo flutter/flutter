@@ -60,7 +60,7 @@ void main() {
   setUp(() {
     flutterVersion = FakeFlutterVersion();
     logger = BufferLogger.test();
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {

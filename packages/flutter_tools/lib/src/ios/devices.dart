@@ -21,7 +21,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';

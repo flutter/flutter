@@ -35,6 +35,7 @@ import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../resident_devtools_handler.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../vmservice.dart';
@@ -75,7 +76,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       systemClock: systemClock,
       fileSystem: fileSystem,
       logger: logger,
-      featureFlags: featureFlags,
     );
   }
 }
@@ -98,13 +98,12 @@ class ResidentWebRunner extends ResidentRunner {
     @required SystemClock systemClock,
     @required Usage usage,
     @required UrlTunneller urlTunneller,
-    @required FeatureFlags featureFlags,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
        _usage = usage,
        _urlTunneller = urlTunneller,
-       _featureFlags = featureFlags,
        super(
           <FlutterDevice>[device],
           target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -112,6 +111,7 @@ class ResidentWebRunner extends ResidentRunner {
           ipv6: ipv6,
           stayResident: stayResident,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final FileSystem _fileSystem;
@@ -119,7 +119,6 @@ class ResidentWebRunner extends ResidentRunner {
   final SystemClock _systemClock;
   final Usage _usage;
   final UrlTunneller _urlTunneller;
-  final FeatureFlags _featureFlags;
 
   FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
@@ -164,20 +163,7 @@ class ResidentWebRunner extends ResidentRunner {
   FlutterVmService _instance;
 
   @override
-  bool get canHotRestart {
-    return true;
-  }
-
-  @override
-  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
-    String method, {
-    FlutterDevice device,
-    Map<String, dynamic> params,
-  }) async {
-    final vmservice.Response response =
-        await _vmService.service.callServiceExtension(method, args: params);
-    return response.toJson();
-  }
+  bool get supportsRestart => true;
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -193,6 +179,7 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
+    await residentDevtoolsHandler.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
     await _extensionEventSub?.cancel();
@@ -228,6 +215,8 @@ class ResidentWebRunner extends ResidentRunner {
     _logger.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
     _logger.printStatus('For a more detailed help message, press "h". $quitMessage');
+    _logger.printStatus('');
+    printDebuggerList();
   }
 
   @override
@@ -307,7 +296,7 @@ class ResidentWebRunner extends ResidentRunner {
         ?.flutterPlatformOverride(
           isolateId: null,
         );
-      final String platform = nextPlatform(currentPlatform, _featureFlags);
+      final String platform = nextPlatform(currentPlatform);
       await _vmService
         ?.flutterPlatformOverride(
             platform: platform,
@@ -632,6 +621,7 @@ class ResidentWebRunner extends ResidentRunner {
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
     _logger.printStatus('Restarted application in $elapsedMS.');
+    unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
@@ -843,6 +833,13 @@ class ResidentWebRunner extends ResidentRunner {
             resumeSub.cancel();
           }
         });
+      }
+      if (enableDevTools) {
+        // The method below is guaranteed never to return a failing future.
+        unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          flutterDevices: flutterDevices,
+        ));
       }
     }
     if (websocketUri != null) {

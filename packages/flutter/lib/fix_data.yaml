@@ -15,6 +15,98 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'dragAnchor'
+      inClass: 'Draggable'
+    changes:
+      - kind: 'rename'
+        newName: 'dragAnchorStrategy'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Draggable'
+    oneOf:
+      - if: "dragAnchor == 'DragAnchor.child'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'childDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.child'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+      - if: "dragAnchor == 'DragAnchor.pointer'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'pointerDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.pointer'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+    variables:
+      dragAnchor:
+        kind: 'fragment'
+        value: 'arguments[dragAnchor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'dragAnchor'
+      inClass: 'LongPressDraggable'
+    changes:
+      - kind: 'rename'
+        newName: 'dragAnchorStrategy'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'LongPressDraggable'
+    oneOf:
+      - if: "dragAnchor == 'DragAnchor.child'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'childDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.child'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+      - if: "dragAnchor == 'DragAnchor.pointer'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'pointerDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.pointer'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+    variables:
+      dragAnchor:
+        kind: 'fragment'
+        value: 'arguments[dragAnchor]'
+
   # Changes made in https://github.com/flutter/flutter/pull/66482
   - title: "Migrate to 'TextSelectionThemeData'"
     date: 2020-09-24
