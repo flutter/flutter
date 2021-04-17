@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:math' as math;
 
@@ -22,19 +21,19 @@ void main() {
 void testMain() async {
   final Rect region = Rect.fromLTWH(0, 0, 500, 100);
 
-  BitmapCanvas canvas;
+  late BitmapCanvas canvas;
 
   void appendToScene() {
     // Create a <flt-scene> element to make sure our CSS reset applies correctly.
     final html.Element testScene = html.Element.tag('flt-scene');
     testScene.append(canvas.rootElement);
-    html.document.querySelector('flt-scene-host').append(testScene);
+    html.document.querySelector('flt-scene-host')!.append(testScene);
   }
 
   setUpStableTestFonts();
 
   tearDown(() {
-    html.document.querySelector('flt-scene').remove();
+    html.document.querySelector('flt-scene')!.remove();
   });
 
   /// Draws several lines, some aligned precisely with the pixel grid, and some
@@ -149,8 +148,9 @@ void testMain() async {
   //
   // More details: https://github.com/flutter/flutter/issues/32274
   test('renders clipped DOM text with high quality', () async {
-    final Paragraph paragraph =
-        (ParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))..addText('Am I blurry?')).build();
+    final EngineParagraph paragraph =
+        (ParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))
+          ..addText('Am I blurry?')).build() as EngineParagraph;
     paragraph.layout(const ParagraphConstraints(width: 1000));
 
     final Rect canvasSize = Rect.fromLTRB(
@@ -200,7 +200,7 @@ void testMain() async {
       'breaks into multiple lines.';
     builder.addText(text);
 
-    final Paragraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build() as EngineParagraph;
     paragraph.layout(const ParagraphConstraints(width: 100));
 
     final Rect canvasSize = Offset.zero & Size(500, 500);
@@ -230,7 +230,7 @@ void testMain() async {
     canvas.drawParagraph(paragraph, const Offset(180, 50));
 
     expect(
-      canvas.rootElement.querySelectorAll('p').map<String>((e) => e.text).toList(),
+      canvas.rootElement.querySelectorAll('p').map<String?>((e) => e.text).toList(),
       <String>[text],
       reason: 'Expected to render text using HTML',
     );
@@ -245,11 +245,11 @@ void testMain() async {
     sb.pop();
     sb.pop();
     sb.pop();
-    final SurfaceScene scene = sb.build();
-    final html.Element sceneElement = scene.webOnlyRootElement;
+    final SurfaceScene scene = sb.build() as SurfaceScene;
+    final html.Element sceneElement = scene.webOnlyRootElement!;
 
-    sceneElement.querySelector('flt-clip').append(canvas.rootElement);
-    html.document.querySelector('flt-scene-host').append(sceneElement);
+    sceneElement.querySelector('flt-clip')!.append(canvas.rootElement);
+    html.document.querySelector('flt-scene-host')!.append(sceneElement);
 
     await matchGoldenFile(
       'bitmap_canvas_draws_text_on_top_of_canvas.png',
