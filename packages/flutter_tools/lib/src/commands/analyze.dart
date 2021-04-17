@@ -41,7 +41,7 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',
         negatable: false,
-        help: '(Deprecated) List every public member that is lacking documentation. '
+        help: '(deprecated) List every public member that is lacking documentation. '
               'This command will be removed in a future version of Flutter.',
         hide: !verboseHelp);
     argParser.addFlag('watch',
