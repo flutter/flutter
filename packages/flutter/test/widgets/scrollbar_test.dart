@@ -54,6 +54,37 @@ class _DrawRectOnceCanvas extends Fake implements Canvas {
   void drawLine(Offset p1, Offset p2, Paint paint) {}
 }
 
+class _TestScrollController extends ScrollController {
+  @override
+  _TestScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+    return _TestScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+    );
+  }
+}
+
+class _TestScrollPosition extends ScrollPositionWithSingleContext {
+  _TestScrollPosition({
+    required ScrollPhysics physics,
+    required ScrollContext context,
+    ScrollPosition? oldPosition,
+  }) : super(physics: physics, context: context, oldPosition: oldPosition);
+
+  @override
+  void didUpdateScrollPositionBy(double delta) {
+    final ScrollMetrics nullMetrics = FixedScrollMetrics(
+        minScrollExtent: null,
+        maxScrollExtent: null,
+        pixels: null,
+        viewportDimension: null,
+        axisDirection: AxisDirection.down
+    );
+    activity!.dispatchScrollUpdateNotification(nullMetrics, context.notificationContext!, delta);
+  }
+}
+
 void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
@@ -529,16 +560,9 @@ void main() {
       expect(error.message, 'A TextDirection must be provided before a Scrollbar can be painted.');
     }
   });
-
+//
   testWidgets('Scrollbar works with null Scroll Metrics', (WidgetTester tester) async {
-    final ScrollMetrics nullMetrics = FixedScrollMetrics(
-      minScrollExtent: null,
-      maxScrollExtent: null,
-      pixels: null,
-      viewportDimension: null,
-      axisDirection: AxisDirection.down
-    );
-    final ScrollController scrollController = ScrollController();
+    final _TestScrollController scrollController = _TestScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -558,17 +582,6 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
-
-    scrollController.position.sendMetrics(nullMetrics);
-    expect(
-        find.byType(RawScrollbar),
-        paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
-          ..rect(
-            rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
-            color: const Color(0x66BCBCBC),
-          )
-    );
   });
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {

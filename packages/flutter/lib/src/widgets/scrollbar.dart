@@ -460,6 +460,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || fadeoutOpacityAnimation.value == 0.0)
       return;
 
+    // Skip painting if there's no viewportDimension.
+    if (!_lastMetrics!.hasViewportDimension) {
+      return;
+    }
+
     // Skip painting if there's not enough space.
     if (_lastMetrics!.viewportDimension <= _mainAxisPadding || _trackExtent <= 0) {
       return;
@@ -1203,7 +1208,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return false;
 
     final ScrollMetrics metrics = notification.metrics;
-    if (metrics.hasViewportDimension && metrics.maxScrollExtent <= metrics.minScrollExtent)
+    if (metrics.hasContentDimensions && metrics.maxScrollExtent <= metrics.minScrollExtent)
       return false;
 
     if (notification is ScrollUpdateNotification ||
