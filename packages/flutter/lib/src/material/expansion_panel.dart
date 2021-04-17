@@ -78,6 +78,9 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.iconColor,
+    this.disabledIconColor,
+    this.expandedIconColor
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -105,6 +108,15 @@ class ExpansionPanel {
   ///
   /// Defaults to [ThemeData.cardColor].
   final Color? backgroundColor;
+
+  /// Defines the icon color of [ExpandIcon] when [isExpanded] is false.
+  final Color? iconColor;
+
+  /// Defines the icon color of [ExpandIcon] when [isExpanded] is true.
+  final Color? expandedIconColor;
+
+  /// Defines the icon color of [ExpandIcon] when [canTapOnHeader] is true.
+  final Color? disabledIconColor;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -128,12 +140,18 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required Widget body,
     bool canTapOnHeader = false,
     Color? backgroundColor,
+    Color? iconColor,
+    Color? disabledIconColor,
+    Color? expandedIconColor,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
         backgroundColor: backgroundColor,
+        iconColor: iconColor,
+        disabledIconColor: disabledIconColor,
+        expandedIconColor: expandedIconColor
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -493,6 +511,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       Widget expandIconContainer = Container(
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
+          color: child.iconColor,
+          disabledColor: child.disabledIconColor,
+          expandedColor: child.expandedIconColor,
           isExpanded: _isChildExpanded(index),
           padding: const EdgeInsets.all(16.0),
           onPressed: !child.canTapOnHeader

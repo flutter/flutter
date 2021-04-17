@@ -1493,6 +1493,7 @@ void main() {
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
 
+  
   testWidgets('ExpansionPanelRadio.backgroundColor test', (WidgetTester tester) async {
     const Color firstPanelColor = Colors.red;
     const Color secondPanelColor = Colors.brown;
@@ -1526,5 +1527,66 @@ void main() {
 
     expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
+  });
+
+  testWidgets('ExpansionPanel.iconColor, ExpansionPanel.expandedIconColor, ExpansionPanel.disbaledColor test', (WidgetTester tester) async {
+    const Color firstIconColor = Colors.red;
+    const Color expandedIconColor = Colors.blue;
+    const Color disabledIconColor = Colors.amber;
+
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const Text('A');
+              },
+              body: const SizedBox(height: 100.0),
+              iconColor: firstIconColor,
+              expandedIconColor: expandedIconColor,
+              disabledIconColor: disabledIconColor
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+    
+    expect(expandIcon.color, firstIconColor);
+    expect(expandIcon.expandedColor, expandedIconColor);
+    expect(expandIcon.disabledColor, disabledIconColor);
+  });
+
+    testWidgets('ExpansionPanelRadio.iconColor, ExpansionPanelRadio.expandedIconColor, ExpansionPanelRadio.disabledIconColor   test', (WidgetTester tester) async {
+    const Color firstIconColor = Colors.red;
+    const Color expandedIconColor = Colors.blue;
+    const Color disabledIconColor = Colors.amber;
+
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList.radio(
+          children: <ExpansionPanelRadio>[
+            ExpansionPanelRadio(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const Text('A');
+              },
+              body: const SizedBox(height: 100.0),
+              iconColor: firstIconColor,
+              expandedIconColor: expandedIconColor,
+              disabledIconColor: disabledIconColor,
+              value:0,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+    
+    expect(expandIcon.color, firstIconColor);
+    expect(expandIcon.expandedColor, expandedIconColor);
+    expect(expandIcon.disabledColor, disabledIconColor);
   });
 }
