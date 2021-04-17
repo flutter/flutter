@@ -213,7 +213,7 @@ enum BottomNavigationBarType {
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example shows [BottomNavigationBar] used in a [Scaffold] Widget with
 /// different interaction patterns. Tapping on the first [BottomNavigationBarItem]
