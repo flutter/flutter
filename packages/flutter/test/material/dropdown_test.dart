@@ -679,9 +679,6 @@ void main() {
     await tester.idle();
     expect(value, 4);
 
-    // TODO(abarth): Remove these calls to pump once navigator cleans up its
-    // pop transitions.
-    await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
   });
 
