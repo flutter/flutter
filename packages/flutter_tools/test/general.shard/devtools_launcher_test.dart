@@ -48,7 +48,7 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -70,7 +70,7 @@ void main() {
           response: const FakeResponse(statusCode: HttpStatus.internalServerError),
         ),
       ]),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     final DevToolsServerAddress address = await launcher.serve();
@@ -86,7 +86,7 @@ void main() {
       }),
       persistentToolState: persistentToolState,
       httpClient: FakeHttpClient.list(<FakeRequest>[]),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     final DevToolsServerAddress address = await launcher.serve();

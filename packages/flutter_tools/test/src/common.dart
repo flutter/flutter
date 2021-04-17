@@ -164,7 +164,7 @@ void test(String description, FutureOr<void> Function() body, {
 
 /// Executes a test body in zone that does not allow context-based injection.
 ///
-/// For classes which have been refactored to excluded context-based injection
+/// For classes which have been refactored to exclude context-based injection
 /// or globals like [fs] or [platform], prefer using this test method as it
 /// will prevent accidentally including these context getters in future code
 /// changes.

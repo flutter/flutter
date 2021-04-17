@@ -240,7 +240,7 @@ void main() {
     });
 
     testWithoutContext('R - hotRestart supported and succeeds', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(true);
+      when(mockResidentRunner.supportsRestart).thenReturn(true);
       when(mockResidentRunner.hotMode).thenReturn(true);
       when(mockResidentRunner.restart(fullRestart: true))
         .thenAnswer((Invocation invocation) async {
@@ -252,7 +252,7 @@ void main() {
     });
 
     testWithoutContext('R - hotRestart supported and fails', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(true);
+      when(mockResidentRunner.supportsRestart).thenReturn(true);
       when(mockResidentRunner.hotMode).thenReturn(true);
       when(mockResidentRunner.restart(fullRestart: true))
         .thenAnswer((Invocation invocation) async {
@@ -266,7 +266,7 @@ void main() {
     });
 
     testWithoutContext('R - hotRestart supported and fails fatally', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(true);
+      when(mockResidentRunner.supportsRestart).thenReturn(true);
       when(mockResidentRunner.hotMode).thenReturn(true);
       when(mockResidentRunner.restart(fullRestart: true))
         .thenAnswer((Invocation invocation) async {
@@ -276,10 +276,21 @@ void main() {
     });
 
     testWithoutContext('R - hot restart unsupported', () async {
-      when(mockResidentRunner.canHotRestart).thenReturn(false);
+      when(mockResidentRunner.supportsRestart).thenReturn(false);
       await terminalHandler.processTerminalInput('R');
 
       verifyNever(mockResidentRunner.restart(fullRestart: true));
+    });
+
+    testWithoutContext('ResidentRunner clears the screen when it should', () async {
+      const String message = 'This should be cleared';
+
+      expect(testLogger.statusText, equals(''));
+      testLogger.printStatus(message);
+      expect(testLogger.statusText, equals(message + '\n'));  // printStatus makes a newline
+
+      await terminalHandler.processTerminalInput('c');
+      expect(testLogger.statusText, equals(''));
     });
 
     testWithoutContext('S - debugDumpSemanticsTreeInTraversalOrder with service protocol', () async {
