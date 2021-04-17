@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
 import 'dart:html' as html;
 import 'dart:typed_data';
 
@@ -20,7 +19,7 @@ void main() {
 void testMain() async {
   final Rect region = Rect.fromLTWH(0, 0, 400, 600);
 
-  BitmapCanvas canvas;
+  late BitmapCanvas canvas;
 
   setUp(() {
     canvas = BitmapCanvas(region, RenderStrategy());
@@ -56,7 +55,7 @@ void testMain() async {
     ]);
     canvas.drawPoints(PointMode.polygon, points3, paint);
 
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_draw_points.png', region: region);
   });
 
@@ -77,7 +76,7 @@ void testMain() async {
       30.0, 40.0, 200.0, 40.0]), strokePaint3);
     canvas.drawPoints(PointMode.points, Float32List.fromList([
       30.0, 50.0, 40.0, 50.0, 50.0, 50.0]), strokePaint3);
-    html.document.body.append(canvas.rootElement);
+    html.document.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_draw_points_stroke.png', region: region);
   });
 }

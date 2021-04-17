@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -12,34 +10,13 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
-import 'package:web_engine_tester/golden_tester.dart';
+import 'screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() async {
-  // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(RecordingCanvas rc, String fileName, ui.Rect screenRect, {bool write = false}) async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
-        RenderStrategy());
-
-    rc.endRecording();
-    rc.apply(engineCanvas, screenRect);
-
-    // Wrap in <flt-scene> so that our CSS selectors kick in.
-    final html.Element sceneElement = html.Element.tag('flt-scene');
-    try {
-      sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: screenRect, maxDiffRatePercent: 0.0, write: write);
-    } finally {
-      // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
-      sceneElement.remove();
-    }
-  }
-
   setUp(() async {
     ui.debugEmulateFlutterTesterEnvironment = true;
     await ui.webOnlyInitializePlatform();
@@ -52,15 +29,15 @@ void testMain() async {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/55930
-  void testMaskFilterBlur({bool isSafariMode}) {
-    final String browser = isSafariMode ? 'Safari' : 'Chrome';
+  void testMaskFilterBlur({bool isWebkit = false}) {
+    final String browser = isWebkit ? 'Safari' : 'Chrome';
 
     test('renders MaskFilter.blur in $browser', () async {
       const double screenWidth = 800.0;
       const double screenHeight = 150.0;
       const ui.Rect screenRect = ui.Rect.fromLTWH(0, 0, screenWidth, screenHeight);
 
-      ContextStateHandle.debugEmulateWebKitMaskFilter = isSafariMode;
+      ContextStateHandle.debugEmulateWebKitMaskFilter = isWebkit;
       final RecordingCanvas rc = RecordingCanvas(screenRect);
       rc.translate(0, 75);
 
@@ -137,7 +114,7 @@ void testMain() async {
         paint,
       );
 
-      await _checkScreenshot(rc, 'mask_filter_$browser', screenRect);
+      await canvasScreenshot(rc, 'mask_filter_$browser', region: screenRect);
     });
 
     test('renders transformed MaskFilter.blur in $browser', () async {
@@ -145,7 +122,7 @@ void testMain() async {
       const double screenHeight = 300.0;
       const ui.Rect screenRect = ui.Rect.fromLTWH(0, 0, screenWidth, screenHeight);
 
-      ContextStateHandle.debugEmulateWebKitMaskFilter = isSafariMode;
+      ContextStateHandle.debugEmulateWebKitMaskFilter = isWebkit;
       final RecordingCanvas rc = RecordingCanvas(screenRect);
       rc.translate(150, 150);
 
@@ -172,12 +149,13 @@ void testMain() async {
         );
       }
 
-      await _checkScreenshot(rc, 'mask_filter_transformed_$browser', screenRect);
+      await canvasScreenshot(rc, 'mask_filter_transformed_$browser',
+          region: screenRect);
     });
   }
 
-  testMaskFilterBlur(isSafariMode: false);
-  testMaskFilterBlur(isSafariMode: true);
+  testMaskFilterBlur(isWebkit: false);
+  testMaskFilterBlur(isWebkit: true);
 
   for (int testDpr in <int>[1, 2, 4]) {
     test('MaskFilter.blur blurs correctly for device-pixel ratio $testDpr', () async {
@@ -196,7 +174,8 @@ void testMain() async {
         paint,
       );
 
-      await _checkScreenshot(rc, 'mask_filter_blur_dpr_$testDpr', screenRect);
+      await canvasScreenshot(rc, 'mask_filter_blur_dpr_$testDpr',
+          region: screenRect);
       window.debugOverrideDevicePixelRatio(1.0);
     });
   }

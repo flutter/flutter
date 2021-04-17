@@ -2,49 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
 
-import 'package:web_engine_tester/golden_tester.dart';
-
+import 'screenshot.dart';
 import 'testimage.dart';
+
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+SurfacePaint makePaint() => Paint() as SurfacePaint;
+
 void testMain() async {
-  const double screenWidth = 600.0;
-  const double screenHeight = 800.0;
+  const double screenWidth = 500.0;
+  const double screenHeight = 500.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-
-  // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
-      {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-        double maxDiffRatePercent = 0.0}) async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
-        RenderStrategy());
-
-    rc.endRecording();
-    rc.apply(engineCanvas, screenRect);
-
-    // Wrap in <flt-scene> so that our CSS selectors kick in.
-    final html.Element sceneElement = html.Element.tag('flt-scene');
-    try {
-      sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: region, maxDiffRatePercent: maxDiffRatePercent);
-    } finally {
-      // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
-      sceneElement.remove();
-    }
-  }
 
   setUp(() async {
     debugEmulateFlutterTesterEnvironment = true;
@@ -78,39 +54,39 @@ void testMain() async {
       for (int row = 0; row < blendModes.length; row++) {
         // draw white background for first 4, black for next 4 blends.
         double top = row * 50.0;
-        rc.drawRect(Rect.fromLTWH(0, top, 200, 50), Paint()
+        rc.drawRect(Rect.fromLTWH(0, top, 200, 50), makePaint()
           ..color = white);
-        rc.drawRect(Rect.fromLTWH(200, top, 200, 50), Paint()
+        rc.drawRect(Rect.fromLTWH(200, top, 200, 50), makePaint()
           ..color = grey);
         BlendMode blendMode = blendModes[row];
         rc.drawImage(createFlutterLogoTestImage(), Offset(0, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(red, blendMode));
         rc.drawImage(createFlutterLogoTestImage(), Offset(50, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(green, blendMode));
         rc.drawImage(createFlutterLogoTestImage(), Offset(100, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(blue, blendMode));
         rc.drawImage(createFlutterLogoTestImage(), Offset(150, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(black, blendMode));
         rc.drawImage(createFlutterLogoTestImage(), Offset(200, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(red, blendMode));
         rc.drawImage(createFlutterLogoTestImage(), Offset(250, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(green, blendMode));
         rc.drawImage(createFlutterLogoTestImage(), Offset(300, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(blue, blendMode));
         rc.drawImage(createFlutterLogoTestImage(), Offset(350, top),
-            Paint()
+            makePaint()
               ..colorFilter = EngineColorFilter.mode(black, blendMode));
       }
       rc.restore();
-      await _checkScreenshot(rc, 'canvas_image_blend_group$blendGroup',
-          maxDiffRatePercent: 8.0);
+      await canvasScreenshot(rc, 'canvas_image_blend_group$blendGroup',
+          maxDiffRatePercent: 8.0, region: screenRect);
     },
         skip: browserEngine == BrowserEngine.webkit &&
             operatingSystem == OperatingSystem.iOs);
@@ -121,10 +97,10 @@ void testMain() async {
     final RecordingCanvas rc = RecordingCanvas(
         const Rect.fromLTRB(0, 0, 400, 400));
     rc.save();
-    rc.drawRect(Rect.fromLTWH(0, 50, 200, 50), Paint()
+    rc.drawRect(Rect.fromLTWH(0, 50, 200, 50), makePaint()
       ..color = white);
     rc.drawImage(createFlutterLogoTestImage(), Offset(0, 50),
-        Paint()
+        makePaint()
           ..colorFilter = EngineColorFilter.mode(red, BlendMode.srcIn));
 
     final Paragraph paragraph = createTestParagraph();
@@ -135,8 +111,8 @@ void testMain() async {
     rc.drawParagraph(paragraph, const Offset(textLeft, textTop));
 
     rc.restore();
-    await _checkScreenshot(rc, 'canvas_image_blend_and_text',
-        maxDiffRatePercent: 8.0);
+    await canvasScreenshot(rc, 'canvas_image_blend_and_text',
+        maxDiffRatePercent: 8.0, region: screenRect);
   });
 }
 
