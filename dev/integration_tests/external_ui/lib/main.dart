@@ -29,7 +29,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   int _widgetBuilds = 0;
   late FrameState _state;
   String _summary = '';
-   IconData? _icon;
+  IconData? _icon;
   double? _flutterFrameRate;
 
   Future<void> _summarizeStats() async {
