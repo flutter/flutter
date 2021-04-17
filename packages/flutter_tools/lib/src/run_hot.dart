@@ -599,9 +599,6 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  bool get supportsRestart => true;
-
-  @override
   Future<OperationResult> restart({
     bool fullRestart = false,
     String reason,
@@ -670,7 +667,7 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool silent,
   }) async {
-    if (!canHotRestart) {
+    if (!supportsRestart) {
       return OperationResult(1, 'hotRestart not supported');
     }
     Status status;
@@ -1089,7 +1086,7 @@ class HotRunner extends ResidentRunner {
   void printHelp({ @required bool details }) {
     globals.printStatus('Flutter run key commands.');
     commandHelp.r.print();
-    if (canHotRestart) {
+    if (supportsRestart) {
       commandHelp.R.print();
     }
     commandHelp.h.print(); // TODO(ianh): print different message if "details" is false
