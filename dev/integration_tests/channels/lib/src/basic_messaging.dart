@@ -148,7 +148,7 @@ Future<TestStepResult> _basicMessageHandshake<T>(
 /// Sends a message on a channel that no one listens on.
 Future<TestStepResult> _basicMessageToUnknownChannel<T>(
   String description,
-  BasicMessageChannel<T> channel,
+  BasicMessageChannel<T?> channel,
 ) async {
   dynamic messageEcho = nothing;
   dynamic error = nothing;
