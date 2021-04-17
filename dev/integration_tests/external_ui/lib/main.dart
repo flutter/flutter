@@ -96,7 +96,7 @@ Widget builds: $_widgetBuilds''';
     debugPrint('Awaiting calm (3 second pause)...');
     await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
-    DateTime startTime;
+    late DateTime startTime;
     int tickCount = 0;
     Ticker? ticker;
     ticker = createTicker((Duration time) {
