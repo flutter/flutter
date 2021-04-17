@@ -30,6 +30,7 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -940,8 +941,9 @@ abstract class ResidentHandlers {
   ///
   /// Throws an [AssertionError] if [Device.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
-    assert(device.device.supportsScreenshot);
-
+    if (!device.device.supportsScreenshot && !supportsServiceProtocol) {
+      return;
+    }
     final Status status = logger.startProgress(
       'Taking screenshot for ${device.device.name}...',
     );
@@ -950,13 +952,13 @@ abstract class ResidentHandlers {
       'flutter',
       'png',
     );
-    List<FlutterView> views = <FlutterView>[];
+    List<vm_service.IsolateRef> views = <vm_service.IsolateRef>[];
     Future<bool> setDebugBanner(bool value) async {
       try {
-        for (final FlutterView view in views) {
+        for (final vm_service.IsolateRef view in views) {
           await device.vmService.flutterDebugAllowBanner(
             value,
-            isolateId: view.uiIsolate.id,
+            isolateId: view.id,
           );
         }
         return true;
@@ -971,13 +973,31 @@ abstract class ResidentHandlers {
       if (supportsServiceProtocol && isRunningDebug) {
         // Ensure that the vmService access is guarded by supportsServiceProtocol, it
         // will be null in release mode.
-        views = await device.vmService.getFlutterViews();
+        views = await device._getCurrentIsolates();
         if (!await setDebugBanner(false)) {
           return;
         }
       }
       try {
-        await device.device.takeScreenshot(outputFile);
+        if (device.device.supportsScreenshot) {
+          await device.device.takeScreenshot(outputFile);
+        } else if (device.targetPlatform == TargetPlatform.web_javascript) {
+          final vm_service.Response response = await device.vmService.callMethodWrapper('ext.dwds.screenshot');
+          if (response == null) {
+            throw Exception('Failed to take screenshot');
+          }
+          final IOSink sink = outputFile.openWrite();
+          sink.add(base64.decode(response.json['data'] as String));
+          await sink.close();
+        } else {
+          final vm_service.Response response = await device.vmService.screenshot();
+          if (response == null) {
+            throw Exception('Failed to take screenshot');
+          }
+          final IOSink sink = outputFile.openWrite();
+          sink.add(base64.decode(response.json['screenshot'] as String));
+          await sink.close();
+        }
       } finally {
         if (supportsServiceProtocol && isRunningDebug) {
           await setDebugBanner(true);
@@ -1633,9 +1653,7 @@ class TerminalHandler {
         return true;
       case 's':
         for (final FlutterDevice device in residentRunner.flutterDevices) {
-          if (device.device.supportsScreenshot) {
-            await residentRunner.screenshot(device);
-          }
+          await residentRunner.screenshot(device);
         }
         return true;
       case 'S':
