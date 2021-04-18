@@ -4,6 +4,61 @@
 
 import 'package:meta/meta.dart';
 
+/// Quiver has this, but unfortunately we can't depend on it bc flutter_tools
+/// uses non-nullsafe quiver by default (because of dwds).
+bool _listsEqual(List<dynamic>? a, List<dynamic>? b) {
+  if (a == b) {
+    return true;
+  }
+  if (a == null || b == null) {
+    return false;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+
+  return a.asMap().entries.every((MapEntry<int, dynamic> e) => e.value == b[e.key]);
+}
+
+/// The normal [RegExp.==] operator is inherited from [Object], so only
+/// returns true when the regexes are the same instance.
+///
+/// This function instead _should_ return true when the regexes are
+/// functionally the same, i.e. when they have the same matches & captures for
+/// any given input. At least that's the goal, in reality this has lots of false
+/// negatives (for example when the flags differ). Still better than [RegExp.==].
+bool _regexesEqual(RegExp? a, RegExp? b) {
+  if (a == b) {
+    return true;
+  }
+  if (a == null || b == null) {
+    return false;
+  }
+
+  return a.pattern == b.pattern
+    && a.isMultiLine == b.isMultiLine
+    && a.isCaseSensitive == b.isCaseSensitive
+    && a.isUnicode == b.isUnicode
+    && a.isDotAll == b.isDotAll;
+}
+
+@immutable
+class JsonRevivalException implements Exception {
+  const JsonRevivalException(this.message);
+
+  const JsonRevivalException.fromDescriptions(
+    String fieldDescription,
+    String expectedValueDescription
+  ) : message = 'Expected $fieldDescription to be $expectedValueDescription.';
+
+  final String message;
+
+  @override
+  String toString() {
+    return 'JsonRevivalException: $message';
+  }
+}
+
 /// A single configured custom device.
 ///
 /// In the custom devices config file on disk, there may be multiple custom
@@ -26,23 +81,79 @@ class CustomDeviceConfig {
     this.screenshotCommand
   }) : assert(forwardPortCommand == null || forwardPortSuccessRegex != null);
 
+  /// Create a CustomDeviceConfig from some JSON value.
+  /// If anything fails internally (some value doesn't have the right type,
+  /// some value is missing, etc) a [JsonRevivalException] with the description
+  /// of the error is thrown. (No exceptions/errors other than JsonRevivalException
+  /// should ever be thrown by this factory.)
   factory CustomDeviceConfig.fromJson(dynamic json) {
-    final Map<String, Object> typedMap = (json as Map<dynamic, dynamic>).cast<String, Object>();
+    final Map<String, dynamic> typedMap = _castJsonObject(
+      json,
+      'device configuration',
+      'a JSON object'
+    );
+
+    final List<String>? forwardPortCommand = _castStringListOrNull(
+      typedMap[_kForwardPortCommand],
+      _kForwardPortCommand,
+      'null or array of strings with at least one element',
+      minLength: 1
+    );
+
+    final RegExp? forwardPortSuccessRegex = _convertToRegexOrNull(
+      typedMap[_kForwardPortSuccessRegex],
+      _kForwardPortSuccessRegex,
+      'null or string-ified regex'
+    );
+
+    if (forwardPortCommand != null && forwardPortSuccessRegex == null) {
+      throw const JsonRevivalException('When forwardPort is given, forwardPortSuccessRegex must be specified too.');
+    }
 
     return CustomDeviceConfig(
-      id: typedMap[_kId]! as String,
-      label: typedMap[_kLabel]! as String,
-      sdkNameAndVersion: typedMap[_kSdkNameAndVersion]! as String,
-      disabled: typedMap[_kDisabled]! as bool,
-      pingCommand: _castStringList(typedMap[_kPingCommand]!),
-      pingSuccessRegex: _convertToRegexOrNull(typedMap[_kPingSuccessRegex]),
-      postBuildCommand: _castStringListOrNull(typedMap[_kPostBuildCommand]),
-      installCommand: _castStringList(typedMap[_kInstallCommand]!),
-      uninstallCommand: _castStringList(typedMap[_kUninstallCommand]!),
-      runDebugCommand: _castStringList(typedMap[_kRunDebugCommand]!),
-      forwardPortCommand: _castStringListOrNull(typedMap[_kForwardPortCommand]),
-      forwardPortSuccessRegex: _convertToRegexOrNull(typedMap[_kForwardPortSuccessRegex]),
-      screenshotCommand: _castStringListOrNull(typedMap[_kScreenshotCommand])
+      id: _castString(typedMap[_kId], _kId, 'a string'),
+      label: _castString(typedMap[_kLabel], _kLabel, 'a string'),
+      sdkNameAndVersion: _castString(typedMap[_kSdkNameAndVersion], _kSdkNameAndVersion, 'a string'),
+      disabled: _castBool(typedMap[_kDisabled], _kDisabled, 'a boolean'),
+      pingCommand: _castStringList(
+        typedMap[_kPingCommand],
+        _kPingCommand,
+        'array of strings with at least one element',
+        minLength: 1
+      ),
+      pingSuccessRegex: _convertToRegexOrNull(typedMap[_kPingSuccessRegex], _kPingSuccessRegex, 'null or string-ified regex'),
+      postBuildCommand: _castStringListOrNull(
+        typedMap[_kPostBuildCommand],
+        _kPostBuildCommand,
+        'null or array of strings with at least one element',
+        minLength: 1,
+      ),
+      installCommand: _castStringList(
+        typedMap[_kInstallCommand],
+        _kInstallCommand,
+        'array of strings with at least one element',
+        minLength: 1
+      ),
+      uninstallCommand: _castStringList(
+        typedMap[_kUninstallCommand],
+        _kUninstallCommand,
+        'array of strings with at least one element',
+        minLength: 1
+      ),
+      runDebugCommand: _castStringList(
+        typedMap[_kRunDebugCommand],
+        _kRunDebugCommand,
+        'array of strings with at least one element',
+        minLength: 1
+      ),
+      forwardPortCommand: forwardPortCommand,
+      forwardPortSuccessRegex: forwardPortSuccessRegex,
+      screenshotCommand: _castStringListOrNull(
+        typedMap[_kScreenshotCommand],
+        _kScreenshotCommand,
+        'array of strings with at least one element',
+        minLength: 1
+      )
     );
   }
 
@@ -62,12 +173,12 @@ class CustomDeviceConfig {
 
   /// An example device config used for creating the default config file.
   static final CustomDeviceConfig example = CustomDeviceConfig(
-    id: 'test1',
-    label: 'Test Device',
-    sdkNameAndVersion: 'Test Device 4 Model B+',
+    id: 'pi',
+    label: 'Raspberry Pi',
+    sdkNameAndVersion: 'Raspberry Pi 4 Model B+',
     disabled: true,
     pingCommand: const <String>['ping', '-w', '500', '-n', '1', 'raspberrypi'],
-    pingSuccessRegex: RegExp('ms TTL='),
+    pingSuccessRegex: RegExp(r'[<=]\d+ms'),
     postBuildCommand: null,
     installCommand: const <String>['scp', '-r', r'${localPath}', r'pi@raspberrypi:/tmp/${appName}'],
     uninstallCommand: const <String>['ssh', 'pi@raspberrypi', r'rm -rf "/tmp/${appName}"'],
@@ -95,16 +206,96 @@ class CustomDeviceConfig {
 
   bool get supportsScreenshotting => screenshotCommand != null;
 
-  static List<String> _castStringList(Object object) {
-    return (object as List<dynamic>).cast<String>();
+  static T _maybeRethrowAsRevivalException<T>(T Function() closure, String fieldDescription, String expectedValueDescription) {
+    try {
+      return closure();
+    } on Object catch (_) {
+      throw JsonRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
+    }
   }
 
-  static List<String>? _castStringListOrNull(Object? object) {
-    return object == null ? null : _castStringList(object);
+  static Map<String, dynamic> _castJsonObject(dynamic value, String fieldDescription, String expectedValueDescription) {
+    if (value == null) {
+      throw JsonRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
+    } else {
+      return _maybeRethrowAsRevivalException(
+        () => Map<String, dynamic>.from(value as Map<dynamic, dynamic>),
+        fieldDescription,
+        expectedValueDescription,
+      );
+    }
   }
 
-  static RegExp? _convertToRegexOrNull(Object? object) {
-    return object == null ? null : RegExp(object as String);
+  static bool _castBool(dynamic value, String fieldDescription, String expectedValueDescription) {
+    if (value == null) {
+      throw JsonRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
+    } else {
+      return _maybeRethrowAsRevivalException(
+        () => value as bool,
+        fieldDescription,
+        expectedValueDescription,
+      );
+    }
+  }
+
+  static String _castString(dynamic value, String fieldDescription, String expectedValueDescription) {
+    if (value == null) {
+      throw JsonRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
+    } else {
+      return _maybeRethrowAsRevivalException(
+        () => value as String,
+        fieldDescription,
+        expectedValueDescription,
+      );
+    }
+  }
+
+  static List<String> _castStringList(
+    dynamic value,
+    String fieldDescription,
+    String expectedValueDescription, {
+    int minLength = 0,
+  }) {
+    if (value == null) {
+      throw JsonRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
+    } else {
+      final List<String> list = _maybeRethrowAsRevivalException(
+        () => List<String>.from(value as Iterable<dynamic>),
+        fieldDescription,
+        expectedValueDescription,
+      );
+
+      if (list.length < minLength) {
+        throw JsonRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
+      }
+
+      return list;
+    }
+  }
+
+  static List<String>? _castStringListOrNull(
+    dynamic value,
+    String fieldDescription,
+    String expectedValueDescription, {
+    int minLength = 0,
+  }) {
+    if (value == null) {
+      return null;
+    } else {
+      return _castStringList(value, fieldDescription, expectedValueDescription, minLength: minLength);
+    }
+  }
+
+  static RegExp? _convertToRegexOrNull(dynamic value, String fieldDescription, String expectedValueDescription) {
+    if (value == null) {
+      return null;
+    } else {
+      return _maybeRethrowAsRevivalException(
+        () => RegExp(value as String),
+        fieldDescription,
+        expectedValueDescription,
+      );
+    }
   }
 
   dynamic toJson() {
@@ -160,5 +351,58 @@ class CustomDeviceConfig {
       forwardPortSuccessRegex: explicitForwardPortSuccessRegex ? forwardPortSuccessRegex : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
       screenshotCommand: explicitScreenshotCommand ? screenshotCommand : (screenshotCommand ?? this.screenshotCommand),
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CustomDeviceConfig
+      && other.id == id
+      && other.label == label
+      && other.sdkNameAndVersion == sdkNameAndVersion
+      && other.disabled == disabled
+      && _listsEqual(other.pingCommand, pingCommand)
+      && _regexesEqual(other.pingSuccessRegex, pingSuccessRegex)
+      && _listsEqual(other.postBuildCommand, postBuildCommand)
+      && _listsEqual(other.installCommand, installCommand)
+      && _listsEqual(other.uninstallCommand, uninstallCommand)
+      && _listsEqual(other.runDebugCommand, runDebugCommand)
+      && _listsEqual(other.forwardPortCommand, forwardPortCommand)
+      && _regexesEqual(other.forwardPortSuccessRegex, forwardPortSuccessRegex)
+      && _listsEqual(other.screenshotCommand, screenshotCommand);
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode
+      ^ label.hashCode
+      ^ sdkNameAndVersion.hashCode
+      ^ disabled.hashCode
+      ^ pingCommand.hashCode
+      ^ (pingSuccessRegex?.pattern).hashCode
+      ^ postBuildCommand.hashCode
+      ^ installCommand.hashCode
+      ^ uninstallCommand.hashCode
+      ^ runDebugCommand.hashCode
+      ^ forwardPortCommand.hashCode
+      ^ (forwardPortSuccessRegex?.pattern).hashCode
+      ^ screenshotCommand.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'CustomDeviceConfig('
+      'id: $id, '
+      'label: $label, '
+      'sdkNameAndVersion: $sdkNameAndVersion, '
+      'disabled: $disabled, '
+      'pingCommand: $pingCommand, '
+      'pingSuccessRegex: $pingSuccessRegex, '
+      'postBuildCommand: $postBuildCommand, '
+      'installCommand: $installCommand, '
+      'uninstallCommand: $uninstallCommand, '
+      'runDebugCommand: $runDebugCommand, '
+      'forwardPortCommand: $forwardPortCommand, '
+      'forwardPortSuccessRegex: $forwardPortSuccessRegex, '
+      'screenshotCommand: $screenshotCommand)';
   }
 }

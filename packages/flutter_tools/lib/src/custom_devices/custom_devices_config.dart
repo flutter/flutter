@@ -25,6 +25,7 @@ class CustomDevicesConfig {
     required Logger logger,
     required Platform platform
   }) : _fileSystem = fileSystem,
+       _logger = logger,
        _config = Config(
          _kCustomDevicesConfigName,
          fileSystem: fileSystem,
@@ -42,6 +43,7 @@ class CustomDevicesConfig {
     Directory? directory,
     required Logger logger
   }) : _fileSystem = fileSystem,
+       _logger = logger,
        _config = Config.test(
          name: _kCustomDevicesConfigName,
          directory: directory,
@@ -58,6 +60,7 @@ class CustomDevicesConfig {
   static const String _kCustomDevices = 'custom-devices';
 
   final FileSystem _fileSystem;
+  final Logger _logger;
   final Config _config;
 
   String get _defaultSchema {
@@ -91,17 +94,37 @@ class CustomDevicesConfig {
   /// Get the list of [CustomDeviceConfig]s that are listed in the config file
   /// including disabled ones.
   ///
-  /// Returns an empty list when the config could not be loaded.
+  /// Returns an empty list when the config could not be loaded and logs
+  /// any errors.
   List<CustomDeviceConfig> get devices {
     final dynamic json = _config.getValue(_kCustomDevicesConfigKey);
 
     if (json == null) {
       return <CustomDeviceConfig>[];
+    } else if (json is! List) {
+      _logger.printError('Could not load custom devices config. config[\'$_kCustomDevicesConfigKey\'] is not a JSON array.');
+      return <CustomDeviceConfig>[];
     }
 
-    final List<dynamic> typedList = json as List<dynamic>;
+    final List<dynamic> typedList = json;
+    final List<CustomDeviceConfig> revived = <CustomDeviceConfig>[];
+    for (final MapEntry<int, dynamic> entry in typedList.asMap().entries) {
+      try {
+        revived.add(CustomDeviceConfig.fromJson(entry.value));
+      } on JsonRevivalException catch (e) {
+        _logger.printError('Could not load custom device from config index ${entry.key}: $e');
+      }
+    }
 
-    return typedList.map((dynamic e) => CustomDeviceConfig.fromJson(e)).toList();
+    return revived;
+  }
+
+  /// Set the list of [CustomDeviceConfig]s in the config file.
+  set devices(List<CustomDeviceConfig> configs) {
+    _config.setValue(
+      _kCustomDevicesConfigKey,
+      configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
+    );
   }
 
   // We don't have a setter for devices here because we don't need it and
