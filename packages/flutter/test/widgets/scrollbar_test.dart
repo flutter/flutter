@@ -560,7 +560,7 @@ void main() {
       expect(error.message, 'A TextDirection must be provided before a Scrollbar can be painted.');
     }
   });
-//
+
   testWidgets('Scrollbar works with null Scroll Metrics', (WidgetTester tester) async {
     final _TestScrollController scrollController = _TestScrollController();
     await tester.pumpWidget(
@@ -582,6 +582,10 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
+    expect(
+        find.byType(RawScrollbar),
+        findsOneWidget,
+    );
   });
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
