@@ -108,7 +108,8 @@ void main() {
     uninstallCommand: const <String>['testuninstall'],
     runDebugCommand: const <String>['testrundebug'],
     forwardPortCommand: const <String>['testforwardport'],
-    forwardPortSuccessRegex: RegExp('testforwardportsuccess')
+    forwardPortSuccessRegex: RegExp('testforwardportsuccess'),
+    screenshotCommand: const <String>['testscreenshot']
   );
 
   const String testConfigPingSuccessOutput = 'testpingsuccess\n';
@@ -520,6 +521,63 @@ void main() {
       ProcessManager: () => FakeProcessManager.any()
     }
   );
+
+  testWithoutContext('CustomDevice screenshotting', () async {
+    bool screenshotCommandWasExecuted = false;
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: testConfig.screenshotCommand,
+        onRun: () => screenshotCommandWasExecuted = true,
+      )
+    ]);
+
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final File screenshotFile = fs.file('screenshot.png');
+
+    final CustomDevice device = CustomDevice(
+      config: testConfig,
+      logger: BufferLogger.test(),
+      processManager: processManager
+    );
+
+    expect(device.supportsScreenshot, true);
+
+    await device.takeScreenshot(screenshotFile);
+    expect(screenshotCommandWasExecuted, true);
+    expect(screenshotFile.existsSync(), true);
+  });
+
+  testWithoutContext('CustomDevice without screenshotting support', () async {
+    bool screenshotCommandWasExecuted = false;
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: testConfig.screenshotCommand,
+        onRun: () => screenshotCommandWasExecuted = true,
+      )
+    ]);
+
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final File screenshotFile = fs.file('screenshot.png');
+
+    final CustomDevice device = CustomDevice(
+        config: testConfig.copyWith(
+          explicitScreenshotCommand: true,
+          screenshotCommand: null
+        ),
+        logger: BufferLogger.test(),
+        processManager: processManager
+    );
+
+    expect(device.supportsScreenshot, false);
+    expect(
+      () => device.takeScreenshot(screenshotFile),
+      throwsA(const TypeMatcher<UnsupportedError>()),
+    );
+    expect(screenshotCommandWasExecuted, false);
+    expect(screenshotFile.existsSync(), false);
+  });
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {
