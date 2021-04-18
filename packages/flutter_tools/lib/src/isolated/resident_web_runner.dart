@@ -29,7 +29,6 @@ import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../features.dart';
 import '../flutter_plugins.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -60,7 +59,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required FileSystem fileSystem,
     @required SystemClock systemClock,
     @required Usage usage,
-    @required FeatureFlags featureFlags,
     bool machine = false,
   }) {
     return ResidentWebRunner(
@@ -120,6 +118,12 @@ class ResidentWebRunner extends ResidentRunner {
   final Usage _usage;
   final UrlTunneller _urlTunneller;
 
+  @override
+  Logger get logger => _logger;
+
+  @override
+  FileSystem get fileSystem => _fileSystem;
+
   FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
   DateTime firstBuildTime;
@@ -161,9 +165,6 @@ class ResidentWebRunner extends ResidentRunner {
     return _instance ??= FlutterVmService(service, wsAddress: websocketUri, httpAddress: httpUri);
   }
   FlutterVmService _instance;
-
-  @override
-  bool get supportsRestart => true;
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -220,239 +221,9 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  Future<bool> debugDumpApp() async {
-    if (!supportsServiceProtocol || _vmService == null) {
-      return false;
-    }
-    try {
-      final String data = await _vmService
-        .flutterDebugDumpApp(
-          isolateId: null,
-        );
-       _logger.printStatus(data);
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugDumpRenderTree() async {
-    if (!supportsServiceProtocol || _vmService == null) {
-      return false;
-    }
-    try {
-      final String data = await _vmService
-        .flutterDebugDumpRenderTree(
-          isolateId: null,
-        );
-      _logger.printStatus(data);
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol || _vmService == null) {
-      return false;
-    }
-    try {
-      final String data = await _vmService
-        .flutterDebugDumpLayerTree(
-          isolateId: null,
-        );
-       _logger.printStatus(data);
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterDebugDumpSemanticsTreeInTraversalOrder(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugTogglePlatform() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      final String currentPlatform = await _vmService
-        ?.flutterPlatformOverride(
-          isolateId: null,
-        );
-      final String platform = nextPlatform(currentPlatform);
-      await _vmService
-        ?.flutterPlatformOverride(
-            platform: platform,
-            isolateId: null,
-          );
-      _logger.printStatus('Switched operating system to $platform');
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugToggleBrightness() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      final Brightness currentBrightness = await _vmService
-        ?.flutterBrightnessOverride(
-          isolateId: null,
-        );
-      Brightness next;
-      if (currentBrightness == Brightness.light) {
-        next = Brightness.dark;
-      } else if (currentBrightness == Brightness.dark) {
-        next = Brightness.light;
-      }
-      next = await _vmService
-        ?.flutterBrightnessOverride(
-            brightness: next,
-            isolateId: null,
-          );
-      _logger.printStatus('Changed brightness to $next.');
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
   Future<void> stopEchoingDeviceLog() async {
     // Do nothing for ResidentWebRunner
     await device.stopEchoingDeviceLog();
-  }
-
-  @override
-  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugToggleDebugPaintSizeEnabled() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterToggleDebugPaintSizeEnabled(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterToggleDebugCheckElevationsEnabled(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugTogglePerformanceOverlayOverride() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterTogglePerformanceOverlayOverride(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugToggleWidgetInspector() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterToggleWidgetInspector(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugToggleInvertOversizedImages() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterToggleInvertOversizedImages(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
-  }
-
-  @override
-  Future<bool> debugToggleProfileWidgetBuilds() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    try {
-      await _vmService
-        ?.flutterToggleProfileWidgetBuilds(
-          isolateId: null,
-        );
-    } on vmservice.RPCError {
-      // do nothing.
-    }
-    return true;
   }
 
   @override
