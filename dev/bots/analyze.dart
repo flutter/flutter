@@ -1197,7 +1197,7 @@ Future<void> _runFlutterAnalyze(String workingDirectory, {
 }) async {
   return runCommand(
     flutter,
-    <String>['analyze', '--dartdocs', ...options],
+    <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
 }
