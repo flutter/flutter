@@ -7,7 +7,7 @@
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
