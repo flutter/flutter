@@ -305,11 +305,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
-          // If the min and max extent are the same, the app bar cannot collapse
-          // and the content should be visible, so opacity = 1.
-          final double opacity = settings.maxExtent == settings.minExtent
-              ? 1.0
-              : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
+          final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
           double height = settings.maxExtent;
 
           // StretchMode.zoomBackground
