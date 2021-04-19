@@ -1777,9 +1777,9 @@ class TimePickerDialog extends StatefulWidget {
   const TimePickerDialog({
     Key? key,
     required this.initialTime,
-    required this.cancelText,
-    required this.confirmText,
-    required this.helpText,
+    this.cancelText,
+    this.confirmText,
+    this.helpText,
     this.restorationId,
     this.initialEntryMode = TimePickerEntryMode.dial,
   }) : assert(initialTime != null),
