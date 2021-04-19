@@ -97,7 +97,7 @@ import 'text_editing_intents.dart';
 ///               style: Theme.of(context).textTheme.headline4,
 ///             ),
 ///             Shortcuts(
-///               shortcuts: <ShortcutActivator, Intent>{
+///               shortcuts: const <ShortcutActivator, Intent>{
 ///                 SingleActivator(LogicalKeyboardKey.arrowUp): IncrementCounterIntent(),
 ///                 SingleActivator(LogicalKeyboardKey.arrowDown): DecrementCounterIntent(),
 ///               },
