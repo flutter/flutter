@@ -1476,6 +1476,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     assert(_lastDragStartDetails == null);
     _lastDragStartDetails = details;
     widget.onDragSelectionStart?.call(details);
+    _cancelDoubleAndTripleTap();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -1513,8 +1514,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _forcePressStarted(ForcePressDetails details) {
-    _doubleTapTimer?.cancel();
-    _doubleTapTimer = null;
+    _cancelDoubleAndTripleTap();
     widget.onForcePressStart?.call(details);
   }
 
@@ -1538,7 +1538,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
       widget.onSingleLongTapEnd!(details);
     }
-    _isDoubleTap = false;
+    _cancelDoubleAndTripleTap();
   }
 
   void _doubleTapTimeout() {
@@ -1551,6 +1551,17 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     _lastTapOffset = null;
   }
 
+  void _cancelDoubleAndTripleTap() {
+    _tripleTapTimer?.cancel();
+    _tripleTapTimer = null;
+    _isTripleTap = false;
+
+    _doubleTapTimer?.cancel();
+    _doubleTapTimer = null;
+    _isDoubleTap = false;
+
+    _lastTapOffset = null;
+  }
   bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
     assert(secondTapOffset != null);
     if (_lastTapOffset == null) {
