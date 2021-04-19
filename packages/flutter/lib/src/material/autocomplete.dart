@@ -168,6 +168,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.onSelected,
     this.maxOptionsHeight=200.0,
     this.optionsViewBuilder,
+    this.initialValue,
   }) : assert(displayStringForOption != null),
        assert(optionsBuilder != null),
        super(key: key);
@@ -198,6 +199,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   ///
   /// defaults to 200.0
   final double maxOptionsHeight;
+  
+  /// {@macro flutter.widgets.RawAutocomplete.initialValue}
+  final TextEditingValue? initialValue;
 
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
@@ -212,6 +216,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     return RawAutocomplete<T>(
       displayStringForOption: displayStringForOption,
       fieldViewBuilder: fieldViewBuilder,
+      initialValue: initialValue,
       optionsBuilder: optionsBuilder,
       optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(

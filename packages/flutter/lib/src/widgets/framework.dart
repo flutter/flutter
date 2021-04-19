@@ -2505,6 +2505,7 @@ class BuildOwner {
   /// [debugPrintBuildScope] to true. This is useful when debugging problems
   /// involving widgets not getting marked dirty, or getting marked dirty too
   /// often.
+  @pragma('vm:notify-debugger-on-exception')
   void buildScope(Element context, [ VoidCallback? callback ]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
@@ -2833,6 +2834,10 @@ class BuildOwner {
   ///
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
+  // TODO(goderbauer): Add pragma (and enable test in
+  //   break_on_framework_exceptions_test.dart) once debugger breaks on correct
+  //   line, https://github.com/dart-lang/sdk/issues/45684
+  // @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
@@ -4579,6 +4584,7 @@ abstract class ComponentElement extends Element {
   /// Called automatically during [mount] to generate the first build, and by
   /// [rebuild] when the element needs updating.
   @override
+  @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
     if (!kReleaseMode && debugProfileBuildsEnabled)
       Timeline.startSync('${widget.runtimeType}',  arguments: timelineArgumentsIndicatingLandmarkEvent);

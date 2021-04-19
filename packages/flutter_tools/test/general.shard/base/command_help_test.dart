@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputPreferences;
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 CommandHelp _createCommandHelp({
-  @required bool ansi,
-  @required int wrapColumn,
+  required bool ansi,
+  required int wrapColumn,
 }) {
   final Platform platform = FakePlatform(
     stdoutSupportsAnsi: ansi,
@@ -36,9 +33,9 @@ CommandHelp _createCommandHelp({
 
 // Used to use the message length in different scenarios in a DRY way
 void _testMessageLength({
-  @required bool stdoutSupportsAnsi,
-  @required int maxTestLineLength,
-  @required int wrapColumn,
+  required bool stdoutSupportsAnsi,
+  required int maxTestLineLength,
+  required int wrapColumn,
 }) {
   final CommandHelp commandHelp = _createCommandHelp(
     ansi: stdoutSupportsAnsi,
@@ -82,7 +79,7 @@ void main() {
     group('toString', () {
       testWithoutContext('ends with a resetBold when it has parenthetical text', () {
         final Platform platform = FakePlatform(stdoutSupportsAnsi: true);
-        final AnsiTerminal terminal = AnsiTerminal(stdio: null, platform: platform);
+        final AnsiTerminal terminal = AnsiTerminal(stdio: FakeStdio(), platform: platform);
 
         final CommandHelpOption commandHelpOption = CommandHelpOption(
           'tester',

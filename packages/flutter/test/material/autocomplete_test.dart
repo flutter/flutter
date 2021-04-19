@@ -59,7 +59,8 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
+  testWidgets('can filter and select a list of string options',
+      (WidgetTester tester) async {
     late String lastSelection;
     await tester.pumpWidget(
       MaterialApp(
@@ -104,7 +105,8 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final TextFormField field =
+        find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, 'chameleon');
     expect(lastSelection, 'chameleon');
 
@@ -119,14 +121,17 @@ void main() {
     expect(list.semanticChildCount, 6);
   });
 
-  testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
+  testWidgets('can filter and select a list of custom User options',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<User>(
             optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptionsUsers.where((User option) {
-                return option.toString().contains(textEditingValue.text.toLowerCase());
+                return option
+                    .toString()
+                    .contains(textEditingValue.text.toLowerCase());
               });
             },
           ),
@@ -160,7 +165,8 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final TextFormField field =
+        find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, 'Alice, alice@example.com');
 
     // Modify the field text. The options appear again and are filtered.
@@ -173,7 +179,8 @@ void main() {
     expect(list.semanticChildCount, 1);
   });
 
-  testWidgets('displayStringForOption is displayed in the options', (WidgetTester tester) async {
+  testWidgets('displayStringForOption is displayed in the options',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -183,7 +190,9 @@ void main() {
             },
             optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptionsUsers.where((User option) {
-                return option.toString().contains(textEditingValue.text.toLowerCase());
+                return option
+                    .toString()
+                    .contains(textEditingValue.text.toLowerCase());
               });
             },
           ),
@@ -200,7 +209,8 @@ void main() {
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
     expect(find.byType(ListView), findsOneWidget);
-    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    final ListView list =
+        find.byType(ListView).evaluate().first.widget as ListView;
     expect(list.semanticChildCount, kOptionsUsers.length);
     for (int i = 0; i < kOptionsUsers.length; i++) {
       expect(find.text(kOptionsUsers[i].name), findsOneWidget);
@@ -212,7 +222,8 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final TextFormField field =
+        find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, kOptionsUsers.first.name);
   });
 
@@ -227,7 +238,10 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context,
+                TextEditingController textEditingController,
+                FocusNode focusNode,
+                VoidCallback onFieldSubmitted) {
               return Container(key: fieldKey);
             },
           ),
@@ -251,7 +265,9 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder: (BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options) {
               return Container(key: optionsKey);
             },
           ),
@@ -269,7 +285,8 @@ void main() {
     expect(find.byKey(optionsKey), findsOneWidget);
   });
 
-  testWidgets('the options take maxSize as 200.0 if not specified', (WidgetTester tester) async {
+  testWidgets('the options take maxSize as 200.0 if not specified',
+      (WidgetTester tester) async {
     const double defaultHeight = 200.0;
     await tester.pumpWidget(MaterialApp(home: Scaffold(
       body: Autocomplete<String>(
@@ -285,7 +302,8 @@ void main() {
     expect(resultingHeight, equals(defaultHeight));
   });
 
-  testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
+  testWidgets('the options height restricts to max desired height',
+      (WidgetTester tester) async {
     const double desiredHeight = 150.0;
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -308,7 +326,9 @@ void main() {
     expect(resultingHeight, equals(desiredHeight));
   });
 
-  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
+  testWidgets(
+      'The height of options shrinks to height of resulting items, if less than maxHeight',
+      (WidgetTester tester) async {
     const double maxOptionsHeight = 250.0;
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -339,5 +359,57 @@ void main() {
     /// so options height shrinks to 1 items height
     final double oneItemsHeight = await getOptionsHeight(tester, 'elep');
     expect(oneItemsHeight, lessThan(twoItemsHeight));
+    testWidgets('initialValue sets initial text field value',
+        (WidgetTester tester) async {
+      late String lastSelection;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Autocomplete<String>(
+              initialValue: const TextEditingValue(text: 'lem'),
+              onSelected: (String selection) {
+                lastSelection = selection;
+              },
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                return kOptions.where((String option) {
+                  return option.contains(textEditingValue.text.toLowerCase());
+                });
+              },
+            ),
+          ),
+        ),
+      );
+
+      // The field is always rendered, but the options are not unless needed.
+      expect(find.byType(TextFormField), findsOneWidget);
+      expect(find.byType(ListView), findsNothing);
+      expect(
+        tester
+            .widget<TextFormField>(find.byType(TextFormField))
+            .controller!
+            .text,
+        'lem',
+      );
+
+      // Focus the empty field. All the options are displayed.
+      await tester.tap(find.byType(TextFormField));
+      await tester.pump();
+      expect(find.byType(ListView), findsOneWidget);
+      final ListView list =
+          find.byType(ListView).evaluate().first.widget as ListView;
+      // Displays just one option ('lemur').
+      expect(list.semanticChildCount, 1);
+
+      // Select a option. The options hide and the field updates to show the
+      // selection.
+      await tester.tap(find.byType(InkWell).first);
+      await tester.pump();
+      expect(find.byType(TextFormField), findsOneWidget);
+      expect(find.byType(ListView), findsNothing);
+      final TextFormField field =
+          find.byType(TextFormField).evaluate().first.widget as TextFormField;
+      expect(field.controller!.text, 'lemur');
+      expect(lastSelection, 'lemur');
+    });
   });
 }
