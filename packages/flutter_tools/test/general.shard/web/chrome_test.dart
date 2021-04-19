@@ -44,7 +44,7 @@ void main() {
       kChromeEnvironment: 'example_chrome',
     });
     fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,

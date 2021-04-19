@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show PointerDeviceKind;
+import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -485,6 +485,49 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
+  });
+
+  testWidgets('TextSelectionGestureDetectorBuilder right click', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/80119
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    renderEditable.text = const TextSpan(text: 'one two three four five six seven');
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(
+      pointer: 0,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryButton,
+    );
+    addTearDown(gesture.removePointer);
+
+    // Get the location of the 10th character
+    final Offset charLocation = renderEditable
+        .getLocalRectForCaret(const TextPosition(offset: 10)).center;
+    final Offset globalCharLocation = charLocation + tester.getTopLeft(find.byType(FakeEditable));
+
+    // Right clicking on a word should select it
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isTrue);
+
+    // Right clicking on a word within a selection shouldn't change the selection
+    renderEditable.selectWordCalled = false;
+    renderEditable.selection = const TextSelection(baseOffset: 3, extentOffset: 20);
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+
+    // Right clicking on a word within a reverse (right-to-left) selection shouldn't change the selection
+    renderEditable.selectWordCalled = false;
+    renderEditable.selection = const TextSelection(baseOffset: 20, extentOffset: 3);
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {

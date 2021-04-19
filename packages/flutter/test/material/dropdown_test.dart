@@ -3165,4 +3165,81 @@ void main() {
         ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 112.0, 47.0, 2.0, 2.0), color: Colors.grey[50], hasMaskFilter: false)
     );
   });
+
+  testWidgets('Tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
+    String? value = 'first';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
+              value: value,
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  enabled: false,
+                  child: Text('disabled'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'first',
+                  child: Text('first'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'second',
+                  child: Text('second'),
+                ),
+              ],
+              onChanged: (String? newValue) {
+                setState(() {
+                  value = newValue;
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on a disabled item.
+    await tester.tap(find.text('disabled').hitTestable());
+    await tester.pumpAndSettle();
+
+    // The dropdown should still be open, i.e., there should be one widget with 'second' text.
+    expect(find.text('second').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('Disabled item should not be focusable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButton<String>(
+            value: 'enabled',
+            onChanged: onChanged,
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(
+                enabled: false,
+                child: Text('disabled'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'enabled',
+                child: Text('enabled'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('enabled').hitTestable());
+    await tester.pumpAndSettle();
+
+    // The `FocusNode` of [disabledItem] should be `null` as enabled is false.
+    final Element disabledItem = tester.element(find.text('disabled').hitTestable());
+    expect(Focus.maybeOf(disabledItem), null, reason: 'Disabled menu item should not be able to request focus');
+  });
 }

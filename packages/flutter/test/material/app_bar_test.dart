@@ -1953,7 +1953,7 @@ void main() {
   });
 
   testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
+    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -1968,6 +1968,48 @@ void main() {
 
     expect(lightTheme.primaryColorBrightness, Brightness.light);
     expect(lightTheme.colorScheme.brightness, Brightness.light);
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+    ));
+  });
+
+  testWidgets('AppBar draws a light system bar for a light theme with a dark background', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.deepOrange);
+    await tester.pumpWidget(MaterialApp(
+      theme: lightTheme,
+      home: Scaffold(
+        appBar: AppBar(
+          backwardsCompatibility: false,
+          title: const Text('test')
+        ),
+      ),
+    ));
+
+    expect(lightTheme.primaryColorBrightness, Brightness.dark);
+    expect(lightTheme.colorScheme.brightness, Brightness.light);
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
+    ));
+  });
+
+  testWidgets('AppBar draws a dark system bar for a dark theme with a light background', (WidgetTester tester) async {
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, cardColor: Colors.white);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            title: const Text('test')
+          ),
+        ),
+      ),
+    );
+
+    expect(darkTheme.primaryColorBrightness, Brightness.dark);
+    expect(darkTheme.colorScheme.brightness, Brightness.dark);
     expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.dark,
@@ -2752,5 +2794,85 @@ void main() {
 
     expect(getAppBarBackgroundColor(), defaultColor);
     expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+  });
+
+  testWidgets('AppBar._handleScrollNotification safely calls setState()', (WidgetTester tester) async {
+    // Regression test for failures found in Google internal issue b/185192049.
+    final ScrollController controller = ScrollController(initialScrollOffset: 400);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            title: const Text('AppBar'),
+          ),
+          body: Scrollbar(
+            isAlwaysShown: true,
+            controller: controller,
+            child: ListView(
+              controller: controller,
+              children: <Widget>[
+                Container(height: 1200.0, color: Colors.teal),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {
+    late double preferredHeight;
+    late Size preferredSize;
+
+    Widget buildFrame({ double? themeToolbarHeight, double? appBarToolbarHeight }) {
+      final AppBar appBar = AppBar(
+        toolbarHeight: appBarToolbarHeight,
+      );
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          appBarTheme: AppBarTheme(
+            toolbarHeight: themeToolbarHeight,
+          ),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            preferredHeight = AppBar.preferredHeightFor(context, appBar.preferredSize);
+            preferredSize = appBar.preferredSize;
+            return Scaffold(
+              appBar: appBar,
+              body: const Placeholder(),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+    expect(preferredHeight, kToolbarHeight);
+    expect(preferredSize.height, kToolbarHeight);
+
+    await tester.pumpWidget(buildFrame(themeToolbarHeight: 96));
+    await tester.pumpAndSettle(); // Animate MaterialApp theme change.
+    expect(tester.getSize(find.byType(AppBar)).height, 96);
+    expect(preferredHeight, 96);
+    // Special case: AppBarTheme.toolbarHeight specified,
+    // AppBar.theme.toolbarHeight is null.
+    expect(preferredSize.height, kToolbarHeight);
+
+    await tester.pumpWidget(buildFrame(appBarToolbarHeight: 64));
+    await tester.pumpAndSettle(); // Animate MaterialApp theme change.
+    expect(tester.getSize(find.byType(AppBar)).height, 64);
+    expect(preferredHeight, 64);
+    expect(preferredSize.height, 64);
+
+    await tester.pumpWidget(buildFrame(appBarToolbarHeight: 64, themeToolbarHeight: 96));
+    await tester.pumpAndSettle(); // Animate MaterialApp theme change.
+    expect(tester.getSize(find.byType(AppBar)).height, 64);
+    expect(preferredHeight, 64);
+    expect(preferredSize.height, 64);
   });
 }

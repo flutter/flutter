@@ -1032,6 +1032,64 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     expect(find.text('popped inner1'), findsOneWidget);
   });
+
+  testWidgets('`didUpdateWidget` test', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    late StateSetter setState;
+    String location = 'first callback';
+    final SimpleRouterDelegate routerDelegate = SimpleRouterDelegate()
+      ..builder = (BuildContext context, RouteInformation? information) {
+        // Creates the sub-router.
+        return Column(
+          children: <Widget>[
+            Text(information!.location!),
+            StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return BackButtonListener(
+                  child: Container(),
+                  onBackButtonPressed: () {
+                    provider.value = RouteInformation(
+                      location: location,
+                    );
+                    return SynchronousFuture<bool>(true);
+                  },
+                );
+              },
+            ),
+          ],
+        );
+      }
+      ..onPopRoute = () {
+        provider.value = const RouteInformation(
+          location: 'popped outter',
+        );
+        return SynchronousFuture<bool>(true);
+      };
+
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: routerDelegate
+      )
+    ));
+
+    // Only update BackButtonListener widget.
+    setState((){
+      location = 'second callback';
+    });
+
+    await tester.pump();
+    await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
+    await tester.pump();
+    expect(find.text('second callback'), findsOneWidget);
+  });
 }
 
 Widget buildBoilerPlate(Widget child) {
