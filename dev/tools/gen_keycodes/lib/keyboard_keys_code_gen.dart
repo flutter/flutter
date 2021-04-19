@@ -15,7 +15,7 @@ String _wrapString(String input) {
   return wrapString(input, prefix: '  /// ');
 }
 
-/// Generates the keyboard_keys.dart based on the information in the key data
+/// Generates the keyboard_key.dart based on the information in the key data
 /// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
   KeyboardKeysCodeGenerator(PhysicalKeyData physicalData, this.logicalData) : super(physicalData);
@@ -145,7 +145,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_keys.tmpl');
+  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_key.tmpl');
 
   @override
   Map<String, String> mappings() {

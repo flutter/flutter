@@ -489,7 +489,7 @@ class LogicalKeyEntry {
   }
 
   /// Gets the named used for the key constant in the definitions in
-  /// keyboard_keys.dart.
+  /// keyboard_key.dart.
   ///
   /// If set by the constructor, returns the name set, but otherwise constructs
   /// the name from the various different names available, making sure that the
