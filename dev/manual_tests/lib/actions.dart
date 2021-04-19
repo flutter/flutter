@@ -407,8 +407,8 @@ class _FocusDemoState extends State<FocusDemo> {
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
           shortcuts: <ShortcutActivator, Intent>{
-            SingleActivator(meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true, LogicalKeyboardKey.keyZ): const RedoIntent(),
-            SingleActivator(meta: Platform.isMacOS, control: !Platform.isMacOS, LogicalKeyboardKey.keyZ): const UndoIntent(),
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true): const RedoIntent(),
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS): const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,
