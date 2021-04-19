@@ -1406,20 +1406,18 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  // Counts down for a short duration after a previous tap. Null otherwise.
-  Timer? _doubleTapTimer;
-  Offset? _lastTapOffset;
-  // True if a second tap down of a double tap is detected. Used to discard
-  // subsequent tap up / tap hold of the same tap.
-  bool _isDoubleTap = false;
 
-  Timer? _tripleTapTimer;
-  bool _isTripleTap = false;
+  // Number of tap down events that have been fired in a row within
+  // [kDoubleTapTimeout] and [kDoubleTapSlop]
+  int _consecutiveTapDownCount = 0;
+  // Track if a tap down happened within [kDoubleTapSlop] of the last one
+  Offset? _lastTapOffset;
+  // Track if a tap down happened within [kDoubleTapTimeout] of the last one
+  Timer? _consecutiveTapTimer;
 
   @override
   void dispose() {
-    _doubleTapTimer?.cancel();
-    _tripleTapTimer?.cancel();
+    _consecutiveTapTimer?.cancel();
     _dragUpdateThrottleTimer?.cancel();
     super.dispose();
   }
@@ -1427,40 +1425,41 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDownDetails details) {
+    // onTapDown is fired in all situations because the text editing
+    // implementation needs to react to single/double/triple tap in sequence
     widget.onTapDown?.call(details);
-    // This isn't detected as a double tap gesture in the gesture recognizer
-    // because it's 2 single taps, each of which may do different things depending
-    // on whether it's a single tap, the first tap of a double tap, the second
-    // tap held down, a clean double tap etc.
-    if (_tripleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
-      widget.onTripleTapDown?.call(details);
 
-      _tripleTapTimer!.cancel();
-      _tripleTapTimeout();
-      _isTripleTap = true;
-    } else if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
-      // If there was already a previous tap, the second down hold/tap is a
-      // double tap down.
-      widget.onDoubleTapDown?.call(details);
+    // This isn't detected in the gesture recognizer because each single tap may
+    // do different things depending on whether it's a single tap, the first tap
+    // of a double tap, the second tap held down, a clean double tap etc.
+    if (_consecutiveTapTimer != null && _isWithinConsecutiveTapTolerance(details.globalPosition)) {
+      _consecutiveTapDownCount++;
+      _consecutiveTapTimer!.cancel();
 
-      _doubleTapTimer!.cancel();
-      _doubleTapTimeout();
-      _isDoubleTap = true;
+      if (_consecutiveTapDownCount == 3) {
+        widget.onTripleTapDown?.call(details);
+      }
+      else if (_consecutiveTapDownCount == 2) {
+        widget.onDoubleTapDown?.call(details);
+      }
+    }
+    else {
+      _consecutiveTapDownCount = 1;
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
-    if (_isTripleTap) {
-      _isTripleTap = false;
-    } else if (_isDoubleTap) {
-      _isDoubleTap = false;
-      _lastTapOffset = details.globalPosition;
-      _tripleTapTimer = Timer(kDoubleTapTimeout, _tripleTapTimeout);
-    } else {
-      // single tap up
+    if (_consecutiveTapDownCount == 1) {
       widget.onSingleTapUp?.call(details);
+    }
+
+    // After 3 consecutive taps, we no longer need to wait for a 4th
+    if (_consecutiveTapDownCount < 3) {
       _lastTapOffset = details.globalPosition;
-      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
+      _consecutiveTapTimer = Timer(kDoubleTapTimeout, _cancelConsecutiveTapTimer);
+    }
+    else {
+      _consecutiveTapDownCount = 0;
     }
   }
 
@@ -1474,9 +1473,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _handleDragStart(DragStartDetails details) {
     assert(_lastDragStartDetails == null);
+    _cancelConsecutiveTapTimer();
     _lastDragStartDetails = details;
     widget.onDragSelectionStart?.call(details);
-    _cancelDoubleAndTripleTap();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -1514,7 +1513,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _forcePressStarted(ForcePressDetails details) {
-    _cancelDoubleAndTripleTap();
+    _cancelConsecutiveTapTimer();
     widget.onForcePressStart?.call(details);
   }
 
@@ -1523,52 +1522,38 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+    if (_consecutiveTapDownCount == 1 && widget.onSingleLongTapStart != null) {
       widget.onSingleLongTapStart!(details);
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
+    if (_consecutiveTapDownCount == 1 && widget.onSingleLongTapMoveUpdate != null) {
       widget.onSingleLongTapMoveUpdate!(details);
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
+    if (_consecutiveTapDownCount == 1 && widget.onSingleLongTapEnd != null) {
       widget.onSingleLongTapEnd!(details);
     }
-    _cancelDoubleAndTripleTap();
+    _cancelConsecutiveTapTimer();
   }
 
-  void _doubleTapTimeout() {
-    _doubleTapTimer = null;
+  void _cancelConsecutiveTapTimer() {
+    _consecutiveTapTimer?.cancel();
+    _consecutiveTapTimer = null;
+    _consecutiveTapDownCount = 0;
     _lastTapOffset = null;
   }
 
-  void _tripleTapTimeout() {
-    _tripleTapTimer = null;
-    _lastTapOffset = null;
-  }
-
-  void _cancelDoubleAndTripleTap() {
-    _tripleTapTimer?.cancel();
-    _tripleTapTimer = null;
-    _isTripleTap = false;
-
-    _doubleTapTimer?.cancel();
-    _doubleTapTimer = null;
-    _isDoubleTap = false;
-
-    _lastTapOffset = null;
-  }
-  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
-    assert(secondTapOffset != null);
+  bool _isWithinConsecutiveTapTolerance(Offset consecutiveTapOffset) {
+    assert(consecutiveTapOffset != null);
     if (_lastTapOffset == null) {
       return false;
     }
 
-    final Offset difference = secondTapOffset - _lastTapOffset!;
+    final Offset difference = consecutiveTapOffset - _lastTapOffset!;
     return difference.distance <= kDoubleTapSlop;
   }
 
