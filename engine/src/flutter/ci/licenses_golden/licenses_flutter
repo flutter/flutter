@@ -269,8 +269,13 @@ FILE: ../../../flutter/fml/synchronization/sync_switch_unittest.cc
 FILE: ../../../flutter/fml/synchronization/waitable_event.cc
 FILE: ../../../flutter/fml/synchronization/waitable_event.h
 FILE: ../../../flutter/fml/synchronization/waitable_event_unittest.cc
+FILE: ../../../flutter/fml/task_queue_id.h
 FILE: ../../../flutter/fml/task_runner.cc
 FILE: ../../../flutter/fml/task_runner.h
+FILE: ../../../flutter/fml/task_source.cc
+FILE: ../../../flutter/fml/task_source.h
+FILE: ../../../flutter/fml/task_source_grade.h
+FILE: ../../../flutter/fml/task_source_unittests.cc
 FILE: ../../../flutter/fml/thread.cc
 FILE: ../../../flutter/fml/thread.h
 FILE: ../../../flutter/fml/thread_local.cc
