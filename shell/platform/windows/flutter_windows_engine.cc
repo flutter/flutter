@@ -184,6 +184,11 @@ FlutterWindowsEngine::~FlutterWindowsEngine() {
   Stop();
 }
 
+void FlutterWindowsEngine::SetSwitches(
+    const std::vector<std::string>& switches) {
+  project_->SetSwitches(switches);
+}
+
 bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
   if (!project_->HasValidPaths()) {
     std::cerr << "Missing or unresolvable paths to assets." << std::endl;

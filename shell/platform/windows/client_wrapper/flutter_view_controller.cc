@@ -12,10 +12,11 @@ namespace flutter {
 #ifdef WINUWP
 FlutterViewController::FlutterViewController(
     ABI::Windows::UI::Core::CoreWindow* window,
+    ABI::Windows::ApplicationModel::Activation::IActivatedEventArgs* args,
     const DartProject& project) {
   engine_ = std::make_unique<FlutterEngine>(project);
   controller_ = FlutterDesktopViewControllerCreateFromCoreWindow(
-      window, engine_->RelinquishEngine());
+      window, args, engine_->RelinquishEngine());
   if (!controller_) {
     std::cerr << "Failed to create view controller." << std::endl;
     return;
