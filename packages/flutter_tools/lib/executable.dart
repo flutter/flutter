@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -149,6 +150,7 @@ List<FlutterCommand> generateCommands({
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
   ConfigCommand(verboseHelp: verboseHelp),
+  CustomDevicesCommand(),
   CreateCommand(verboseHelp: verboseHelp),
   DaemonCommand(hidden: !verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),

@@ -238,6 +238,10 @@ class CustomDeviceAppSession {
        _device = device,
        _logger = logger,
        _processManager = processManager,
+       _processUtils = ProcessUtils(
+         processManager: processManager,
+         logger: logger
+       ),
        logReader = CustomDeviceLogReader(name);
 
   final String name;
@@ -245,10 +249,89 @@ class CustomDeviceAppSession {
   final ApplicationPackage _appPackage;
   final Logger _logger;
   final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final CustomDeviceLogReader logReader;
 
   Process _process;
   int _forwardedHostPort;
+
+  List<String> _getEngineOptions(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
+    final List<String> options = <String>[];
+
+    void addFlag(String value) {
+      options.add(value);
+    }
+
+    addFlag('enable-dart-profiling=true');
+    addFlag('enable-background-compilation=true');
+
+    if (traceStartup) {
+      addFlag('trace-startup=true');
+    }
+    if (route != null) {
+      addFlag('route=$route');
+    }
+    if (debuggingOptions.enableSoftwareRendering) {
+      addFlag('enable-software-rendering=true');
+    }
+    if (debuggingOptions.skiaDeterministicRendering) {
+      addFlag('skia-deterministic-rendering=true');
+    }
+    if (debuggingOptions.traceSkia) {
+      addFlag('trace-skia=true');
+    }
+    if (debuggingOptions.traceAllowlist != null) {
+      addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
+    }
+    if (debuggingOptions.traceSystrace) {
+      addFlag('trace-systrace=true');
+    }
+    if (debuggingOptions.endlessTraceBuffer) {
+      addFlag('endless-trace-buffer=true');
+    }
+    if (debuggingOptions.dumpSkpOnShaderCompilation) {
+      addFlag('dump-skp-on-shader-compilation=true');
+    }
+    if (debuggingOptions.cacheSkSL) {
+      addFlag('cache-sksl=true');
+    }
+    if (debuggingOptions.purgePersistentCache) {
+      addFlag('purge-persistent-cache=true');
+    }
+    // Options only supported when there is a VM Service connection between the
+    // tool and the device, usually in debug or profile mode.
+    if (debuggingOptions.debuggingEnabled) {
+      if (debuggingOptions.deviceVmServicePort != null) {
+        addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+      }
+      if (debuggingOptions.buildInfo.isDebug) {
+        addFlag('enable-checked-mode=true');
+        addFlag('verify-entry-points=true');
+      }
+      if (debuggingOptions.startPaused) {
+        addFlag('start-paused=true');
+      }
+      if (debuggingOptions.disableServiceAuthCodes) {
+        addFlag('disable-service-auth-codes=true');
+      }
+      final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+      if (dartVmFlags.isNotEmpty) {
+        addFlag('dart-flags=$dartVmFlags');
+      }
+      if (debuggingOptions.useTestFonts) {
+        addFlag('use-test-fonts=true');
+      }
+      if (debuggingOptions.verboseSystemLogs) {
+        addFlag('verbose-logging=true');
+      }
+    }
+
+    return options;
+  }
+
+  String _getEngineOptionsForCmdline(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
+    return _getEngineOptions(debuggingOptions, traceStartup, route).map((String e) => '--$e').join(' ');
+  }
 
   Future<LaunchResult> start({
     String mainPath,
@@ -259,15 +342,17 @@ class CustomDeviceAppSession {
     bool ipv6 = false,
     String userIdentifier
   }) async {
+    final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
     final List<String> interpolated = interpolateCommand(
       _device._config.runDebugCommand,
       <String, String>{
         'remotePath': '/tmp/',
-        'appName': _appPackage.name
+        'appName': _appPackage.name,
+        'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route)
       }
     );
 
-    final Process process = await _processManager.start(interpolated);
+    final Process process = await _processUtils.start(interpolated);
     assert(_process == null);
     _process = process;
 
