@@ -21,7 +21,7 @@ class WriteBuffer {
     _eightBytesAsList = _eightBytes.buffer.asUint8List();
   }
 
-  final Uint8Buffer _buffer;
+  Uint8Buffer _buffer;
   bool _isDone;
   final ByteData _eightBytes;
   late Uint8List _eightBytesAsList;
@@ -110,6 +110,7 @@ class WriteBuffer {
       throw StateError('done() must not be called more than once on the same $runtimeType.');
     }
     final ByteData result = _buffer.buffer.asByteData(0, _buffer.lengthInBytes);
+    _buffer = Uint8Buffer();
     _isDone = true;
     return result;
   }
