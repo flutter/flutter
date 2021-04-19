@@ -74,6 +74,17 @@ void main() {
     const String assetDirPath = 'example';
     const String depfilePath = 'example.d';
 
+    final BuildSystem buildSystem = TestBuildSystem.all(
+      BuildResult(success: true),
+      (Target target, Environment environment) {
+        env = environment;
+        environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+        environment.outputDir.childFile('isolate_snapshot_data').createSync();
+        environment.outputDir.childFile('vm_snapshot_data').createSync();
+        environment.outputDir.childFile('LICENSE').createSync(recursive: true);
+      }
+    );
+
     await BundleBuilder().build(
       platform: TargetPlatform.ios,
       buildInfo: const BuildInfo(
@@ -91,6 +102,7 @@ void main() {
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       depfilePath: depfilePath,
+      buildSystem: buildSystem
     );
 
     expect(env, isNotNull);
@@ -108,12 +120,5 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      env = environment;
-      environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
-      environment.outputDir.childFile('isolate_snapshot_data').createSync();
-      environment.outputDir.childFile('vm_snapshot_data').createSync();
-      environment.outputDir.childFile('LICENSE').createSync(recursive: true);
-    }),
   });
 }

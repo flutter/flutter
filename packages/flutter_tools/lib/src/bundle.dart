@@ -91,11 +91,13 @@ class BundleBuilder {
     String applicationKernelFilePath,
     String depfilePath,
     String assetDirPath,
+    @visibleForTesting BuildSystem buildSystem
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
+    buildSystem ??= globals.buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
     final Environment environment = Environment(
@@ -115,9 +117,12 @@ class BundleBuilder {
         kTargetPlatform: getNameForTargetPlatform(platform),
         kTargetFile: mainPath,
         kTrackWidgetCreation: buildInfo.trackWidgetCreation.toString(),
-        kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
-        kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
-        kFileSystemRoots: buildInfo.fileSystemRoots?.join(','),
+        if (buildInfo.extraFrontEndOptions.isNotEmpty)
+          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
+        if (buildInfo.extraGenSnapshotOptions.isNotEmpty)
+          kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
+        if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
+          kFileSystemRoots: buildInfo.fileSystemRoots?.join(','),
         kFileSystemScheme: buildInfo.fileSystemScheme,
         if (buildInfo.dartDefines.isNotEmpty)
           kDartDefines: encodeDartDefines(buildInfo.dartDefines),
@@ -136,7 +141,7 @@ class BundleBuilder {
     final Target target = buildInfo.mode == BuildMode.debug
         ? const CopyFlutterBundle()
         : const ReleaseCopyFlutterBundle();
-    final BuildResult result = await globals.buildSystem.build(target, environment);
+    final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
