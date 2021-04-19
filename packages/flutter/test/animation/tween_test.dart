@@ -230,4 +230,11 @@ void main() {
     expect(tween.transform(0.5), 0.31640625);
     expect(tween.transform(1.0), 1.0);
   });
+
+  test('BorderRadiusTween nullable test', () {
+    final BorderRadiusTween tween = BorderRadiusTween(begin: null, end: null);
+    expect(tween.transform(0.0), null);
+    expect(tween.transform(1.0), null);
+    expect(tween.lerp(0.0), null);
+  });
 }

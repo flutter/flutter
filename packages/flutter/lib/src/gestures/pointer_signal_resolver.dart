@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -189,6 +188,7 @@ class PointerSignalResolver {
   ///
   /// This is called by the [GestureBinding] after the framework has finished
   /// dispatching the pointer signal event.
+  @pragma('vm:notify-debugger-on-exception')
   void resolve(PointerSignalEvent event) {
     if (_firstRegisteredCallback == null) {
       assert(_currentEvent == null);

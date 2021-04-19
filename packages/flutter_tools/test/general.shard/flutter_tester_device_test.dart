@@ -54,7 +54,7 @@ void main() {
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
     setUp(() {
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       device = createDevice();
 
       fileSystem
