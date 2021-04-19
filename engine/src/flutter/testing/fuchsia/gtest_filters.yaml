@@ -2,6 +2,6 @@
 # as test arguments for flutter on FEMU tests.
 
 txt_tests: -ParagraphTest.*
-fml_tests: -MessageLoop.TimeSensistiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
+fml_tests: -MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
 shell_tests: -ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
 flutter_runner_scenic_tests: -SessionConnectionTest.*:CalculateNextLatchPointTest.*
