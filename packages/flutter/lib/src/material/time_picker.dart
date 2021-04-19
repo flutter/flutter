@@ -1310,6 +1310,13 @@ class _TimePickerInput extends StatefulWidget {
 
   final ValueChanged<TimeOfDay> onChanged;
 
+  /// Restoration ID to save and restore the state of the time picker input
+  /// widget.
+  ///
+  /// If it is non-null, the widget will persist and restore its state
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
   final String? restorationId;
 
   @override
@@ -1729,25 +1736,28 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       height: _kTimePickerHeaderControlHeight,
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-        child: TextFormField(
-          restorationId: 'hour_minute_text_form_field',
-          autofocus: widget.autofocus ?? false,
-          expands: true,
-          maxLines: null,
-          inputFormatters: <TextInputFormatter>[
-            LengthLimitingTextInputFormatter(2),
-          ],
-          focusNode: focusNode,
-          textAlign: TextAlign.center,
-          keyboardType: TextInputType.number,
-          style: widget.style.copyWith(color: timePickerTheme.hourMinuteTextColor ?? colorScheme.onSurface),
-          controller: controller.value,
-          decoration: inputDecoration,
-          validator: widget.validator,
-          onEditingComplete: () => widget.onSavedSubmitted(controller.value.text),
-          onSaved: widget.onSavedSubmitted,
-          onFieldSubmitted: widget.onSavedSubmitted,
-          onChanged: widget.onChanged,
+        child: UnmanagedRestorationScope(
+          bucket: bucket,
+          child: TextFormField(
+            restorationId: 'hour_minute_text_form_field',
+            autofocus: widget.autofocus ?? false,
+            expands: true,
+            maxLines: null,
+            inputFormatters: <TextInputFormatter>[
+              LengthLimitingTextInputFormatter(2),
+            ],
+            focusNode: focusNode,
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            style: widget.style.copyWith(color: timePickerTheme.hourMinuteTextColor ?? colorScheme.onSurface),
+            controller: controller.value,
+            decoration: inputDecoration,
+            validator: widget.validator,
+            onEditingComplete: () => widget.onSavedSubmitted(controller.value.text),
+            onSaved: widget.onSavedSubmitted,
+            onFieldSubmitted: widget.onSavedSubmitted,
+            onChanged: widget.onChanged,
+          ),
         ),
       ),
     );
