@@ -5,8 +5,19 @@
 @JS()
 library engine;
 
+// This file is transformed during the build process in order to make it a
+// single library. Some notable transformations:
+//
+// 1. Imports of engine/* files are stripped out.
+// 2. Exports of engine/* files are replaced with a part directive.
+//
+// The code that performs the transformations lives in:
+// - https://github.com/flutter/engine/blob/master/web_sdk/sdk_rewriter.dart
+
 import 'dart:async';
 import 'dart:collection'
+    // Some of these names are used in services/buffers.dart for example.
+    // ignore: unused_shown_name
     show ListBase, IterableBase, DoubleLinkedQueue, DoubleLinkedQueueEntry;
 import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
@@ -21,10 +32,68 @@ import 'package:meta/meta.dart';
 
 import '../ui.dart' as ui;
 
-part 'engine/alarm_clock.dart';
+import 'engine/alarm_clock.dart';
+export 'engine/alarm_clock.dart';
+
+import 'engine/browser_detection.dart';
+export 'engine/browser_detection.dart';
+
+import 'engine/mouse_cursor.dart';
+export 'engine/mouse_cursor.dart';
+
+import 'engine/navigation/history.dart';
+export 'engine/navigation/history.dart';
+
+import 'engine/navigation/js_url_strategy.dart';
+export 'engine/navigation/js_url_strategy.dart';
+
+import 'engine/navigation/url_strategy.dart';
+export 'engine/navigation/url_strategy.dart';
+
+import 'engine/plugins.dart';
+export 'engine/plugins.dart';
+
+import 'engine/pointer_binding.dart';
+export 'engine/pointer_binding.dart';
+
+// This import is intentionally commented out because the analyzer says it's unused.
+// import 'engine/pointer_converter.dart';
+export 'engine/pointer_converter.dart';
+
+// This import is intentionally commented out because the analyzer says it's unused.
+// import 'engine/services/buffers.dart';
+export 'engine/services/buffers.dart';
+
+import 'engine/services/message_codec.dart';
+export 'engine/services/message_codec.dart';
+
+import 'engine/services/message_codecs.dart';
+export 'engine/services/message_codecs.dart';
+
+// This import is intentionally commented out because the analyzer says it's unused.
+// import 'engine/services/serialization.dart';
+export 'engine/services/serialization.dart';
+
+import 'engine/shadow.dart';
+export 'engine/shadow.dart';
+
+import 'engine/test_embedding.dart';
+export 'engine/test_embedding.dart';
+
+import 'engine/ulps.dart';
+export 'engine/ulps.dart';
+
+import 'engine/validators.dart';
+export 'engine/validators.dart';
+
+import 'engine/vector_math.dart';
+export 'engine/vector_math.dart';
+
+import 'engine/web_experiments.dart';
+export 'engine/web_experiments.dart';
+
 part 'engine/assets.dart';
 part 'engine/bitmap_canvas.dart';
-part 'engine/browser_detection.dart';
 part 'engine/canvaskit/canvas.dart';
 part 'engine/canvaskit/canvaskit_canvas.dart';
 part 'engine/canvaskit/canvaskit_api.dart';
@@ -63,9 +132,6 @@ part 'engine/dom_canvas.dart';
 part 'engine/dom_renderer.dart';
 part 'engine/engine_canvas.dart';
 part 'engine/frame_reference.dart';
-part 'engine/navigation/history.dart';
-part 'engine/navigation/js_url_strategy.dart';
-part 'engine/navigation/url_strategy.dart';
 part 'engine/html/backdrop_filter.dart';
 part 'engine/html/canvas.dart';
 part 'engine/html/clip.dart';
@@ -101,14 +167,10 @@ part 'engine/html_image_codec.dart';
 part 'engine/keyboard_binding.dart';
 part 'engine/keyboard.dart';
 part 'engine/key_map.dart';
-part 'engine/mouse_cursor.dart';
 part 'engine/onscreen_logging.dart';
 part 'engine/picture.dart';
 part 'engine/platform_dispatcher.dart';
 part 'engine/platform_views.dart';
-part 'engine/plugins.dart';
-part 'engine/pointer_binding.dart';
-part 'engine/pointer_converter.dart';
 part 'engine/profiler.dart';
 part 'engine/rrect_renderer.dart';
 part 'engine/semantics/accessibility.dart';
@@ -122,12 +184,6 @@ part 'engine/semantics/semantics.dart';
 part 'engine/semantics/semantics_helper.dart';
 part 'engine/semantics/tappable.dart';
 part 'engine/semantics/text_field.dart';
-part 'engine/services/buffers.dart';
-part 'engine/services/message_codec.dart';
-part 'engine/services/message_codecs.dart';
-part 'engine/services/serialization.dart';
-part 'engine/shadow.dart';
-part 'engine/test_embedding.dart';
 part 'engine/text/font_collection.dart';
 part 'engine/text/layout_service.dart';
 part 'engine/text/line_break_properties.dart';
@@ -144,11 +200,7 @@ part 'engine/text_editing/autofill_hint.dart';
 part 'engine/text_editing/input_type.dart';
 part 'engine/text_editing/text_capitalization.dart';
 part 'engine/text_editing/text_editing.dart';
-part 'engine/ulps.dart';
 part 'engine/util.dart';
-part 'engine/validators.dart';
-part 'engine/vector_math.dart';
-part 'engine/web_experiments.dart';
 part 'engine/window.dart';
 
 // The mode the app is running in.

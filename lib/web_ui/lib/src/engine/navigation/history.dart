@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+
+import 'package:ui/src/engine.dart' show EnginePlatformDispatcher;
+import 'package:ui/ui.dart' as ui;
+
+import '../services/message_codec.dart';
+import '../services/message_codecs.dart';
+import 'url_strategy.dart';
 
 /// An abstract class that provides the API for [EngineWindow] to delegate its
 /// navigating events.
