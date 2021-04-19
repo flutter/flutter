@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/alarm_clock.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

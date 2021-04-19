@@ -9,7 +9,9 @@ import 'dart:js_util' as js_util;
 import 'package:meta/meta.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' show domRenderer, window;
+import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/pointer_binding.dart';
 import 'package:ui/ui.dart' as ui;
 
 const int _kNoButtonChange = -1;

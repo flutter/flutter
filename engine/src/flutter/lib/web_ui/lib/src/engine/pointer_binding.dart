@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:js' as js;
+import 'dart:js_util' as js_util;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
+
+import 'pointer_converter.dart';
 
 /// Set this flag to true to see all the fired events in the console.
 const bool _debugLogPointerEvents = false;

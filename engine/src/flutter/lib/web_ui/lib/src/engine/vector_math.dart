@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show assertionsEnabled;
 
 class Matrix4 {
   final Float32List _m4storage;

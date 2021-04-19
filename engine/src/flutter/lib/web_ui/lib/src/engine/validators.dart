@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
 
 bool rectIsValid(ui.Rect rect) {
   assert(rect != null, 'Rect argument was null.'); // ignore: unnecessary_null_comparison

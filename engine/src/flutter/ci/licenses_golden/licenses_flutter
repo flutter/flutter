@@ -519,6 +519,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/history.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/url_strategy.dart
@@ -542,6 +543,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/semantics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/tappable.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/text_field.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/services.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/services/buffers.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/services/message_codec.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/services/message_codecs.dart

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:collection';
+import 'dart:typed_data';
 
 abstract class _TypedDataBuffer<E> extends ListBase<E> {
   static const int _initialLength = 8;

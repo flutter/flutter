@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'buffers.dart';
 
 /// Write-only buffer for incrementally building a [ByteData] instance.
 ///

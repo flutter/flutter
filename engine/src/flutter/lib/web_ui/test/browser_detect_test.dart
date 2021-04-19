@@ -4,7 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/browser_detection.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
