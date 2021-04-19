@@ -1136,8 +1136,10 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   late Map<Type, Action<Intent>> _actionMap;
-///   late Map<ShortcutActivator, Intent> _shortcutMap;
+///   final Map<Type, Action<Intent>> _actionMap = const <ShortcutActivator, Intent>{
+///     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
+///   };
+///   late Map<LogicalKeySet, Intent> _shortcutMap;
 ///
 ///   @override
 ///   void initState() {
@@ -1146,9 +1148,6 @@ class _ActionsMarker extends InheritedWidget {
 ///       ActivateIntent: CallbackAction<Intent>(
 ///         onInvoke: (Intent intent) => _toggleState(),
 ///       ),
-///     };
-///     _shortcutMap = <ShortcutActivator, Intent>{
-///       SingleActivator(LogicalKeyboardKey.keyX): const ActivateIntent(),
 ///     };
 ///   }
 ///

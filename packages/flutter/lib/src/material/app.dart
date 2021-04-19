@@ -586,7 +586,7 @@ class MaterialApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     shortcuts: <ShortcutActivator, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
+  ///       const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget? child) {

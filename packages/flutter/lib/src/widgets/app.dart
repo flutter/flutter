@@ -882,7 +882,7 @@ class WidgetsApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     shortcuts: <ShortcutActivator, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
+  ///       const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget? child) {
@@ -896,8 +896,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.shortcuts.seeAlso}
   /// See also:
   ///
-  ///  * [SingleActivator], a set of [LogicalKeyboardKey]s that make up the keys
-  ///    for this map.
+  ///  * [SingleActivator], which defines shortcut key combination of a single
+  ///    key and modifiers, such as "Delete" or "Control+C".
   ///  * The [Shortcuts] widget, which defines a keyboard mapping.
   ///  * The [Actions] widget, which defines the mapping from intent to action.
   ///  * The [Intent] and [Action] classes, which allow definition of new
