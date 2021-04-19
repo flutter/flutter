@@ -72,7 +72,22 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   using SkSLCache = std::pair<sk_sp<SkData>, sk_sp<SkData>>;
 
   /// Load all the SkSL shader caches in the right directory.
-  std::vector<SkSLCache> LoadSkSLs();
+  std::vector<SkSLCache> LoadSkSLs() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Precompile SkSLs packaged with the application and gathered
+  ///             during previous runs in the given context.
+  ///
+  /// @warning    The context must be the rendering context. This context may be
+  ///             destroyed during application suspension and subsequently
+  ///             recreated. The SkSLs must be precompiled again in the new
+  ///             context.
+  ///
+  /// @param      context  The rendering context to precompile shaders in.
+  ///
+  /// @return     The number of SkSLs precompiled.
+  ///
+  size_t PrecompileKnownSkSLs(GrDirectContext* context) const;
 
   // Return mappings for all skp's accessible through the AssetManager
   std::vector<std::unique_ptr<fml::Mapping>> GetSkpsFromAssetManager() const;
@@ -82,7 +97,9 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   static void SetAssetManager(std::shared_ptr<AssetManager> value);
 
   static bool cache_sksl() { return cache_sksl_; }
+
   static void SetCacheSkSL(bool value);
+
   static void MarkStrategySet() { strategy_set_ = true; }
 
   static constexpr char kSkSLSubdirName[] = "sksl";

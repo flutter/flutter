@@ -17,6 +17,7 @@ class ShellTestPlatformView : public PlatformView {
   enum class BackendType {
     kGLBackend,
     kVulkanBackend,
+    kMetalBackend,
     kDefaultBackend,
   };
 

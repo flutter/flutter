@@ -28,6 +28,7 @@ std::unique_ptr<VsyncWaiter> ShellTestPlatformViewGL::CreateVSyncWaiter() {
   return create_vsync_waiter_();
 }
 
+// |ShellTestPlatformView|
 void ShellTestPlatformViewGL::SimulateVSync() {
   vsync_clock_->SimulateVSync();
 }
