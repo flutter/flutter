@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:io';
-
 import 'package:file/memory.dart';
 import 'package:yaml/yaml.dart';
 
@@ -77,9 +75,7 @@ void main() {
   String syntheticL10nPackagePath;
 
   setUp(() {
-    fs = MemoryFileSystem(
-      style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix
-    );
+    fs = MemoryFileSystem.test();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
@@ -272,7 +268,6 @@ void main() {
     });
 
     group('className should only take valid Dart class names', () {
-      // LocalizationsGenerator generator;
       setUp(() {
         _standardFlutterDirectoryL10nSetup(fs);
       });
