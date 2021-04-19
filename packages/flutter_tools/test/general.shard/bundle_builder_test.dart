@@ -67,13 +67,12 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
   });
 
-  Environment env;
   testUsingContext('Passes correct defines to build system', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
     final String mainPath = globals.fs.path.join('lib', 'main.dart');
     const String assetDirPath = 'example';
     const String depfilePath = 'example.d';
-
+    Environment env;
     final BuildSystem buildSystem = TestBuildSystem.all(
       BuildResult(success: true),
       (Target target, Environment environment) {
