@@ -169,7 +169,7 @@ Widget buildFrame({
 }
 
 class SyncLoadTest extends StatefulWidget {
-  const SyncLoadTest();
+  const SyncLoadTest({Key? key}) : super(key: key);
 
   @override
   SyncLoadTestState createState() => SyncLoadTestState();

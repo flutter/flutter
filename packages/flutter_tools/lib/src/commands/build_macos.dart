@@ -11,7 +11,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -44,7 +44,7 @@ class BuildMacosCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
-      throwToolExit('"build macos" is not currently supported.');
+      throwToolExit('"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".');
     }
     if (!globals.platform.isMacOS) {
       throwToolExit('"build macos" only supported on macOS hosts.');

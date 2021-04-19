@@ -25,7 +25,7 @@ void main() {
                     });
                   },
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
+                    return SizedBox(
                       height: 100,
                       child: Text('item ${items[index]}'),
                     );
@@ -63,7 +63,7 @@ void main() {
                     });
                   },
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
+                    return SizedBox(
                       height: 100,
                       child: Text('item ${items[index]}'),
                     );

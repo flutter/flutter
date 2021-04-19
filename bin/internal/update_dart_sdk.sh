@@ -109,7 +109,13 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   mkdir -m 755 -p -- "$DART_SDK_PATH"
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/$DART_ZIP_NAME"
 
-  curl --retry 3 --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
+  # Conditionally set verbose flag for LUCI
+  verbose_curl=""
+  if [[ -n "$LUCI_CI" ]]; then
+    verbose_curl="--verbose"
+  fi
+
+  curl ${verbose_curl} --retry 3 --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
     >&2 echo
     >&2 echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
     >&2 echo "If you're located in China, please see this page:"

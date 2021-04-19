@@ -10,9 +10,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
@@ -41,7 +42,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
-        terminal: Terminal.test(),
         usage: null,
       );
     });
@@ -91,7 +91,7 @@ void main() {
   BufferLogger logger;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
@@ -101,7 +101,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: null,
     );
   });
@@ -174,9 +173,7 @@ void main() {
       ),
     ]);
 
-    expect(xcodeProjectInterpreter.majorVersion, 11);
-    expect(xcodeProjectInterpreter.minorVersion, 4);
-    expect(xcodeProjectInterpreter.patchVersion, 1);
+    expect(xcodeProjectInterpreter.version, Version(11, 4, 1));
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -190,9 +187,7 @@ void main() {
       ),
     ]);
 
-    expect(xcodeProjectInterpreter.majorVersion, 11);
-    expect(xcodeProjectInterpreter.minorVersion, 0);
-    expect(xcodeProjectInterpreter.patchVersion, 0);
+    expect(xcodeProjectInterpreter.version, Version(11, 0, 0));
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -205,9 +200,7 @@ void main() {
         stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
       ),
     ]);
-    expect(xcodeProjectInterpreter.majorVersion, isNull);
-    expect(xcodeProjectInterpreter.minorVersion, isNull);
-    expect(xcodeProjectInterpreter.patchVersion, isNull);
+    expect(xcodeProjectInterpreter.version, isNull);
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -218,7 +211,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
@@ -422,7 +414,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
@@ -449,12 +440,11 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
     expect(
-        () async => await xcodeProjectInterpreter.getInfo(workingDirectory),
+        () async => xcodeProjectInterpreter.getInfo(workingDirectory),
         throwsToolExit(message: stderr));
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
@@ -649,7 +639,7 @@ Information about project "Runner":
       fs.file(xcodebuild).createSync(recursive: true);
     });
 
-    void testUsingOsxContext(String description, dynamic testMethod()) {
+    void testUsingOsxContext(String description, dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localArtifacts,
         Platform: () => macOS,
@@ -671,12 +661,14 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=armv7'), isTrue);
+      expect(contents.contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64 i386'), isTrue);
 
       final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
       expect(buildPhaseScriptContents.contains('ARCHS=armv7'), isTrue);
+      expect(buildPhaseScriptContents.contains('EXCLUDED_ARCHS'), isFalse);
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {

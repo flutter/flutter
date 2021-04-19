@@ -725,6 +725,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   double? get height => _delegate.height;
   @override
+  TextLeadingDistribution? get leadingDistribution => _delegate.leadingDistribution;
+  @override
   Locale? get locale => _delegate.locale;
   @override
   ui.Paint? get foreground => _delegate.foreground;
@@ -742,6 +744,8 @@ class _TextStyleProxy implements TextStyle {
   List<Shadow>? get shadows => _delegate.shadows;
   @override
   List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
+  @override
+  TextOverflow? get overflow => _delegate.overflow;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
@@ -778,10 +782,12 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextLeadingDistribution? leadingDistribution,
     TextBaseline? textBaseline,
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }
@@ -805,6 +811,7 @@ class _TextStyleProxy implements TextStyle {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     ui.Paint? foreground,
     ui.Paint? background,
@@ -815,6 +822,7 @@ class _TextStyleProxy implements TextStyle {
     TextDecorationStyle? decorationStyle,
     double? decorationThickness,
     String? debugLabel,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }

@@ -27,7 +27,7 @@ import 'restoration.dart';
 ///   // During state restoration it is automatically restored to its old value.
 ///   // If no restoration data is available to restore the answer from, it is
 ///   // initialized to the specified default value, in this case 42.
-///   RestorableInt _answer = RestorableInt(42);
+///   final RestorableInt _answer = RestorableInt(42);
 ///
 ///   @override
 ///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -356,6 +356,61 @@ class RestorableStringN extends _RestorablePrimitiveValueN<String?> {
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableStringN(String? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableValue] that knows how to save and restore [DateTime].
+///
+/// {@macro flutter.widgets.RestorableNum}.
+class RestorableDateTime extends RestorableValue<DateTime> {
+  /// Creates a [RestorableDateTime].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableDateTime(DateTime defaultValue) : _defaultValue = defaultValue;
+
+  final DateTime _defaultValue;
+
+  @override
+  DateTime createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(DateTime? oldValue) {
+    assert(debugIsSerializableForRestoration(value.millisecondsSinceEpoch));
+    notifyListeners();
+  }
+
+  @override
+  DateTime fromPrimitives(Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
+
+  @override
+  Object? toPrimitives() => value.millisecondsSinceEpoch;
+}
+
+/// A [RestorableValue] that knows how to save and restore [DateTime] that is
+/// nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}.
+class RestorableDateTimeN extends RestorableValue<DateTime?> {
+  /// Creates a [RestorableDateTime].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableDateTimeN(DateTime? defaultValue) : _defaultValue = defaultValue;
+
+  final DateTime? _defaultValue;
+
+  @override
+  DateTime? createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(DateTime? oldValue) {
+    assert(debugIsSerializableForRestoration(value?.millisecondsSinceEpoch));
+    notifyListeners();
+  }
+
+  @override
+  DateTime? fromPrimitives(Object? data) => data != null ? DateTime.fromMillisecondsSinceEpoch(data as int) : null;
+
+  @override
+  Object? toPrimitives() => value?.millisecondsSinceEpoch;
 }
 
 /// A base class for creating a [RestorableProperty] that stores and restores a

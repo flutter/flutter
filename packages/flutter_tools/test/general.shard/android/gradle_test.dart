@@ -11,18 +11,15 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -196,7 +193,7 @@ void main() {
       expect(() {
         updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
       }, throwsToolExit(
-        message: '$warningMark No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
+        message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
       ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
@@ -325,7 +322,7 @@ include ':app'
       android = fakePlatform('android');
     });
 
-    void testUsingAndroidContext(String description, dynamic testMethod()) {
+    void testUsingAndroidContext(String description, dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localEngineArtifacts,
         Platform: () => android,
@@ -630,16 +627,15 @@ flutter:
   group('buildPluginsAsAar', () {
     FileSystem fs;
     FakeProcessManager fakeProcessManager;
-    MockAndroidSdk mockAndroidSdk;
+    FakeAndroidSdk androidSdk;
     AndroidGradleBuilder builder;
     BufferLogger logger;
 
     setUp(() {
       logger = BufferLogger.test();
       fs = MemoryFileSystem.test();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn(fs.directory('irrelevant'));
+      fakeProcessManager = FakeProcessManager.empty();
+      androidSdk = FakeAndroidSdk();
       builder = AndroidGradleBuilder(
         logger: logger,
         processManager: fakeProcessManager,
@@ -761,7 +757,7 @@ plugin2=${plugin2.path}
       );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => androidSdk,
       FileSystem: () => fs,
       ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
@@ -808,7 +804,7 @@ plugin1=${plugin1.path}
       );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidSdk: () => androidSdk,
       FileSystem: () => fs,
       ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
@@ -1031,6 +1027,6 @@ class FakeGradleUtils extends GradleUtils {
   }
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {}
 class MockAndroidProject extends Mock implements AndroidProject {}
 class MockFlutterProject extends Mock implements FlutterProject {}

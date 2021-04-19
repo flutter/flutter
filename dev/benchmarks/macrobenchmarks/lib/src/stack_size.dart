@@ -81,12 +81,14 @@ final GetStackPointerCallback getStackPointer = () {
 }();
 
 class StackSizePage extends StatelessWidget {
+  const StackSizePage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Column(
-        children: <Widget>[
-          Container(
+        children: const <Widget>[
+          SizedBox(
             width: 200,
             height: 100,
             child: ParentWidget(),
@@ -98,6 +100,8 @@ class StackSizePage extends StatelessWidget {
 }
 
 class ParentWidget extends StatelessWidget {
+  const ParentWidget({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final int myStackSize = getStackPointer();

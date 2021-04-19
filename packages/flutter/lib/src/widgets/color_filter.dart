@@ -26,9 +26,9 @@ import 'framework.dart';
 /// Widget build(BuildContext context) {
 ///   return SingleChildScrollView(
 ///     child: Column(
-///       children: [
+///       children: <Widget>[
 ///         ColorFiltered(
-///           colorFilter: ColorFilter.mode(
+///           colorFilter: const ColorFilter.mode(
 ///             Colors.red,
 ///             BlendMode.modulate,
 ///           ),
@@ -36,7 +36,7 @@ import 'framework.dart';
 ///               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///         ),
 ///         ColorFiltered(
-///           colorFilter: ColorFilter.mode(
+///           colorFilter: const ColorFilter.mode(
 ///             Colors.grey,
 ///             BlendMode.saturation,
 ///           ),

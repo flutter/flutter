@@ -1035,7 +1035,6 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.hardEdge
-    // ignore: unnecessary_nullable_for_final_variable_declarations
     final dynamic renderObject = tester.renderObject(find.byType(Overlay));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 

@@ -50,22 +50,22 @@ void main() {
   final behavior = stack.clipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
-  const Form form = Form(autovalidateMode: AutoValidateMode.always);
-  const Form form = Form(autovalidateMode: AutoValidateMode.disabled);
+  const Form form = Form(autovalidateMode: AutovalidateMode.always);
+  const Form form = Form(autovalidateMode: AutovalidateMode.disabled);
   final autoMode = form.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
-  const FormField formField = FormField(autovalidateMode: AutoValidateMode.always);
-  const FormField formField = FormField(autovalidateMode: AutoValidateMode.disabled);
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.disabled);
   final autoMode = formField.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
-  const TextFormField textFormField = TextFormField(autovalidateMode: AutoValidateMode.always);
-  const TextFormField textFormField = TextFormField(autovalidateMode: AutoValidateMode.disabled);
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutovalidateMode.always);
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutovalidateMode.disabled);
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
-  const DropdownButtonFormField dropDownButtonFormField = DropdownButtonFormField(autovalidateMode: AutoValidateMode.always);
-  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(autovalidateMode: AutoValidateMode.disabled);
+  const DropdownButtonFormField dropDownButtonFormField = DropdownButtonFormField(autovalidateMode: AutovalidateMode.always);
+  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(autovalidateMode: AutovalidateMode.disabled);
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var TextTheme textTheme = TextTheme(
@@ -178,4 +178,96 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
   bottomNavigationBarItem.label;
+
+  // Changes made in https://github.com/flutter/flutter/pull/65246
+  RectangularSliderTrackShape();
+
+  // Changes made in https://github.com/flutter/flutter/pull/46115
+  const InputDecoration inputDecoration = InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecoration();
+  InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecoration.collapsed();
+  inputDecoration.floatingLabelBehavior;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecorationTheme();
+  inputDecorationTheme.floatingLabelBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData();
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData.raw();
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
+  ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+  ThemeData.raw(
+    textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  Draggable draggable = Draggable();
+  draggable = Draggable(dragAnchorStrategy: childDragAnchorStrategy);
+  draggable = Draggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  draggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  longPressDraggable.dragAnchorStrategy;
 }

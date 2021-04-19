@@ -20,7 +20,7 @@ import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
-import 'src/reporting/reporting.dart';
+import 'src/reporting/crash_reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
@@ -57,7 +57,7 @@ Future<int> run(
     String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object firstError;
     StackTrace firstStackTrace;
-    return await runZoned<Future<int>>(() async {
+    return runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
 
@@ -74,7 +74,7 @@ Future<int> run(
       } catch (error, stackTrace) {  // ignore: avoid_catches_without_on_clauses
         firstError = error;
         firstStackTrace = stackTrace;
-        return await _handleToolError(
+        return _handleToolError(
             error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
     }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
@@ -94,7 +94,7 @@ Future<int> _handleToolError(
   bool verbose,
   List<String> args,
   bool reportCrashes,
-  String getFlutterVersion(),
+  String Function() getFlutterVersion,
 ) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
@@ -250,7 +250,7 @@ Future<int> _exit(int code) async {
   }
 
   // Run shutdown hooks before flushing logs
-  await shutdownHooks.runShutdownHooks();
+  await globals.shutdownHooks.runShutdownHooks();
 
   final Completer<void> completer = Completer<void>();
 

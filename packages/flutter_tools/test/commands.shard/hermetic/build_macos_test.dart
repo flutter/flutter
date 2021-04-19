@@ -20,11 +20,11 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
@@ -131,18 +131,33 @@ void main() {
   testUsingContext('macOS build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
-    ), throwsToolExit());
+    ), throwsToolExit(message: '"build macos" only supported on macOS hosts.'));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build fails when feature is disabled', () async {
+    final BuildCommand command = BuildCommand();
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
+
+    expect(createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--no-pub']
+    ), throwsToolExit(message: '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".'));
+  }, overrides: <Type, Generator>{
+    Platform: () => macosPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('macOS build forwards error stdout to status logger error', () async {
@@ -273,7 +288,8 @@ void main() {
       'TRACK_WIDGET_CREATION=true',
       'TREE_SHAKE_ICONS=true',
       'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
-      'PACKAGE_CONFIG=/.dart_tool/package_config.json'
+      'PACKAGE_CONFIG=/.dart_tool/package_config.json',
+      'COCOAPODS_PARALLEL_CODE_SIGN=true',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

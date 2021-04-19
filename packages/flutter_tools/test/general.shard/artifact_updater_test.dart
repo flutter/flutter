@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -175,7 +173,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -230,7 +228,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -260,7 +258,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http:///foo-bar/test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -286,7 +284,7 @@ void main() {
         ..createSync(),
     );
 
-    await expectLater(() async => await artifactUpdater.downloadZipArchive(
+    await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
@@ -461,7 +459,7 @@ void main() {
       ..createSync(recursive: true);
     handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
 
-    await expectLater(() async => await artifactUpdater.downloadZippedTarball(
+    await expectLater(() async => artifactUpdater.downloadZippedTarball(
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),

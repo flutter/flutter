@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/migrations/cmake_custom_command_migration.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -34,7 +34,7 @@ void main () {
     group('migrate add_custom_command() to use VERBATIM', () {
       MemoryFileSystem memoryFileSystem;
       BufferLogger testLogger;
-      MockCmakeProject mockCmakeProject;
+      FakeCmakeProject mockCmakeProject;
       File managedCmakeFile;
 
       setUp(() {
@@ -49,8 +49,7 @@ void main () {
           outputPreferences: OutputPreferences.test(),
         );
 
-        mockCmakeProject = MockCmakeProject();
-        when(mockCmakeProject.managedCmakeFile).thenReturn(managedCmakeFile);
+        mockCmakeProject = FakeCmakeProject(managedCmakeFile);
       });
 
       testWithoutContext('skipped if files are missing', () {
@@ -179,7 +178,12 @@ add_custom_command(
   });
 }
 
-class MockCmakeProject extends Mock implements CmakeBasedProject {}
+class FakeCmakeProject extends Fake implements CmakeBasedProject {
+  FakeCmakeProject(this.managedCmakeFile);
+
+  @override
+  final File managedCmakeFile;
+}
 
 class FakeCmakeMigrator extends ProjectMigrator {
   FakeCmakeMigrator({@required this.succeeds})

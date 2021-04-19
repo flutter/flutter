@@ -20,6 +20,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class MyCupertinoTabScaffoldPage extends StatefulWidget {
+///   const MyCupertinoTabScaffoldPage({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _CupertinoTabScaffoldPageState createState() => _CupertinoTabScaffoldPageState();
 /// }
@@ -31,7 +33,7 @@ import 'theme.dart';
 ///   Widget build(BuildContext context) {
 ///     return CupertinoTabScaffold(
 ///       tabBar: CupertinoTabBar(
-///         items: <BottomNavigationBarItem> [
+///         items: const <BottomNavigationBarItem> [
 ///           // ...
 ///         ],
 ///       ),
@@ -143,7 +145,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// ```dart
 /// CupertinoTabScaffold(
 ///   tabBar: CupertinoTabBar(
-///     items: <BottomNavigationBarItem> [
+///     items: const <BottomNavigationBarItem> [
 ///       // ...
 ///     ],
 ///   ),
@@ -218,7 +220,7 @@ class CupertinoTabScaffold extends StatefulWidget {
        assert(
          controller == null || controller.index < tabBar.items.length,
          "The CupertinoTabController's current index ${controller.index} is "
-         'out of bounds for the tab bar with ${tabBar.items.length} tabs'
+         'out of bounds for the tab bar with ${tabBar.items.length} tabs',
        ),
        super(key: key);
 
@@ -365,7 +367,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
     assert(
       _controller.index >= 0 && _controller.index < widget.tabBar.items.length,
       "The $runtimeType's current index ${_controller.index} is "
-      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
+      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs',
     );
 
     // The value of `_controller.index` has already been updated at this point.

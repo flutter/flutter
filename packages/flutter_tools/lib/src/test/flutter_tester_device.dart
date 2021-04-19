@@ -5,13 +5,12 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:io' as io; // ignore: dart_io_import;
+import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -72,8 +71,12 @@ class FlutterTesterTestDevice extends TestDevice {
   Process _process;
   HttpServer _server;
 
+  /// Starts the device.
+  ///
+  /// [entrypointPath] is the path to the entrypoint file which must be compiled
+  /// as a dill.
   @override
-  Future<StreamChannel<String>> start({@required String compiledEntrypointPath}) async {
+  Future<StreamChannel<String>> start(String entrypointPath) async {
     assert(!_exitCode.isCompleted);
     assert(_process == null);
     assert(_server == null);
@@ -114,7 +117,7 @@ class FlutterTesterTestDevice extends TestDevice {
       if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
-      compiledEntrypointPath,
+      entrypointPath,
     ];
 
     // If the FLUTTER_TEST environment variable has been set, then pass it on
@@ -165,11 +168,12 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
-        final Future<vm_service.VmService> localVmService = connectToVmService(
+        final Future<FlutterVmService> localVmService = connectToVmService(
           forwardingUri,
           compileExpression: compileExpression,
+          logger: logger,
         );
-        unawaited(localVmService.then((vm_service.VmService vmservice) {
+        unawaited(localVmService.then((FlutterVmService vmservice) {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         }));
 
@@ -273,7 +277,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   void _pipeStandardStreamsToConsole({
     @required Process process,
-    @required Future<void> reportObservatoryUri(Uri uri),
+    @required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
     const String observatoryString = 'Observatory listening on ';
     for (final Stream<List<int>> stream in <Stream<List<int>>>[

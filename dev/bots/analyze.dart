@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -11,6 +12,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -61,9 +63,6 @@ Future<void> run(List<String> arguments) async {
   print('$clock Test imports...');
   await verifyNoTestImports(flutterRoot);
 
-  print('$clock Test package imports...');
-  await verifyNoTestPackageImports(flutterRoot);
-
   print('$clock Bad imports (framework)...');
   await verifyNoBadImportsInFlutter(flutterRoot);
 
@@ -78,6 +77,11 @@ Future<void> run(List<String> arguments) async {
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
+
+  /// Ensure that no new dependencies have been accidentally
+  /// added to core packages.
+  print('$clock Package Allowlist...');
+  await _checkConsumerDependencies();
 
   // Analyze all the Dart code in the repo.
   print('$clock Dart analysis...');
@@ -99,7 +103,7 @@ Future<void> run(List<String> arguments) async {
   // Analyze all the sample code in the repo
   print('$clock Sample code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -129,9 +133,9 @@ Future<void> run(List<String> arguments) async {
 // TESTS
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
-final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // ignore: flutter_deprecation_syntax (see analyze.dart)
+final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
 final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
-final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)(\-[0-9]+\.[0-9]+\.pre)?\.'$");
+final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)(\-[0-9]+\.[0-9]+\.pre)?\.',?$");
 final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 
 /// Some deprecation notices are special, for example they're used to annotate members that
@@ -139,10 +143,10 @@ final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 /// (One example would be a library that intentionally conflicts with a member in another
 /// library to indicate that it is incompatible with that other library. Another would be
 /// the regexp just above...)
-const String _ignoreDeprecation = ' // ignore: flutter_deprecation_syntax (see analyze.dart)';
+const String _ignoreDeprecation = ' // flutter_ignore: deprecation_syntax (see analyze.dart)';
 
 /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
-final RegExp _legacyDeprecation = RegExp(r' // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
+final RegExp _legacyDeprecation = RegExp(r' // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
 
 Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
@@ -171,8 +175,13 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
         String message;
         do {
           final Match match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
-          if (match2 == null)
-            throw 'Deprecation notice does not match required pattern.';
+          if (match2 == null) {
+            String possibleReason = '';
+            if (lines[lineNumber].trimLeft().startsWith('"')) {
+              possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+            }
+            throw 'Deprecation notice does not match required pattern.$possibleReason';
+          }
           if (!lines[lineNumber].startsWith("$indent  '"))
             throw 'Unexpected deprecation notice indent.';
           if (message == null) {
@@ -290,79 +299,6 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
     exitWithError(<String>[
       '${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset',
       ...errors,
-    ]);
-  }
-}
-
-Future<void> verifyNoTestPackageImports(String workingDirectory) async {
-  // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
-  final List<String> shims = <String>[];
-  final List<String> errors = (await _allFiles(workingDirectory, 'dart', minimumMatches: 2000).toList())
-    .map<String>((File file) {
-      final String name = Uri.file(path.relative(file.path,
-          from: workingDirectory)).toFilePath(windows: false);
-      if (name.startsWith('bin/cache') ||
-          name == 'dev/bots/test.dart' ||
-          name.startsWith('.pub-cache'))
-        return null;
-      final String data = file.readAsStringSync();
-      if (data.contains("import 'package:test/test.dart'")) {
-        if (data.contains("// Defines a 'package:test' shim.")) {
-          shims.add('  $name');
-          if (!data.contains('https://github.com/dart-lang/matcher/issues/98'))
-            return '  $name: Shims must link to the isInstanceOf issue.';
-          if (data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;") &&
-              data.contains("export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
-            return null;
-          return '  $name: Shim seems to be missing the expected import/export lines.';
-        }
-        final int count = 'package:test'.allMatches(data).length;
-        if (path.split(file.path).contains('test_driver') ||
-            name.startsWith('dev/missing_dependency_tests/') ||
-            name.startsWith('dev/automated_tests/') ||
-            name.startsWith('dev/snippets/') ||
-            name.startsWith('packages/flutter/test/engine/') ||
-            name.startsWith('examples/layers/test/smoketests/raw/') ||
-            name.startsWith('examples/layers/test/smoketests/rendering/') ||
-            name.startsWith('dev/integration_tests/flutter_gallery/test/calculator')) {
-          // We only exempt driver tests, some of our special trivial tests.
-          // Driver tests aren't typically expected to use TypeMatcher and company.
-          // The trivial tests don't typically do anything at all and it would be
-          // a pain to have to give them a shim.
-          if (!data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
-            return '  $name: test does not hide TypeMatcher and isInstanceOf from package:test; consider using a shim instead.';
-          assert(count > 0);
-          if (count == 1)
-            return null;
-          return "  $name: uses 'package:test' $count times.";
-        }
-        if (name.startsWith('packages/flutter_test/')) {
-          // flutter_test has deep ties to package:test
-          return null;
-        }
-        if (data.contains("import 'package:test/test.dart' as test_package;") ||
-            data.contains("import 'package:test/test.dart' as test_package show ")) {
-          if (count == 1)
-            return null;
-        }
-        return "  $name: uses 'package:test' directly";
-      }
-      return null;
-    })
-    .where((String line) => line != null)
-    .toList()
-    ..sort();
-
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    final String s1 = errors.length == 1 ? 's' : '';
-    final String s2 = errors.length == 1 ? '' : 's';
-    exitWithError(<String>[
-      "${bold}The following file$s2 use$s1 'package:test' incorrectly:$reset",
-      ...errors,
-      "Rather than depending on 'package:test' directly, use one of the shims:",
-      ...shims,
-      "This insulates us from breaking changes in 'package:test'."
     ]);
   }
 }
@@ -1200,12 +1136,68 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   return result;
 }
 
+Future<void> _checkConsumerDependencies() async {
+  final ProcessResult result = await Process.run(flutter, <String>[
+    'update-packages',
+    '--transitive-closure',
+    '--consumer-only',
+  ]);
+  if (result.exitCode != 0) {
+    print(result.stdout);
+    print(result.stderr);
+    exit(result.exitCode);
+  }
+  final Set<String> dependencySet = <String>{};
+  for (final String line in result.stdout.toString().split('\n')) {
+    if (!line.contains('->')) {
+      continue;
+    }
+    final List<String> parts = line.split('->');
+    final String name = parts[0].trim();
+    dependencySet.add(name);
+  }
+  final List<String> dependencies = dependencySet.toList()
+    ..sort();
+  final List<String> disallowed = <String>[];
+  final StreamController<Digest> controller = StreamController<Digest>();
+  final ByteConversionSink hasher = sha256.startChunkedConversion(controller.sink);
+  for (final String dependency in dependencies) {
+    hasher.add(utf8.encode(dependency));
+    if (!kCorePackageAllowList.contains(dependency)) {
+      disallowed.add(dependency);
+    }
+  }
+  hasher.close();
+  final Digest digest = await controller.stream.last;
+  final String signature = base64.encode(digest.bytes);
+
+  // Do not change this signature without following the directions in
+  // dev/bots/allowlist.dart
+  const String kExpected = '3S20q38QbN+dDAp+jApXiTRaDgVGGBZ0t4bMJgD3AUY=';
+
+  if (disallowed.isNotEmpty) {
+    exitWithError(<String>[
+      'Warning: transitive closure contained non-allowlisted packages:',
+      '${disallowed..join(', ')}',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+    ]);
+  }
+
+  if (signature != kExpected) {
+    exitWithError(<String>[
+      'Warning: transitive closure sha256 does not match expected signature.',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+      '$signature != $kExpected',
+    ]);
+  }
+}
+
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
-  return await runCommand(
+  return runCommand(
     flutter,
-    <String>['analyze', '--dartdocs', ...options],
+    <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
 }
@@ -1214,7 +1206,7 @@ final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+
 final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
 Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) async {
-  return await _allFiles(srcPath, 'dart', minimumMatches: 1)
+  return _allFiles(srcPath, 'dart', minimumMatches: 1)
     .map<Set<String>>((File file) {
       final Set<String> result = <String>{};
       for (final String line in file.readAsLinesSync()) {

@@ -320,13 +320,13 @@ Future<void> main() async {
         );
 
         bool called = false;
-        final DecoderCallback decode = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+        Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
           expect(cacheWidth, 20);
           expect(cacheHeight, 30);
           expect(allowUpscaling, false);
           called = true;
           return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
-        };
+        }
         final ImageProvider resizeImage = image.placeholder;
         expect(image.placeholder, isA<ResizeImage>());
         expect(called, false);
@@ -343,13 +343,13 @@ Future<void> main() async {
         );
 
         bool called = false;
-        final DecoderCallback decode = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+        Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
           expect(cacheWidth, null);
           expect(cacheHeight, null);
           expect(allowUpscaling, false);
           called = true;
           return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-        };
+        }
         // image.placeholder should be an instance of MemoryImage instead of ResizeImage
         final ImageProvider memoryImage = image.placeholder;
         expect(image.placeholder, isA<MemoryImage>());

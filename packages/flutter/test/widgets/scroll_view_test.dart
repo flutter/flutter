@@ -851,7 +851,7 @@ void main() {
           child: ListView(
             controller: controller,
             children: kStates.map<Widget>((String state) {
-              return Container(
+              return SizedBox(
                 height: 200.0,
                 child: Text(state),
               );
@@ -1231,6 +1231,13 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
+    testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(() => ListView(
+      itemExtent: 100,
+      prototypeItem: const SizedBox(),
+    ), throwsAssertionError);
+  });
+
   testWidgets('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
     expect(() => ListView.builder(
       itemBuilder: (BuildContext context, int index) {
@@ -1257,6 +1264,28 @@ void main() {
       },
       itemCount: 1,
       semanticChildCount: 4,
+    ), throwsAssertionError);
+  });
+
+  testWidgets('ListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemExtent: 100,
+      prototypeItem: const SizedBox(),
+    ), throwsAssertionError);
+  });
+
+  testWidgets('ListView.custom asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(() => ListView.custom(
+      childrenDelegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) {
+          return const SizedBox();
+        },
+      ),
+      itemExtent: 100,
+      prototypeItem: const SizedBox(),
     ), throwsAssertionError);
   });
 

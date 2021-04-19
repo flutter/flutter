@@ -220,6 +220,11 @@ abstract class FlutterDriver {
     await sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
+  /// Waits until [finder] is tappable.
+  Future<void> waitForTappable(SerializableFinder finder, { Duration? timeout }) async {
+    await sendCommand(WaitForTappable(finder, timeout: timeout));
+  }
+
   /// Waits until the given [waitCondition] is satisfied.
   Future<void> waitForCondition(SerializableWaitCondition waitCondition, {Duration? timeout}) async {
     await sendCommand(WaitForCondition(waitCondition, timeout: timeout));
@@ -656,7 +661,7 @@ abstract class FlutterDriver {
   ///
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> traceAction(
-    Future<dynamic> action(), {
+    Future<dynamic> Function() action, {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     bool retainPriorEvents = false,
   }) async {
@@ -691,7 +696,7 @@ abstract class FlutterDriver {
   /// With frame sync disabled, it's the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
-  Future<T> runUnsynchronized<T>(Future<T> action(), { Duration? timeout }) async {
+  Future<T> runUnsynchronized<T>(Future<T> Function() action, { Duration? timeout }) async {
     await sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
     try {

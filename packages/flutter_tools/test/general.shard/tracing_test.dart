@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
+import '../src/fake_vm_services.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -149,7 +150,7 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     ), throwsToolExit(message: 'The device disconnected before the timeline could be retrieved.'));
@@ -176,7 +177,7 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     ), throwsToolExit(message: 'Engine start event is missing in the timeline'));
@@ -212,7 +213,7 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     ), throwsToolExit(message: 'First frame events are missing in the timeline'));

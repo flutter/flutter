@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -28,16 +30,38 @@ Future<void> main() async {
           'Runner.xcarchive',
         );
 
-        checkDirectoryExists(path.join(
-          archivePath,
-          'Products',
-        ));
+        final String products = path.join(archivePath, 'Products');
+
+        checkDirectoryExists(products);
 
         checkDirectoryExists(path.join(
           archivePath,
           'dSYMs',
           'Runner.app.dSYM',
         ));
+        final Directory applications = Directory(path.join(products, 'Applications'));
+
+        final Directory appBundle = applications
+            .listSync()
+            .whereType<Directory>()
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
+
+        final String flutterFramework = path.join(
+          appBundle.path,
+          'Frameworks',
+          'Flutter.framework',
+          'Flutter',
+        );
+        // Exits 0 only if codesigned.
+        eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
+
+        final String appFramework = path.join(
+          appBundle.path,
+          'Frameworks',
+          'App.framework',
+          'App',
+        );
+        eval('xcrun', <String>['codesign', '--verify', appFramework]);
       });
 
       return TaskResult.success(null);

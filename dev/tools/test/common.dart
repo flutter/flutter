@@ -4,21 +4,15 @@
 
 import 'dart:io';
 
-import 'package:file/file.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
-
-import 'package:dev_tools/stdio.dart';
-
 import 'package:args/args.dart';
+import 'package:dev_tools/stdio.dart';
+import 'package:file/file.dart';
+import 'package:test/test.dart';
 
-export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
-// Defines a 'package:test' shim.
-// TODO(ianh): Remove this file once https://github.com/dart-lang/matcher/issues/98 is fixed
+export 'package:test/test.dart' hide isInstanceOf;
 
 /// A matcher that compares the type of the actual value to the type argument T.
-test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
+TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that
@@ -41,7 +35,7 @@ Matcher throwsExceptionWith(String messageSubString) {
   );
 }
 
-class TestStdio implements Stdio {
+class TestStdio extends Stdio {
   TestStdio({
     this.verbose = false,
     List<String> stdin,
@@ -49,35 +43,14 @@ class TestStdio implements Stdio {
     _stdin = stdin ?? <String>[];
   }
 
-  final StringBuffer _error = StringBuffer();
-  String get error => _error.toString();
+  String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
 
-  final StringBuffer _stdout = StringBuffer();
-  String get stdout => _stdout.toString();
+  String get stdout => logs.where((String log) {
+    return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ');
+  }).join('\n');
+
   final bool verbose;
   List<String> _stdin;
-
-  @override
-  void printError(String message) {
-    _error.writeln(message);
-  }
-
-  @override
-  void printStatus(String message) {
-    _stdout.writeln(message);
-  }
-
-  @override
-  void printTrace(String message) {
-    if (verbose) {
-      _stdout.writeln(message);
-    }
-  }
-
-  @override
-  void write(String message) {
-    _stdout.write(message);
-  }
 
   @override
   String readLineSync() {

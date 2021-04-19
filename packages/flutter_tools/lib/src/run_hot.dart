@@ -25,8 +25,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
-import 'globals.dart' as globals;
-import 'project.dart';
+import 'globals_null_migrated.dart' as globals;
 import 'reporting/reporting.dart';
 import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
@@ -165,8 +164,8 @@ class HotRunner extends ResidentRunner {
         final CompilerOutput compilerOutput =
             await device.generator.compileExpression(expression, definitions,
                 typeDefinitions, libraryUri, klass, isStatic);
-        if (compilerOutput != null && compilerOutput.outputFilename != null) {
-          return base64.encode(globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+        if (compilerOutput != null && compilerOutput.expressionData != null) {
+          return base64.encode(compilerOutput.expressionData);
         }
       }
     }
@@ -278,7 +277,7 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       globals.printStatus('Benchmarking hot restart');
       await restart(fullRestart: true);
-      // Wait multiple seconds to stabilize benchmark on slower devicelab hardware.
+      // Wait multiple seconds to stabilize benchmark on slower device lab hardware.
       // Hot restart finishes when the new isolate is started, not when the new isolate
       // is ready. This process can actually take multiple seconds.
       await Future<void>.delayed(const Duration(seconds: 10));
@@ -315,15 +314,6 @@ class HotRunner extends ResidentRunner {
     bool enableDevTools = false,
     String route,
   }) async {
-    File mainFile = globals.fs.file(mainPath);
-    // `generated_main.dart` contains the Dart plugin registry.
-    final Directory buildDir = FlutterProject.current()
-        .directory
-        .childDirectory(globals.fs.path.join('.dart_tool', 'flutter_build'));
-    final File newMainDart = buildDir?.childFile('generated_main.dart');
-    if (newMainDart != null && newMainDart.existsSync()) {
-      mainFile = newMainDart;
-    }
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
@@ -336,7 +326,7 @@ class HotRunner extends ResidentRunner {
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
-            mainFile.uri,
+            globals.fs.file(mainPath).uri,
             <Uri>[],
             // When running without a provided applicationBinary, the tool will
             // simultaneously run the initial frontend_server compilation and
@@ -532,17 +522,17 @@ class HotRunner extends ResidentRunner {
             // The embedder requires that the isolate is unpaused, because the
             // runInView method requires interaction with dart engine APIs that
             // are not thread-safe, and thus must be run on the same thread that
-            // would be blocked by the pause. Simply unpausing is not sufficient,
+            // would be blocked by the pause. Simply un-pausing is not sufficient,
             // because this does not prevent the isolate from immediately hitting
             // a breakpoint, for example if the breakpoint was placed in a loop
             // or in a frequently called method. Instead, all breakpoints are first
             // disabled and then the isolate resumed.
             final List<Future<void>> breakpointRemoval = <Future<void>>[
               for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
-                device.vmService.removeBreakpoint(isolate.id, breakpoint.id)
+                device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id)
             ];
             await Future.wait(breakpointRemoval);
-            await device.vmService.resume(view.uiIsolate.id);
+            await device.vmService.service.resume(view.uiIsolate.id);
           }
         }));
       }
@@ -550,12 +540,12 @@ class HotRunner extends ResidentRunner {
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
       // will not be restarted, and so they must be manually killed.
-      final vm_service.VM vm = await device.vmService.getVM();
+      final vm_service.VM vm = await device.vmService.service.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates) {
         if (uiIsolatesIds.contains(isolateRef.id)) {
           continue;
         }
-        operations.add(device.vmService.kill(isolateRef.id)
+        operations.add(device.vmService.service.kill(isolateRef.id)
           .catchError((dynamic error, StackTrace stackTrace) {
             // Do nothing on a SentinelException since it means the isolate
             // has already been killed.
@@ -607,9 +597,6 @@ class HotRunner extends ResidentRunner {
     }
     return true;
   }
-
-  @override
-  bool get supportsRestart => true;
 
   @override
   Future<OperationResult> restart({
@@ -680,7 +667,7 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool silent,
   }) async {
-    if (!canHotRestart) {
+    if (!supportsRestart) {
       return OperationResult(1, 'hotRestart not supported');
     }
     Status status;
@@ -788,10 +775,10 @@ class HotRunner extends ResidentRunner {
   }) async {
     final String deviceEntryUri = device.devFS.baseUri
       .resolve(entryPath).toString();
-    final vm_service.VM vm = await device.vmService.getVM();
+    final vm_service.VM vm = await device.vmService.service.getVM();
     return <Future<vm_service.ReloadReport>>[
       for (final vm_service.IsolateRef isolateRef in vm.isolates)
-        device.vmService.reloadSources(
+        device.vmService.service.reloadSources(
           isolateRef.id,
           pause: pause,
           rootLibUri: deviceEntryUri,
@@ -850,7 +837,7 @@ class HotRunner extends ResidentRunner {
     await _evictDirtyAssets();
 
     // Check if any isolates are paused and reassemble those that aren't.
-    final Map<FlutterView, vm_service.VmService> reassembleViews = <FlutterView, vm_service.VmService>{};
+    final Map<FlutterView, FlutterVmService> reassembleViews = <FlutterView, FlutterVmService>{};
     final List<Future<void>> reassembleFutures = <Future<void>>[];
     String serviceEventKind;
     int pausedIsolatesFound = 0;
@@ -1099,7 +1086,7 @@ class HotRunner extends ResidentRunner {
   void printHelp({ @required bool details }) {
     globals.printStatus('Flutter run key commands.');
     commandHelp.r.print();
-    if (canHotRestart) {
+    if (supportsRestart) {
       commandHelp.R.print();
     }
     commandHelp.h.print(); // TODO(ianh): print different message if "details" is false
@@ -1176,6 +1163,7 @@ class HotRunner extends ResidentRunner {
       await flutterDevice.device.dispose();
     }
     await _cleanupDevFS();
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
   }
 }

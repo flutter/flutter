@@ -786,8 +786,8 @@ class _PrefixedStringBuilder {
   _PrefixedStringBuilder({
     required this.prefixLineOne,
     required String? prefixOtherLines,
-    this.wrapWidth}) :
-      _prefixOtherLines = prefixOtherLines;
+    this.wrapWidth,
+  })  : _prefixOtherLines = prefixOtherLines;
 
   /// Prefix to add to the first line.
   final String prefixLineOne;
@@ -1124,10 +1124,11 @@ class TextTreeRenderer {
       return '';
     } else {
       return _debugRender(
-          node,
-          prefixLineOne: prefixLineOne,
-          prefixOtherLines: prefixOtherLines,
-          parentConfiguration: parentConfiguration);
+        node,
+        prefixLineOne: prefixLineOne,
+        prefixOtherLines: prefixOtherLines,
+        parentConfiguration: parentConfiguration,
+      );
     }
   }
 
@@ -1246,7 +1247,7 @@ class TextTreeRenderer {
     }
 
     final Iterable<DiagnosticsNode> propertiesIterable = node.getProperties().where(
-            (DiagnosticsNode n) => !n.isFiltered(_minLevel)
+            (DiagnosticsNode n) => !n.isFiltered(_minLevel),
     );
     List<DiagnosticsNode> properties;
     if (_maxDescendentsTruncatableNode >= 0 && node.allowTruncate) {
@@ -1435,7 +1436,7 @@ abstract class DiagnosticsNode {
          name == null || !name.endsWith(':'),
          'Names of diagnostic nodes must not end with colons.\n'
          'name:\n'
-         '  "$name"'
+         '  "$name"',
        );
 
   /// Diagnostics containing just a string `message` and not a concrete name or
@@ -1657,8 +1658,7 @@ abstract class DiagnosticsNode {
     assert(minLevel != null);
     assert(() {
       if (_isSingleLine(style)) {
-        result = toStringDeep(
-            parentConfiguration: parentConfiguration, minLevel: minLevel);
+        result = toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
       } else {
         final String description = toDescription(parentConfiguration: parentConfiguration)!;
 
@@ -1763,8 +1763,8 @@ abstract class DiagnosticsNode {
 /// of an actual property of the object:
 ///
 /// ```dart
-/// var table = MessageProperty('table size', '$columns\u00D7$rows');
-/// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
+/// MessageProperty table = MessageProperty('table size', '$columns\u00D7$rows');
+/// MessageProperty usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
@@ -1773,7 +1773,7 @@ abstract class DiagnosticsNode {
 /// concrete value that is a string:
 ///
 /// ```dart
-/// var name = StringProperty('name', _name);
+/// StringProperty name = StringProperty('name', _name);
 /// ```
 /// {@end-tool}
 ///
@@ -3068,7 +3068,7 @@ class DiagnosticPropertiesBuilder {
 }
 
 // Examples can assume:
-// class ExampleSuperclass with Diagnosticable { late String message; late double stepWidth; late double scale; late double paintExtent; late double hitTestExtent; late double paintExtend; late double maxWidth; late bool primary; late double progress; late int maxLines; late Duration duration; late int depth; late dynamic boxShadow; late dynamic style; late bool hasSize; late Matrix4 transform; Map<Listenable, VoidCallback>? handles; late Color color; late bool obscureText; late ImageRepeat repeat; late Size size; late Widget widget; late bool isCurrent; late bool keepAlive; late TextAlign textAlign; }
+// class ExampleSuperclass with Diagnosticable { late String message; late double stepWidth; late double scale; late double paintExtent; late double hitTestExtent; late double paintExtend; late double maxWidth; late bool primary; late double progress; late int maxLines; late Duration duration; late int depth; Iterable<BoxShadow>? boxShadow; late DiagnosticsTreeStyle style; late bool hasSize; late Matrix4 transform; Map<Listenable, VoidCallback>? handles; late Color color; late bool obscureText; late ImageRepeat repeat; late Size size; late Widget widget; late bool isCurrent; late bool keepAlive; late TextAlign textAlign; }
 
 /// A mixin class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.

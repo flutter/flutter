@@ -27,14 +27,14 @@ import 'package:gen_keycodes/mask_constants.dart';
 
 /// Get contents of the file that contains the physical key mapping in Chromium
 /// source.
-Future<String> getChromiumPhysicalKeys() async {
+Future<String> getChromiumCodes() async {
   final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the logical key mapping in Chromium
 /// source.
-Future<String> getChromiumLogicalKeys() async {
+Future<String> getChromiumKeys() async {
   final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
@@ -47,7 +47,7 @@ Future<String> getAndroidKeyCodes() async {
 
 Future<String> getWindowsKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.10240.0/um/WinUser.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 /// Get contents of the file that contains the scan codes in Android source.
@@ -63,12 +63,12 @@ Future<String> getAndroidScanCodes() async {
 
 Future<String> getGlfwKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/glfw/glfw/master/include/GLFW/glfw3.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 Future<String> getGtkKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 Future<void> main(List<String> rawArguments) async {
@@ -173,8 +173,8 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'code',
-    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_keys.dart'),
-    help: 'The path to where the output "keyboard_keys.dart" file should be '
+    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_key.dart'),
+    help: 'The path to where the output "keyboard_key.dart" file should be '
         'written. If --code is not specified, the output will be written to the '
         'correct directory in the flutter tree. If the output directory does not '
         'exist, it, and the path to it, will be created.',
@@ -210,12 +210,12 @@ Future<void> main(List<String> rawArguments) async {
     exit(0);
   }
 
-  PhysicalKeyData physicalData;
-  LogicalKeyData logicalData;
+  late PhysicalKeyData physicalData;
+  late LogicalKeyData logicalData;
   if (parsedArguments['collect'] as bool) {
     // Physical
     final String baseHidCodes = parsedArguments['chromium-hid-codes'] == null ?
-      await getChromiumPhysicalKeys() :
+      await getChromiumCodes() :
       File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
     final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
     final String hidCodes = '$baseHidCodes\n$supplementalHidCodes';
@@ -240,7 +240,7 @@ Future<void> main(List<String> rawArguments) async {
       File(parsedArguments['gtk-keycodes'] as String).readAsStringSync();
 
     final String webLogicalKeys = parsedArguments['chromium-keys'] == null ?
-      await getChromiumLogicalKeys() :
+      await getChromiumKeys() :
       File(parsedArguments['chromium-keys'] as String).readAsStringSync();
 
     final String gtkToDomKey = File(parsedArguments['gtk-domkey'] as String).readAsStringSync();

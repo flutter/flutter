@@ -427,7 +427,7 @@ void _tests() {
     );
 
     // Ensure we preserve day period as we roll over.
-    final dynamic pickerState = tester.state(_timePickerDialog); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic pickerState = tester.state(_timePickerDialog);
     expect(pickerState.selectedTime, const TimeOfDay(hour: 1, minute: 0));
 
     await actAndExpect(
@@ -492,7 +492,7 @@ void _tests() {
     );
 
     // Ensure we preserve hour period as we roll over.
-    final dynamic pickerState = tester.state(_timePickerDialog); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic pickerState = tester.state(_timePickerDialog);
     expect(pickerState.selectedTime, const TimeOfDay(hour: 11, minute: 0));
 
     await actAndExpect(

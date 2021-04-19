@@ -1141,20 +1141,16 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(
-                  child: Focus(
-                    key: key3,
-                    child: Container(),
-                  ),
+                child: Focus(
+                  key: key3,
+                  child: Container(),
                 ),
               ),
               Focus(
                 key: key4,
-                child: Container(
-                  child: Focus(
-                    key: key5,
-                    child: Container(),
-                  ),
+                child: Focus(
+                  key: key5,
+                  child: Container(),
                 ),
               ),
               Focus(
@@ -1600,7 +1596,7 @@ void main() {
       bool? keyEventHandled;
       await tester.pumpWidget(
         Focus(
-          onKey: (_, __) => true, // This one does nothing.
+          onKey: (_, __) => KeyEventResult.ignored, // This one does nothing.
           focusNode: focusNode,
           child: Container(key: key1),
         ),
@@ -1615,7 +1611,7 @@ void main() {
         Focus(
           onKey: (FocusNode node, RawKeyEvent event) { // The updated handler handles the key.
             keyEventHandled = true;
-            return true;
+            return KeyEventResult.handled;
           },
           focusNode: focusNode,
           child: Container(key: key1),

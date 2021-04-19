@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   MockFuchsiaArtifacts mockFuchsiaArtifacts;
@@ -38,7 +38,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      expect(() async => await fuchsiaDevFinder.list(),
+      expect(() async => fuchsiaDevFinder.list(),
         throwsToolExit(message: 'Fuchsia device-finder tool not found.'));
     });
 

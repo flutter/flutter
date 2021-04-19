@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 
 import '../../src/common.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
 
 void main() {
   final FakePlatform windows = FakePlatform(operatingSystem: 'windows');

@@ -99,7 +99,7 @@ class AnimatedIcon extends StatelessWidget {
   /// horizontally (e.g back arrow will point right).
   final TextDirection? textDirection;
 
-  static final _UiPathFactory _pathFactory = () => ui.Path();
+  static ui.Path _pathFactory() => ui.Path();
 
   @override
   Widget build(BuildContext context) {

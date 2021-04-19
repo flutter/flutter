@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -118,19 +118,19 @@ void main() {
       testWithoutContext('String', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
-            'May have non-tool-internal info, very long string, 0b8abb4724aa590dd0f429683339b'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
-              '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            'May have non-tool-internal info, very long string, 0b8abb4724aa590dd0f429683339b' // ignore: missing_whitespace_between_adjacent_strings
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
+            '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
           ),
           'String: <1,016 characters>',
         );

@@ -617,13 +617,13 @@ class ToggleButtons extends StatelessWidget {
       !isSelected.any((bool val) => val == null),
       'All elements of isSelected must be non-null.\n'
       'The current list of isSelected values is as follows:\n'
-      '$isSelected'
+      '$isSelected',
     );
     assert(
       focusNodes == null || !focusNodes!.any((FocusNode val) => val == null),
       'All elements of focusNodes must be non-null.\n'
       'The current list of focus node values is as follows:\n'
-      '$focusNodes'
+      '$focusNodes',
     );
     assert(
       () {
@@ -633,7 +633,7 @@ class ToggleButtons extends StatelessWidget {
       }(),
       'focusNodes.length must match children.length.\n'
       'There are ${focusNodes!.length} focus nodes, while '
-      'there are ${children.length} children.'
+      'there are ${children.length} children.',
     );
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
