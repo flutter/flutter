@@ -27,14 +27,14 @@ import 'package:gen_keycodes/mask_constants.dart';
 
 /// Get contents of the file that contains the physical key mapping in Chromium
 /// source.
-Future<String> getChromiumPhysicalKeys() async {
+Future<String> getChromiumCodes() async {
   final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the logical key mapping in Chromium
 /// source.
-Future<String> getChromiumLogicalKeys() async {
+Future<String> getChromiumKeys() async {
   final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
@@ -210,12 +210,12 @@ Future<void> main(List<String> rawArguments) async {
     exit(0);
   }
 
-  PhysicalKeyData physicalData;
-  LogicalKeyData logicalData;
+  late PhysicalKeyData physicalData;
+  late LogicalKeyData logicalData;
   if (parsedArguments['collect'] as bool) {
     // Physical
     final String baseHidCodes = parsedArguments['chromium-hid-codes'] == null ?
-      await getChromiumPhysicalKeys() :
+      await getChromiumCodes() :
       File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
     final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
     final String hidCodes = '$baseHidCodes\n$supplementalHidCodes';
@@ -240,7 +240,7 @@ Future<void> main(List<String> rawArguments) async {
       File(parsedArguments['gtk-keycodes'] as String).readAsStringSync();
 
     final String webLogicalKeys = parsedArguments['chromium-keys'] == null ?
-      await getChromiumLogicalKeys() :
+      await getChromiumKeys() :
       File(parsedArguments['chromium-keys'] as String).readAsStringSync();
 
     final String gtkToDomKey = File(parsedArguments['gtk-domkey'] as String).readAsStringSync();
