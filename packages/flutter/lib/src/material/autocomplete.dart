@@ -199,7 +199,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   ///
   /// Defaults to 200.0
   final double maxOptionsHeight;
-  
+
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
