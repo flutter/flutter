@@ -975,7 +975,6 @@ class TextPainter {
     assert(!_needsLayout);
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
-    selection = _getPlaceholderAdjustedSelection(selection)!;
     return _paragraph!.getBoxesForRange(
       _getPlaceholderAdjustedOffset(selection.start),
       _getPlaceholderAdjustedOffset(selection.end),

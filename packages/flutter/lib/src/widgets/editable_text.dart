@@ -319,6 +319,15 @@ class ReplacementTextEditingController extends TextEditingController {
 
   final List<TextEditingInlineSpanReplacement> textEditingInlineSpanReplacements;
 
+  /// If composing regions should be matched against for replacements.
+  ///
+  /// When true, composing regions are added before any patterns are applied,
+  /// invalidating the composing region from being matched against.
+  ///
+  /// When false, composing regions are added after all patterns are matched
+  /// and replacements made. This means that composing region may sometimes
+  /// fail to display if the composing region matches against of the the
+  /// replacement patterns.
   final bool composingRegionPrioritized;
 
   @override
@@ -326,7 +335,7 @@ class ReplacementTextEditingController extends TextEditingController {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
 
     // Keep a mapping of TextRanges to the InlineSpan to replace it with.
-    final Map<TextRange, InlineSpan> rangeSpanMapping= <TextRange, InlineSpan>{};
+    final Map<TextRange, InlineSpan> rangeSpanMapping = <TextRange, InlineSpan>{};
 
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -335,14 +344,18 @@ class ReplacementTextEditingController extends TextEditingController {
     // Add composing region as a replacement to a TextSpan with underline.
     if (composingRegionPrioritized && value.isComposingRangeValid && withComposing) {
       _addToMappingWithoutOverlap((String value, TextRange range) {
-        final TextStyle composingStyle = style!.merge(
-          const TextStyle(decoration: TextDecoration.underline),
-        );
-        return TextSpan(
-          style: composingStyle,
-          text: value,
-        );
-      } , value.composing, rangeSpanMapping, value.text);
+          final TextStyle composingStyle = style!.merge(
+            const TextStyle(decoration: TextDecoration.underline),
+          );
+          return TextSpan(
+            style: composingStyle,
+            text: value,
+          );
+        },
+        value.composing,
+        rangeSpanMapping,
+        value.text
+      );
     }
     // Iterate through TextEditingInlineSpanReplacements, adding non overlapping
     // to the mapping pointing towards the generated InlineSpan.
@@ -358,19 +371,22 @@ class ReplacementTextEditingController extends TextEditingController {
     // Add composing region as a replacement to a TextSpan with underline.
     if (!composingRegionPrioritized && value.isComposingRangeValid && withComposing) {
       _addToMappingWithoutOverlap((String value, TextRange range) {
-        final TextStyle composingStyle = style!.merge(
-          const TextStyle(decoration: TextDecoration.underline),
-        );
-        return TextSpan(
-          style: composingStyle,
-          text: value,
-        );
-      } , value.composing, rangeSpanMapping, value.text);
+          final TextStyle composingStyle = style!.merge(
+            const TextStyle(decoration: TextDecoration.underline),
+          );
+          return TextSpan(
+            style: composingStyle,
+            text: value,
+          );
+        },
+        value.composing,
+        rangeSpanMapping,
+        value.text
+      );
     }
     // Sort the matches by start index. Since no overlapping exists, this is safe.
     List<TextRange> sortedRanges = rangeSpanMapping.keys.toList();
     sortedRanges.sort((a, b) => a.start.compareTo(b.start));
-
     // Create TextSpans for non-replaced text ranges and insert the replacements spans
     // for any ranges that are marked to be replaced.
     final List<InlineSpan> spans = <InlineSpan>[];
@@ -398,10 +414,9 @@ void _addToMappingWithoutOverlap(InlineSpanGenerator generator, TextRange matche
   for (final TextRange range in rangeSpanMapping.keys) {
     // Only the first match for a given text range is replaced.
     // Overlapping matches are ignored.
-    if (matchedRange.start >= range.start &&
-        matchedRange.start < range.end ||
-        matchedRange.end > range.start &&
-        matchedRange.end < range.end) {
+    if (matchedRange.start >= range.start && matchedRange.start < range.end ||
+        matchedRange.end > range.start && matchedRange.end <= range.end ||
+        matchedRange.start < range.start && matchedRange.end > range.end) {
       overlap = true;
       break;
     }

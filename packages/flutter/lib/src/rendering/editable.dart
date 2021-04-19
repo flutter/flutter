@@ -3285,14 +3285,51 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // Hit test text spans.
+    final bool hitText;
     final Offset effectivePosition = position - _paintOffset;
-    final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
+    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));
-      return true;
+      hitText = true;
+    } else {
+      hitText = false;
     }
-    return false;
+
+    // Hit test render object children
+    RenderBox? child = firstChild;
+    int childIndex = 0;
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
+      final TextParentData textParentData = child.parentData! as TextParentData;
+      final Matrix4 transform = Matrix4.translationValues(
+        textParentData.offset.dx,
+        textParentData.offset.dy,
+        0.0,
+      )..scale(
+        textParentData.scale,
+        textParentData.scale,
+        textParentData.scale,
+      );
+      final bool isHit = result.addWithPaintTransform(
+        transform: transform,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset? transformed) {
+          assert(() {
+            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
+            return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
+              && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
+          }());
+          return child!.hitTest(result, position: transformed!);
+        },
+      );
+      if (isHit) {
+        return true;
+      }
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    return hitText;
   }
 
   late TapGestureRecognizer _tap;
@@ -3850,7 +3887,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final double scale = textParentData.scale!;
       context.pushTransform(
         needsCompositing,
-        offset + textParentData.offset,
+        effectiveOffset + textParentData.offset,
         Matrix4.diagonal3Values(scale, scale, scale),
         (PaintingContext context, Offset offset) {
           context.paintChild(
