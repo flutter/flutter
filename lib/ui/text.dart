@@ -1658,11 +1658,10 @@ class TextHeightBehavior {
 
   /// Creates a new TextHeightBehavior object from an encoded form.
   ///
-  /// See [encode] for the creation of the encoded form.
-  TextHeightBehavior.fromEncoded(int encoded)
+  /// See [_encode] for the creation of the encoded form.
+  const TextHeightBehavior._fromEncoded(int encoded, this.leadingDistribution)
     : applyHeightToFirstAscent = (encoded & 0x1) == 0,
-      applyHeightToLastDescent = (encoded & 0x2) == 0,
-      leadingDistribution = TextLeadingDistribution.values[encoded >> 2];
+      applyHeightToLastDescent = (encoded & 0x2) == 0;
 
   /// Whether to apply the [TextStyle.height] modifier to the ascent of the first
   /// line in the paragraph.
@@ -1700,11 +1699,11 @@ class TextHeightBehavior {
   /// Defaults to [TextLeadingDistribution.proportional],
   final TextLeadingDistribution leadingDistribution;
 
-  /// Returns an encoded int representation of this object.
-  int encode() {
+  /// Returns an encoded int representation of this object (excluding
+  /// [leadingDistribution]).
+  int _encode() {
     return (applyHeightToFirstAscent ? 0 : 1 << 0)
-         | (applyHeightToLastDescent ? 0 : 1 << 1)
-         | (leadingDistribution.index << 2);
+         | (applyHeightToLastDescent ? 0 : 1 << 1);
   }
 
   @override
@@ -1760,7 +1759,8 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
 //  - Element 0: A bit field where the ith bit indicates whether the ith element
 //    has a non-null value. Bits 8 to 12 indicate whether |fontFamily|,
 //    |fontSize|, |letterSpacing|, |wordSpacing|, and |height| are non-null,
-//    respectively. Bit 0 is unused.
+//    respectively. Bit 0 indicates the [TextLeadingDistribution] of the text
+//    style.
 //
 //  - Element 1: The |color| in ARGB with 8 bits per channel.
 //
@@ -1778,8 +1778,6 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
 //
 //  - Element 7: The enum index of the |textBaseline|.
 //
-//  - Element 8: The encoded value of the |leadingDistribution|.
-//
 Int32List _encodeTextStyle(
   Color? color,
   TextDecoration? decoration,
@@ -1795,7 +1793,6 @@ Int32List _encodeTextStyle(
   double? letterSpacing,
   double? wordSpacing,
   double? height,
-  TextLeadingDistribution? leadingDistribution,
   Locale? locale,
   Paint? background,
   Paint? foreground,
@@ -1803,6 +1800,8 @@ Int32List _encodeTextStyle(
   List<FontFeature>? fontFeatures,
 ) {
   final Int32List result = Int32List(9);
+  // The 0th bit of result[0] is reserved for leadingDistribution.
+
   if (color != null) {
     result[0] |= 1 << 1;
     result[1] = color.value;
@@ -1831,51 +1830,47 @@ Int32List _encodeTextStyle(
     result[0] |= 1 << 7;
     result[7] = textBaseline.index;
   }
-  if (leadingDistribution != null) {
-    result[0] |= 1 << 8;
-    result[8] = leadingDistribution.index;
-  }
   if (decorationThickness != null) {
-    result[0] |= 1 << 9;
+    result[0] |= 1 << 8;
   }
   if (fontFamily != null || (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty)) {
-    result[0] |= 1 << 10;
+    result[0] |= 1 << 9;
     // Passed separately to native.
   }
   if (fontSize != null) {
-    result[0] |= 1 << 11;
+    result[0] |= 1 << 10;
     // Passed separately to native.
   }
   if (letterSpacing != null) {
-    result[0] |= 1 << 12;
+    result[0] |= 1 << 11;
     // Passed separately to native.
   }
   if (wordSpacing != null) {
-    result[0] |= 1 << 13;
+    result[0] |= 1 << 12;
     // Passed separately to native.
   }
   if (height != null) {
-    result[0] |= 1 << 14;
+    result[0] |= 1 << 13;
     // Passed separately to native.
   }
   if (locale != null) {
-    result[0] |= 1 << 15;
+    result[0] |= 1 << 14;
     // Passed separately to native.
   }
   if (background != null) {
-    result[0] |= 1 << 16;
+    result[0] |= 1 << 15;
     // Passed separately to native.
   }
   if (foreground != null) {
-    result[0] |= 1 << 17;
+    result[0] |= 1 << 16;
     // Passed separately to native.
   }
   if (shadows != null) {
-    result[0] |= 1 << 18;
+    result[0] |= 1 << 17;
     // Passed separately to native.
   }
   if (fontFeatures != null) {
-    result[0] |= 1 << 19;
+    result[0] |= 1 << 18;
     // Passed separately to native.
   }
 
@@ -1913,7 +1908,8 @@ class TextStyle {
   /// * `textBaseline`: The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
   /// * `height`: The height of this text span, as a multiplier of the font size. Omitting `height` will allow the line height
   ///   to take the height as defined by the font, which may not be exactly the height of the fontSize.
-  /// * `leadingDistribution`: When `height` is specified, how the extra vertical space should be distributed over and under the text.
+  /// * `leadingDistribution`: When `height` is specified, how the extra vertical space should be distributed over and under the text. Defaults
+  ///   to the paragraph's [TextHeightBehavior] if left unspecified.
   /// * `locale`: The locale used to select region-specific glyphs.
   /// * `background`: The paint drawn as a background for the text.
   /// * `foreground`: The paint used to draw the text. If this is specified, `color` must be null.
@@ -1958,13 +1954,13 @@ class TextStyle {
          letterSpacing,
          wordSpacing,
          height,
-         leadingDistribution,
          locale,
          background,
          foreground,
          shadows,
          fontFeatures,
        ),
+       _leadingDistribution = leadingDistribution,
        _fontFamily = fontFamily ?? '',
        _fontFamilyFallback = fontFamilyFallback,
        _fontSize = fontSize,
@@ -1991,12 +1987,14 @@ class TextStyle {
   final Paint? _foreground;
   final List<Shadow>? _shadows;
   final List<FontFeature>? _fontFeatures;
+  final TextLeadingDistribution? _leadingDistribution;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is TextStyle
+        && other._leadingDistribution == _leadingDistribution
         && other._fontFamily == _fontFamily
         && other._fontSize == _fontSize
         && other._letterSpacing == _letterSpacing
@@ -2013,7 +2011,7 @@ class TextStyle {
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontFamilyFallback, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground, hashList(_shadows), _decorationThickness, hashList(_fontFeatures));
+  int get hashCode => hashValues(hashList(_encoded), _leadingDistribution, _fontFamily, _fontFamilyFallback, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground, hashList(_shadows), _decorationThickness, hashList(_fontFeatures));
 
   @override
   String toString() {
@@ -2023,25 +2021,25 @@ class TextStyle {
              'decorationColor: ${    _encoded[0] & 0x00008 == 0x00008  ? Color(_encoded[3])                           : "unspecified"}, '
              'decorationStyle: ${    _encoded[0] & 0x00010 == 0x00010  ? TextDecorationStyle.values[_encoded[4]]      : "unspecified"}, '
              // The decorationThickness is not in encoded order in order to keep it near the other decoration properties.
-             'decorationThickness: ${_encoded[0] & 0x00200 == 0x00200  ? _decorationThickness                         : "unspecified"}, '
+             'decorationThickness: ${_encoded[0] & 0x00100 == 0x00100  ? _decorationThickness                         : "unspecified"}, '
              'fontWeight: ${         _encoded[0] & 0x00020 == 0x00020  ? FontWeight.values[_encoded[5]]               : "unspecified"}, '
              'fontStyle: ${          _encoded[0] & 0x00040 == 0x00040  ? FontStyle.values[_encoded[6]]                : "unspecified"}, '
              'textBaseline: ${       _encoded[0] & 0x00080 == 0x00080  ? TextBaseline.values[_encoded[7]]             : "unspecified"}, '
-             'fontFamily: ${         _encoded[0] & 0x00400 == 0x00400
+             'fontFamily: ${         _encoded[0] & 0x00200 == 0x00200
                                      && _fontFamily != ''              ? _fontFamily                                  : "unspecified"}, '
-             'fontFamilyFallback: ${ _encoded[0] & 0x00400 == 0x00400
+             'fontFamilyFallback: ${ _encoded[0] & 0x00200 == 0x00200
                                      && _fontFamilyFallback != null
                                      && _fontFamilyFallback!.isNotEmpty ? _fontFamilyFallback                         : "unspecified"}, '
-             'fontSize: ${           _encoded[0] & 0x00800 == 0x00800  ? _fontSize                                    : "unspecified"}, '
-             'letterSpacing: ${      _encoded[0] & 0x01000 == 0x01000  ? "${_letterSpacing}x"                         : "unspecified"}, '
-             'wordSpacing: ${        _encoded[0] & 0x02000 == 0x02000  ? "${_wordSpacing}x"                           : "unspecified"}, '
-             'height: ${             _encoded[0] & 0x04000 == 0x04000  ? "${_height}x"                                : "unspecified"}, '
-             'leadingDistribution: ${_encoded[0] & 0x0100 == 0x0100    ? "${TextLeadingDistribution.values[_encoded[8]]}" : "unspecified"}, '
-             'locale: ${             _encoded[0] & 0x08000 == 0x08000  ? _locale                                      : "unspecified"}, '
-             'background: ${         _encoded[0] & 0x10000 == 0x10000  ? _background                                  : "unspecified"}, '
-             'foreground: ${         _encoded[0] & 0x20000 == 0x20000  ? _foreground                                  : "unspecified"}, '
-             'shadows: ${            _encoded[0] & 0x40000 == 0x40000  ? _shadows                                     : "unspecified"}, '
-             'fontFeatures: ${       _encoded[0] & 0x80000 == 0x80000  ? _fontFeatures                                : "unspecified"}'
+             'fontSize: ${           _encoded[0] & 0x00400 == 0x00400  ? _fontSize                                    : "unspecified"}, '
+             'letterSpacing: ${      _encoded[0] & 0x00800 == 0x00800  ? "${_letterSpacing}x"                         : "unspecified"}, '
+             'wordSpacing: ${        _encoded[0] & 0x01000 == 0x01000  ? "${_wordSpacing}x"                           : "unspecified"}, '
+             'height: ${             _encoded[0] & 0x02000 == 0x02000  ? "${_height}x"                                : "unspecified"}, '
+             'leadingDistribution: ${_leadingDistribution ?? "unspecified"}, '
+             'locale: ${             _encoded[0] & 0x04000 == 0x04000  ? _locale                                      : "unspecified"}, '
+             'background: ${         _encoded[0] & 0x08000 == 0x08000  ? _background                                  : "unspecified"}, '
+             'foreground: ${         _encoded[0] & 0x10000 == 0x10000  ? _foreground                                  : "unspecified"}, '
+             'shadows: ${            _encoded[0] & 0x20000 == 0x20000  ? _shadows                                     : "unspecified"}, '
+             'fontFeatures: ${       _encoded[0] & 0x40000 == 0x40000  ? _fontFeatures                                : "unspecified"}'
            ')';
   }
 }
@@ -2065,8 +2063,8 @@ class TextStyle {
 //
 //  - Element 5: The value of |maxLines|.
 //
-//  - Element 6: The encoded value of |textHeightBehavior|.
-//
+//  - Element 6: The encoded value of |textHeightBehavior|, except its leading
+//    distribution.
 Int32List _encodeParagraphStyle(
   TextAlign? textAlign,
   TextDirection? textDirection,
@@ -2104,7 +2102,7 @@ Int32List _encodeParagraphStyle(
   }
   if (textHeightBehavior != null) {
     result[0] |= 1 << 6;
-    result[6] = textHeightBehavior.encode();
+    result[6] = textHeightBehavior._encode();
   }
   if (fontFamily != null) {
     result[0] |= 1 << 7;
@@ -2173,6 +2171,7 @@ class ParagraphStyle {
   ///
   /// * `leadingDistribution`: Specifies how the extra vertical space added by
   ///   the `height` multiplier should be distributed over and under the text.
+  ///   Defaults to [TextLeadingDistribution.proportional].
   ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
@@ -2226,7 +2225,8 @@ class ParagraphStyle {
        _height = height,
        _strutStyle = strutStyle,
        _ellipsis = ellipsis,
-       _locale = locale;
+       _locale = locale,
+       _leadingDistribution = textHeightBehavior?.leadingDistribution ?? TextLeadingDistribution.proportional;
 
   final Int32List _encoded;
   final String? _fontFamily;
@@ -2235,6 +2235,7 @@ class ParagraphStyle {
   final StrutStyle? _strutStyle;
   final String? _ellipsis;
   final Locale? _locale;
+  final TextLeadingDistribution _leadingDistribution;
 
   @override
   bool operator ==(Object other) {
@@ -2249,11 +2250,12 @@ class ParagraphStyle {
         && other._strutStyle == _strutStyle
         && other._ellipsis == _ellipsis
         && other._locale == _locale
+        && other._leadingDistribution == _leadingDistribution
         && _listEquals<int>(other._encoded, _encoded);
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _height, _ellipsis, _locale);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _height, _ellipsis, _locale, _leadingDistribution);
 
   @override
   String toString() {
@@ -2265,7 +2267,7 @@ class ParagraphStyle {
              'maxLines: ${      _encoded[0] & 0x020 == 0x020 ? _encoded[5]                       : "unspecified"}, '
              'textHeightBehavior: ${
                                 _encoded[0] & 0x040 == 0x040 ?
-                                          TextHeightBehavior.fromEncoded(_encoded[6]).toString() : "unspecified"}, '
+                                          TextHeightBehavior._fromEncoded(_encoded[6], _leadingDistribution).toString() : "unspecified"}, '
              'fontFamily: ${    _encoded[0] & 0x080 == 0x080 ? _fontFamily                       : "unspecified"}, '
              'fontSize: ${      _encoded[0] & 0x100 == 0x100 ? _fontSize                         : "unspecified"}, '
              'height: ${        _encoded[0] & 0x200 == 0x200 ? "${_height}x"                     : "unspecified"}, '
@@ -2322,11 +2324,9 @@ ByteData _encodeStrut(
     bitmask |= 1 << 2;
     // passed separately to native
   }
-  if (leadingDistribution != null) {
-    bitmask |= 1 << 3;
-    data.setInt8(byteCount, leadingDistribution.index);
-    byteCount += 1;
-  }
+
+  // The 3rd bit (0-indexed) is reserved for leadingDistribution.
+
   if (fontSize != null) {
     bitmask |= 1 << 4;
     data.setFloat32(byteCount, fontSize, _kFakeHostEndian);
@@ -2388,7 +2388,8 @@ class StrutStyle {
   /// * `leadingDistribution`: how the extra vertical space added by the
   ///   `height` multiplier should be distributed over and under the text,
   ///   independent of `leading` (which is always distributed evenly over and
-  ///   under text).
+  ///   under text). Defaults to the paragraph's [TextHeightBehavior]'s leading
+  ///   distribution.
   ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
@@ -2424,13 +2425,16 @@ class StrutStyle {
          fontStyle,
          forceStrutHeight,
        ),
+       _leadingDistribution = leadingDistribution,
        _fontFamily = fontFamily,
        _fontFamilyFallback = fontFamilyFallback;
 
   final ByteData _encoded; // Most of the data for strut is encoded.
   final String? _fontFamily;
   final List<String>? _fontFamilyFallback;
+  final TextLeadingDistribution? _leadingDistribution;
 
+  bool get _enabled => _encoded.lengthInBytes > 0;
 
   @override
   bool operator ==(Object other) {
@@ -2440,12 +2444,13 @@ class StrutStyle {
       return false;
     return other is StrutStyle
         && other._fontFamily == _fontFamily
+        && other._leadingDistribution == _leadingDistribution
         && _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback)
         && _listEquals<int>(other._encoded.buffer.asInt8List(), _encoded.buffer.asInt8List());
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded.buffer.asInt8List()), _fontFamily);
+  int get hashCode => hashValues(hashList(_encoded.buffer.asInt8List()), _fontFamily, _leadingDistribution);
 
 }
 
@@ -3306,27 +3311,38 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Creates a new [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
   @pragma('vm:entry-point')
-  ParagraphBuilder(ParagraphStyle style) {
-    List<String>? strutFontFamilies;
-    final StrutStyle? strutStyle = style._strutStyle;
-    if (strutStyle != null) {
-      strutFontFamilies = <String>[];
-      final String? fontFamily = strutStyle._fontFamily;
-      if (fontFamily != null)
-        strutFontFamilies.add(fontFamily);
-      if (strutStyle._fontFamilyFallback != null)
-        strutFontFamilies.addAll(strutStyle._fontFamilyFallback!);
-    }
-    _constructor(
-      style._encoded,
-      strutStyle?._encoded,
-      style._fontFamily,
-      strutFontFamilies,
-      style._fontSize,
-      style._height,
-      style._ellipsis,
-      _encodeLocale(style._locale)
-    );
+  ParagraphBuilder(ParagraphStyle style)
+    : _defaultLeadingDistribution = style._leadingDistribution {
+      List<String>? strutFontFamilies;
+      final StrutStyle? strutStyle = style._strutStyle;
+      final ByteData? encodedStrutStyle;
+      if (strutStyle != null && strutStyle._enabled) {
+        final String? fontFamily = strutStyle._fontFamily;
+        strutFontFamilies = <String>[
+          if (fontFamily != null) fontFamily,
+          ...?strutStyle._fontFamilyFallback,
+        ];
+
+        assert(TextLeadingDistribution.values.length <= 2);
+        final TextLeadingDistribution leadingDistribution = strutStyle._leadingDistribution
+          ?? style._leadingDistribution;
+        encodedStrutStyle = strutStyle._encoded;
+        int bitmask = encodedStrutStyle.getInt8(0);
+        bitmask |= (leadingDistribution.index) << 3;
+        encodedStrutStyle.setInt8(0, bitmask);
+      } else {
+        encodedStrutStyle = null;
+      }
+      _constructor(
+        style._encoded,
+        encodedStrutStyle,
+        style._fontFamily,
+        strutFontFamilies,
+        style._fontSize,
+        style._height,
+        style._ellipsis,
+        _encodeLocale(style._locale)
+      );
   }
 
   void _constructor(
@@ -3348,6 +3364,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   List<double> get placeholderScales => _placeholderScales;
   List<double> _placeholderScales = <double>[];
 
+  final TextLeadingDistribution _defaultLeadingDistribution;
   /// Applies the given style to the added text until [pop] is called.
   ///
   /// See [pop] for details.
@@ -3355,7 +3372,16 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
     final List<String> fullFontFamilies = <String>[];
     fullFontFamilies.add(style._fontFamily);
     if (style._fontFamilyFallback != null)
-    fullFontFamilies.addAll(style._fontFamilyFallback!);
+      fullFontFamilies.addAll(style._fontFamilyFallback!);
+
+    final Int32List encoded = style._encoded;
+    final TextLeadingDistribution finalLeadingDistribution = style._leadingDistribution ?? _defaultLeadingDistribution;
+    // ensure the enum can be represented using 1 bit.
+    assert(TextLeadingDistribution.values.length <= 2);
+
+    // Use the leading distribution from the paragraph's style if it's not
+    // explicitly set in `style`.
+    encoded[0] |= finalLeadingDistribution.index << 0;
 
     ByteData? encodedFontFeatures;
     final List<FontFeature>? fontFeatures = style._fontFeatures;
@@ -3369,7 +3395,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
     }
 
     _pushStyle(
-      style._encoded,
+      encoded,
       fullFontFamilies,
       style._fontSize,
       style._letterSpacing,

@@ -107,6 +107,7 @@ skt::TextStyle TxtToSkia(const TextStyle& txt) {
   skia.setWordSpacing(SkDoubleToScalar(txt.word_spacing));
   skia.setHeight(SkDoubleToScalar(txt.height));
   skia.setHeightOverride(txt.has_height_override);
+  skia.setHalfLeading(txt.half_leading);
 
   skia.setLocale(SkString(txt.locale.c_str()));
   if (txt.has_background) {

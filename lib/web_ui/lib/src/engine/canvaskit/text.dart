@@ -131,7 +131,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     }
 
     if (textHeightBehavior != null) {
-      properties.textHeightBehavior = textHeightBehavior.encode();
+      properties.textHeightBehavior = (textHeightBehavior.applyHeightToFirstAscent ? 0 : 1 << 0)
+                                    | (textHeightBehavior.applyHeightToLastDescent ? 0 : 1 << 1);
     }
 
     if (ellipsis != null) {
