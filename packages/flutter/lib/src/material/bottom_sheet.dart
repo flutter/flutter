@@ -165,9 +165,19 @@ class BottomSheet extends StatefulWidget {
 
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
+  /// Typically a bottom sheet will cover the entire width of its
+  /// parent. However for large screens you may want to limit the width
+  /// to something smaller and this property provides a way to specify
+  /// a maximum width.
+  ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
-  /// is null then the bottom sheet's size will be unconstrained.
+  /// is null then the bottom sheet's size will be constrained
+  /// by its parent (usually a [Scaffold]).
+  ///
+  /// If constraints are specified (either in this property or in the
+  /// theme), the bottom sheet will be aligned to the bottom-center of
+  /// the available space. Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
 
   @override
@@ -608,9 +618,11 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
-/// The optional [backgroundColor], [elevation], [shape], [clipBehavior] and [transitionAnimationController]
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
+/// [constraints] and [transitionAnimationController]
 /// parameters can be passed in to customize the appearance and behavior of
-/// modal bottom sheets.
+/// modal bottom sheets (see the documentation for these on [BottomSheet]
+/// for more details).
 ///
 /// The [transitionAnimationController] controls the bottom sheet's entrance and
 /// exit animations if provided.
@@ -722,9 +734,11 @@ Future<T?> showModalBottomSheet<T>({
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
 ///
-/// The optional [backgroundColor], [elevation], [shape], [clipBehavior] and [transitionAnimationController]
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
+/// [constraints] and [transitionAnimationController]
 /// parameters can be passed in to customize the appearance and behavior of
-/// persistent bottom sheets.
+/// persistent bottom sheets (see the documentation for these on [BottomSheet]
+/// for more details).
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by
