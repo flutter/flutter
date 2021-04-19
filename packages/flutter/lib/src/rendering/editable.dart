@@ -930,6 +930,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return selection.copyWith(extentOffset: nextExtent);
   }
 
+  // Later to use for a more accurate drag-to-extend-selection implementation
+  // In place of selectParagraphAt
+  TextSelection? _dragStartInitialSelection;
+  void setDragStartInitialSelection() {
+    _dragStartInitialSelection = selection;
+  }
+  void extendSelectionToOffset({required Offset to, required SelectionChangedCause cause}) {
+    assert(to != null);
+    assert(cause != null);
+
+    final TextSelection? initialSelection = _dragStartInitialSelection;
+    if (initialSelection == null)
+      return;
+
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+
+    final TextPosition toPosition = _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+    final TextSelection newSelection = _selectionExtendedTo(
+      from: initialSelection,
+      to: toPosition,
+      getBoundary: _textPainter.getWordBoundary,
+    );
+
+    _setSelection(newSelection, cause);
+  }
+
   // Extend the current selection to the end of the field.
   //
   // If selectionEnabled is false, keeps the selection collapsed and moves it to
@@ -2913,40 +2939,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return null;
   }
 
-  TextRange _getParagraphBoundary(TextPosition position) {
-    return TextRange(start: _getParagraphStartOffset(position), end: _getParagraphEndOffset(position));
-  }
-
-  int _getParagraphStartOffset(TextPosition position) {
-    int offset = position.offset;
-    int? codeUnit = text!.codeUnitAt(offset);
-
-    while (codeUnit != null) {
-      if (_isLineFeed(codeUnit))
-        return offset;
-
-      offset--;
-      codeUnit = text!.codeUnitAt(offset);
-    }
-
-    return 0;
-  }
-
-  int _getParagraphEndOffset(TextPosition position) {
-    int offset = position.offset;
-    int? codeUnit = text!.codeUnitAt(offset);
-
-    while (codeUnit != null) {
-      if (_isLineFeed(codeUnit))
-        return offset;
-
-      offset++;
-      codeUnit = text!.codeUnitAt(offset);
-    }
-
-    return offset;
-  }
-
   // Check if the given text range only contains white space or separator
   // characters.
   //
@@ -3419,14 +3411,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void selectParagraphAt({ required Offset from, required SelectionChangedCause cause }) {
     assert(from != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextRange boundary = _getParagraphBoundary(firstPosition);
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextRange boundary = _getParagraphBoundary(text!, fromPosition);
+
 
     _setSelection(
       TextSelection(
         baseOffset: boundary.start,
         extentOffset: boundary.end,
-        affinity: firstPosition.affinity,
+        affinity: fromPosition.affinity,
       ),
       cause,
     );
@@ -4208,4 +4201,66 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
 
     return false;
   }
+}
+
+
+// Keeping supporting code isolated here for now
+// Can figure out how to organize the code below once I get some feedback
+
+// Later can use this when dragging to extend a selection
+TextSelection _selectionExtendedTo({
+  required TextSelection from,
+  required TextPosition to,
+  required TextRange Function(TextPosition position) getBoundary,
+}) {
+  final int positionOffset = to.offset;
+  final int baseOffset = from.baseOffset;
+  final int extentOffset = from.extentOffset;
+
+  if (positionOffset > extentOffset) {
+    final TextRange range = getBoundary(to);
+    return TextSelection(baseOffset: baseOffset, extentOffset: range.end);
+  } else if (positionOffset < baseOffset) {
+    final TextRange range = getBoundary(to);
+    return TextSelection(baseOffset: range.start, extentOffset: extentOffset);
+  } else {
+    return from;
+  }
+}
+
+TextRange _getParagraphBoundary(TextSpan text, TextPosition position) {
+  int _getParagraphBoundaryStart(TextSpan text, TextPosition position) {
+    int offset = position.offset;
+    int? codeUnit = text.codeUnitAt(offset);
+
+    while (codeUnit != null) {
+      if (_isLineFeed(codeUnit))
+        return offset;
+
+      offset--;
+      codeUnit = text.codeUnitAt(offset);
+    }
+
+    return 0;
+  }
+
+  int _getParagraphBoundaryEnd(TextSpan text, TextPosition position) {
+    int offset = position.offset;
+    int? codeUnit = text.codeUnitAt(offset);
+
+    while (codeUnit != null) {
+      if (_isLineFeed(codeUnit))
+        return offset;
+
+      offset++;
+      codeUnit = text.codeUnitAt(offset);
+    }
+
+    return offset;
+  }
+
+  return TextRange(
+    start: _getParagraphBoundaryStart(text, position),
+    end: _getParagraphBoundaryEnd(text, position)
+  );
 }
