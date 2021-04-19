@@ -41,6 +41,9 @@ class FlutterProjectBundle {
   // Returns any switches that should be passed to the engine.
   const std::vector<std::string> GetSwitches();
 
+  // Sets engine switches.
+  void SetSwitches(const std::vector<std::string>& switches);
+
   // Attempts to load AOT data for this bundle. The returned data must be
   // retained until any engine instance it is passed to has been shut down.
   //
@@ -62,6 +65,9 @@ class FlutterProjectBundle {
 
   // Dart entrypoint arguments.
   std::vector<std::string> dart_entrypoint_arguments_;
+
+  // Engine switches.
+  std::vector<std::string> engine_switches_;
 };
 
 }  // namespace flutter

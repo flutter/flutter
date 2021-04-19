@@ -14,6 +14,7 @@
 #include "flutter_plugin_registrar.h"
 
 #ifdef WINUWP
+#include <windows.applicationmodel.activation.h>
 #include <windows.ui.core.h>
 #endif
 
@@ -57,6 +58,7 @@ typedef struct {
   // Array of Dart entrypoint arguments. This is deep copied during the call
   // to FlutterDesktopEngineCreate.
   const char** dart_entrypoint_argv;
+
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
@@ -80,6 +82,7 @@ typedef struct {
 FLUTTER_EXPORT FlutterDesktopViewControllerRef
 FlutterDesktopViewControllerCreateFromCoreWindow(
     ABI::Windows::UI::Core::CoreWindow* window,
+    ABI::Windows::ApplicationModel::Activation::IActivatedEventArgs* args,
     FlutterDesktopEngineRef engine);
 #else  //! WINUWP
 // The Win32 implementation accepts width, height
