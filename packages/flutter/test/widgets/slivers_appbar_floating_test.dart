@@ -229,7 +229,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
-  
+
   group('Pointer scrolled floating', () {
     Widget buildTest(Widget sliver) {
       return MaterialApp(
@@ -239,7 +239,7 @@ void main() {
             SliverFixedExtentList(
               itemExtent: 50.0,
               delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Container(child: Text('Item $index')),
+                  (BuildContext context, int index) => Text('Item $index'),
                 childCount: 30,
               )
             ),

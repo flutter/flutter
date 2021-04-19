@@ -295,11 +295,6 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
             overlapsContent
           ))
           : widget.delegate.build(this, shrinkOffset, overlapsContent),
-        widget.delegate.build(
-          this,
-          shrinkOffset,
-          overlapsContent,
-        ),
         null,
       );
     });
