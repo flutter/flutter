@@ -296,6 +296,8 @@ class MockSimControl extends Mock implements SimControl {
 }
 
 class FakeOperatingSystemUtils implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({this.hostPlatform});
+
   @override
   ProcessResult makeExecutable(File file) => null;
 

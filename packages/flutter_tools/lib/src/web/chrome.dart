@@ -191,7 +191,12 @@ class ChromiumLauncher {
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
-    final List<String> args = <String>[
+
+    // Force Chrome to launch natively on ARM macOS.
+    final List<String> args = _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm
+        ? <String>['/usr/bin/arch', '-arm64e']
+        : <String>[];
+    args.addAll(<String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
       // allowing for the remote debug port to be enabled.
@@ -216,7 +221,7 @@ class ChromiumLauncher {
           '--window-size=2400,1800',
         ],
       url,
-    ];
+    ]);
 
     final Process? process = await _spawnChromiumProcess(args);
 
