@@ -158,15 +158,15 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
 
   @override
   TimeOfDay fromPrimitives(Object? data) {
-    final Map<String, dynamic> timeData = Map<String, dynamic>.from(data! as Map<String, dynamic>);
+    final Map<String, int> timeData = Map<String, int>.from(data! as Map<Object?, Object?>);
     return TimeOfDay(
-      minute: timeData['minute'] as int,
-      hour: timeData['hour'] as int,
+      minute: timeData['minute']!,
+      hour: timeData['hour']!,
     );
   }
 
   @override
-  Object? toPrimitives() => <String, dynamic>{
+  Object? toPrimitives() => <String, int>{
     'minute': value.minute,
     'hour': value.hour,
   };
