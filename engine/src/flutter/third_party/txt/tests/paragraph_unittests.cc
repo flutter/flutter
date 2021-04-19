@@ -1883,80 +1883,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(HeightOverrideParagraph)) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(HeightOverrideHalfLeadingParagraph)) {
-  // All 3 lines will have the same typeface.
-  const char* text = "01234満毎冠行来昼本可\nabcd\n満毎冠行来昼本可";
-  auto icu_text = icu::UnicodeString::fromUTF8(text);
-  std::u16string u16_text(icu_text.getBuffer(),
-                          icu_text.getBuffer() + icu_text.length());
-
-  txt::ParagraphStyle paragraph_style;
-  paragraph_style.max_lines = 10;
-  paragraph_style.text_height_behavior = TextHeightBehavior::kEvenLeading;
-  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
-
-  txt::TextStyle text_style;
-  text_style.font_families = std::vector<std::string>(1, "Roboto");
-  text_style.font_size = 20;
-  text_style.letter_spacing = 0;
-  text_style.word_spacing = 0;
-  text_style.color = SK_ColorBLACK;
-  text_style.height = 3.6345;
-  text_style.has_height_override = true;
-  // Disables text style leading distribution behavior override so it defaults
-  // to the paragraph style.
-  text_style.has_leading_distribution_override = false;
-  builder.PushStyle(text_style);
-
-  builder.AddText(u16_text);
-
-  builder.Pop();
-
-  auto paragraph = BuildParagraph(builder);
-  paragraph->Layout(550);
-
-  paragraph->Paint(GetCanvas(), 0, 0);
-
-  SkPaint paint;
-  paint.setStyle(SkPaint::kStroke_Style);
-  paint.setAntiAlias(true);
-  paint.setStrokeWidth(1);
-
-  // Tests for GetRectsForRange()
-  Paragraph::RectHeightStyle rect_height_style =
-      Paragraph::RectHeightStyle::kTight;
-  Paragraph::RectWidthStyle rect_width_style =
-      Paragraph::RectWidthStyle::kTight;
-  paint.setColor(SK_ColorRED);
-  std::vector<txt::Paragraph::TextBox> boxes =
-      paragraph->GetRectsForRange(0, 0, rect_height_style, rect_width_style);
-  for (size_t i = 0; i < boxes.size(); ++i) {
-    GetCanvas()->drawRect(boxes[i].rect, paint);
-  }
-  EXPECT_EQ(boxes.size(), 0ull);
-
-  boxes =
-      paragraph->GetRectsForRange(0, 40, rect_height_style, rect_width_style);
-  for (size_t i = 0; i < boxes.size(); ++i) {
-    GetCanvas()->drawRect(boxes[i].rect, paint);
-  }
-  // With half-leadding, the x coordinates should remain the same but the glyphs
-  // are shifted up (as compared to AD-scaling).
-  EXPECT_EQ(boxes.size(), 3ull);
-
-  const double line_spacing1 = boxes[1].rect.top() - boxes[0].rect.bottom();
-  const double line_spacing2 = boxes[2].rect.top() - boxes[1].rect.bottom();
-
-  EXPECT_EQ(line_spacing1, line_spacing2);
-  // half leading.
-  EXPECT_NEAR(line_spacing1 * 0.5, boxes[0].rect.top(), 0.5);
-
-  EXPECT_FLOAT_EQ(boxes[1].rect.left(), 0);
-  EXPECT_FLOAT_EQ(boxes[1].rect.right(), 43.851562);
-
-  ASSERT_TRUE(Snapshot());
-}
-
 TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(HeightOverrideHalfLeadingTextStyle)) {
   // All 3 lines will have the same typeface.
   const char* text = "01234満毎冠行来昼本可\nabcd\n満毎冠行来昼本可";
@@ -1978,7 +1904,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(HeightOverrideHalfLeadingTextStyle)) {
   text_style.height = 3.6345;
   text_style.has_height_override = true;
   // Override paragraph_style.text_height_behavior:
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = true;
   builder.PushStyle(text_style);
 
@@ -2060,13 +1985,11 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(MixedTextHeightBehaviorSameLine)) {
   text_style.height = 3.6345;
   text_style.has_height_override = true;
   // First run, with half-leading.
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = true;
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
 
   // Second run with AD-scaling.
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = false;
 
   builder.PushStyle(text_style);
@@ -2144,13 +2067,11 @@ TEST_F(ParagraphTest,
   text_style.height = 0;
   text_style.has_height_override = true;
   // First run, with half-leading.
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = true;
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
 
   // Second run with AD-scaling.
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = false;
 
   builder.PushStyle(text_style);
@@ -2214,7 +2135,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(HeightOverrideHalfLeadingStrut)) {
   paragraph_style.strut_height = 3.6345;
   paragraph_style.strut_font_size = 20;
   paragraph_style.strut_font_families.push_back("Roboto");
-  paragraph_style.strut_has_leading_distribution_override = true;
   paragraph_style.strut_half_leading = true;
   txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
 
@@ -2226,8 +2146,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(HeightOverrideHalfLeadingStrut)) {
   text_style.color = SK_ColorBLACK;
   text_style.height = 3.6345;
   text_style.has_height_override = true;
-  // Override paragraph_style.text_height_behavior:
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = true;
   builder.PushStyle(text_style);
 
@@ -2314,13 +2232,11 @@ TEST_F(ParagraphTest,
   text_style.has_height_override = true;
 
   // First run, with half-leading.
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = true;
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
 
   // Second run with AD-scaling.
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = false;
 
   builder.PushStyle(text_style);
@@ -7158,7 +7074,6 @@ TEST_F(ParagraphTest, MixedTextHeightBehaviorRectsParagraph) {
   text_style.font_size = 30;
   text_style.height = 5;
   text_style.has_height_override = true;
-  text_style.has_leading_distribution_override = true;
   text_style.half_leading = true;
 
   builder.PushStyle(text_style);
