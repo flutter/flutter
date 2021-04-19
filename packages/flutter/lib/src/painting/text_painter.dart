@@ -429,6 +429,23 @@ class TextPainter {
   }
   List<PlaceholderDimensions>? _placeholderDimensions;
 
+  // Placeholders when used in TextFields are frequently inserted as replacements
+  // for strings of text. However, in text layout, the placeholder is treated as
+  // a single object replacement character codepoint. This means that the TextField
+  // treats text editing positions/offsets with the full un-replaced string's length
+  // while the layout and rendering treats placeholders as a single offset.
+  //
+  // This method converts a un-replaced offset to the layout engine's single codepoint
+  // placeholder offset by accounting for the replaced string's length and subtracting
+  // it from the offset.
+  //
+  // This conversion should be applied before calling any _paragraph methods, and any
+  // offsets returned by _paragraph should call _getRawOffset before using the value.
+  //
+  // See also:
+  //
+  //  * _getRawOffset
+  //  * _getPlaceholderAdjustedPosition
   int _getPlaceholderAdjustedOffset(int offset) {
     if (_placeholderDimensions == null) {
       return offset;
@@ -456,15 +473,16 @@ class TextPainter {
     return offset - adjustment;
   }
 
+  // This method performs the opposite conversion of _getPlaceholderAdjustedOffset,
+  // taking a layout-space offset and adding placeholder replaced string lengths
+  // as appropriate.
   int _getRawOffset(int offset) {
     if (_placeholderDimensions == null) {
       return offset;
     }
     for (final PlaceholderDimensions dims in _placeholderDimensions!) {
       if (dims.range != null) {
-        if (offset > dims.range!.end) {
-          offset += dims.range!.end - dims.range!.start - 1;
-        } else if (offset > dims.range!.start && offset <= dims.range!.end) {
+        if (offset > dims.range!.end || offset > dims.range!.start && offset <= dims.range!.end) {
           offset += dims.range!.end - dims.range!.start - 1;
         } else  {
           break;
@@ -478,22 +496,6 @@ class TextPainter {
     return TextPosition(
       offset: _getPlaceholderAdjustedOffset(position.offset),
       affinity: position.affinity
-    );
-  }
-
-  TextSelection? _getPlaceholderAdjustedSelection(TextSelection? selection) {
-    return selection == null ? null : TextSelection(
-      baseOffset: _getPlaceholderAdjustedOffset(selection.baseOffset),
-      extentOffset: _getPlaceholderAdjustedOffset(selection.extentOffset),
-      affinity: selection.affinity,
-      isDirectional: selection.isDirectional,
-    );
-  }
-
-  TextRange _getPlaceholderAdjustedRange(TextRange range) {
-    return TextRange(
-      start: _getPlaceholderAdjustedOffset(range.start),
-      end: _getPlaceholderAdjustedOffset(range.end),
     );
   }
 
@@ -975,8 +977,8 @@ class TextPainter {
     assert(boxWidthStyle != null);
     selection = _getPlaceholderAdjustedSelection(selection)!;
     return _paragraph!.getBoxesForRange(
-      selection.start,
-      selection.end,
+      _getPlaceholderAdjustedOffset(selection.start),
+      _getPlaceholderAdjustedOffset(selection.end),
       boxHeightStyle: boxHeightStyle,
       boxWidthStyle: boxWidthStyle,
     );
