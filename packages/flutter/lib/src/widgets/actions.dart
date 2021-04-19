@@ -1137,7 +1137,7 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _hovering = false;
 ///   bool _on = false;
 ///   late Map<Type, Action<Intent>> _actionMap;
-///   late Map<LogicalKeySet, Intent> _shortcutMap;
+///   late Map<ShortcutActivator, Intent> _shortcutMap;
 ///
 ///   @override
 ///   void initState() {
@@ -1147,8 +1147,8 @@ class _ActionsMarker extends InheritedWidget {
 ///         onInvoke: (Intent intent) => _toggleState(),
 ///       ),
 ///     };
-///     _shortcutMap = <LogicalKeySet, Intent>{
-///       LogicalKeySet(LogicalKeyboardKey.keyX): const ActivateIntent(),
+///     _shortcutMap = <ShortcutActivator, Intent>{
+///       SingleActivator(LogicalKeyboardKey.keyX): const ActivateIntent(),
 ///     };
 ///   }
 ///
@@ -1287,7 +1287,7 @@ class FocusableActionDetector extends StatefulWidget {
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.shortcuts.shortcuts}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// A function that will be called when the focus highlight should be shown or
   /// hidden.

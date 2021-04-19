@@ -406,9 +406,9 @@ class _FocusDemoState extends State<FocusDemo> {
       child: FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
-          shortcuts: <LogicalKeySet, Intent>{
-            LogicalKeySet(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ): const RedoIntent(),
-            LogicalKeySet(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ): const UndoIntent(),
+          shortcuts: <ShortcutActivator, Intent>{
+            SingleActivator(meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true, LogicalKeyboardKey.keyZ): const RedoIntent(),
+            SingleActivator(meta: Platform.isMacOS, control: !Platform.isMacOS, LogicalKeyboardKey.keyZ): const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,

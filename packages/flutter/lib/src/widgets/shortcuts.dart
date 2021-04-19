@@ -355,7 +355,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
 /// Intent>` (the same type as the [Shortcuts.shortcuts] property) so that its
 /// diagnostic output is human-readable.
 class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Intent>> {
-  /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
+  /// Create a diagnostics property for `Map<ShortcutActivator, Intent>` objects,
   /// which are the same type as the [Shortcuts.shortcuts] property.
   ShortcutMapProperty(
     String name,
