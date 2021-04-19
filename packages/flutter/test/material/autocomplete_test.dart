@@ -20,7 +20,7 @@ class User {
   }
 }
 
-/// given a string input this method enters the string in the autocomplete field
+/// Given a string input this method enters the string in the autocomplete field
 /// and it returns the height of the resulting options
 Future<double> getOptionsHeight(WidgetTester tester, String text) async {
   final Finder listFinder = find.byType(ListView);
