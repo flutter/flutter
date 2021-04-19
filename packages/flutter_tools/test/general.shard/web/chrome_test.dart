@@ -189,7 +189,7 @@ void main() {
     expect(logger.errorText, contains('Failed to restore Chrome preferences'));
   });
 
-  testWithoutContext('can launch Chrome natively on x86_64 macOS', () async {
+  testWithoutContext('can launch Chrome on x86_64 macOS', () async {
     final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -222,7 +222,7 @@ void main() {
     );
   });
 
-  testWithoutContext('can launch Chrome natively on ARM macOS', () async {
+  testWithoutContext('can launch x86_64 Chrome on ARM macOS', () async {
     final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -236,8 +236,13 @@ void main() {
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          '/usr/bin/arch',
-          '-arm64e',
+          'file',
+          'example_chrome',
+        ],
+        stdout: 'Mach-O 64-bit executable x86_64',
+      ),
+      const FakeCommand(
+        command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
           '--remote-debugging-port=12345',
@@ -246,6 +251,48 @@ void main() {
         ],
         stderr: kDevtoolsStderr,
       )
+    ]);
+
+    expect(
+          () async => chromiumLauncher.launch(
+        'example_url',
+        skipCheck: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  testWithoutContext('can launch ARM Chrome natively on ARM macOS when installed', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'file',
+          'example_chrome',
+        ],
+        stdout: 'Mach-O 64-bit executable arm64',
+      ),
+      const FakeCommand(
+        command: <String>[
+          '/usr/bin/arch',
+          '-arm64',
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
     ]);
 
     expect(
