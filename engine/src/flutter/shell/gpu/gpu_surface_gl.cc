@@ -70,14 +70,7 @@ sk_sp<GrDirectContext> GPUSurfaceGL::MakeGLContext(
 
   context->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
 
-  std::vector<PersistentCache::SkSLCache> caches =
-      PersistentCache::GetCacheForProcess()->LoadSkSLs();
-  int compiled_count = 0;
-  for (const auto& cache : caches) {
-    compiled_count += context->precompileShader(*cache.first, *cache.second);
-  }
-  FML_LOG(INFO) << "Found " << caches.size() << " SkSL shaders; precompiled "
-                << compiled_count;
+  PersistentCache::GetCacheForProcess()->PrecompileKnownSkSLs(context.get());
 
   return context;
 }

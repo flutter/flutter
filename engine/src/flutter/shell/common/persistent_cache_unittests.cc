@@ -24,6 +24,8 @@
 namespace flutter {
 namespace testing {
 
+using PersistentCacheTest = ShellTest;
+
 static void WaitForIO(Shell* shell) {
   std::promise<bool> io_task_finished;
   shell->GetTaskRunners().GetIOTaskRunner()->PostTask(
@@ -31,7 +33,14 @@ static void WaitForIO(Shell* shell) {
   io_task_finished.get_future().wait();
 }
 
-TEST_F(ShellTest, CacheSkSLWorks) {
+static void WaitForRaster(Shell* shell) {
+  std::promise<bool> raster_task_finished;
+  shell->GetTaskRunners().GetRasterTaskRunner()->PostTask(
+      [&raster_task_finished]() { raster_task_finished.set_value(true); });
+  raster_task_finished.get_future().wait();
+}
+
+TEST_F(PersistentCacheTest, CacheSkSLWorks) {
   // Create a temp dir to store the persistent cache
   fml::ScopedTemporaryDirectory dir;
   PersistentCache::SetCacheDirectoryPath(dir.path());
@@ -41,9 +50,11 @@ TEST_F(ShellTest, CacheSkSLWorks) {
   settings.cache_sksl = true;
   settings.dump_skp_on_shader_compilation = true;
 
-  fml::AutoResetWaitableEvent firstFrameLatch;
+  fml::AutoResetWaitableEvent first_frame_latch;
   settings.frame_rasterized_callback =
-      [&firstFrameLatch](const FrameTiming& t) { firstFrameLatch.Signal(); };
+      [&first_frame_latch](const FrameTiming& t) {
+        first_frame_latch.Signal();
+      };
 
   auto sksl_config = RunConfiguration::InferFromSettings(settings);
   sksl_config.SetEntrypoint("emptyMain");
@@ -64,7 +75,7 @@ TEST_F(ShellTest, CacheSkSLWorks) {
     root->Add(physical_shape_layer);
   };
   PumpOneFrame(shell.get(), 100, 100, builder);
-  firstFrameLatch.Wait();
+  first_frame_latch.Wait();
   WaitForIO(shell.get());
 
   // Some skp should be dumped due to shader compilations.
@@ -95,14 +106,14 @@ TEST_F(ShellTest, CacheSkSLWorks) {
   shell = CreateShell(settings);
   PlatformViewNotifyCreated(shell.get());
   RunEngine(shell.get(), std::move(normal_config));
-  firstFrameLatch.Reset();
+  first_frame_latch.Reset();
   PumpOneFrame(shell.get(), 100, 100, builder);
-  firstFrameLatch.Wait();
+  first_frame_latch.Wait();
   WaitForIO(shell.get());
 
-// Shader precompilation from SKSL is not implemented on the Skia Vulkan
+// Shader precompilation from SkSL is not implemented on the Skia Vulkan
 // backend so don't run the second half of this test on Vulkan. This can get
-// removed if SKSL precompilation is implemented in the Skia Vulkan backend.
+// removed if SkSL precompilation is implemented in the Skia Vulkan backend.
 #if !defined(SHELL_ENABLE_VULKAN)
   // To check that all shaders are precompiled, verify that no new skp is dumped
   // due to shader compilations.
@@ -113,22 +124,66 @@ TEST_F(ShellTest, CacheSkSLWorks) {
 #endif  // !defined(SHELL_ENABLE_VULKAN)
 
   // Remove all files generated
-  fml::FileVisitor remove_visitor = [&remove_visitor](
-                                        const fml::UniqueFD& directory,
-                                        const std::string& filename) {
-    if (fml::IsDirectory(directory, filename.c_str())) {
-      {  // To trigger fml::~UniqueFD before fml::UnlinkDirectory
-        fml::UniqueFD sub_dir =
-            fml::OpenDirectoryReadOnly(directory, filename.c_str());
-        fml::VisitFiles(sub_dir, remove_visitor);
-      }
-      fml::UnlinkDirectory(directory, filename.c_str());
-    } else {
-      fml::UnlinkFile(directory, filename.c_str());
-    }
-    return true;
+  fml::RemoveFilesInDirectory(dir.fd());
+  DestroyShell(std::move(shell));
+}
+
+TEST_F(PersistentCacheTest, CanPrecompileMetalShaders) {
+#if !SHELL_ENABLE_METAL
+  GTEST_SKIP();
+#endif  //  !SHELL_ENABLE_METAL
+  fml::ScopedTemporaryDirectory dir;
+  PersistentCache::SetCacheDirectoryPath(dir.path());
+  PersistentCache::ResetCacheForProcess();
+
+  auto settings = CreateSettingsForFixture();
+  settings.cache_sksl = true;
+  settings.dump_skp_on_shader_compilation = true;
+
+  fml::AutoResetWaitableEvent first_frame_latch;
+  settings.frame_rasterized_callback =
+      [&first_frame_latch](const FrameTiming& t) {
+        first_frame_latch.Signal();
+      };
+
+  auto sksl_config = RunConfiguration::InferFromSettings(settings);
+  sksl_config.SetEntrypoint("emptyMain");
+  std::unique_ptr<Shell> shell =
+      CreateShell(settings,                                          //
+                  GetTaskRunnersForFixture(),                        //
+                  false,                                             //
+                  nullptr,                                           //
+                  false,                                             //
+                  ShellTestPlatformView::BackendType::kMetalBackend  //
+      );
+  PlatformViewNotifyCreated(shell.get());
+  RunEngine(shell.get(), std::move(sksl_config));
+
+  // Initially, we should have no SkSL cache
+  {
+    auto empty_cache = PersistentCache::GetCacheForProcess()->LoadSkSLs();
+    ASSERT_EQ(empty_cache.size(), 0u);
+  }
+
+  // Draw something to trigger shader compilations.
+  LayerTreeBuilder builder = [](std::shared_ptr<ContainerLayer> root) {
+    SkPath path;
+    path.addCircle(50, 50, 20);
+    auto physical_shape_layer = std::make_shared<PhysicalShapeLayer>(
+        SK_ColorRED, SK_ColorBLUE, 1.0f, path, Clip::antiAlias);
+    root->Add(physical_shape_layer);
   };
-  fml::VisitFiles(dir.fd(), remove_visitor);
+  PumpOneFrame(shell.get(), 100, 100, builder);
+  first_frame_latch.Wait();
+  WaitForRaster(shell.get());
+  WaitForIO(shell.get());
+
+  // Assert that SkSLs have been generated.
+  auto filled_cache = PersistentCache::GetCacheForProcess()->LoadSkSLs();
+  ASSERT_GT(filled_cache.size(), 0u);
+
+  // Remove all files generated.
+  fml::RemoveFilesInDirectory(dir.fd());
   DestroyShell(std::move(shell));
 }
 
@@ -148,7 +203,7 @@ static void CheckTwoSkSLsAreLoaded() {
   ASSERT_EQ(shaders.size(), 2u);
 }
 
-TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
+TEST_F(PersistentCacheTest, CanLoadSkSLsFromAsset) {
   // Avoid polluting unit tests output by hiding INFO level logging.
   fml::LogSettings warning_only = {fml::LOG_WARNING};
   fml::ScopedSetLogSettings scoped_set_log_settings(warning_only);
@@ -212,7 +267,7 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
   fml::UnlinkFile(asset_dir.fd(), PersistentCache::kAssetFileName);
 }
 
-TEST_F(ShellTest, CanRemoveOldPersistentCache) {
+TEST_F(PersistentCacheTest, CanRemoveOldPersistentCache) {
   fml::ScopedTemporaryDirectory base_dir;
   ASSERT_TRUE(base_dir.fd().is_valid());
 
@@ -242,7 +297,7 @@ TEST_F(ShellTest, CanRemoveOldPersistentCache) {
   fml::RemoveFilesInDirectory(base_dir.fd());
 }
 
-TEST_F(ShellTest, CanPurgePersistentCache) {
+TEST_F(PersistentCacheTest, CanPurgePersistentCache) {
   fml::ScopedTemporaryDirectory base_dir;
   ASSERT_TRUE(base_dir.fd().is_valid());
   auto cache_dir = fml::CreateDirectory(
@@ -274,7 +329,7 @@ TEST_F(ShellTest, CanPurgePersistentCache) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, PurgeAllowsFutureSkSLCache) {
+TEST_F(PersistentCacheTest, PurgeAllowsFutureSkSLCache) {
   sk_sp<SkData> shader_key = SkData::MakeWithCString("key");
   sk_sp<SkData> shader_value = SkData::MakeWithCString("value");
   std::string shader_filename = PersistentCache::SkKeyToFilePath(*shader_key);

@@ -681,6 +681,8 @@ FILE: ../../../flutter/shell/common/shell_test_platform_view.cc
 FILE: ../../../flutter/shell/common/shell_test_platform_view.h
 FILE: ../../../flutter/shell/common/shell_test_platform_view_gl.cc
 FILE: ../../../flutter/shell/common/shell_test_platform_view_gl.h
+FILE: ../../../flutter/shell/common/shell_test_platform_view_metal.h
+FILE: ../../../flutter/shell/common/shell_test_platform_view_metal.mm
 FILE: ../../../flutter/shell/common/shell_test_platform_view_vulkan.cc
 FILE: ../../../flutter/shell/common/shell_test_platform_view_vulkan.h
 FILE: ../../../flutter/shell/common/shell_unittests.cc

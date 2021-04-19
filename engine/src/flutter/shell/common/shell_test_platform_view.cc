@@ -10,6 +10,9 @@
 #ifdef SHELL_ENABLE_VULKAN
 #include "flutter/shell/common/shell_test_platform_view_vulkan.h"
 #endif  // SHELL_ENABLE_VULKAN
+#ifdef SHELL_ENABLE_METAL
+#include "flutter/shell/common/shell_test_platform_view_metal.h"
+#endif  // SHELL_ENABLE_METAL
 
 namespace flutter {
 namespace testing {
@@ -38,6 +41,13 @@ std::unique_ptr<ShellTestPlatformView> ShellTestPlatformView::Create(
           delegate, task_runners, vsync_clock, create_vsync_waiter,
           shell_test_external_view_embedder);
 #endif  // SHELL_ENABLE_VULKAN
+#ifdef SHELL_ENABLE_METAL
+    case BackendType::kMetalBackend:
+      return std::make_unique<ShellTestPlatformViewMetal>(
+          delegate, task_runners, vsync_clock, create_vsync_waiter,
+          shell_test_external_view_embedder);
+#endif  // SHELL_ENABLE_METAL
+
     default:
       FML_LOG(FATAL) << "No backends supported for ShellTestPlatformView";
       return nullptr;

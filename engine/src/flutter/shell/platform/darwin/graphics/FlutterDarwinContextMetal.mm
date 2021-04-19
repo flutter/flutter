@@ -59,6 +59,9 @@ static GrContextOptions CreateMetalGrContextOptions() {
       return nil;
     }
 
+    // The devices are in the same "sharegroup" because they share the same device and command
+    // queues for now. When the resource context gets its own transfer queue, this will have to be
+    // refactored.
     _mainContext = [self createGrContext];
     _resourceContext = [self createGrContext];
 
