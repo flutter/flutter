@@ -4,26 +4,26 @@
 
 // @dart = 2.8
 
-import 'dart:io';
+import 'dart:io' hide Directory;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
@@ -173,8 +173,7 @@ void main() {
         return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
       });
 
-      mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -182,27 +181,6 @@ void main() {
     });
 
     group('AndroidSdk', () {
-      testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final String projectPath = await createProject(tempDir,
-            arguments: <String>['--no-pub', '--template=app']);
-
-        await expectLater(
-          runBuildApkCommand(
-            projectPath,
-            arguments: <String>['--no-pub'],
-          ),
-          throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
-        );
-
-        verifyNever(mockAndroidSdk.validateSdkWellFormed());
-        verify(mockAndroidSdk.reinitialize()).called(1);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => mockProcessManager,
-      });
-
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
         final String projectPath = await createProject(tempDir,
             arguments: <String>['--no-pub', '--template=app']);
@@ -398,7 +376,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'gradle-r8-failure',
           parameters: <String, String>{},
         ),
@@ -464,7 +442,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-not-using-android-x',
           parameters: <String, String>{},
         ),
@@ -521,7 +499,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-using-android-x',
           parameters: <String, String>{},
         ),
@@ -551,6 +529,29 @@ Future<BuildApkCommand> runBuildApkCommand(
   return command;
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  FakeAndroidSdk(this.directory);
+
+  @override
+  final Directory directory;
+}
+
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
+
+/// Creates a mock process that returns with the given [exitCode], [stdout] and [stderr].
+Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
+  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
+    utf8.encode(stdout),
+  ]);
+  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
+    utf8.encode(stderr),
+  ]);
+  final Process process = _MockBasicProcess();
+
+  when(process.stdout).thenAnswer((_) => stdoutStream);
+  when(process.stderr).thenAnswer((_) => stderrStream);
+  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
+  return process;
+}
+
+class _MockBasicProcess extends Mock implements Process {}

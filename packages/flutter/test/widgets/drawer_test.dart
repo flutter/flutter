@@ -273,11 +273,9 @@ void main() {
                   ],
                 ),
               ),
-              body: Container(
-                child: TextButton(
-                  child: const Text('button'),
-                  onPressed: () { buttonPressed = true; },
-                ),
+              body: TextButton(
+                child: const Text('button'),
+                onPressed: () { buttonPressed = true; },
               ),
             );
           },

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,7 +23,7 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
   @override
   void registerServiceExtension({
     required String name,
-    required FutureOr<Map<String, Object?>> callback(Map<String, String> parameters),
+    required FutureOr<Map<String, Object?>> Function(Map<String, String> parameters) callback,
   }) {
     assert(!extensions.containsKey(name));
     extensions[name] = callback;

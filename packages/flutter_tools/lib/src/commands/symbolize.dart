@@ -45,7 +45,7 @@ class SymbolizeCommand extends FlutterCommand {
     argParser.addOption(
       'output',
       abbr: 'o',
-      valueHelp: 'A file path for a symbolized stack trace to be written to.'
+      help: 'A file path for a symbolized stack trace to be written to.'
     );
   }
 

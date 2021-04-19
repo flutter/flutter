@@ -7,6 +7,6 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.androidArm64;
+  deviceOperatingSystem = DeviceOperatingSystem.androidArm;
   await task(createStackSizeTest());
 }

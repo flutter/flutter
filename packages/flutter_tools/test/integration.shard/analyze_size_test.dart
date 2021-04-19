@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -96,7 +97,7 @@ void main() {
 
     print(result.stdout);
     print(result.stderr);
-    expect(result.stderr.toString(), contains('--analyze-size can only be used on release builds'));
+    expect(result.stderr.toString(), contains('"--analyze-size" can only be used on release builds'));
 
     expect(result.exitCode, 1);
   });
@@ -113,8 +114,31 @@ void main() {
       '--split-debug-info=infos'
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
-    expect(result.stderr.toString(), contains('--analyze-size cannot be combined with --split-debug-info'));
+    expect(result.stderr.toString(), contains('"--analyze-size" cannot be combined with "--split-debug-info"'));
 
     expect(result.exitCode, 1);
+  });
+
+  testWithoutContext('--analyze-size allows overriding the directory for code size files', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('size_test');
+
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+       ...getLocalEngineArguments(),
+      'build',
+      'apk',
+      '--analyze-size',
+      '--code-size-directory=${tempDir.path}',
+      '--target-platform=android-arm64',
+      '--release',
+    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+
+    expect(result.exitCode, 0);
+    expect(tempDir.existsSync(), true);
+    expect(tempDir.childFile('snapshot.arm64-v8a.json').existsSync(), true);
+    expect(tempDir.childFile('trace.arm64-v8a.json').existsSync(), true);
+
+    tempDir.deleteSync(recursive: true);
   });
 }

@@ -245,9 +245,7 @@ void main() {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
-                        return Container(
-                          child: const Text('This is a modal bottom sheet.'),
-                        );
+                        return const Text('This is a modal bottom sheet.');
                       },
                     );
                   },
@@ -299,10 +297,8 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext _) {
-                        return Container(
-                          child: const Text(
-                            'This is a modal bottom sheet.',
-                          ),
+                        return const Text(
+                          'This is a modal bottom sheet.',
                         );
                       },
                     );
@@ -314,10 +310,8 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                     showBottomSheet<void>(
                       context: context,
                       builder: (BuildContext _) {
-                        return Container(
-                          child: const Text(
-                            'This is a persistent bottom sheet.',
-                          ),
+                        return const Text(
+                          'This is a persistent bottom sheet.',
                         );
                       },
                     );

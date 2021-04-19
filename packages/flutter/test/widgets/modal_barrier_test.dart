@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
 
 import 'semantics_tester.dart';
@@ -290,7 +288,8 @@ void main() {
               return false;
             },
           ),
-      ],),
+        ],
+      ),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -330,7 +329,8 @@ void main() {
               return true;
             },
           ),
-        ],),
+        ],
+      ),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -380,7 +380,7 @@ void main() {
       children: <TestSemantics>[
         TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
-          actions: SemanticsAction.tap.index,
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
           label: 'Dismiss',
           textDirection: TextDirection.ltr,
         ),
@@ -428,9 +428,7 @@ class FirstWidget extends StatelessWidget {
       onTap: () {
         Navigator.pushNamed(context, '/modal');
       },
-      child: Container(
-        child: const Text('X'),
-      ),
+      child: const Text('X'),
     );
   }
 }

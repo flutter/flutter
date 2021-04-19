@@ -26,7 +26,8 @@ import 'theme_data.dart';
 ///  * [ElevatedButton], a filled ButtonStyleButton whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
 abstract class ButtonStyleButton extends StatefulWidget {
-  /// Create a [ButtonStyleButton].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ButtonStyleButton({
     Key? key,
     required this.onPressed,
@@ -267,6 +268,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
+    final Size? resolvedMaximumSize = resolve<Size?>((ButtonStyle? style) => style?.maximumSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -290,6 +292,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       BoxConstraints(
         minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
+        maxWidth: resolvedMaximumSize!.width,
+        maxHeight: resolvedMaximumSize.height,
       ),
     );
     if (resolvedFixedSize != null) {
@@ -303,7 +307,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       if (size.height.isFinite) {
         effectiveConstraints = effectiveConstraints.copyWith(
           minHeight: size.height,
-          maxHeight: size.height
+          maxHeight: size.height,
         );
       }
     }

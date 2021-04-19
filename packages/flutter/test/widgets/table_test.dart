@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 class TestStatefulWidget extends StatefulWidget {
@@ -962,6 +961,42 @@ void main() {
         expect(error, isNotNull);
         expect(error!.toStringDeep(), contains('The children property of TableRow must not be null.'));
       }
+  });
+
+  testWidgets('Can replace child with a different RenderObject type', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/69395.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(children: const <TableRow>[
+          TableRow(children: <Widget>[
+            TestChildWidget(),
+            TestChildWidget(),
+            TestChildWidget(),
+          ]),
+          TableRow(children: <Widget>[
+            TestChildWidget(),
+            TestChildWidget(),
+            TestChildWidget(),
+          ]),
+        ]),
+      ),
+    );
+    final RenderTable table = tester.renderObject(find.byType(Table));
+
+    expect(find.text('CRASHHH'), findsNothing);
+    expect(find.byType(SizedBox), findsNWidgets(3 * 2));
+    final Type toBeReplaced = table.column(2).last.runtimeType;
+
+    final TestChildState state = tester.state(find.byType(TestChildWidget).last);
+    state.toggleMe();
+    await tester.pump();
+
+    expect(find.byType(SizedBox), findsNWidgets(5));
+    expect(find.text('CRASHHH'), findsOneWidget);
+
+    // The RenderObject got replaced by a different type.
+    expect(table.column(2).last.runtimeType, isNot(toBeReplaced));
   });
 
   // TODO(ianh): Test handling of TableCell object

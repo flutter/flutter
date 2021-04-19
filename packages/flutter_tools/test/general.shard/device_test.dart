@@ -4,7 +4,10 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
@@ -18,8 +21,6 @@ import 'package:fake_async/fake_async.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
-import '../src/fakes.dart';
-import '../src/mocks.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -151,11 +152,11 @@ void main() {
   });
 
   group('Filter devices', () {
-    final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
-    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo', true);
-    final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-    final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
-    final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', true, false);
+    final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
+    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo');
+    final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', ephemeral: false);
+    final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', ephemeral: false);
+    final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
     final FakeDevice webDevice = FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     final FakeDevice fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
@@ -334,7 +335,7 @@ void main() {
         terminal: mockTerminal,
       );
       await expectLater(
-        () async => await deviceManager.findTargetDevices(FakeFlutterProject()),
+        () async => deviceManager.findTargetDevices(FakeFlutterProject()),
         throwsA(isA<ToolExit>())
       );
     });
@@ -481,24 +482,6 @@ void main() {
     });
   });
 
-  group('ForwardedPort', () {
-    group('dispose()', () {
-      testUsingContext('does not throw exception if no process is present', () {
-        final ForwardedPort forwardedPort = ForwardedPort(123, 456);
-        expect(forwardedPort.context, isNull);
-        forwardedPort.dispose();
-      });
-
-      testUsingContext('kills process if process was available', () {
-        final MockProcess mockProcess = MockProcess();
-        final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, mockProcess);
-        forwardedPort.dispose();
-        expect(forwardedPort.context, isNotNull);
-        verify(mockProcess.kill());
-      });
-    });
-  });
-
   group('JSON encode devices', () {
     testUsingContext('Consistency of JSON representation', () async {
       expect(
@@ -555,3 +538,45 @@ class TestDeviceManager extends DeviceManager {
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}
 class FakeFlutterProject extends Fake implements FlutterProject {}
+
+class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  LongPollingDeviceDiscovery() : super('forever');
+
+  final Completer<List<Device>> _completer = Completer<List<Device>>();
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    return _completer.future;
+  }
+
+  @override
+  Future<void> stopPolling() async {
+    _completer.complete();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _completer.complete();
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
+
+class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  ThrowingPollingDeviceDiscovery() : super('throw');
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    throw const ProcessException('fake-discovery', <String>[]);
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import 'test_utils.dart';
 
 const String _kInitialVersion = 'v1.9.1';
@@ -26,7 +27,6 @@ final ProcessUtils processUtils = ProcessUtils(processManager: processManager, l
   outputPreferences: OutputPreferences.test(wrapText: true),
 ));
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
-final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
@@ -46,7 +46,7 @@ void main() {
     }
   });
 
-  testWithoutContext('Can upgrade and downgrade a Flutter checkout', () async {
+  testUsingContext('Can upgrade and downgrade a Flutter checkout', () async {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 

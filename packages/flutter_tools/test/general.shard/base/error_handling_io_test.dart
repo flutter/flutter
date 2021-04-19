@@ -4,28 +4,28 @@
 
 // @dart = 2.8
 
+import 'dart:io' as io; // flutter_ignore: dart_io_import;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show flutterUsage;
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockPathContext extends Mock implements path.Context {}
 class MockDirectory extends Mock implements Directory {}
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
-class MockProcessManager extends Mock implements ProcessManager {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -225,9 +225,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -249,9 +249,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -269,9 +269,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The file is being used by another program';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -290,9 +290,9 @@ void main() {
 
       const String expectedMessage = 'There is a problem with the device driver '
         'that this file or directory is stored on';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -314,7 +314,7 @@ void main() {
       final Directory directory = fs.directory('directory');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await directory.createTemp('prefix'),
+      expect(() async => directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
@@ -369,6 +369,7 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
+
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -391,9 +392,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file or directory';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -415,9 +416,9 @@ void main() {
       final Directory directory = fs.directory('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file or directory';
-      expect(() async => await directory.create(),
+      expect(() async => directory.create(),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await directory.delete(),
+      expect(() async => directory.delete(),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createSync(),
              throwsToolExit(message: expectedMessage));
@@ -435,9 +436,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -455,7 +456,7 @@ void main() {
       final Directory directory = fs.directory('directory');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await directory.createTemp('prefix'),
+      expect(() async => directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
@@ -473,6 +474,19 @@ void main() {
       const String expectedMessage = 'Flutter failed to check for directory existence at';
       expect(() => directory.existsSync(),
              throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('When the current working directory disappears', () async {
+      setupReadMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kSystemCannotFindFile,
+      );
+
+      expect(() => fs.currentDirectory, throwsToolExit(message: 'Unable to read current working directory'));
+
+      // Error is not caught by other operations.
+      expect(() => fs.file('foo').readAsStringSync(), throwsFileSystemException(kSystemCannotFindFile));
     });
   });
 
@@ -502,9 +516,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -524,9 +538,9 @@ void main() {
       final Directory directory = fs.directory('file');
 
       const String expectedMessage = 'The flutter tool cannot access the file or directory';
-      expect(() async => await directory.create(),
+      expect(() async => directory.create(),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await directory.delete(),
+      expect(() async => directory.delete(),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createSync(),
              throwsToolExit(message: expectedMessage));
@@ -544,9 +558,9 @@ void main() {
       final File file = fs.file('file');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await file.writeAsBytes(<int>[0]),
+      expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
-      expect(() async => await file.writeAsString(''),
+      expect(() async => file.writeAsString(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
@@ -564,7 +578,7 @@ void main() {
       final Directory directory = fs.directory('directory');
 
       const String expectedMessage = 'The target device is full';
-      expect(() async => await directory.createTemp('prefix'),
+      expect(() async => directory.createTemp('prefix'),
              throwsToolExit(message: expectedMessage));
       expect(() => directory.createTempSync('prefix'),
              throwsToolExit(message: expectedMessage));
@@ -670,88 +684,106 @@ void main() {
     });
   });
 
-  test('skipCommandLookup invokes Process calls directly', () async {
-    final ErrorHandlingProcessManager processManager = ErrorHandlingProcessManager(
-      delegate: const LocalProcessManager(),
-      platform: windowsPlatform,
-    );
-
-    // Throws an argument error because package:process fails to locate the executable.
-    expect(() => processManager.runSync(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.run(<String>['foo']), throwsArgumentError);
-    expect(() => processManager.start(<String>['foo']), throwsArgumentError);
-
-    // Throws process exception because the executable does not exist.
-    await ErrorHandlingProcessManager.skipCommandLookup<void>(() async {
-      expect(() => processManager.runSync(<String>['foo']), throwsA(isA<ProcessException>()));
-      expect(() => processManager.run(<String>['foo']), throwsA(isA<ProcessException>()));
-      expect(() => processManager.start(<String>['foo']), throwsA(isA<ProcessException>()));
-    });
-  });
-
   group('ProcessManager on windows throws tool exit', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
 
-    test('when the device is full', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
+    test('when PackageProcess throws an exception containg non-executable bits', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
+      ]);
+
       final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
+        delegate: fakeProcessManager,
         platform: windowsPlatform,
       );
-      setupProcessManagerMocks(mockProcessManager, kDeviceFull);
+
+      const String expectedMessage = 'The Flutter tool could not locate an executable with suitable permissions';
+
+      expect(() async => processManager.start(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.runSync(<String>['foo']),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    test('when PackageProcess throws an exception without containing non-executable bits', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      // If there were no located executables treat this as a programming error and rethrow the original
+      // exception.
+      expect(() async => processManager.start(<String>['foo']), throwsProcessException());
+      expect(() async => processManager.runSync(<String>['foo']), throwsProcessException());
+    });
+
+    test('when the device is full', () {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
 
       const String expectedMessage = 'The target device is full';
-      expect(() => processManager.canRun('foo'),
+
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() => processManager.killPid(1),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.start(<String>['foo']),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
 
     test('when the file is being used by another program', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
+      ]);
+
       final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
+        delegate: fakeProcessManager,
         platform: windowsPlatform,
       );
-      setupProcessManagerMocks(mockProcessManager, kUserMappedSectionOpened);
 
       const String expectedMessage = 'The file is being used by another program';
-      expect(() => processManager.canRun('foo'),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() => processManager.killPid(1),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.start(<String>['foo']),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
 
     test('when permissions are denied', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
+      ]);
+
       final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
+        delegate: fakeProcessManager,
         platform: windowsPlatform,
       );
-      setupProcessManagerMocks(mockProcessManager, kUserPermissionDenied);
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() => processManager.canRun('foo'),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() => processManager.killPid(1),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.start(<String>['foo']),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -763,42 +795,42 @@ void main() {
     const int eacces = 13;
 
     test('when writing to a full device', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+      ]);
+
       final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
+        delegate: fakeProcessManager,
         platform: linuxPlatform,
       );
-      setupProcessManagerMocks(mockProcessManager, enospc);
 
       const String expectedMessage = 'The target device is full';
-      expect(() => processManager.canRun('foo'),
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() => processManager.killPid(1),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.start(<String>['foo']),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
 
     test('when permissions are denied', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+      ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
+        delegate: fakeProcessManager,
         platform: linuxPlatform,
       );
-      setupProcessManagerMocks(mockProcessManager, eacces);
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() => processManager.canRun('foo'),
+
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() => processManager.killPid(1),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.start(<String>['foo']),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -810,45 +842,60 @@ void main() {
     const int eacces = 13;
 
     test('when writing to a full device', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
+      ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
+        delegate: fakeProcessManager,
         platform: macOSPlatform,
       );
-      setupProcessManagerMocks(mockProcessManager, enospc);
 
       const String expectedMessage = 'The target device is full';
-      expect(() => processManager.canRun('foo'),
+
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() => processManager.killPid(1),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.start(<String>['foo']),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
 
     test('when permissions are denied', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
+      ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
-        delegate: mockProcessManager,
+        delegate: fakeProcessManager,
         platform: linuxPlatform,
       );
-      setupProcessManagerMocks(mockProcessManager, eacces);
 
       const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() => processManager.canRun('foo'),
+
+      expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
-      expect(() => processManager.killPid(1),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.start(<String>['foo']),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => await processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
+    });
+  });
+
+  testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly', () async {
+    final FakeSignalProcessManager fakeProcessManager = FakeSignalProcessManager();
+    final ProcessManager processManager = ErrorHandlingProcessManager(
+      delegate: fakeProcessManager,
+      platform: linuxPlatform,
+    );
+
+    expect(processManager.killPid(1, io.ProcessSignal.sigterm), true);
+    expect(processManager.killPid(3, io.ProcessSignal.sigkill), true);
+    expect(fakeProcessManager.killedProcesses, <int, io.ProcessSignal>{
+      1: io.ProcessSignal.sigterm,
+      3: io.ProcessSignal.sigkill,
     });
   });
 
@@ -923,8 +970,7 @@ void main() {
       verify(source.copySync('dest')).called(1);
     });
 
-    // Uses context for analytics.
-    testUsingContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
+    testWithoutContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
       final MockFile dest = MockFile();
@@ -946,15 +992,9 @@ void main() {
       fileSystem.file('source').copySync('dest');
 
       expect(memoryDest.readAsBytesSync(), expectedBytes);
-      expect((globals.flutterUsage as TestUsage).events, contains(
-        const TestUsageEvent('error-handling', 'copy-fallback'),
-      ));
-    }, overrides: <Type, Generator>{
-      Usage: () => TestUsage(),
     });
 
-    // Uses context for analytics.
-    testUsingContext('copySync deletes the result file if the fallback fails', () {
+    testWithoutContext('copySync deletes the result file if the fallback fails', () {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
       final MockFile dest = MockFile();
@@ -983,43 +1023,16 @@ void main() {
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
 
       verify(dest.deleteSync(recursive: true)).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => TestUsage(),
     });
   });
 }
 
-void setupProcessManagerMocks(
-  MockProcessManager processManager,
-  int errorCode,
-) {
-  when(processManager.canRun(any, workingDirectory: anyNamed('workingDirectory')))
-    .thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.killPid(any, any))
-    .thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.runSync(
-    any,
-    environment: anyNamed('environment'),
-    includeParentEnvironment: anyNamed('includeParentEnvironment'),
-    runInShell: anyNamed('runInShell'),
-    workingDirectory: anyNamed('workingDirectory'),
-    stdoutEncoding: anyNamed('stdoutEncoding'),
-    stderrEncoding: anyNamed('stderrEncoding'),
-  )).thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.run(
-    any,
-    environment: anyNamed('environment'),
-    includeParentEnvironment: anyNamed('includeParentEnvironment'),
-    runInShell: anyNamed('runInShell'),
-    workingDirectory: anyNamed('workingDirectory'),
-    stdoutEncoding: anyNamed('stdoutEncoding'),
-    stderrEncoding: anyNamed('stderrEncoding'),
-  )).thenThrow(ProcessException('', <String>[], '', errorCode));
-  when(processManager.start(
-    any,
-    environment: anyNamed('environment'),
-    includeParentEnvironment: anyNamed('includeParentEnvironment'),
-    runInShell: anyNamed('runInShell'),
-    workingDirectory: anyNamed('workingDirectory'),
-  )).thenThrow(ProcessException('', <String>[], '', errorCode));
+class FakeSignalProcessManager extends Fake implements ProcessManager {
+  final Map<int, io.ProcessSignal> killedProcesses = <int, io.ProcessSignal>{};
+
+  @override
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    killedProcesses[pid] = signal;
+    return true;
+  }
 }

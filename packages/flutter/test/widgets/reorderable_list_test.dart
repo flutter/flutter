@@ -5,7 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('negative itemCount should assert', (WidgetTester tester) async {
@@ -26,7 +25,7 @@ void main() {
                     });
                   },
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
+                    return SizedBox(
                       height: 100,
                       child: Text('item ${items[index]}'),
                     );
@@ -64,7 +63,7 @@ void main() {
                     });
                   },
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
+                    return SizedBox(
                       height: 100,
                       child: Text('item ${items[index]}'),
                     );

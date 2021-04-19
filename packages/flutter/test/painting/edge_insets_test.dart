@@ -54,6 +54,8 @@ void main() {
   test('EdgeInsets.resolve()', () {
     expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
     expect(const EdgeInsetsDirectional.fromSTEB(99.0, 98.0, 97.0, 96.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(97.0, 98.0, 99.0, 96.0));
+    expect(const EdgeInsetsDirectional.all(50.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(50.0, 50.0, 50.0, 50.0));
+    expect(const EdgeInsetsDirectional.all(50.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(50.0, 50.0, 50.0, 50.0));
     expect(const EdgeInsetsDirectional.only(start: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(963.25, 0.0, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(top: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 963.25, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(end: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 0.0, 963.25, 0.0));

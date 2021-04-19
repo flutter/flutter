@@ -56,9 +56,20 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
         final String addCustomCommandReplacement = '$addCustomCommandOriginal\n  VERBATIM';
         newProjectContents = newProjectContents.replaceAll(addCustomCommandOriginal, addCustomCommandReplacement);
       }
+
+      // CMake's add_custom_command() should add FLUTTER_TARGET_PLATFORM to support multi-architecture.
+      // However, developers would get the following warning every time if we do nothing.
+      // ------------------------------
+      // CMake Warning:
+      //   Manually-specified variables were not used by the project:
+      //    FLUTTER_TARGET_PLATFORM
+      // ------------------------------
+      if (addCustomCommandOriginal?.contains('linux-x64') == true) {
+        newProjectContents = newProjectContents.replaceAll('linux-x64', r'${FLUTTER_TARGET_PLATFORM}');
+      }
     }
     if (originalProjectContents != newProjectContents) {
-      logger.printStatus('add_custom_command() missing VERBATIM, updating.');
+      logger.printStatus('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.');
       _cmakeFile.writeAsStringSync(newProjectContents.toString());
     }
     return true;

@@ -10,7 +10,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -21,11 +20,13 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
-import '../macos/xcode.dart';
+import '../device_port_forwarder.dart';
+import '../globals_null_migrated.dart' as globals;
+import '../macos/xcdevice.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
+import 'application_package.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
@@ -119,7 +120,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       );
     }
 
-    return await _xcdevice.getAvailableIOSDevices(timeout: timeout);
+    return _xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
   @override
@@ -130,7 +131,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       ];
     }
 
-    return await _xcdevice.getDiagnostics();
+    return _xcdevice.getDiagnostics();
   }
 }
 
@@ -258,6 +259,7 @@ class IOSDevice extends Device {
       installationResult = await _iosDeploy.installApp(
         deviceId: id,
         bundlePath: bundle.path,
+        appDeltaDirectory: app.appDeltaDirectory,
         launchArguments: <String>[],
         interfaceType: interfaceType,
       );
@@ -384,6 +386,7 @@ class IOSDevice extends Device {
           iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
             deviceId: id,
             bundlePath: bundle.path,
+            appDeltaDirectory: package.appDeltaDirectory,
             launchArguments: launchArguments,
             interfaceType: interfaceType,
           );
@@ -404,6 +407,7 @@ class IOSDevice extends Device {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
           bundlePath: bundle.path,
+          appDeltaDirectory: package.appDeltaDirectory,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
         );
@@ -656,29 +660,29 @@ class IOSDeviceLogReader extends DeviceLogReader {
   Stream<String> get logLines => _linesController.stream;
 
   @override
-  vm_service.VmService get connectedVMService => _connectedVMService;
-  vm_service.VmService _connectedVMService;
+  FlutterVmService get connectedVMService => _connectedVMService;
+  FlutterVmService _connectedVMService;
 
   @override
-  set connectedVMService(vm_service.VmService connectedVmService) {
+  set connectedVMService(FlutterVmService connectedVmService) {
     _listenToUnifiedLoggingEvents(connectedVmService);
     _connectedVMService = connectedVmService;
   }
 
   static const int minimumUniversalLoggingSdkVersion = 13;
 
-  Future<void> _listenToUnifiedLoggingEvents(vm_service.VmService connectedVmService) async {
+  Future<void> _listenToUnifiedLoggingEvents(FlutterVmService connectedVmService) async {
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
     }
     try {
       // The VM service will not publish logging events unless the debug stream is being listened to.
       // Listen to this stream as a side effect.
-      unawaited(connectedVmService.streamListen('Debug'));
+      unawaited(connectedVmService.service.streamListen('Debug'));
 
       await Future.wait(<Future<void>>[
-        connectedVmService.streamListen(vm_service.EventStreams.kStdout),
-        connectedVmService.streamListen(vm_service.EventStreams.kStderr),
+        connectedVmService.service.streamListen(vm_service.EventStreams.kStdout),
+        connectedVmService.service.streamListen(vm_service.EventStreams.kStderr),
       ]);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
@@ -696,8 +700,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     _loggingSubscriptions.addAll(<StreamSubscription<void>>[
-      connectedVmService.onStdoutEvent.listen(logMessage),
-      connectedVmService.onStderrEvent.listen(logMessage),
+      connectedVmService.service.onStdoutEvent.listen(logMessage),
+      connectedVmService.service.onStderrEvent.listen(logMessage),
     ]);
   }
 

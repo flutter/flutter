@@ -373,7 +373,7 @@ class DataCell {
 ///
 /// ```dart
 /// static const int numItems = 10;
-/// List<bool> selected = List<bool>.generate(numItems, (index) => false);
+/// List<bool> selected = List<bool>.generate(numItems, (int index) => false);
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -387,17 +387,18 @@ class DataCell {
 ///       ],
 ///       rows: List<DataRow>.generate(
 ///         numItems,
-///         (index) => DataRow(
+///         (int index) => DataRow(
 ///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
 ///             if (states.contains(MaterialState.selected))
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
 ///             // Even rows will have a grey color.
-///             if (index % 2 == 0)
+///             if (index.isEven) {
 ///               return Colors.grey.withOpacity(0.3);
+///             }
 ///             return null;  // Use default value for other states and odd rows.
 ///           }),
-///           cells: [DataCell(Text('Row $index'))],
+///           cells: <DataCell>[ DataCell(Text('Row $index')) ],
 ///           selected: selected[index],
 ///           onSelectChanged: (bool? value) {
 ///             setState(() {
@@ -469,6 +470,7 @@ class DataTable extends StatelessWidget {
     this.showBottomBorder = false,
     this.dividerThickness,
     required this.rows,
+    this.checkboxHorizontalMargin,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -636,6 +638,10 @@ class DataTable extends StatelessWidget {
   ///
   /// If null, [DataTableThemeData.horizontalMargin] is used. This value
   /// defaults to 24.0 to adhere to the Material Design specifications.
+  ///
+  /// If [checkboxHorizontalMargin] is null, then [horizontalMargin] is also the
+  /// margin between the edge of the table and the checkbox, as well as the
+  /// margin between the checkbox and the content in the first data column.
   final double? horizontalMargin;
 
   /// {@template flutter.material.dataTable.columnSpacing}
@@ -678,6 +684,16 @@ class DataTable extends StatelessWidget {
   /// By default, a border is not shown at the bottom to allow for a border
   /// around the table defined by [decoration].
   final bool showBottomBorder;
+
+  /// {@template flutter.material.dataTable.checkboxHorizontalMargin}
+  /// Horizontal margin around the checkbox, if it is displayed.
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.checkboxHorizontalMargin] is used. If that is
+  /// also null, then [horizontalMargin] is used as the margin between the edge
+  /// of the table and the checkbox, as well as the margin between the checkbox
+  /// and the content in the first data column. This value defaults to 24.0.
+  final double? checkboxHorizontalMargin;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -746,12 +762,18 @@ class DataTable extends StatelessWidget {
     final double effectiveHorizontalMargin = horizontalMargin
       ?? themeData.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
+    final double effectiveCheckboxHorizontalMarginStart = checkboxHorizontalMargin
+      ?? themeData.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin;
+    final double effectiveCheckboxHorizontalMarginEnd = checkboxHorizontalMargin
+      ?? themeData.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin / 2.0;
     Widget contents = Semantics(
       container: true,
       child: Padding(
         padding: EdgeInsetsDirectional.only(
-          start: effectiveHorizontalMargin,
-          end: effectiveHorizontalMargin / 2.0,
+          start: effectiveCheckboxHorizontalMarginStart,
+          end: effectiveCheckboxHorizontalMarginEnd,
         ),
         child: Center(
           child: Checkbox(
@@ -933,6 +955,12 @@ class DataTable extends StatelessWidget {
     final double effectiveHorizontalMargin = horizontalMargin
       ?? theme.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
+    final double effectiveCheckboxHorizontalMarginStart = checkboxHorizontalMargin
+      ?? theme.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin;
+    final double effectiveCheckboxHorizontalMarginEnd = checkboxHorizontalMargin
+      ?? theme.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin / 2.0;
     final double effectiveColumnSpacing = columnSpacing
       ?? theme.dataTableTheme.columnSpacing
       ?? _columnSpacing;
@@ -976,7 +1004,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (displayCheckboxColumn) {
-      tableColumns[0] = FixedColumnWidth(effectiveHorizontalMargin + Checkbox.width + effectiveHorizontalMargin / 2.0);
+      tableColumns[0] = FixedColumnWidth(effectiveCheckboxHorizontalMarginStart + Checkbox.width + effectiveCheckboxHorizontalMarginEnd);
       tableRows[0].children![0] = _buildCheckbox(
         context: context,
         checked: someChecked ? null : allChecked,
@@ -990,7 +1018,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children![0] = _buildCheckbox(
           context: context,
           checked: row.selected,
-          onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged!(!row.selected) : null ,
+          onRowTap: () => row.onSelectChanged?.call(!row.selected),
           onCheckboxChanged: row.onSelectChanged,
           overlayColor: row.color ?? effectiveDataRowColor,
           tristate: false,
@@ -1004,7 +1032,9 @@ class DataTable extends StatelessWidget {
       final DataColumn column = columns[dataColumnIndex];
 
       final double paddingStart;
-      if (dataColumnIndex == 0 && displayCheckboxColumn) {
+      if (dataColumnIndex == 0 && displayCheckboxColumn && checkboxHorizontalMargin != null) {
+        paddingStart = effectiveHorizontalMargin;
+      } else if (dataColumnIndex == 0 && displayCheckboxColumn) {
         paddingStart = effectiveHorizontalMargin / 2.0;
       } else if (dataColumnIndex == 0 && !displayCheckboxColumn) {
         paddingStart = effectiveHorizontalMargin;
@@ -1054,7 +1084,7 @@ class DataTable extends StatelessWidget {
           onLongPress: cell.onLongPress,
           onTapCancel: cell.onTapCancel,
           onTapDown: cell.onTapDown,
-          onSelectChanged: () => row.onSelectChanged != null ? row.onSelectChanged!(!row.selected) : null,
+          onSelectChanged: () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
         );
         rowIndex += 1;

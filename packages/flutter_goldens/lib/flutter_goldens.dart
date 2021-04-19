@@ -11,7 +11,6 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_goldens_client/skia_client.dart';
@@ -27,7 +26,7 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
 /// works for the current test. _Which_ FlutterGoldenFileComparator is
 /// instantiated is based on the current testing environment.
-Future<void> testExecutable(FutureOr<void> testMain()) async {
+Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   const Platform platform = LocalPlatform();
   if (FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromDefaultComparator(platform);

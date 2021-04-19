@@ -116,7 +116,7 @@ void main() {
 
     // Use didPopRoute() to simulate the system back button. Check that
     // didPopRoute() indicates that the notification was handled.
-    final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
     expect(await widgetsAppState.didPopRoute(), isTrue);
     expect(find.text('Sample Page'), findsOneWidget);
 

@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -20,9 +19,9 @@ import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -50,7 +49,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesDartDefineOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
-    usesExtraDartFlagOptions();
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -74,15 +73,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
               'By default, all build configurations are built.'
       )
       ..addFlag('universal',
-        help: '(Deprecated) Produce universal frameworks that include all valid architectures.',
+        help: '(deprecated) Produce universal frameworks that include all valid architectures.',
         negatable: true,
-        hide: true,
+        hide: !verboseHelp,
       )
       ..addFlag('xcframework',
         help: 'Produce xcframeworks that include all valid architectures.',
         negatable: false,
         defaultsTo: true,
-        hide: true,
+        hide: !verboseHelp,
       )
       ..addFlag('cocoapods',
         help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
@@ -94,8 +93,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag('force',
         abbr: 'f',
-        help: 'Force Flutter.podspec creation on the master channel. For testing only.',
-        hide: true
+        help: 'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
+        hide: !verboseHelp,
       );
   }
 
@@ -322,7 +321,7 @@ end
 
     try {
       // Copy xcframework engine cache framework to mode directory.
-      globals.fsUtils.copyDirectorySync(
+      copyDirectory(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
       );
@@ -382,6 +381,7 @@ end
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
+          platform: globals.platform,
           engineVersion: globals.artifacts.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,
@@ -525,7 +525,15 @@ end
       '-create-xcframework',
       for (Directory framework in frameworks) ...<String>[
         '-framework',
-        framework.path
+        framework.path,
+        ...framework.parent
+            .listSync()
+            .where((FileSystemEntity entity) =>
+                entity.basename.endsWith('bcsymbolmap') ||
+                entity.basename.endsWith('dSYM'))
+            .map((FileSystemEntity entity) =>
+                <String>['-debug-symbols', entity.path])
+            .expand<String>((List<String> parameter) => parameter)
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path

@@ -111,11 +111,17 @@ void main() {
             );
           }),
           Container(
+            color: Colors.green,
             child: Container(
+              color: Colors.green,
               child: Container(
+                color: Colors.green,
                 child: Container(
+                  color: Colors.green,
                   child: Container(
+                    color: Colors.green,
                     child: Container(
+                      color: Colors.green,
                       child: StatefulBuilder(
                         builder: (BuildContext context, StateSetter setState) {
                           childSetState = setState;

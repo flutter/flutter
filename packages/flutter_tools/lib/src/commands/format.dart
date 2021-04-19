@@ -30,7 +30,8 @@ class FormatCommand extends FlutterCommand {
     );
     argParser.addOption('line-length',
       abbr: 'l',
-      help: 'Wrap lines longer than this length. Defaults to 80 characters.',
+      help: 'Wrap lines longer than this length.',
+      valueHelp: 'characters',
       defaultsTo: '80',
     );
   }

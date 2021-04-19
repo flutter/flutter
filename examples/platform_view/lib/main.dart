@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(PlatformView());
+  runApp(const PlatformView());
 }
 
 class PlatformView extends StatelessWidget {
+  const PlatformView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

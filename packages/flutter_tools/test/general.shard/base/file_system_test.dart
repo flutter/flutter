@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -15,12 +13,11 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('fsUtils', () {
-    MemoryFileSystem fs;
-    FileSystemUtils fsUtils;
+    late MemoryFileSystem fs;
+    late FileSystemUtils fsUtils;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -28,16 +25,6 @@ void main() {
         fileSystem: fs,
         platform: FakePlatform(),
       );
-    });
-
-    testWithoutContext('ensureDirectoryExists recursively creates a directory if it does not exist', () async {
-      fsUtils.ensureDirectoryExists('foo/bar/baz.flx');
-      expect(fs.isDirectorySync('foo/bar'), true);
-    });
-
-    testWithoutContext('ensureDirectoryExists throws tool exit on failure to create', () async {
-      fs.file('foo').createSync();
-      expect(() => fsUtils.ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
     });
 
     testWithoutContext('getUniqueFile creates a unique file name', () async {
@@ -77,11 +64,7 @@ void main() {
       const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
 
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: sourceMemoryFs,
-        platform: FakePlatform(),
-      );
-      fsUtils.copyDirectorySync(sourceDirectory, targetDirectory);
+      copyDirectory(sourceDirectory, targetDirectory);
 
       expect(targetDirectory.existsSync(), true);
       targetMemoryFs.currentDirectory = targetPath;
@@ -97,10 +80,6 @@ void main() {
 
     testWithoutContext('Skip files if shouldCopyFile returns false', () {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-      );
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
       fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
@@ -109,7 +88,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
 
       final Directory destination = fileSystem.directory('/destination');
-      fsUtils.copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
+      copyDirectory(origin, destination, shouldCopyFile: (File origin, File dest) {
         return origin.basename == 'b.txt';
       });
 
@@ -147,15 +126,15 @@ void main() {
   });
 
   group('LocalFileSystem', () {
-    FakeProcessSignal fakeSignal;
-    ProcessSignal signalUnderTest;
+    late FakeProcessSignal fakeSignal;
+    late ProcessSignal signalUnderTest;
 
     setUp(() {
       fakeSignal = FakeProcessSignal();
       signalUnderTest = ProcessSignal(fakeSignal);
     });
 
-    testUsingContext('deletes system temp entry on a fatal signal', () async {
+    testWithoutContext('deletes system temp entry on a fatal signal', () async {
       final Completer<void> completer = Completer<void>();
       final Signals signals = Signals.test();
       final LocalFileSystem localFileSystem = LocalFileSystem.test(

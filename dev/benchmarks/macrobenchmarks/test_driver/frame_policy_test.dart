@@ -16,8 +16,8 @@ Future<void> main() => driver.integrationDriver(
 
     if(benchmarkLiveResult['frame_count'] as int < 10
        || fullyLiveResult['frame_count'] as int < 10) {
-      print('Failure Details:\nNot Enough frames collected:'
-            'benchmarkLive ${benchmarkLiveResult['frameCount']},'
+      print('Failure Details:\nNot Enough frames collected: '
+            'benchmarkLive ${benchmarkLiveResult['frameCount']}, '
             '${fullyLiveResult['frameCount']}.');
       exit(1);
     }

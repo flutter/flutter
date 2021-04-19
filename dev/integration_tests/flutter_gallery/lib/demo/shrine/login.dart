@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/shrine/colors.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }

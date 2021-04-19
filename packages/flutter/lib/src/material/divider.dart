@@ -140,7 +140,7 @@ class Divider extends StatelessWidget {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// Divider(
+  /// const Divider(
   ///   color: Colors.deepOrange,
   /// )
   /// ```
@@ -332,7 +332,7 @@ class VerticalDivider extends StatelessWidget {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// Divider(
+  /// const Divider(
   ///   color: Colors.deepOrange,
   /// )
   /// ```

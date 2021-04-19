@@ -36,6 +36,7 @@ class Cocoon {
     @visibleForTesting Client httpClient,
     @visibleForTesting this.fs = const LocalFileSystem(),
     @visibleForTesting this.processRunSync = Process.runSync,
+    @visibleForTesting this.requestRetryLimit = 5,
   }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: fs);
 
   /// Client to make http requests to Cocoon.
@@ -50,6 +51,9 @@ class Cocoon {
   final FileSystem fs;
 
   static final Logger logger = Logger('CocoonClient');
+
+  @visibleForTesting
+  final int requestRetryLimit;
 
   String get commitSha => _commitSha ?? _readCommitSha();
   String _commitSha;
@@ -122,6 +126,7 @@ class Cocoon {
     if (resultFile.existsSync()) {
       resultFile.deleteSync();
     }
+    logger.fine('Writing results: ' + json.encode(updateRequest));
     resultFile.createSync();
     resultFile.writeAsStringSync(json.encode(updateRequest));
   }
@@ -137,6 +142,7 @@ class Cocoon {
       'BuilderName': builderName,
       'NewStatus': result.succeeded ? 'Succeeded' : 'Failed',
     };
+    logger.fine('Update request: $updateRequest');
 
     // Make a copy of result data because we may alter it for validation below.
     updateRequest['ResultData'] = result.data;
@@ -177,7 +183,7 @@ class Cocoon {
     final Response response = await retry(
       () => _httpClient.post(url, body: json.encode(jsonData)),
       retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
-      maxAttempts: 5,
+      maxAttempts: requestRetryLimit,
     );
     return json.decode(response.body) as Map<String, dynamic>;
   }

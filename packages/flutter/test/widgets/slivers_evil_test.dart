@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/material.dart';
 
 class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -33,11 +32,13 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
 }
 
 class TestBehavior extends ScrollBehavior {
+  const TestBehavior();
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFFFFFFFF),
     );
   }
@@ -79,7 +80,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: ScrollConfiguration(
-            behavior: TestBehavior(),
+            behavior: const TestBehavior(),
             child: Scrollbar(
               child: Scrollable(
                 axisDirection: AxisDirection.down,

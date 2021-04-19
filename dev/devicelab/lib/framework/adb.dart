@@ -52,7 +52,7 @@ String _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, androidArm64 ,ios, fuchsia, fake }
+enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -63,6 +63,8 @@ abstract class DeviceDiscovery {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
         return AndroidDeviceDiscovery();
+      case DeviceOperatingSystem.androidArm:
+        return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm);
       case DeviceOperatingSystem.androidArm64:
         return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm64);
       case DeviceOperatingSystem.ios:
@@ -70,8 +72,7 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
       case DeviceOperatingSystem.fake:
-        print('Looking for fake devices!'
-              'You should not see this in release builds.');
+        print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
       default:
         throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
@@ -158,6 +159,7 @@ abstract class Device {
 }
 
 enum _AndroidCPU {
+  arm,
   arm64,
 }
 
@@ -199,6 +201,8 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     switch (cpu) {
       case _AndroidCPU.arm64:
         return device.isArm64();
+      case _AndroidCPU.arm:
+        return device.isArm();
     }
     return true;
   }
@@ -322,12 +326,12 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
  FuchsiaDevice _workingDevice;
 
- String get _devFinder {
-    final String devFinder = path.join(getArtifactPath(), 'fuchsia', 'tools', 'device-finder');
-    if (!File(devFinder).existsSync()) {
-      throw FileSystemException("Couldn't find device-finder at location $devFinder");
+ String get _ffx {
+    final String ffx = path.join(getArtifactPath(), 'fuchsia', 'tools','x64', 'ffx');
+    if (!File(ffx).existsSync()) {
+      throw FileSystemException("Couldn't find ffx at location $ffx");
     }
-    return devFinder;
+    return ffx;
  }
 
   @override
@@ -373,7 +377,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> output = (await eval(_devFinder, <String>['list', '-full']))
+    final List<String> output = (await eval(_ffx, <String>['target', 'list', '--format', 's']))
       .trim()
       .split('\n');
 
@@ -392,11 +396,12 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
     for (final String deviceId in await discoverDevices()) {
       try {
         final int resolveResult = await exec(
-          _devFinder,
+          _ffx,
           <String>[
-            'resolve',
-            '-device-limit',
-            '1',
+            'target',
+            'list',
+            '--format',
+            'a',
             deviceId,
           ]
         );
@@ -486,6 +491,11 @@ class AndroidDevice extends Device {
     return cpuInfo.contains('arm64');
   }
 
+  Future<bool> isArm() async {
+    final String cpuInfo = await shellEval('getprop', const <String>['ro.product.cpu.abi']);
+    return cpuInfo.contains('armeabi');
+  }
+
   Future<void> _updateDeviceInfo() async {
     String info;
     try {
@@ -571,7 +581,9 @@ class AndroidDevice extends Device {
           .transform<String>(const LineSplitter())
           .listen((String line) {
             print('adb logcat: $line');
-            stream.sink.add(line);
+            if (!stream.isClosed) {
+              stream.sink.add(line);
+            }
           }, onDone: () { stdoutDone.complete(); });
         process.stderr
           .transform<String>(utf8.decoder)
@@ -793,7 +805,7 @@ class IosDevice extends Device {
 
   @override
   Future<void> reboot() {
-    return Process.run('idevicesyslog', <String>['reboot', '-u', deviceId]);
+    return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
 }
 

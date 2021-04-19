@@ -8,12 +8,10 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:meta/meta.dart';
@@ -45,11 +43,9 @@ void main () {
       BufferLogger testLogger;
       MockIosProject mockIosProject;
       File xcodeProjectInfoFile;
-      MockXcode mockXcode;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
-        mockXcode = MockXcode();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
         testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
@@ -60,7 +56,6 @@ void main () {
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
           testLogger,
-          mockXcode,
           testUsage
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -80,7 +75,6 @@ void main () {
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
           testLogger,
-          mockXcode,
           testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -101,7 +95,6 @@ shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
           testLogger,
-          mockXcode,
           testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -129,7 +122,6 @@ keep this 2
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
           testLogger,
-          mockXcode,
           testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -147,13 +139,10 @@ keep this 2
         xcodeProjectInfoFile.writeAsStringSync('''
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
           testLogger,
-          mockXcode,
           testUsage,
         );
 
@@ -167,13 +156,10 @@ keep this 2
         xcodeProjectInfoFile.writeAsStringSync('''
       9705A1C71CF904A300538480 /* Flutter.framework in Embed Frameworks */,
 ''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
           testLogger,
-          mockXcode,
           testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
@@ -186,68 +172,10 @@ keep this 2
         xcodeProjectInfoFile.writeAsStringSync('''
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
-        when(mockXcode.isInstalled).thenReturn(false);
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
           testLogger,
-          mockXcode,
-          testUsage,
-        );
-        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(testUsage.events, contains(
-          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-        ));
-      });
-
-      testWithoutContext('migration fails on Xcode < 11.4', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
-        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
-''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 3, 0));
-
-        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
-          testLogger,
-          mockXcode,
-          testUsage,
-        );
-        expect(iosProjectMigration.migrate(), isTrue);
-        expect(testUsage.events, isEmpty);
-        expect(testLogger.errorText, isEmpty);
-      });
-
-      testWithoutContext('migration fails on Xcode 11.4', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
-        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
-''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
-
-        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
-          testLogger,
-          mockXcode,
-          testUsage,
-        );
-        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(testUsage.events, contains(
-          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-        ));
-      });
-
-      testWithoutContext('migration fails on Xcode 12,0', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
-        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
-''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(12, 0, 0));
-
-        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
-          testLogger,
-          mockXcode,
           testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
@@ -565,7 +493,6 @@ keep this 3
 }
 
 class MockIosProject extends Mock implements IosProject {}
-class MockXcode extends Mock implements Xcode {}
 
 class FakeIOSMigrator extends ProjectMigrator {
   FakeIOSMigrator({@required this.succeeds})

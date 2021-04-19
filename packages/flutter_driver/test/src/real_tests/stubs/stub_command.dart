@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/flutter_driver.dart'; // ignore: import_of_legacy_library_into_null_safe
+import 'package:flutter_driver/flutter_driver.dart';
 
 class StubNestedCommand extends CommandWithTarget {
   StubNestedCommand(SerializableFinder finder, this.times, {Duration? timeout})

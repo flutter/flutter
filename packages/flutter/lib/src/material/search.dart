@@ -69,7 +69,7 @@ Future<T?> showSearch<T>({
 /// The search page always shows an [AppBar] at the top where users can
 /// enter their search queries. The buttons shown before and after the search
 /// query text field can be customized via [SearchDelegate.buildLeading]
-/// and [SearchDelegate.buildActions]. Additonally, a widget can be placed
+/// and [SearchDelegate.buildActions]. Additionally, a widget can be placed
 /// across the bottom of the [AppBar] via [SearchDelegate.buildBottom].
 ///
 /// The body below the [AppBar] can either show suggested queries (returned by
@@ -101,7 +101,7 @@ abstract class SearchDelegate<T> {
   ///
   /// {@tool snippet}
   /// ```dart
-  /// class CustomSearchHintDelegate extends SearchDelegate {
+  /// class CustomSearchHintDelegate extends SearchDelegate<String> {
   ///   CustomSearchHintDelegate({
   ///     required String hintText,
   ///   }) : super(
@@ -111,22 +111,23 @@ abstract class SearchDelegate<T> {
   ///   );
   ///
   ///   @override
-  ///   Widget buildLeading(BuildContext context) => Text("leading");
+  ///   Widget buildLeading(BuildContext context) => const Text('leading');
   ///
+  ///   @override
   ///   PreferredSizeWidget buildBottom(BuildContext context) {
-  ///     return PreferredSize(
+  ///     return const PreferredSize(
   ///        preferredSize: Size.fromHeight(56.0),
-  ///        child: Text("bottom"));
+  ///        child: Text('bottom'));
   ///   }
   ///
   ///   @override
-  ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
+  ///   Widget buildSuggestions(BuildContext context) => const Text('suggestions');
   ///
   ///   @override
-  ///   Widget buildResults(BuildContext context) => Text('results');
+  ///   Widget buildResults(BuildContext context) => const Text('results');
   ///
   ///   @override
-  ///   List<Widget> buildActions(BuildContext context) => [];
+  ///   List<Widget> buildActions(BuildContext context) => <Widget>[];
   /// }
   /// ```
   /// {@end-tool}
@@ -179,7 +180,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.leading], the intended use for the return value of this method.
-  Widget buildLeading(BuildContext context);
+  Widget? buildLeading(BuildContext context);
 
   /// Widgets to display after the search query in the [AppBar].
   ///
@@ -192,7 +193,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.actions], the intended use for the return value of this method.
-  List<Widget> buildActions(BuildContext context);
+  List<Widget>? buildActions(BuildContext context);
 
   /// Widget to display across the bottom of the [AppBar].
   ///
@@ -582,7 +583,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             duration: const Duration(milliseconds: 300),
             child: body,
           ),
-        )
+        ),
       ),
     );
   }
