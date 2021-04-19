@@ -720,7 +720,7 @@ class ContainerLayer extends Layer {
   // `PipelineOwner` or other singleton level is because this method can be used
   // both to render the whole layer tree (e.g. a normal application frame) and
   // to render a subtree (e.g. `OffsetLayer.toImage`).
-  ui.Scene buildScene(ui.SceneBuilder builder) {
+  ui.Scene buildScene(ui.SceneBuilder builder, {int? frameKey}) {
     List<PictureLayer>? temporaryLayers;
     assert(() {
       if (debugCheckElevationsEnabled) {
@@ -734,7 +734,7 @@ class ContainerLayer extends Layer {
     // because `addToScene` calls children's `addToScene` methods, which may
     // mark this layer as dirty.
     _needsAddToScene = false;
-    final ui.Scene scene = builder.build();
+    final ui.Scene scene = builder.build(frameKey: frameKey);
     assert(() {
       // We should remove any layers that got added to highlight the incorrect
       // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers

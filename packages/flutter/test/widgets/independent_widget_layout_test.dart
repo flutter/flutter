@@ -41,7 +41,7 @@ class OffscreenRenderView extends RenderView {
   );
 
   @override
-  void compositeFrame() {
+  void compositeFrame({int? frameKey}) {
     // Don't draw to ui.window
   }
 }

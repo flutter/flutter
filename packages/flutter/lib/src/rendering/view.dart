@@ -210,11 +210,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Uploads the composited layer tree to the engine.
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
-  void compositeFrame() {
+  void compositeFrame({int? frameKey}) {
     Timeline.startSync('Compositing', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
-      final ui.Scene scene = layer!.buildScene(builder);
+      final ui.Scene scene = layer!.buildScene(builder, frameKey: frameKey);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
       _window.render(scene);

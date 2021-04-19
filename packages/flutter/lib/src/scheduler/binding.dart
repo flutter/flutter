@@ -202,12 +202,8 @@ mixin SchedulerBinding on BindingBase {
     _instance = this;
 
     if (!kReleaseMode) {
-      int frameNumber = 0;
       addTimingsCallback((List<FrameTiming> timings) {
-        for (final FrameTiming frameTiming in timings) {
-          frameNumber += 1;
-          _profileFramePostEvent(frameNumber, frameTiming);
-        }
+        timings.forEach(_profileFramePostEvent);
       });
     }
   }
@@ -957,6 +953,15 @@ mixin SchedulerBinding on BindingBase {
     return _lastRawTimeStamp;
   }
 
+  /// The current frame number.
+  ///
+  /// In release mode, this always return `-1`.
+  int get debugFrameNumber {
+    if (!kReleaseMode) {
+      return _debugFrameNumber;
+    }
+    return -1;
+  }
   int _debugFrameNumber = 0;
   String? _debugBanner;
 
@@ -1106,9 +1111,9 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
-  void _profileFramePostEvent(int frameNumber, FrameTiming frameTiming) {
+  void _profileFramePostEvent(FrameTiming frameTiming) {
     postEvent('Flutter.Frame', <String, dynamic>{
-      'number': frameNumber,
+      'number': frameTiming.frameKey,
       'startTime': frameTiming.timestampInMicroseconds(FramePhase.buildStart),
       'elapsed': frameTiming.totalSpan.inMicroseconds,
       'build': frameTiming.buildDuration.inMicroseconds,

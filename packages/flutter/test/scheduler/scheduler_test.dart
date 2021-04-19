@@ -143,6 +143,7 @@ void main() {
       buildFinish: 15000,
       rasterStart: 16000,
       rasterFinish: 20000,
+      frameKey: -1,
     )]);
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
