@@ -12,7 +12,6 @@
     "services": [
       "fuchsia.logger.LogSink",
       "fuchsia.sys.Environment",
-      "fuchsia.scenic.allocation.Allocator",
       "fuchsia.sysmem.Allocator",
       "fuchsia.tracing.provider.Registry",
       "fuchsia.ui.input.ImeService",
