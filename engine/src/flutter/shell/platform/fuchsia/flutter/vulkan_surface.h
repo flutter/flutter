@@ -71,10 +71,10 @@ class VulkanSurface final : public SurfaceProducerSurface {
  public:
   VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
                 fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
-                fuchsia::scenic::allocation::AllocatorPtr& scenic_allocator,
                 sk_sp<GrDirectContext> context,
                 scenic::Session* session,
-                const SkISize& size);
+                const SkISize& size,
+                uint32_t buffer_id);
 
   ~VulkanSurface() override;
 
@@ -144,12 +144,10 @@ class VulkanSurface final : public SurfaceProducerSurface {
                      zx_status_t status,
                      const zx_packet_signal_t* signal);
 
-  bool AllocateDeviceMemory(
-      fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
-      fuchsia::scenic::allocation::AllocatorPtr& scenic_allocator,
-      fuchsia::scenic::allocation::BufferCollectionExportToken export_token,
-      sk_sp<GrDirectContext> context,
-      const SkISize& size);
+  bool AllocateDeviceMemory(fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+                            sk_sp<GrDirectContext> context,
+                            const SkISize& size,
+                            uint32_t buffer_id);
 
   bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
                          const SkISize& size,
@@ -163,9 +161,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
 
   bool CreateFences();
 
-  void PushSessionImageSetupOps(
-      scenic::Session* session,
-      fuchsia::scenic::allocation::BufferCollectionImportToken import_token);
+  void PushSessionImageSetupOps(scenic::Session* session);
 
   void Reset();
 
@@ -179,6 +175,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
   VkMemoryAllocateInfo vk_memory_info_;
   vulkan::VulkanHandle<VkFence> command_buffer_fence_;
   sk_sp<SkSurface> sk_surface_;
+  uint32_t buffer_id_ = 0;
   uint32_t image_id_ = 0;
   vulkan::VulkanHandle<VkBufferCollectionFUCHSIA> collection_;
   zx::event acquire_event_;

@@ -5,7 +5,6 @@
   "facets": {
     "fuchsia.test": {
       "system-services": [
-        "fuchsia.scenic.allocation.Allocator",
         "fuchsia.sysmem.Allocator",
         "fuchsia.vulkan.loader.Loader"
       ]
@@ -26,7 +25,6 @@
       "fuchsia.logger.LogSink",
       "fuchsia.process.Launcher",
       "fuchsia.settings.Intl",
-      "fuchsia.scenic.allocation.Allocator",
       "fuchsia.sysmem.Allocator",
       "fuchsia.tracing.provider.Registry",
       "fuchsia.ui.input3.Keyboard",

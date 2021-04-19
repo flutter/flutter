@@ -8,7 +8,6 @@
   "facets": {
     "fuchsia.test": {
       "system-services": [
-        "fuchsia.scenic.allocation.Allocator",
         "fuchsia.sysmem.Allocator",
         "fuchsia.ui.scenic.Scenic",
         "fuchsia.vulkan.loader.Loader"
@@ -28,7 +27,6 @@
       "fuchsia.process.Launcher",
       "fuchsia.vulkan.loader.Loader",
       "fuchsia.logger.LogSink",
-      "fuchsia.scenic.allocation.Allocator",
       "fuchsia.sysmem.Allocator",
       "fuchsia.ui.scenic.Scenic"
     ]
