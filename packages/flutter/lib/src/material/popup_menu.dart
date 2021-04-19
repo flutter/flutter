@@ -732,7 +732,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.shape,
     this.color,
     required this.capturedThemes,
-    this.menuGlobalKey,
+    this.menuKey,
     this.positionCallback,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
@@ -745,7 +745,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final ShapeBorder? shape;
   final Color? color;
   final CapturedThemes capturedThemes;
-  final GlobalKey? menuGlobalKey;
+  final Key? menuKey;
   final PopupMenuButtonPositionCallback? positionCallback;
 
   @override
@@ -783,7 +783,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
 
     return StatefulBuilder(
-      key: menuGlobalKey,
+      key: menuKey,
       builder: (BuildContext context, StateSetter setState) {
         final MediaQueryData mediaQuery = MediaQuery.of(context);
         return CustomSingleChildLayout(
@@ -807,7 +807,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// `items` should be non-null and not empty.
 ///
 /// Prefer to use `positionCallback` to obtain position instead of 'position'
-/// when `positionCallback` is non-null.
+/// when `positionCallback` is non-null. In this way, the position of the menu
+/// can be recalculated through this callback during the rebuild phase of the menu.
 ///
 /// If `initialValue` is specified then the first item with a matching value
 /// will be highlighted and the value of `position` gives the rectangle whose
@@ -870,7 +871,7 @@ Future<T?> showMenu<T>({
   ShapeBorder? shape,
   Color? color,
   bool useRootNavigator = false,
-  GlobalKey? menuGlobalKey,
+  Key? menuKey,
   PopupMenuButtonPositionCallback? positionCallback,
 }) {
   assert(context != null);
@@ -901,7 +902,7 @@ Future<T?> showMenu<T>({
     shape: shape,
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
-    menuGlobalKey: menuGlobalKey,
+    menuKey: menuKey,
     positionCallback: positionCallback,
   ));
 }
@@ -1166,7 +1167,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         position: _buttonPosition!,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
-        menuGlobalKey: _menuGlobalKey,
+        menuKey: _menuGlobalKey,
         positionCallback: _getButtonPosition,
       )
       .then<void>((T? newValue) {
