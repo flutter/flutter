@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -25,6 +24,7 @@ import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
 import 'src/commands/config.dart';
 import 'src/commands/create.dart';
+import 'src/commands/custom_devices.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
