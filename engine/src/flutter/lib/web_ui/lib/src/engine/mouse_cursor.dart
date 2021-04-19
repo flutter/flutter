@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'package:ui/src/engine.dart' show domRenderer, DomRenderer;
 
 /// Provides mouse cursor bindings, such as the `flutter/mousecursor` channel.
 class MouseCursor {
