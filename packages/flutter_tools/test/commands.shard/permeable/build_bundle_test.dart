@@ -43,12 +43,6 @@ void main() {
         applicationKernelFilePath: anyNamed('applicationKernelFilePath'),
         depfilePath: anyNamed('depfilePath'),
         assetDirPath: anyNamed('assetDirPath'),
-        trackWidgetCreation: anyNamed('trackWidgetCreation'),
-        extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
-        extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
-        fileSystemRoots: anyNamed('fileSystemRoots'),
-        fileSystemScheme: anyNamed('fileSystemScheme'),
-        treeShakeIcons: anyNamed('treeShakeIcons'),
       ),
     ).thenAnswer((_) => Future<void>.value());
   });

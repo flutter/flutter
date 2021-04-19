@@ -526,16 +526,11 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
   Future<void> build({
     TargetPlatform platform,
     BuildInfo buildInfo,
+    FlutterProject project,
     String mainPath,
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
     String depfilePath,
     String assetDirPath,
-    bool trackWidgetCreation = false,
-    List<String> extraFrontEndOptions = const <String>[],
-    List<String> extraGenSnapshotOptions = const <String>[],
-    List<String> fileSystemRoots,
-    String fileSystemScheme,
-    bool treeShakeIcons
   }) async {}
 }

@@ -16,17 +16,20 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/test_build_system.dart';
 
-// Tests for the temporary flutter assemble/bundle shim.
+// Tests for BundleBuilder.
 void main() {
   testUsingContext('Copies assets to expected directory after building', () async {
-    await buildWithAssemble(
-      buildMode: BuildMode.debug,
-      flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+    await BundleBuilder().build(
+      platform: TargetPlatform.ios,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false
+      ),
+      project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       mainPath: globals.fs.path.join('lib', 'main.dart'),
-      outputDir: 'example',
-      targetPlatform: TargetPlatform.ios,
+      assetDirPath: 'example',
       depfilePath: 'example.d',
-      treeShakeIcons: false,
     );
     expect(globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
@@ -43,14 +46,17 @@ void main() {
   });
 
   testUsingContext('Handles build system failure', () {
-    expect(() => buildWithAssemble(
-      buildMode: BuildMode.debug,
-      flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+    expect(() => BundleBuilder().build(
+      platform: TargetPlatform.ios,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false
+      ),
+      project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       mainPath: 'lib/main.dart',
-      outputDir: 'example',
-      targetPlatform: TargetPlatform.linux_x64,
+      assetDirPath: 'example',
       depfilePath: 'example.d',
-      treeShakeIcons: false,
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
