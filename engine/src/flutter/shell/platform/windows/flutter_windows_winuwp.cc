@@ -13,7 +13,11 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <vector>
+
+#include <winrt/Windows.ApplicationModel.Activation.h>
+#include "winrt/Windows.ApplicationModel.Core.h"
 
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
@@ -25,9 +29,21 @@ static flutter::FlutterWindowsEngine* EngineFromHandle(
   return reinterpret_cast<flutter::FlutterWindowsEngine*>(ref);
 }
 
+// Returns a list of discrete arguments splitting the input using a ",".
+std::vector<std::string> SplitCommaSeparatedString(const std::string& s) {
+  std::vector<std::string> components;
+  std::istringstream stream(s);
+  std::string component;
+  while (getline(stream, component, ',')) {
+    components.push_back(component);
+  }
+  return (components);
+}
+
 FlutterDesktopViewControllerRef
 FlutterDesktopViewControllerCreateFromCoreWindow(
     ABI::Windows::UI::Core::CoreWindow* window,
+    ABI::Windows::ApplicationModel::Activation::IActivatedEventArgs* args,
     FlutterDesktopEngineRef engine) {
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
       std::make_unique<flutter::FlutterWindowWinUWP>(window);
@@ -39,6 +55,28 @@ FlutterDesktopViewControllerCreateFromCoreWindow(
   state->view->SetEngine(
       std::unique_ptr<flutter::FlutterWindowsEngine>(EngineFromHandle(engine)));
   state->view->CreateRenderSurface();
+
+  winrt::Windows::ApplicationModel::Activation::IActivatedEventArgs
+      arg_interface{nullptr};
+  winrt::copy_from_abi(arg_interface, args);
+
+  std::vector<std::string> engine_switches;
+  winrt::Windows::ApplicationModel::Activation::LaunchActivatedEventArgs launch{
+      nullptr};
+  if (arg_interface.Kind() ==
+      winrt::Windows::ApplicationModel::Activation::ActivationKind::Launch) {
+    launch = arg_interface.as<winrt::Windows::ApplicationModel::Activation::
+                                  LaunchActivatedEventArgs>();
+    if (launch != nullptr) {
+      std::string launchargs = winrt::to_string(launch.Arguments());
+      if (!launchargs.empty()) {
+        engine_switches = SplitCommaSeparatedString(launchargs);
+      }
+    }
+  }
+
+  state->view->GetEngine()->SetSwitches(engine_switches);
+
   if (!state->view->GetEngine()->running()) {
     if (!state->view->GetEngine()->RunWithEntrypoint(nullptr)) {
       return nullptr;
