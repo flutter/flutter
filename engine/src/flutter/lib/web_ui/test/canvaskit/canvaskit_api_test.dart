@@ -1273,7 +1273,7 @@ void _paragraphTests() {
     props.textAlign = canvasKit.TextAlign.Center;
     props.textDirection = canvasKit.TextDirection.RTL;
     props.heightMultiplier = 3;
-    props.textHeightBehavior = ui.TextHeightBehavior().encode();
+    props.textHeightBehavior = 0;
     props.maxLines = 4;
     props.ellipsis = '___';
     props.textStyle = SkTextStyleProperties()

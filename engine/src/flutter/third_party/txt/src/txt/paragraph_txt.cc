@@ -566,14 +566,8 @@ void ParagraphTxt::ComputeStrut(StrutMetrics* strut, SkFont& font) {
               : (paragraph_style_.strut_leading *
                  paragraph_style_.strut_font_size);
 
-      const bool half_leading_enabled =
-          paragraph_style_.strut_has_leading_distribution_override
-              ? paragraph_style_.strut_half_leading
-              : paragraph_style_.text_height_behavior &
-                    TextHeightBehavior::kEvenLeading;
-
       const double available_height =
-          half_leading_enabled ? metrics_height : strut_height;
+          paragraph_style_.strut_half_leading ? metrics_height : strut_height;
 
       strut->ascent =
           (-strut_metrics.fAscent / metrics_height) * available_height;
@@ -1213,11 +1207,6 @@ void ParagraphTxt::UpdateLineMetrics(const SkFontMetrics& metrics,
     const double blob_height = style.has_height_override
                                    ? style.height * style.font_size
                                    : metrics_font_height + metrics.fLeading;
-    const bool half_leading_enabled =
-        style.has_leading_distribution_override
-            ? style.half_leading
-            : paragraph_style_.text_height_behavior &
-                  TextHeightBehavior::kEvenLeading;
 
     // Scale the ascent and descent such that the sum of ascent and
     // descent is `style.height * style.font_size`.
@@ -1266,14 +1255,14 @@ void ParagraphTxt::UpdateLineMetrics(const SkFontMetrics& metrics,
     // a sane, consistent, and reasonable "blob_height" to be specified,
     // though it breaks with what is done by any of the platforms above.
     const bool shouldNormalizeFont =
-        style.has_height_override && !half_leading_enabled;
+        style.has_height_override && !style.half_leading;
     const double font_height =
         shouldNormalizeFont ? style.font_size : metrics_font_height;
 
     // Reserve the outermost vertical space we want to distribute evenly over
     // and under the text ("half-leading").
     double leading;
-    if (half_leading_enabled) {
+    if (style.half_leading) {
       leading = blob_height - font_height;
     } else {
       leading = style.has_height_override ? 0.0 : metrics.fLeading;

@@ -45,9 +45,6 @@ class TextStyle {
   FontStyle font_style = FontStyle::normal;
   TextBaseline text_baseline = TextBaseline::kAlphabetic;
   bool half_leading = false;
-  // whether TextStyle.half_leading should be applied or we should defer to
-  // ParagraphStyle.half_leading.
-  bool has_leading_distribution_override = false;
   // An ordered list of fonts in order of priority. The first font is more
   // highly preferred than the last font.
   std::vector<std::string> font_families;
