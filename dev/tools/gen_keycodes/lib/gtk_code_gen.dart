@@ -64,7 +64,8 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   data->length = $length;
   data->first_logical_key = ${toHex(firstLogical.value, digits: 9)};  // ${firstLogical.constantName}
   physical_keys = g_new(uint64_t, $length);
-  data->physical_keys = physical_keys;''');
+  data->physical_keys = physical_keys;
+  data->is_caps_lock = ${physicalNames.first == 'CapsLock' ? 'true' : 'false'};''');
       for (final String physicalName in physicalNames) {
         final PhysicalKeyEntry entry = physicalData.getEntryByName(physicalName);
         if (entry == null) {
