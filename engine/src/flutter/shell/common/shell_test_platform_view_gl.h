@@ -23,8 +23,10 @@ class ShellTestPlatformViewGL : public ShellTestPlatformView,
                           std::shared_ptr<ShellTestExternalViewEmbedder>
                               shell_test_external_view_embedder);
 
+  // |ShellTestPlatformView|
   virtual ~ShellTestPlatformViewGL() override;
 
+  // |ShellTestPlatformView|
   virtual void SimulateVSync() override;
 
  private:

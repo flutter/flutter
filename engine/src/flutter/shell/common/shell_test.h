@@ -18,6 +18,7 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell_test_external_view_embedder.h"
+#include "flutter/shell/common/shell_test_platform_view.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiters_test.h"
 #include "flutter/testing/elf_loader.h"
@@ -40,7 +41,9 @@ class ShellTest : public FixtureTest {
       bool simulate_vsync = false,
       std::shared_ptr<ShellTestExternalViewEmbedder>
           shell_test_external_view_embedder = nullptr,
-      bool is_gpu_disabled = false);
+      bool is_gpu_disabled = false,
+      ShellTestPlatformView::BackendType rendering_backend =
+          ShellTestPlatformView::BackendType::kDefaultBackend);
   void DestroyShell(std::unique_ptr<Shell> shell);
   void DestroyShell(std::unique_ptr<Shell> shell, TaskRunners task_runners);
   TaskRunners GetTaskRunnersForFixture();

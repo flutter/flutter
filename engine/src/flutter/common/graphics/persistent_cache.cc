@@ -18,6 +18,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/version/version.h"
 #include "rapidjson/document.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
@@ -191,7 +192,31 @@ sk_sp<SkData> ParseBase64(const std::string& input) {
   return data;
 }
 
-std::vector<PersistentCache::SkSLCache> PersistentCache::LoadSkSLs() {
+size_t PersistentCache::PrecompileKnownSkSLs(GrDirectContext* context) const {
+  auto known_sksls = LoadSkSLs();
+  // A trace must be present even if no precompilations have been completed.
+  FML_TRACE_EVENT("flutter", "PersistentCache::PrecompileKnownSkSLs", "count",
+                  known_sksls.size());
+
+  if (context == nullptr) {
+    return 0;
+  }
+
+  size_t precompiled_count = 0;
+  for (const auto& sksl : known_sksls) {
+    TRACE_EVENT0("flutter", "PrecompilingSkSL");
+    if (context->precompileShader(*sksl.first, *sksl.second)) {
+      precompiled_count++;
+    }
+  }
+
+  FML_TRACE_COUNTER("flutter", "PersistentCache::PrecompiledSkSLs",
+                    reinterpret_cast<int64_t>(this),  // Trace Counter ID
+                    "Successful", precompiled_count);
+  return precompiled_count;
+}
+
+std::vector<PersistentCache::SkSLCache> PersistentCache::LoadSkSLs() const {
   TRACE_EVENT0("flutter", "PersistentCache::LoadSkSLs");
   std::vector<PersistentCache::SkSLCache> result;
   fml::FileVisitor visitor = [&result](const fml::UniqueFD& directory,
