@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file for details.
  */
 
-#include <Entity/Entity.h>
+#include "Entity.h"
 
 namespace rl {
 namespace entity {

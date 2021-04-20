@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file for details.
  */
 
-#include <Entity/Color.h>
+#include "Color.h"
 #include <algorithm>
 #include <cmath>
 #include <sstream>

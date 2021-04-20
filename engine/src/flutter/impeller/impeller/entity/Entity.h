@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <Entity/Color.h>
-#include <Geometry/Matrix.h>
-#include <Geometry/Path.h>
-#include <Geometry/Rect.h>
-#include <Image/Image.h>
+#include "Color.h"
+#include "Image.h"
+#include "Matrix.h"
+#include "Path.h"
+#include "Rect.h"
 
 namespace rl {
 namespace entity {
@@ -224,7 +224,7 @@ class Entity : public core::ArchiveSerializable {
  private:
   UpdateCallback _updateCallback;
 
-  RL_DISALLOW_COPY_AND_ASSIGN(Entity);
+  FML_DISALLOW_COPY_AND_ASSIGN(Entity);
 };
 
 }  // namespace entity
