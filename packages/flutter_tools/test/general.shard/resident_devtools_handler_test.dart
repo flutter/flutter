@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/logger.dart';
-
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -22,8 +21,10 @@ import '../src/fake_vm_services.dart';
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
-  pauseEvent:
-      vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
@@ -84,9 +85,7 @@ void main() {
     expect(handler.activeDevToolsServer, null);
   });
 
-  testWithoutContext(
-      'Does not serve devtools if ResidentRunner does not support the service protocol',
-      () async {
+  testWithoutContext('Does not serve devtools if ResidentRunner does not support the service protocol', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher(),
       FakeResidentRunner()..supportsServiceProtocol = false,
@@ -123,12 +122,9 @@ void main() {
     expect(handler.activeDevToolsServer.port, 8181);
   });
 
-  testWithoutContext(
-      'serveAndAnnounceDevTools with attached device does not fail on null vm service',
-      () async {
+  testWithoutContext('serveAndAnnounceDevTools with attached device does not fail on null vm service', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
-      FakeDevtoolsLauncher()
-        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
       BufferLogger.test(),
     );
@@ -141,20 +137,19 @@ void main() {
     );
   });
 
-  testWithoutContext(
-      'serveAndAnnounceDevTools with invokes devtools and vm_service setter',
-      () async {
+  testWithoutContext('serveAndAnnounceDevTools with invokes devtools and vm_service setter', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
-      FakeDevtoolsLauncher()
-        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
       BufferLogger.test(),
     );
-    final FakeVmServiceHost fakeVmServiceHost =
-        FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
-        'streamId': 'Isolate',
-      }),
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        }
+      ),
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -197,16 +192,17 @@ void main() {
 
   testWithoutContext('serveAndAnnounceDevTools with web device', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
-      FakeDevtoolsLauncher()
-        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
       BufferLogger.test(),
     );
-    final FakeVmServiceHost fakeVmServiceHost =
-        FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
-        'streamId': 'Isolate',
-      }),
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        }
+      ),
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: fakeVM.toJson(),
@@ -248,17 +244,13 @@ void main() {
     );
   });
 
-  testWithoutContext(
-      'serveAndAnnounceDevTools with skips calling service extensions when VM service disappears',
-      () async {
+  testWithoutContext('serveAndAnnounceDevTools with skips calling service extensions when VM service disappears', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
-      FakeDevtoolsLauncher()
-        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
       BufferLogger.test(),
     );
-    final FakeVmServiceHost fakeVmServiceHost =
-        FakeVmServiceHost(requests: <VmServiceExpectation>[
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       const FakeVmServiceRequest(
         method: 'streamListen',
         args: <String, Object>{
@@ -286,18 +278,14 @@ void main() {
     );
   });
 
-  testWithoutContext(
-      'serveAndAnnounceDevTools with multiple devices and VM service disappears on one',
-      () async {
+  testWithoutContext('serveAndAnnounceDevTools with multiple devices and VM service disappears on one', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
-      FakeDevtoolsLauncher()
-        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
       BufferLogger.test(),
     );
 
-    final FakeVmServiceHost vmServiceHost =
-        FakeVmServiceHost(requests: <VmServiceExpectation>[
+    final FakeVmServiceHost vmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       const FakeVmServiceRequest(
         method: 'streamListen',
         args: <String, Object>{
@@ -336,8 +324,7 @@ void main() {
       ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
-    final FakeVmServiceHost vmServiceHostThatDisappears =
-        FakeVmServiceHost(requests: <VmServiceExpectation>[
+    final FakeVmServiceHost vmServiceHostThatDisappears = FakeVmServiceHost(requests: <VmServiceExpectation>[
       const FakeVmServiceRequest(
         method: 'streamListen',
         args: <String, Object>{
@@ -359,8 +346,10 @@ void main() {
 
     await handler.serveAndAnnounceDevTools(
       flutterDevices: <FlutterDevice>[
-        FakeFlutterDevice()..vmService = vmServiceHostThatDisappears.vmService,
-        FakeFlutterDevice()..vmService = vmServiceHost.vmService,
+        FakeFlutterDevice()
+          ..vmService = vmServiceHostThatDisappears.vmService,
+        FakeFlutterDevice()
+          ..vmService = vmServiceHost.vmService,
       ],
     );
   });
