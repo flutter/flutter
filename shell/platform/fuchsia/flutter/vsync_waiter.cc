@@ -197,7 +197,7 @@ void VsyncWaiter::FireCallbackNow() {
   }
   fml::TimePoint previous_vsync = next_vsync - vsync_info.presentation_interval;
 
-  FireCallback(previous_vsync, next_vsync);
+  FireCallback(previous_vsync, next_vsync, false);
 }
 
 }  // namespace flutter_runner

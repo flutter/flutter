@@ -21,8 +21,11 @@ static fml::TimePoint SnapToNextTick(fml::TimePoint value,
 
 }  // namespace
 
-VsyncWaiterFallback::VsyncWaiterFallback(TaskRunners task_runners)
-    : VsyncWaiter(std::move(task_runners)), phase_(fml::TimePoint::Now()) {}
+VsyncWaiterFallback::VsyncWaiterFallback(TaskRunners task_runners,
+                                         bool for_testing)
+    : VsyncWaiter(std::move(task_runners)),
+      phase_(fml::TimePoint::Now()),
+      for_testing_(for_testing) {}
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
@@ -36,7 +39,7 @@ void VsyncWaiterFallback::AwaitVSync() {
   auto next =
       SnapToNextTick(fml::TimePoint::Now(), phase_, kSingleFrameInterval);
 
-  FireCallback(next, next + kSingleFrameInterval);
+  FireCallback(next, next + kSingleFrameInterval, !for_testing_);
 }
 
 }  // namespace flutter
