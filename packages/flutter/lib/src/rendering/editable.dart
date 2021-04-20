@@ -2847,74 +2847,97 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     Rect currentRect;
     double ordinal = 0.0;
     int start = 0;
+    int placeholderIndex = 0;
+    int childIndex = 0;
+    RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
-      assert(!info.isPlaceholder);
+      // assert(!info.isPlaceholder);
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
       );
       start += info.text.length;
 
-      final TextDirection initialDirection = currentDirection;
-      final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
-      if (rects.isEmpty) {
-        continue;
-      }
-      Rect rect = rects.first.toRect();
-      currentDirection = rects.first.direction;
-      for (final ui.TextBox textBox in rects.skip(1)) {
-        rect = rect.expandToInclude(textBox.toRect());
-        currentDirection = textBox.direction;
-      }
-      // Any of the text boxes may have had infinite dimensions.
-      // We shouldn't pass infinite dimensions up to the bridges.
-      rect = Rect.fromLTWH(
-        math.max(0.0, rect.left),
-        math.max(0.0, rect.top),
-        math.min(rect.width, constraints.maxWidth),
-        math.min(rect.height, constraints.maxHeight),
-      );
-      // Round the current rectangle to make this API testable and add some
-      // padding so that the accessibility rects do not overlap with the text.
-      currentRect = Rect.fromLTRB(
-        rect.left.floorToDouble() - 4.0,
-        rect.top.floorToDouble() - 4.0,
-        rect.right.ceilToDouble() + 4.0,
-        rect.bottom.ceilToDouble() + 4.0,
-      );
-      final SemanticsConfiguration configuration = SemanticsConfiguration()
-        ..sortKey = OrdinalSortKey(ordinal++)
-        ..textDirection = initialDirection
-        ..label = info.semanticsLabel ?? info.text;
-      final GestureRecognizer? recognizer = info.recognizer;
-      if (recognizer != null) {
-        if (recognizer is TapGestureRecognizer) {
-          if (recognizer.onTap != null) {
-            configuration.onTap = recognizer.onTap;
-            configuration.isLink = true;
-          }
-        } else if (recognizer is DoubleTapGestureRecognizer) {
-          if (recognizer.onDoubleTap != null) {
-            configuration.onTap = recognizer.onDoubleTap;
-            configuration.isLink = true;
-          }
-        } else if (recognizer is LongPressGestureRecognizer) {
-          if (recognizer.onLongPress != null) {
-            configuration.onLongPress = recognizer.onLongPress;
-          }
-        } else {
-          assert(false, '${recognizer.runtimeType} is not supported.');
+      if (info.isPlaceholder) {
+        // A placeholder span may have 0 to multiple semantics nodes, we need
+        // to annotate all of the semantics nodes belong to this span.
+        while (children.length > childIndex &&
+               children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+          final SemanticsNode childNode = children.elementAt(childIndex);
+          final TextParentData parentData = child!.parentData! as TextParentData;
+          childNode.rect = Rect.fromLTWH(
+            childNode.rect.left,
+            childNode.rect.top,
+            childNode.rect.width * parentData.scale!,
+            childNode.rect.height * parentData.scale!,
+          );
+          newChildren.add(childNode);
+          childIndex += 1;
         }
+        child = childAfter(child!);
+        placeholderIndex += 1;
+      } else {
+        final TextDirection initialDirection = currentDirection;
+        final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
+        if (rects.isEmpty) {
+          continue;
+        }
+        Rect rect = rects.first.toRect();
+        currentDirection = rects.first.direction;
+        for (final ui.TextBox textBox in rects.skip(1)) {
+          rect = rect.expandToInclude(textBox.toRect());
+          currentDirection = textBox.direction;
+        }
+        // Any of the text boxes may have had infinite dimensions.
+        // We shouldn't pass infinite dimensions up to the bridges.
+        rect = Rect.fromLTWH(
+          math.max(0.0, rect.left),
+          math.max(0.0, rect.top),
+          math.min(rect.width, constraints.maxWidth),
+          math.min(rect.height, constraints.maxHeight),
+        );
+        // Round the current rectangle to make this API testable and add some
+        // padding so that the accessibility rects do not overlap with the text.
+        currentRect = Rect.fromLTRB(
+          rect.left.floorToDouble() - 4.0,
+          rect.top.floorToDouble() - 4.0,
+          rect.right.ceilToDouble() + 4.0,
+          rect.bottom.ceilToDouble() + 4.0,
+        );
+        final SemanticsConfiguration configuration = SemanticsConfiguration()
+          ..sortKey = OrdinalSortKey(ordinal++)
+          ..textDirection = initialDirection
+          ..label = info.semanticsLabel ?? info.text;
+        final GestureRecognizer? recognizer = info.recognizer;
+        if (recognizer != null) {
+          if (recognizer is TapGestureRecognizer) {
+            if (recognizer.onTap != null) {
+              configuration.onTap = recognizer.onTap;
+              configuration.isLink = true;
+            }
+          } else if (recognizer is DoubleTapGestureRecognizer) {
+            if (recognizer.onDoubleTap != null) {
+              configuration.onTap = recognizer.onDoubleTap;
+              configuration.isLink = true;
+            }
+          } else if (recognizer is LongPressGestureRecognizer) {
+            if (recognizer.onLongPress != null) {
+              configuration.onLongPress = recognizer.onLongPress;
+            }
+          } else {
+            assert(false, '${recognizer.runtimeType} is not supported.');
+          }
+        }
+        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
+            ? _cachedChildNodes!.removeFirst()
+            : SemanticsNode();
+        newChild
+          ..updateWith(config: configuration)
+          ..rect = currentRect;
+        newChildCache.addLast(newChild);
+        newChildren.add(newChild);
       }
-      final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
-          ? _cachedChildNodes!.removeFirst()
-          : SemanticsNode();
-      newChild
-        ..updateWith(config: configuration)
-        ..rect = currentRect;
-      newChildCache.addLast(newChild);
-      newChildren.add(newChild);
     }
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
@@ -3213,15 +3236,106 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMinIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics()) {
+      return 0.0;
+    }
+    _computeChildrenWidthWithMinIntrinsics(height);
     _layoutText(maxWidth: double.infinity);
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics()) {
+      return 0.0;
+    }
+    _computeChildrenWidthWithMaxIntrinsics(height);
     _layoutText(maxWidth: double.infinity);
     return _textPainter.maxIntrinsicWidth + cursorWidth;
   }
+
+    // Intrinsics cannot be calculated without a full layout for
+  // alignments that require the baseline (baseline, aboveBaseline,
+  // belowBaseline).
+  bool _canComputeIntrinsics() {
+    for (final PlaceholderSpan span in _placeholderSpans) {
+      switch (span.alignment) {
+        case ui.PlaceholderAlignment.baseline:
+        case ui.PlaceholderAlignment.aboveBaseline:
+        case ui.PlaceholderAlignment.belowBaseline: {
+          assert(
+            RenderObject.debugCheckingIntrinsics,
+            'Intrinsics are not available for PlaceholderAlignment.baseline, '
+            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
+          );
+          return false;
+        }
+        case ui.PlaceholderAlignment.top:
+        case ui.PlaceholderAlignment.middle:
+        case ui.PlaceholderAlignment.bottom: {
+          continue;
+        }
+      }
+    }
+    return true;
+  }
+
+  void _computeChildrenWidthWithMaxIntrinsics(double height) {
+    RenderBox? child = firstChild;
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    int childIndex = 0;
+    while (child != null) {
+      // Height and baseline is irrelevant as all text will be laid
+      // out in a single line. Therefore, using 0.0 as a dummy for the height.
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        size: Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
+      );
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
+  }
+
+  void _computeChildrenWidthWithMinIntrinsics(double height) {
+    RenderBox? child = firstChild;
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    int childIndex = 0;
+    while (child != null) {
+      // Height and baseline is irrelevant; only looking for the widest word or
+      // placeholder. Therefore, using 0.0 as a dummy for height.
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        size: Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
+      );
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
+  }
+
+  void _computeChildrenHeightWithMinIntrinsics(double width) {
+    RenderBox? child = firstChild;
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scaled up when it paints.
+    width = width / textScaleFactor;
+    while (child != null) {
+      final Size size = child.getDryLayout(BoxConstraints(maxWidth: width));
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        size: size,
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
+      );
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
+  }
+
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
   /// This does not require the layout to be updated.

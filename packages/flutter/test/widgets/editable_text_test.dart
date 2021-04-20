@@ -3816,8 +3816,9 @@ void main() {
     focusNode.unfocus();
     await tester.pump();
 
+    expect(renderEditable.text!.children, isNull);
     // Everything's just formated the same way now.
-    expect((renderEditable.text!.children![0] as TextSpan).text, 'text composing text');
+    expect(renderEditable.text!.text, 'text composing text');
     expect(renderEditable.text!.style!.decoration, isNull);
   });
 
@@ -7512,6 +7513,259 @@ void main() {
 
     expect(fadeTransition.toString(), contains('DISPOSED'));
   }, skip: kIsWeb);
+
+  testWidgets('ReplacementTextEditingController simple style change', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text {hi}',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          '{hi}',
+          (String value, TextRange range) {
+            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+          }
+        ),
+      ],
+    );
+    final FocusNode focusNode = FocusNode(debugLabel: 'Test Focus Node');
+
+    await tester.pumpWidget(MaterialApp( // So we can show overlays.
+      home: EditableText(
+        autofocus: true,
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onEditingComplete: () {
+          // This prevents the default focus change behavior on submission.
+        },
+      ),
+    ));
+
+    assert(focusNode.hasFocus);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    // The actual text span is split into 3 parts with the middle part underlined.
+    expect(renderEditable.text!.children!.length, 4);
+    final TextSpan textSpan = renderEditable.text!.children![3] as TextSpan;
+    expect(textSpan.text, 'hi');
+    expect(textSpan.style!.fontSize, 20);
+  });
+
+  testWidgets('ReplacementTextEditingController simple widget replacement', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text [10][20][30]',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          RegExp(r'\[[\w]+\]'),
+          (String value, TextRange range) {
+            double size = double.parse(value.substring(1, value.length - 1));
+            return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
+          }
+        ),
+      ],
+    );
+
+    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+
+    expect(spans.children!.length, 6);
+    WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 10);
+    expect((widgetSpan.child as SizedBox).height, 10);
+
+    widgetSpan = spans.children![4] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 20);
+    expect((widgetSpan.child as SizedBox).height, 20);
+
+    widgetSpan = spans.children![5] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 30);
+    expect((widgetSpan.child as SizedBox).height, 30);
+  });
+
+  testWidgets('ReplacementTextEditingController widget replacement non-consecutive', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text [10]hello[20][30]',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          RegExp(r'\[[\w]+\]'),
+          (String value, TextRange range) {
+            double size = double.parse(value.substring(1, value.length - 1));
+            return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
+          }
+        ),
+      ],
+    );
+
+    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+
+    expect(spans.children!.length, 7);
+    WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 10);
+    expect((widgetSpan.child as SizedBox).height, 10);
+
+    TextSpan textSpan = spans.children![4] as TextSpan;
+    expect(textSpan.text, 'hello');
+
+    widgetSpan = spans.children![5] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 20);
+    expect((widgetSpan.child as SizedBox).height, 20);
+
+    widgetSpan = spans.children![6] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 30);
+    expect((widgetSpan.child as SizedBox).height, 30);
+  });
+
+  testWidgets('ReplacementTextEditingController multiple replacements', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing {hi} text [10]hello[20][30]',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          RegExp(r'\[[\w]+\]'),
+          (String value, TextRange range) {
+            double size = double.parse(value.substring(1, value.length - 1));
+            return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          '{hi}',
+          (String value, TextRange range) {
+            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+          }
+        ),
+      ],
+    );
+
+    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+
+    expect(spans.children!.length, 9);
+    TextSpan textSpan = spans.children![3] as TextSpan;
+    expect(textSpan.text, 'hi');
+    expect(textSpan.style!.fontSize, 20);
+
+    WidgetSpan widgetSpan = spans.children![5] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 10);
+    expect((widgetSpan.child as SizedBox).height, 10);
+
+    textSpan = spans.children![6] as TextSpan;
+    expect(textSpan.text, 'hello');
+
+    widgetSpan = spans.children![7] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 20);
+    expect((widgetSpan.child as SizedBox).height, 20);
+
+    widgetSpan = spans.children![8] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 30);
+    expect((widgetSpan.child as SizedBox).height, 30);
+  });
+
+  testWidgets('ReplacementTextEditingController overlapping replacements', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text [10]hello[20][30]',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          RegExp(r'\[[\w]+\]'),
+          (String value, TextRange range) {
+            double size = double.parse(value.substring(1, value.length - 1));
+            return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          '[10]',
+          (String value, TextRange range) {
+            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          ' [10]hello[20]',
+          (String value, TextRange range) {
+            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+          }
+        ),
+      ],
+    );
+
+    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+
+    expect(spans.children!.length, 7);
+    WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 10);
+    expect((widgetSpan.child as SizedBox).height, 10);
+
+    TextSpan textSpan = spans.children![4] as TextSpan;
+    expect(textSpan.text, 'hello');
+
+    widgetSpan = spans.children![5] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 20);
+    expect((widgetSpan.child as SizedBox).height, 20);
+
+    widgetSpan = spans.children![6] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 30);
+    expect((widgetSpan.child as SizedBox).height, 30);
+  });
+
+  testWidgets('ReplacementTextEditingController overlapping replacements order', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text [10]hello[20][30]',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          ' [10]hello[20]',
+          (String value, TextRange range) {
+            return WidgetSpan(child: SizedBox(width: 15, height: 15), range: range);
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          '[10]',
+          (String value, TextRange range) {
+            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          RegExp(r'\[[\w]+\]'),
+          (String value, TextRange range) {
+            double size = double.parse(value.substring(1, value.length - 1));
+            return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
+          }
+        ),
+      ],
+    );
+
+    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+
+    expect(spans.children!.length, 5);
+    WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 15);
+    expect((widgetSpan.child as SizedBox).height, 15);
+
+    widgetSpan = spans.children![4] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 30);
+    expect((widgetSpan.child as SizedBox).height, 30);
+  });
 }
 
 class UnsettableController extends TextEditingController {

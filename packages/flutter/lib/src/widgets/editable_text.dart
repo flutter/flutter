@@ -351,20 +351,20 @@ class ReplacementTextEditingController extends TextEditingController {
   /// Constructs a controller with optional text that handles the provided list of replacements.
   ReplacementTextEditingController({
     String? text,
-    required this.textEditingInlineSpanReplacements,
+    required this.replacements,
     this.composingRegionPrioritized = false,
-  }) : assert(textEditingInlineSpanReplacements.isNotEmpty), super(text: text);
+  }) : assert(replacements.isNotEmpty), super(text: text);
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
   ReplacementTextEditingController.fromValue(TextEditingValue? value, {
-    required this.textEditingInlineSpanReplacements,
+    required this.replacements,
     this.composingRegionPrioritized = false
-  }) : assert(textEditingInlineSpanReplacements.isNotEmpty), super.fromValue(value);
+  }) : assert(replacements.isNotEmpty), super.fromValue(value);
 
-  final List<TextEditingInlineSpanReplacement> textEditingInlineSpanReplacements;
+  final List<TextEditingInlineSpanReplacement> replacements;
 
   /// If composing regions should be matched against for replacements.
   ///
@@ -378,7 +378,7 @@ class ReplacementTextEditingController extends TextEditingController {
   final bool composingRegionPrioritized;
 
   @override
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
 
     // Keep a mapping of TextRanges to the InlineSpan to replace it with.
@@ -406,7 +406,7 @@ class ReplacementTextEditingController extends TextEditingController {
     }
     // Iterate through TextEditingInlineSpanReplacements, adding non overlapping
     // to the mapping pointing towards the generated InlineSpan.
-    for (final TextEditingInlineSpanReplacement replacement in textEditingInlineSpanReplacements) {
+    for (final TextEditingInlineSpanReplacement replacement in replacements) {
       for (final Match match in replacement.pattern.allMatches(value.text)) {
         _addToMappingWithoutOverlap(replacement.generator, TextRange(start: match.start, end: match.end), rangeSpanMapping, value.text);
       }
