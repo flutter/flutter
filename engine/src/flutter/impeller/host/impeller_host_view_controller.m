@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 #import "impeller_host_view_controller.h"
-#import "Renderer.h"
+
+#import "impeller_renderer.h"
 
 @implementation ImpellerHostViewController {
   MTKView* view_;
-
-  Renderer* renderer_;
+  ImpellerRenderer* renderer_;
 }
 
 - (void)loadView {
@@ -27,10 +27,8 @@
     return;
   }
 
-  renderer_ = [[Renderer alloc] initWithMetalKitView:view_];
-
+  renderer_ = [[ImpellerRenderer alloc] initWithMetalKitView:view_];
   [renderer_ mtkView:view_ drawableSizeWillChange:view_.bounds.size];
-
   view_.delegate = renderer_;
 }
 

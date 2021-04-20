@@ -11,11 +11,11 @@ executable("host") {
   output_name = "impeller"
 
   sources = [
-    "Renderer.h",
-    "Renderer.m",
     "ShaderTypes.h",
     "impeller_host_view_controller.h",
     "impeller_host_view_controller.m",
+    "impeller_renderer.h",
+    "impeller_renderer.m",
     "main.m",
   ]
 
