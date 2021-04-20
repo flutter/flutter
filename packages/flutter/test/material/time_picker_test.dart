@@ -1004,8 +1004,6 @@ void _testsInput() {
       (TimeOfDay? time) { result = time; },
       restorationId: 'restorable_time_picker',
     ))!;
-
-    // Test that dial values are correctly restored.
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
     final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
 
@@ -1014,6 +1012,7 @@ void _testsInput() {
     await tester.restartAndRestore();
     await tester.tapAt(min45);
     await tester.pump(const Duration(milliseconds: 50));
+    final TestRestorationData restorationData = await tester.getRestorationData();
     await tester.restartAndRestore();
     // Setting to PM adds 12 hours (18:45)
     await tester.tap(find.text('PM'));
@@ -1021,6 +1020,11 @@ void _testsInput() {
     await tester.restartAndRestore();
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 18, minute: 45)));
+
+    // Test restoring from before PM was selected (6:45)
+    await tester.restoreFrom(restorationData);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
   });
 
   testWidgets('Time Picker state restoration test - input mode', (WidgetTester tester) async {
@@ -1037,25 +1041,32 @@ void _testsInput() {
 
     await tester.enterText(find.byType(TextField).last, '12');
     await tester.pump(const Duration(milliseconds: 50));
+    final TestRestorationData restorationData = await tester.getRestorationData();
     await tester.restartAndRestore();
 
-    // Setting to PM adds 12 hours (21:45)
+    // Setting to PM adds 12 hours (21:12)
     await tester.tap(find.text('PM'));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.restartAndRestore();
 
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 21, minute: 12)));
+
+    // Restoring from before PM was set (9:12)
+    await tester.restoreFrom(restorationData);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
   });
 
   testWidgets('Time Picker state restoration test - switching modes', (WidgetTester tester) async {
     TimeOfDay? result;
-    await startPicker(
+    final Offset center = (await startPicker(
       tester,
       (TimeOfDay? time) { result = time; },
       restorationId: 'restorable_time_picker',
-    );
+    ))!;
 
+    final TestRestorationData restorationData = await tester.getRestorationData();
     // Switch to input mode from dial mode.
     await tester.tap(find.byIcon(Icons.keyboard));
     await tester.pump(const Duration(milliseconds: 50));
@@ -1067,6 +1078,19 @@ void _testsInput() {
     await tester.pump(const Duration(milliseconds: 50));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
+
+    // Restoring from dial mode.
+    await tester.restoreFrom(restorationData);
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await tester.tapAt(min45);
+    await tester.pump(const Duration(milliseconds: 50));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
   });
 }
 
