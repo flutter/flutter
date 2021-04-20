@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <Core/File.h>
-#include <Core/MessageSerializable.h>
 #include <Geometry/Size.h>
 #include <Image/ImageResult.h>
 
@@ -15,7 +13,7 @@ namespace image {
 
 class ImageSource;
 
-class Image : public core::MessageSerializable {
+class Image {
  public:
   Image();
 
@@ -26,10 +24,6 @@ class Image : public core::MessageSerializable {
   ~Image();
 
   ImageResult decode() const;
-
-  bool serialize(core::Message& message) const override;
-
-  bool deserialize(core::Message& message, core::Namespace* ns) override;
 
   bool isValid() const;
 

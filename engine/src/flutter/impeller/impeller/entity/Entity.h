@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <Core/Archive.h>
-#include <Core/Macros.h>
 #include <Entity/Color.h>
 #include <Geometry/Matrix.h>
 #include <Geometry/Path.h>
