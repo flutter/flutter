@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <Geometry/Size.h>
-#include <Image/ImageResult.h>
+#include "ImageResult.h"
+#include "Size.h"
 
 namespace rl {
 namespace image {
@@ -34,7 +34,7 @@ class ImageEncoder {
 
   void write(const uint8_t* data, size_t size);
 
-  RL_DISALLOW_COPY_AND_ASSIGN(ImageEncoder);
+  FML_DISALLOW_COPY_AND_ASSIGN(ImageEncoder);
 };
 
 }  // namespace image

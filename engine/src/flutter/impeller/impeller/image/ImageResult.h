@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Geometry/Size.h>
+#include "Size.h"
 
 namespace rl {
 namespace image {
@@ -46,7 +46,7 @@ class ImageResult {
   Components _components;
   core::Allocation _allocation;
 
-  RL_DISALLOW_COPY_AND_ASSIGN(ImageResult);
+  FML_DISALLOW_COPY_AND_ASSIGN(ImageResult);
 };
 
 }  // namespace image

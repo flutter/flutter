@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file for details.
  */
 
-#include <Image/ImageEncoder.h>
+#include "ImageEncoder.h"
 #include <stb_image_write.h>
 
 namespace rl {

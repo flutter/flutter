@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file for details.
  */
 
-#include <Image/ImageResult.h>
+#include "ImageResult.h"
 
 namespace rl {
 namespace image {
