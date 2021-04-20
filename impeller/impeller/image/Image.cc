@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file for details.
  */
 
-#include <Image/Image.h>
+#include "Image.h"
 #include <stb_image.h>
 #include "ImageSource.h"
 

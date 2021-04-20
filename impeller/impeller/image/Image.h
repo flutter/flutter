@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <Geometry/Size.h>
-#include <Image/ImageResult.h>
+#include "ImageResult.h"
+#include "Size.h"
 
 namespace rl {
 namespace image {
