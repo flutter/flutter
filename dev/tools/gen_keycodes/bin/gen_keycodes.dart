@@ -210,8 +210,8 @@ Future<void> main(List<String> rawArguments) async {
     exit(0);
   }
 
-  late PhysicalKeyData physicalData;
-  late LogicalKeyData logicalData;
+  PhysicalKeyData physicalData;
+  LogicalKeyData logicalData;
   if (parsedArguments['collect'] as bool) {
     // Physical
     final String baseHidCodes = parsedArguments['chromium-hid-codes'] == null ?
