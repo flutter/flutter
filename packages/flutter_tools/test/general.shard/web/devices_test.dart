@@ -125,7 +125,7 @@ void main() {
   });
 
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     processManager.excludedExecutables = <String>{kLinuxExecutable};
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -256,7 +256,7 @@ void main() {
   });
 
   testWithoutContext('Chrome and Edge version check handles missing registry on Windows', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
     processManager.excludedExecutables.add('reg');
 
     final Platform platform = FakePlatform(
@@ -327,7 +327,7 @@ void main() {
         operatingSystem: 'linux',
         environment: <String, String>{}
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
@@ -340,7 +340,7 @@ void main() {
         operatingSystem: 'macos',
         environment: <String, String>{}
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);

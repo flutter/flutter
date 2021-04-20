@@ -412,6 +412,51 @@ void main() {
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
   });
 
+  test('does not paint the caret when selection is null', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      paintCursorAboveText: true,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      showCursor: showCursor,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 2,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    expect(
+      editable,
+      paints
+        ..paragraph()
+        // Red collapsed cursor is painted, not a selection box.
+        ..rect(color: Colors.red[500]),
+    );
+
+    // Let the RenderEditable paint again. Setting the selection to null should
+    // prevent the caret from being painted.
+    editable.selection = null;
+    // Still paints the paragraph.
+    expect(editable, paints..paragraph());
+    // No longer paints the caret.
+    expect(editable, isNot(paints..rect(color: Colors.red[500])));
+  });
+
   test('selects correct place with offsets', () {
     const String text = 'test\ntest';
     final TextSelectionDelegate delegate = FakeEditableTextState()

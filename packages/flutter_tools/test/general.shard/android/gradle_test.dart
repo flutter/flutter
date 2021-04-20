@@ -634,7 +634,7 @@ flutter:
     setUp(() {
       logger = BufferLogger.test();
       fs = MemoryFileSystem.test();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       androidSdk = FakeAndroidSdk();
       builder = AndroidGradleBuilder(
         logger: logger,

@@ -23,7 +23,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     config = Config.test();
   });
 

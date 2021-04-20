@@ -18,7 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -30,6 +30,7 @@ import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
+import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {

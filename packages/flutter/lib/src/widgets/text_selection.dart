@@ -963,8 +963,8 @@ class TextSelectionGestureDetectorBuilder {
       renderEditable.lastSecondaryTapDownPosition!,
     );
 
-    return renderEditable.selection!.base.offset <= textPosition.offset
-        && renderEditable.selection!.extent.offset >= textPosition.offset;
+    return renderEditable.selection!.start <= textPosition.offset
+        && renderEditable.selection!.end >= textPosition.offset;
   }
 
   /// Whether to show the selection toolbar.

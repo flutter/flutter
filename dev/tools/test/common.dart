@@ -35,7 +35,7 @@ Matcher throwsExceptionWith(String messageSubString) {
   );
 }
 
-class TestStdio implements Stdio {
+class TestStdio extends Stdio {
   TestStdio({
     this.verbose = false,
     List<String> stdin,
@@ -43,35 +43,14 @@ class TestStdio implements Stdio {
     _stdin = stdin ?? <String>[];
   }
 
-  final StringBuffer _error = StringBuffer();
-  String get error => _error.toString();
+  String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
 
-  final StringBuffer _stdout = StringBuffer();
-  String get stdout => _stdout.toString();
+  String get stdout => logs.where((String log) {
+    return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ');
+  }).join('\n');
+
   final bool verbose;
   List<String> _stdin;
-
-  @override
-  void printError(String message) {
-    _error.writeln(message);
-  }
-
-  @override
-  void printStatus(String message) {
-    _stdout.writeln(message);
-  }
-
-  @override
-  void printTrace(String message) {
-    if (verbose) {
-      _stdout.writeln(message);
-    }
-  }
-
-  @override
-  void write(String message) {
-    _stdout.write(message);
-  }
 
   @override
   String readLineSync() {

@@ -3710,7 +3710,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _clipRectLayer = null;
       _paintContents(context, offset);
     }
-    _paintHandleLayers(context, getEndpointsForSelection(selection!));
+    final TextSelection? selection = this.selection;
+    if (selection != null) {
+      _paintHandleLayers(context, getEndpointsForSelection(selection));
+    }
   }
 
   ClipRectLayer? _clipRectLayer;
@@ -4067,9 +4070,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     assert(renderEditable != null);
     final TextSelection? selection = renderEditable.selection;
 
-    // TODO(LongCatIsLooong): skip painting the caret when the selection is
-    // (-1, -1).
-    if (selection == null || !selection.isCollapsed)
+    if (selection == null || !selection.isCollapsed || !selection.isValid)
       return;
 
     final Rect? floatingCursorRect = this.floatingCursorRect;

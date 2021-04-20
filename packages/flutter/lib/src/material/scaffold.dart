@@ -3035,7 +3035,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
-      _appBarMaxHeight = widget.appBar!.preferredSize.height + topPadding;
+      _appBarMaxHeight = AppBar.preferredHeightFor(context, widget.appBar!.preferredSize) + topPadding;
       assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
       _addIfNonNull(
         children,
