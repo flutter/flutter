@@ -8,8 +8,8 @@ import 'package:dev_tools/roll_dev.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import './common.dart';
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
+import './common.dart';
 
 void main() {
   group('rollDev()', () {
@@ -199,7 +199,9 @@ void main() {
       expect(stdio.logs.join('').contains(nextVersion), true);
     });
 
-    test("exits with exception if --skip-tagging is provided but commit isn't already tagged", () {
+    test(
+        "exits with exception if --skip-tagging is provided but commit isn't already tagged",
+        () {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
