@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
-// @dart = 2.8
 
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -25,7 +26,8 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-final Platform _kNoColorTerminalPlatform = FakePlatform(stdoutSupportsAnsi: false);
+final Platform _kNoColorTerminalPlatform =
+    FakePlatform(stdoutSupportsAnsi: false);
 
 void main() {
   String analyzerSeparator;
@@ -70,11 +72,12 @@ void main() {
 
   void _createDotPackages(String projectPath, [bool nullSafe = false]) {
     final StringBuffer flutterRootUri = StringBuffer('file://');
-    final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(Cache.flutterRoot);
+    final String canonicalizedFlutterRootPath =
+        fileSystem.path.canonicalize(Cache.flutterRoot);
     if (platform.isWindows) {
       flutterRootUri
-          ..write('/')
-          ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
+        ..write('/')
+        ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
@@ -104,7 +107,8 @@ void main() {
 }
 ''';
 
-    fileSystem.file(fileSystem.path.join(projectPath, '.dart_tool', 'package_config.json'))
+    fileSystem.file(
+        fileSystem.path.join(projectPath, '.dart_tool', 'package_config.json'))
       ..createSync(recursive: true)
       ..writeAsStringSync(dotPackagesSrc);
   }
@@ -117,7 +121,8 @@ void main() {
     fileSystem = globals.localFileSystem;
     logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
-    final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+    final OperatingSystemUtils operatingSystemUtils =
+        FakeOperatingSystemUtils();
     artifacts = CachedArtifacts(
       cache: FlutterCache(
         fileSystem: fileSystem,
@@ -137,17 +142,20 @@ void main() {
   });
 
   setUp(() {
-    tempDir = fileSystem.systemTempDirectory.createTempSync(
-      'flutter_analyze_once_test_1.',
-    ).absolute;
+    tempDir = fileSystem.systemTempDirectory
+        .createTempSync(
+          'flutter_analyze_once_test_1.',
+        )
+        .absolute;
     projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
     fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync(pubspecYamlSrc);
+      ..createSync(recursive: true)
+      ..writeAsStringSync(pubspecYamlSrc);
     _createDotPackages(projectPath);
-    libMain = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'main.dart'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync(mainDartSrc);
+    libMain =
+        fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(mainDartSrc);
   });
 
   tearDown(() {
@@ -205,9 +213,9 @@ void main() {
       '// onPressed: _incrementCounter,',
     );
     source = source.replaceFirst(
-        '_counter++;',
-        '_counter++; throw "an error message";',
-      );
+      '_counter++;',
+      '_counter++; throw "an error message";',
+    );
     libMain.writeAsStringSync(source);
 
     // Analyze in the current directory - no arguments
@@ -239,7 +247,8 @@ void main() {
   testUsingContext('working directory with local options', () async {
     // Insert an analysis_options.yaml file in the project
     // which will trigger a lint for broken code that was inserted earlier
-    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    final File optionsFile = fileSystem
+        .file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
     try {
       optionsFile.writeAsStringSync('''
   include: package:flutter/analysis_options_user.yaml
@@ -286,18 +295,22 @@ void main() {
   });
 
   testUsingContext('analyze once no duplicate issues', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
+    final Directory tempDir = fileSystem.systemTempDirectory
+        .createTempSync('flutter_analyze_once_test_2.')
+        .absolute;
     _createDotPackages(tempDir.path);
 
     try {
-      final File foo = fileSystem.file(fileSystem.path.join(tempDir.path, 'foo.dart'));
+      final File foo =
+          fileSystem.file(fileSystem.path.join(tempDir.path, 'foo.dart'));
       foo.writeAsStringSync('''
 import 'bar.dart';
 
 void foo() => bar();
 ''');
 
-      final File bar = fileSystem.file(fileSystem.path.join(tempDir.path, 'bar.dart'));
+      final File bar =
+          fileSystem.file(fileSystem.path.join(tempDir.path, 'bar.dart'));
       bar.writeAsStringSync('''
 import 'dart:async'; // unused
 
@@ -307,33 +320,34 @@ void bar() {
 
       // Analyze in the current directory - no arguments
       await runCommand(
-        command: AnalyzeCommand(
-          workingDirectory: tempDir,
-          platform: platform,
-          fileSystem: fileSystem,
-          logger: logger,
-          processManager: processManager,
-          terminal: terminal,
-          artifacts: artifacts,
-        ),
-        arguments: <String>['analyze', '--no-pub'],
-        statusTextContains: <String>[
-          'Analyzing',
-        ],
-        exitMessageContains: '1 issue found.',
-        toolExit: true,
-        exitCode: 1
-      );
+          command: AnalyzeCommand(
+            workingDirectory: tempDir,
+            platform: platform,
+            fileSystem: fileSystem,
+            logger: logger,
+            processManager: processManager,
+            terminal: terminal,
+            artifacts: artifacts,
+          ),
+          arguments: <String>['analyze', '--no-pub'],
+          statusTextContains: <String>[
+            'Analyzing',
+          ],
+          exitMessageContains: '1 issue found.',
+          toolExit: true,
+          exitCode: 1);
     } finally {
       tryToDelete(tempDir);
     }
   });
 
-  testUsingContext('analyze once returns no issues when source is error-free', () async {
+  testUsingContext('analyze once returns no issues when source is error-free',
+      () async {
     const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+    final Directory tempDir = fileSystem.systemTempDirectory
+        .createTempSync('flutter_analyze_once_test_3.');
     _createDotPackages(tempDir.path);
 
     tempDir.childFile('main.dart').writeAsStringSync(contents);
@@ -356,12 +370,14 @@ StringBuffer bar = StringBuffer('baz');
     }
   });
 
-  testUsingContext('analyze once returns no issues for todo comments', () async {
+  testUsingContext('analyze once returns no issues for todo comments',
+      () async {
     const String contents = '''
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
 ''';
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
+    final Directory tempDir = fileSystem.systemTempDirectory
+        .createTempSync('flutter_analyze_once_test_4.');
     _createDotPackages(tempDir.path);
 
     tempDir.childFile('main.dart').writeAsStringSync(contents);
@@ -384,7 +400,9 @@ StringBuffer bar = StringBuffer('baz');
     }
   });
 
-  testUsingContext('analyze once with default options has info issue finally exit code 1.', () async {
+  testUsingContext(
+      'analyze once with default options has info issue finally exit code 1.',
+      () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_analyze_once_default_options_info_issue_exit_code_1.');
     _createDotPackages(tempDir.path);
@@ -419,7 +437,9 @@ int analyze() {}
     }
   });
 
-  testUsingContext('analyze once with no-fatal-infos has info issue finally exit code 0.', () async {
+  testUsingContext(
+      'analyze once with no-fatal-infos has info issue finally exit code 0.',
+      () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_analyze_once_no_fatal_infos_info_issue_exit_code_0.');
     _createDotPackages(tempDir.path);
@@ -454,7 +474,9 @@ int analyze() {}
     }
   });
 
-  testUsingContext('analyze once only fatal-warnings has info issue finally exit code 0.', () async {
+  testUsingContext(
+      'analyze once only fatal-warnings has info issue finally exit code 0.',
+      () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_analyze_once_only_fatal_warnings_info_issue_exit_code_0.');
     _createDotPackages(tempDir.path);
@@ -475,7 +497,12 @@ int analyze() {}
           fileSystem: fileSystem,
           artifacts: artifacts,
         ),
-        arguments: <String>['analyze', '--no-pub', '--fatal-warnings', '--no-fatal-infos'],
+        arguments: <String>[
+          'analyze',
+          '--no-pub',
+          '--fatal-warnings',
+          '--no-fatal-infos'
+        ],
         statusTextContains: <String>[
           'info',
           'missing_return',
@@ -489,7 +516,9 @@ int analyze() {}
     }
   });
 
-  testUsingContext('analyze once only fatal-infos has warning issue finally exit code 1.', () async {
+  testUsingContext(
+      'analyze once only fatal-infos has warning issue finally exit code 1.',
+      () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_analyze_once_only_fatal_infos_warning_issue_exit_code_1.');
     _createDotPackages(tempDir.path);
@@ -498,7 +527,8 @@ int analyze() {}
 int analyze() {}
 ''';
 
-    final File optionsFile = fileSystem.file(fileSystem.path.join(tempDir.path, 'analysis_options.yaml'));
+    final File optionsFile = fileSystem
+        .file(fileSystem.path.join(tempDir.path, 'analysis_options.yaml'));
     optionsFile.writeAsStringSync('''
 analyzer:
   errors:
@@ -517,7 +547,12 @@ analyzer:
           fileSystem: fileSystem,
           artifacts: artifacts,
         ),
-        arguments: <String>['analyze','--no-pub', '--fatal-infos', '--no-fatal-warnings'],
+        arguments: <String>[
+          'analyze',
+          '--no-pub',
+          '--fatal-infos',
+          '--no-fatal-warnings'
+        ],
         statusTextContains: <String>[
           'warning',
           'missing_return',
