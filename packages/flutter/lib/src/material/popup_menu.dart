@@ -732,6 +732,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.shape,
     this.color,
     required this.capturedThemes,
+    this.menuKey,
+    this.positionCallback,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -743,6 +745,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final ShapeBorder? shape;
   final Color? color;
   final CapturedThemes capturedThemes;
+  final Key? menuKey;
+  final PopupMenuButtonPositionCallback? positionCallback;
 
   @override
   Animation<double> createAnimation() {
@@ -778,12 +782,13 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
     final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
 
-    return Builder(
-      builder: (BuildContext context) {
+    return StatefulBuilder(
+      key: menuKey,
+      builder: (BuildContext context, StateSetter setState) {
         final MediaQueryData mediaQuery = MediaQuery.of(context);
         return CustomSingleChildLayout(
           delegate: _PopupMenuRouteLayout(
-            position,
+            positionCallback == null ? position : positionCallback!(),
             itemSizes,
             selectedItemIndex,
             Directionality.of(context),
@@ -800,6 +805,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// Show a popup menu that contains the `items` at `position`.
 ///
 /// `items` should be non-null and not empty.
+///
+/// Prefer to use `positionCallback` to obtain position instead of 'position'
+/// when `positionCallback` is non-null. In this way, the position of the menu
+/// can be recalculated through this callback during the rebuild phase of the menu.
 ///
 /// If `initialValue` is specified then the first item with a matching value
 /// will be highlighted and the value of `position` gives the rectangle whose
@@ -862,6 +871,8 @@ Future<T?> showMenu<T>({
   ShapeBorder? shape,
   Color? color,
   bool useRootNavigator = false,
+  Key? menuKey,
+  PopupMenuButtonPositionCallback? positionCallback,
 }) {
   assert(context != null);
   assert(position != null);
@@ -891,6 +902,8 @@ Future<T?> showMenu<T>({
     shape: shape,
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+    menuKey: menuKey,
+    positionCallback: positionCallback,
   ));
 }
 
@@ -1090,11 +1103,44 @@ class PopupMenuButton<T> extends StatefulWidget {
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
 
+/// Signature for the callback used by [showMenu] to obtain the position of the
+/// [PopupMenuButton].
+///
+/// Used by [showMenu].
+typedef PopupMenuButtonPositionCallback = RelativeRect Function();
+
 /// The [State] for a [PopupMenuButton].
 ///
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+  GlobalKey _menuGlobalKey = GlobalKey();
+  RelativeRect? _buttonPosition;
+
+  RelativeRect _getButtonPosition() => _buttonPosition!;
+
+  RelativeRect _calculateButtonPosition() {
+    final RenderBox button = context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    return RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(widget.offset, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero) + widget.offset, ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+  }
+
+  void _maybeUpdateMenuPosition() {
+    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+      final RelativeRect newPosition = _calculateButtonPosition();
+      if (newPosition != _buttonPosition) {
+        _menuGlobalKey.currentState?.setState(() {});
+        _buttonPosition = newPosition;
+      }
+    });
+  }
+
   /// A method to show a popup menu with the items supplied to
   /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
   ///
@@ -1105,16 +1151,12 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final RenderBox button = context.findRenderObject()! as RenderBox;
-    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(widget.offset, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero) + widget.offset, ancestor: overlay),
-      ),
-      Offset.zero & overlay.size,
-    );
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
+    // It is possible that the fade-out animation of the menu has not finished
+    // yet, and the key needs to be regenerated at this time, otherwise there will
+    // be an exception of duplicate GlobalKey.
+    if (_menuGlobalKey.currentState != null)
+      _menuGlobalKey = GlobalKey();
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
       showMenu<T?>(
@@ -1122,9 +1164,11 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         elevation: widget.elevation ?? popupMenuTheme.elevation,
         items: items,
         initialValue: widget.initialValue,
-        position: position,
+        position: _buttonPosition!,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
+        menuKey: _menuGlobalKey,
+        positionCallback: _getButtonPosition,
       )
       .then<void>((T? newValue) {
         if (!mounted)
@@ -1146,6 +1190,18 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       case NavigationMode.directional:
         return true;
     }
+  }
+
+  @override
+  void didUpdateWidget(PopupMenuButton<T> oldWidget) {
+    _maybeUpdateMenuPosition();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeDependencies() {
+    _maybeUpdateMenuPosition();
+    super.didChangeDependencies();
   }
 
   @override

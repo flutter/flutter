@@ -83,6 +83,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -131,6 +133,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -193,16 +197,16 @@ void main() {
         ),
         false,
       );
-      expect(stdio.stdout.contains(nextVersion), true);
+      expect(stdio.logs.join('').contains(nextVersion), true);
     });
 
-    test(
-        'exits with exception if --skip-tagging is provided but commit isn\'t '
-        'already tagged', () {
+    test("exits with exception if --skip-tagging is provided but commit isn't already tagged", () {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -283,6 +287,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -356,6 +362,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -433,6 +441,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -526,6 +536,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -623,6 +635,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
