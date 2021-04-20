@@ -10,7 +10,6 @@
 /*
 /fontconfig/src/
 !.gitignore
-!expat/
 !fontconfig/
 !libxml/
 !zlib/
