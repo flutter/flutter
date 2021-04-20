@@ -29,11 +29,14 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 /// [additionalContent] may contain additional DevFS entries that will be
 /// included in the final bundle, but not the AssetManifest.json file.
 ///
+/// If [dyRun] is true, no assets are copied.
+///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   Map<String, DevFSContent> additionalContent,
   @required TargetPlatform targetPlatform,
   BuildMode buildMode,
+  bool dryRun = false,
 }) async {
   // Check for an SkSL bundle.
   final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
@@ -98,6 +101,9 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
         final File file = environment.fileSystem.file(
           environment.fileSystem.path.join(outputDirectory.path, entry.key));
         outputs.add(file);
+        if (dryRun) {
+          return;
+        }
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
