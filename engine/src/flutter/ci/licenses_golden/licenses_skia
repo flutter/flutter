@@ -1,4 +1,4 @@
-Signature: 40623d3d0fe8f6f3ac0e379653534873
+Signature: c9095494611fadb2b3b409b5a78eed3d
 
 UNUSED LICENSES:
 
@@ -1217,8 +1217,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests_lo
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus7-CPU-Tegra3-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Ubuntu18-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-ANGLE.json
-FILE: ../../../third_party/skia/infra/bots/recipes/perf_canvaskit.expected/Perf-Debian10-EMCC-GCE-CPU-AVX2-wasm-Release-All-CanvasKit.json
-FILE: ../../../third_party/skia/infra/bots/recipes/perf_canvaskit.expected/pathkit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-Debian10-EMCC-GCE-CPU-AVX2-asmjs-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-Debian10-EMCC-GCE-CPU-AVX2-wasm-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/pathkit_trybot.json
