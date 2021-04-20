@@ -26,7 +26,9 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
     final StringBuffer definitions = StringBuffer();
-    for (final PhysicalKeyEntry entry in physicalData.data) {
+    for (final PhysicalKeyEntry entry in physicalData.data..sort(
+      (PhysicalKeyEntry a, PhysicalKeyEntry b) => a.usbHidCode.compareTo(b.usbHidCode)
+    )) {
       final String firstComment = _wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = _wrapString('See the function '
@@ -123,7 +125,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of USB HID codes to physical keys.
   String get _predefinedHidCodeMap {
     final StringBuffer scanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in physicalData.data) {
+    for (final PhysicalKeyEntry entry in physicalData.data..sort(
+      (PhysicalKeyEntry a, PhysicalKeyEntry b) => a.usbHidCode.compareTo(b.usbHidCode)
+    )) {
       scanCodeMap.writeln('    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
     }
     return scanCodeMap.toString().trimRight();

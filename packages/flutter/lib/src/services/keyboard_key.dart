@@ -3672,6 +3672,11 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey superKey = PhysicalKeyboardKey(0x00000011);
 
+  /// Represents the location of the "Fn" key on a generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey fn = PhysicalKeyboardKey(0x00000012);
+
   /// Represents the location of the "Fn Lock" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
@@ -3713,6 +3718,192 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey displayToggleIntExt = PhysicalKeyboardKey(0x000100b5);
+
+  /// Represents the location of the "Game Button 1" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton1 = PhysicalKeyboardKey(0x0005ff01);
+
+  /// Represents the location of the "Game Button 2" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton2 = PhysicalKeyboardKey(0x0005ff02);
+
+  /// Represents the location of the "Game Button 3" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton3 = PhysicalKeyboardKey(0x0005ff03);
+
+  /// Represents the location of the "Game Button 4" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton4 = PhysicalKeyboardKey(0x0005ff04);
+
+  /// Represents the location of the "Game Button 5" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton5 = PhysicalKeyboardKey(0x0005ff05);
+
+  /// Represents the location of the "Game Button 6" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton6 = PhysicalKeyboardKey(0x0005ff06);
+
+  /// Represents the location of the "Game Button 7" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton7 = PhysicalKeyboardKey(0x0005ff07);
+
+  /// Represents the location of the "Game Button 8" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton8 = PhysicalKeyboardKey(0x0005ff08);
+
+  /// Represents the location of the "Game Button 9" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton9 = PhysicalKeyboardKey(0x0005ff09);
+
+  /// Represents the location of the "Game Button 10" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton10 = PhysicalKeyboardKey(0x0005ff0a);
+
+  /// Represents the location of the "Game Button 11" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton11 = PhysicalKeyboardKey(0x0005ff0b);
+
+  /// Represents the location of the "Game Button 12" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton12 = PhysicalKeyboardKey(0x0005ff0c);
+
+  /// Represents the location of the "Game Button 13" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton13 = PhysicalKeyboardKey(0x0005ff0d);
+
+  /// Represents the location of the "Game Button 14" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton14 = PhysicalKeyboardKey(0x0005ff0e);
+
+  /// Represents the location of the "Game Button 15" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton15 = PhysicalKeyboardKey(0x0005ff0f);
+
+  /// Represents the location of the "Game Button 16" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButton16 = PhysicalKeyboardKey(0x0005ff10);
+
+  /// Represents the location of the "Game Button A" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonA = PhysicalKeyboardKey(0x0005ff11);
+
+  /// Represents the location of the "Game Button B" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonB = PhysicalKeyboardKey(0x0005ff12);
+
+  /// Represents the location of the "Game Button C" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonC = PhysicalKeyboardKey(0x0005ff13);
+
+  /// Represents the location of the "Game Button Left 1" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonLeft1 = PhysicalKeyboardKey(0x0005ff14);
+
+  /// Represents the location of the "Game Button Left 2" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonLeft2 = PhysicalKeyboardKey(0x0005ff15);
+
+  /// Represents the location of the "Game Button Mode" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonMode = PhysicalKeyboardKey(0x0005ff16);
+
+  /// Represents the location of the "Game Button Right 1" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonRight1 = PhysicalKeyboardKey(0x0005ff17);
+
+  /// Represents the location of the "Game Button Right 2" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonRight2 = PhysicalKeyboardKey(0x0005ff18);
+
+  /// Represents the location of the "Game Button Select" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonSelect = PhysicalKeyboardKey(0x0005ff19);
+
+  /// Represents the location of the "Game Button Start" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonStart = PhysicalKeyboardKey(0x0005ff1a);
+
+  /// Represents the location of the "Game Button Thumb Left" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonThumbLeft = PhysicalKeyboardKey(0x0005ff1b);
+
+  /// Represents the location of the "Game Button Thumb Right" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonThumbRight = PhysicalKeyboardKey(0x0005ff1c);
+
+  /// Represents the location of the "Game Button X" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonX = PhysicalKeyboardKey(0x0005ff1d);
+
+  /// Represents the location of the "Game Button Y" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonY = PhysicalKeyboardKey(0x0005ff1e);
+
+  /// Represents the location of the "Game Button Z" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey gameButtonZ = PhysicalKeyboardKey(0x0005ff1f);
 
   /// Represents the location of the "Usb Reserved" key on a generalized
   /// keyboard.
@@ -4806,17 +4997,17 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey launchScreenSaver = PhysicalKeyboardKey(0x000c01b1);
 
-  /// Represents the location of the "Launch Assistant" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey launchAssistant = PhysicalKeyboardKey(0x000c01cb);
-
   /// Represents the location of the "Launch Audio Browser" key on a generalized
   /// keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey launchAudioBrowser = PhysicalKeyboardKey(0x000c01b7);
+
+  /// Represents the location of the "Launch Assistant" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey launchAssistant = PhysicalKeyboardKey(0x000c01cb);
 
   /// Represents the location of the "New Key" key on a generalized keyboard.
   ///
@@ -4929,203 +5120,13 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey showAllWindows = PhysicalKeyboardKey(0x000c029f);
 
-  /// Represents the location of the "Game Button 1" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton1 = PhysicalKeyboardKey(0x0005ff01);
-
-  /// Represents the location of the "Game Button 2" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton2 = PhysicalKeyboardKey(0x0005ff02);
-
-  /// Represents the location of the "Game Button 3" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton3 = PhysicalKeyboardKey(0x0005ff03);
-
-  /// Represents the location of the "Game Button 4" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton4 = PhysicalKeyboardKey(0x0005ff04);
-
-  /// Represents the location of the "Game Button 5" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton5 = PhysicalKeyboardKey(0x0005ff05);
-
-  /// Represents the location of the "Game Button 6" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton6 = PhysicalKeyboardKey(0x0005ff06);
-
-  /// Represents the location of the "Game Button 7" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton7 = PhysicalKeyboardKey(0x0005ff07);
-
-  /// Represents the location of the "Game Button 8" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton8 = PhysicalKeyboardKey(0x0005ff08);
-
-  /// Represents the location of the "Game Button 9" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton9 = PhysicalKeyboardKey(0x0005ff09);
-
-  /// Represents the location of the "Game Button 10" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton10 = PhysicalKeyboardKey(0x0005ff0a);
-
-  /// Represents the location of the "Game Button 11" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton11 = PhysicalKeyboardKey(0x0005ff0b);
-
-  /// Represents the location of the "Game Button 12" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton12 = PhysicalKeyboardKey(0x0005ff0c);
-
-  /// Represents the location of the "Game Button 13" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton13 = PhysicalKeyboardKey(0x0005ff0d);
-
-  /// Represents the location of the "Game Button 14" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton14 = PhysicalKeyboardKey(0x0005ff0e);
-
-  /// Represents the location of the "Game Button 15" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton15 = PhysicalKeyboardKey(0x0005ff0f);
-
-  /// Represents the location of the "Game Button 16" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButton16 = PhysicalKeyboardKey(0x0005ff10);
-
-  /// Represents the location of the "Game Button A" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonA = PhysicalKeyboardKey(0x0005ff11);
-
-  /// Represents the location of the "Game Button B" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonB = PhysicalKeyboardKey(0x0005ff12);
-
-  /// Represents the location of the "Game Button C" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonC = PhysicalKeyboardKey(0x0005ff13);
-
-  /// Represents the location of the "Game Button Left 1" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonLeft1 = PhysicalKeyboardKey(0x0005ff14);
-
-  /// Represents the location of the "Game Button Left 2" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonLeft2 = PhysicalKeyboardKey(0x0005ff15);
-
-  /// Represents the location of the "Game Button Mode" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonMode = PhysicalKeyboardKey(0x0005ff16);
-
-  /// Represents the location of the "Game Button Right 1" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonRight1 = PhysicalKeyboardKey(0x0005ff17);
-
-  /// Represents the location of the "Game Button Right 2" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonRight2 = PhysicalKeyboardKey(0x0005ff18);
-
-  /// Represents the location of the "Game Button Select" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonSelect = PhysicalKeyboardKey(0x0005ff19);
-
-  /// Represents the location of the "Game Button Start" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonStart = PhysicalKeyboardKey(0x0005ff1a);
-
-  /// Represents the location of the "Game Button Thumb Left" key on a
-  /// generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonThumbLeft = PhysicalKeyboardKey(0x0005ff1b);
-
-  /// Represents the location of the "Game Button Thumb Right" key on a
-  /// generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonThumbRight = PhysicalKeyboardKey(0x0005ff1c);
-
-  /// Represents the location of the "Game Button X" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonX = PhysicalKeyboardKey(0x0005ff1d);
-
-  /// Represents the location of the "Game Button Y" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonY = PhysicalKeyboardKey(0x0005ff1e);
-
-  /// Represents the location of the "Game Button Z" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonZ = PhysicalKeyboardKey(0x0005ff1f);
-
-  /// Represents the location of the "Fn" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey fn = PhysicalKeyboardKey(0x00000012);
-
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{
     0x00000000: none,
     0x00000010: hyper,
     0x00000011: superKey,
+    0x00000012: fn,
     0x00000013: fnLock,
     0x00000014: suspend,
     0x00000015: resume,
@@ -5134,6 +5135,37 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00010082: sleep,
     0x00010083: wakeUp,
     0x000100b5: displayToggleIntExt,
+    0x0005ff01: gameButton1,
+    0x0005ff02: gameButton2,
+    0x0005ff03: gameButton3,
+    0x0005ff04: gameButton4,
+    0x0005ff05: gameButton5,
+    0x0005ff06: gameButton6,
+    0x0005ff07: gameButton7,
+    0x0005ff08: gameButton8,
+    0x0005ff09: gameButton9,
+    0x0005ff0a: gameButton10,
+    0x0005ff0b: gameButton11,
+    0x0005ff0c: gameButton12,
+    0x0005ff0d: gameButton13,
+    0x0005ff0e: gameButton14,
+    0x0005ff0f: gameButton15,
+    0x0005ff10: gameButton16,
+    0x0005ff11: gameButtonA,
+    0x0005ff12: gameButtonB,
+    0x0005ff13: gameButtonC,
+    0x0005ff14: gameButtonLeft1,
+    0x0005ff15: gameButtonLeft2,
+    0x0005ff16: gameButtonMode,
+    0x0005ff17: gameButtonRight1,
+    0x0005ff18: gameButtonRight2,
+    0x0005ff19: gameButtonSelect,
+    0x0005ff1a: gameButtonStart,
+    0x0005ff1b: gameButtonThumbLeft,
+    0x0005ff1c: gameButtonThumbRight,
+    0x0005ff1d: gameButtonX,
+    0x0005ff1e: gameButtonY,
+    0x0005ff1f: gameButtonZ,
     0x00070000: usbReserved,
     0x00070001: usbErrorRollOver,
     0x00070002: usbPostFail,
@@ -5338,8 +5370,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x000c01ab: spellCheck,
     0x000c01ae: launchKeyboardLayout,
     0x000c01b1: launchScreenSaver,
-    0x000c01cb: launchAssistant,
     0x000c01b7: launchAudioBrowser,
+    0x000c01cb: launchAssistant,
     0x000c0201: newKey,
     0x000c0203: close,
     0x000c0207: save,
@@ -5360,38 +5392,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x000c028c: mailSend,
     0x000c029d: keyboardLayoutSelect,
     0x000c029f: showAllWindows,
-    0x0005ff01: gameButton1,
-    0x0005ff02: gameButton2,
-    0x0005ff03: gameButton3,
-    0x0005ff04: gameButton4,
-    0x0005ff05: gameButton5,
-    0x0005ff06: gameButton6,
-    0x0005ff07: gameButton7,
-    0x0005ff08: gameButton8,
-    0x0005ff09: gameButton9,
-    0x0005ff0a: gameButton10,
-    0x0005ff0b: gameButton11,
-    0x0005ff0c: gameButton12,
-    0x0005ff0d: gameButton13,
-    0x0005ff0e: gameButton14,
-    0x0005ff0f: gameButton15,
-    0x0005ff10: gameButton16,
-    0x0005ff11: gameButtonA,
-    0x0005ff12: gameButtonB,
-    0x0005ff13: gameButtonC,
-    0x0005ff14: gameButtonLeft1,
-    0x0005ff15: gameButtonLeft2,
-    0x0005ff16: gameButtonMode,
-    0x0005ff17: gameButtonRight1,
-    0x0005ff18: gameButtonRight2,
-    0x0005ff19: gameButtonSelect,
-    0x0005ff1a: gameButtonStart,
-    0x0005ff1b: gameButtonThumbLeft,
-    0x0005ff1c: gameButtonThumbRight,
-    0x0005ff1d: gameButtonX,
-    0x0005ff1e: gameButtonY,
-    0x0005ff1f: gameButtonZ,
-    0x00000012: fn,
   };
 
   static const Map<int, String> _debugNames = kReleaseMode ?
