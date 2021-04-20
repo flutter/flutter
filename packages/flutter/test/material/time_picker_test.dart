@@ -1047,6 +1047,27 @@ void _testsInput() {
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 21, minute: 12)));
   });
+
+  testWidgets('Time Picker state restoration test - switching modes', (WidgetTester tester) async {
+    TimeOfDay? result;
+    await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      restorationId: 'restorable_time_picker',
+    );
+
+    // Switch to input mode from dial mode.
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+
+    // Select time using input mode controls.
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.enterText(find.byType(TextField).last, '12');
+    await tester.pump(const Duration(milliseconds: 50));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
+  });
 }
 
 final Finder findDialPaint = find.descendant(
