@@ -693,7 +693,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     } else {
       result.setBoundsInParent(bounds);
     }
-    result.setBoundsInScreen(bounds);
+    final Rect boundsInScreen = getBoundsInScreen(bounds);
+    result.setBoundsInScreen(boundsInScreen);
     result.setVisibleToUser(true);
     result.setEnabled(
         !semanticsNode.hasFlag(Flag.HAS_ENABLED_STATE) || semanticsNode.hasFlag(Flag.IS_ENABLED));
@@ -867,6 +868,20 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.addChild(rootAccessibilityView, child.id);
     }
     return result;
+  }
+
+  /**
+   * Get the bounds in screen with root FlutterView's offset.
+   *
+   * @param bounds the bounds in FlutterView
+   * @return the bounds with offset
+   */
+  private Rect getBoundsInScreen(Rect bounds) {
+    Rect boundsInScreen = new Rect(bounds);
+    int[] locationOnScreen = new int[2];
+    rootAccessibilityView.getLocationOnScreen(locationOnScreen);
+    boundsInScreen.offset(locationOnScreen[0], locationOnScreen[1]);
+    return boundsInScreen;
   }
 
   /**
