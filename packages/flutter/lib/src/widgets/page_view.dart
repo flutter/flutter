@@ -836,6 +836,9 @@ class PageView extends StatefulWidget {
   final ScrollPhysics? physics;
 
   /// Set to false to disable page snapping, useful for custom scroll behavior.
+  ///
+  /// If [padEnds] is false, the page snapping will start at the beginning
+  /// instead of the center.
   final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
