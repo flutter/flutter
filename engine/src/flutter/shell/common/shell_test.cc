@@ -325,7 +325,7 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
           std::make_unique<ShellTestVsyncWaiter>(task_runners, vsync_clock));
     } else {
       return static_cast<std::unique_ptr<VsyncWaiter>>(
-          std::make_unique<VsyncWaiterFallback>(task_runners));
+          std::make_unique<VsyncWaiterFallback>(task_runners, true));
     }
   };
 
