@@ -3457,6 +3457,82 @@ void main() {
     expect(controller.index, 1);
     expect(controller.animation!.value, 1);
   });
+
+  testWidgets('Tab preferredSize gives correct value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Row(
+            children: const <Tab>[
+              Tab(icon: Icon(Icons.message)),
+              Tab(text: 'Two'),
+              Tab(text: 'Three', icon: Icon(Icons.chat)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.message));
+    final Tab secondTab = tester.widget(find.widgetWithText(Tab, 'Two'));
+    final Tab thirdTab = tester.widget(find.widgetWithText(Tab, 'Three'));
+
+    expect(firstTab.preferredSize, const Size.fromHeight(46.0));
+    expect(secondTab.preferredSize, const Size.fromHeight(46.0));
+    expect(thirdTab.preferredSize, const Size.fromHeight(72.0));
+  });
+
+  testWidgets('TabBar preferredSize gives correct value when there are both icon and text in tabs', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 5,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(text: 'car'),
+                Tab(text: 'transit'),
+                Tab(text: 'bike'),
+                Tab(text: 'boat', icon: Icon(Icons.message)),
+                Tab(text: 'bus'),
+              ],
+            ),
+            title: const Text('Tabs Test'),
+          ),
+        ),
+      ),
+    ));
+
+    final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
+
+    expect(tabBar.preferredSize, const Size.fromHeight(74.0));
+  });
+
+  testWidgets('TabBar preferredSize gives correct value when there is only icon or text in tabs', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 5,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(text: 'car'),
+                Tab(icon: Icon(Icons.message)),
+                Tab(text: 'bike'),
+                Tab(icon: Icon(Icons.chat)),
+                Tab(text: 'bus'),
+              ],
+            ),
+            title: const Text('Tabs Test'),
+          ),
+        ),
+      ),
+    ));
+
+    final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
+
+    expect(tabBar.preferredSize, const Size.fromHeight(48.0));
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
