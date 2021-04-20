@@ -944,8 +944,9 @@ abstract class ResidentHandlers {
   /// downside of being unable to display the contents of platform views.
   ///
   /// This method wil return without writing the screenshot file if any
-  /// RPC errors are encountered, even if that occurs after the data
-  /// has already been recieved.
+  /// RPC errors are encountered, printing them to stderr. This is true even
+  /// if an error occurs after the data has already been recieved, such as
+  /// from restoring the debug banner.
   Future<void> screenshot(FlutterDevice device) async {
     if (!device.device.supportsScreenshot && !supportsServiceProtocol) {
       return;
