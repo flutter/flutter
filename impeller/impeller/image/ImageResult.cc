@@ -10,7 +10,7 @@ namespace image {
 
 ImageResult::ImageResult(geom::Size size,
                          Components components,
-                         core::Allocation allocation)
+                         fml::RefPtr<const fml::Mapping> allocation)
     : _success(true),
       _size(size),
       _components(components),
@@ -47,7 +47,7 @@ ImageResult::Components ImageResult::components() const {
   return _components;
 }
 
-const core::Allocation& ImageResult::allocation() const {
+const fml::RefPtr<const fml::Mapping>& ImageResult::allocation() const {
   return _allocation;
 }
 

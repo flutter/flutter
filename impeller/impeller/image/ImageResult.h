@@ -6,6 +6,9 @@
 #pragma once
 
 #include "Size.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
+#include "flutter/fml/memory/ref_counted.h"
 
 namespace rl {
 namespace image {
@@ -24,7 +27,7 @@ class ImageResult {
 
   ImageResult(geom::Size size,
               Components components,
-              core::Allocation allocation);
+              fml::RefPtr<const fml::Mapping> allocation);
 
   ImageResult(ImageResult&&);
 
@@ -38,13 +41,13 @@ class ImageResult {
 
   Components components() const;
 
-  const core::Allocation& allocation() const;
+  const fml::RefPtr<const fml::Mapping>& allocation() const;
 
  private:
   bool _success;
   geom::Size _size;
   Components _components;
-  core::Allocation _allocation;
+  fml::RefPtr<const fml::Mapping> _allocation;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageResult);
 };
