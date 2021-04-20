@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -21,23 +18,26 @@ class FileStorage {
   FileStorage(this.version, this.files);
 
   factory FileStorage.fromBuffer(Uint8List buffer) {
-    final Map<String, dynamic> json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    final Map<String, dynamic>? json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
+    if (json == null) {
+      throw Exception('File storage format invalid');
+    }
     final int version = json['version'] as int;
-    final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
-    final List<FileHash> cachedFiles = <FileHash>[
-      for (final Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
+    final List<Map<String, dynamic>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final List<_FileHash> cachedFiles = <_FileHash>[
+      for (final Map<String, dynamic> rawFile in rawCachedFiles) _FileHash._fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
 
   final int version;
-  final List<FileHash> files;
+  final List<_FileHash> files;
 
   List<int> toBuffer() {
     final Map<String, Object> json = <String, Object>{
       'version': version,
       'files': <Object>[
-        for (final FileHash file in files) file.toJson(),
+        for (final _FileHash file in files) file.toJson(),
       ],
     };
     return utf8.encode(jsonEncode(json));
@@ -45,11 +45,14 @@ class FileStorage {
 }
 
 /// A stored file hash and path.
-class FileHash {
-  FileHash(this.path, this.hash);
+class _FileHash {
+  _FileHash(this.path, this.hash);
 
-  factory FileHash.fromJson(Map<String, Object> json) {
-    return FileHash(json['path'] as String, json['hash'] as String);
+  factory _FileHash._fromJson(Map<String, dynamic> json) {
+    if (!json.containsKey('path') || !json.containsKey('hash')) {
+      throw Exception('File storage format invalid');
+    }
+    return _FileHash(json['path']! as String, json['hash']! as String);
   }
 
   final String path;
@@ -88,8 +91,8 @@ enum FileStoreStrategy {
 /// The format of the file store is subject to change and not part of its API.
 class FileStore {
   FileStore({
-    @required File cacheFile,
-    @required Logger logger,
+    required File cacheFile,
+    required Logger logger,
     FileStoreStrategy strategy = FileStoreStrategy.hash,
   }) : _logger = logger,
        _strategy = strategy,
@@ -139,7 +142,7 @@ class FileStore {
       _cacheFile.deleteSync();
       return;
     }
-    for (final FileHash fileHash in fileStorage.files) {
+    for (final _FileHash fileHash in fileStorage.files) {
       previousAssetKeys[fileHash.path] = fileHash.hash;
     }
     _logger.printTrace('Done initializing file store');
@@ -151,9 +154,9 @@ class FileStore {
     if (!_cacheFile.existsSync()) {
       _cacheFile.createSync(recursive: true);
     }
-    final List<FileHash> fileHashes = <FileHash>[];
+    final List<_FileHash> fileHashes = <_FileHash>[];
     for (final MapEntry<String, String> entry in currentAssetKeys.entries) {
-      fileHashes.add(FileHash(entry.key, entry.value));
+      fileHashes.add(_FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
       _kVersion,
@@ -200,7 +203,7 @@ class FileStore {
 
   void _checkModification(File file, List<File> dirty) {
     final String absolutePath = file.path;
-    final String previousTime = previousAssetKeys[absolutePath];
+    final String? previousTime = previousAssetKeys[absolutePath];
 
     // If the file is missing it is assumed to be dirty.
     if (!file.existsSync()) {
@@ -221,7 +224,7 @@ class FileStore {
 
   void _hashFile(File file, List<File> dirty) {
     final String absolutePath = file.path;
-    final String previousHash = previousAssetKeys[absolutePath];
+    final String? previousHash = previousAssetKeys[absolutePath];
     // If the file is missing it is assumed to be dirty.
     if (!file.existsSync()) {
       currentAssetKeys.remove(absolutePath);
@@ -231,7 +234,7 @@ class FileStore {
     }
     final int fileBytes = file.lengthSync();
     final Md5Hash hash = Md5Hash();
-    RandomAccessFile openFile;
+    RandomAccessFile? openFile;
     try {
       openFile = file.openSync(mode: FileMode.read);
       int bytes = 0;

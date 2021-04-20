@@ -48,12 +48,12 @@ abstract class UrlStrategy {
   /// Push a new history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object state, String title, String url);
+  void pushState(Object? state, String title, String url);
 
   /// Replace the currently active history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object state, String title, String url);
+  void replaceState(Object? state, String title, String url);
 
   /// Moves forwards or backwards through the history stack.
   ///
@@ -129,12 +129,12 @@ class HashUrlStrategy extends UrlStrategy {
   }
 
   @override
-  void pushState(Object state, String title, String url) {
+  void pushState(Object? state, String title, String url) {
     _platformLocation.pushState(state, title, prepareExternalUrl(url));
   }
 
   @override
-  void replaceState(Object state, String title, String url) {
+  void replaceState(Object? state, String title, String url) {
     _platformLocation.replaceState(state, title, prepareExternalUrl(url));
   }
 
@@ -245,12 +245,12 @@ abstract class PlatformLocation {
   /// Adds a new entry to the browser history stack.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object state, String title, String url);
+  void pushState(Object? state, String title, String url);
 
   /// Replaces the current entry in the browser history stack.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object state, String title, String url);
+  void replaceState(Object? state, String title, String url);
 
   /// Moves forwards or backwards through the history stack.
   ///
@@ -310,12 +310,12 @@ class BrowserPlatformLocation extends PlatformLocation {
   Object? get state => _history.state;
 
   @override
-  void pushState(Object state, String title, String url) {
+  void pushState(Object? state, String title, String url) {
     _history.pushState(state, title, url);
   }
 
   @override
-  void replaceState(Object state, String title, String url) {
+  void replaceState(Object? state, String title, String url) {
     _history.replaceState(state, title, url);
   }
 

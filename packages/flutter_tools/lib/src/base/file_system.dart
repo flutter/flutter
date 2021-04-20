@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
@@ -31,8 +29,8 @@ class FileNotFoundException implements IOException {
 /// Various convenience file system methods.
 class FileSystemUtils {
   FileSystemUtils({
-    @required FileSystem fileSystem,
-    @required Platform platform,
+    required FileSystem fileSystem,
+    required Platform platform,
   }) : _fileSystem = fileSystem,
        _platform = platform;
 
@@ -43,18 +41,7 @@ class FileSystemUtils {
   /// Appends a number to a filename in order to make it unique under a
   /// directory.
   File getUniqueFile(Directory dir, String baseName, String ext) {
-    final FileSystem fs = dir.fileSystem;
-    int i = 1;
-
-    while (true) {
-      final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
-      final File file = fs.file(_fileSystem.path.join(dir.path, name));
-      if (!file.existsSync()) {
-        file.createSync(recursive: true);
-        return file;
-      }
-      i += 1;
-    }
+    return _getUniqueFile(dir, baseName, ext);
   }
 
   /// Appends a number to a directory name in order to make it unique under a
@@ -86,8 +73,8 @@ class FileSystemUtils {
   ///
   /// Returns false, if [entity] exists, but [referenceFile] does not.
   bool isOlderThanReference({
-    @required FileSystemEntity entity,
-    @required File referenceFile,
+    required FileSystemEntity entity,
+    required File referenceFile,
   }) {
     if (!entity.existsSync()) {
       return true;
@@ -97,8 +84,8 @@ class FileSystemUtils {
   }
 
   /// Return the absolute path of the user's home directory.
-  String get homeDirPath {
-    String path = _platform.isWindows
+  String? get homeDirPath {
+    String? path = _platform.isWindows
       ? _platform.environment['USERPROFILE']
       : _platform.environment['HOME'];
     if (path != null) {
@@ -123,8 +110,8 @@ String getDisplayPath(String fullPath, FileSystem fileSystem) {
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
-  bool Function(File srcFile, File destFile) shouldCopyFile,
-  void Function(File srcFile, File destFile) onFileCopied,
+  bool Function(File srcFile, File destFile)? shouldCopyFile,
+  void Function(File srcFile, File destFile)? onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
@@ -159,35 +146,44 @@ void copyDirectory(
   }
 }
 
+File _getUniqueFile(Directory dir, String baseName, String ext) {
+  final FileSystem fs = dir.fileSystem;
+  int i = 1;
+
+  while (true) {
+    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    final File file = fs.file(dir.fileSystem.path.join(dir.path, name));
+    if (!file.existsSync()) {
+      file.createSync(recursive: true);
+      return file;
+    }
+    i += 1;
+  }
+}
+
+/// Appends a number to a filename in order to make it unique under a
+/// directory.
+File getUniqueFile(Directory dir, String baseName, String ext) {
+  return _getUniqueFile(dir, baseName, ext);
+}
+
 /// This class extends [local_fs.LocalFileSystem] in order to clean up
 /// directories and files that the tool creates under the system temporary
 /// directory when the tool exits either normally or when killed by a signal.
 class LocalFileSystem extends local_fs.LocalFileSystem {
-  LocalFileSystem._(Signals signals, List<ProcessSignal> fatalSignals) :
-    _signals = signals, _fatalSignals = fatalSignals;
+  LocalFileSystem(this._signals, this._fatalSignals, this._shutdownHooks);
 
   @visibleForTesting
   LocalFileSystem.test({
-    @required Signals signals,
+    required Signals signals,
     List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
-  }) : this._(signals, fatalSignals);
+  }) : this(signals, fatalSignals, null);
 
-  // Unless we're in a test of this class's signal handling features, we must
-  // have only one instance created with the singleton LocalSignals instance
-  // and the catchable signals it considers to be fatal.
-  static LocalFileSystem _instance;
-  static LocalFileSystem get instance => _instance ??= LocalFileSystem._(
-    LocalSignals.instance,
-    Signals.defaultExitSignals,
-  );
-
-  Directory _systemTemp;
+  Directory? _systemTemp;
   final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
+  final ShutdownHooks? _shutdownHooks;
 
-  @visibleForTesting
-  static Future<void> dispose() => LocalFileSystem.instance?._dispose();
-
-  Future<void> _dispose() async {
+  Future<void> dispose() async {
     _tryToDeleteTemp();
     for (final MapEntry<ProcessSignal, Object> signalToken in _signalTokens.entries) {
       await _signals.removeHandler(signalToken.key, signalToken.value);
@@ -201,7 +197,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   void _tryToDeleteTemp() {
     try {
       if (_systemTemp?.existsSync() ?? false) {
-        _systemTemp.deleteSync(recursive: true);
+        _systemTemp?.deleteSync(recursive: true);
       }
     } on FileSystemException {
       // ignore.
@@ -233,10 +229,10 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       }
       // Make sure that the temporary directory is cleaned up when the tool
       // exits normally.
-      shutdownHooks?.addShutdownHook(
+      _shutdownHooks?.addShutdownHook(
         _tryToDeleteTemp,
       );
     }
-    return _systemTemp;
+    return _systemTemp!;
   }
 }

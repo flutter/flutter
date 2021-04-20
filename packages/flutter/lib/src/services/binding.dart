@@ -272,6 +272,10 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  // TODO(goderbauer): Add pragma (and enable test in
+  //   break_on_framework_exceptions_test.dart) when it works on async methods,
+  //   https://github.com/dart-lang/sdk/issues/45673
+  // @pragma('vm:notify-debugger-on-exception')
   Future<void> handlePlatformMessage(
     String channel,
     ByteData? data,

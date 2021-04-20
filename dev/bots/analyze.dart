@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -11,6 +12,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -76,6 +78,11 @@ Future<void> run(List<String> arguments) async {
     workingDirectory: flutterRoot,
   );
 
+  /// Ensure that no new dependencies have been accidentally
+  /// added to core packages.
+  print('$clock Package Allowlist...');
+  await _checkConsumerDependencies();
+
   // Analyze all the Dart code in the repo.
   print('$clock Dart analysis...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
@@ -126,9 +133,9 @@ Future<void> run(List<String> arguments) async {
 // TESTS
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
-final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // ignore: flutter_deprecation_syntax (see analyze.dart)
+final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
 final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
-final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)(\-[0-9]+\.[0-9]+\.pre)?\.'$");
+final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)(\-[0-9]+\.[0-9]+\.pre)?\.',?$");
 final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 
 /// Some deprecation notices are special, for example they're used to annotate members that
@@ -136,10 +143,10 @@ final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 /// (One example would be a library that intentionally conflicts with a member in another
 /// library to indicate that it is incompatible with that other library. Another would be
 /// the regexp just above...)
-const String _ignoreDeprecation = ' // ignore: flutter_deprecation_syntax (see analyze.dart)';
+const String _ignoreDeprecation = ' // flutter_ignore: deprecation_syntax (see analyze.dart)';
 
 /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
-final RegExp _legacyDeprecation = RegExp(r' // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
+final RegExp _legacyDeprecation = RegExp(r' // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
 
 Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
@@ -1129,12 +1136,68 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   return result;
 }
 
+Future<void> _checkConsumerDependencies() async {
+  final ProcessResult result = await Process.run(flutter, <String>[
+    'update-packages',
+    '--transitive-closure',
+    '--consumer-only',
+  ]);
+  if (result.exitCode != 0) {
+    print(result.stdout);
+    print(result.stderr);
+    exit(result.exitCode);
+  }
+  final Set<String> dependencySet = <String>{};
+  for (final String line in result.stdout.toString().split('\n')) {
+    if (!line.contains('->')) {
+      continue;
+    }
+    final List<String> parts = line.split('->');
+    final String name = parts[0].trim();
+    dependencySet.add(name);
+  }
+  final List<String> dependencies = dependencySet.toList()
+    ..sort();
+  final List<String> disallowed = <String>[];
+  final StreamController<Digest> controller = StreamController<Digest>();
+  final ByteConversionSink hasher = sha256.startChunkedConversion(controller.sink);
+  for (final String dependency in dependencies) {
+    hasher.add(utf8.encode(dependency));
+    if (!kCorePackageAllowList.contains(dependency)) {
+      disallowed.add(dependency);
+    }
+  }
+  hasher.close();
+  final Digest digest = await controller.stream.last;
+  final String signature = base64.encode(digest.bytes);
+
+  // Do not change this signature without following the directions in
+  // dev/bots/allowlist.dart
+  const String kExpected = '3S20q38QbN+dDAp+jApXiTRaDgVGGBZ0t4bMJgD3AUY=';
+
+  if (disallowed.isNotEmpty) {
+    exitWithError(<String>[
+      'Warning: transitive closure contained non-allowlisted packages:',
+      '${disallowed..join(', ')}',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+    ]);
+  }
+
+  if (signature != kExpected) {
+    exitWithError(<String>[
+      'Warning: transitive closure sha256 does not match expected signature.',
+      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+      '$signature != $kExpected',
+    ]);
+  }
+}
+
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
   return runCommand(
     flutter,
-    <String>['analyze', '--dartdocs', ...options],
+    <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
 }

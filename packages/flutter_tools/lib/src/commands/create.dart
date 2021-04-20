@@ -8,7 +8,6 @@ import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/net.dart';
 import '../base/terminal.dart';
 import '../convert.dart';
@@ -16,7 +15,7 @@ import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -91,7 +90,7 @@ class CreateCommand extends CreateBase {
   // Lazy-initialize the net utilities with values from the context.
   Net _cachedNet;
   Net get _net => _cachedNet ??= Net(
-    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    httpClientFactory: context.get<HttpClientFactory>(),
     logger: globals.logger,
     platform: globals.platform,
   );
@@ -228,7 +227,7 @@ class CreateCommand extends CreateBase {
       );
     }
 
-    final Map<String, dynamic> templateContext = createTemplateContext(
+    final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),
@@ -236,15 +235,15 @@ class CreateCommand extends CreateBase {
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
-      ios: platforms.contains('ios'),
-      android: platforms.contains('android'),
+      ios: featureFlags.isIOSEnabled && platforms.contains('ios'),
+      android: featureFlags.isAndroidEnabled && platforms.contains('android'),
       web: featureFlags.isWebEnabled && platforms.contains('web'),
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
-      // Enable null-safety for sample code, which is - unlike our regular templates - already migrated.
-      dartSdkVersionBounds: sampleCode != null ? '">=2.12.0-0 <3.0.0"' : '">=2.7.0 <3.0.0"'
+      // Enable null safety everywhere.
+      dartSdkVersionBounds: '">=2.12.0 <3.0.0"'
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -325,11 +324,6 @@ In order to run your $application, type:
 
   \$ cd $relativeAppPath
   \$ flutter run
-
-To enable null safety, type:
-
-  \$ cd $relativeAppPath
-  \$ dart migrate --apply-changes
 
 Your $application code is in $relativeAppMain.
 ''');

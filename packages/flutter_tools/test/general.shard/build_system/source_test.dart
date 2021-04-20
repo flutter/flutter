@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
 final Platform windowsPlatform = FakePlatform(
@@ -44,7 +44,7 @@ void main() {
     });
   });
 
-  test('configures implicit vs explict correctly', () => testbed.run(() {
+  test('configures implicit vs explicit correctly', () => testbed.run(() {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
   }));

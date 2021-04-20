@@ -21,6 +21,8 @@ import 'test_pointer.dart';
 /// This value must be greater than [kTouchSlop].
 const double kDragSlopDefault = 20.0;
 
+const String _defaultPlatform = kIsWeb ? 'web' : 'android';
+
 /// Class that programmatically interacts with widgets.
 ///
 /// For a variant of this class suited specifically for unit tests, see
@@ -910,7 +912,7 @@ abstract class WidgetController {
     if (renderObject is! RenderBox) {
       throw FlutterError(
         'The finder "$finder" (used in a call to "$callee()") found an element whose corresponding render object is not a RenderBox (it is a ${renderObject.runtimeType}: "$renderObject"). '
-        'Unfortunately "$callee()" only supports targetting widgets that correspond to RenderBox objects in the rendering.'
+        'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.'
       );
     }
     final RenderBox box = element.renderObject! as RenderBox;
@@ -976,8 +978,8 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
-  /// Windows, iOS) are not yet supported.
+  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
+  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -991,7 +993,7 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
     assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform);
     // Internally wrapped in async guard.
@@ -1006,8 +1008,8 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
-  /// Windows, iOS) are not yet supported.
+  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
+  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -1017,7 +1019,7 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform);
@@ -1029,8 +1031,8 @@ abstract class WidgetController {
   /// not from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android". May not be null.
+  /// [Platform.operatingSystem] to make the event appear to be from that type of
+  /// system. Defaults to "web" on web, and "android" everywhere else. May not be null.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -1038,7 +1040,7 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);

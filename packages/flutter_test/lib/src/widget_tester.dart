@@ -149,6 +149,7 @@ void testWidgets(
           () async {
             binding.reset();
             debugResetSemanticsIdCounter();
+            tester.resetTestTextInput();
             Object? memento;
             try {
               memento = await variant.setUp(value);
@@ -1001,13 +1002,18 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Typical app tests will not need to use this value. To add text to widgets
   /// like [TextField] or [TextFormField], call [enterText].
-  ///
-  /// Some of the properties and methods on this value are only valid if the
-  /// binding's [TestWidgetsFlutterBinding.registerTestTextInput] flag is set to
-  /// true as a test is starting (meaning that the keyboard is to be simulated
-  /// by the test framework). If those members are accessed when using a binding
-  /// that sets this flag to false, they will throw.
   TestTextInput get testTextInput => binding.testTextInput;
+
+  /// Ensures that [testTextInput] is registered and [TestTextInput.log] is
+  /// reset.
+  ///
+  /// This is called by the testing framework before test runs, so that if a
+  /// previous test has set its own handler on [SystemChannels.textInput], the
+  /// [testTextInput] regains control and the log is fresh for the new test.
+  /// It should not typically need to be called by tests.
+  void resetTestTextInput() {
+    testTextInput.resetAndRegister();
+  }
 
   /// Give the text input widget specified by [finder] the focus, as if the
   /// onscreen keyboard had appeared.
@@ -1025,7 +1031,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
-          matching: find.byType(EditableText),
+          matching: find.byType(EditableText, skipOffstage: finder.skipOffstage),
           matchRoot: true,
         ),
       );
@@ -1034,12 +1040,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
-  /// Give the text input widget specified by [finder] the focus and
-  /// enter [text] as if it been provided by the onscreen keyboard.
+  /// Give the text input widget specified by [finder] the focus and replace its
+  /// content with [text], as if it had been provided by the onscreen keyboard.
   ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
   /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
+  ///
+  /// When the returned future completes, the text input widget's text will be
+  /// exactly `text`, and the caret will be placed at the end of `text`.
   ///
   /// To just give [finder] the focus without entering any text,
   /// see [showKeyboard].

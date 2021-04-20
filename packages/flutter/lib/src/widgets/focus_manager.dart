@@ -55,8 +55,7 @@ enum KeyEventResult {
 ///
 /// Returns a [KeyEventResult] that describes how, and whether, the key event
 /// was handled.
-// TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
-typedef FocusOnKeyCallback = dynamic Function(FocusNode node, RawKeyEvent event);
+typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
@@ -729,10 +728,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Offset is the offset of the transformed widget in global coordinates.
   Offset get offset {
     assert(
-        context != null,
-        "Tried to get the offset of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. '
-        'Setting the context is typically done with the attach method.');
+      context != null,
+      "Tried to get the offset of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. '
+      'Setting the context is typically done with the attach method.',
+    );
     final RenderObject object = context!.findRenderObject()!;
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
@@ -743,10 +743,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Rect is the rectangle of the transformed widget in global coordinates.
   Rect get rect {
     assert(
-        context != null,
-        "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. '
-        'Setting the context is typically done with the attach method.');
+      context != null,
+      "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. '
+      'Setting the context is typically done with the attach method.',
+    );
     final RenderObject object = context!.findRenderObject()!;
     final Offset topLeft = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
     final Offset bottomRight = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.bottomRight);
@@ -1595,6 +1596,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusManager] notifies.
   void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.remove(listener);
 
+  @pragma('vm:notify-debugger-on-exception')
   void _notifyHighlightModeListeners() {
     if (_listeners.isEmpty) {
       return;
@@ -1672,31 +1674,18 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     bool handled = false;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
       if (node.onKey != null) {
-        // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
-        final dynamic result = node.onKey!(node, event);
-        assert(result is bool || result is KeyEventResult,
-            'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
-        if (result is KeyEventResult) {
-          switch (result) {
-            case KeyEventResult.handled:
-              assert(_focusDebug('Node $node handled key event $event.'));
-              handled = true;
-              break;
-            case KeyEventResult.skipRemainingHandlers:
-              assert(_focusDebug('Node $node stopped key event propagation: $event.'));
-              handled = false;
-              break;
-            case KeyEventResult.ignored:
-              continue;
-          }
-        } else if (result is bool){
-          if (result) {
+        final KeyEventResult result = node.onKey!(node, event);
+        switch (result) {
+          case KeyEventResult.handled:
             assert(_focusDebug('Node $node handled key event $event.'));
             handled = true;
             break;
-          } else {
+          case KeyEventResult.skipRemainingHandlers:
+            assert(_focusDebug('Node $node stopped key event propagation: $event.'));
+            handled = false;
+            break;
+          case KeyEventResult.ignored:
             continue;
-          }
         }
         break;
       }

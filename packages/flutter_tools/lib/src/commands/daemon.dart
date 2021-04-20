@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -28,6 +29,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 import '../web/web_runner.dart';
 
 const String protocolVersion = '0.6.0';
@@ -390,6 +392,9 @@ class DaemonDomain extends Domain {
       if (featureFlags.isFuchsiaEnabled && flutterProject.fuchsia.existsSync()) {
         result.add('fuchsia');
       }
+      if (featureFlags.areCustomDevicesEnabled) {
+        result.add('custom');
+      }
       return <String, Object>{
         'platforms': result,
       };
@@ -427,9 +432,7 @@ class AppDomain extends Domain {
     registerHandler('detach', detach);
   }
 
-  // TODO(jonahwilliams): update after google3 uuid is updated.
-  // ignore: prefer_const_constructors
-  static final Uuid _uuidGenerator = Uuid();
+  static const Uuid _uuidGenerator = Uuid();
 
   static String _getNewAppId() => _uuidGenerator.v4();
 
@@ -685,9 +688,16 @@ class AppDomain extends Domain {
     if (app == null) {
       throw "app '$appId' not found";
     }
-
-    final Map<String, dynamic> result = await app.runner
-        .invokeFlutterExtensionRpcRawOnFirstIsolate(methodName, params: params);
+    final FlutterDevice device = app.runner.flutterDevices.first;
+    final List<FlutterView> views = await device.vmService.getFlutterViews();
+    final Map<String, dynamic> result = await device
+      .vmService
+      .invokeFlutterExtensionRpcRaw(
+        methodName,
+        args: params,
+        isolateId: views
+          .first.uiIsolate.id
+      );
     if (result == null) {
       throw 'method not available: $methodName';
     }

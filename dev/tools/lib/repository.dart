@@ -11,28 +11,68 @@ import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
 import './git.dart';
-import './globals.dart' as globals;
+import './globals.dart';
 import './stdio.dart';
 import './version.dart';
+
+/// Allowed git remote names.
+enum RemoteName {
+  upstream,
+  mirror,
+}
+
+class Remote {
+  const Remote({
+    @required RemoteName name,
+    @required this.url,
+  }) : _name = name;
+
+  final RemoteName _name;
+
+  /// The name of the remote.
+  String get name {
+    switch (_name) {
+      case RemoteName.upstream:
+        return 'upstream';
+      case RemoteName.mirror:
+        return 'mirror';
+    }
+    throw ConductorException('Invalid value of _name: $_name'); // For analyzer
+  }
+
+  /// The URL of the remote.
+  final String url;
+}
 
 /// A source code repository.
 abstract class Repository {
   Repository({
     @required this.name,
-    @required this.upstream,
+    @required this.fetchRemote,
     @required this.processManager,
     @required this.stdio,
     @required this.platform,
     @required this.fileSystem,
     @required this.parentDirectory,
+    this.initialRef,
     this.localUpstream = false,
     this.useExistingCheckout = false,
+    this.pushRemote,
   })  : git = Git(processManager),
         assert(localUpstream != null),
         assert(useExistingCheckout != null);
 
   final String name;
-  final String upstream;
+  final Remote fetchRemote;
+
+  /// Remote to publish tags and commits to.
+  ///
+  /// This value can be null, in which case attempting to publish will lead to
+  /// a [ConductorException].
+  final Remote pushRemote;
+
+  /// The initial ref (branch or commit name) to check out.
+  final String initialRef;
   final Git git;
   final ProcessManager processManager;
   final Stdio stdio;
@@ -55,33 +95,49 @@ abstract class Repository {
       return _checkoutDirectory;
     }
     _checkoutDirectory = parentDirectory.childDirectory(name);
+    lazilyInitialize();
+    return _checkoutDirectory;
+  }
+
+  /// Ensure the repository is cloned to disk and initialized with proper state.
+  void lazilyInitialize() {
     if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
       _checkoutDirectory.deleteSync(recursive: true);
-    } else if (useExistingCheckout && _checkoutDirectory.existsSync()) {
-      git.run(
-        <String>['checkout', 'master'],
-        'Checkout to master branch',
-        workingDirectory: _checkoutDirectory.path,
-      );
-      git.run(
-        <String>['pull', '--ff-only'],
-        'Updating $name repo',
-        workingDirectory: _checkoutDirectory.path,
-      );
     }
+
     if (!_checkoutDirectory.existsSync()) {
       stdio.printTrace(
-          'Cloning $name from $upstream to ${_checkoutDirectory.path}...');
+        'Cloning $name from ${fetchRemote.url} to ${_checkoutDirectory.path}...',
+      );
       git.run(
-        <String>['clone', '--', upstream, _checkoutDirectory.path],
+        <String>[
+          'clone',
+          '--origin',
+          fetchRemote.name,
+          '--',
+          fetchRemote.url,
+          _checkoutDirectory.path
+        ],
         'Cloning $name repo',
         workingDirectory: parentDirectory.path,
       );
+      if (pushRemote != null) {
+        git.run(
+          <String>['remote', 'add', pushRemote.name, pushRemote.url],
+          'Adding remote ${pushRemote.url} as ${pushRemote.name}',
+          workingDirectory: _checkoutDirectory.path,
+        );
+        git.run(
+          <String>['fetch', pushRemote.name],
+          'Fetching git remote ${pushRemote.name}',
+          workingDirectory: _checkoutDirectory.path,
+        );
+      }
       if (localUpstream) {
         // These branches must exist locally for the repo that depends on it
         // to fetch and push to.
-        for (final String channel in globals.kReleaseChannels) {
+        for (final String channel in kReleaseChannels) {
           git.run(
             <String>['checkout', channel, '--'],
             'check out branch $channel locally',
@@ -91,10 +147,17 @@ abstract class Repository {
       }
     }
 
+    if (initialRef != null) {
+      git.run(
+        <String>['checkout', '${fetchRemote.name}/$initialRef'],
+        'Checking out initialRef $initialRef',
+        workingDirectory: _checkoutDirectory.path,
+      );
+    }
     final String revision = reverseParse('HEAD');
-    stdio
-        .printTrace('Repository $name is checked out at revision "$revision".');
-    return _checkoutDirectory;
+    stdio.printTrace(
+      'Repository $name is checked out at revision "$revision".',
+    );
   }
 
   /// The URL of the remote named [remoteName].
@@ -117,6 +180,15 @@ abstract class Repository {
     return output == '';
   }
 
+  /// Return the revision for the branch point between two refs.
+  String branchPoint(String firstRef, String secondRef) {
+    return git.getOutput(
+      <String>['merge-base', firstRef, secondRef],
+      'determine the merge base between $firstRef and $secondRef',
+      workingDirectory: checkoutDirectory.path,
+    ).trim();
+  }
+
   /// Fetch all branches and associated commits and tags from [remoteName].
   void fetch(String remoteName) {
     git.run(
@@ -126,10 +198,22 @@ abstract class Repository {
     );
   }
 
-  void checkout(String revision) {
+  /// Create (and checkout) a new branch based on the current HEAD.
+  ///
+  /// Runs `git checkout -b $branchName`.
+  void newBranch(String branchName) {
     git.run(
-      <String>['checkout', revision],
-      'checkout $revision',
+      <String>['checkout', '-b', branchName],
+      'create & checkout new branch $branchName',
+      workingDirectory: checkoutDirectory.path,
+    );
+  }
+
+  /// Check out the given ref.
+  void checkout(String ref) {
+    git.run(
+      <String>['checkout', ref],
+      'checkout ref',
       workingDirectory: checkoutDirectory.path,
     );
   }
@@ -146,13 +230,25 @@ abstract class Repository {
     );
   }
 
+  /// List commits in reverse chronological order.
+  List<String> revList(List<String> args) {
+    return git
+        .getOutput(
+          <String>['rev-list', ...args],
+          'rev-list with args ${args.join(' ')}',
+          workingDirectory: checkoutDirectory.path,
+        )
+        .trim()
+        .split('\n');
+  }
+
   /// Look up the commit for [ref].
   String reverseParse(String ref) {
     final String revisionHash = git.getOutput(
       <String>['rev-parse', ref],
       'look up the commit for the ref $ref',
       workingDirectory: checkoutDirectory.path,
-    ).trim();
+    );
     assert(revisionHash.isNotEmpty);
     return revisionHash;
   }
@@ -184,11 +280,55 @@ abstract class Repository {
     return exitcode == 0;
   }
 
-  /// Resets repository HEAD to [commit].
-  void reset(String commit) {
+  /// Determines if a commit will cherry-pick to current HEAD without conflict.
+  bool canCherryPick(String commit) {
+    assert(
+      gitCheckoutClean(),
+      'cannot cherry-pick because git checkout ${checkoutDirectory.path} is not clean',
+    );
+
+    final int exitcode = git.run(
+      <String>['cherry-pick', '--no-commit', commit],
+      'attempt to cherry-pick $commit without committing',
+      allowNonZeroExitCode: true,
+      workingDirectory: checkoutDirectory.path,
+    );
+
+    final bool result = exitcode == 0;
+
+    if (result == false) {
+      stdio.printError(git.getOutput(
+        <String>['diff'],
+        'get diff of failed cherry-pick',
+        workingDirectory: checkoutDirectory.path,
+      ));
+    }
+
+    reset('HEAD');
+    return result;
+  }
+
+  /// Cherry-pick a [commit] to the current HEAD.
+  ///
+  /// This method will throw a [GitException] if the command fails.
+  void cherryPick(String commit) {
+    assert(
+      gitCheckoutClean(),
+      'cannot cherry-pick because git checkout ${checkoutDirectory.path} is not clean',
+    );
+
     git.run(
-      <String>['reset', commit, '--hard'],
-      'reset to the release commit',
+      <String>['cherry-pick', '--no-commit', commit],
+      'attempt to cherry-pick $commit without committing',
+      workingDirectory: checkoutDirectory.path,
+    );
+  }
+
+  /// Resets repository HEAD to [ref].
+  void reset(String ref) {
+    git.run(
+      <String>['reset', ref, '--hard'],
+      'reset to $ref',
       workingDirectory: checkoutDirectory.path,
     );
   }
@@ -260,12 +400,17 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     String name = 'framework',
-    String upstream = FrameworkRepository.defaultUpstream,
+    Remote fetchRemote = const Remote(
+        name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
+    String initialRef,
+    Remote pushRemote,
   }) : super(
           name: name,
-          upstream: upstream,
+          fetchRemote: fetchRemote,
+          pushRemote: pushRemote,
+          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
@@ -288,7 +433,10 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      upstream: 'file://$upstreamPath/',
+      fetchRemote: Remote(
+        name: RemoteName.upstream,
+        url: 'file://$upstreamPath/',
+      ),
       localUpstream: false,
       useExistingCheckout: useExistingCheckout,
     );
@@ -297,6 +445,8 @@ class FrameworkRepository extends Repository {
   final Checkouts checkouts;
   static const String defaultUpstream =
       'https://github.com/flutter/flutter.git';
+
+  static const String defaultBranch = 'master';
 
   String get cacheDirectory => fileSystem.path.join(
         checkoutDirectory.path,
@@ -311,7 +461,8 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      upstream: 'file://${checkoutDirectory.path}/',
+      fetchRemote: Remote(
+          name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
       useExistingCheckout: useExistingCheckout,
     );
   }
@@ -345,8 +496,8 @@ class FrameworkRepository extends Repository {
   }
 
   @override
-  void checkout(String revision) {
-    super.checkout(revision);
+  void checkout(String ref) {
+    super.checkout(ref);
     // The tool will overwrite old cached artifacts, but not delete unused
     // artifacts from a previous version. Thus, delete the entire cache and
     // re-populate.
@@ -363,9 +514,52 @@ class FrameworkRepository extends Repository {
     final io.ProcessResult result =
         runFlutter(<String>['--version', '--machine']);
     final Map<String, dynamic> versionJson = jsonDecode(
-      globals.stdoutToString(result.stdout),
+      stdoutToString(result.stdout),
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
+  }
+}
+
+class EngineRepository extends Repository {
+  EngineRepository(
+    this.checkouts, {
+    String name = 'engine',
+    String initialRef = EngineRepository.defaultBranch,
+    Remote fetchRemote = const Remote(
+        name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
+    bool localUpstream = false,
+    bool useExistingCheckout = false,
+    Remote pushRemote,
+  }) : super(
+          name: name,
+          fetchRemote: fetchRemote,
+          pushRemote: pushRemote,
+          initialRef: initialRef,
+          fileSystem: checkouts.fileSystem,
+          localUpstream: localUpstream,
+          parentDirectory: checkouts.directory,
+          platform: checkouts.platform,
+          processManager: checkouts.processManager,
+          stdio: checkouts.stdio,
+          useExistingCheckout: useExistingCheckout,
+        );
+
+  final Checkouts checkouts;
+
+  static const String defaultUpstream = 'https://github.com/flutter/engine.git';
+  static const String defaultBranch = 'master';
+
+  @override
+  Repository cloneRepository(String cloneName) {
+    assert(localUpstream);
+    cloneName ??= 'clone-of-$name';
+    return EngineRepository(
+      checkouts,
+      name: cloneName,
+      fetchRemote: Remote(
+          name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
+      useExistingCheckout: useExistingCheckout,
+    );
   }
 }
 

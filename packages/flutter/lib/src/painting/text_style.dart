@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
+import 'text_painter.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
@@ -149,6 +150,47 @@ const double _kDefaultFontSize = 14.0;
 /// ![Since the explicit line height is applied as a scale factor on the font-metrics-defined line height, the gap above the text grows faster, as the height grows, than the gap below the text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
 /// See [StrutStyle] for further control of line height at the paragraph level.
+///
+/// ### Leading Distribution and Trimming
+///
+/// [Leading](https://en.wikipedia.org/wiki/Leading) is the vertical space
+/// between glyphs from adjacent lines. Quantitatively, it is the line height
+/// (see the previous section) subtracted by the font's ascent and descent.
+/// It's possible to have a negative `Leading` if [height] is sufficiently
+/// small.
+///
+/// When the [height] multiplier is null, `leading` and how it is distributed
+/// is up to the font's
+/// [metrics](https://en.wikipedia.org/wiki/Typeface#Font_metrics).
+/// When the [height] multiplier is specified, the exact behavior can be
+/// configured via [leadingDistribution] and [TextPainter.textHeightBehavior].
+///
+/// ![In configuration 1 the line height is divided by the alphabetic baseline proportionally to the font's ascent and descent, in configuration 3 the glyphs are roughly centered within the line height, configuration 2 is similar to configuration 1 except the Text Top guide on the same line as the font's ascent](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_breakdown.png)
+///
+/// Above is a side-by-side comparison of different [leadingDistribution] and
+/// [TextPainter.textHeightBehavior] combinations.
+///
+///  * Configuration 1: The default. [leadingDistribution] is set to [TextLeadingDistribution.proportional].
+///  * Configuration 2: same as Configuration 1, except [TextHeightBehavior.applyHeightToFirstAscent] is set to false.
+///  * Configuration 3: [leadingDistribution] is set to [TextLeadingDistribution.even].
+///  * Configuration 4: same as Configuration 3, except [TextHeightBehavior.applyHeightToLastDescent] is set to false.
+///
+/// The [leadingDistribution] property controls how leading is distributed over
+/// and under the text. With [TextLeadingDistribution.proportional]
+/// (Configuration 1), `Top Leading : Bottom Leading = Font Ascent : Font
+/// Descent`, which also means the alphabetic baseline divides the line height
+/// into 2 parts proportional to the font's ascent and descent. With
+/// [TextLeadingDistribution.even] (Configuration 3), `Top Leading` equals
+/// `Bottom Leading`, and the glyphs are roughly centered within the allotted
+/// line height.
+///
+/// The [TextPainter.textHeightBehavior] is a property that controls leading at
+/// the paragraph level. The `applyHeightToFirstAscent` property is applied
+/// **after** [height] and [leadingDistribution]. Setting it to false trims the
+/// "Top Leading" of the text box to match the font's ascent if it's on the
+/// first line (see Configuration 2). Similarly setting
+/// `applyHeightToLastDescent` to false reduces "Bottom Leading" to 0 for the
+/// last line of text (Configuration 4).
 ///
 /// ### Wavy red underline with black text
 ///
@@ -439,6 +481,7 @@ class TextStyle with Diagnosticable {
     String? fontFamily,
     List<String>? fontFamilyFallback,
     String? package,
+    this.overflow,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
@@ -578,7 +621,8 @@ class TextStyle with Diagnosticable {
   /// When a non-null [height] is specified, after accommodating the glyphs of
   /// the text, the remaining vertical space from the allotted line height will
   /// be distributed over and under the text, according to the
-  /// [leadingDistribution] property.
+  /// [leadingDistribution] property. See the [TextStyle] class's documentation
+  /// for an example.
   ///
   /// When [height] is null, [leadingDistribution] does not affect the text
   /// layout.
@@ -716,6 +760,9 @@ class TextStyle with Diagnosticable {
   /// these variants will be used for rendering.
   final List<ui.FontFeature>? fontFeatures;
 
+  /// How visual text overflow should be handled.
+  final TextOverflow? overflow;
+
   /// Creates a copy of this text style but with the given fields replaced with
   /// the new values.
   ///
@@ -749,6 +796,7 @@ class TextStyle with Diagnosticable {
     TextDecorationStyle? decorationStyle,
     double? decorationThickness,
     String? debugLabel,
+    TextOverflow? overflow,
   }) {
     assert(color == null || foreground == null, _kColorForegroundWarning);
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
@@ -782,6 +830,7 @@ class TextStyle with Diagnosticable {
       decorationStyle: decorationStyle ?? this.decorationStyle,
       decorationThickness: decorationThickness ?? this.decorationThickness,
       debugLabel: newDebugLabel,
+      overflow: overflow ?? this.overflow
     );
   }
 
@@ -839,6 +888,7 @@ class TextStyle with Diagnosticable {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    TextOverflow? overflow,
   }) {
     assert(fontSizeFactor != null);
     assert(fontSizeDelta != null);
@@ -887,6 +937,7 @@ class TextStyle with Diagnosticable {
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
       decorationThickness: decorationThickness == null ? null : decorationThickness! * decorationThicknessFactor + decorationThicknessDelta,
+      overflow: overflow ?? this.overflow,
       debugLabel: modifiedDebugLabel,
     );
   }
@@ -947,6 +998,7 @@ class TextStyle with Diagnosticable {
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
       decorationThickness: other.decorationThickness,
+      overflow: other.overflow,
       debugLabel: mergedDebugLabel,
     );
   }
@@ -1001,6 +1053,7 @@ class TextStyle with Diagnosticable {
         decorationColor: Color.lerp(null, b.decorationColor, t),
         decorationStyle: t < 0.5 ? null : b.decorationStyle,
         decorationThickness: t < 0.5 ? null : b.decorationThickness,
+        overflow: t < 0.5 ? null : b.overflow,
         debugLabel: lerpDebugLabel,
       );
     }
@@ -1029,6 +1082,7 @@ class TextStyle with Diagnosticable {
         decorationColor: Color.lerp(a.decorationColor, null, t),
         decorationStyle: t < 0.5 ? a.decorationStyle : null,
         decorationThickness: t < 0.5 ? a.decorationThickness : null,
+        overflow: t < 0.5 ? a.overflow : null,
         debugLabel: lerpDebugLabel,
       );
     }
@@ -1064,6 +1118,7 @@ class TextStyle with Diagnosticable {
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
       decorationThickness: ui.lerpDouble(a.decorationThickness ?? b.decorationThickness, b.decorationThickness ?? a.decorationThickness, t),
+      overflow: t < 0.5 ? a.overflow : b.overflow,
       debugLabel: lerpDebugLabel,
     );
   }
@@ -1176,7 +1231,8 @@ class TextStyle with Diagnosticable {
         background != other.background ||
         !listEquals(shadows, other.shadows) ||
         !listEquals(fontFeatures, other.fontFeatures) ||
-        !listEquals(fontFamilyFallback, other.fontFamilyFallback))
+        !listEquals(fontFamilyFallback, other.fontFamilyFallback) ||
+        overflow != other.overflow)
       return RenderComparison.layout;
     if (color != other.color ||
         backgroundColor != other.backgroundColor ||
@@ -1216,7 +1272,8 @@ class TextStyle with Diagnosticable {
         && other.decorationThickness == decorationThickness
         && listEquals(other.shadows, shadows)
         && listEquals(other.fontFeatures, fontFeatures)
-        && listEquals(other.fontFamilyFallback, fontFamilyFallback);
+        && listEquals(other.fontFamilyFallback, fontFamilyFallback)
+        && other.overflow == overflow;
   }
 
   @override
@@ -1243,6 +1300,7 @@ class TextStyle with Diagnosticable {
       hashList(shadows),
       hashList(fontFeatures),
       hashList(fontFamilyFallback),
+      overflow,
     ]);
   }
 
@@ -1313,5 +1371,7 @@ class TextStyle with Diagnosticable {
 
     if (!styleSpecified)
       properties.add(FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
+
+    styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
   }
 }

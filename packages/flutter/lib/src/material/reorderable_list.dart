@@ -121,6 +121,44 @@ class ReorderableListView extends StatefulWidget {
   /// constructor. Even more efficient, however, is to create the instances
   /// on demand using this constructor's `itemBuilder` callback.
   ///
+  /// This example creates a list using the
+  /// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
+  /// list items are built lazily on demand.
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// ```dart
+  /// final List<int> _items = List<int>.generate(50, (int index) => index);
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
+  ///   final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+  ///   final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+  ///
+  ///   return ReorderableListView.builder(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 40),
+  ///     itemCount:_items.length,
+  ///     itemBuilder: (BuildContext context, int index) {
+  ///       return ListTile(
+  ///         key: Key('$index'),
+  ///         tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+  ///         title: Text('Item ${_items[index]}'),
+  ///         );
+  ///     },
+  ///     onReorder: (int oldIndex, int newIndex) {
+  ///       setState(() {
+  ///         if (oldIndex < newIndex) {
+  ///           newIndex -= 1;
+  ///         }
+  ///         final int item = _items.removeAt(oldIndex);
+  ///         _items.insert(newIndex, item);
+  ///       });
+  ///     },
+  ///   );
+  /// }
+  ///
+  /// ```
+  /// {@end-tool}
   /// See also:
   ///
   ///   * [ReorderableListView], which allows you to build a reorderable
@@ -289,115 +327,7 @@ class ReorderableListView extends StatefulWidget {
   _ReorderableListViewState createState() => _ReorderableListViewState();
 }
 
-// This top-level state manages an Overlay that contains the list and
-// also any items being dragged on top fo the list.
-//
-// The Overlay doesn't properly keep state by building new overlay entries,
-// and so we cache a single OverlayEntry for use as the list layer.
-// That overlay entry then builds a _ReorderableListContent which may
-// insert items being dragged into the Overlay above itself.
 class _ReorderableListViewState extends State<ReorderableListView> {
-  // This entry contains the scrolling list itself.
-  late OverlayEntry _listOverlayEntry;
-
-  @override
-  void initState() {
-    super.initState();
-    _listOverlayEntry = OverlayEntry(
-      opaque: true,
-      builder: (BuildContext context) {
-        return _ReorderableListContent(
-          itemBuilder: widget.itemBuilder,
-          itemCount: widget.itemCount,
-          onReorder: widget.onReorder,
-          proxyDecorator: widget.proxyDecorator,
-          buildDefaultDragHandles: widget.buildDefaultDragHandles,
-          padding: widget.padding,
-          header: widget.header,
-          scrollDirection: widget.scrollDirection,
-          reverse: widget.reverse,
-          scrollController: widget.scrollController,
-          primary: widget.primary,
-          physics: widget.physics,
-          shrinkWrap: widget.shrinkWrap,
-          anchor: widget.anchor,
-          cacheExtent: widget.cacheExtent,
-          dragStartBehavior: widget.dragStartBehavior,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
-          restorationId: widget.restorationId,
-          clipBehavior: widget.clipBehavior,
-        );
-      },
-    );
-  }
-
-  @override
-  void didUpdateWidget(ReorderableListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // As this depends on pretty much everything, it
-    // is ok to mark this as dirty unconditionally.
-    _listOverlayEntry.markNeedsBuild();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
-    return Overlay(
-      initialEntries: <OverlayEntry>[
-        _listOverlayEntry
-      ],
-    );
-  }
-}
-
-class _ReorderableListContent extends StatefulWidget {
-  const _ReorderableListContent({
-    required this.itemBuilder,
-    required this.itemCount,
-    required this.onReorder,
-    required this.proxyDecorator,
-    required this.buildDefaultDragHandles,
-    required this.padding,
-    required this.header,
-    required this.scrollDirection,
-    required this.reverse,
-    required this.scrollController,
-    required this.primary,
-    required this.physics,
-    required this.shrinkWrap,
-    required this.anchor,
-    required this.cacheExtent,
-    required this.dragStartBehavior,
-    required this.keyboardDismissBehavior,
-    required this.restorationId,
-    required this.clipBehavior,
-  });
-
-  final IndexedWidgetBuilder itemBuilder;
-  final int itemCount;
-  final ReorderCallback onReorder;
-  final ReorderItemProxyDecorator? proxyDecorator;
-  final bool buildDefaultDragHandles;
-  final EdgeInsets? padding;
-  final Widget? header;
-  final Axis scrollDirection;
-  final bool reverse;
-  final ScrollController? scrollController;
-  final bool? primary;
-  final ScrollPhysics? physics;
-  final bool shrinkWrap;
-  final double anchor;
-  final double? cacheExtent;
-  final DragStartBehavior dragStartBehavior;
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
-  final String? restorationId;
-  final Clip clipBehavior;
-
-  @override
-  _ReorderableListContentState createState() => _ReorderableListContentState();
-}
-
-class _ReorderableListContentState extends State<_ReorderableListContent> {
   Widget _wrapWithSemantics(Widget child, int index) {
     void reorder(int startIndex, int endIndex) {
       if (startIndex != endIndex)
@@ -460,7 +390,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     assert(() {
       if (item.key == null) {
         throw FlutterError(
-          'Every item of ReorderableListView must have a key.'
+          'Every item of ReorderableListView must have a key.',
         );
       }
       return true;
@@ -477,25 +407,48 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
-          return Stack(
-            key: itemGlobalKey,
-            children: <Widget>[
-              itemWithSemantics,
-              Positioned.directional(
-                textDirection: Directionality.of(context),
-                top: 0,
-                bottom: 0,
-                end: 8,
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: ReorderableDragStartListener(
-                    index: index,
-                    child: const Icon(Icons.drag_handle),
+          switch (widget.scrollDirection) {
+            case Axis.horizontal:
+              return Stack(
+                key: itemGlobalKey,
+                children: <Widget>[
+                  itemWithSemantics,
+                  Positioned.directional(
+                    textDirection: Directionality.of(context),
+                    start: 0,
+                    end: 0,
+                    bottom: 8,
+                    child: Align(
+                      alignment: AlignmentDirectional.bottomCenter,
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
+                ],
+              );
+            case Axis.vertical:
+              return Stack(
+                key: itemGlobalKey,
+                children: <Widget>[
+                  itemWithSemantics,
+                  Positioned.directional(
+                    textDirection: Directionality.of(context),
+                    top: 0,
+                    bottom: 0,
+                    end: 8,
+                    child: Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+          }
 
         case TargetPlatform.iOS:
         case TargetPlatform.android:
@@ -530,64 +483,74 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
 
   @override
   Widget build(BuildContext context) {
-    // If there is a header we can't just apply the padding to the list,
-    // so we wrap the CustomScrollView in the padding for the top, left and right
-    // and only add the padding from the bottom to the sliver list (or the equivalent
-    // for other axis directions).
-    final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
-    late EdgeInsets outerPadding;
-    late EdgeInsets listPadding;
-    switch (widget.scrollDirection) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasOverlay(context));
 
-      case Axis.horizontal:
-        if (widget.reverse) {
-          outerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
-          listPadding = EdgeInsets.fromLTRB(padding.left, 0, 0, 0);
-        } else {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
-          listPadding = EdgeInsets.fromLTRB(0, 0, padding.right, 0);
-        }
-        break;
-      case Axis.vertical:
-        if (widget.reverse) {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
-          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, 0);
-        } else {
-          outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
-          listPadding = EdgeInsets.fromLTRB(0, 0, 0, padding.bottom);
-        }
-        break;
+    // If there is a header we can't just apply the padding to the list,
+    // so we break it up into padding for the header and padding for the list.
+    final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
+    late final EdgeInsets headerPadding;
+    late final EdgeInsets listPadding;
+
+    if (widget.header == null) {
+      headerPadding = EdgeInsets.zero;
+      listPadding = padding;
+    } else {
+      switch (widget.scrollDirection) {
+        case Axis.horizontal:
+          if (widget.reverse) {
+            // Header on the right
+            headerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
+          } else {
+            // Header on the left
+            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
+          }
+          break;
+        case Axis.vertical:
+          if (widget.reverse) {
+            // Header on the bottom
+            headerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
+            listPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
+          } else {
+            // Header on the top
+            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
+            listPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
+          }
+          break;
+      }
     }
 
-    return Padding(
-      padding: outerPadding,
-      child: CustomScrollView(
-        scrollDirection: widget.scrollDirection,
-        reverse: widget.reverse,
-        controller: widget.scrollController,
-        primary: widget.primary,
-        physics: widget.physics,
-        shrinkWrap: widget.shrinkWrap,
-        anchor: widget.anchor,
-        cacheExtent: widget.cacheExtent,
-        dragStartBehavior: widget.dragStartBehavior,
-        keyboardDismissBehavior: widget.keyboardDismissBehavior,
-        restorationId: widget.restorationId,
-        clipBehavior: widget.clipBehavior,
-        slivers: <Widget>[
-          if (widget.header != null)
-            SliverToBoxAdapter(child: widget.header!),
+    return CustomScrollView(
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
+      controller: widget.scrollController,
+      primary: widget.primary,
+      physics: widget.physics,
+      shrinkWrap: widget.shrinkWrap,
+      anchor: widget.anchor,
+      cacheExtent: widget.cacheExtent,
+      dragStartBehavior: widget.dragStartBehavior,
+      keyboardDismissBehavior: widget.keyboardDismissBehavior,
+      restorationId: widget.restorationId,
+      clipBehavior: widget.clipBehavior,
+      slivers: <Widget>[
+        if (widget.header != null)
           SliverPadding(
-            padding: listPadding,
-            sliver: SliverReorderableList(
-              itemBuilder: _itemBuilder,
-              itemCount: widget.itemCount,
-              onReorder: widget.onReorder,
-              proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
-            ),
+            padding: headerPadding,
+            sliver: SliverToBoxAdapter(child: widget.header!),
           ),
-        ],
-      ),
+        SliverPadding(
+          padding: listPadding,
+          sliver: SliverReorderableList(
+            itemBuilder: _itemBuilder,
+            itemCount: widget.itemCount,
+            onReorder: widget.onReorder,
+            proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
+          ),
+        ),
+      ],
     );
   }
 }

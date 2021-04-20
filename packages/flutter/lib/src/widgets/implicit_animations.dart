@@ -125,7 +125,7 @@ class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
 /// [BorderRadius.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class BorderRadiusTween extends Tween<BorderRadius> {
+class BorderRadiusTween extends Tween<BorderRadius?> {
   /// Creates a [BorderRadius] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -134,7 +134,7 @@ class BorderRadiusTween extends Tween<BorderRadius> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t)!;
+  BorderRadius? lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Border]s.
@@ -152,11 +152,7 @@ class BorderTween extends Tween<Border?> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Border? lerp(double t) {
-    if (begin == null || end == null)
-      return t < 0.5 ? begin : end;
-    return Border.lerp(begin!, end!, t);
-  }
+  Border? lerp(double t) => Border.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Matrix4]s.
@@ -370,8 +366,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
-          if (widget.onEnd != null)
-            widget.onEnd!();
+          widget.onEnd?.call();
           break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
@@ -647,7 +642,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        constraints =
