@@ -100,12 +100,12 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String get _logicalKeyLabels {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
       result.write('''
-    ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
+    ${toHex(entry.value, digits: 11)}: '${entry.commentName}',
 ''');
     }
-    PhysicalKeyEntry.synonyms.forEach((String name, List<String> synonyms) {
+    LogicalKeyData.synonyms.forEach((String name, List<String> synonyms) {
       // Use the first item in the synonyms as a template for the ID to use.
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.

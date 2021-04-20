@@ -1740,21 +1740,6 @@
       ]
     }
   },
-  "alt": {
-    "constant": "alt",
-    "english": "Alt",
-    "value": 258,
-    "names": {
-      "web": [
-        "Alt"
-      ]
-    },
-    "values": {
-      "web": [
-        258
-      ]
-    }
-  },
   "altGraph": {
     "constant": "altGraph",
     "english": "Alt Graph",
@@ -1812,21 +1797,6 @@
       ],
       "android": [
         115
-      ]
-    }
-  },
-  "control": {
-    "constant": "control",
-    "english": "Control",
-    "value": 261,
-    "names": {
-      "web": [
-        "Control"
-      ]
-    },
-    "values": {
-      "web": [
-        261
       ]
     }
   },
@@ -1892,21 +1862,6 @@
       "gtk": [
         65517,
         65518
-      ]
-    }
-  },
-  "meta": {
-    "constant": "meta",
-    "english": "Meta",
-    "value": 265,
-    "names": {
-      "web": [
-        "Meta"
-      ]
-    },
-    "values": {
-      "web": [
-        265
       ]
     }
   },
@@ -1985,21 +1940,6 @@
       ],
       "android": [
         116
-      ]
-    }
-  },
-  "shift": {
-    "constant": "shift",
-    "english": "Shift",
-    "value": 269,
-    "names": {
-      "web": [
-        "Shift"
-      ]
-    },
-    "values": {
-      "web": [
-        269
       ]
     }
   },

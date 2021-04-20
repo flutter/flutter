@@ -145,6 +145,7 @@ class LogicalKeyData {
           name: pair.right,
           keyLabel: null, // Modifier keys don't have keyLabels
         );
+        continue;
       }
 
       // If it has a numpad counterpart, also add the numpad key.
@@ -329,6 +330,23 @@ class LogicalKeyData {
       return MapEntry<String, String>(key, value as String);
     });
   }();
+
+  /// Returns the static map of synonym representations.
+  ///
+  /// These include synonyms for keys which don't have printable
+  /// representations, and appear in more than one place on the keyboard (e.g.
+  /// SHIFT, ALT, etc.).
+  static late final Map<String, List<String>> synonyms = ((){
+    final String synonymKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'synonyms.json',)).readAsStringSync();
+    final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
+    return dynamicSynonym.map((String name, dynamic values) {
+      // The keygen and algorithm of macOS relies on synonyms being pairs.
+      // See siblingKeyMap in macos_code_gen.dart.
+      final List<String> names = (values as List<dynamic>).whereType<String>().toList();
+      assert(names.length == 2);
+      return MapEntry<String, List<String>>(name, names);
+    });
+  })();
 }
 
 /// A single entry in the key data structure.
@@ -386,7 +404,7 @@ class LogicalKeyEntry {
       windowsValues = _toNonEmptyArray<int>(map['values']['windows']),
       androidNames = _toNonEmptyArray<String>(map['names']['android']),
       androidValues = _toNonEmptyArray<int>(map['values']['android']),
-      keyLabel = map['keyLabel'] as String;
+      keyLabel = map['keyLabel'] as String?;
 
   final int value;
 
