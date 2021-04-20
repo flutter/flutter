@@ -101,11 +101,11 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String get _logicalKeyLabels {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data.toList()..sort(
-      (PhysicalKeyEntry a, PhysicalKeyEntry b) => a.flutterId.compareTo(b.flutterId)
+    for (final LogicalKeyEntry entry in logicalData.data.values.toList()..sort(
+      (LogicalKeyEntry a, LogicalKeyEntry b) => a.value.compareTo(b.value)
     )) {
       result.write('''
-    ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
+    ${toHex(entry.value, digits: 11)}: '${entry.commentName}',
 ''');
     }
     for (final String name in PhysicalKeyEntry.synonyms.keys) {
