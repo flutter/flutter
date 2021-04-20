@@ -943,7 +943,7 @@ abstract class ResidentHandlers {
   /// will fallback to a rasterizer screenshot from the engine. This has the
   /// downside of being unable to display the contents of platform views.
   ///
-  /// This method wil return without writing the screenshot file if any
+  /// This method will return without writing the screenshot file if any
   /// RPC errors are encountered, printing them to stderr. This is true even
   /// if an error occurs after the data has already been recieved, such as
   /// from restoring the debug banner.
