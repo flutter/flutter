@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file for details.
  */
 
-#include <Core/Message.h>
 #include <Image/Image.h>
 #include <stb_image.h>
 #include "ImageSource.h"

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file for details.
  */
 
-#include <Core/Macros.h>
 #include <Entity/Color.h>
 #include <algorithm>
 #include <cmath>

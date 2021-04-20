@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <Core/Allocation.h>
-#include <Core/Macros.h>
 #include <Geometry/Size.h>
 
 namespace rl {

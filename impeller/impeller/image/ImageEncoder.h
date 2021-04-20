@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <Core/FileIOAdapter.h>
-#include <Core/Macros.h>
 #include <Geometry/Size.h>
 #include <Image/ImageResult.h>
 

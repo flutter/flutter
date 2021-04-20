@@ -39,18 +39,12 @@ source_set("impeller") {
   ]
 
   image_sources = [
-    "image/DataImageSource.cc",
-    "image/DataImageSource.h",
-    "image/FileImageSource.cc",
-    "image/FileImageSource.h",
     "image/Image.cc",
     "image/Image.h",
     "image/ImageEncoder.cc",
     "image/ImageEncoder.h",
     "image/ImageResult.cc",
     "image/ImageResult.h",
-    "image/ImageSource.cc",
-    "image/ImageSource.h",
   ]
 
   sources = geometry_sources + entity_sources + image_sources
