@@ -42,7 +42,9 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
 
   String get _physicalDebugNames {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.toList()..sort(
+      (PhysicalKeyEntry a, PhysicalKeyEntry b) => a.usbHidCode.compareTo(b.usbHidCode)
+    )) {
       result.write('''
       ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
 ''');
@@ -99,7 +101,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String get _logicalKeyLabels {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.toList()..sort(
+      (PhysicalKeyEntry a, PhysicalKeyEntry b) => a.flutterId.compareTo(b.flutterId)
+    )) {
       result.write('''
     ${toHex(entry.flutterId, digits: 11)}: '${entry.commentName}',
 ''');
