@@ -943,8 +943,9 @@ abstract class ResidentHandlers {
   /// will fallback to a rasterizer screenshot from the engine. This has the
   /// downside of being unable to display the contents of platform views.
   ///
-  /// Currently the behavior of screenshot is to bail if it encounters any
-  /// RPC errors.
+  /// This method wil return without writing the screenshot file if any
+  /// RPC errors are encountered, even if that occurs after the data
+  /// has already been recieved.
   Future<void> screenshot(FlutterDevice device) async {
     if (!device.device.supportsScreenshot && !supportsServiceProtocol) {
       return;
