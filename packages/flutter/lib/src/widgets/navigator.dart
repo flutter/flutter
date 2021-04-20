@@ -5624,7 +5624,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
     final Map<Object?, Object?> casted = data! as Map<Object?, Object?>;
     return casted.map<String?, List<Object>>((Object? key, Object? value) => MapEntry<String?, List<Object>>(
       key as String?,
-      List<Object>.from(value as List<Object>, growable: true),
+      List<Object>.from(value! as List<Object>, growable: true),
     ));
   }
 
