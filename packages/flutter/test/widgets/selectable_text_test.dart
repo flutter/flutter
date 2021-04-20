@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
+import '../rendering/rendering_tester.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
 
@@ -4724,4 +4725,21 @@ void main() {
     expect(selection!.baseOffset, 6);
     expect(selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+
+  testWidgets('Ellipsis is passed to the inner TextPainter when provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SelectableText(
+            'overflow',
+            maxLines: 1,
+            style: TextStyle(overflow: TextOverflow.ellipsis),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+    expect(editableTextState.renderEditable.textPainter.ellipsis, kDefaultEllipsis);
+  });
 }

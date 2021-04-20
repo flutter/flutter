@@ -2216,6 +2216,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _cachedPlainText!;
   }
 
+  /// The text painter used by this render editable. This is visible for test
+  /// purposes only.
+  @visibleForTesting
+  TextPainter get textPainter => _textPainter;
+
   /// The text to display.
   TextSpan? get text => _textPainter.text as TextSpan?;
   final TextPainter _textPainter;
