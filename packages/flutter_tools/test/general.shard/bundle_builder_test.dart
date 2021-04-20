@@ -22,6 +22,16 @@ import '../src/testbed.dart';
 // Tests for BundleBuilder.
 void main() {
   testUsingContext('Copies assets to expected directory after building', () async {
+    final BuildSystem buildSystem = TestBuildSystem.all(
+      BuildResult(success: true),
+      (Target target, Environment environment) {
+        environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+        environment.outputDir.childFile('isolate_snapshot_data').createSync();
+        environment.outputDir.childFile('vm_snapshot_data').createSync();
+        environment.outputDir.childFile('LICENSE').createSync(recursive: true);
+      }
+    );
+
     await BundleBuilder().build(
       platform: TargetPlatform.ios,
       buildInfo: const BuildInfo(
@@ -33,6 +43,7 @@ void main() {
       mainPath: globals.fs.path.join('lib', 'main.dart'),
       assetDirPath: 'example',
       depfilePath: 'example.d',
+      buildSystem: buildSystem
     );
     expect(globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
@@ -40,31 +51,28 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
-      environment.outputDir.childFile('isolate_snapshot_data').createSync();
-      environment.outputDir.childFile('vm_snapshot_data').createSync();
-      environment.outputDir.childFile('LICENSE').createSync(recursive: true);
-    }),
   });
 
   testUsingContext('Handles build system failure', () {
-    expect(() => BundleBuilder().build(
-      platform: TargetPlatform.ios,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        null,
-        treeShakeIcons: false
+    expect(
+      () => BundleBuilder().build(
+        platform: TargetPlatform.ios,
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false
+        ),
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        mainPath: 'lib/main.dart',
+        assetDirPath: 'example',
+        depfilePath: 'example.d',
+        buildSystem: TestBuildSystem.all(BuildResult(success: false))
       ),
-      project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
-      mainPath: 'lib/main.dart',
-      assetDirPath: 'example',
-      depfilePath: 'example.d',
-    ), throwsToolExit());
+      throwsToolExit()
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
   });
 
   Environment env;
