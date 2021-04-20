@@ -868,6 +868,88 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itMakesPlatformViewImportantForAccessibility() {
+    PlatformViewsAccessibilityDelegate accessibilityDelegate =
+        mock(PlatformViewsAccessibilityDelegate.class);
+
+    Context context = RuntimeEnvironment.application.getApplicationContext();
+    View rootAccessibilityView = new View(context);
+    AccessibilityViewEmbedder accessibilityViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            rootAccessibilityView,
+            /*accessibilityChannel=*/ null,
+            /*accessibilityManager=*/ null,
+            /*contentResolver=*/ null,
+            accessibilityViewEmbedder,
+            accessibilityDelegate);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+
+    TestSemanticsNode platformView = new TestSemanticsNode();
+    platformView.id = 1;
+    platformView.platformViewId = 1;
+    root.addChild(platformView);
+
+    View embeddedView = mock(View.class);
+    when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(embeddedView);
+    when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(false);
+
+    TestSemanticsUpdate testSemanticsRootUpdate = root.toUpdate();
+    accessibilityBridge.updateSemantics(
+        testSemanticsRootUpdate.buffer, testSemanticsRootUpdate.strings);
+
+    verify(embeddedView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+  }
+
+  @Test
+  public void itMakesPlatformViewNoImportantForAccessibility() {
+    PlatformViewsAccessibilityDelegate accessibilityDelegate =
+        mock(PlatformViewsAccessibilityDelegate.class);
+
+    Context context = RuntimeEnvironment.application.getApplicationContext();
+    View rootAccessibilityView = new View(context);
+    AccessibilityViewEmbedder accessibilityViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            rootAccessibilityView,
+            /*accessibilityChannel=*/ null,
+            /*accessibilityManager=*/ null,
+            /*contentResolver=*/ null,
+            accessibilityViewEmbedder,
+            accessibilityDelegate);
+
+    TestSemanticsNode rootWithPlatformView = new TestSemanticsNode();
+    rootWithPlatformView.id = 0;
+
+    TestSemanticsNode platformView = new TestSemanticsNode();
+    platformView.id = 1;
+    platformView.platformViewId = 1;
+    rootWithPlatformView.addChild(platformView);
+
+    View embeddedView = mock(View.class);
+    when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(embeddedView);
+    when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(false);
+
+    TestSemanticsUpdate testSemanticsRootWithPlatformViewUpdate = rootWithPlatformView.toUpdate();
+    accessibilityBridge.updateSemantics(
+        testSemanticsRootWithPlatformViewUpdate.buffer,
+        testSemanticsRootWithPlatformViewUpdate.strings);
+
+    TestSemanticsNode rootWithoutPlatformView = new TestSemanticsNode();
+    rootWithoutPlatformView.id = 0;
+    TestSemanticsUpdate testSemanticsRootWithoutPlatformViewUpdate =
+        rootWithoutPlatformView.toUpdate();
+    accessibilityBridge.updateSemantics(
+        testSemanticsRootWithoutPlatformViewUpdate.buffer,
+        testSemanticsRootWithoutPlatformViewUpdate.strings);
+
+    verify(embeddedView)
+        .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+  }
+
+  @Test
   public void itProducesPlatformViewNodeForVirtualDisplay() {
     PlatformViewsAccessibilityDelegate accessibilityDelegate =
         mock(PlatformViewsAccessibilityDelegate.class);
