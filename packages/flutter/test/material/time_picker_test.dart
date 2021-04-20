@@ -14,38 +14,86 @@ final Finder _hourControl = find.byWidgetPredicate((Widget w) => '${w.runtimeTyp
 final Finder _minuteControl = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
 final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == 'TimePickerDialog');
 
-class _TimePickerLauncher extends StatelessWidget {
+class _TimePickerLauncher extends StatefulWidget {
   const _TimePickerLauncher({
     Key? key,
     required this.onChanged,
-    this.locale,
     this.entryMode = TimePickerEntryMode.dial,
+    this.restorationId,
   }) : super(key: key);
 
   final ValueChanged<TimeOfDay?> onChanged;
-  final Locale? locale;
   final TimePickerEntryMode entryMode;
+  final String? restorationId;
+
+  @override
+  _TimePickerLauncherState createState() => _TimePickerLauncherState();
+}
+
+class _TimePickerLauncherState extends State<_TimePickerLauncher> with RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  late final RestorableRouteFuture<TimeOfDay?> _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
+    onComplete: _selectTime,
+    onPresent: (NavigatorState navigator, Object? arguments) {
+      return navigator.restorablePush(
+        _timePickerRoute,
+        arguments: <String, int>{
+          'entryMode': widget.entryMode.index,
+        },
+      );
+    },
+  );
+
+  static Route<TimeOfDay> _timePickerRoute(
+    BuildContext context,
+    Object? arguments,
+  ) {
+    final Map<dynamic, dynamic> args = arguments! as Map<dynamic, dynamic>;
+    final TimePickerEntryMode entryMode = TimePickerEntryMode.values[args['entryMode'] as int];
+    return DialogRoute<TimeOfDay>(
+      context: context,
+      builder: (BuildContext context) {
+        return TimePickerDialog(
+          restorationId: 'time_picker_dialog',
+          initialTime: const TimeOfDay(hour: 7, minute: 0),
+          initialEntryMode: entryMode,
+        );
+      },
+    );
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_restorableTimePickerRouteFuture, 'time_picker_route_future');
+  }
+
+  void _selectTime(TimeOfDay? newSelectedTime) {
+    widget.onChanged(newSelectedTime);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      locale: locale,
-      home: Material(
-        child: Center(
-          child: Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () async {
-                    onChanged(await showTimePicker(
-                      context: context,
-                      initialTime: const TimeOfDay(hour: 7, minute: 0),
-                      initialEntryMode: entryMode,
-                    ));
-                  },
-                );
-              }
-          ),
+    return Material(
+      child: Center(
+        child: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              child: const Text('X'),
+              onPressed: () async {
+                if (widget.restorationId == null) {
+                  widget.onChanged(await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    initialEntryMode: widget.entryMode,
+                  ));
+                } else {
+                  _restorableTimePickerRouteFuture.present();
+                }
+              },
+            );
+          },
         ),
       ),
     );
@@ -56,8 +104,17 @@ Future<Offset?> startPicker(
     WidgetTester tester,
     ValueChanged<TimeOfDay?> onChanged, {
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
+      String? restorationId,
     }) async {
-  await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: const Locale('en', 'US'), entryMode: entryMode));
+  await tester.pumpWidget(MaterialApp(
+    restorationScopeId: 'app',
+    locale: const Locale('en', 'US'),
+    home: _TimePickerLauncher(
+      onChanged: onChanged,
+      entryMode: entryMode,
+      restorationId: restorationId,
+    ),
+  ));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
   return entryMode == TimePickerEntryMode.dial ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial'))) : null;
@@ -940,116 +997,56 @@ void _testsInput() {
     expect(minuteFieldTop, separatorTop);
   });
 
-  testWidgets('Time Picker state restoration test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        locale: Locale('en', 'US'),
-        restorationScopeId: 'app',
-        home: _RestorableTimePickerTest(
-          restorationId: 'time_picker',
-        ),
-      ),
-    );
+  testWidgets('Time Picker state restoration test - dial mode', (WidgetTester tester) async {
+    TimeOfDay? result;
+    final Offset center = (await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      restorationId: 'restorable_time_picker',
+    ))!;
 
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
+    // Test that dial values are correctly restored.
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
 
-    expect(
-      find.byType(TimePickerDialog),
-      findsOneWidget,
-    );
-
-    final Offset center = tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
-    await tester.tapAt(Offset(center.dx + 50.0, center.dy)); // 3:00 AM
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await tester.tapAt(min45);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    // Setting to PM adds 12 hours (18:45)
+    await tester.tap(find.text('PM'));
+    await tester.pump(const Duration(milliseconds: 50));
     await tester.restartAndRestore();
     await finishPicker(tester);
-
-    expect(
-      tester.widget<Text>(find.byKey(const ValueKey<String>('selectedTime'))).data,
-      '3:00',
-    );
-
+    expect(result, equals(const TimeOfDay(hour: 18, minute: 45)));
   });
-}
 
-class _RestorableTimePickerTest extends StatefulWidget {
-  const _RestorableTimePickerTest({Key? key, this.restorationId}) : super(key: key);
-
-  final String? restorationId;
-
-  @override
-  _RestorableTimePickerTestState createState() => _RestorableTimePickerTestState();
-}
-
-class _RestorableTimePickerTestState extends State<_RestorableTimePickerTest> with RestorationMixin {
-  @override
-  String? get restorationId => widget.restorationId;
-
-  final RestorableTimeOfDay _timeOfDay = RestorableTimeOfDay(const TimeOfDay(hour: 0, minute: 0));
-  late final RestorableRouteFuture<TimeOfDay?> _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
-    onComplete: _selectTime,
-    onPresent: (NavigatorState navigator, Object? arguments) {
-      return navigator.restorablePush(
-        _timePickerRoute,
-        arguments: <String, dynamic>{
-          'hour': _timeOfDay.value.hour,
-          'minute': _timeOfDay.value.minute,
-        },
-      );
-    },
-  );
-
-  static Route<TimeOfDay> _timePickerRoute(
-    BuildContext context,
-    Object? arguments,
-  ) {
-    final Map<dynamic, dynamic> initialTime = arguments! as Map<dynamic, dynamic>;
-    return DialogRoute<TimeOfDay>(
-      context: context,
-      builder: (BuildContext context) {
-        return TimePickerDialog(
-          restorationId: 'time_picker_dialog',
-          initialTime: TimeOfDay(
-            hour: initialTime['hour'] as int,
-            minute: initialTime['minute'] as int,
-          ),
-        );
-      },
+  testWidgets('Time Picker state restoration test - input mode', (WidgetTester tester) async {
+    TimeOfDay? result;
+    await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      entryMode: TimePickerEntryMode.input,
+      restorationId: 'restorable_time_picker',
     );
-  }
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
 
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_timeOfDay, 'selected_date');
-    registerForRestoration(_restorableTimePickerRouteFuture, 'time_picker_route_future');
-  }
+    await tester.enterText(find.byType(TextField).last, '12');
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
 
-  void _selectTime(TimeOfDay? newSelectedTime) {
-    if (newSelectedTime != null) {
-      setState(() {
-        _timeOfDay.value = newSelectedTime;
-      });
-    }
-  }
+    // Setting to PM adds 12 hours (21:45)
+    await tester.tap(find.text('PM'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          '${_timeOfDay.value.hour}:${_timeOfDay.value.minute}',
-          key: const ValueKey<String>('selectedTime'),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _restorableTimePickerRouteFuture.present();
-        },
-        tooltip: 'Select Time',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 21, minute: 12)));
+  });
 }
 
 final Finder findDialPaint = find.descendant(

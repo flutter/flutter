@@ -1505,6 +1505,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                         children: <Widget>[
                           const SizedBox(height: 8.0),
                           _MinuteTextField(
+                            restorationId: 'minute_text_field',
                             selectedTime: _selectedTime.value,
                             style: hourMinuteStyle,
                             autofocus: widget.autofocusMinute,
@@ -1594,6 +1595,7 @@ class _MinuteTextField extends StatelessWidget {
     required this.autofocus,
     required this.validator,
     required this.onSavedSubmitted,
+    this.restorationId,
   }) : super(key: key);
 
   final TimeOfDay selectedTime;
@@ -1601,10 +1603,12 @@ class _MinuteTextField extends StatelessWidget {
   final bool? autofocus;
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
+  final String? restorationId;
 
   @override
   Widget build(BuildContext context) {
     return _HourMinuteTextField(
+      restorationId: restorationId,
       selectedTime: selectedTime,
       isHour: false,
       autofocus: autofocus,
