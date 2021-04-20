@@ -20,11 +20,14 @@ class PhysicalKeyData {
     String chromiumHidCodes,
     String androidKeyboardLayout,
     String androidNameMap,
+    String glfwHeaderFile,
+    String glfwNameMap,
   ) {
     final Map<String, List<int>> nameToAndroidScanCodes = _readAndroidScanCodes(
       androidKeyboardLayout,
       androidNameMap,
     );
+    final Map<String, List<int>> nameToGlfwKeyCodes = _readGlfwKeyCodes(glfwHeaderFile, glfwNameMap);
     // final Map<String, int> nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
     // // Cast Android dom map
     // final Map<String, List<String>> nameToAndroidNames = (json.decode(androidNameMap) as Map<String, dynamic>)
@@ -40,9 +43,7 @@ class PhysicalKeyData {
     //   });
     final Map<String, PhysicalKeyEntry> data = _readHidEntries(chromiumHidCodes,
       nameToAndroidScanCodes,
-      // nameToAndroidNames,
-      // nameToGlfwKeyCode,
-      // nameToGlfwNames,
+      nameToGlfwKeyCodes,
     );
     final List<MapEntry<String, PhysicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, PhysicalKeyEntry> a, MapEntry<String, PhysicalKeyEntry> b) => a.value.usbHidCode.compareTo(b.value.usbHidCode)
@@ -101,7 +102,7 @@ class PhysicalKeyData {
     final RegExp keyEntry = RegExp(r'#?\s*key\s+([0-9]+)\s*"?(?:KEY_)?([0-9A-Z_]+|\(undefined\))"?\s*(FUNCTION)?');
     final Map<String, List<int>> androidNameToScanCodes = <String, List<int>>{};
     for (final Match match in keyEntry.allMatches(keyboardLayout)) {
-      if (match.group(3)! == 'FUNCTION') {
+      if (match.group(3) == 'FUNCTION') {
         // Skip odd duplicate Android FUNCTION keys (F1-F12 are already defined).
         continue;
       }
@@ -125,7 +126,7 @@ class PhysicalKeyData {
     final Map<String, List<int>> result = nameToAndroidNames.map((String name, List<String> androidNames) {
       final Set<int> scanCodes = <int>{};
       for (final String androidName in androidNames) {
-        scanCodes.addAll(androidNameToScanCodes[androidName] ?? <int>{});
+        scanCodes.addAll(androidNameToScanCodes[androidName] ?? <int>[]);
       }
       return MapEntry<String, List<int>>(name, scanCodes.toList()..sort());
     });
@@ -157,12 +158,56 @@ class PhysicalKeyData {
   //   return result;
   // }
 
+  /// Parses entries from GLFW's keycodes.h key code data file.
+  ///
+  /// Lines in this file look like this (without the ///):
+  ///  /** Space key. */
+  ///  #define GLFW_KEY_SPACE              32,
+  static Map<String, List<int>> _readGlfwKeyCodes(String headerFile, String nameMap) {
+    // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
+    final RegExp definedCodes = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
+    final Map<String, dynamic> replaced = <String, dynamic>{};
+    for (final Match match in definedCodes.allMatches(headerFile)) {
+      replaced[match.group(1)!] = int.tryParse(match.group(2)!) ?? match.group(2)!.replaceAll('GLFW_KEY_', '');
+    }
+    final Map<String, int> glfwNameToKeyCode = <String, int>{};
+    replaced.forEach((String key, dynamic value) {
+      // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
+      if (value is String) {
+        glfwNameToKeyCode[key] = replaced[value] as int;
+      } else {
+        glfwNameToKeyCode[key] = value as int;
+      }
+    });
+
+    final Map<String, List<String>> nameToGlfwNames = (json.decode(nameMap) as Map<String, dynamic>)
+      .cast<String, List<dynamic>>()
+      .map<String, List<String>>((String key, List<dynamic> value) {
+        return MapEntry<String, List<String>>(key, value.cast<String>());
+      });
+
+    final Map<String, List<int>> result = nameToGlfwNames.map((String name, List<String> glfwNames) {
+      final Set<int> keyCodes = <int>{};
+      for (final String glfwName in glfwNames) {
+        if (glfwNameToKeyCode[glfwName] != null)
+          keyCodes.add(glfwNameToKeyCode[glfwName]!);
+      }
+      return MapEntry<String, List<int>>(name, keyCodes.toList()..sort());
+    });
+
+    return result;
+  }
+
   /// Parses entries from Chromium's HID code mapping header file.
   ///
   /// Lines in this file look like this (without the ///):
   ///            USB       evdev   XKB     Win     Mac     Code     Enum
   /// DOM_CODE(0x000010, 0x0000, 0x0000, 0x0000, 0xffff, "Hyper", HYPER),
-  static Map<String, PhysicalKeyEntry> _readHidEntries(String input, Map<String, List<int>> nameToAndroidScanCodes) {
+  static Map<String, PhysicalKeyEntry> _readHidEntries(
+    String input,
+    Map<String, List<int>> nameToAndroidScanCodes,
+    Map<String, List<int>> nameToGlfwKeyCodes,
+  ) {
     final Map<int, PhysicalKeyEntry> entries = <int, PhysicalKeyEntry>{};
     final RegExp usbMapRegExp = RegExp(
         r'DOM_CODE\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
@@ -184,6 +229,7 @@ class PhysicalKeyData {
       final PhysicalKeyEntry newEntry = PhysicalKeyEntry(
         usbHidCode: usbHidCode,
         androidScanCodes: nameToAndroidScanCodes[name] ?? <int>[],
+        glfwKeyCodes: nameToGlfwKeyCodes[name] ?? <int>[],
         linuxScanCode: linuxScanCode == 0 ? null : linuxScanCode,
         xKbScanCode: xKbScanCode == 0 ? null : xKbScanCode,
         windowsScanCode: windowsScanCode == 0 ? null : windowsScanCode,
@@ -227,6 +273,7 @@ class PhysicalKeyEntry {
     required this.macOsScanCode,
     required this.iosScanCode,
     required this.chromiumName,
+    required this.glfwKeyCodes,
   })  : assert(usbHidCode != null),
         assert(chromiumName != null);
 
@@ -244,7 +291,7 @@ class PhysicalKeyEntry {
       macOsScanCode: map['scanCodes']['macos'] as int,
       iosScanCode: map['scanCodes']['ios'] as int,
       // glfwKeyNames: (map['names']['glfw'] as List<dynamic>?)?.cast<String>() ?? <String>[],
-      // glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
+      glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
     );
   }
 
@@ -265,29 +312,16 @@ class PhysicalKeyEntry {
   /// the Android name in the Chromium data, and substituting the Android scan
   /// code value.
   final List<int> androidScanCodes;
+  /// The list of GLFW key codes matching this key, created by looking up the
+  /// Linux name in the Chromium data, and substituting the GLFW key code
+  /// value.
+  final List<int> glfwKeyCodes;
   /// The name of the key, mostly derived from the DomKey name in Chromium,
   /// but where there was no DomKey representation, derived from the Chromium
   /// symbol name.
   final String name;
   /// The Chromium symbol name for the key.
   final String chromiumName;
-
-  // /// The list of names that Android gives to this key (symbol names minus the
-  // /// prefix).
-  // final List<String> androidKeyNames = <String>[];
-  // /// The list of Android scan codes matching this key, created by looking up
-  // /// the Android name in the Chromium data, and substituting the Android scan
-  // /// code value.
-  // final List<int> androidScanCodes = <int>[];
-
-  // /// The list of names that GFLW gives to this key (symbol names minus the
-  // /// prefix).
-  // final List<String> glfwKeyNames = <String>[];
-
-  // /// The list of GLFW key codes matching this key, created by looking up the
-  // /// Linux name in the Chromium data, and substituting the GLFW key code
-  // /// value.
-  // final List<int> glfwKeyCodes = <int>[];
 
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
@@ -308,9 +342,9 @@ class PhysicalKeyEntry {
         'macos': macOsScanCode,
         'ios': iosScanCode,
       }),
-      // 'keyCodes': removeEmptyValues(<String, List<int>>{
-      //   'glfw': glfwKeyCodes,
-      // }),
+      'keyCodes': removeEmptyValues(<String, List<int>>{
+        'glfw': glfwKeyCodes,
+      }),
     });
   }
 

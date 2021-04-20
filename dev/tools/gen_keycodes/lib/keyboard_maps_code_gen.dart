@@ -11,7 +11,7 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-bool _isLetter(String char) {
+bool _isLetter(String? char) {
   if (char == null)
     return false;
   const int charUpperA = 0x41;
@@ -61,11 +61,10 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   final LogicalKeyData logicalData;
 
-  Set<String> get logicalKeyNames {
-    return _logicalKeyNames ??= Set<String>.from(
+  late final Set<String> logicalKeyNames = (() {
+    return Set<String>.from(
       logicalData.data.values.map<String>((LogicalKeyEntry entry) => entry.constantName));
-  }
-  Set<String> _logicalKeyNames;
+  })();
 
   List<PhysicalKeyEntry> get numpadKeyData {
     return keyData.data.where((PhysicalKeyEntry entry) {
@@ -97,10 +96,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get glfwNumpadMap {
     final StringBuffer glfwNumpadMap = StringBuffer();
     for (final PhysicalKeyEntry entry in numpadKeyData) {
-      if (entry.glfwKeyCodes != null) {
-        for (final int code in entry.glfwKeyCodes.cast<int>()) {
-          glfwNumpadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.glfwKeyCodes) {
+        glfwNumpadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return glfwNumpadMap.toString().trimRight();
@@ -110,10 +107,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get glfwKeyCodeMap {
     final StringBuffer glfwKeyCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data) {
-      if (entry.glfwKeyCodes != null) {
-        for (final int code in entry.glfwKeyCodes.cast<int>()) {
-          glfwKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.glfwKeyCodes) {
+        glfwKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return glfwKeyCodeMap.toString().trimRight();
@@ -215,9 +210,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       // Letter keys on Windows are not recorded in logical_key_data.json,
       // because they are not used by the embedding. Add them manually.
-      final List<int> keyCodes = entry.windowsValues.isNotEmpty
+      final List<int>? keyCodes = entry.windowsValues.isNotEmpty
         ? entry.windowsValues
-        : (_isLetter(entry.keyLabel) ? <int>[entry.keyLabel.toUpperCase().codeUnitAt(0)] : null);
+        : (_isLetter(entry.keyLabel) ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] : null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
@@ -352,11 +347,11 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get webLocationMap {
     final String jsonRaw = File(path.join(
       flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_logical_location_mapping.json')).readAsStringSync();
-    final Map<String, List<String>> locationMap = parseMapOfListOfString(jsonRaw);
+    final Map<String, List<String?>> locationMap = parseMapOfListOfNullableString(jsonRaw);
     final StringBuffer result = StringBuffer();
-    locationMap.forEach((String key, List<String> keyNames) {
-      final String keyStrings = keyNames.map((String keyName) {
-        final String constantName = logicalData.data[keyName]?.constantName;
+    locationMap.forEach((String key, List<String?> keyNames) {
+      final String keyStrings = keyNames.map((String? keyName) {
+        final String? constantName = logicalData.data[keyName]?.constantName;
         if (constantName == null && keyName != null) {
           print('Error: $keyName is not a valid key.');
           return 'null';
