@@ -96,7 +96,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '33358ba597f875f6646522fd4ea86c1b31404d77',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '45ce223bc8d8ca88e2eb2f38eb0cf799e39edd06',
 
    # Fuchsia compatibility
    #
@@ -340,6 +340,9 @@ deps = {
 
   'src/third_party/colorama/src':
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
+
+  'src/third_party/expat':
+   Var('flutter_git') + '/third_party/expat' + '@' + '1441fc5252746e53b285d15be7e65e4cd74d97eb',
 
   'src/third_party/freetype2':
    Var('flutter_git') + '/third_party/freetype2' + '@' + '1f03c1b2d7f2ae832a4fbe9d12bd96c3c15bbece',
