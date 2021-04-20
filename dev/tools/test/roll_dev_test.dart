@@ -199,9 +199,7 @@ void main() {
       expect(stdio.logs.join('').contains(nextVersion), true);
     });
 
-    test(
-        "exits with exception if --skip-tagging is provided but commit isn't already tagged",
-        () {
+    test("exits with exception if --skip-tagging is provided but commit isn't already tagged", () {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
