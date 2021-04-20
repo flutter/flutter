@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -74,6 +75,41 @@ public class AccessibilityBridgeTest {
 
     assertEquals(nodeInfo.getContentDescription(), null);
     assertEquals(nodeInfo.getText(), "Hello, World");
+  }
+
+  @Test
+  public void itTakesGlobalCoordinatesOfFlutterViewIntoAccount() {
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    final int position = 88;
+    // The getBoundsInScreen() in createAccessibilityNodeInfo() needs View.getLocationOnScreen()
+    doAnswer(
+            invocation -> {
+              int[] outLocation = (int[]) invocation.getArguments()[0];
+              outLocation[0] = position;
+              outLocation[1] = position;
+              return null;
+            })
+        .when(mockRootView)
+        .getLocationOnScreen(any(int[].class));
+
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
+
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+
+    Rect outBoundsInScreen = new Rect();
+    nodeInfo.getBoundsInScreen(outBoundsInScreen);
+    assertEquals(position, outBoundsInScreen.left);
+    assertEquals(position, outBoundsInScreen.top);
   }
 
   @Test
