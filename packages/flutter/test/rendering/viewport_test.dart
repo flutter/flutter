@@ -5,12 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 // This file is separate from viewport_caching_test.dart because we can't use
 // both testWidgets and rendering_tester in the same file - testWidgets will
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
-
-import 'package:flutter_test/flutter_test.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
