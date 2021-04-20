@@ -12,52 +12,13 @@ namespace image {
 
 Image::Image() = default;
 
-Image::Image(core::Allocation sourceAllocation)
+Image::Image(fml::RefPtr<const fml::Mapping> sourceAllocation)
     : _source(ImageSource::Create(std::move(sourceAllocation))) {}
 
 Image::Image(core::FileHandle sourceFile)
     : _source(ImageSource::Create(std::move(sourceFile))) {}
 
 Image::~Image() = default;
-
-bool Image::serialize(core::Message& message) const {
-  if (_source == nullptr) {
-    return false;
-  }
-
-  /*
-   *  Encode the type.
-   */
-  RL_RETURN_IF_FALSE(message.encode(_source->type()));
-
-  /*
-   *  Encode the image source.
-   */
-  RL_RETURN_IF_FALSE(_source->serialize(message));
-
-  return true;
-}
-
-bool Image::deserialize(core::Message& message, core::Namespace* ns) {
-  auto type = ImageSource::Type::Unknown;
-
-  /*
-   *  Decode the type.
-   */
-  RL_RETURN_IF_FALSE(message.decode(type, ns))
-
-  /*
-   *  Create and decode the image source of that type.
-   */
-  auto source = ImageSource::ImageSourceForType(type);
-  if (source == nullptr) {
-    return false;
-  }
-  RL_RETURN_IF_FALSE(source->deserialize(message, ns));
-  _source = source;
-
-  return true;
-}
 
 ImageResult Image::decode() const {
   if (_source == nullptr) {
@@ -83,8 +44,8 @@ ImageResult Image::decode() const {
                             &comps,                     // Out: Components
                             STBI_default);
 
-  auto destinationAllocation =
-      core::Allocation{decoded, width * height * comps * sizeof(stbi_uc)};
+  auto destinationAllocation = fml::RefPtr<const fml::Mapping>{
+      decoded, width * height * comps * sizeof(stbi_uc)};
 
   /*
    *  If either the decoded allocation is null or the size works out to be zero,
