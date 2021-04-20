@@ -14,7 +14,7 @@
 namespace rl {
 namespace entity {
 
-class Entity : public core::ArchiveSerializable {
+class Entity {
  public:
   using PropertyMaskType = uint16_t;
 
@@ -56,17 +56,11 @@ class Entity : public core::ArchiveSerializable {
   };
 #undef RL_MASK
 
-  using UpdateCallback = std::function<void(const Entity& /*entity*/,
-                                            Entity::Property /*property*/,
-                                            core::Name /*otherIdentifier*/)>;
-
-  Entity(core::Name identifier, UpdateCallback updateCallback = nullptr);
+  Entity();
 
   Entity(Entity&& entity);
 
-  virtual ~Entity();
-
-  core::Name identifier() const;
+  ~Entity();
 
   /**
    *  The frame specifies the origin and size of the entity in the coordinate
@@ -194,18 +188,7 @@ class Entity : public core::ArchiveSerializable {
 
   void setPath(geom::Path path);
 
-  void mergeProperties(const Entity& entity, PropertyMaskType only);
-
-  static const core::ArchiveDef ArchiveDefinition;
-
-  ArchiveName archiveName() const override;
-
-  bool serialize(core::ArchiveItem& item) const override;
-
-  bool deserialize(core::ArchiveItem& item, core::Namespace* ns) override;
-
- protected:
-  core::Name _identifier;
+ private:
   geom::Rect _bounds;
   geom::Point _position;
   geom::Point _anchorPoint;
@@ -216,13 +199,6 @@ class Entity : public core::ArchiveSerializable {
   double _opacity;
   Color _strokeColor;
   double _strokeSize;
-
-  void notifyInterfaceIfNecessary(
-      Property property,
-      core::Name identifier = core::Name() /* dead name */) const;
-
- private:
-  UpdateCallback _updateCallback;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Entity);
 };

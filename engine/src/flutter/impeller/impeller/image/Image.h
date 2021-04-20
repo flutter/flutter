@@ -7,6 +7,8 @@
 
 #include "ImageResult.h"
 #include "Size.h"
+#include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
 
 namespace rl {
 namespace image {
@@ -17,9 +19,7 @@ class Image {
  public:
   Image();
 
-  Image(core::Allocation sourceAllocation);
-
-  Image(core::FileHandle sourceFile);
+  Image(fml::RefPtr<const fml::Mapping> sourceAllocation);
 
   ~Image();
 
