@@ -359,7 +359,9 @@ void main() {
     /// so options height shrinks to 1 items height
     final double oneItemsHeight = await getOptionsHeight(tester, 'elep');
     expect(oneItemsHeight, lessThan(twoItemsHeight));
-    testWidgets('initialValue sets initial text field value',
+  });
+
+   testWidgets('initialValue sets initial text field value',
         (WidgetTester tester) async {
       late String lastSelection;
       await tester.pumpWidget(
@@ -411,5 +413,4 @@ void main() {
       expect(field.controller!.text, 'lemur');
       expect(lastSelection, 'lemur');
     });
-  });
 }
