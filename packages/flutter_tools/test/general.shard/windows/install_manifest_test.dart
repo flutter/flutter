@@ -19,8 +19,13 @@ import '../../src/context.dart';
 final Platform platform = FakePlatform(operatingSystem: 'windows');
 
 void main() {
-  testWithoutContext('Generates install manifest for a debug build', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+  FileSystem fileSystem;
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+  });
+
+  testUsingContext('Generates install manifest for a debug build', () async {
     final Logger logger = BufferLogger.test();
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final Directory buildDirectory = fileSystem.currentDirectory
@@ -45,10 +50,12 @@ void main() {
       '/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
       '/winuwp/flutter/ephemeral/icudtl.dat',
     ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('Generates install manifest for a release build', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+  testUsingContext('Generates install manifest for a release build', () async {
     final Logger logger = BufferLogger.test();
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final Directory buildDirectory = fileSystem.currentDirectory
@@ -73,15 +80,11 @@ void main() {
       '/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
       '/winuwp/flutter/ephemeral/icudtl.dat'
     ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  FileSystem fileSystem;
-
-  setUp(() {
-    fileSystem = MemoryFileSystem.test();
-  });
-
-  // Assset system still uses build context.
   testUsingContext('Generates install manifest for a release build with assets', () async {
     final BufferLogger logger = BufferLogger.test();
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
