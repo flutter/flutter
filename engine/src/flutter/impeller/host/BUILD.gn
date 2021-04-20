@@ -25,4 +25,6 @@ executable("host") {
     "MetalKit.framework",
     "ModelIO.framework",
   ]
+
+  deps = [ "//flutter/impeller/impeller" ]
 }
