@@ -5,7 +5,7 @@
 #import <Cocoa/Cocoa.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
-#import "Renderer.h"
+#import "impeller_renderer.h"
 
 @interface ImpellerHostViewController : NSViewController
 
