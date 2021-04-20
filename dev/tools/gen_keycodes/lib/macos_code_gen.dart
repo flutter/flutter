@@ -10,7 +10,7 @@ import 'mask_constants.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-const List<String> kModifiersOfInterest = [
+const List<String> kModifiersOfInterest = <String>[
   'shiftLeft',
   'shiftRight',
   'controlLeft',
@@ -116,7 +116,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  @${toHex(logicalData.data[name].macOsKeyCodeValues[0])} : @(kModifierFlag${lowerCamelToUpperCamel(name)}),');
+      modifierKeyMap.writeln('  @${toHex(logicalData.data[name]!.macOsKeyCodeValues[0])} : @(kModifierFlag${lowerCamelToUpperCamel(name)}),');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -125,7 +125,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  @(kModifierFlag${lowerCamelToUpperCamel(name)}) : @${toHex(logicalData.data[name].macOsKeyCodeValues[0])},');
+      modifierKeyMap.writeln('  @(kModifierFlag${lowerCamelToUpperCamel(name)}) : @${toHex(logicalData.data[name]!.macOsKeyCodeValues[0])},');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -134,10 +134,10 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _specialKeyConstants {
     final StringBuffer specialKeyConstants = StringBuffer();
     for (final String keyName in kSpecialPhysicalKeys) {
-      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.getEntryByName(keyName).usbHidCode)};');
+      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.getEntryByName(keyName)!.usbHidCode)};');
     }
     for (final String keyName in kSpecialLogicalKeys) {
-      specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.data[keyName].value)};');
+      specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.data[keyName]!.value)};');
     }
     return specialKeyConstants.toString().trimRight();
   }

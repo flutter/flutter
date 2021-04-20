@@ -226,13 +226,13 @@ Future<void> main(List<String> rawArguments) async {
 
     final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
 
-    final String glfwKeyCodes = parsedArguments['glfw-keycodes'] == null ?
-      await getGlfwKeyCodes() :
-      File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
+    // final String glfwKeyCodes = parsedArguments['glfw-keycodes'] == null ?
+    //   await getGlfwKeyCodes() :
+    //   File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
 
-    final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
+    // final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
 
-    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
+    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidToDomKey);
 
     // Logical
     final String gtkKeyCodes = parsedArguments['gtk-keycodes'] == null ?
@@ -282,42 +282,24 @@ Future<void> main(List<String> rawArguments) async {
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
 
-  for (final String platform in <String>['android', 'macos', 'ios', 'glfw', 'fuchsia', 'linux', 'windows', 'web']) {
-    PlatformCodeGenerator codeGenerator;
-    switch (platform) {
-      case 'glfw':
-        codeGenerator = GlfwCodeGenerator(physicalData);
-        break;
-      case 'fuchsia':
-        codeGenerator = FuchsiaCodeGenerator(physicalData);
-        break;
-      case 'android':
-        codeGenerator = AndroidCodeGenerator(physicalData, logicalData);
-        break;
-      case 'macos':
-        codeGenerator = MacOsCodeGenerator(physicalData, logicalData, maskConstants);
-        break;
-      case 'ios':
-        codeGenerator = IosCodeGenerator(physicalData);
-        break;
-      case 'windows':
-        codeGenerator = WindowsCodeGenerator(physicalData, logicalData);
-        break;
-      case 'linux':
-        codeGenerator = GtkCodeGenerator(physicalData, logicalData);
-        break;
-      case 'web':
-        codeGenerator = WebCodeGenerator(physicalData, logicalData);
-        break;
-      default:
-        assert(false);
-    }
-
+  final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
+    'glfw': GlfwCodeGenerator(physicalData),
+    'fuchsia': FuchsiaCodeGenerator(physicalData),
+    'android': AndroidCodeGenerator(physicalData, logicalData),
+    'macos': MacOsCodeGenerator(physicalData, logicalData, maskConstants),
+    'ios': IosCodeGenerator(physicalData),
+    'windows': WindowsCodeGenerator(physicalData, logicalData),
+    'linux': GtkCodeGenerator(physicalData, logicalData),
+    'web': WebCodeGenerator(physicalData, logicalData),
+  };
+  await Future.wait(platforms.entries.map((MapEntry<String, PlatformCodeGenerator> entry) {
+    final String platform = entry.key;
+    final PlatformCodeGenerator codeGenerator = entry.value;
     final File platformFile = File(codeGenerator.outputPath(platform));
     if (!platformFile.existsSync()) {
       platformFile.createSync(recursive: true);
     }
     print('Writing ${'$platform map'.padRight(15)}${platformFile.absolute}');
-    await platformFile.writeAsString(codeGenerator.generate());
-  }
+    return platformFile.writeAsString(codeGenerator.generate());
+  }));
 }

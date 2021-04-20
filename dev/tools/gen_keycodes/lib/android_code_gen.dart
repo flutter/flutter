@@ -21,25 +21,25 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   String get _androidKeyCodeMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      for (final int code in entry.androidValues ?? <int>[]) {
+      for (final int code in entry.androidValues) {
         androidKeyCodeMap.writeln('      put(${toHex(code, digits: 10)}L, ${toHex(entry.value, digits: 10)}L);    // ${entry.constantName}');
       }
     }
     return androidKeyCodeMap.toString().trimRight();
   }
 
-  /// This generates the map of Android number pad key codes to logical keys.
-  String get _androidNumpadMap {
-    final StringBuffer androidKeyCodeMap = StringBuffer();
-    // for (final PhysicalKeyEntry entry in numpadKeyData) {
-    //   if (entry.androidKeyCodes != null) {
-    //     for (final int code in entry.androidKeyCodes.cast<int>()) {
-    //       androidKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
-    //     }
-    //   }
-    // }
-    return androidKeyCodeMap.toString().trimRight();
-  }
+  // /// This generates the map of Android number pad key codes to logical keys.
+  // String get _androidNumpadMap {
+  //   final StringBuffer androidKeyCodeMap = StringBuffer();
+  //   // for (final PhysicalKeyEntry entry in numpadKeyData) {
+  //   //   if (entry.androidKeyCodes != null) {
+  //   //     for (final int code in entry.androidKeyCodes.cast<int>()) {
+  //   //       androidKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
+  //   //     }
+  //   //   }
+  //   // }
+  //   return androidKeyCodeMap.toString().trimRight();
+  // }
 
   /// This generates the map of Android scan codes to physical keys.
   String get _androidScanCodeMap {

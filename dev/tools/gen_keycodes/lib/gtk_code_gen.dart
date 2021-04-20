@@ -52,7 +52,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
       final String firstLogicalName = keyNames[0];
       final List<String> physicalNames = keyNames.sublist(1);
       final int length = physicalNames.length;
-      final LogicalKeyEntry firstLogical = logicalData.data[firstLogicalName];
+      final LogicalKeyEntry? firstLogical = logicalData.data[firstLogicalName];
       if (firstLogical == null) {
         print('Unrecognized first logical key $firstLogicalName specified for $debugFunctionName.');
         return;
@@ -67,7 +67,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   data->physical_keys = physical_keys;
   data->is_caps_lock = ${physicalNames.first == 'CapsLock' ? 'true' : 'false'};''');
       for (final String physicalName in physicalNames) {
-        final PhysicalKeyEntry entry = physicalData.getEntryByName(physicalName);
+        final PhysicalKeyEntry? entry = physicalData.getEntryByName(physicalName);
         if (entry == null) {
           print('Unrecognized physical key $physicalName specified for $debugFunctionName.');
           return;

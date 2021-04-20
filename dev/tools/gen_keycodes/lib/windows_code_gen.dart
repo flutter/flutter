@@ -52,8 +52,8 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
     ).readAsStringSync()) as Map<String, dynamic>;
     final StringBuffer result = StringBuffer();
     source.forEach((String scanCodeName, dynamic logicalName) {
-      final PhysicalKeyEntry physicalEntry = keyData.getEntryByName(scanCodeName);
-      final int logicalValue = logicalData.data[logicalName]?.value;
+      final PhysicalKeyEntry? physicalEntry = keyData.getEntryByName(scanCodeName);
+      final int? logicalValue = logicalData.data[logicalName]?.value;
       if (physicalEntry == null) {
         print('Unexpected scan code $scanCodeName specified for scanCodeToLogicalMap.');
         return;
