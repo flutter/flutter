@@ -42,7 +42,7 @@ typedef SelectionChangedCallback = void Function(TextSelection selection, Select
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 
-typedef InlineSpanGenerator = InlineSpan Function(String value, TextRange range);
+typedef InlineSpanGenerator = InlineSpan Function(String, TextRange);
 
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
@@ -57,12 +57,59 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
+/// Represents one "replacement" to check for, consisting of a [Pattern] to
+/// match and a generator [InlineSpanGenerator] function that creates an
+/// [InlineSpan] from a matched string.
+///
+/// The generator function is called for every match of the pattern found.
+///
+/// Typically, the generator should return a custom [TextSpan] with unique styling
+/// or a [WidgetSpan] to embed widgets within text fields.
+///
+/// {@tool snippet}
+/// In this example, all strings enclosed in {} are matched and
+/// the contents of the braces are interpreted as an image url.
+///
+/// ```dart
+/// TextEditingInlineSpanReplacement(
+///   RegExp(r'\{[\w\/\.]+\}'),
+///   (String value, TextRange range) {
+///     return WidgetSpan(
+///       child: Image.asset(value.substring(1, value.length - 1)),
+///       range: range,
+///     );
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// In this simple example, the word following a # symbol is styled in blue.
+///
+/// ```dart
+/// TextEditingInlineSpanReplacement(
+///   RegExp(r'#[\w]+'),
+///   (String value, TextRange range) {
+///     return TextSpan(text: value, style: TextStyle(color: Colors.blue));
+///   },
+/// )
+/// ```
+/// {@end-tool}
 class TextEditingInlineSpanReplacement {
 
   TextEditingInlineSpanReplacement(this.pattern, this.generator);
 
+  /// The [Pattern] to match.
+  ///
+  /// Matched patterns are replaced with the output of the [generator] callback.
   Pattern pattern;
 
+  /// Function that returns an [InlineSpan] instance for each match of
+  /// [Pattern].
+  ///
+  /// When returning a [PlaceholderSpan] such as [WidgetSpan], the [TextRange] argument
+  /// should be provided to the [PlaceholderSpan] constructor so that the caret position
+  /// can be computed properly.
   InlineSpanGenerator generator;
 }
 
@@ -295,18 +342,18 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// insert custom [InlineSpans] in place of matched [Pattern]s.
 ///
 /// This controller should be passed [TextEditingInlineSpanReplacement], each of which contains a
-/// a pattern to match with and a generator function to generate the [InlineSpan] to replace
+/// a [Pattern] to match with and a generator function to generate an [InlineSpan] to replace
 /// the matched [Pattern] with based on the matched string.
 ///
-/// 
+/// See [TextEditingInlineSpanReplacement] for example replacements to provide this class with.
 class ReplacementTextEditingController extends TextEditingController {
 
+  /// Constructs a controller with optional text that handles the provided list of replacements.
   ReplacementTextEditingController({
     String? text,
     required this.textEditingInlineSpanReplacements,
     this.composingRegionPrioritized = false,
-  })
-    : super(text: text);
+  }) : assert(textEditingInlineSpanReplacements.isNotEmpty), super(text: text);
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
@@ -315,7 +362,7 @@ class ReplacementTextEditingController extends TextEditingController {
   ReplacementTextEditingController.fromValue(TextEditingValue? value, {
     required this.textEditingInlineSpanReplacements,
     this.composingRegionPrioritized = false
-  }) : super.fromValue(value);
+  }) : assert(textEditingInlineSpanReplacements.isNotEmpty), super.fromValue(value);
 
   final List<TextEditingInlineSpanReplacement> textEditingInlineSpanReplacements;
 
