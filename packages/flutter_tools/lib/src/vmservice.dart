@@ -709,11 +709,16 @@ class FlutterVmService {
         'ext.flutter.exit',
         isolateId: isolateId,
       );
+      // A response of `null` indicates that `invokeFlutterExtensionRpcRaw` caught an RPCError
+      // with a missing method code. This can happen when attempting to quit a flutter app
+      // that never registered the methods in the bindings.
       if (result == null) {
         return false;
       }
     } on vm_service.SentinelException {
       // Do nothing on sentinel, the isolate already exited.
+    } on vm_service.RPCError {
+      // Do nothing on RPCError, the isolate already exited.
     }
     return true;
   }
