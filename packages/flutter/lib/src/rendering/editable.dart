@@ -3412,7 +3412,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(from != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextRange boundary = _getParagraphBoundary(text!, fromPosition);
+    final TextRange boundary = _getParagraphAtOffset(fromPosition);
 
 
     _setSelection(
@@ -3504,6 +3504,47 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     }
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
+  }
+
+  TextSelection _getParagraphAtOffset(TextPosition position) {
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+    }
+
+    int _getParagraphStart(TextSpan text, TextPosition position) {
+      int offset = position.offset;
+      int? codeUnit = text.codeUnitAt(offset);
+
+      while (codeUnit != null) {
+        if (_isLineFeed(codeUnit))
+          return offset;
+
+        offset--;
+        codeUnit = text.codeUnitAt(offset);
+      }
+
+      return 0;
+    }
+
+    int _getParagraphEnd(TextSpan text, TextPosition position) {
+      int offset = position.offset;
+      int? codeUnit = text.codeUnitAt(offset);
+
+      while (codeUnit != null) {
+        if (_isLineFeed(codeUnit))
+          return offset;
+
+        offset++;
+        codeUnit = text.codeUnitAt(offset);
+      }
+
+      return offset;
+    }
+
+    return TextSelection(
+      baseOffset: _getParagraphStart(text!, position),
+      extentOffset: _getParagraphEnd(text!, position)
+    );
   }
 
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
@@ -4226,41 +4267,4 @@ TextSelection _selectionExtendedTo({
   } else {
     return from;
   }
-}
-
-TextRange _getParagraphBoundary(TextSpan text, TextPosition position) {
-  int _getParagraphBoundaryStart(TextSpan text, TextPosition position) {
-    int offset = position.offset;
-    int? codeUnit = text.codeUnitAt(offset);
-
-    while (codeUnit != null) {
-      if (_isLineFeed(codeUnit))
-        return offset;
-
-      offset--;
-      codeUnit = text.codeUnitAt(offset);
-    }
-
-    return 0;
-  }
-
-  int _getParagraphBoundaryEnd(TextSpan text, TextPosition position) {
-    int offset = position.offset;
-    int? codeUnit = text.codeUnitAt(offset);
-
-    while (codeUnit != null) {
-      if (_isLineFeed(codeUnit))
-        return offset;
-
-      offset++;
-      codeUnit = text.codeUnitAt(offset);
-    }
-
-    return offset;
-  }
-
-  return TextRange(
-    start: _getParagraphBoundaryStart(text, position),
-    end: _getParagraphBoundaryEnd(text, position)
-  );
 }
