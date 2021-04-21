@@ -166,7 +166,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
-    this.maxOptionsHeight=200.0,
+    this.maxOptionsHeight = 200.0,
     this.optionsViewBuilder,
     this.initialValue,
   }) : assert(displayStringForOption != null),
@@ -197,7 +197,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// Defines the maximum height the options can take
   /// if optionsViewBuilder is null
   ///
-  /// Defaults to 200.0
+  /// Defaults to 200.
   final double maxOptionsHeight;
 
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
