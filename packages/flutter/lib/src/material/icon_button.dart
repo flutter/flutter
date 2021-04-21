@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'app_bar.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
@@ -330,7 +329,6 @@ class IconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
-
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;
