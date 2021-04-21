@@ -38,11 +38,9 @@ void verifyCommand(Command<Object> runner) {
 }
 
 // Patterns for arguments names.
-// The "ExtraFrontEndOptions", "ExtraGenSnapshotOptions", and "DartDefines" cases are special cases
-// that we should remove; search for "useLegacyNames" in commands/assemble.dart and other files.
 // TODO(ianh): consider changing all underscores to hyphens in argument names when we can do aliases.
 // That depends on being able to have argument aliases: https://github.com/dart-lang/args/issues/181
-final RegExp _allowedArgumentNamePattern = RegExp(r'^([-a-z0-9_]+|ExtraFrontEndOptions|ExtraGenSnapshotOptions|DartDefines)$');
+final RegExp _allowedArgumentNamePattern = RegExp(r'^([-a-z0-9_]+)$');
 
 // Patterns for help messages.
 final RegExp _bannedLeadingPatterns = RegExp(r'^[-a-z]', multiLine: true);
