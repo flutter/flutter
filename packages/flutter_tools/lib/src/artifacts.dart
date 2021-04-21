@@ -838,7 +838,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   }
 
   String _genSnapshotPath() {
-    const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386'];
+    const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386', 'clang_arm64'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (final String clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(engineOutPath, clangDir, genSnapshotName);
