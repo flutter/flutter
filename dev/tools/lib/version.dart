@@ -67,7 +67,7 @@ class Version {
 
     versionString = versionString.trim();
     // stable tag
-    Match match = versionPatterns[VersionType.stable]!.firstMatch(versionString)!;
+    Match? match = versionPatterns[VersionType.stable]!.firstMatch(versionString);
     if (match != null) {
       // parse stable
       final List<int> parts = match
@@ -82,7 +82,7 @@ class Version {
       );
     }
     // development tag
-    match = versionPatterns[VersionType.development]!.firstMatch(versionString)!;
+    match = versionPatterns[VersionType.development]!.firstMatch(versionString);
     if (match != null) {
       // parse development
       final List<int> parts =
@@ -97,7 +97,7 @@ class Version {
       );
     }
     // latest tag
-    match = versionPatterns[VersionType.latest]!.firstMatch(versionString)!;
+    match = versionPatterns[VersionType.latest]!.firstMatch(versionString);
     if (match != null) {
       // parse latest
       final List<int> parts = match.groups(
