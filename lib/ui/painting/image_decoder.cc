@@ -286,7 +286,7 @@ void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
                                                             flow);
 
         if (!decompressed) {
-          FML_LOG(ERROR) << "Could not decompress image.";
+          FML_DLOG(ERROR) << "Could not decompress image.";
           result({}, std::move(flow));
           return;
         }
@@ -298,7 +298,7 @@ void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
                                                flow =
                                                    std::move(flow)]() mutable {
           if (!io_manager) {
-            FML_LOG(ERROR) << "Could not acquire IO manager.";
+            FML_DLOG(ERROR) << "Could not acquire IO manager.";
             result({}, std::move(flow));
             return;
           }
@@ -316,7 +316,7 @@ void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
               UploadRasterImage(std::move(decompressed), io_manager, flow);
 
           if (!uploaded.get()) {
-            FML_LOG(ERROR) << "Could not upload image to the GPU.";
+            FML_DLOG(ERROR) << "Could not upload image to the GPU.";
             result({}, std::move(flow));
             return;
           }
