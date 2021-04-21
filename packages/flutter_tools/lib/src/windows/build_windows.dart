@@ -19,6 +19,7 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import '../project.dart';
+import 'install_manifest.dart';
 import 'visual_studio.dart';
 
 // From https://cmake.org/cmake/help/v3.15/manual/cmake-generators.7.html#visual-studio-generators
@@ -120,6 +121,7 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
   String target,
   VisualStudio visualStudioOverride,
 }) async {
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
   if (!windowsProject.existsSync()) {
     throwToolExit(
       'No Windows UWP desktop project configured. See '
@@ -136,6 +138,14 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
    // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.parent);
+  await createManifest(
+    buildDirectory: buildDirectory,
+    logger: globals.logger,
+    platform: globals.platform,
+    project: windowsProject,
+    buildInfo: buildInfo,
+    fileSystem: globals.fs,
+  );
 
   final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
     fileSystem: globals.fs,
@@ -149,7 +159,6 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
         'Please run `flutter doctor` for more details.');
   }
 
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
   final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
