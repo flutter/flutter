@@ -152,7 +152,7 @@ void main() {
     expect(versionInfo, containsPair('flutterRoot', isNotNull));
   });
 
-  testWithoutContext('A tool exit is thrown for an invalid debug-uri in flutter attach', () async {
+  testWithoutContext('A tool exit is thrown for an invalid debug-url in flutter attach', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
@@ -162,11 +162,11 @@ void main() {
       'attach',
       '-d',
       'flutter-tester',
-      '--debug-uri=http://127.0.0.1:3333*/',
+      '--debug-url=http://127.0.0.1:3333*/',
     ], workingDirectory: helloWorld);
 
     expect(result.exitCode, 1);
-    expect(result.stderr, contains('Invalid `--debug-uri`: http://127.0.0.1:3333*/'));
+    expect(result.stderr, contains('Invalid `--debug-url`: http://127.0.0.1:3333*/'));
   });
 
   testWithoutContext('will load bootstrap script before starting', () async {

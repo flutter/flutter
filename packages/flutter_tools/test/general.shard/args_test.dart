@@ -41,6 +41,7 @@ void verifyCommand(Command<Object> runner) {
 // TODO(ianh): consider changing all underscores to hyphens in argument names when we can do aliases.
 // That depends on being able to have argument aliases: https://github.com/dart-lang/args/issues/181
 final RegExp _allowedArgumentNamePattern = RegExp(r'^([-a-z0-9_]+)$');
+final RegExp _bannedArgumentNamePattern = RegExp(r'-uri$');
 
 // Patterns for help messages.
 final RegExp _bannedLeadingPatterns = RegExp(r'^[-a-z]', multiLine: true);
@@ -61,6 +62,7 @@ void verifyOptions(String command, Iterable<Option> options) {
   for (final Option option in options) {
     // If you think you need to add an exception here, please ask Hixie (but he'll say no).
     expect(option.name, matches(_allowedArgumentNamePattern), reason: '$_header$command--${option.name}" is not a valid name for a command line argument. (Is it all lowercase?)');
+    expect(option.name, isNot(matches(_bannedArgumentNamePattern)), reason: '$_header$command--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)');
     expect(option.hide, isFalse, reason: '${_header}Help for $command--${option.name}" is always hidden. $_needHelp');
     expect(option.help, isNotNull, reason: '${_header}Help for $command--${option.name}" has null help. $_needHelp');
     expect(option.help, isNotEmpty, reason: '${_header}Help for $command--${option.name}" has empty help. $_needHelp');
