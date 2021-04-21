@@ -562,11 +562,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('Howdy!'),
-            iconTheme: const IconThemeData(
-              size: 30,
-              opacity: 1.0,
-              color: Colors.white,
-            ),
+            iconTheme: const IconThemeData(size: 30),
           ),
           drawer: const Drawer(),
         ),
@@ -602,11 +598,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('Howdy!'),
-            iconTheme: const IconThemeData(
-              size: 30,
-              opacity: 1.0,
-              color: Colors.white,
-            ),
+            iconTheme: const IconThemeData(size: 30),
           ),
           endDrawer: const Drawer(),
         ),
