@@ -95,24 +95,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     return buffer.toString().trimRight();
   }
 
-  /// This generates a map between the physical code of sibling keys, such as
-  /// left and right shift, including both directions.
-  // String get _siblingKeyMap {
-  //   final StringBuffer siblingKeyMap = StringBuffer();
-  //   PhysicalKeyEntry.synonyms.forEach((String name, List<String> keyNames) {
-  //     assert(keyNames.length == 2);
-  //     final int first = keyData.getEntryByName(keyNames[0]).macOsScanCode;
-  //     final int second = keyData.getEntryByName(keyNames[1]).macOsScanCode;
-  //     if (first == null || second == null) {
-  //       print('Invalid sibling key: $name, $keyNames');
-  //     }
-  //     siblingKeyMap.writeln('  @${toHex(first)} : @${toHex(second)}, // $name');
-  //     siblingKeyMap.writeln('  @${toHex(second)} : @${toHex(first)}, // $name');
-  //   });
-  //   return siblingKeyMap.toString().trimRight();
-  // }
-
-  /// This generates a map from the key code of a modifier flag.
+  /// This generates a map from the key code to a modifier flag.
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
@@ -157,7 +140,6 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
       'MACOS_SCAN_CODE_MAP': _scanCodeMap,
       'MACOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
       'MASK_CONSTANTS': _maskConstants,
-      // 'SIBLING_KEY_MAP': _siblingKeyMap,
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,

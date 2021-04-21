@@ -473,22 +473,22 @@ class LogicalKeyEntry {
       'english': commentName,
       'value': value,
       'keyLabel': keyLabel,
-      'names': removeEmptyValues(<String, dynamic>{
+      'names': <String, dynamic>{
         'web': webNames,
         'macOs': macOsKeyCodeNames,
         'ios': iosKeyCodeNames,
         'gtk': gtkNames,
         'windows': windowsNames,
         'android': androidNames,
-      }),
-      'values': removeEmptyValues(<String, List<int>>{
+      },
+      'values': <String, List<int>>{
         'web': webValues,
         'macOs': macOsKeyCodeValues,
         'ios': iosKeyCodeValues,
         'gtk': gtkValues,
         'windows': windowsValues,
         'android': androidValues,
-      }),
+      },
     });
   }
 

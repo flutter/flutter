@@ -1,482 +1,443 @@
 {
-  "hyper": {
+  "None": {
     "names": {
-      "domkey": "Hyper",
-      "english": "Hyper",
-      "chromium": "hyper"
+      "name": "None"
+    },
+    "scanCodes": {
+      "usb": 0
+    }
+  },
+  "Hyper": {
+    "names": {
+      "name": "Hyper",
+      "chromium": "Hyper"
     },
     "scanCodes": {
       "usb": 16
-    },
-    "keyCodes": {}
+    }
   },
-  "superKey": {
+  "Super": {
     "names": {
-      "domkey": "Super",
-      "english": "Super Key",
-      "chromium": "super"
+      "name": "Super",
+      "chromium": "Super"
     },
     "scanCodes": {
       "usb": 17
-    },
-    "keyCodes": {}
+    }
   },
-  "fn": {
+  "Fn": {
     "names": {
-      "domkey": "Fn",
-      "english": "Fn",
-      "chromium": "fn"
+      "name": "Fn",
+      "chromium": "Fn"
     },
     "scanCodes": {
       "usb": 18,
       "macos": 63
-    },
-    "keyCodes": {}
+    }
   },
-  "fnLock": {
+  "FnLock": {
     "names": {
-      "domkey": "FnLock",
-      "english": "Fn Lock",
-      "chromium": "fnLock"
+      "name": "FnLock",
+      "chromium": "FnLock"
     },
     "scanCodes": {
       "usb": 19
-    },
-    "keyCodes": {}
+    }
   },
-  "suspend": {
+  "Suspend": {
     "names": {
-      "domkey": "Suspend",
-      "english": "Suspend",
-      "chromium": "suspend"
+      "name": "Suspend",
+      "chromium": "Suspend"
     },
     "scanCodes": {
       "usb": 20
-    },
-    "keyCodes": {}
+    }
   },
-  "resume": {
+  "Resume": {
     "names": {
-      "domkey": "Resume",
-      "english": "Resume",
-      "chromium": "resume"
+      "name": "Resume",
+      "chromium": "Resume"
     },
     "scanCodes": {
       "usb": 21
-    },
-    "keyCodes": {}
+    }
   },
-  "turbo": {
+  "Turbo": {
     "names": {
-      "domkey": "Turbo",
-      "english": "Turbo",
-      "chromium": "turbo"
+      "name": "Turbo",
+      "chromium": "Turbo"
     },
     "scanCodes": {
       "usb": 22
-    },
-    "keyCodes": {}
+    }
   },
-  "privacyScreenToggle": {
+  "PrivacyScreenToggle": {
     "names": {
-      "domkey": "PrivacyScreenToggle",
-      "english": "Privacy Screen Toggle",
-      "chromium": "privacyScreenToggle"
+      "name": "PrivacyScreenToggle",
+      "chromium": "PrivacyScreenToggle"
     },
     "scanCodes": {
       "usb": 23,
       "linux": 633,
       "xkb": 641
-    },
-    "keyCodes": {}
+    }
   },
-  "sleep": {
+  "Sleep": {
     "names": {
-      "domkey": "Sleep",
-      "english": "Sleep",
-      "chromium": "sleep"
+      "name": "Sleep",
+      "chromium": "Sleep"
     },
     "scanCodes": {
       "usb": 65666,
       "linux": 142,
       "xkb": 150,
       "windows": 57439
-    },
-    "keyCodes": {}
+    }
   },
-  "wakeUp": {
+  "WakeUp": {
     "names": {
-      "domkey": "WakeUp",
-      "english": "Wake Up",
-      "chromium": "wakeUp"
+      "name": "WakeUp",
+      "chromium": "WakeUp"
     },
     "scanCodes": {
       "usb": 65667,
       "linux": 143,
       "xkb": 151,
       "windows": 57443
-    },
-    "keyCodes": {}
+    }
   },
-  "displayToggleIntExt": {
+  "DisplayToggleIntExt": {
     "names": {
-      "domkey": "DisplayToggleIntExt",
-      "english": "Display Toggle Int Ext",
-      "chromium": "displayToggleIntExt"
+      "name": "DisplayToggleIntExt",
+      "chromium": "DisplayToggleIntExt"
     },
     "scanCodes": {
       "usb": 65717,
       "linux": 227,
       "xkb": 235
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton1": {
+  "GameButton1": {
     "names": {
-      "domkey": "GameButton1",
-      "english": "Game Button 1",
-      "chromium": "button1"
+      "name": "GameButton1",
+      "chromium": "GameButton1"
     },
     "scanCodes": {
       "usb": 392961
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton2": {
+  "GameButton2": {
     "names": {
-      "domkey": "GameButton2",
-      "english": "Game Button 2",
-      "chromium": "button2"
+      "name": "GameButton2",
+      "chromium": "GameButton2"
     },
     "scanCodes": {
       "usb": 392962
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton3": {
+  "GameButton3": {
     "names": {
-      "domkey": "GameButton3",
-      "english": "Game Button 3",
-      "chromium": "button3"
+      "name": "GameButton3",
+      "chromium": "GameButton3"
     },
     "scanCodes": {
       "usb": 392963
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton4": {
+  "GameButton4": {
     "names": {
-      "domkey": "GameButton4",
-      "english": "Game Button 4",
-      "chromium": "button4"
+      "name": "GameButton4",
+      "chromium": "GameButton4"
     },
     "scanCodes": {
       "usb": 392964
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton5": {
+  "GameButton5": {
     "names": {
-      "domkey": "GameButton5",
-      "english": "Game Button 5",
-      "chromium": "button5"
+      "name": "GameButton5",
+      "chromium": "GameButton5"
     },
     "scanCodes": {
       "usb": 392965
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton6": {
+  "GameButton6": {
     "names": {
-      "domkey": "GameButton6",
-      "english": "Game Button 6",
-      "chromium": "button6"
+      "name": "GameButton6",
+      "chromium": "GameButton6"
     },
     "scanCodes": {
       "usb": 392966
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton7": {
+  "GameButton7": {
     "names": {
-      "domkey": "GameButton7",
-      "english": "Game Button 7",
-      "chromium": "button7"
+      "name": "GameButton7",
+      "chromium": "GameButton7"
     },
     "scanCodes": {
       "usb": 392967
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton8": {
+  "GameButton8": {
     "names": {
-      "domkey": "GameButton8",
-      "english": "Game Button 8",
-      "chromium": "button8"
+      "name": "GameButton8",
+      "chromium": "GameButton8"
     },
     "scanCodes": {
       "usb": 392968
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton9": {
+  "GameButton9": {
     "names": {
-      "domkey": "GameButton9",
-      "english": "Game Button 9",
-      "chromium": "button9"
+      "name": "GameButton9",
+      "chromium": "GameButton9"
     },
     "scanCodes": {
       "usb": 392969
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton10": {
+  "GameButton10": {
     "names": {
-      "domkey": "GameButton10",
-      "english": "Game Button 10",
-      "chromium": "button10"
+      "name": "GameButton10",
+      "chromium": "GameButton10"
     },
     "scanCodes": {
       "usb": 392970
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton11": {
+  "GameButton11": {
     "names": {
-      "domkey": "GameButton11",
-      "english": "Game Button 11",
-      "chromium": "button11"
+      "name": "GameButton11",
+      "chromium": "GameButton11"
     },
     "scanCodes": {
       "usb": 392971
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton12": {
+  "GameButton12": {
     "names": {
-      "domkey": "GameButton12",
-      "english": "Game Button 12",
-      "chromium": "button12"
+      "name": "GameButton12",
+      "chromium": "GameButton12"
     },
     "scanCodes": {
       "usb": 392972
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton13": {
+  "GameButton13": {
     "names": {
-      "domkey": "GameButton13",
-      "english": "Game Button 13",
-      "chromium": "button13"
+      "name": "GameButton13",
+      "chromium": "GameButton13"
     },
     "scanCodes": {
       "usb": 392973
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton14": {
+  "GameButton14": {
     "names": {
-      "domkey": "GameButton14",
-      "english": "Game Button 14",
-      "chromium": "button14"
+      "name": "GameButton14",
+      "chromium": "GameButton14"
     },
     "scanCodes": {
       "usb": 392974
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton15": {
+  "GameButton15": {
     "names": {
-      "domkey": "GameButton15",
-      "english": "Game Button 15",
-      "chromium": "button15"
+      "name": "GameButton15",
+      "chromium": "GameButton15"
     },
     "scanCodes": {
       "usb": 392975
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButton16": {
+  "GameButton16": {
     "names": {
-      "domkey": "GameButton16",
-      "english": "Game Button 16",
-      "chromium": "button16"
+      "name": "GameButton16",
+      "chromium": "GameButton16"
     },
     "scanCodes": {
       "usb": 392976
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonA": {
+  "GameButtonA": {
     "names": {
-      "domkey": "GameButtonA",
-      "english": "Game Button A",
-      "chromium": "buttonA"
+      "name": "GameButtonA",
+      "chromium": "GameButtonA"
     },
     "scanCodes": {
       "usb": 392977
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonB": {
+  "GameButtonB": {
     "names": {
-      "domkey": "GameButtonB",
-      "english": "Game Button B",
-      "chromium": "buttonB"
+      "name": "GameButtonB",
+      "chromium": "GameButtonB"
     },
     "scanCodes": {
       "usb": 392978
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonC": {
+  "GameButtonC": {
     "names": {
-      "domkey": "GameButtonC",
-      "english": "Game Button C",
-      "chromium": "buttonC"
+      "name": "GameButtonC",
+      "chromium": "GameButtonC"
     },
     "scanCodes": {
       "usb": 392979
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonLeft1": {
+  "GameButtonLeft1": {
     "names": {
-      "domkey": "GameButtonLeft1",
-      "english": "Game Button Left 1",
-      "chromium": "buttonL1"
+      "name": "GameButtonLeft1",
+      "chromium": "GameButtonLeft1"
     },
     "scanCodes": {
       "usb": 392980
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonLeft2": {
+  "GameButtonLeft2": {
     "names": {
-      "domkey": "GameButtonLeft2",
-      "english": "Game Button Left 2",
-      "chromium": "buttonL2"
+      "name": "GameButtonLeft2",
+      "chromium": "GameButtonLeft2"
     },
     "scanCodes": {
       "usb": 392981
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonMode": {
+  "GameButtonMode": {
     "names": {
-      "domkey": "GameButtonMode",
-      "english": "Game Button Mode",
-      "chromium": "buttonMode"
+      "name": "GameButtonMode",
+      "chromium": "GameButtonMode"
     },
     "scanCodes": {
       "usb": 392982
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonRight1": {
+  "GameButtonRight1": {
     "names": {
-      "domkey": "GameButtonRight1",
-      "english": "Game Button Right 1",
-      "chromium": "buttonR1"
+      "name": "GameButtonRight1",
+      "chromium": "GameButtonRight1"
     },
     "scanCodes": {
       "usb": 392983
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonRight2": {
+  "GameButtonRight2": {
     "names": {
-      "domkey": "GameButtonRight2",
-      "english": "Game Button Right 2",
-      "chromium": "buttonR2"
+      "name": "GameButtonRight2",
+      "chromium": "GameButtonRight2"
     },
     "scanCodes": {
       "usb": 392984
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonSelect": {
+  "GameButtonSelect": {
     "names": {
-      "domkey": "GameButtonSelect",
-      "english": "Game Button Select",
-      "chromium": "buttonSelect"
+      "name": "GameButtonSelect",
+      "chromium": "GameButtonSelect"
     },
     "scanCodes": {
       "usb": 392985
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonStart": {
+  "GameButtonStart": {
     "names": {
-      "domkey": "GameButtonStart",
-      "english": "Game Button Start",
-      "chromium": "buttonStart"
+      "name": "GameButtonStart",
+      "chromium": "GameButtonStart"
     },
     "scanCodes": {
       "usb": 392986
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonThumbLeft": {
+  "GameButtonThumbLeft": {
     "names": {
-      "domkey": "GameButtonThumbLeft",
-      "english": "Game Button Thumb Left",
-      "chromium": "buttonThumbl"
+      "name": "GameButtonThumbLeft",
+      "chromium": "GameButtonThumbLeft"
     },
     "scanCodes": {
       "usb": 392987
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonThumbRight": {
+  "GameButtonThumbRight": {
     "names": {
-      "domkey": "GameButtonThumbRight",
-      "english": "Game Button Thumb Right",
-      "chromium": "buttonThumbr"
+      "name": "GameButtonThumbRight",
+      "chromium": "GameButtonThumbRight"
     },
     "scanCodes": {
       "usb": 392988
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonX": {
+  "GameButtonX": {
     "names": {
-      "domkey": "GameButtonX",
-      "english": "Game Button X",
-      "chromium": "buttonX"
+      "name": "GameButtonX",
+      "chromium": "GameButtonX"
     },
     "scanCodes": {
       "usb": 392989
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonY": {
+  "GameButtonY": {
     "names": {
-      "domkey": "GameButtonY",
-      "english": "Game Button Y",
-      "chromium": "buttonY"
+      "name": "GameButtonY",
+      "chromium": "GameButtonY"
     },
     "scanCodes": {
       "usb": 392990
-    },
-    "keyCodes": {}
+    }
   },
-  "gameButtonZ": {
+  "GameButtonZ": {
     "names": {
-      "domkey": "GameButtonZ",
-      "english": "Game Button Z",
-      "chromium": "buttonZ"
+      "name": "GameButtonZ",
+      "chromium": "GameButtonZ"
     },
     "scanCodes": {
       "usb": 392991
-    },
-    "keyCodes": {}
+    }
   },
-  "keyA": {
+  "UsbReserved": {
     "names": {
-      "domkey": "KeyA",
-      "english": "Key A",
-      "chromium": "usA"
+      "name": "UsbReserved"
+    },
+    "scanCodes": {
+      "usb": 458752,
+      "ios": 0
+    }
+  },
+  "UsbErrorRollOver": {
+    "names": {
+      "name": "UsbErrorRollOver"
+    },
+    "scanCodes": {
+      "usb": 458753,
+      "windows": 255,
+      "ios": 1
+    }
+  },
+  "UsbPostFail": {
+    "names": {
+      "name": "UsbPostFail"
+    },
+    "scanCodes": {
+      "usb": 458754,
+      "windows": 252,
+      "ios": 2
+    }
+  },
+  "UsbErrorUndefined": {
+    "names": {
+      "name": "UsbErrorUndefined"
+    },
+    "scanCodes": {
+      "usb": 458755,
+      "ios": 3
+    }
+  },
+  "KeyA": {
+    "names": {
+      "name": "KeyA",
+      "chromium": "KeyA"
     },
     "scanCodes": {
       "usb": 458756,
@@ -485,14 +446,12 @@
       "windows": 30,
       "macos": 0,
       "ios": 4
-    },
-    "keyCodes": {}
+    }
   },
-  "keyB": {
+  "KeyB": {
     "names": {
-      "domkey": "KeyB",
-      "english": "Key B",
-      "chromium": "usB"
+      "name": "KeyB",
+      "chromium": "KeyB"
     },
     "scanCodes": {
       "usb": 458757,
@@ -501,14 +460,12 @@
       "windows": 48,
       "macos": 11,
       "ios": 5
-    },
-    "keyCodes": {}
+    }
   },
-  "keyC": {
+  "KeyC": {
     "names": {
-      "domkey": "KeyC",
-      "english": "Key C",
-      "chromium": "usC"
+      "name": "KeyC",
+      "chromium": "KeyC"
     },
     "scanCodes": {
       "usb": 458758,
@@ -517,14 +474,12 @@
       "windows": 46,
       "macos": 8,
       "ios": 6
-    },
-    "keyCodes": {}
+    }
   },
-  "keyD": {
+  "KeyD": {
     "names": {
-      "domkey": "KeyD",
-      "english": "Key D",
-      "chromium": "usD"
+      "name": "KeyD",
+      "chromium": "KeyD"
     },
     "scanCodes": {
       "usb": 458759,
@@ -533,14 +488,12 @@
       "windows": 32,
       "macos": 2,
       "ios": 7
-    },
-    "keyCodes": {}
+    }
   },
-  "keyE": {
+  "KeyE": {
     "names": {
-      "domkey": "KeyE",
-      "english": "Key E",
-      "chromium": "usE"
+      "name": "KeyE",
+      "chromium": "KeyE"
     },
     "scanCodes": {
       "usb": 458760,
@@ -549,14 +502,12 @@
       "windows": 18,
       "macos": 14,
       "ios": 8
-    },
-    "keyCodes": {}
+    }
   },
-  "keyF": {
+  "KeyF": {
     "names": {
-      "domkey": "KeyF",
-      "english": "Key F",
-      "chromium": "usF"
+      "name": "KeyF",
+      "chromium": "KeyF"
     },
     "scanCodes": {
       "usb": 458761,
@@ -565,14 +516,12 @@
       "windows": 33,
       "macos": 3,
       "ios": 9
-    },
-    "keyCodes": {}
+    }
   },
-  "keyG": {
+  "KeyG": {
     "names": {
-      "domkey": "KeyG",
-      "english": "Key G",
-      "chromium": "usG"
+      "name": "KeyG",
+      "chromium": "KeyG"
     },
     "scanCodes": {
       "usb": 458762,
@@ -581,14 +530,12 @@
       "windows": 34,
       "macos": 5,
       "ios": 10
-    },
-    "keyCodes": {}
+    }
   },
-  "keyH": {
+  "KeyH": {
     "names": {
-      "domkey": "KeyH",
-      "english": "Key H",
-      "chromium": "usH"
+      "name": "KeyH",
+      "chromium": "KeyH"
     },
     "scanCodes": {
       "usb": 458763,
@@ -597,14 +544,12 @@
       "windows": 35,
       "macos": 4,
       "ios": 11
-    },
-    "keyCodes": {}
+    }
   },
-  "keyI": {
+  "KeyI": {
     "names": {
-      "domkey": "KeyI",
-      "english": "Key I",
-      "chromium": "usI"
+      "name": "KeyI",
+      "chromium": "KeyI"
     },
     "scanCodes": {
       "usb": 458764,
@@ -613,14 +558,12 @@
       "windows": 23,
       "macos": 34,
       "ios": 12
-    },
-    "keyCodes": {}
+    }
   },
-  "keyJ": {
+  "KeyJ": {
     "names": {
-      "domkey": "KeyJ",
-      "english": "Key J",
-      "chromium": "usJ"
+      "name": "KeyJ",
+      "chromium": "KeyJ"
     },
     "scanCodes": {
       "usb": 458765,
@@ -629,14 +572,12 @@
       "windows": 36,
       "macos": 38,
       "ios": 13
-    },
-    "keyCodes": {}
+    }
   },
-  "keyK": {
+  "KeyK": {
     "names": {
-      "domkey": "KeyK",
-      "english": "Key K",
-      "chromium": "usK"
+      "name": "KeyK",
+      "chromium": "KeyK"
     },
     "scanCodes": {
       "usb": 458766,
@@ -645,14 +586,12 @@
       "windows": 37,
       "macos": 40,
       "ios": 14
-    },
-    "keyCodes": {}
+    }
   },
-  "keyL": {
+  "KeyL": {
     "names": {
-      "domkey": "KeyL",
-      "english": "Key L",
-      "chromium": "usL"
+      "name": "KeyL",
+      "chromium": "KeyL"
     },
     "scanCodes": {
       "usb": 458767,
@@ -661,14 +600,12 @@
       "windows": 38,
       "macos": 37,
       "ios": 15
-    },
-    "keyCodes": {}
+    }
   },
-  "keyM": {
+  "KeyM": {
     "names": {
-      "domkey": "KeyM",
-      "english": "Key M",
-      "chromium": "usM"
+      "name": "KeyM",
+      "chromium": "KeyM"
     },
     "scanCodes": {
       "usb": 458768,
@@ -677,14 +614,12 @@
       "windows": 50,
       "macos": 46,
       "ios": 16
-    },
-    "keyCodes": {}
+    }
   },
-  "keyN": {
+  "KeyN": {
     "names": {
-      "domkey": "KeyN",
-      "english": "Key N",
-      "chromium": "usN"
+      "name": "KeyN",
+      "chromium": "KeyN"
     },
     "scanCodes": {
       "usb": 458769,
@@ -693,14 +628,12 @@
       "windows": 49,
       "macos": 45,
       "ios": 17
-    },
-    "keyCodes": {}
+    }
   },
-  "keyO": {
+  "KeyO": {
     "names": {
-      "domkey": "KeyO",
-      "english": "Key O",
-      "chromium": "usO"
+      "name": "KeyO",
+      "chromium": "KeyO"
     },
     "scanCodes": {
       "usb": 458770,
@@ -709,14 +642,12 @@
       "windows": 24,
       "macos": 31,
       "ios": 18
-    },
-    "keyCodes": {}
+    }
   },
-  "keyP": {
+  "KeyP": {
     "names": {
-      "domkey": "KeyP",
-      "english": "Key P",
-      "chromium": "usP"
+      "name": "KeyP",
+      "chromium": "KeyP"
     },
     "scanCodes": {
       "usb": 458771,
@@ -725,14 +656,12 @@
       "windows": 25,
       "macos": 35,
       "ios": 19
-    },
-    "keyCodes": {}
+    }
   },
-  "keyQ": {
+  "KeyQ": {
     "names": {
-      "domkey": "KeyQ",
-      "english": "Key Q",
-      "chromium": "usQ"
+      "name": "KeyQ",
+      "chromium": "KeyQ"
     },
     "scanCodes": {
       "usb": 458772,
@@ -741,14 +670,12 @@
       "windows": 16,
       "macos": 12,
       "ios": 20
-    },
-    "keyCodes": {}
+    }
   },
-  "keyR": {
+  "KeyR": {
     "names": {
-      "domkey": "KeyR",
-      "english": "Key R",
-      "chromium": "usR"
+      "name": "KeyR",
+      "chromium": "KeyR"
     },
     "scanCodes": {
       "usb": 458773,
@@ -757,14 +684,12 @@
       "windows": 19,
       "macos": 15,
       "ios": 21
-    },
-    "keyCodes": {}
+    }
   },
-  "keyS": {
+  "KeyS": {
     "names": {
-      "domkey": "KeyS",
-      "english": "Key S",
-      "chromium": "usS"
+      "name": "KeyS",
+      "chromium": "KeyS"
     },
     "scanCodes": {
       "usb": 458774,
@@ -773,14 +698,12 @@
       "windows": 31,
       "macos": 1,
       "ios": 22
-    },
-    "keyCodes": {}
+    }
   },
-  "keyT": {
+  "KeyT": {
     "names": {
-      "domkey": "KeyT",
-      "english": "Key T",
-      "chromium": "usT"
+      "name": "KeyT",
+      "chromium": "KeyT"
     },
     "scanCodes": {
       "usb": 458775,
@@ -789,14 +712,12 @@
       "windows": 20,
       "macos": 17,
       "ios": 23
-    },
-    "keyCodes": {}
+    }
   },
-  "keyU": {
+  "KeyU": {
     "names": {
-      "domkey": "KeyU",
-      "english": "Key U",
-      "chromium": "usU"
+      "name": "KeyU",
+      "chromium": "KeyU"
     },
     "scanCodes": {
       "usb": 458776,
@@ -805,14 +726,12 @@
       "windows": 22,
       "macos": 32,
       "ios": 24
-    },
-    "keyCodes": {}
+    }
   },
-  "keyV": {
+  "KeyV": {
     "names": {
-      "domkey": "KeyV",
-      "english": "Key V",
-      "chromium": "usV"
+      "name": "KeyV",
+      "chromium": "KeyV"
     },
     "scanCodes": {
       "usb": 458777,
@@ -821,14 +740,12 @@
       "windows": 47,
       "macos": 9,
       "ios": 25
-    },
-    "keyCodes": {}
+    }
   },
-  "keyW": {
+  "KeyW": {
     "names": {
-      "domkey": "KeyW",
-      "english": "Key W",
-      "chromium": "usW"
+      "name": "KeyW",
+      "chromium": "KeyW"
     },
     "scanCodes": {
       "usb": 458778,
@@ -837,14 +754,12 @@
       "windows": 17,
       "macos": 13,
       "ios": 26
-    },
-    "keyCodes": {}
+    }
   },
-  "keyX": {
+  "KeyX": {
     "names": {
-      "domkey": "KeyX",
-      "english": "Key X",
-      "chromium": "usX"
+      "name": "KeyX",
+      "chromium": "KeyX"
     },
     "scanCodes": {
       "usb": 458779,
@@ -853,14 +768,12 @@
       "windows": 45,
       "macos": 7,
       "ios": 27
-    },
-    "keyCodes": {}
+    }
   },
-  "keyY": {
+  "KeyY": {
     "names": {
-      "domkey": "KeyY",
-      "english": "Key Y",
-      "chromium": "usY"
+      "name": "KeyY",
+      "chromium": "KeyY"
     },
     "scanCodes": {
       "usb": 458780,
@@ -869,14 +782,12 @@
       "windows": 21,
       "macos": 16,
       "ios": 28
-    },
-    "keyCodes": {}
+    }
   },
-  "keyZ": {
+  "KeyZ": {
     "names": {
-      "domkey": "KeyZ",
-      "english": "Key Z",
-      "chromium": "usZ"
+      "name": "KeyZ",
+      "chromium": "KeyZ"
     },
     "scanCodes": {
       "usb": 458781,
@@ -885,14 +796,12 @@
       "windows": 44,
       "macos": 6,
       "ios": 29
-    },
-    "keyCodes": {}
+    }
   },
-  "digit1": {
+  "Digit1": {
     "names": {
-      "domkey": "Digit1",
-      "english": "Digit 1",
-      "chromium": "digit1"
+      "name": "Digit1",
+      "chromium": "Digit1"
     },
     "scanCodes": {
       "usb": 458782,
@@ -901,14 +810,12 @@
       "windows": 2,
       "macos": 18,
       "ios": 30
-    },
-    "keyCodes": {}
+    }
   },
-  "digit2": {
+  "Digit2": {
     "names": {
-      "domkey": "Digit2",
-      "english": "Digit 2",
-      "chromium": "digit2"
+      "name": "Digit2",
+      "chromium": "Digit2"
     },
     "scanCodes": {
       "usb": 458783,
@@ -917,14 +824,12 @@
       "windows": 3,
       "macos": 19,
       "ios": 31
-    },
-    "keyCodes": {}
+    }
   },
-  "digit3": {
+  "Digit3": {
     "names": {
-      "domkey": "Digit3",
-      "english": "Digit 3",
-      "chromium": "digit3"
+      "name": "Digit3",
+      "chromium": "Digit3"
     },
     "scanCodes": {
       "usb": 458784,
@@ -933,14 +838,12 @@
       "windows": 4,
       "macos": 20,
       "ios": 32
-    },
-    "keyCodes": {}
+    }
   },
-  "digit4": {
+  "Digit4": {
     "names": {
-      "domkey": "Digit4",
-      "english": "Digit 4",
-      "chromium": "digit4"
+      "name": "Digit4",
+      "chromium": "Digit4"
     },
     "scanCodes": {
       "usb": 458785,
@@ -949,14 +852,12 @@
       "windows": 5,
       "macos": 21,
       "ios": 33
-    },
-    "keyCodes": {}
+    }
   },
-  "digit5": {
+  "Digit5": {
     "names": {
-      "domkey": "Digit5",
-      "english": "Digit 5",
-      "chromium": "digit5"
+      "name": "Digit5",
+      "chromium": "Digit5"
     },
     "scanCodes": {
       "usb": 458786,
@@ -965,14 +866,12 @@
       "windows": 6,
       "macos": 23,
       "ios": 34
-    },
-    "keyCodes": {}
+    }
   },
-  "digit6": {
+  "Digit6": {
     "names": {
-      "domkey": "Digit6",
-      "english": "Digit 6",
-      "chromium": "digit6"
+      "name": "Digit6",
+      "chromium": "Digit6"
     },
     "scanCodes": {
       "usb": 458787,
@@ -981,14 +880,12 @@
       "windows": 7,
       "macos": 22,
       "ios": 35
-    },
-    "keyCodes": {}
+    }
   },
-  "digit7": {
+  "Digit7": {
     "names": {
-      "domkey": "Digit7",
-      "english": "Digit 7",
-      "chromium": "digit7"
+      "name": "Digit7",
+      "chromium": "Digit7"
     },
     "scanCodes": {
       "usb": 458788,
@@ -997,14 +894,12 @@
       "windows": 8,
       "macos": 26,
       "ios": 36
-    },
-    "keyCodes": {}
+    }
   },
-  "digit8": {
+  "Digit8": {
     "names": {
-      "domkey": "Digit8",
-      "english": "Digit 8",
-      "chromium": "digit8"
+      "name": "Digit8",
+      "chromium": "Digit8"
     },
     "scanCodes": {
       "usb": 458789,
@@ -1013,14 +908,12 @@
       "windows": 9,
       "macos": 28,
       "ios": 37
-    },
-    "keyCodes": {}
+    }
   },
-  "digit9": {
+  "Digit9": {
     "names": {
-      "domkey": "Digit9",
-      "english": "Digit 9",
-      "chromium": "digit9"
+      "name": "Digit9",
+      "chromium": "Digit9"
     },
     "scanCodes": {
       "usb": 458790,
@@ -1029,14 +922,12 @@
       "windows": 10,
       "macos": 25,
       "ios": 38
-    },
-    "keyCodes": {}
+    }
   },
-  "digit0": {
+  "Digit0": {
     "names": {
-      "domkey": "Digit0",
-      "english": "Digit 0",
-      "chromium": "digit0"
+      "name": "Digit0",
+      "chromium": "Digit0"
     },
     "scanCodes": {
       "usb": 458791,
@@ -1045,14 +936,12 @@
       "windows": 11,
       "macos": 29,
       "ios": 39
-    },
-    "keyCodes": {}
+    }
   },
-  "enter": {
+  "Enter": {
     "names": {
-      "domkey": "Enter",
-      "english": "Enter",
-      "chromium": "enter"
+      "name": "Enter",
+      "chromium": "Enter"
     },
     "scanCodes": {
       "usb": 458792,
@@ -1061,14 +950,12 @@
       "windows": 28,
       "macos": 36,
       "ios": 40
-    },
-    "keyCodes": {}
+    }
   },
-  "escape": {
+  "Escape": {
     "names": {
-      "domkey": "Escape",
-      "english": "Escape",
-      "chromium": "escape"
+      "name": "Escape",
+      "chromium": "Escape"
     },
     "scanCodes": {
       "usb": 458793,
@@ -1077,14 +964,12 @@
       "windows": 1,
       "macos": 53,
       "ios": 41
-    },
-    "keyCodes": {}
+    }
   },
-  "backspace": {
+  "Backspace": {
     "names": {
-      "domkey": "Backspace",
-      "english": "Backspace",
-      "chromium": "backspace"
+      "name": "Backspace",
+      "chromium": "Backspace"
     },
     "scanCodes": {
       "usb": 458794,
@@ -1093,14 +978,12 @@
       "windows": 14,
       "macos": 51,
       "ios": 42
-    },
-    "keyCodes": {}
+    }
   },
-  "tab": {
+  "Tab": {
     "names": {
-      "domkey": "Tab",
-      "english": "Tab",
-      "chromium": "tab"
+      "name": "Tab",
+      "chromium": "Tab"
     },
     "scanCodes": {
       "usb": 458795,
@@ -1109,14 +992,12 @@
       "windows": 15,
       "macos": 48,
       "ios": 43
-    },
-    "keyCodes": {}
+    }
   },
-  "space": {
+  "Space": {
     "names": {
-      "domkey": "Space",
-      "english": "Space",
-      "chromium": "space"
+      "name": "Space",
+      "chromium": "Space"
     },
     "scanCodes": {
       "usb": 458796,
@@ -1125,14 +1006,12 @@
       "windows": 57,
       "macos": 49,
       "ios": 44
-    },
-    "keyCodes": {}
+    }
   },
-  "minus": {
+  "Minus": {
     "names": {
-      "domkey": "Minus",
-      "english": "Minus",
-      "chromium": "minus"
+      "name": "Minus",
+      "chromium": "Minus"
     },
     "scanCodes": {
       "usb": 458797,
@@ -1141,14 +1020,12 @@
       "windows": 12,
       "macos": 27,
       "ios": 45
-    },
-    "keyCodes": {}
+    }
   },
-  "equal": {
+  "Equal": {
     "names": {
-      "domkey": "Equal",
-      "english": "Equal",
-      "chromium": "equal"
+      "name": "Equal",
+      "chromium": "Equal"
     },
     "scanCodes": {
       "usb": 458798,
@@ -1157,14 +1034,12 @@
       "windows": 13,
       "macos": 24,
       "ios": 46
-    },
-    "keyCodes": {}
+    }
   },
-  "bracketLeft": {
+  "BracketLeft": {
     "names": {
-      "domkey": "BracketLeft",
-      "english": "Bracket Left",
-      "chromium": "bracketLeft"
+      "name": "BracketLeft",
+      "chromium": "BracketLeft"
     },
     "scanCodes": {
       "usb": 458799,
@@ -1173,14 +1048,12 @@
       "windows": 26,
       "macos": 33,
       "ios": 47
-    },
-    "keyCodes": {}
+    }
   },
-  "bracketRight": {
+  "BracketRight": {
     "names": {
-      "domkey": "BracketRight",
-      "english": "Bracket Right",
-      "chromium": "bracketRight"
+      "name": "BracketRight",
+      "chromium": "BracketRight"
     },
     "scanCodes": {
       "usb": 458800,
@@ -1189,14 +1062,12 @@
       "windows": 27,
       "macos": 30,
       "ios": 48
-    },
-    "keyCodes": {}
+    }
   },
-  "backslash": {
+  "Backslash": {
     "names": {
-      "domkey": "Backslash",
-      "english": "Backslash",
-      "chromium": "backslash"
+      "name": "Backslash",
+      "chromium": "Backslash"
     },
     "scanCodes": {
       "usb": 458801,
@@ -1205,14 +1076,12 @@
       "windows": 43,
       "macos": 42,
       "ios": 49
-    },
-    "keyCodes": {}
+    }
   },
-  "semicolon": {
+  "Semicolon": {
     "names": {
-      "domkey": "Semicolon",
-      "english": "Semicolon",
-      "chromium": "semicolon"
+      "name": "Semicolon",
+      "chromium": "Semicolon"
     },
     "scanCodes": {
       "usb": 458803,
@@ -1221,14 +1090,12 @@
       "windows": 39,
       "macos": 41,
       "ios": 51
-    },
-    "keyCodes": {}
+    }
   },
-  "quote": {
+  "Quote": {
     "names": {
-      "domkey": "Quote",
-      "english": "Quote",
-      "chromium": "quote"
+      "name": "Quote",
+      "chromium": "Quote"
     },
     "scanCodes": {
       "usb": 458804,
@@ -1237,14 +1104,12 @@
       "windows": 40,
       "macos": 39,
       "ios": 52
-    },
-    "keyCodes": {}
+    }
   },
-  "backquote": {
+  "Backquote": {
     "names": {
-      "domkey": "Backquote",
-      "english": "Backquote",
-      "chromium": "backquote"
+      "name": "Backquote",
+      "chromium": "Backquote"
     },
     "scanCodes": {
       "usb": 458805,
@@ -1253,14 +1118,12 @@
       "windows": 41,
       "macos": 50,
       "ios": 53
-    },
-    "keyCodes": {}
+    }
   },
-  "comma": {
+  "Comma": {
     "names": {
-      "domkey": "Comma",
-      "english": "Comma",
-      "chromium": "comma"
+      "name": "Comma",
+      "chromium": "Comma"
     },
     "scanCodes": {
       "usb": 458806,
@@ -1269,14 +1132,12 @@
       "windows": 51,
       "macos": 43,
       "ios": 54
-    },
-    "keyCodes": {}
+    }
   },
-  "period": {
+  "Period": {
     "names": {
-      "domkey": "Period",
-      "english": "Period",
-      "chromium": "period"
+      "name": "Period",
+      "chromium": "Period"
     },
     "scanCodes": {
       "usb": 458807,
@@ -1285,14 +1146,12 @@
       "windows": 52,
       "macos": 47,
       "ios": 55
-    },
-    "keyCodes": {}
+    }
   },
-  "slash": {
+  "Slash": {
     "names": {
-      "domkey": "Slash",
-      "english": "Slash",
-      "chromium": "slash"
+      "name": "Slash",
+      "chromium": "Slash"
     },
     "scanCodes": {
       "usb": 458808,
@@ -1301,14 +1160,12 @@
       "windows": 53,
       "macos": 44,
       "ios": 56
-    },
-    "keyCodes": {}
+    }
   },
-  "capsLock": {
+  "CapsLock": {
     "names": {
-      "domkey": "CapsLock",
-      "english": "Caps Lock",
-      "chromium": "capsLock"
+      "name": "CapsLock",
+      "chromium": "CapsLock"
     },
     "scanCodes": {
       "usb": 458809,
@@ -1317,14 +1174,12 @@
       "windows": 58,
       "macos": 57,
       "ios": 57
-    },
-    "keyCodes": {}
+    }
   },
-  "f1": {
+  "F1": {
     "names": {
-      "domkey": "F1",
-      "english": "F1",
-      "chromium": "f1"
+      "name": "F1",
+      "chromium": "F1"
     },
     "scanCodes": {
       "usb": 458810,
@@ -1333,14 +1188,12 @@
       "windows": 59,
       "macos": 122,
       "ios": 58
-    },
-    "keyCodes": {}
+    }
   },
-  "f2": {
+  "F2": {
     "names": {
-      "domkey": "F2",
-      "english": "F2",
-      "chromium": "f2"
+      "name": "F2",
+      "chromium": "F2"
     },
     "scanCodes": {
       "usb": 458811,
@@ -1349,14 +1202,12 @@
       "windows": 60,
       "macos": 120,
       "ios": 59
-    },
-    "keyCodes": {}
+    }
   },
-  "f3": {
+  "F3": {
     "names": {
-      "domkey": "F3",
-      "english": "F3",
-      "chromium": "f3"
+      "name": "F3",
+      "chromium": "F3"
     },
     "scanCodes": {
       "usb": 458812,
@@ -1365,14 +1216,12 @@
       "windows": 61,
       "macos": 99,
       "ios": 60
-    },
-    "keyCodes": {}
+    }
   },
-  "f4": {
+  "F4": {
     "names": {
-      "domkey": "F4",
-      "english": "F4",
-      "chromium": "f4"
+      "name": "F4",
+      "chromium": "F4"
     },
     "scanCodes": {
       "usb": 458813,
@@ -1381,14 +1230,12 @@
       "windows": 62,
       "macos": 118,
       "ios": 61
-    },
-    "keyCodes": {}
+    }
   },
-  "f5": {
+  "F5": {
     "names": {
-      "domkey": "F5",
-      "english": "F5",
-      "chromium": "f5"
+      "name": "F5",
+      "chromium": "F5"
     },
     "scanCodes": {
       "usb": 458814,
@@ -1397,14 +1244,12 @@
       "windows": 63,
       "macos": 96,
       "ios": 62
-    },
-    "keyCodes": {}
+    }
   },
-  "f6": {
+  "F6": {
     "names": {
-      "domkey": "F6",
-      "english": "F6",
-      "chromium": "f6"
+      "name": "F6",
+      "chromium": "F6"
     },
     "scanCodes": {
       "usb": 458815,
@@ -1413,14 +1258,12 @@
       "windows": 64,
       "macos": 97,
       "ios": 63
-    },
-    "keyCodes": {}
+    }
   },
-  "f7": {
+  "F7": {
     "names": {
-      "domkey": "F7",
-      "english": "F7",
-      "chromium": "f7"
+      "name": "F7",
+      "chromium": "F7"
     },
     "scanCodes": {
       "usb": 458816,
@@ -1429,14 +1272,12 @@
       "windows": 65,
       "macos": 98,
       "ios": 64
-    },
-    "keyCodes": {}
+    }
   },
-  "f8": {
+  "F8": {
     "names": {
-      "domkey": "F8",
-      "english": "F8",
-      "chromium": "f8"
+      "name": "F8",
+      "chromium": "F8"
     },
     "scanCodes": {
       "usb": 458817,
@@ -1445,14 +1286,12 @@
       "windows": 66,
       "macos": 100,
       "ios": 65
-    },
-    "keyCodes": {}
+    }
   },
-  "f9": {
+  "F9": {
     "names": {
-      "domkey": "F9",
-      "english": "F9",
-      "chromium": "f9"
+      "name": "F9",
+      "chromium": "F9"
     },
     "scanCodes": {
       "usb": 458818,
@@ -1461,14 +1300,12 @@
       "windows": 67,
       "macos": 101,
       "ios": 66
-    },
-    "keyCodes": {}
+    }
   },
-  "f10": {
+  "F10": {
     "names": {
-      "domkey": "F10",
-      "english": "F10",
-      "chromium": "f10"
+      "name": "F10",
+      "chromium": "F10"
     },
     "scanCodes": {
       "usb": 458819,
@@ -1477,14 +1314,12 @@
       "windows": 68,
       "macos": 109,
       "ios": 67
-    },
-    "keyCodes": {}
+    }
   },
-  "f11": {
+  "F11": {
     "names": {
-      "domkey": "F11",
-      "english": "F11",
-      "chromium": "f11"
+      "name": "F11",
+      "chromium": "F11"
     },
     "scanCodes": {
       "usb": 458820,
@@ -1493,14 +1328,12 @@
       "windows": 87,
       "macos": 103,
       "ios": 68
-    },
-    "keyCodes": {}
+    }
   },
-  "f12": {
+  "F12": {
     "names": {
-      "domkey": "F12",
-      "english": "F12",
-      "chromium": "f12"
+      "name": "F12",
+      "chromium": "F12"
     },
     "scanCodes": {
       "usb": 458821,
@@ -1509,14 +1342,12 @@
       "windows": 88,
       "macos": 111,
       "ios": 69
-    },
-    "keyCodes": {}
+    }
   },
-  "printScreen": {
+  "PrintScreen": {
     "names": {
-      "domkey": "PrintScreen",
-      "english": "Print Screen",
-      "chromium": "printScreen"
+      "name": "PrintScreen",
+      "chromium": "PrintScreen"
     },
     "scanCodes": {
       "usb": 458822,
@@ -1524,14 +1355,12 @@
       "xkb": 107,
       "windows": 57399,
       "ios": 70
-    },
-    "keyCodes": {}
+    }
   },
-  "scrollLock": {
+  "ScrollLock": {
     "names": {
-      "domkey": "ScrollLock",
-      "english": "Scroll Lock",
-      "chromium": "scrollLock"
+      "name": "ScrollLock",
+      "chromium": "ScrollLock"
     },
     "scanCodes": {
       "usb": 458823,
@@ -1539,14 +1368,12 @@
       "xkb": 78,
       "windows": 70,
       "ios": 71
-    },
-    "keyCodes": {}
+    }
   },
-  "pause": {
+  "Pause": {
     "names": {
-      "domkey": "Pause",
-      "english": "Pause",
-      "chromium": "pause"
+      "name": "Pause",
+      "chromium": "Pause"
     },
     "scanCodes": {
       "usb": 458824,
@@ -1554,14 +1381,12 @@
       "xkb": 127,
       "windows": 69,
       "ios": 72
-    },
-    "keyCodes": {}
+    }
   },
-  "insert": {
+  "Insert": {
     "names": {
-      "domkey": "Insert",
-      "english": "Insert",
-      "chromium": "insert"
+      "name": "Insert",
+      "chromium": "Insert"
     },
     "scanCodes": {
       "usb": 458825,
@@ -1570,14 +1395,12 @@
       "windows": 57426,
       "macos": 114,
       "ios": 73
-    },
-    "keyCodes": {}
+    }
   },
-  "home": {
+  "Home": {
     "names": {
-      "domkey": "Home",
-      "english": "Home",
-      "chromium": "home"
+      "name": "Home",
+      "chromium": "Home"
     },
     "scanCodes": {
       "usb": 458826,
@@ -1586,14 +1409,12 @@
       "windows": 57415,
       "macos": 115,
       "ios": 74
-    },
-    "keyCodes": {}
+    }
   },
-  "pageUp": {
+  "PageUp": {
     "names": {
-      "domkey": "PageUp",
-      "english": "Page Up",
-      "chromium": "pageUp"
+      "name": "PageUp",
+      "chromium": "PageUp"
     },
     "scanCodes": {
       "usb": 458827,
@@ -1602,14 +1423,12 @@
       "windows": 57417,
       "macos": 116,
       "ios": 75
-    },
-    "keyCodes": {}
+    }
   },
-  "delete": {
+  "Delete": {
     "names": {
-      "domkey": "Delete",
-      "english": "Delete",
-      "chromium": "del"
+      "name": "Delete",
+      "chromium": "Delete"
     },
     "scanCodes": {
       "usb": 458828,
@@ -1618,14 +1437,12 @@
       "windows": 57427,
       "macos": 117,
       "ios": 76
-    },
-    "keyCodes": {}
+    }
   },
-  "end": {
+  "End": {
     "names": {
-      "domkey": "End",
-      "english": "End",
-      "chromium": "end"
+      "name": "End",
+      "chromium": "End"
     },
     "scanCodes": {
       "usb": 458829,
@@ -1634,14 +1451,12 @@
       "windows": 57423,
       "macos": 119,
       "ios": 77
-    },
-    "keyCodes": {}
+    }
   },
-  "pageDown": {
+  "PageDown": {
     "names": {
-      "domkey": "PageDown",
-      "english": "Page Down",
-      "chromium": "pageDown"
+      "name": "PageDown",
+      "chromium": "PageDown"
     },
     "scanCodes": {
       "usb": 458830,
@@ -1650,14 +1465,12 @@
       "windows": 57425,
       "macos": 121,
       "ios": 78
-    },
-    "keyCodes": {}
+    }
   },
-  "arrowRight": {
+  "ArrowRight": {
     "names": {
-      "domkey": "ArrowRight",
-      "english": "Arrow Right",
-      "chromium": "arrowRight"
+      "name": "ArrowRight",
+      "chromium": "ArrowRight"
     },
     "scanCodes": {
       "usb": 458831,
@@ -1666,14 +1479,12 @@
       "windows": 57421,
       "macos": 124,
       "ios": 79
-    },
-    "keyCodes": {}
+    }
   },
-  "arrowLeft": {
+  "ArrowLeft": {
     "names": {
-      "domkey": "ArrowLeft",
-      "english": "Arrow Left",
-      "chromium": "arrowLeft"
+      "name": "ArrowLeft",
+      "chromium": "ArrowLeft"
     },
     "scanCodes": {
       "usb": 458832,
@@ -1682,14 +1493,12 @@
       "windows": 57419,
       "macos": 123,
       "ios": 80
-    },
-    "keyCodes": {}
+    }
   },
-  "arrowDown": {
+  "ArrowDown": {
     "names": {
-      "domkey": "ArrowDown",
-      "english": "Arrow Down",
-      "chromium": "arrowDown"
+      "name": "ArrowDown",
+      "chromium": "ArrowDown"
     },
     "scanCodes": {
       "usb": 458833,
@@ -1698,14 +1507,12 @@
       "windows": 57424,
       "macos": 125,
       "ios": 81
-    },
-    "keyCodes": {}
+    }
   },
-  "arrowUp": {
+  "ArrowUp": {
     "names": {
-      "domkey": "ArrowUp",
-      "english": "Arrow Up",
-      "chromium": "arrowUp"
+      "name": "ArrowUp",
+      "chromium": "ArrowUp"
     },
     "scanCodes": {
       "usb": 458834,
@@ -1714,14 +1521,12 @@
       "windows": 57416,
       "macos": 126,
       "ios": 82
-    },
-    "keyCodes": {}
+    }
   },
-  "numLock": {
+  "NumLock": {
     "names": {
-      "domkey": "NumLock",
-      "english": "Num Lock",
-      "chromium": "numLock"
+      "name": "NumLock",
+      "chromium": "NumLock"
     },
     "scanCodes": {
       "usb": 458835,
@@ -1730,14 +1535,12 @@
       "windows": 57413,
       "macos": 71,
       "ios": 83
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadDivide": {
+  "NumpadDivide": {
     "names": {
-      "domkey": "NumpadDivide",
-      "english": "Numpad Divide",
-      "chromium": "numpadDivide"
+      "name": "NumpadDivide",
+      "chromium": "NumpadDivide"
     },
     "scanCodes": {
       "usb": 458836,
@@ -1746,14 +1549,12 @@
       "windows": 57397,
       "macos": 75,
       "ios": 84
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadMultiply": {
+  "NumpadMultiply": {
     "names": {
-      "domkey": "NumpadMultiply",
-      "english": "Numpad Multiply",
-      "chromium": "numpadMultiply"
+      "name": "NumpadMultiply",
+      "chromium": "NumpadMultiply"
     },
     "scanCodes": {
       "usb": 458837,
@@ -1762,14 +1563,12 @@
       "windows": 55,
       "macos": 67,
       "ios": 85
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadSubtract": {
+  "NumpadSubtract": {
     "names": {
-      "domkey": "NumpadSubtract",
-      "english": "Numpad Subtract",
-      "chromium": "numpadSubtract"
+      "name": "NumpadSubtract",
+      "chromium": "NumpadSubtract"
     },
     "scanCodes": {
       "usb": 458838,
@@ -1778,14 +1577,12 @@
       "windows": 74,
       "macos": 78,
       "ios": 86
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadAdd": {
+  "NumpadAdd": {
     "names": {
-      "domkey": "NumpadAdd",
-      "english": "Numpad Add",
-      "chromium": "numpadAdd"
+      "name": "NumpadAdd",
+      "chromium": "NumpadAdd"
     },
     "scanCodes": {
       "usb": 458839,
@@ -1794,14 +1591,12 @@
       "windows": 78,
       "macos": 69,
       "ios": 87
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadEnter": {
+  "NumpadEnter": {
     "names": {
-      "domkey": "NumpadEnter",
-      "english": "Numpad Enter",
-      "chromium": "numpadEnter"
+      "name": "NumpadEnter",
+      "chromium": "NumpadEnter"
     },
     "scanCodes": {
       "usb": 458840,
@@ -1810,14 +1605,12 @@
       "windows": 57372,
       "macos": 76,
       "ios": 88
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad1": {
+  "Numpad1": {
     "names": {
-      "domkey": "Numpad1",
-      "english": "Numpad 1",
-      "chromium": "numpad1"
+      "name": "Numpad1",
+      "chromium": "Numpad1"
     },
     "scanCodes": {
       "usb": 458841,
@@ -1826,14 +1619,12 @@
       "windows": 79,
       "macos": 83,
       "ios": 89
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad2": {
+  "Numpad2": {
     "names": {
-      "domkey": "Numpad2",
-      "english": "Numpad 2",
-      "chromium": "numpad2"
+      "name": "Numpad2",
+      "chromium": "Numpad2"
     },
     "scanCodes": {
       "usb": 458842,
@@ -1842,14 +1633,12 @@
       "windows": 80,
       "macos": 84,
       "ios": 90
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad3": {
+  "Numpad3": {
     "names": {
-      "domkey": "Numpad3",
-      "english": "Numpad 3",
-      "chromium": "numpad3"
+      "name": "Numpad3",
+      "chromium": "Numpad3"
     },
     "scanCodes": {
       "usb": 458843,
@@ -1858,14 +1647,12 @@
       "windows": 81,
       "macos": 85,
       "ios": 91
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad4": {
+  "Numpad4": {
     "names": {
-      "domkey": "Numpad4",
-      "english": "Numpad 4",
-      "chromium": "numpad4"
+      "name": "Numpad4",
+      "chromium": "Numpad4"
     },
     "scanCodes": {
       "usb": 458844,
@@ -1874,14 +1661,12 @@
       "windows": 75,
       "macos": 86,
       "ios": 92
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad5": {
+  "Numpad5": {
     "names": {
-      "domkey": "Numpad5",
-      "english": "Numpad 5",
-      "chromium": "numpad5"
+      "name": "Numpad5",
+      "chromium": "Numpad5"
     },
     "scanCodes": {
       "usb": 458845,
@@ -1890,14 +1675,12 @@
       "windows": 76,
       "macos": 87,
       "ios": 93
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad6": {
+  "Numpad6": {
     "names": {
-      "domkey": "Numpad6",
-      "english": "Numpad 6",
-      "chromium": "numpad6"
+      "name": "Numpad6",
+      "chromium": "Numpad6"
     },
     "scanCodes": {
       "usb": 458846,
@@ -1906,14 +1689,12 @@
       "windows": 77,
       "macos": 88,
       "ios": 94
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad7": {
+  "Numpad7": {
     "names": {
-      "domkey": "Numpad7",
-      "english": "Numpad 7",
-      "chromium": "numpad7"
+      "name": "Numpad7",
+      "chromium": "Numpad7"
     },
     "scanCodes": {
       "usb": 458847,
@@ -1922,14 +1703,12 @@
       "windows": 71,
       "macos": 89,
       "ios": 95
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad8": {
+  "Numpad8": {
     "names": {
-      "domkey": "Numpad8",
-      "english": "Numpad 8",
-      "chromium": "numpad8"
+      "name": "Numpad8",
+      "chromium": "Numpad8"
     },
     "scanCodes": {
       "usb": 458848,
@@ -1938,14 +1717,12 @@
       "windows": 72,
       "macos": 91,
       "ios": 96
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad9": {
+  "Numpad9": {
     "names": {
-      "domkey": "Numpad9",
-      "english": "Numpad 9",
-      "chromium": "numpad9"
+      "name": "Numpad9",
+      "chromium": "Numpad9"
     },
     "scanCodes": {
       "usb": 458849,
@@ -1954,14 +1731,12 @@
       "windows": 73,
       "macos": 92,
       "ios": 97
-    },
-    "keyCodes": {}
+    }
   },
-  "numpad0": {
+  "Numpad0": {
     "names": {
-      "domkey": "Numpad0",
-      "english": "Numpad 0",
-      "chromium": "numpad0"
+      "name": "Numpad0",
+      "chromium": "Numpad0"
     },
     "scanCodes": {
       "usb": 458850,
@@ -1970,14 +1745,12 @@
       "windows": 82,
       "macos": 82,
       "ios": 98
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadDecimal": {
+  "NumpadDecimal": {
     "names": {
-      "domkey": "NumpadDecimal",
-      "english": "Numpad Decimal",
-      "chromium": "numpadDecimal"
+      "name": "NumpadDecimal",
+      "chromium": "NumpadDecimal"
     },
     "scanCodes": {
       "usb": 458851,
@@ -1986,14 +1759,12 @@
       "windows": 83,
       "macos": 65,
       "ios": 99
-    },
-    "keyCodes": {}
+    }
   },
-  "intlBackslash": {
+  "IntlBackslash": {
     "names": {
-      "domkey": "IntlBackslash",
-      "english": "Intl Backslash",
-      "chromium": "intlBackslash"
+      "name": "IntlBackslash",
+      "chromium": "IntlBackslash"
     },
     "scanCodes": {
       "usb": 458852,
@@ -2002,14 +1773,12 @@
       "windows": 86,
       "macos": 10,
       "ios": 100
-    },
-    "keyCodes": {}
+    }
   },
-  "contextMenu": {
+  "ContextMenu": {
     "names": {
-      "domkey": "ContextMenu",
-      "english": "Context Menu",
-      "chromium": "contextMenu"
+      "name": "ContextMenu",
+      "chromium": "ContextMenu"
     },
     "scanCodes": {
       "usb": 458853,
@@ -2018,14 +1787,12 @@
       "windows": 57437,
       "macos": 110,
       "ios": 101
-    },
-    "keyCodes": {}
+    }
   },
-  "power": {
+  "Power": {
     "names": {
-      "domkey": "Power",
-      "english": "Power",
-      "chromium": "power"
+      "name": "Power",
+      "chromium": "Power"
     },
     "scanCodes": {
       "usb": 458854,
@@ -2033,14 +1800,12 @@
       "xkb": 124,
       "windows": 57438,
       "ios": 102
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadEqual": {
+  "NumpadEqual": {
     "names": {
-      "domkey": "NumpadEqual",
-      "english": "Numpad Equal",
-      "chromium": "numpadEqual"
+      "name": "NumpadEqual",
+      "chromium": "NumpadEqual"
     },
     "scanCodes": {
       "usb": 458855,
@@ -2049,14 +1814,12 @@
       "windows": 89,
       "macos": 81,
       "ios": 103
-    },
-    "keyCodes": {}
+    }
   },
-  "f13": {
+  "F13": {
     "names": {
-      "domkey": "F13",
-      "english": "F13",
-      "chromium": "f13"
+      "name": "F13",
+      "chromium": "F13"
     },
     "scanCodes": {
       "usb": 458856,
@@ -2065,14 +1828,12 @@
       "windows": 100,
       "macos": 105,
       "ios": 104
-    },
-    "keyCodes": {}
+    }
   },
-  "f14": {
+  "F14": {
     "names": {
-      "domkey": "F14",
-      "english": "F14",
-      "chromium": "f14"
+      "name": "F14",
+      "chromium": "F14"
     },
     "scanCodes": {
       "usb": 458857,
@@ -2081,14 +1842,12 @@
       "windows": 101,
       "macos": 107,
       "ios": 105
-    },
-    "keyCodes": {}
+    }
   },
-  "f15": {
+  "F15": {
     "names": {
-      "domkey": "F15",
-      "english": "F15",
-      "chromium": "f15"
+      "name": "F15",
+      "chromium": "F15"
     },
     "scanCodes": {
       "usb": 458858,
@@ -2097,14 +1856,12 @@
       "windows": 102,
       "macos": 113,
       "ios": 106
-    },
-    "keyCodes": {}
+    }
   },
-  "f16": {
+  "F16": {
     "names": {
-      "domkey": "F16",
-      "english": "F16",
-      "chromium": "f16"
+      "name": "F16",
+      "chromium": "F16"
     },
     "scanCodes": {
       "usb": 458859,
@@ -2113,14 +1870,12 @@
       "windows": 103,
       "macos": 106,
       "ios": 107
-    },
-    "keyCodes": {}
+    }
   },
-  "f17": {
+  "F17": {
     "names": {
-      "domkey": "F17",
-      "english": "F17",
-      "chromium": "f17"
+      "name": "F17",
+      "chromium": "F17"
     },
     "scanCodes": {
       "usb": 458860,
@@ -2129,14 +1884,12 @@
       "windows": 104,
       "macos": 64,
       "ios": 108
-    },
-    "keyCodes": {}
+    }
   },
-  "f18": {
+  "F18": {
     "names": {
-      "domkey": "F18",
-      "english": "F18",
-      "chromium": "f18"
+      "name": "F18",
+      "chromium": "F18"
     },
     "scanCodes": {
       "usb": 458861,
@@ -2145,14 +1898,12 @@
       "windows": 105,
       "macos": 79,
       "ios": 109
-    },
-    "keyCodes": {}
+    }
   },
-  "f19": {
+  "F19": {
     "names": {
-      "domkey": "F19",
-      "english": "F19",
-      "chromium": "f19"
+      "name": "F19",
+      "chromium": "F19"
     },
     "scanCodes": {
       "usb": 458862,
@@ -2161,14 +1912,12 @@
       "windows": 106,
       "macos": 80,
       "ios": 110
-    },
-    "keyCodes": {}
+    }
   },
-  "f20": {
+  "F20": {
     "names": {
-      "domkey": "F20",
-      "english": "F20",
-      "chromium": "f20"
+      "name": "F20",
+      "chromium": "F20"
     },
     "scanCodes": {
       "usb": 458863,
@@ -2177,14 +1926,12 @@
       "windows": 107,
       "macos": 90,
       "ios": 111
-    },
-    "keyCodes": {}
+    }
   },
-  "f21": {
+  "F21": {
     "names": {
-      "domkey": "F21",
-      "english": "F21",
-      "chromium": "f21"
+      "name": "F21",
+      "chromium": "F21"
     },
     "scanCodes": {
       "usb": 458864,
@@ -2192,14 +1939,12 @@
       "xkb": 199,
       "windows": 108,
       "ios": 112
-    },
-    "keyCodes": {}
+    }
   },
-  "f22": {
+  "F22": {
     "names": {
-      "domkey": "F22",
-      "english": "F22",
-      "chromium": "f22"
+      "name": "F22",
+      "chromium": "F22"
     },
     "scanCodes": {
       "usb": 458865,
@@ -2207,14 +1952,12 @@
       "xkb": 200,
       "windows": 109,
       "ios": 113
-    },
-    "keyCodes": {}
+    }
   },
-  "f23": {
+  "F23": {
     "names": {
-      "domkey": "F23",
-      "english": "F23",
-      "chromium": "f23"
+      "name": "F23",
+      "chromium": "F23"
     },
     "scanCodes": {
       "usb": 458866,
@@ -2222,14 +1965,12 @@
       "xkb": 201,
       "windows": 110,
       "ios": 114
-    },
-    "keyCodes": {}
+    }
   },
-  "f24": {
+  "F24": {
     "names": {
-      "domkey": "F24",
-      "english": "F24",
-      "chromium": "f24"
+      "name": "F24",
+      "chromium": "F24"
     },
     "scanCodes": {
       "usb": 458867,
@@ -2237,28 +1978,24 @@
       "xkb": 202,
       "windows": 118,
       "ios": 115
-    },
-    "keyCodes": {}
+    }
   },
-  "open": {
+  "Open": {
     "names": {
-      "domkey": "Open",
-      "english": "Open",
-      "chromium": "open"
+      "name": "Open",
+      "chromium": "Open"
     },
     "scanCodes": {
       "usb": 458868,
       "linux": 134,
       "xkb": 142,
       "ios": 116
-    },
-    "keyCodes": {}
+    }
   },
-  "help": {
+  "Help": {
     "names": {
-      "domkey": "Help",
-      "english": "Help",
-      "chromium": "help"
+      "name": "Help",
+      "chromium": "Help"
     },
     "scanCodes": {
       "usb": 458869,
@@ -2266,42 +2003,36 @@
       "xkb": 146,
       "windows": 57403,
       "ios": 117
-    },
-    "keyCodes": {}
+    }
   },
-  "select": {
+  "Select": {
     "names": {
-      "domkey": "Select",
-      "english": "Select",
-      "chromium": "select"
+      "name": "Select",
+      "chromium": "Select"
     },
     "scanCodes": {
       "usb": 458871,
       "linux": 132,
       "xkb": 140,
       "ios": 119
-    },
-    "keyCodes": {}
+    }
   },
-  "again": {
+  "Again": {
     "names": {
-      "domkey": "Again",
-      "english": "Again",
-      "chromium": "again"
+      "name": "Again",
+      "chromium": "Again"
     },
     "scanCodes": {
       "usb": 458873,
       "linux": 129,
       "xkb": 137,
       "ios": 121
-    },
-    "keyCodes": {}
+    }
   },
-  "undo": {
+  "Undo": {
     "names": {
-      "domkey": "Undo",
-      "english": "Undo",
-      "chromium": "undo"
+      "name": "Undo",
+      "chromium": "Undo"
     },
     "scanCodes": {
       "usb": 458874,
@@ -2309,14 +2040,12 @@
       "xkb": 139,
       "windows": 57352,
       "ios": 122
-    },
-    "keyCodes": {}
+    }
   },
-  "cut": {
+  "Cut": {
     "names": {
-      "domkey": "Cut",
-      "english": "Cut",
-      "chromium": "cut"
+      "name": "Cut",
+      "chromium": "Cut"
     },
     "scanCodes": {
       "usb": 458875,
@@ -2324,14 +2053,12 @@
       "xkb": 145,
       "windows": 57367,
       "ios": 123
-    },
-    "keyCodes": {}
+    }
   },
-  "copy": {
+  "Copy": {
     "names": {
-      "domkey": "Copy",
-      "english": "Copy",
-      "chromium": "copy"
+      "name": "Copy",
+      "chromium": "Copy"
     },
     "scanCodes": {
       "usb": 458876,
@@ -2339,14 +2066,12 @@
       "xkb": 141,
       "windows": 57368,
       "ios": 124
-    },
-    "keyCodes": {}
+    }
   },
-  "paste": {
+  "Paste": {
     "names": {
-      "domkey": "Paste",
-      "english": "Paste",
-      "chromium": "paste"
+      "name": "Paste",
+      "chromium": "Paste"
     },
     "scanCodes": {
       "usb": 458877,
@@ -2354,28 +2079,24 @@
       "xkb": 143,
       "windows": 57354,
       "ios": 125
-    },
-    "keyCodes": {}
+    }
   },
-  "find": {
+  "Find": {
     "names": {
-      "domkey": "Find",
-      "english": "Find",
-      "chromium": "find"
+      "name": "Find",
+      "chromium": "Find"
     },
     "scanCodes": {
       "usb": 458878,
       "linux": 136,
       "xkb": 144,
       "ios": 126
-    },
-    "keyCodes": {}
+    }
   },
-  "audioVolumeMute": {
+  "AudioVolumeMute": {
     "names": {
-      "domkey": "AudioVolumeMute",
-      "english": "Audio Volume Mute",
-      "chromium": "volumeMute"
+      "name": "AudioVolumeMute",
+      "chromium": "AudioVolumeMute"
     },
     "scanCodes": {
       "usb": 458879,
@@ -2384,14 +2105,12 @@
       "windows": 57376,
       "macos": 74,
       "ios": 127
-    },
-    "keyCodes": {}
+    }
   },
-  "audioVolumeUp": {
+  "AudioVolumeUp": {
     "names": {
-      "domkey": "AudioVolumeUp",
-      "english": "Audio Volume Up",
-      "chromium": "volumeUp"
+      "name": "AudioVolumeUp",
+      "chromium": "AudioVolumeUp"
     },
     "scanCodes": {
       "usb": 458880,
@@ -2400,14 +2119,12 @@
       "windows": 57392,
       "macos": 72,
       "ios": 128
-    },
-    "keyCodes": {}
+    }
   },
-  "audioVolumeDown": {
+  "AudioVolumeDown": {
     "names": {
-      "domkey": "AudioVolumeDown",
-      "english": "Audio Volume Down",
-      "chromium": "volumeDown"
+      "name": "AudioVolumeDown",
+      "chromium": "AudioVolumeDown"
     },
     "scanCodes": {
       "usb": 458881,
@@ -2416,14 +2133,12 @@
       "windows": 57390,
       "macos": 73,
       "ios": 129
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadComma": {
+  "NumpadComma": {
     "names": {
-      "domkey": "NumpadComma",
-      "english": "Numpad Comma",
-      "chromium": "numpadComma"
+      "name": "NumpadComma",
+      "chromium": "NumpadComma"
     },
     "scanCodes": {
       "usb": 458885,
@@ -2432,14 +2147,12 @@
       "windows": 126,
       "macos": 95,
       "ios": 133
-    },
-    "keyCodes": {}
+    }
   },
-  "intlRo": {
+  "IntlRo": {
     "names": {
-      "domkey": "IntlRo",
-      "english": "Intl Ro",
-      "chromium": "intlRo"
+      "name": "IntlRo",
+      "chromium": "IntlRo"
     },
     "scanCodes": {
       "usb": 458887,
@@ -2448,14 +2161,12 @@
       "windows": 115,
       "macos": 94,
       "ios": 135
-    },
-    "keyCodes": {}
+    }
   },
-  "kanaMode": {
+  "KanaMode": {
     "names": {
-      "domkey": "KanaMode",
-      "english": "Kana Mode",
-      "chromium": "kanaMode"
+      "name": "KanaMode",
+      "chromium": "KanaMode"
     },
     "scanCodes": {
       "usb": 458888,
@@ -2463,14 +2174,12 @@
       "xkb": 101,
       "windows": 112,
       "ios": 136
-    },
-    "keyCodes": {}
+    }
   },
-  "intlYen": {
+  "IntlYen": {
     "names": {
-      "domkey": "IntlYen",
-      "english": "Intl Yen",
-      "chromium": "intlYen"
+      "name": "IntlYen",
+      "chromium": "IntlYen"
     },
     "scanCodes": {
       "usb": 458889,
@@ -2479,14 +2188,12 @@
       "windows": 125,
       "macos": 93,
       "ios": 137
-    },
-    "keyCodes": {}
+    }
   },
-  "convert": {
+  "Convert": {
     "names": {
-      "domkey": "Convert",
-      "english": "Convert",
-      "chromium": "convert"
+      "name": "Convert",
+      "chromium": "Convert"
     },
     "scanCodes": {
       "usb": 458890,
@@ -2494,14 +2201,12 @@
       "xkb": 100,
       "windows": 121,
       "ios": 138
-    },
-    "keyCodes": {}
+    }
   },
-  "nonConvert": {
+  "NonConvert": {
     "names": {
-      "domkey": "NonConvert",
-      "english": "Non Convert",
-      "chromium": "nonConvert"
+      "name": "NonConvert",
+      "chromium": "NonConvert"
     },
     "scanCodes": {
       "usb": 458891,
@@ -2509,14 +2214,12 @@
       "xkb": 102,
       "windows": 123,
       "ios": 139
-    },
-    "keyCodes": {}
+    }
   },
-  "lang1": {
+  "Lang1": {
     "names": {
-      "domkey": "Lang1",
-      "english": "Lang 1",
-      "chromium": "lang1"
+      "name": "Lang1",
+      "chromium": "Lang1"
     },
     "scanCodes": {
       "usb": 458896,
@@ -2525,14 +2228,12 @@
       "windows": 114,
       "macos": 104,
       "ios": 144
-    },
-    "keyCodes": {}
+    }
   },
-  "lang2": {
+  "Lang2": {
     "names": {
-      "domkey": "Lang2",
-      "english": "Lang 2",
-      "chromium": "lang2"
+      "name": "Lang2",
+      "chromium": "Lang2"
     },
     "scanCodes": {
       "usb": 458897,
@@ -2541,14 +2242,12 @@
       "windows": 113,
       "macos": 102,
       "ios": 145
-    },
-    "keyCodes": {}
+    }
   },
-  "lang3": {
+  "Lang3": {
     "names": {
-      "domkey": "Lang3",
-      "english": "Lang 3",
-      "chromium": "lang3"
+      "name": "Lang3",
+      "chromium": "Lang3"
     },
     "scanCodes": {
       "usb": 458898,
@@ -2556,14 +2255,12 @@
       "xkb": 98,
       "windows": 120,
       "ios": 146
-    },
-    "keyCodes": {}
+    }
   },
-  "lang4": {
+  "Lang4": {
     "names": {
-      "domkey": "Lang4",
-      "english": "Lang 4",
-      "chromium": "lang4"
+      "name": "Lang4",
+      "chromium": "Lang4"
     },
     "scanCodes": {
       "usb": 458899,
@@ -2571,176 +2268,159 @@
       "xkb": 99,
       "windows": 119,
       "ios": 147
-    },
-    "keyCodes": {}
+    }
   },
-  "lang5": {
+  "Lang5": {
     "names": {
-      "domkey": "Lang5",
-      "english": "Lang 5",
-      "chromium": "lang5"
+      "name": "Lang5",
+      "chromium": "Lang5"
     },
     "scanCodes": {
       "usb": 458900,
       "linux": 85,
       "xkb": 93,
       "ios": 148
-    },
-    "keyCodes": {}
+    }
   },
-  "abort": {
+  "Abort": {
     "names": {
-      "domkey": "Abort",
-      "english": "Abort",
-      "chromium": "abort"
+      "name": "Abort",
+      "chromium": "Abort"
     },
     "scanCodes": {
       "usb": 458907,
       "ios": 155
-    },
-    "keyCodes": {}
+    }
   },
-  "props": {
+  "Props": {
     "names": {
-      "domkey": "Props",
-      "english": "Props",
-      "chromium": "props"
+      "name": "Props",
+      "chromium": "Props"
     },
     "scanCodes": {
       "usb": 458915,
       "ios": 163
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadParenLeft": {
+  "NumpadParenLeft": {
     "names": {
-      "domkey": "NumpadParenLeft",
-      "english": "Numpad Paren Left",
-      "chromium": "numpadParenLeft"
+      "name": "NumpadParenLeft",
+      "chromium": "NumpadParenLeft"
     },
     "scanCodes": {
       "usb": 458934,
       "linux": 179,
       "xkb": 187,
       "ios": 182
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadParenRight": {
+  "NumpadParenRight": {
     "names": {
-      "domkey": "NumpadParenRight",
-      "english": "Numpad Paren Right",
-      "chromium": "numpadParenRight"
+      "name": "NumpadParenRight",
+      "chromium": "NumpadParenRight"
     },
     "scanCodes": {
       "usb": 458935,
       "linux": 180,
       "xkb": 188,
       "ios": 183
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadBackspace": {
+  "NumpadBackspace": {
     "names": {
-      "domkey": "NumpadBackspace",
-      "english": "Numpad Backspace",
-      "chromium": "numpadBackspace"
+      "name": "NumpadBackspace",
+      "chromium": "NumpadBackspace"
     },
     "scanCodes": {
       "usb": 458939,
       "ios": 187
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadMemoryStore": {
+  "NumpadMemoryStore": {
     "names": {
-      "domkey": "NumpadMemoryStore",
-      "english": "Numpad Memory Store",
-      "chromium": "numpadMemoryStore"
+      "name": "NumpadMemoryStore",
+      "chromium": "NumpadMemoryStore"
     },
     "scanCodes": {
       "usb": 458960,
       "ios": 208
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadMemoryRecall": {
+  "NumpadMemoryRecall": {
     "names": {
-      "domkey": "NumpadMemoryRecall",
-      "english": "Numpad Memory Recall",
-      "chromium": "numpadMemoryRecall"
+      "name": "NumpadMemoryRecall",
+      "chromium": "NumpadMemoryRecall"
     },
     "scanCodes": {
       "usb": 458961,
       "ios": 209
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadMemoryClear": {
+  "NumpadMemoryClear": {
     "names": {
-      "domkey": "NumpadMemoryClear",
-      "english": "Numpad Memory Clear",
-      "chromium": "numpadMemoryClear"
+      "name": "NumpadMemoryClear",
+      "chromium": "NumpadMemoryClear"
     },
     "scanCodes": {
       "usb": 458962,
       "ios": 210
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadMemoryAdd": {
+  "NumpadMemoryAdd": {
     "names": {
-      "domkey": "NumpadMemoryAdd",
-      "english": "Numpad Memory Add",
-      "chromium": "numpadMemoryAdd"
+      "name": "NumpadMemoryAdd",
+      "chromium": "NumpadMemoryAdd"
     },
     "scanCodes": {
       "usb": 458963,
       "ios": 211
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadMemorySubtract": {
+  "NumpadMemorySubtract": {
     "names": {
-      "domkey": "NumpadMemorySubtract",
-      "english": "Numpad Memory Subtract",
-      "chromium": "numpadMemorySubtract"
+      "name": "NumpadMemorySubtract",
+      "chromium": "NumpadMemorySubtract"
     },
     "scanCodes": {
       "usb": 458964,
       "ios": 212
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadClear": {
+  "NumpadSignChange": {
     "names": {
-      "domkey": "NumpadClear",
-      "english": "Numpad Clear",
-      "chromium": "numpadClear"
+      "name": "NumpadSignChange"
+    },
+    "scanCodes": {
+      "usb": 458967,
+      "linux": 118,
+      "xkb": 126,
+      "ios": 215
+    }
+  },
+  "NumpadClear": {
+    "names": {
+      "name": "NumpadClear",
+      "chromium": "NumpadClear"
     },
     "scanCodes": {
       "usb": 458968,
       "ios": 216
-    },
-    "keyCodes": {}
+    }
   },
-  "numpadClearEntry": {
+  "NumpadClearEntry": {
     "names": {
-      "domkey": "NumpadClearEntry",
-      "english": "Numpad Clear Entry",
-      "chromium": "numpadClearEntry"
+      "name": "NumpadClearEntry",
+      "chromium": "NumpadClearEntry"
     },
     "scanCodes": {
       "usb": 458969,
       "ios": 217
-    },
-    "keyCodes": {}
+    }
   },
-  "controlLeft": {
+  "ControlLeft": {
     "names": {
-      "domkey": "ControlLeft",
-      "english": "Control Left",
-      "chromium": "controlLeft"
+      "name": "ControlLeft",
+      "chromium": "ControlLeft"
     },
     "scanCodes": {
       "usb": 458976,
@@ -2749,14 +2429,12 @@
       "windows": 29,
       "macos": 59,
       "ios": 224
-    },
-    "keyCodes": {}
+    }
   },
-  "shiftLeft": {
+  "ShiftLeft": {
     "names": {
-      "domkey": "ShiftLeft",
-      "english": "Shift Left",
-      "chromium": "shiftLeft"
+      "name": "ShiftLeft",
+      "chromium": "ShiftLeft"
     },
     "scanCodes": {
       "usb": 458977,
@@ -2765,14 +2443,12 @@
       "windows": 42,
       "macos": 56,
       "ios": 225
-    },
-    "keyCodes": {}
+    }
   },
-  "altLeft": {
+  "AltLeft": {
     "names": {
-      "domkey": "AltLeft",
-      "english": "Alt Left",
-      "chromium": "altLeft"
+      "name": "AltLeft",
+      "chromium": "AltLeft"
     },
     "scanCodes": {
       "usb": 458978,
@@ -2781,14 +2457,12 @@
       "windows": 56,
       "macos": 58,
       "ios": 226
-    },
-    "keyCodes": {}
+    }
   },
-  "metaLeft": {
+  "MetaLeft": {
     "names": {
-      "domkey": "MetaLeft",
-      "english": "Meta Left",
-      "chromium": "metaLeft"
+      "name": "MetaLeft",
+      "chromium": "MetaLeft"
     },
     "scanCodes": {
       "usb": 458979,
@@ -2797,14 +2471,12 @@
       "windows": 57435,
       "macos": 55,
       "ios": 227
-    },
-    "keyCodes": {}
+    }
   },
-  "controlRight": {
+  "ControlRight": {
     "names": {
-      "domkey": "ControlRight",
-      "english": "Control Right",
-      "chromium": "controlRight"
+      "name": "ControlRight",
+      "chromium": "ControlRight"
     },
     "scanCodes": {
       "usb": 458980,
@@ -2813,14 +2485,12 @@
       "windows": 57373,
       "macos": 62,
       "ios": 228
-    },
-    "keyCodes": {}
+    }
   },
-  "shiftRight": {
+  "ShiftRight": {
     "names": {
-      "domkey": "ShiftRight",
-      "english": "Shift Right",
-      "chromium": "shiftRight"
+      "name": "ShiftRight",
+      "chromium": "ShiftRight"
     },
     "scanCodes": {
       "usb": 458981,
@@ -2829,14 +2499,12 @@
       "windows": 54,
       "macos": 60,
       "ios": 229
-    },
-    "keyCodes": {}
+    }
   },
-  "altRight": {
+  "AltRight": {
     "names": {
-      "domkey": "AltRight",
-      "english": "Alt Right",
-      "chromium": "altRight"
+      "name": "AltRight",
+      "chromium": "AltRight"
     },
     "scanCodes": {
       "usb": 458982,
@@ -2845,14 +2513,12 @@
       "windows": 57400,
       "macos": 61,
       "ios": 230
-    },
-    "keyCodes": {}
+    }
   },
-  "metaRight": {
+  "MetaRight": {
     "names": {
-      "domkey": "MetaRight",
-      "english": "Meta Right",
-      "chromium": "metaRight"
+      "name": "MetaRight",
+      "chromium": "MetaRight"
     },
     "scanCodes": {
       "usb": 458983,
@@ -2861,452 +2527,725 @@
       "windows": 57436,
       "macos": 54,
       "ios": 231
-    },
-    "keyCodes": {}
+    }
   },
-  "brightnessUp": {
+  "Info": {
     "names": {
-      "domkey": "BrightnessUp",
-      "english": "Brightness Up",
-      "chromium": "brightnessUp"
+      "name": "Info"
+    },
+    "scanCodes": {
+      "usb": 786528,
+      "linux": 358,
+      "xkb": 366
+    }
+  },
+  "ClosedCaptionToggle": {
+    "names": {
+      "name": "ClosedCaptionToggle"
+    },
+    "scanCodes": {
+      "usb": 786529,
+      "linux": 370,
+      "xkb": 378
+    }
+  },
+  "BrightnessUp": {
+    "names": {
+      "name": "BrightnessUp",
+      "chromium": "BrightnessUp"
     },
     "scanCodes": {
       "usb": 786543,
       "linux": 225,
       "xkb": 233
-    },
-    "keyCodes": {}
+    }
   },
-  "brightnessDown": {
+  "BrightnessDown": {
     "names": {
-      "domkey": "BrightnessDown",
-      "english": "Brightness Down",
-      "chromium": "brightnessDown"
+      "name": "BrightnessDown",
+      "chromium": "BrightnessDown"
     },
     "scanCodes": {
       "usb": 786544,
       "linux": 224,
       "xkb": 232
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaPlay": {
+  "BrightnessToggle": {
     "names": {
-      "domkey": "MediaPlay",
-      "english": "Media Play",
-      "chromium": "mediaPlay"
+      "name": "BrightnessToggle"
+    },
+    "scanCodes": {
+      "usb": 786546,
+      "linux": 431,
+      "xkb": 439
+    }
+  },
+  "BrightnessMinimum": {
+    "names": {
+      "name": "BrightnessMinimum"
+    },
+    "scanCodes": {
+      "usb": 786547,
+      "linux": 592,
+      "xkb": 600
+    }
+  },
+  "BrightnessMaximum": {
+    "names": {
+      "name": "BrightnessMaximum"
+    },
+    "scanCodes": {
+      "usb": 786548,
+      "linux": 593,
+      "xkb": 601
+    }
+  },
+  "BrightnessAuto": {
+    "names": {
+      "name": "BrightnessAuto"
+    },
+    "scanCodes": {
+      "usb": 786549,
+      "linux": 244,
+      "xkb": 252
+    }
+  },
+  "KbdIllumUp": {
+    "names": {
+      "name": "KbdIllumUp"
+    },
+    "scanCodes": {
+      "usb": 786553,
+      "linux": 230,
+      "xkb": 238
+    }
+  },
+  "KbdIllumDown": {
+    "names": {
+      "name": "KbdIllumDown"
+    },
+    "scanCodes": {
+      "usb": 786554,
+      "linux": 229,
+      "xkb": 237
+    }
+  },
+  "MediaLast": {
+    "names": {
+      "name": "MediaLast"
+    },
+    "scanCodes": {
+      "usb": 786563,
+      "linux": 405,
+      "xkb": 413
+    }
+  },
+  "LaunchPhone": {
+    "names": {
+      "name": "LaunchPhone"
+    },
+    "scanCodes": {
+      "usb": 786572,
+      "linux": 169,
+      "xkb": 177
+    }
+  },
+  "ProgramGuide": {
+    "names": {
+      "name": "ProgramGuide"
+    },
+    "scanCodes": {
+      "usb": 786573,
+      "linux": 362,
+      "xkb": 370
+    }
+  },
+  "Exit": {
+    "names": {
+      "name": "Exit"
+    },
+    "scanCodes": {
+      "usb": 786580,
+      "linux": 174,
+      "xkb": 182
+    }
+  },
+  "ChannelUp": {
+    "names": {
+      "name": "ChannelUp"
+    },
+    "scanCodes": {
+      "usb": 786588,
+      "linux": 410,
+      "xkb": 418
+    }
+  },
+  "ChannelDown": {
+    "names": {
+      "name": "ChannelDown"
+    },
+    "scanCodes": {
+      "usb": 786589,
+      "linux": 411,
+      "xkb": 419
+    }
+  },
+  "MediaPlay": {
+    "names": {
+      "name": "MediaPlay",
+      "chromium": "MediaPlay"
     },
     "scanCodes": {
       "usb": 786608,
       "linux": 207,
       "xkb": 215
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaPause": {
+  "MediaPause": {
     "names": {
-      "domkey": "MediaPause",
-      "english": "Media Pause",
-      "chromium": "mediaPause"
+      "name": "MediaPause",
+      "chromium": "MediaPause"
     },
     "scanCodes": {
       "usb": 786609,
       "linux": 201,
       "xkb": 209
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaRecord": {
+  "MediaRecord": {
     "names": {
-      "domkey": "MediaRecord",
-      "english": "Media Record",
-      "chromium": "mediaRecord"
+      "name": "MediaRecord",
+      "chromium": "MediaRecord"
     },
     "scanCodes": {
       "usb": 786610,
       "linux": 167,
       "xkb": 175
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaFastForward": {
+  "MediaFastForward": {
     "names": {
-      "domkey": "MediaFastForward",
-      "english": "Media Fast Forward",
-      "chromium": "mediaFastForward"
+      "name": "MediaFastForward",
+      "chromium": "MediaFastForward"
     },
     "scanCodes": {
       "usb": 786611,
       "linux": 208,
       "xkb": 216
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaRewind": {
+  "MediaRewind": {
     "names": {
-      "domkey": "MediaRewind",
-      "english": "Media Rewind",
-      "chromium": "mediaRewind"
+      "name": "MediaRewind",
+      "chromium": "MediaRewind"
     },
     "scanCodes": {
       "usb": 786612,
       "linux": 168,
       "xkb": 176
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaTrackNext": {
+  "MediaTrackNext": {
     "names": {
-      "domkey": "MediaTrackNext",
-      "english": "Media Track Next",
-      "chromium": "mediaTrackNext"
+      "name": "MediaTrackNext",
+      "chromium": "MediaTrackNext"
     },
     "scanCodes": {
       "usb": 786613,
       "linux": 163,
       "xkb": 171,
       "windows": 57369
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaTrackPrevious": {
+  "MediaTrackPrevious": {
     "names": {
-      "domkey": "MediaTrackPrevious",
-      "english": "Media Track Previous",
-      "chromium": "mediaTrackPrevious"
+      "name": "MediaTrackPrevious",
+      "chromium": "MediaTrackPrevious"
     },
     "scanCodes": {
       "usb": 786614,
       "linux": 165,
       "xkb": 173,
       "windows": 57360
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaStop": {
+  "MediaStop": {
     "names": {
-      "domkey": "MediaStop",
-      "english": "Media Stop",
-      "chromium": "mediaStop"
+      "name": "MediaStop",
+      "chromium": "MediaStop"
     },
     "scanCodes": {
       "usb": 786615,
       "linux": 166,
       "xkb": 174,
       "windows": 57380
-    },
-    "keyCodes": {}
+    }
   },
-  "eject": {
+  "Eject": {
     "names": {
-      "domkey": "Eject",
-      "english": "Eject",
-      "chromium": "eject"
+      "name": "Eject",
+      "chromium": "Eject"
     },
     "scanCodes": {
       "usb": 786616,
       "linux": 161,
       "xkb": 169,
       "windows": 57388
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaPlayPause": {
+  "MediaPlayPause": {
     "names": {
-      "domkey": "MediaPlayPause",
-      "english": "Media Play Pause",
-      "chromium": "mediaPlayPause"
+      "name": "MediaPlayPause",
+      "chromium": "MediaPlayPause"
     },
     "scanCodes": {
       "usb": 786637,
       "linux": 164,
       "xkb": 172,
       "windows": 57378
-    },
-    "keyCodes": {}
+    }
   },
-  "mediaSelect": {
+  "SpeechInputToggle": {
     "names": {
-      "domkey": "MediaSelect",
-      "english": "Media Select",
-      "chromium": "mediaSelect"
+      "name": "SpeechInputToggle"
+    },
+    "scanCodes": {
+      "usb": 786639,
+      "linux": 582,
+      "xkb": 590
+    }
+  },
+  "BassBoost": {
+    "names": {
+      "name": "BassBoost"
+    },
+    "scanCodes": {
+      "usb": 786661,
+      "linux": 209,
+      "xkb": 217
+    }
+  },
+  "MediaSelect": {
+    "names": {
+      "name": "MediaSelect",
+      "chromium": "MediaSelect"
     },
     "scanCodes": {
       "usb": 786819,
       "linux": 171,
       "xkb": 179,
       "windows": 57453
-    },
-    "keyCodes": {}
+    }
   },
-  "launchMail": {
+  "LaunchWordProcessor": {
     "names": {
-      "domkey": "LaunchMail",
-      "english": "Launch Mail",
-      "chromium": "launchMail"
+      "name": "LaunchWordProcessor"
+    },
+    "scanCodes": {
+      "usb": 786820,
+      "linux": 421,
+      "xkb": 429
+    }
+  },
+  "LaunchSpreadsheet": {
+    "names": {
+      "name": "LaunchSpreadsheet"
+    },
+    "scanCodes": {
+      "usb": 786822,
+      "linux": 423,
+      "xkb": 431
+    }
+  },
+  "LaunchMail": {
+    "names": {
+      "name": "LaunchMail",
+      "chromium": "LaunchMail"
     },
     "scanCodes": {
       "usb": 786826,
       "linux": 155,
       "xkb": 163,
       "windows": 57452
-    },
-    "keyCodes": {}
+    }
   },
-  "launchApp2": {
+  "LaunchContacts": {
     "names": {
-      "domkey": "LaunchApp2",
-      "english": "Launch App2",
-      "chromium": "launchApp2"
+      "name": "LaunchContacts"
+    },
+    "scanCodes": {
+      "usb": 786829,
+      "linux": 429,
+      "xkb": 437
+    }
+  },
+  "LaunchCalendar": {
+    "names": {
+      "name": "LaunchCalendar"
+    },
+    "scanCodes": {
+      "usb": 786830,
+      "linux": 397,
+      "xkb": 405
+    }
+  },
+  "LaunchApp2": {
+    "names": {
+      "name": "LaunchApp2",
+      "chromium": "LaunchApp2"
     },
     "scanCodes": {
       "usb": 786834,
       "linux": 140,
       "xkb": 148,
       "windows": 57377
-    },
-    "keyCodes": {}
+    }
   },
-  "launchApp1": {
+  "LaunchApp1": {
     "names": {
-      "domkey": "LaunchApp1",
-      "english": "Launch App1",
-      "chromium": "launchApp1"
+      "name": "LaunchApp1",
+      "chromium": "LaunchApp1"
     },
     "scanCodes": {
       "usb": 786836,
       "linux": 144,
       "xkb": 152,
       "windows": 57451
-    },
-    "keyCodes": {}
+    }
   },
-  "launchControlPanel": {
+  "LaunchInternetBrowser": {
     "names": {
-      "domkey": "LaunchControlPanel",
-      "english": "Launch Control Panel",
-      "chromium": "launchControlPanel"
+      "name": "LaunchInternetBrowser"
+    },
+    "scanCodes": {
+      "usb": 786838,
+      "linux": 150,
+      "xkb": 158
+    }
+  },
+  "LogOff": {
+    "names": {
+      "name": "LogOff"
+    },
+    "scanCodes": {
+      "usb": 786844,
+      "linux": 433,
+      "xkb": 441
+    }
+  },
+  "LockScreen": {
+    "names": {
+      "name": "LockScreen"
+    },
+    "scanCodes": {
+      "usb": 786846,
+      "linux": 152,
+      "xkb": 160
+    }
+  },
+  "LaunchControlPanel": {
+    "names": {
+      "name": "LaunchControlPanel",
+      "chromium": "LaunchControlPanel"
     },
     "scanCodes": {
       "usb": 786847,
       "linux": 579,
       "xkb": 587
-    },
-    "keyCodes": {}
+    }
   },
-  "selectTask": {
+  "SelectTask": {
     "names": {
-      "domkey": "SelectTask",
-      "english": "Select Task",
-      "chromium": "selectTask"
+      "name": "SelectTask",
+      "chromium": "SelectTask"
     },
     "scanCodes": {
       "usb": 786850,
       "linux": 580,
       "xkb": 588
-    },
-    "keyCodes": {}
+    }
   },
-  "launchScreenSaver": {
+  "LaunchDocuments": {
     "names": {
-      "domkey": "LaunchScreenSaver",
-      "english": "Launch Screen Saver",
-      "chromium": "launchScreenSaver"
+      "name": "LaunchDocuments"
+    },
+    "scanCodes": {
+      "usb": 786855,
+      "linux": 235,
+      "xkb": 243
+    }
+  },
+  "SpellCheck": {
+    "names": {
+      "name": "SpellCheck"
+    },
+    "scanCodes": {
+      "usb": 786859,
+      "linux": 432,
+      "xkb": 440
+    }
+  },
+  "LaunchKeyboardLayout": {
+    "names": {
+      "name": "LaunchKeyboardLayout"
+    },
+    "scanCodes": {
+      "usb": 786862,
+      "linux": 374,
+      "xkb": 382
+    }
+  },
+  "LaunchScreenSaver": {
+    "names": {
+      "name": "LaunchScreenSaver",
+      "chromium": "LaunchScreenSaver"
     },
     "scanCodes": {
       "usb": 786865,
       "linux": 581,
       "xkb": 589
-    },
-    "keyCodes": {}
+    }
   },
-  "launchAssistant": {
+  "LaunchAudioBrowser": {
     "names": {
-      "domkey": "LaunchAssistant",
-      "english": "Launch Assistant",
-      "chromium": "launchAssistant"
+      "name": "LaunchAudioBrowser"
+    },
+    "scanCodes": {
+      "usb": 786871,
+      "linux": 392,
+      "xkb": 400
+    }
+  },
+  "LaunchAssistant": {
+    "names": {
+      "name": "LaunchAssistant",
+      "chromium": "LaunchAssistant"
     },
     "scanCodes": {
       "usb": 786891,
       "linux": 583,
       "xkb": 591
-    },
-    "keyCodes": {}
+    }
   },
-  "browserSearch": {
+  "New": {
     "names": {
-      "domkey": "BrowserSearch",
-      "english": "Browser Search",
-      "chromium": "browserSearch"
+      "name": "New"
+    },
+    "scanCodes": {
+      "usb": 786945,
+      "linux": 181,
+      "xkb": 189
+    }
+  },
+  "Close": {
+    "names": {
+      "name": "Close"
+    },
+    "scanCodes": {
+      "usb": 786947,
+      "linux": 206,
+      "xkb": 214
+    }
+  },
+  "Save": {
+    "names": {
+      "name": "Save"
+    },
+    "scanCodes": {
+      "usb": 786951,
+      "linux": 234,
+      "xkb": 242
+    }
+  },
+  "Print": {
+    "names": {
+      "name": "Print"
+    },
+    "scanCodes": {
+      "usb": 786952,
+      "linux": 210,
+      "xkb": 218
+    }
+  },
+  "BrowserSearch": {
+    "names": {
+      "name": "BrowserSearch",
+      "chromium": "BrowserSearch"
     },
     "scanCodes": {
       "usb": 786977,
       "linux": 217,
       "xkb": 225,
       "windows": 57445
-    },
-    "keyCodes": {}
+    }
   },
-  "browserHome": {
+  "BrowserHome": {
     "names": {
-      "domkey": "BrowserHome",
-      "english": "Browser Home",
-      "chromium": "browserHome"
+      "name": "BrowserHome",
+      "chromium": "BrowserHome"
     },
     "scanCodes": {
       "usb": 786979,
       "linux": 172,
       "xkb": 180,
       "windows": 57394
-    },
-    "keyCodes": {}
+    }
   },
-  "browserBack": {
+  "BrowserBack": {
     "names": {
-      "domkey": "BrowserBack",
-      "english": "Browser Back",
-      "chromium": "browserBack"
+      "name": "BrowserBack",
+      "chromium": "BrowserBack"
     },
     "scanCodes": {
       "usb": 786980,
       "linux": 158,
       "xkb": 166,
       "windows": 57450
-    },
-    "keyCodes": {}
+    }
   },
-  "browserForward": {
+  "BrowserForward": {
     "names": {
-      "domkey": "BrowserForward",
-      "english": "Browser Forward",
-      "chromium": "browserForward"
+      "name": "BrowserForward",
+      "chromium": "BrowserForward"
     },
     "scanCodes": {
       "usb": 786981,
       "linux": 159,
       "xkb": 167,
       "windows": 57449
-    },
-    "keyCodes": {}
+    }
   },
-  "browserStop": {
+  "BrowserStop": {
     "names": {
-      "domkey": "BrowserStop",
-      "english": "Browser Stop",
-      "chromium": "browserStop"
+      "name": "BrowserStop",
+      "chromium": "BrowserStop"
     },
     "scanCodes": {
       "usb": 786982,
       "linux": 128,
       "xkb": 136,
       "windows": 57448
-    },
-    "keyCodes": {}
+    }
   },
-  "browserRefresh": {
+  "BrowserRefresh": {
     "names": {
-      "domkey": "BrowserRefresh",
-      "english": "Browser Refresh",
-      "chromium": "browserRefresh"
+      "name": "BrowserRefresh",
+      "chromium": "BrowserRefresh"
     },
     "scanCodes": {
       "usb": 786983,
       "linux": 173,
       "xkb": 181,
       "windows": 57447
-    },
-    "keyCodes": {}
+    }
   },
-  "browserFavorites": {
+  "BrowserFavorites": {
     "names": {
-      "domkey": "BrowserFavorites",
-      "english": "Browser Favorites",
-      "chromium": "browserFavorites"
+      "name": "BrowserFavorites",
+      "chromium": "BrowserFavorites"
     },
     "scanCodes": {
       "usb": 786986,
       "linux": 156,
       "xkb": 164,
       "windows": 57446
-    },
-    "keyCodes": {}
+    }
   },
-  "zoomToggle": {
+  "ZoomIn": {
     "names": {
-      "domkey": "ZoomToggle",
-      "english": "Zoom Toggle",
-      "chromium": "zoomToggle"
+      "name": "ZoomIn"
+    },
+    "scanCodes": {
+      "usb": 786989,
+      "linux": 418,
+      "xkb": 426
+    }
+  },
+  "ZoomOut": {
+    "names": {
+      "name": "ZoomOut"
+    },
+    "scanCodes": {
+      "usb": 786990,
+      "linux": 419,
+      "xkb": 427
+    }
+  },
+  "ZoomToggle": {
+    "names": {
+      "name": "ZoomToggle",
+      "chromium": "ZoomToggle"
     },
     "scanCodes": {
       "usb": 786994,
       "linux": 372,
       "xkb": 380
-    },
-    "keyCodes": {}
+    }
   },
-  "mailReply": {
+  "Redo": {
     "names": {
-      "domkey": "MailReply",
-      "english": "Mail Reply",
-      "chromium": "mailReply"
+      "name": "Redo"
+    },
+    "scanCodes": {
+      "usb": 787065,
+      "linux": 182,
+      "xkb": 190
+    }
+  },
+  "MailReply": {
+    "names": {
+      "name": "MailReply",
+      "chromium": "MailReply"
     },
     "scanCodes": {
       "usb": 787081,
       "linux": 232,
       "xkb": 240
-    },
-    "keyCodes": {}
+    }
   },
-  "mailForward": {
+  "MailForward": {
     "names": {
-      "domkey": "MailForward",
-      "english": "Mail Forward",
-      "chromium": "mailForward"
+      "name": "MailForward",
+      "chromium": "MailForward"
     },
     "scanCodes": {
       "usb": 787083,
       "linux": 233,
       "xkb": 241
-    },
-    "keyCodes": {}
+    }
   },
-  "mailSend": {
+  "MailSend": {
     "names": {
-      "domkey": "MailSend",
-      "english": "Mail Send",
-      "chromium": "mailSend"
+      "name": "MailSend",
+      "chromium": "MailSend"
     },
     "scanCodes": {
       "usb": 787084,
       "linux": 231,
       "xkb": 239
-    },
-    "keyCodes": {}
+    }
   },
-  "keyboardLayoutSelect": {
+  "KeyboardLayoutSelect": {
     "names": {
-      "domkey": "KeyboardLayoutSelect",
-      "english": "Keyboard Layout Select",
-      "chromium": "keyboardLayoutSelect"
+      "name": "KeyboardLayoutSelect",
+      "chromium": "KeyboardLayoutSelect"
     },
     "scanCodes": {
       "usb": 787101,
       "linux": 584,
       "xkb": 592
-    },
-    "keyCodes": {}
+    }
   },
-  "showAllWindows": {
+  "ShowAllWindows": {
     "names": {
-      "domkey": "ShowAllWindows",
-      "english": "Show All Windows",
-      "chromium": "showAllWindows"
+      "name": "ShowAllWindows",
+      "chromium": "ShowAllWindows"
     },
     "scanCodes": {
       "usb": 787103,
       "linux": 120,
       "xkb": 128
-    },
-    "keyCodes": {}
+    }
   }
 }

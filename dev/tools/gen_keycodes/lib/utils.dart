@@ -11,9 +11,9 @@ import 'package:path/path.dart' as path;
 /// this script.
 final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
 
-/// Converts `FOO_BAR` to `fooBar`.
-String shoutingToLowerCamel(String shouting) {
-  final RegExp initialLetter = RegExp(r'_([^_])([^_]*)');
+/// Converts `FOO_BAR` to `FooBar`.
+String shoutingToUpperCamel(String shouting) {
+  final RegExp initialLetter = RegExp(r'(?:_|^)([^_])([^_]*)');
   final String snake = shouting.toLowerCase();
   final String result = snake.replaceAllMapped(initialLetter, (Match match) {
     return match.group(1)!.toUpperCase() + match.group(2)!.toLowerCase();
@@ -192,6 +192,16 @@ Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, vo
 ///
 /// Will modify the input map.
 Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
-  return map..removeWhere((String key, dynamic value) =>
-      value == null || (value is List<dynamic> && value.isEmpty));
+  return map..removeWhere((String key, dynamic value) {
+    if (value == null)
+      return true;
+    if (value is Map<String, dynamic>) {
+      final Map<String, dynamic> regularizedMap = removeEmptyValues(value);
+      return regularizedMap.isEmpty;
+    }
+    if (value is Iterable<dynamic>) {
+      return value.isEmpty;
+    }
+    return false;
+  });
 }

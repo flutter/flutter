@@ -23,30 +23,16 @@ class PhysicalKeyData {
     String glfwHeaderFile,
     String glfwNameMap,
   ) {
-    final Map<String, List<int>> nameToAndroidScanCodes = _readAndroidScanCodes(
-      androidKeyboardLayout,
-      androidNameMap,
-    );
+    final Map<String, List<int>> nameToAndroidScanCodes = _readAndroidScanCodes(androidKeyboardLayout, androidNameMap);
     final Map<String, List<int>> nameToGlfwKeyCodes = _readGlfwKeyCodes(glfwHeaderFile, glfwNameMap);
-    // final Map<String, int> nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
-    // // Cast Android dom map
-    // final Map<String, List<String>> nameToAndroidNames = (json.decode(androidNameMap) as Map<String, dynamic>)
-    //   .cast<String, List<dynamic>>()
-    //   .map<String, List<String>>((String key, List<dynamic> value) {
-    //     return MapEntry<String, List<String>>(key, value.cast<String>());
-    //   });
-    // // Cast GLFW dom map
-    // final Map<String, List<dynamic>> nameToGlfwNames = (json.decode(glfwNameMap) as Map<String, dynamic>)
-    //   .cast<String, List<dynamic>>()
-    //   .map<String, List<String>>((String key, List<dynamic> value) {
-    //     return MapEntry<String, List<String>>(key, value.cast<String>());
-    //   });
-    final Map<String, PhysicalKeyEntry> data = _readHidEntries(chromiumHidCodes,
+    final Map<String, PhysicalKeyEntry> data = _readHidEntries(
+      chromiumHidCodes,
       nameToAndroidScanCodes,
       nameToGlfwKeyCodes,
     );
     final List<MapEntry<String, PhysicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
-      (MapEntry<String, PhysicalKeyEntry> a, MapEntry<String, PhysicalKeyEntry> b) => a.value.usbHidCode.compareTo(b.value.usbHidCode)
+      (MapEntry<String, PhysicalKeyEntry> a, MapEntry<String, PhysicalKeyEntry> b) =>
+        PhysicalKeyEntry.compareByUsbHidCode(a.value, b.value),
     );
     data
       ..clear()
@@ -75,11 +61,10 @@ class PhysicalKeyData {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> outputMap = <String, dynamic>{};
     for (final PhysicalKeyEntry entry in _dataByName.values) {
-      outputMap[entry.constantName] = entry.toJson();
+      outputMap[entry.name] = entry.toJson();
     }
     return outputMap;
   }
-
 
   /// The list of keys.
   PhysicalKeyEntry? getEntryByName(String name) {
@@ -139,30 +124,6 @@ class PhysicalKeyData {
   /// Lines in this file look like this (without the ///):
   ///  /** Space key. */
   ///  #define GLFW_KEY_SPACE              32,
-  // static Map<String, int> _readGlfwKeyCodes(String headerFile) {
-  //   // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
-  //   final RegExp definedCodes = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
-  //   final Map<String, dynamic> replaced = <String, dynamic>{};
-  //   for (final Match match in definedCodes.allMatches(headerFile)) {
-  //     replaced[match.group(1)!] = int.tryParse(match.group(2)!) ?? match.group(2)!.replaceAll('GLFW_KEY_', '');
-  //   }
-  //   final Map<String, int> result = <String, int>{};
-  //   replaced.forEach((String key, dynamic value) {
-  //     // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
-  //     if (value is String) {
-  //       result[key] = replaced[value] as int;
-  //     } else {
-  //       result[key] = value as int;
-  //     }
-  //   });
-  //   return result;
-  // }
-
-  /// Parses entries from GLFW's keycodes.h key code data file.
-  ///
-  /// Lines in this file look like this (without the ///):
-  ///  /** Space key. */
-  ///  #define GLFW_KEY_SPACE              32,
   static Map<String, List<int>> _readGlfwKeyCodes(String headerFile, String nameMap) {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
     final RegExp definedCodes = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
@@ -211,21 +172,25 @@ class PhysicalKeyData {
     final Map<int, PhysicalKeyEntry> entries = <int, PhysicalKeyEntry>{};
     final RegExp usbMapRegExp = RegExp(
         r'DOM_CODE\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
-        r'\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*"?([^\s]+?)"?,\s*([^\s]+?)\s*\)',
+        r'\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*(?:"([^\s]+)")?[^")]*?,\s*([^\s]+?)\s*\)',
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
     for (final Match match in usbMapRegExp.allMatches(input)) {
       final int usbHidCode = getHex(match.group(1)!);
-      final int macScanCode = getHex(match.group(5)!);
       final int linuxScanCode = getHex(match.group(2)!);
       final int xKbScanCode = getHex(match.group(3)!);
       final int windowsScanCode = getHex(match.group(4)!);
+      final int macScanCode = getHex(match.group(5)!);
+      final String? chromiumCode = match.group(6);
       // The input data has a typo...
-      final String chromiumName = shoutingToLowerCamel(match.group(7)!).replaceAll('Minimium', 'Minimum');
-      if (match.group(6) == 'NULL')
+      final String enumName = match.group(7)!.replaceAll('MINIMIUM', 'MINIMUM');
+
+      final String name = chromiumCode ?? shoutingToUpperCamel(enumName);
+      if (name == 'IntlHash') {
+        // Skip key that is not actually generated by any keyboard.
         continue;
-      final String name = chromiumName == 'none' ? 'None' : match.group(6)!;
+      }
       final PhysicalKeyEntry newEntry = PhysicalKeyEntry(
         usbHidCode: usbHidCode,
         androidScanCodes: nameToAndroidScanCodes[name] ?? <int>[],
@@ -236,12 +201,8 @@ class PhysicalKeyData {
         macOsScanCode: macScanCode == 0xffff ? null : macScanCode,
         iosScanCode: (usbHidCode & 0x070000) == 0x070000 ? (usbHidCode ^ 0x070000) : null,
         name: name,
-        chromiumName: chromiumName,
+        chromiumCode: chromiumCode,
       );
-      if (newEntry.name == 'IntlHash') {
-        // Skip key that is not actually generated by any keyboard.
-        continue;
-      }
       // Remove duplicates: last one wins, so that supplemental codes
       // override.
       if (entries.containsKey(newEntry.usbHidCode)) {
@@ -272,25 +233,22 @@ class PhysicalKeyEntry {
     required this.windowsScanCode,
     required this.macOsScanCode,
     required this.iosScanCode,
-    required this.chromiumName,
+    required this.chromiumCode,
     required this.glfwKeyCodes,
-  })  : assert(usbHidCode != null),
-        assert(chromiumName != null);
+  })  : assert(usbHidCode != null);
 
   /// Populates the key from a JSON map.
   factory PhysicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map) {
     return PhysicalKeyEntry(
-      name: map['names']['domkey'] as String,
-      chromiumName: map['names']['chromium'] as String,
+      name: map['names']['name'] as String,
+      chromiumCode: map['names']['chromium'] as String?,
       usbHidCode: map['scanCodes']['usb'] as int,
-      // androidKeyNames: (map['names']['android'] as List<dynamic>?)?.cast<String>() ?? <String>[],
       androidScanCodes: (map['scanCodes']['android'] as List<dynamic>?)?.cast<int>() ?? <int>[],
       linuxScanCode: map['scanCodes']['linux'] as int?,
       xKbScanCode: map['scanCodes']['xkb'] as int?,
       windowsScanCode: map['scanCodes']['windows'] as int?,
       macOsScanCode: map['scanCodes']['macos'] as int?,
       iosScanCode: map['scanCodes']['ios'] as int?,
-      // glfwKeyNames: (map['names']['glfw'] as List<dynamic>?)?.cast<String>() ?? <String>[],
       glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
     );
   }
@@ -320,20 +278,17 @@ class PhysicalKeyEntry {
   /// but where there was no DomKey representation, derived from the Chromium
   /// symbol name.
   final String name;
-  /// The Chromium symbol name for the key.
-  final String chromiumName;
+  /// The Chromium event code for the key.
+  final String? chromiumCode;
 
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
     return removeEmptyValues(<String, dynamic>{
-      'names': removeEmptyValues(<String, dynamic>{
-        'domkey': name,
-        // 'android': androidKeyNames,
-        'english': commentName,
-        'chromium': chromiumName,
-        // 'glfw': glfwKeyNames,
-      }),
-      'scanCodes': removeEmptyValues(<String, dynamic>{
+      'names': <String, dynamic>{
+        'name': name,
+        'chromium': chromiumCode,
+      },
+      'scanCodes': <String, dynamic>{
         'android': androidScanCodes,
         'usb': usbHidCode,
         'linux': linuxScanCode,
@@ -341,10 +296,10 @@ class PhysicalKeyEntry {
         'windows': windowsScanCode,
         'macos': macOsScanCode,
         'ios': iosScanCode,
-      }),
-      'keyCodes': removeEmptyValues(<String, List<int>>{
+      },
+      'keyCodes': <String, List<int>>{
         'glfw': glfwKeyCodes,
-      }),
+      },
     });
   }
 
@@ -383,13 +338,14 @@ class PhysicalKeyEntry {
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
   /// the end of the name).
   late final String constantName = ((){
-    String result;
-    if (name == null || name.isEmpty) {
+    String? result;
+    if (name.isEmpty) {
       // If it doesn't have a DomKey name then use the Chromium symbol name.
-      result = chromiumName;
+      result = chromiumCode;
     } else {
       result = upperCamelToLowerCamel(name);
     }
+    result ??= 'Key${toHex(usbHidCode)}';
     if (kDartReservedWords.contains(result)) {
       return '${result}Key';
     }
@@ -401,7 +357,7 @@ class PhysicalKeyEntry {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
         'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
         'windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '
-        'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumName '
+        'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumCode '
         'iOSScanCode: ${toHex(iosScanCode)})';
   }
 
@@ -441,4 +397,7 @@ class PhysicalKeyEntry {
 
   /// The code prefix for pseudo-keys which represent collections of key synonyms.
   static const int synonymPlane = 0x20000000000;
+
+  static int compareByUsbHidCode(PhysicalKeyEntry a, PhysicalKeyEntry b) =>
+      a.usbHidCode.compareTo(b.usbHidCode);
 }

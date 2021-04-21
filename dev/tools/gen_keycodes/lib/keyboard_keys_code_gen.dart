@@ -75,7 +75,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
       final List<String> synonyms = PhysicalKeyEntry.synonyms[name]!;
-      final PhysicalKeyEntry entry = physicalData.data.firstWhere((PhysicalKeyEntry item) => item.name == synonyms[0]);
+      final PhysicalKeyEntry entry = physicalData.data.firstWhere((PhysicalKeyEntry item) => item.chromiumCode == synonyms[0]);
       final Set<String> unionNames = synonyms.map<String>((dynamic name) {
         return upperCamelToLowerCamel(name as String);
       }).toSet();
@@ -109,7 +109,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // Use the first item in the synonyms as a template for the ID to use.
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
-      final PhysicalKeyEntry entry = keyData.data.firstWhere((PhysicalKeyEntry item) => item.name == synonyms[0]);
+      final PhysicalKeyEntry entry = keyData.data.firstWhere((PhysicalKeyEntry item) => item.chromiumCode == synonyms[0]);
       result.write('''
     ${toHex(PhysicalKeyEntry.synonymPlane | entry.flutterId, digits: 11)}: '${PhysicalKeyEntry.getCommentName(name)}',
 ''');
@@ -137,7 +137,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
       final PhysicalKeyEntry primaryKey = physicalData.data.firstWhere((PhysicalKeyEntry item) {
-        return item.name == synonyms[0];
+        return item.chromiumCode == synonyms[0];
       });
       assert(primaryKey != null);
       keyCodeMap.writeln('    ${toHex(PhysicalKeyEntry.synonymPlane | primaryKey.flutterId, digits: 10)}: $entry,');
