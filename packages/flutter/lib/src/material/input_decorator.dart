@@ -3340,7 +3340,7 @@ class InputDecoration {
   /// space.
   ///
   /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
-  /// [InputDecorationThemeData.constraints] will be used. If that
+  /// [InputDecorationTheme.constraints] will be used. If that
   /// is null then the decorator will fill the available width with
   /// a default height based on text size.
   final BoxConstraints? constraints;
