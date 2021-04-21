@@ -45,8 +45,8 @@ import 'dart:io' as io
     StdoutException,
     stdout;
 
-import 'package:meta/meta.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
 import 'async_guard.dart';
 import 'platform.dart';

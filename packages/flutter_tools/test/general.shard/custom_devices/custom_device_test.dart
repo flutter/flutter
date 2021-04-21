@@ -6,6 +6,8 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:file/src/interface/directory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,11 +19,8 @@ import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-
-import 'package:file/memory.dart';
-import 'package:file/file.dart';
+import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
