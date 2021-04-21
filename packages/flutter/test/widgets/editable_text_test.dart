@@ -5698,7 +5698,7 @@ void main() {
       selection: controller.selection,
     ));
 
-    expect(log.length, 0);
+    expect(log, isEmpty);
 
     // setEditingState is called when remote value modified by the formatter.
     state.updateEditingValue(TextEditingValue(

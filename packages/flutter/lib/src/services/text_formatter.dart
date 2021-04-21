@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
@@ -10,6 +9,8 @@ import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
 import 'text_input.dart';
+
+typedef FilteringFormatterReplacingStrategy = void Function(TextEditingValueAccumulator accumulator, int regionStart, int regionEnd, String replacement);
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus
@@ -150,9 +151,10 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     this.filterPattern, {
     required this.allow,
     this.replacementString = '',
-  }) : assert(filterPattern != null),
-       assert(allow != null),
-       assert(replacementString != null);
+    this.replacingStrategy = preserveSelectionAndComposingRegion,
+  })  : assert(filterPattern != null),
+        assert(allow != null),
+        assert(replacementString != null);
 
   /// Creates a formatter that only allows characters matching a pattern.
   ///
@@ -161,9 +163,10 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   FilteringTextInputFormatter.allow(
     this.filterPattern, {
     this.replacementString = '',
-  }) : assert(filterPattern != null),
-       assert(replacementString != null),
-       allow = true;
+    this.replacingStrategy = preserveSelectionAndComposingRegion,
+  })  : assert(filterPattern != null),
+        assert(replacementString != null),
+        allow = true;
 
   /// Creates a formatter that blocks characters matching a pattern.
   ///
@@ -172,9 +175,10 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   FilteringTextInputFormatter.deny(
     this.filterPattern, {
     this.replacementString = '',
-  }) : assert(filterPattern != null),
-       assert(replacementString != null),
-       allow = false;
+    this.replacingStrategy = preserveSelectionAndComposingRegion,
+  })  : assert(filterPattern != null),
+        assert(replacementString != null),
+        allow = false;
 
   /// A [Pattern] to match and replace in incoming [TextEditingValue]s.
   ///
@@ -258,21 +262,87 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// behavior in both cases.
   final String replacementString;
 
+  final FilteringFormatterReplacingStrategy replacingStrategy;
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    return _selectionAwareTextManipulation(
-      newValue,
-      (String substring) {
-        return substring.splitMapJoin(
+    print('>>> start formatting for $newValue');
+    final TextEditingValueAccumulator accumulator =
+        TextEditingValueAccumulator._(newValue);
+
+    if (accumulator.selection == null && accumulator.composingRegion == null) {
+      print('!!!! short circuit');
+      return newValue.copyWith(
+        text: newValue.text.splitMapJoin(
           filterPattern,
           onMatch: !allow ? (Match match) => replacementString : null,
-          onNonMatch: allow ? (String nonMatch) => nonMatch.isNotEmpty ? replacementString : '' : null,
-        );
-      },
-    );
+          onNonMatch: allow
+            ? ((String nonMatch) => nonMatch.isNotEmpty ? replacementString : '')
+            : null,
+        ),
+      );
+    }
+
+    final Iterable<Match> matches = filterPattern.allMatches(newValue.text);
+    Match? previousMatch;
+    for (final Match match in matches) {
+      final int allowStart;
+      final int allowEnd;
+      final int replaceStart;
+      final int replaceEnd;
+
+      assert(match.end > match.start);
+
+      // For each `Match`, compute the non-match region between itself and the
+      // previous match, since only the non-match regions are going to change.
+      if (allow) {
+        allowStart = match.start;
+        allowEnd = match.end;
+        print('allow: allow range: $allowStart - $allowEnd');
+        replaceStart = previousMatch?.end ?? 0;
+        replaceEnd = match.start;
+
+        // Write the replaced text first since it's the non-match region.
+        if (replaceStart < replaceEnd) {
+          replacingStrategy(accumulator, replaceStart, replaceEnd, replacementString);
+        }
+        accumulator.stringBuffer.write(newValue.text.substring(allowStart, allowEnd));
+      } else {
+        allowStart = previousMatch?.end ?? 0;
+        allowEnd = match.start;
+        replaceStart = match.start;
+        replaceEnd = match.end;
+        print('deny: allow range: $allowStart - $allowEnd, deny range: $replaceStart - $replaceEnd');
+
+        // Write the allowed text first since it's the non-match region.
+        accumulator.stringBuffer.write(newValue.text.substring(allowStart, allowEnd));
+        if (replaceStart < replaceEnd) {
+          replacingStrategy(accumulator, replaceStart, replaceEnd, replacementString);
+        }
+      }
+
+      previousMatch = match;
+    }
+
+    // Handle the last non-match region betwee the last match region and the end
+    // of the text.
+    final int replaceStart = previousMatch?.end ?? 0;
+    final int replaceEnd = newValue.text.length;
+
+    if (replaceStart < replaceEnd) {
+      if (allow) {
+        replacingStrategy(accumulator, replaceStart, replaceEnd, replacementString);
+      } else {
+        print('ending. appending: ${newValue.text.substring(replaceStart)}');
+        accumulator.stringBuffer.write(newValue.text.substring(replaceStart));
+      }
+    }
+
+    print('output: ${accumulator._finalize()}');
+    return accumulator._finalize();
   }
 
   /// A [TextInputFormatter] that forces input to be a single line.
@@ -280,6 +350,132 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
   /// A [TextInputFormatter] that takes in digits `[0-9]` only.
   static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
+
+  /// A [FilteringFormatterReplacingStrategy] that attempts to preserve the
+  /// previous selection and composing region as much as possible.
+  ///
+  /// If the
+  static void preserveSelectionAndComposingRegion(
+    TextEditingValueAccumulator accumulator,
+    int regionStart,
+    int regionEnd,
+    String replacement,
+  ) {
+    assert(regionEnd > regionStart);
+    final MutableTextRange<TextSelection>? selection = accumulator.selection;
+    final MutableTextRange<TextRange>? composingRegion = accumulator.composingRegion;
+
+    // Always replace the text.
+    accumulator.stringBuffer.write(replacement);
+    print('($regionStart - $regionEnd): accumulator.stringBuffer: ${accumulator.stringBuffer.toString()}');
+
+    final int replacementLength = replacement.length;
+    // Don't modify the text ranges if the region is replaced with a string of
+    // the same length.
+    if (regionEnd - regionStart == replacementLength) {
+      return;
+    }
+    if (composingRegion != null) {
+      // All 4 indices are adjusted to account for the string replacement,
+      // following the same logic below:
+      //
+      // - If the index precedes the replace region (i.e., before
+      //   [regionStart, regionEnd)), the index does not require adjustment.
+      // - Otherwise, add `replacementLenght` to the index to account for the
+      //   replacement text (we're placing the index **after** the replacement
+      //   text), and subtract the length of substring within
+      //   [regionStart, regionEnd), that's also before the index.
+      composingRegion.base += regionStart >= composingRegion.originalRange.start
+          ? 0
+          : replacementLength - (math.min(composingRegion.originalRange.start, regionEnd) - regionStart);
+
+      composingRegion.extent += regionStart >= composingRegion.originalRange.end
+          ? 0
+          : replacementLength - (math.min(composingRegion.originalRange.end, regionEnd) - regionStart);
+    }
+    if (selection != null) {
+      selection.base += regionStart >= selection.originalRange.baseOffset
+          ? 0
+          : replacementLength - (math.min(selection.originalRange.baseOffset, regionEnd) - regionStart);
+
+      selection.extent += regionStart >= selection.originalRange.extentOffset
+          ? 0
+          : replacementLength - (math.min(selection.originalRange.extentOffset, regionEnd) - regionStart);
+    }
+  }
+
+  static void preserveSelectionAndSkipComposingRegion(
+    TextEditingValueAccumulator accumulator,
+    int regionStart,
+    int regionEnd,
+    String replacement,
+  ) {
+    assert(regionEnd > regionStart);
+    final TextRange? composingRegion =
+        accumulator.composingRegion?.originalRange;
+    assert(
+      composingRegion == null || composingRegion.isNormalized,
+      'The composing region $composingRegion should be normalized',
+    );
+    if (composingRegion == null || regionEnd <= composingRegion.start || regionStart >= composingRegion.end) {
+      preserveSelectionAndComposingRegion(accumulator, regionStart, regionEnd, replacement);
+    } else {
+      // Skip the region if it overlaps the composing region.
+      accumulator.stringBuffer.write(accumulator.originalText.substring(regionStart, regionEnd));
+    }
+  }
+}
+
+class MutableTextRange<T extends TextRange> {
+  MutableTextRange._(this.base, this.extent, this.originalRange);
+
+  static MutableTextRange<TextRange>? _fromComposingRange(TextRange range) {
+    return range.isValid && !range.isCollapsed
+        ? MutableTextRange<TextRange>._(range.start, range.end, range)
+        : null;
+  }
+
+  static MutableTextRange<TextSelection>? _fromTextSelection(
+      TextSelection selection) {
+    return selection.isValid
+        ? MutableTextRange<TextSelection>._(selection.baseOffset, selection.extentOffset, selection)
+        : null;
+  }
+
+  int base;
+  int extent;
+  final T originalRange;
+}
+
+class TextEditingValueAccumulator {
+  TextEditingValueAccumulator._(
+    TextEditingValue textEditingValue,
+  )   : selection =
+            MutableTextRange._fromTextSelection(textEditingValue.selection),
+        composingRegion =
+            MutableTextRange._fromComposingRange(textEditingValue.composing),
+        originalText = textEditingValue.text;
+
+  final String originalText;
+  final StringBuffer stringBuffer = StringBuffer();
+
+  final MutableTextRange<TextSelection>? selection;
+  final MutableTextRange<TextRange>? composingRegion;
+
+  TextEditingValue _finalize() {
+    final MutableTextRange<TextSelection>? selection = this.selection;
+    final MutableTextRange<TextRange>? composingRegion = this.composingRegion;
+    return TextEditingValue(
+      text: stringBuffer.toString(),
+      composing: composingRegion == null || composingRegion.base == composingRegion.extent
+          ? TextRange.empty
+          : TextRange(start: composingRegion.base, end: composingRegion.extent),
+      // The selection affinity is downstream.
+      selection: selection == null
+          ? const TextSelection.collapsed(offset: -1)
+          : TextSelection(baseOffset: selection.base, extentOffset: selection.extent),
+    );
+  }
 }
 
 /// Old name for [FilteringTextInputFormatter.deny].
@@ -526,46 +722,4 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         return truncate(newValue, maxLength);
     }
   }
-}
-
-TextEditingValue _selectionAwareTextManipulation(
-  TextEditingValue value,
-  String Function(String substring) substringManipulation,
-) {
-  final int selectionStartIndex = value.selection.start;
-  final int selectionEndIndex = value.selection.end;
-  String manipulatedText;
-  TextSelection? manipulatedSelection;
-  if (selectionStartIndex < 0 || selectionEndIndex < 0) {
-    manipulatedText = substringManipulation(value.text);
-  } else {
-    final String beforeSelection = substringManipulation(
-      value.text.substring(0, selectionStartIndex),
-    );
-    final String inSelection = substringManipulation(
-      value.text.substring(selectionStartIndex, selectionEndIndex),
-    );
-    final String afterSelection = substringManipulation(
-      value.text.substring(selectionEndIndex),
-    );
-    manipulatedText = beforeSelection + inSelection + afterSelection;
-    if (value.selection.baseOffset > value.selection.extentOffset) {
-      manipulatedSelection = value.selection.copyWith(
-        baseOffset: beforeSelection.length + inSelection.length,
-        extentOffset: beforeSelection.length,
-      );
-    } else {
-      manipulatedSelection = value.selection.copyWith(
-        baseOffset: beforeSelection.length,
-        extentOffset: beforeSelection.length + inSelection.length,
-      );
-    }
-  }
-  return TextEditingValue(
-    text: manipulatedText,
-    selection: manipulatedSelection ?? const TextSelection.collapsed(offset: -1),
-    composing: manipulatedText == value.text
-        ? value.composing
-        : TextRange.empty,
-  );
 }
