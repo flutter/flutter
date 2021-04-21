@@ -365,7 +365,7 @@ class FlutterDevice {
     for (final FlutterView view in views) {
       if (view != null && view.uiIsolate != null) {
         // If successful, there will be no response from flutterExit. If the exit
-        // method is not registered, this will return null.
+        // method is not registered, this will complete with `false`.
         unawaited(vmService.flutterExit(
           isolateId: view.uiIsolate.id,
         ).then((bool exited) async {
