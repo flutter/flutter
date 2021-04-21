@@ -4,6 +4,8 @@
 
 // See: https://github.com/flutter/flutter/wiki/Release-process
 
+// @dart = 2.8
+
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
