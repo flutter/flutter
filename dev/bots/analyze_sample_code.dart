@@ -83,12 +83,12 @@ void main(List<String> arguments) {
   if (((parsedArguments['dart-ui-location'] ?? '') as String).isNotEmpty) {
     dartUiLocation = Directory(
         path.absolute(parsedArguments['dart-ui-location'] as String));
-    if (!dartUiLocation.existsSync()) {
-      stderr.writeln('Unable to find dart:ui directory ${dartUiLocation.path}');
-      exit(-1);
-    }
   } else {
     dartUiLocation = Directory(_defaultDartUiLocation);
+  }
+  if (!dartUiLocation.existsSync()) {
+    stderr.writeln('Unable to find dart:ui directory ${dartUiLocation.path}');
+    exit(-1);
   }
 
   Directory? tempDirectory;
@@ -162,10 +162,30 @@ class SampleCheckerException implements Exception {
 /// don't necessarily match. It does, however, print the source of the
 /// problematic line.
 class SampleChecker {
-  SampleChecker(this._flutterPackage, {Directory? tempDirectory, this.verbose = false, Directory? dartUiLocation})
-      : _tempDirectory = tempDirectory ?? Directory.systemTemp.createTempSync('flutter_analyze_sample_code.'),
-        _keepTmp = tempDirectory != null,
-        _dartUiLocation = dartUiLocation;
+  /// Creates a [SampleChecker].
+  ///
+  /// The positional argument is the path to the the package directory for the
+  /// flutter package within the Flutter root dir.
+  ///
+  /// The optional `tempDirectory` argument supplies the location for the
+  /// temporary files to be written and analyzed. If not supplied, it defaults
+  /// to a system generated temp directory.
+  ///
+  /// The optional `verbose` argument indicates whether or not status output
+  /// should be emitted while doing the check.
+  ///
+  /// The optional `dartUiLocation` argument indicates the location of the
+  /// `dart:ui` code to be analyzed along with the framework code. If not
+  /// supplied, the default location of the `dart:ui` code in the Flutter
+  /// repository is used (i.e. "<flutter repo>/bin/cache/pkg/sky_engine/lib/ui").
+  SampleChecker(
+    this._flutterPackage, {
+    Directory? tempDirectory,
+    this.verbose = false,
+    Directory? dartUiLocation,
+  }) : _tempDirectory = tempDirectory ?? Directory.systemTemp.createTempSync('flutter_analyze_sample_code.'),
+       _keepTmp = tempDirectory != null,
+       _dartUiLocation = dartUiLocation;
 
   /// The prefix of each comment line
   static const String _dartDocPrefix = '///';
@@ -206,7 +226,11 @@ class SampleChecker {
   /// The package directory for the flutter package within the flutter root dir.
   final Directory _flutterPackage;
 
-  /// The package directory for the flutter package within the flutter root dir.
+  /// The directory for the dart:ui code to be analyzed with the flutter code.
+  ///
+  /// If this is null, then no dart:ui code is included in the analysis.  It
+  /// defaults to the location inside of the flutter bin/cache directory that
+  /// contains the dart:ui code supplied by the engine.
   final Directory? _dartUiLocation;
 
   /// A serial number so that we can create unique expression names when we
