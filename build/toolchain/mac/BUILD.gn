@@ -263,9 +263,28 @@ mac_toolchain("ios_clang_x64") {
   sysroot_flags = "-isysroot $ios_simulator_sdk_path -mios-simulator-version-min=$ios_deployment_target"
 }
 
-# Toolchain used for Mac host targets.
+# Toolchain used for Mac X64 host targets.
 mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
+  toolchain_os = "mac"
+  if (!use_xcode) {
+    prefix = rebase_path(llvm_bin_path, root_build_dir)
+    ar = "$prefix/llvm-ar"
+    cc = "$prefix/clang"
+    cxx = "$prefix/clang++"
+  } else {
+    ar = "ar"
+    cc = "clang"
+    cxx = "clang++"
+  }
+  ld = cxx
+  is_clang = true
+  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"
+}
+
+# Toolchain used for Mac ARM64 host targets.
+mac_toolchain("clang_arm64") {
+  toolchain_cpu = "arm64"
   toolchain_os = "mac"
   if (!use_xcode) {
     prefix = rebase_path(llvm_bin_path, root_build_dir)
