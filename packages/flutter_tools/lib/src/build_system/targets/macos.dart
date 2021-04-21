@@ -132,11 +132,13 @@ class DebugMacOSFramework extends Target {
         ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
+    final DarwinArch darwinArch = _darwinArchForEnvironment(environment);
+    final String targetArch = getNameForDarwinArch(darwinArch);
     final RunResult result = await globals.xcode.clang(<String>[
       '-x',
       'c',
       debugApp.path,
-      '-arch', 'x86_64',
+      '-arch', targetArch,
       '-dynamiclib',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
@@ -162,6 +164,19 @@ static const int Moo = 88;
   ];
 }
 
+DarwinArch _darwinArchForEnvironment(Environment environment) {
+  final String platform = environment.defines[kTargetPlatform];
+  final TargetPlatform targetPlatform = getTargetPlatformForName(platform);
+  switch (targetPlatform) {
+    case TargetPlatform.darwin_arm64:
+      return DarwinArch.arm64;
+    case TargetPlatform.darwin_x64:
+      return DarwinArch.x86_64;
+    default:
+      throw Exception('Invalid macos target platform: $targetPlatform');
+  }
+}
+
 class CompileMacOSFramework extends Target {
   const CompileMacOSFramework();
 
@@ -181,15 +196,16 @@ class CompileMacOSFramework extends Target {
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
+    final DarwinArch darwinArch = _darwinArchForEnvironment(environment);
 
     if (codeSizeDirectory != null) {
       final File codeSizeFile = environment.fileSystem
         .directory(codeSizeDirectory)
-        .childFile('snapshot.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
+        .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
       final File precompilerTraceFile = environment.fileSystem
         .directory(codeSizeDirectory)
-        .childFile('trace.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
+        .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
       extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
@@ -208,7 +224,7 @@ class CompileMacOSFramework extends Target {
       mainPath: environment.buildDir.childFile('app.dill').path,
       outputPath: environment.buildDir.path,
       platform: TargetPlatform.darwin_x64,
-      darwinArch: DarwinArch.x86_64,
+      darwinArch: darwinArch,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,
       extraGenSnapshotOptions: extraGenSnapshotOptions,

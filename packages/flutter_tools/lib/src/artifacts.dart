@@ -548,6 +548,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
       case TargetPlatform.windows_x64:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
@@ -586,7 +587,8 @@ class CachedArtifacts implements Artifacts {
 
 TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils operatingSystemUtils) {
   if (platform.isMacOS) {
-    return TargetPlatform.darwin_x64;
+    return operatingSystemUtils.hostPlatform == HostPlatform.darwin_x64 ?
+             TargetPlatform.darwin_x64 : TargetPlatform.darwin_arm64;
   }
   if (platform.isLinux) {
     return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?

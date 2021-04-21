@@ -312,6 +312,7 @@ class AOTSnapshotter {
       TargetPlatform.android_x64,
       TargetPlatform.ios,
       TargetPlatform.darwin_x64,
+      TargetPlatform.darwin_arm64,
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
