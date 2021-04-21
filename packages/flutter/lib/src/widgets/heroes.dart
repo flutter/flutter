@@ -487,8 +487,8 @@ class _HeroFlightManifest {
   final HeroFlightDirection type;
   final OverlayState overlay;
   final Size navigatorSize;
-  final PageRoute<dynamic> fromRoute;
-  final PageRoute<dynamic> toRoute;
+  final PageRoute<Object?> fromRoute;
+  final PageRoute<Object?> toRoute;
   final _HeroState fromHero;
   final _HeroState toHero;
   final CreateRectTween? createRectTween;
@@ -830,14 +830,14 @@ class HeroController extends NavigatorObserver {
   final Map<Object, _HeroFlight> _flights = <Object, _HeroFlight>{};
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route<Object?> route, Route<Object?>? previousRoute) {
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(previousRoute, route, HeroFlightDirection.push, false);
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPop(Route<Object?> route, Route<Object?>? previousRoute) {
     assert(navigator != null);
     assert(route != null);
     // Don't trigger another flight when a pop is committed as a user gesture
@@ -847,7 +847,7 @@ class HeroController extends NavigatorObserver {
   }
 
   @override
-  void didReplace({ Route<dynamic>? newRoute, Route<dynamic>? oldRoute }) {
+  void didReplace({ Route<Object?>? newRoute, Route<Object?>? oldRoute }) {
     assert(navigator != null);
     if (newRoute?.isCurrent == true) {
       // Only run hero animations if the top-most route got replaced.
@@ -856,7 +856,7 @@ class HeroController extends NavigatorObserver {
   }
 
   @override
-  void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didStartUserGesture(Route<Object?> route, Route<Object?>? previousRoute) {
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, true);
@@ -892,14 +892,14 @@ class HeroController extends NavigatorObserver {
   // If we're transitioning between different page routes, start a hero transition
   // after the toRoute has been laid out with its animation's value at 1.0.
   void _maybeStartHeroTransition(
-    Route<dynamic>? fromRoute,
-    Route<dynamic>? toRoute,
+    Route<Object?>? fromRoute,
+    Route<Object?>? toRoute,
     HeroFlightDirection flightType,
     bool isUserGestureTransition,
   ) {
-    if (toRoute != fromRoute && toRoute is PageRoute<dynamic> && fromRoute is PageRoute<dynamic>) {
-      final PageRoute<dynamic> from = fromRoute;
-      final PageRoute<dynamic> to = toRoute;
+    if (toRoute != fromRoute && toRoute is PageRoute<Object?> && fromRoute is PageRoute<Object?>) {
+      final PageRoute<Object?> from = fromRoute;
+      final PageRoute<Object?> to = toRoute;
       final Animation<double> animation = (flightType == HeroFlightDirection.push) ? to.animation! : from.animation!;
 
       // A user gesture may have already completed the pop, or we might be the initial route
@@ -940,8 +940,8 @@ class HeroController extends NavigatorObserver {
   // Find the matching pairs of heroes in from and to and either start or a new
   // hero flight, or divert an existing one.
   void _startHeroTransition(
-    PageRoute<dynamic> from,
-    PageRoute<dynamic> to,
+    PageRoute<Object?> from,
+    PageRoute<Object?> to,
     Animation<double> animation,
     HeroFlightDirection flightType,
     bool isUserGestureTransition,

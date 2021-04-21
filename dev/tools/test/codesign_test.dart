@@ -109,6 +109,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -194,6 +196,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -279,6 +283,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -336,6 +342,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',

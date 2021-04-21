@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
 
@@ -229,5 +229,12 @@ void main() {
     expect(tween.transform(0.0), 0.0);
     expect(tween.transform(0.5), 0.31640625);
     expect(tween.transform(1.0), 1.0);
+  });
+
+  test('BorderRadiusTween nullable test', () {
+    final BorderRadiusTween tween = BorderRadiusTween(begin: null, end: null);
+    expect(tween.transform(0.0), null);
+    expect(tween.transform(1.0), null);
+    expect(tween.lerp(0.0), null);
   });
 }

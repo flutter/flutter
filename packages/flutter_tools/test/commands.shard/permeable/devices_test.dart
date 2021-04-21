@@ -7,11 +7,10 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
-
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;

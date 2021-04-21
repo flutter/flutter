@@ -121,39 +121,7 @@ void main() {
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/80451
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            toolbarHeight: 300,
-            flexibleSpace: const FlexibleSpaceBar(
-              title: Text('Title'),
-              background:  Text('Background'),
-              collapseMode: CollapseMode.pin,
-            ),
-          ),
-          body: CustomScrollView(
-            primary: true,
-            slivers: <Widget>[
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 1200.0,
-                  color: Colors.orange[400],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    final Opacity backgroundOpacity = tester.firstWidget(find.byType(Opacity));
-    expect(backgroundOpacity.opacity, 1.0);
-  });
-
-  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('Collpased FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(

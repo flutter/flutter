@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -73,7 +74,7 @@ void main() {
         final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-        when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
+        when(mockXcodeProjectInterpreter.version).thenReturn(Version(1000, 0, 0));
         await CleanCommand().runCommand();
 
         expect(buildDirectory.existsSync(), isFalse);
@@ -108,7 +109,7 @@ void main() {
         setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-        when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
+        when(mockXcodeProjectInterpreter.version).thenReturn(Version(1000, 0, 0));
 
         await CleanCommand(verbose: true).runCommand();
         verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: true)).called(2);
