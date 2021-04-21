@@ -4017,7 +4017,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [InputDecorator.constraints], which can override this setting for a
+  ///  * [InputDecoration.constraints], which can override this setting for a
   ///    given decorator.
   final BoxConstraints? constraints;
 
