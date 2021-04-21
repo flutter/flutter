@@ -43,12 +43,6 @@ void main() {
         applicationKernelFilePath: anyNamed('applicationKernelFilePath'),
         depfilePath: anyNamed('depfilePath'),
         assetDirPath: anyNamed('assetDirPath'),
-        trackWidgetCreation: anyNamed('trackWidgetCreation'),
-        extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
-        extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
-        fileSystemRoots: anyNamed('fileSystemRoots'),
-        fileSystemScheme: anyNamed('fileSystemScheme'),
-        treeShakeIcons: anyNamed('treeShakeIcons'),
       ),
     ).thenAnswer((_) => Future<void>.value());
   });
@@ -223,11 +217,13 @@ void main() {
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
-        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
         kTrackWidgetCreation: 'true',
-        kIconTreeShakerFlag: null,
+        kFileSystemScheme: 'org-dartlang-root',
+        kIconTreeShakerFlag: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
@@ -250,12 +246,133 @@ void main() {
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
-        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
         kTrackWidgetCreation: 'true',
-        kIconTreeShakerFlag: null,
+        kFileSystemScheme: 'org-dartlang-root',
         kDartDefines: 'Zm9vPWJhcg==',
+        kIconTreeShakerFlag: 'false',
+        kDeferredComponents: 'false'
+      });
+    }),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('passes filesystem-scheme through', () async {
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--filesystem-scheme=org-dartlang-root2',
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+        kTrackWidgetCreation: 'true',
+        kFileSystemScheme: 'org-dartlang-root2',
+        kIconTreeShakerFlag: 'false',
+        kDeferredComponents: 'false'
+      });
+    }),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('passes filesystem-roots through', () async {
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--filesystem-root=test1,test2'
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+        kTrackWidgetCreation: 'true',
+        kFileSystemScheme: 'org-dartlang-root',
+        kFileSystemRoots: 'test1,test2',
+        kIconTreeShakerFlag: 'false',
+        kDeferredComponents: 'false'
+      });
+    }),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('passes extra frontend-options through', () async {
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--extra-front-end-options=--testflag,--testflag2'
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+        kTrackWidgetCreation: 'true',
+        kFileSystemScheme: 'org-dartlang-root',
+        kExtraFrontEndOptions: '--testflag,--testflag2',
+        kIconTreeShakerFlag: 'false',
+        kDeferredComponents: 'false'
+      });
+    }),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('passes extra gen_snapshot-options through', () async {
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--extra-gen-snapshot-options=--testflag,--testflag2'
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+        kTrackWidgetCreation: 'true',
+        kFileSystemScheme: 'org-dartlang-root',
+        kExtraGenSnapshotOptions: '--testflag,--testflag2',
+        kIconTreeShakerFlag: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
