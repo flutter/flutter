@@ -1335,7 +1335,6 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   };
   AddNativeCallback("NativeReportTimingsCallback",
                     CREATE_NATIVE_ENTRY(nativeTimingCallback));
-  ASSERT_TRUE(configuration.IsValid());
   RunEngine(shell.get(), std::move(configuration));
 
   for (int i = 0; i < 10; i += 1) {

@@ -14,11 +14,9 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/fml/task_source.h"
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/runtime/dart_vm.h"
@@ -3443,56 +3441,6 @@ TEST_F(EmbedderTest, SnapshotRenderTargetScalesDownToDriverMax) {
   ASSERT_TRUE(engine.is_valid());
 
   latch.Wait();
-}
-
-TEST_F(EmbedderTest, ObjectsPostedViaPortsServicedOnSecondaryTaskHeap) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig(SkISize::Make(800, 1024));
-  builder.SetDartEntrypoint("objects_can_be_posted");
-
-  // Synchronously acquire the send port from the Dart end. We will be using
-  // this to send message. The Dart end will just echo those messages back to us
-  // for inspection.
-  FlutterEngineDartPort port = 0;
-  fml::AutoResetWaitableEvent event;
-  context.AddNativeCallback("SignalNativeCount",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              port = tonic::DartConverter<int64_t>::FromDart(
-                                  Dart_GetNativeArgument(args, 0));
-                              event.Signal();
-                            }));
-  auto engine = builder.LaunchEngine();
-  ASSERT_TRUE(engine.is_valid());
-  event.Wait();
-  ASSERT_NE(port, 0);
-
-  using Trampoline = std::function<void(Dart_Handle message)>;
-  Trampoline trampoline;
-
-  context.AddNativeCallback("SendObjectToNativeCode",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              FML_CHECK(trampoline);
-                              auto trampoline_copy = trampoline;
-                              trampoline = nullptr;
-                              trampoline_copy(Dart_GetNativeArgument(args, 0));
-                            }));
-
-  // Send a boolean value and assert that it's received by the right heap.
-  {
-    FlutterEngineDartObject object = {};
-    object.type = kFlutterEngineDartObjectTypeBool;
-    object.bool_value = true;
-    trampoline = [&](Dart_Handle handle) {
-      ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(handle));
-      auto task_grade = fml::MessageLoopTaskQueues::GetCurrentTaskSourceGrade();
-      EXPECT_EQ(task_grade, fml::TaskSourceGrade::kDartMicroTasks);
-      event.Signal();
-    };
-    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
-              kSuccess);
-    event.Wait();
-  }
 }
 
 }  // namespace testing

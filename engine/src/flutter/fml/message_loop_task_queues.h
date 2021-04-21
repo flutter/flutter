@@ -14,11 +14,21 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/synchronization/shared_mutex.h"
-#include "flutter/fml/task_queue_id.h"
-#include "flutter/fml/task_source.h"
 #include "flutter/fml/wakeable.h"
 
 namespace fml {
+
+class TaskQueueId {
+ public:
+  static const size_t kUnmerged;
+
+  explicit TaskQueueId(size_t value) : value_(value) {}
+
+  operator int() const { return value_; }
+
+ private:
+  size_t value_ = kUnmerged;
+};
 
 static const TaskQueueId _kUnmerged = TaskQueueId(TaskQueueId::kUnmerged);
 
@@ -29,7 +39,7 @@ class TaskQueueEntry {
   using TaskObservers = std::map<intptr_t, fml::closure>;
   Wakeable* wakeable;
   TaskObservers task_observers;
-  std::unique_ptr<TaskSource> task_source;
+  DelayedTaskQueue delayed_tasks;
 
   // Note: Both of these can be _kUnmerged, which indicates that
   // this queue has not been merged or subsumed. OR exactly one
@@ -38,9 +48,7 @@ class TaskQueueEntry {
   TaskQueueId owner_of;
   TaskQueueId subsumed_by;
 
-  TaskQueueId created_for;
-
-  explicit TaskQueueEntry(TaskQueueId created_for);
+  TaskQueueEntry();
 
  private:
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(TaskQueueEntry);
@@ -71,17 +79,13 @@ class MessageLoopTaskQueues
 
   void RegisterTask(TaskQueueId queue_id,
                     const fml::closure& task,
-                    fml::TimePoint target_time,
-                    fml::TaskSourceGrade task_source_grade =
-                        fml::TaskSourceGrade::kUnspecified);
+                    fml::TimePoint target_time);
 
   bool HasPendingTasks(TaskQueueId queue_id) const;
 
   fml::closure GetNextTaskToRun(TaskQueueId queue_id, fml::TimePoint from_time);
 
   size_t GetNumPendingTasks(TaskQueueId queue_id) const;
-
-  static TaskSourceGrade GetCurrentTaskSourceGrade();
 
   // Observers methods.
 
@@ -122,10 +126,6 @@ class MessageLoopTaskQueues
   // otherwise.
   TaskQueueId GetSubsumedTaskQueueId(TaskQueueId owner) const;
 
-  void PauseSecondarySource(TaskQueueId queue_id);
-
-  void ResumeSecondarySource(TaskQueueId queue_id);
-
  private:
   class MergedQueuesRunner;
 
@@ -137,7 +137,8 @@ class MessageLoopTaskQueues
 
   bool HasPendingTasksUnlocked(TaskQueueId queue_id) const;
 
-  TaskSource::TopTask PeekNextTaskUnlocked(TaskQueueId owner) const;
+  const DelayedTask& PeekNextTaskUnlocked(TaskQueueId owner,
+                                          TaskQueueId& top_queue_id) const;
 
   fml::TimePoint GetNextWakeTimeUnlocked(TaskQueueId queue_id) const;
 
