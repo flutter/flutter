@@ -641,11 +641,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   };
 
   void _handleKeyEvent(RawKeyEvent keyEvent) {
-    if (kIsWeb) {
-      // On web platform, we should ignore the key because it's processed already.
-      return;
-    }
-
     if (keyEvent is! RawKeyDownEvent)
       return;
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);

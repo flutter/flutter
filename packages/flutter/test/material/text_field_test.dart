@@ -22,9 +22,6 @@ typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingVa
 // On web, the context menu (aka toolbar) is provided by the browser.
 final bool isContextMenuProvidedByPlatform = isBrowser;
 
-// On web, key events in text fields are handled by the browser.
-final bool areKeyEventsHandledByPlatform = isBrowser;
-
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -616,7 +613,7 @@ void main() {
         selection: TextSelection.collapsed(offset: 2),
       ),
     );
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -4675,7 +4672,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     });
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('Copy paste test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4748,7 +4745,7 @@ void main() {
 
     const String expected = 'a biga big house\njumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('Copy paste obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4821,7 +4818,7 @@ void main() {
 
     const String expected = 'a biga big house jumped over a mouse';
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   // Regressing test for https://github.com/flutter/flutter/issues/78219
   testWidgets('Paste does not crash when the section is inValid', (WidgetTester tester) async {
@@ -4947,7 +4944,7 @@ void main() {
 
     const String expected = ' housa bige\njumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('Cut obscured text test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5021,7 +5018,7 @@ void main() {
 
     const String expected = ' housa bige jumped over a mouse';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5070,7 +5067,7 @@ void main() {
 
     const String expected = '';
     expect(find.text(expected), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('Delete test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5122,7 +5119,7 @@ void main() {
 
     const String expected2 = '';
     expect(find.text(expected2), findsOneWidget);
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('Changing positions of text fields', (WidgetTester tester) async {
 
@@ -5214,7 +5211,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
@@ -5289,7 +5286,7 @@ void main() {
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-  }, skip: areKeyEventsHandledByPlatform);
+  });
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
