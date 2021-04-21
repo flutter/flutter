@@ -8,6 +8,7 @@
 #include <queue>
 
 #include "flutter/fml/closure.h"
+#include "flutter/fml/task_source_grade.h"
 #include "flutter/fml/time/time_point.h"
 
 namespace fml {
@@ -16,7 +17,8 @@ class DelayedTask {
  public:
   DelayedTask(size_t order,
               const fml::closure& task,
-              fml::TimePoint target_time);
+              fml::TimePoint target_time,
+              fml::TaskSourceGrade task_source_grade);
 
   DelayedTask(const DelayedTask& other);
 
@@ -26,12 +28,15 @@ class DelayedTask {
 
   fml::TimePoint GetTargetTime() const;
 
+  fml::TaskSourceGrade GetTaskSourceGrade() const;
+
   bool operator>(const DelayedTask& other) const;
 
  private:
   size_t order_;
   fml::closure task_;
   fml::TimePoint target_time_;
+  fml::TaskSourceGrade task_source_grade_;
 };
 
 using DelayedTaskQueue = std::priority_queue<DelayedTask,

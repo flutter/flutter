@@ -10,12 +10,16 @@ namespace fml {
 
 DelayedTask::DelayedTask(size_t order,
                          const fml::closure& task,
-                         fml::TimePoint target_time)
-    : order_(order), task_(task), target_time_(target_time) {}
-
-DelayedTask::DelayedTask(const DelayedTask& other) = default;
+                         fml::TimePoint target_time,
+                         fml::TaskSourceGrade task_source_grade)
+    : order_(order),
+      task_(task),
+      target_time_(target_time),
+      task_source_grade_(task_source_grade) {}
 
 DelayedTask::~DelayedTask() = default;
+
+DelayedTask::DelayedTask(const DelayedTask& other) = default;
 
 const fml::closure& DelayedTask::GetTask() const {
   return task_;
@@ -23,6 +27,10 @@ const fml::closure& DelayedTask::GetTask() const {
 
 fml::TimePoint DelayedTask::GetTargetTime() const {
   return target_time_;
+}
+
+fml::TaskSourceGrade DelayedTask::GetTaskSourceGrade() const {
+  return task_source_grade_;
 }
 
 bool DelayedTask::operator>(const DelayedTask& other) const {
