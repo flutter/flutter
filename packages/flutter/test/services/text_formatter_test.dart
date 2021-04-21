@@ -736,6 +736,19 @@ void main() {
         ).selection,
         const TextSelection(baseOffset: 3, extentOffset: 3),
       );
+
+      // The unfortunate case, we don't know for sure where to put the selection
+      // so put it after the replacement string.
+      // AAAB|B|BCCC => AAA****|CCC
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 5, extentOffset: 4),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 7, extentOffset: 7),
+      );
     });
 
     test('Preserves selection region, allow', () {
@@ -918,6 +931,19 @@ void main() {
           ),
         ).selection,
         const TextSelection(baseOffset: 3, extentOffset: 3),
+      );
+
+      // The unfortunate case, we don't know for sure where to put the selection
+      // so put it after the replacement string.
+      // AAAB|B|BCCC => AAA****|CCC
+      expect(
+        FilteringTextInputFormatter.deny('BBB', replacementString: '****').formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 5, extentOffset: 4),
+          ),
+        ).selection,
+        const TextSelection(baseOffset: 7, extentOffset: 7),
       );
     });
 
