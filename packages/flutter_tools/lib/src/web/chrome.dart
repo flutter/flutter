@@ -241,6 +241,7 @@ class ChromiumLauncher {
       // Check if ARM Chrome is installed.
       // Mach-O 64-bit executable arm64
       if ((result.stdout as String).contains('arm64')) {
+        _logger.printTrace('Found ARM Chrome installation at $chromeExecutable, forcing native launch.');
         // If so, force Chrome to launch natively.
         args.insertAll(0, <String>['/usr/bin/arch', '-arm64']);
       }
