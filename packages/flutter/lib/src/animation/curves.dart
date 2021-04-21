@@ -305,14 +305,12 @@ class Cubic extends Curve {
   }
 }
 
-/// A cubic polynomial composed of two curves that share a common center point,
-/// mapping of the unit interval.
+/// A cubic polynomial composed of two curves that share a common center point.
 ///
 /// The curve runs through three points: (0,0), the [midpoint], and (1,1).
 ///
 /// The [Curves] class contains a curve defined with this class:
-///
-///  * [Curves.easeInOutCubicEmphasized]
+/// [Curves.easeInOutCubicEmphasized].
 ///
 /// The [ThreePointCubic] class implements third-order Bézier curves, where two
 /// curves share an interior [midpoint] that the curve passes through. If the
