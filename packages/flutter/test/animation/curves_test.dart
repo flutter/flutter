@@ -66,6 +66,7 @@ void main() {
     assertMaximumSlope(Curves.easeOutSine, 20.0);
     assertMaximumSlope(Curves.easeOutQuad, 20.0);
     assertMaximumSlope(Curves.easeOutCubic, 20.0);
+    assertMaximumSlope(Curves.easeInOutCubicEmphasized, 20.0);
     assertMaximumSlope(Curves.easeOutQuart, 20.0);
     assertMaximumSlope(Curves.easeOutQuint, 20.0);
     assertMaximumSlope(Curves.easeOutExpo, 20.0);
@@ -170,6 +171,15 @@ void main() {
     expect(d2, lessThan(d1));
   });
 
+  test('ThreePointCubic interpolates midpoint', () {
+    const ThreePointCubic test = ThreePointCubic(
+      Offset(0.05, 0), Offset(0.133333, 0.06),
+      Offset(0.166666, 0.4),
+      Offset(0.208333, 0.82), Offset(0.25, 1),
+    );
+    expect(test.transform(0.166666), equals(0.4));
+  });
+
   test('Invalid transform parameter should assert', () {
     expect(() => const SawTooth(2).transform(-0.0001), throwsAssertionError);
     expect(() => const SawTooth(2).transform(1.0001), throwsAssertionError);
@@ -188,6 +198,9 @@ void main() {
 
     expect(() => const Cubic(0.42, 0.0, 0.58, 1.0).transform(-0.0001), throwsAssertionError);
     expect(() => const Cubic(0.42, 0.0, 0.58, 1.0).transform(1.0001), throwsAssertionError);
+
+    expect(() => Curves.easeInOutCubicEmphasized.transform(-0.0001), throwsAssertionError);
+    expect(() => Curves.easeInOutCubicEmphasized.transform(1.0001), throwsAssertionError);
 
     expect(() => Curves.decelerate.transform(-0.0001), throwsAssertionError);
     expect(() => Curves.decelerate.transform(1.0001), throwsAssertionError);
@@ -226,6 +239,9 @@ void main() {
 
     expect(Curves.easeInOutExpo.transform(0), 0);
     expect(Curves.easeInOutExpo.transform(1), 1);
+
+    expect(Curves.easeInOutCubicEmphasized.transform(0), 0);
+    expect(Curves.easeInOutCubicEmphasized.transform(1), 1);
 
     expect(const FlippedCurve(Curves.easeInOutExpo).transform(0), 0);
     expect(const FlippedCurve(Curves.easeInOutExpo).transform(1), 1);
