@@ -538,10 +538,25 @@ void main() {
     expect(yCenter(appBarKey), equals(yCenter(action1Key)));
   });
 
-  testWidgets('AppBar actions are sized by iconTheme', (WidgetTester tester) async {
-    final UniqueKey action0Key = UniqueKey();
-    final UniqueKey action1Key = UniqueKey();
+  testWidgets('AppBar drawer icon has default size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+    final double iconSize = const IconThemeData.fallback().size!;
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(Size(iconSize, iconSize)),
+    );
+  });
 
+  testWidgets('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -552,82 +567,55 @@ void main() {
               opacity: 1.0,
               color: Colors.white,
             ),
-            actions: <Widget>[
-              IconButton(icon: Icon(Icons.add, key: action0Key), onPressed: () {},),
-              IconButton(iconSize: 1, icon: Icon(Icons.add, key: action1Key), onPressed: () {},),
-            ],
           ),
+          drawer: const Drawer(),
         ),
       ),
     );
-
-    // The height of the widget with key
-    Size size(Key key) => tester.getSize(find.byKey(key));
-
-    expect(const Size(30, 30), equals(size(action0Key)));
-    expect(const Size(1, 1), equals(size(action1Key)));
-  });
-
-  testWidgets('AppBar actions are sized by global iconTheme', (WidgetTester tester) async {
-    final UniqueKey action0Key = UniqueKey();
-    final UniqueKey action1Key = UniqueKey();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light().copyWith(
-          iconTheme: const IconThemeData(
-            size: 19,
-            opacity: 1.0,
-            color: Colors.white,
-          ),
-        ),
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Howdy!'),
-            actions: <Widget>[
-              IconButton(icon: Icon(Icons.add, key: action0Key), onPressed: () {},),
-              IconButton(iconSize: 11, icon: Icon(Icons.add, key: action1Key), onPressed: () {},),
-            ],
-          ),
-        ),
-      ),
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(const Size(30, 30)),
     );
-
-    // The height of the widget with key
-    Size size(Key key) => tester.getSize(find.byKey(key));
-
-    expect(const Size(19, 19), equals(size(action0Key)));
-    expect(const Size(11, 11), equals(size(action1Key)));
   });
 
-  testWidgets('AppBar actions are sized by actionsIconTheme', (WidgetTester tester) async {
-    final UniqueKey action0Key = UniqueKey();
-    final UniqueKey action1Key = UniqueKey();
-
+  testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
             title: const Text('Howdy!'),
-            actionsIconTheme: const IconThemeData(
-              size: 14,
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+    final double iconSize = const IconThemeData.fallback().size!;
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(Size(iconSize, iconSize)),
+    );
+  });
+
+  testWidgets('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(
+              size: 30,
               opacity: 1.0,
               color: Colors.white,
             ),
-            actions: <Widget>[
-              IconButton(icon: Icon(Icons.add, key: action0Key), onPressed: () {},),
-              IconButton(iconSize: 7, icon: Icon(Icons.add, key: action1Key), onPressed: () {},),
-            ],
           ),
+          endDrawer: const Drawer(),
         ),
       ),
     );
-
-    // The height of the widget with key
-    Size size(Key key) => tester.getSize(find.byKey(key));
-
-    expect(const Size(14, 14), equals(size(action0Key)));
-    expect(const Size(7, 7), equals(size(action1Key)));
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(const Size(30, 30)),
+    );
   });
 
   testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {

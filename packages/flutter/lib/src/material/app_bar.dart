@@ -818,15 +818,13 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.foregroundColor
       ?? (colorScheme.brightness == Brightness.dark ? colorScheme.onSurface : colorScheme.onPrimary);
 
-    final double size = appBarTheme.iconTheme?.size ?? const IconThemeData.fallback().size!;
-
     IconThemeData overallIconTheme = backwardsCompatibility
       ? widget.iconTheme
         ?? appBarTheme.iconTheme
         ?? theme.primaryIconTheme
       : widget.iconTheme
         ?? appBarTheme.iconTheme
-        ?? theme.iconTheme.copyWith(color: foregroundColor, size: size);
+        ?? theme.iconTheme.copyWith(color: foregroundColor);
 
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
@@ -867,6 +865,7 @@ class _AppBarState extends State<AppBar> {
       if (hasDrawer) {
         leading = IconButton(
           icon: const Icon(Icons.menu),
+          iconSize: overallIconTheme.size ?? 24,
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
@@ -940,6 +939,7 @@ class _AppBarState extends State<AppBar> {
     } else if (hasEndDrawer) {
       actions = IconButton(
         icon: const Icon(Icons.menu),
+        iconSize: overallIconTheme.size ?? 24,
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );
