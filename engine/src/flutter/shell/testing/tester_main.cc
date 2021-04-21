@@ -10,6 +10,7 @@
 
 #include "flutter/assets/asset_manager.h"
 #include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -31,6 +32,32 @@
 #endif  // defined(OS_POSIX)
 
 namespace flutter {
+
+class TesterExternalViewEmbedder : public ExternalViewEmbedder {
+  // |ExternalViewEmbedder|
+  SkCanvas* GetRootCanvas() override { return nullptr; }
+
+  // |ExternalViewEmbedder|
+  void CancelFrame() override {}
+
+  // |ExternalViewEmbedder|
+  void BeginFrame(
+      SkISize frame_size,
+      GrDirectContext* context,
+      double device_pixel_ratio,
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override {}
+
+  // |ExternalViewEmbedder|
+  void PrerollCompositeEmbeddedView(
+      int view_id,
+      std::unique_ptr<EmbeddedViewParams> params) override {}
+
+  // |ExternalViewEmbedder|
+  std::vector<SkCanvas*> GetCurrentCanvases() override { return {}; }
+
+  // |ExternalViewEmbedder|
+  SkCanvas* CompositeEmbeddedView(int view_id) override { return nullptr; }
+};
 
 class TesterPlatformView : public PlatformView,
                            public GPUSurfaceSoftwareDelegate {
@@ -73,8 +100,15 @@ class TesterPlatformView : public PlatformView,
     return true;
   }
 
+  // |PlatformView|
+  std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override {
+    return external_view_embedder_;
+  }
+
  private:
   sk_sp<SkSurface> sk_surface_ = nullptr;
+  std::shared_ptr<TesterExternalViewEmbedder> external_view_embedder_ =
+      std::make_shared<TesterExternalViewEmbedder>();
 };
 
 // Checks whether the engine's main Dart isolate has no pending work.  If so,

@@ -31,20 +31,30 @@ def PrintDivider(char='='):
     print(''.join([char for _ in xrange(80)]))
   print '\n'
 
-def RunCmd(cmd, **kwargs):
+def RunCmd(cmd, forbidden_output=[], **kwargs):
   command_string = ' '.join(cmd)
 
   PrintDivider('>')
   print 'Running command "%s"' % command_string
 
   start_time = time.time()
-  process = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr, **kwargs)
-  process.communicate()
+  stdout_pipe = sys.stdout if not forbidden_output else subprocess.PIPE
+  stderr_pipe = sys.stderr if not forbidden_output else subprocess.PIPE
+  process = subprocess.Popen(cmd, stdout=stdout_pipe, stderr=stderr_pipe, **kwargs)
+  stdout, stderr = process.communicate()
   end_time = time.time()
 
   if process.returncode != 0:
     PrintDivider('!')
     raise Exception('Command "%s" exited with code %d' % (command_string, process.returncode))
+
+  if stdout or stderr:
+    print(stdout)
+    print(stderr)
+
+  for forbidden_string in forbidden_output:
+    if (stdout and forbidden_string in stdout) or (stderr and forbidden_string in stderr):
+      raise Exception('command "%s" contained forbidden string %s' % (command_string, forbidden_string))
 
   PrintDivider('<')
   print 'Command run successfully in %.2f seconds: %s' % (end_time - start_time, command_string)
@@ -81,7 +91,7 @@ def FindExecutablePath(path):
   raise Exception('Executable %s does not exist!' % path)
 
 
-def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildroot_dir):
+def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildroot_dir, forbidden_output=[]):
   if filter is not None and executable_name not in filter:
     print('Skipping %s due to filter.' % executable_name)
     return
@@ -91,7 +101,7 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildr
   print('Running %s in %s' % (executable_name, cwd))
   test_command = [ executable ] + flags
   print(' '.join(test_command))
-  RunCmd(test_command, cwd=cwd)
+  RunCmd(test_command, cwd=cwd, forbidden_output=forbidden_output)
 
 
 def RunCCTests(build_dir, filter):
@@ -247,7 +257,8 @@ def RunDartTest(build_dir, dart_file, verbose_dart_snapshot, multithreaded, enab
     threading = 'single-threaded'
 
   print("Running test '%s' using 'flutter_tester' (%s)" % (kernel_file_name, threading))
-  RunEngineExecutable(build_dir, 'flutter_tester', None, command_args)
+  forbidden_output = [] if 'unopt' in build_dir else ['[ERROR']
+  RunEngineExecutable(build_dir, 'flutter_tester', None, command_args, forbidden_output=forbidden_output)
 
 def RunPubGet(build_dir, directory):
   print("Running 'pub get' in the tests directory %s" % dart_tests_dir)
@@ -263,7 +274,7 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
   variant_out_dir = os.path.join(out_dir, 'host_debug_unopt')
 
   ninja_command = [
-    'autoninja',
+    'ninja',
     '-C',
     variant_out_dir,
     'flutter/sky/packages'

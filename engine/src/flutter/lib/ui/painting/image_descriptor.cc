@@ -171,14 +171,14 @@ void ImageDescriptor::instantiateCodec(Dart_Handle codec_handle,
 sk_sp<SkImage> ImageDescriptor::image() const {
   SkBitmap bitmap;
   if (!bitmap.tryAllocPixels(image_info_)) {
-    FML_LOG(ERROR) << "Failed to allocate memory for bitmap of size "
-                   << image_info_.computeMinByteSize() << "B";
+    FML_DLOG(ERROR) << "Failed to allocate memory for bitmap of size "
+                    << image_info_.computeMinByteSize() << "B";
     return nullptr;
   }
 
   const auto& pixmap = bitmap.pixmap();
   if (!get_pixels(pixmap)) {
-    FML_LOG(ERROR) << "Failed to get pixels for image.";
+    FML_DLOG(ERROR) << "Failed to get pixels for image.";
     return nullptr;
   }
   bitmap.setImmutable();
