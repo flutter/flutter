@@ -845,8 +845,9 @@ class PageView extends StatefulWidget {
 
   /// Set to false to disable page snapping, useful for custom scroll behavior.
   ///
-  /// If the [padEnds] is false, the page will snap to the beginning of the
-  /// page view.
+  /// If the [padEnds] is false and [PageController.viewportFraction] < 1.0,
+  /// the page will snap to the beginning of the viewport; otherwise, the page
+  /// will snap to the center of the viewport.
   final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
