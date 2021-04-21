@@ -213,8 +213,10 @@ class ColdRunner extends ResidentRunner {
     globals.printStatus('Flutter run key commands.');
     if (details) {
       printHelpDetails();
+      commandHelp.hWithDetails.print();
+    } else {
+      commandHelp.hWithoutDetails.print();
     }
-    commandHelp.h.print(); // TODO(ianh): print different message if details is false
     if (_didAttach) {
       commandHelp.d.print();
     }
