@@ -1704,7 +1704,7 @@ void main() {
     );
     flutterDevice.vmService = fakeVmServiceHost.vmService;
 
-    await flutterDevice.exitApps();
+    await flutterDevice.exitApps(timeoutDelay: Duration.zero);
 
     expect(mockDevice.appStopped, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
