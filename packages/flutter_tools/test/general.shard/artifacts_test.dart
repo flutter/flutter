@@ -134,35 +134,35 @@ void main() {
 
     testWithoutContext('precompiled web artifact paths are correct', () {
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSdk),
         'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps),
         'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js.map',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk),
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps),
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSoundSdk),
         'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps),
         'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js.map',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk),
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js',
       );
       expect(
-        artifacts.getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps),
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps),
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js.map',
       );
     });
@@ -292,7 +292,7 @@ void main() {
         fileSystem.path.join('/out', 'android_debug_unopt', 'flutter_tester'),
       );
       expect(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        artifacts.getHostArtifact(HostArtifact.engineDartSdkPath),
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
       );
     });
@@ -323,7 +323,7 @@ void main() {
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
-      expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
+      expect(artifacts.getHostArtifact(HostArtifact.engineDartBinary), contains('.exe'));
     });
 
     testWithoutContext('Looks up windows UWP artifacts in host engine', () async {
@@ -341,7 +341,7 @@ void main() {
     });
 
     testWithoutContext('Looks up dart on linux platforms', () async {
-      expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
+      expect(artifacts.getHostArtifact(HostArtifact.engineDartBinary), isNot(contains('.exe')));
     });
   });
 }

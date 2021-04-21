@@ -113,7 +113,7 @@ class IconTreeShaker {
       _artifacts.getArtifactPath(Artifact.constFinder),
     );
     final File dart = _fs.file(
-      _artifacts.getArtifactPath(Artifact.engineDartBinary),
+      _artifacts.getHostArtifact(HostArtifact.engineDartBinary),
     );
 
     final Map<String, List<int>> iconData = await _findConstants(

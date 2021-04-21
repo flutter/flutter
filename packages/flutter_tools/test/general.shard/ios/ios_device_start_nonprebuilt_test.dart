@@ -76,7 +76,7 @@ void main() {
 
   setUp(() {
     artifacts = Artifacts.test();
-    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    iosDeployPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
   });
 
   group('IOSDevice.startApp succeeds in release mode', () {
