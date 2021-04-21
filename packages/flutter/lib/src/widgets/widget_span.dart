@@ -105,7 +105,6 @@ class WidgetSpan extends PlaceholderSpan {
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
-    print(dimensions);
     final bool hasStyle = style != null;
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));

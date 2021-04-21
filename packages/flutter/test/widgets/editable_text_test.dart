@@ -7766,6 +7766,123 @@ void main() {
     expect((widgetSpan.child as SizedBox).width, 30);
     expect((widgetSpan.child as SizedBox).height, 30);
   });
+
+  testWidgets('ReplacementTextEditingController overlapping composing region', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text [10]hello[20][30]',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          'posi',
+          (String value, TextRange range) {
+            return WidgetSpan(child: SizedBox(width: 15, height: 15), range: range);
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          '[10]',
+          (String value, TextRange range) {
+            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          RegExp(r'\[[\w]+\]'),
+          (String value, TextRange range) {
+            double size = double.parse(value.substring(1, value.length - 1));
+            return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
+          }
+        ),
+      ],
+    );
+
+    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+
+    expect(spans.children!.length, 7);
+    TextSpan textSpan = spans.children![0] as TextSpan;
+    expect(textSpan.text, 'text com');
+
+    WidgetSpan widgetSpan = spans.children![1] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 15);
+    expect((widgetSpan.child as SizedBox).height, 15);
+
+    textSpan = spans.children![2] as TextSpan;
+    expect(textSpan.text, 'ng text ');
+
+    textSpan = spans.children![3] as TextSpan;
+    expect(textSpan.text, 'hi');
+
+    textSpan = spans.children![4] as TextSpan;
+    expect(textSpan.text, 'hello');
+
+    widgetSpan = spans.children![5] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 20);
+    expect((widgetSpan.child as SizedBox).height, 20);
+
+    widgetSpan = spans.children![6] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 30);
+    expect((widgetSpan.child as SizedBox).height, 30);
+  });
+
+  testWidgets('ReplacementTextEditingController overlapping composing region override', (WidgetTester tester) async {
+    final ReplacementTextEditingController controller = ReplacementTextEditingController.fromValue(
+      const TextEditingValue(
+        text: 'text composing text [10]hello[20][30]',
+        selection: TextSelection.collapsed(offset: 14),
+        composing: TextRange(start: 5, end: 14),
+      ),
+      replacements: <TextEditingInlineSpanReplacement>[
+        TextEditingInlineSpanReplacement(
+          'posi',
+          (String value, TextRange range) {
+            return WidgetSpan(child: SizedBox(width: 15, height: 15), range: range);
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          '[10]',
+          (String value, TextRange range) {
+            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+          }
+        ),
+        TextEditingInlineSpanReplacement(
+          RegExp(r'\[[\w]+\]'),
+          (String value, TextRange range) {
+            double size = double.parse(value.substring(1, value.length - 1));
+            return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
+          }
+        ),
+      ],
+      composingRegionPrioritized: true,
+    );
+
+    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+
+    expect(spans.children!.length, 7);
+    TextSpan textSpan = spans.children![0] as TextSpan;
+    expect(textSpan.text, 'text ');
+
+    // Composing region is used instead of replacement.
+    textSpan = spans.children![1] as TextSpan;
+    expect(textSpan.text, 'composing');
+
+    textSpan = spans.children![2] as TextSpan;
+    expect(textSpan.text, ' text ');
+
+    textSpan = spans.children![3] as TextSpan;
+    expect(textSpan.text, 'hi');
+
+    textSpan = spans.children![4] as TextSpan;
+    expect(textSpan.text, 'hello');
+
+    WidgetSpan widgetSpan = spans.children![5] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 20);
+    expect((widgetSpan.child as SizedBox).height, 20);
+
+    widgetSpan = spans.children![6] as WidgetSpan;
+    expect((widgetSpan.child as SizedBox).width, 30);
+    expect((widgetSpan.child as SizedBox).height, 30);
+  });
 }
 
 class UnsettableController extends TextEditingController {
