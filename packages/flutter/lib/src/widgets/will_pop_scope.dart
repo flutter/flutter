@@ -117,7 +117,7 @@ class WillPopScope extends StatefulWidget {
 }
 
 class _WillPopScopeState extends State<WillPopScope> {
-  ModalRoute<dynamic>? _route;
+  ModalRoute<Object?>? _route;
 
   @override
   void didChangeDependencies() {
