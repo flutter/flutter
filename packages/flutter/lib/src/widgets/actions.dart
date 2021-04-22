@@ -1136,20 +1136,14 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   final Map<Type, Action<Intent>> _actionMap = const <ShortcutActivator, Intent>{
+///   final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+///     ActivateIntent: CallbackAction<Intent>(
+///       onInvoke: (Intent intent) => _toggleState(),
+///     ),
+///   };
+///   final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
 ///     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
 ///   };
-///   late Map<LogicalKeySet, Intent> _shortcutMap;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _actionMap = <Type, Action<Intent>>{
-///       ActivateIntent: CallbackAction<Intent>(
-///         onInvoke: (Intent intent) => _toggleState(),
-///       ),
-///     };
-///   }
 ///
 ///   Color get color {
 ///     Color baseColor = Colors.lightBlue;
