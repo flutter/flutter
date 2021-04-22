@@ -58,31 +58,6 @@ path_provider_linux:/path_provider_linux/lib/
 path_provider_example:lib/
 ''';
 
-const String _kSamplePackageJsonWindows = '''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "file:///C:/path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "path_provider_example",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''';
-
-const String _kSamplePackagesFileWindows = '''
-path_provider_linux:file:///C:/path_provider_linux/lib/
-path_provider_example:lib/
-''';
-
 const String _kSamplePubspecFile = '''
 name: path_provider_example
 description: Demonstrates how to use the path_provider plugin.
@@ -200,7 +175,7 @@ void main() {
           .childDirectory('.dart_tool')
           .childFile('package_config.json');
       config.createSync(recursive: true);
-      config.writeAsStringSync(Platform.isWindows ? _kSamplePackageJsonWindows : _kSamplePackageJson);
+      config.writeAsStringSync(_kSamplePackageJson);
 
       final File pubspec = environment.projectDir.childFile('pubspec.yaml');
       pubspec.createSync();
@@ -237,7 +212,7 @@ void main() {
           .childDirectory('.dart_tool')
           .childFile('package_config.json');
       config.createSync(recursive: true);
-      config.writeAsStringSync(Platform.isWindows ? _kSamplePackageJsonWindows : _kSamplePackageJson);
+      config.writeAsStringSync(_kSamplePackageJson);
 
       final File pubspec = projectDir.childFile('pubspec.yaml');
       pubspec.createSync();
@@ -245,7 +220,7 @@ void main() {
 
       final File packages = projectDir.childFile('.packages');
       packages.createSync();
-      packages.writeAsStringSync(Platform.isWindows ? _kSamplePackagesFileWindows : _kSamplePackagesFile);
+      packages.writeAsStringSync(_kSamplePackagesFile);
 
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
@@ -280,7 +255,7 @@ void main() {
           .childDirectory('.dart_tool')
           .childFile('package_config.json');
       config.createSync(recursive: true);
-      config.writeAsStringSync(Platform.isWindows ? _kSamplePackageJsonWindows : _kSamplePackageJson);
+      config.writeAsStringSync(_kSamplePackageJson);
 
       final File pubspec = environment.projectDir.childFile('pubspec.yaml');
       pubspec.createSync();
@@ -288,7 +263,7 @@ void main() {
 
       final File packages = environment.projectDir.childFile('.packages');
       packages.createSync();
-      packages.writeAsStringSync(Platform.isWindows ? _kSamplePackagesFileWindows : _kSamplePackagesFile);
+      packages.writeAsStringSync(_kSamplePackagesFile);
 
       final File generatedMain = environment.projectDir
           .childDirectory('.dart_tool')
