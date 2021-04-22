@@ -985,4 +985,49 @@ void main() {
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
+
+  testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/64718.
+    final PageController controller = PageController(
+      initialPage: 1,
+    );
+
+    Widget build(Size size) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: PageView(
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+              controller: controller,
+              onPageChanged: (int page) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The pageView have a zero viewport, so nothing display.
+    await tester.pumpWidget(build(const Size(0.0, 0.0)));
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
+
+    // Resize from zero viewport to non-zero, the controller's initialPage 1 will display.
+    await tester.pumpWidget(build(const Size(200.0, 200.0)));
+    expect(find.text('Alaska'), findsOneWidget);
+
+    // Jump to page 'Iowa'.
+    controller.jumpToPage(kStates.indexOf('Iowa'));
+    await tester.pump();
+    expect(find.text('Iowa'), findsOneWidget);
+
+    // Resize to zero viewport again, nothing display.
+    await tester.pumpWidget(build(const Size(0.0, 0.0)));
+    expect(find.text('Iowa'), findsNothing);
+
+    // Resize from zero to non-zero, the pageView should not lose state, so the page 'Iowa' show again.
+    await tester.pumpWidget(build(const Size(200.0, 200.0)));
+    expect(find.text('Iowa'), findsOneWidget);
+  });
 }
