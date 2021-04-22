@@ -453,8 +453,9 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 /// [MutableTextRange] that has its [base] and [extent] initialized to the
 /// composing region or the selection's base offset and extent offset.
 ///
-/// See [preserveSelectionAndComposingRegion] for an example of how
-/// [MutableTextRange]s are updated in a [FilteringFormatterReplacingStrategy].
+/// See [FilteringTextInputFormatter.preserveSelectionAndComposingRegion] for an
+/// example of how [MutableTextRange]s are updated in a
+/// [FilteringFormatterReplacingStrategy].
 class MutableTextRange<T extends TextRange> {
   MutableTextRange._(this.base, this.extent, this.originalRange);
 
@@ -497,8 +498,8 @@ class MutableTextRange<T extends TextRange> {
 /// the [FilteringFormatterReplacingStrategy] is responsible for providing a
 /// [TextEditingValueAccumulator] to the [FilteringFormatterReplacingStrategy].
 ///
-/// See [preserveSelectionAndComposingRegion] for an example of how a
-/// [TextEditingValueAccumulator] is updated in a typical
+/// See [FilteringTextInputFormatter.preserveSelectionAndComposingRegion] for an
+/// example of how a [TextEditingValueAccumulator] is updated in a typical
 /// [FilteringFormatterReplacingStrategy] implementation.
 class TextEditingValueAccumulator {
   TextEditingValueAccumulator._(TextEditingValue textEditingValue)
