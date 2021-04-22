@@ -44,8 +44,8 @@ void main() {
     final File manifest = flutterProject.windowsUwp.ephemeralDirectory.childFile('install_manifest');
     expect(manifest, exists);
     expect(manifest.readAsLinesSync(), unorderedEquals(<String>[
-      'C:/build/winuwp/flutter_assets/kernel_blob.bin',
-      'C:/build/winuwp/flutter_assets/AssetManifest.json',
+      'C:/build/flutter_assets/kernel_blob.bin',
+      'C:/build/flutter_assets/AssetManifest.json',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
       'C:/winuwp/flutter/ephemeral/icudtl.dat',
@@ -75,7 +75,7 @@ void main() {
     expect(manifest, exists);
     expect(manifest.readAsLinesSync(), unorderedEquals(<String>[
       'C:/build/winuwp/app.so',
-      'C:/build/winuwp/flutter_assets/AssetManifest.json',
+      'C:/build/flutter_assets/AssetManifest.json',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
       'C:/winuwp/flutter/ephemeral/icudtl.dat'
@@ -129,10 +129,10 @@ flutter:
     expect(manifest, exists);
     expect(manifest.readAsLinesSync(), unorderedEquals(<String>[
       'C:/build/winuwp/app.so',
-      'C:/build/winuwp/flutter_assets/assets/foo.png',
-      'C:/build/winuwp/flutter_assets/AssetManifest.json',
-      'C:/build/winuwp/flutter_assets/FontManifest.json',
-      'C:/build/winuwp/flutter_assets/NOTICES',
+      'C:/build/flutter_assets/assets/foo.png',
+      'C:/build/flutter_assets/AssetManifest.json',
+      'C:/build/flutter_assets/FontManifest.json',
+      'C:/build/flutter_assets/NOTICES',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
       'C:/winuwp/flutter/ephemeral/icudtl.dat'
