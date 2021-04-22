@@ -196,8 +196,11 @@ class PhysicalKeyData {
       // Remove duplicates: last one wins, so that supplemental codes
       // override.
       if (entries.containsKey(newEntry.usbHidCode)) {
-        print('Duplicate usbHidCode ${newEntry.usbHidCode} of key ${newEntry.name} '
-          'conflicts with existing ${entries[newEntry.usbHidCode]!.name}. Keeping the new one.');
+        // This is expected for Fn. Warn for other keys.
+        if (!<String>{'Fn'}.contains(newEntry.name)) {
+          print('Duplicate usbHidCode ${newEntry.usbHidCode} of key ${newEntry.name} '
+            'conflicts with existing ${entries[newEntry.usbHidCode]!.name}. Keeping the new one.');
+        }
       }
       entries[newEntry.usbHidCode] = newEntry;
     }

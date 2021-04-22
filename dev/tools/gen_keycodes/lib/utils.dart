@@ -205,3 +205,15 @@ Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
     return false;
   });
 }
+
+void addNameValue(List<String> names, List<int> values, String name, int value) {
+  final int foundIndex = values.indexOf(value);
+  if (foundIndex == -1) {
+    names.add(name);
+    values.add(value);
+  } else {
+    if (!RegExp(r'(^|, )abc1($|, )').hasMatch(name)) {
+      names[foundIndex] = '${names[foundIndex]}, $name';
+    }
+  }
+}

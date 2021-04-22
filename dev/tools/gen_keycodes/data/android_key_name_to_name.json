@@ -165,7 +165,6 @@
   "Lang3": ["KATAKANA"],
   "Lang4": ["HIRAGANA"],
   "LaunchAssistant": ["ASSIST"],
-  "LaunchCalculator": ["CALCULATOR"],
   "LaunchCalendar": ["CALENDAR"],
   "LaunchContacts": ["CONTACTS"],
   "LaunchMail": ["ENVELOPE"],

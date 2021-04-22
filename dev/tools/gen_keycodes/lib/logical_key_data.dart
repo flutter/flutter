@@ -291,9 +291,12 @@ class LogicalKeyData {
         print('Invalid logical entry by name $name (from Windows $windowsName)');
         continue;
       }
-      entry
-        ..windowsNames.add(windowsName)
-        ..windowsValues.add(value);
+      addNameValue(
+        entry.windowsNames,
+        entry.windowsValues,
+        windowsName,
+        value,
+      );
     }
   }
 

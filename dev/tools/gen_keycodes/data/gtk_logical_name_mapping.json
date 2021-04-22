@@ -99,7 +99,6 @@
   "Hyper": ["Hyper_L", "Hyper_R"],
   "Insert": ["Insert"],
   "IntlYen": ["yen"],
-  "KanaMode": ["kana_switch"],
   "KanjiMode": ["Kanji"],
   "Katakana": ["Katakana"],
   "KbdIllumDown": ["KbdBrightnessDown"],
