@@ -94,7 +94,9 @@ void main() {
     void testChildren() {
       expect(find.byKey(leadingKey), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
-      if (hasSubtitle) expect(find.text('subtitle'), findsOneWidget);
+      if (hasSubtitle) {
+        expect(find.text('subtitle'), findsOneWidget);
+      }
       expect(find.byKey(trailingKey), findsOneWidget);
     }
 
@@ -114,7 +116,9 @@ void main() {
     void testHorizontalGeometry() {
       expect(leftKey(leadingKey), math.max(16.0, leftPadding));
       expect(left('title'), 56.0 + math.max(16.0, leftPadding));
-      if (hasSubtitle) expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
+      if (hasSubtitle) {
+        expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
+      }
       expect(left('title'), rightKey(leadingKey) + 32.0);
       expect(rightKey(trailingKey), 800.0 - math.max(16.0, rightPadding));
       expect(widthKey(trailingKey), 24.0);

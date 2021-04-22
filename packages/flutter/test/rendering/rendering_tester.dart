@@ -95,15 +95,25 @@ class TestRenderingFlutterBinding extends BindingBase
     };
     try {
       pipelineOwner.flushLayout();
-      if (phase == EnginePhase.layout) return;
+      if (phase == EnginePhase.layout) {
+        return;
+      }
       pipelineOwner.flushCompositingBits();
-      if (phase == EnginePhase.compositingBits) return;
+      if (phase == EnginePhase.compositingBits) {
+        return;
+      }
       pipelineOwner.flushPaint();
-      if (phase == EnginePhase.paint) return;
+      if (phase == EnginePhase.paint) {
+        return;
+      }
       renderView.compositeFrame();
-      if (phase == EnginePhase.composite) return;
+      if (phase == EnginePhase.composite) {
+        return;
+      }
       pipelineOwner.flushSemantics();
-      if (phase == EnginePhase.flushSemantics) return;
+      if (phase == EnginePhase.flushSemantics) {
+        return;
+      }
       assert(phase == EnginePhase.flushSemantics || phase == EnginePhase.sendSemanticsUpdate);
     } finally {
       FlutterError.onError = oldErrorHandler;

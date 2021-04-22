@@ -213,7 +213,9 @@ void main() {
         .evaluate();
 
     // Indicators get an 8 pixel margin, 16 + 8 = 24.
-    for (final Element indicatorElement in indicatorElements) expect(indicatorElement.size, const Size(24.0, 24.0));
+    for (final Element indicatorElement in indicatorElements) {
+      expect(indicatorElement.size, const Size(24.0, 24.0));
+    }
 
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });

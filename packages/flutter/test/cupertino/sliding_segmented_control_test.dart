@@ -21,7 +21,9 @@ dynamic getRenderSegmentedControl(WidgetTester tester) {
 Rect currentUnscaledThumbRect(WidgetTester tester, {bool useGlobalCoordinate = false}) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
   final Rect local = renderSegmentedControl.currentThumbRect as Rect;
-  if (!useGlobalCoordinate) return local;
+  if (!useGlobalCoordinate) {
+    return local;
+  }
 
   final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
   return local.shift(segmentedControl.localToGlobal(Offset.zero));

@@ -42,7 +42,9 @@ void main() {
     final SimpleAsyncRouteInformationParser parser = SimpleAsyncRouteInformationParser();
     final SimpleAsyncRouterDelegate delegate = SimpleAsyncRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
-        if (information == null) return const Text('waiting');
+        if (information == null) {
+          return const Text('waiting');
+        }
         return Text(information.location!);
       },
     );
@@ -561,11 +563,15 @@ void main() {
         onPressed: () {
           if (isNavigating) {
             Router.navigate(context, () {
-              if (delegate.routeInformation != nextRouteInformation) delegate.routeInformation = nextRouteInformation;
+              if (delegate.routeInformation != nextRouteInformation) {
+                delegate.routeInformation = nextRouteInformation;
+              }
             });
           } else {
             Router.neglect(context, () {
-              if (delegate.routeInformation != nextRouteInformation) delegate.routeInformation = nextRouteInformation;
+              if (delegate.routeInformation != nextRouteInformation) {
+                delegate.routeInformation = nextRouteInformation;
+              }
             });
           }
         },
@@ -653,8 +659,12 @@ void main() {
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
         final List<Widget> children = <Widget>[];
-        if (information!.location! != null) children.add(Text(information.location!));
-        if (information.state != null) children.add(Text(information.state.toString()));
+        if (information!.location! != null) {
+          children.add(Text(information.location!));
+        }
+        if (information.state != null) {
+          children.add(Text(information.state.toString()));
+        }
         return Column(
           children: children,
         );
@@ -1139,7 +1149,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   RouteInformation? get currentConfiguration {
-    if (reportConfiguration) return routeInformation;
+    if (reportConfiguration) {
+      return routeInformation;
+    }
     return null;
   }
 

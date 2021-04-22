@@ -50,7 +50,9 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     final String description = item.toString();
     const String prefix = 'TextStyle(';
     const String suffix = ')';
-    if (!description.startsWith(prefix) || !description.endsWith(suffix)) return false;
+    if (!description.startsWith(prefix) || !description.endsWith(suffix)) {
+      return false;
+    }
 
     final String propertyDescription = description.substring(
       prefix.length,

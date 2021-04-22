@@ -2558,7 +2558,9 @@ void main() {
       renderObject,
       paints
         ..something((Symbol method, List<dynamic> arguments) {
-          if (method != #drawRRect) return false;
+          if (method != #drawRRect) {
+            return false;
+          }
           activeTrackRRect = arguments[0] as RRect;
           return true;
         }),

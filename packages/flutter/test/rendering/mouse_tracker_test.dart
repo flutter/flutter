@@ -43,13 +43,19 @@ void main() {
   }) {
     final TestAnnotationTarget oneAnnotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) {
-        if (logEvents != null) logEvents.add(event);
+        if (logEvents != null) {
+          logEvents.add(event);
+        }
       },
       onHover: (PointerHoverEvent event) {
-        if (logEvents != null) logEvents.add(event);
+        if (logEvents != null) {
+          logEvents.add(event);
+        }
       },
       onExit: (PointerExitEvent event) {
-        if (logEvents != null) logEvents.add(event);
+        if (logEvents != null) {
+          logEvents.add(event);
+        }
       },
     );
     _setUpMouseAnnotationFinder(
@@ -524,7 +530,9 @@ void main() {
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegionOne)
         yield TestAnnotationEntry(annotation1);
-      else if (isInHitRegionTwo) yield TestAnnotationEntry(annotation2);
+      else if (isInHitRegionTwo) {
+        yield TestAnnotationEntry(annotation2);
+      }
     });
 
     isInHitRegionOne = false;
@@ -752,10 +760,14 @@ class _EventListCriticalFieldsMatcher extends Matcher {
 
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
-    if (untypedItem is! Iterable<PointerEvent>) return false;
+    if (untypedItem is! Iterable<PointerEvent>) {
+      return false;
+    }
     final Iterable<PointerEvent> item = untypedItem;
     final Iterator<PointerEvent> iterator = item.iterator;
-    if (item.length != _expected.length) return false;
+    if (item.length != _expected.length) {
+      return false;
+    }
     int i = 0;
     for (final BaseEventMatcher matcher in _expected) {
       iterator.moveNext();

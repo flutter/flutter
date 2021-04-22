@@ -1355,7 +1355,9 @@ void main() {
               selected: selected,
               color: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) return selectedColor;
+                  if (states.contains(MaterialState.selected)) {
+                    return selectedColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1407,7 +1409,9 @@ void main() {
             DataRow(
               color: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) return disabledColor;
+                  if (states.contains(MaterialState.disabled)) {
+                    return disabledColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1451,7 +1455,9 @@ void main() {
           DataRow(
             color: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return pressedColor;
+                if (states.contains(MaterialState.pressed)) {
+                  return pressedColor;
+                }
                 return Colors.transparent;
               },
             ),

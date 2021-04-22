@@ -99,7 +99,9 @@ class RenderTest extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (!_isSemanticBoundary) return;
+    if (!_isSemanticBoundary) {
+      return;
+    }
 
     config
       ..isSemanticBoundary = _isSemanticBoundary
@@ -109,14 +111,18 @@ class RenderTest extends RenderProxyBox {
 
   String _label = '<>';
   set label(String value) {
-    if (value == _label) return;
+    if (value == _label) {
+      return;
+    }
     _label = value;
     markNeedsSemanticsUpdate();
   }
 
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
-    if (_isSemanticBoundary == value) return;
+    if (_isSemanticBoundary == value) {
+      return;
+    }
     _isSemanticBoundary = value;
     markNeedsSemanticsUpdate();
   }

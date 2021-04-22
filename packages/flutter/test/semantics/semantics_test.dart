@@ -717,12 +717,24 @@ class TestRender extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isSemanticBoundary;
-    if (hasTapAction) config.onTap = () {};
-    if (hasLongPressAction) config.onLongPress = () {};
-    if (hasScrollLeftAction) config.onScrollLeft = () {};
-    if (hasScrollRightAction) config.onScrollRight = () {};
-    if (hasScrollUpAction) config.onScrollUp = () {};
-    if (hasScrollDownAction) config.onScrollDown = () {};
+    if (hasTapAction) {
+      config.onTap = () {};
+    }
+    if (hasLongPressAction) {
+      config.onLongPress = () {};
+    }
+    if (hasScrollLeftAction) {
+      config.onScrollLeft = () {};
+    }
+    if (hasScrollRightAction) {
+      config.onScrollRight = () {};
+    }
+    if (hasScrollUpAction) {
+      config.onScrollUp = () {};
+    }
+    if (hasScrollDownAction) {
+      config.onScrollDown = () {};
+    }
   }
 }
 

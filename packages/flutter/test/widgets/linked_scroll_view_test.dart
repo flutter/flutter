@@ -83,7 +83,9 @@ class LinkedScrollController extends ScrollController {
 
   Iterable<LinkedScrollActivity> link(LinkedScrollPosition driver) sync* {
     assert(hasClients);
-    for (final LinkedScrollPosition position in positions.cast<LinkedScrollPosition>()) yield position.link(driver);
+    for (final LinkedScrollPosition position in positions.cast<LinkedScrollPosition>()) {
+      yield position.link(driver);
+    }
   }
 
   @override
@@ -123,13 +125,19 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void beginActivity(ScrollActivity? newActivity) {
-    if (newActivity == null) return;
+    if (newActivity == null) {
+      return;
+    }
     if (_beforeActivities != null) {
-      for (final LinkedScrollActivity activity in _beforeActivities!) activity.unlink(this);
+      for (final LinkedScrollActivity activity in _beforeActivities!) {
+        activity.unlink(this);
+      }
       _beforeActivities!.clear();
     }
     if (_afterActivities != null) {
-      for (final LinkedScrollActivity activity in _afterActivities!) activity.unlink(this);
+      for (final LinkedScrollActivity activity in _afterActivities!) {
+        activity.unlink(this);
+      }
       _afterActivities!.clear();
     }
     super.beginActivity(newActivity);
@@ -140,7 +148,9 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
     final double value = pixels - physics.applyPhysicsToUserOffset(this, delta);
 
-    if (value == pixels) return;
+    if (value == pixels) {
+      return;
+    }
 
     double beforeOverscroll = 0.0;
     if (owner.canLinkWithBefore && (value < minScrollExtent)) {
@@ -177,15 +187,21 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   LinkedScrollActivity link(LinkedScrollPosition driver) {
-    if (this.activity is! LinkedScrollActivity) beginActivity(LinkedScrollActivity(this));
+    if (this.activity is! LinkedScrollActivity) {
+      beginActivity(LinkedScrollActivity(this));
+    }
     final LinkedScrollActivity? activity = this.activity as LinkedScrollActivity?;
     activity!.link(driver);
     return activity;
   }
 
   void unlink(LinkedScrollActivity activity) {
-    if (_beforeActivities != null) _beforeActivities!.remove(activity);
-    if (_afterActivities != null) _afterActivities!.remove(activity);
+    if (_beforeActivities != null) {
+      _beforeActivities!.remove(activity);
+    }
+    if (_afterActivities != null) {
+      _afterActivities!.remove(activity);
+    }
   }
 
   @override
@@ -211,7 +227,9 @@ class LinkedScrollActivity extends ScrollActivity {
 
   void unlink(LinkedScrollPosition driver) {
     drivers.remove(driver);
-    if (drivers.isEmpty) delegate.goIdle();
+    if (drivers.isEmpty) {
+      delegate.goIdle();
+    }
   }
 
   @override
@@ -230,7 +248,9 @@ class LinkedScrollActivity extends ScrollActivity {
     ScrollDirection? commonDirection;
     for (final LinkedScrollPosition driver in drivers) {
       commonDirection ??= driver.userScrollDirection;
-      if (driver.userScrollDirection != commonDirection) commonDirection = ScrollDirection.idle;
+      if (driver.userScrollDirection != commonDirection) {
+        commonDirection = ScrollDirection.idle;
+      }
     }
 
     if (commonDirection != null) {
@@ -241,7 +261,9 @@ class LinkedScrollActivity extends ScrollActivity {
 
   @override
   void dispose() {
-    for (final LinkedScrollPosition driver in drivers) driver.unlink(this);
+    for (final LinkedScrollPosition driver in drivers) {
+      driver.unlink(this);
+    }
     super.dispose();
   }
 }

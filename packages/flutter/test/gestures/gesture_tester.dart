@@ -11,7 +11,9 @@ import 'package:meta/meta.dart';
 class TestGestureFlutterBinding extends BindingBase with GestureBinding {}
 
 void ensureGestureBinding() {
-  if (GestureBinding.instance == null) TestGestureFlutterBinding();
+  if (GestureBinding.instance == null) {
+    TestGestureFlutterBinding();
+  }
   assert(GestureBinding.instance != null);
 }
 

@@ -263,7 +263,9 @@ class FakeAndroidPlatformViewsController {
       pointerOffsets.add(Offset(x, y));
     }
 
-    if (!motionEvents.containsKey(id)) motionEvents[id] = <FakeAndroidMotionEvent>[];
+    if (!motionEvents.containsKey(id)) {
+      motionEvents[id] = <FakeAndroidMotionEvent>[];
+    }
 
     motionEvents[id]!.add(FakeAndroidMotionEvent(action, pointerIds, pointerOffsets));
     return Future<dynamic>.sync(() => null);
@@ -338,7 +340,9 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _create(MethodCall call) async {
-    if (creationDelay != null) await creationDelay!.future;
+    if (creationDelay != null) {
+      await creationDelay!.future;
+    }
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
@@ -489,7 +493,9 @@ class FakeAndroidPlatformView {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is FakeAndroidPlatformView &&
         other.id == id &&
         other.type == type &&
@@ -543,7 +549,9 @@ class FakeUiKitView {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is FakeUiKitView && other.id == id && other.type == type && other.creationParams == creationParams;
   }
 
@@ -565,7 +573,9 @@ class FakeHtmlPlatformView {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is FakeHtmlPlatformView && other.id == id && other.type == type;
   }
 

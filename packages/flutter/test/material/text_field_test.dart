@@ -4762,7 +4762,9 @@ void main() {
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData') return <String, dynamic>{'text': clipboardContent};
+      else if (methodCall.method == 'Clipboard.getData') {
+        return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
 
@@ -4832,7 +4834,9 @@ void main() {
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData') return <String, dynamic>{'text': clipboardContent};
+      else if (methodCall.method == 'Clipboard.getData') {
+        return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
 
@@ -4901,7 +4905,9 @@ void main() {
 
     const String clipboardContent = 'I love Flutter!';
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData') return <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.getData') {
+        return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
 
@@ -4950,7 +4956,9 @@ void main() {
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData') return <String, dynamic>{'text': clipboardContent};
+      else if (methodCall.method == 'Clipboard.getData') {
+        return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
 
@@ -5022,7 +5030,9 @@ void main() {
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData') return <String, dynamic>{'text': clipboardContent};
+      else if (methodCall.method == 'Clipboard.getData') {
+        return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
 

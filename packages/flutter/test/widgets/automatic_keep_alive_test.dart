@@ -56,7 +56,9 @@ List<Widget> generateList(Widget child, {required bool impliedMode}) {
         key: GlobalObjectKey<_LeafState>(index),
         child: child,
       );
-      if (impliedMode) return result;
+      if (impliedMode) {
+        return result;
+      }
       return AutomaticKeepAlive(child: result);
     },
     growable: false,

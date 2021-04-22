@@ -65,7 +65,9 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<String> loadString(String key, {bool cache = true}) {
-    if (key == 'AssetManifest.json') return SynchronousFuture<String>(manifest);
+    if (key == 'AssetManifest.json') {
+      return SynchronousFuture<String>(manifest);
+    }
     return SynchronousFuture<String>('');
   }
 

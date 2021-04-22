@@ -74,7 +74,9 @@ class RenderInvertColorTest extends RenderProxyBox {
   Color get color => _color;
   Color _color;
   set color(Color value) {
-    if (color == value) return;
+    if (color == value) {
+      return;
+    }
     _color = value;
     markNeedsPaint();
   }
@@ -82,7 +84,9 @@ class RenderInvertColorTest extends RenderProxyBox {
   ColorFilter? get filter => _filter;
   ColorFilter? _filter;
   set filter(ColorFilter? value) {
-    if (filter == value) return;
+    if (filter == value) {
+      return;
+    }
     _filter = value;
     markNeedsPaint();
   }

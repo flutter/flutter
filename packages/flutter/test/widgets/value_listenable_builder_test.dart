@@ -18,7 +18,9 @@ void main() {
       child: ValueListenableBuilder<String?>(
         valueListenable: valueListenable,
         builder: (BuildContext context, String? value, Widget? child) {
-          if (value == null) return const Placeholder();
+          if (value == null) {
+            return const Placeholder();
+          }
           return Text(value);
         },
       ),

@@ -504,14 +504,18 @@ class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
 class RenderOne extends RenderProxyBox {
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! DummyParentData) child.parentData = DummyParentData();
+    if (child.parentData is! DummyParentData) {
+      child.parentData = DummyParentData();
+    }
   }
 }
 
 class RenderAnother extends RenderProxyBox {
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! DummyParentData) child.parentData = DummyParentData();
+    if (child.parentData is! DummyParentData) {
+      child.parentData = DummyParentData();
+    }
   }
 }
 

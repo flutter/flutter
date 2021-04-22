@@ -210,7 +210,9 @@ class _MethodCall implements Invocation {
 }
 
 String _valueName(Object? value) {
-  if (value is double) return value.toStringAsFixed(1);
+  if (value is double) {
+    return value.toStringAsFixed(1);
+  }
   return value.toString();
 }
 

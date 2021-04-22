@@ -236,7 +236,9 @@ void main() {
             onSelectedItemChanged: (_) {},
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
-                if (index < -15 || index > -5) return null;
+                if (index < -15 || index > -5) {
+                  return null;
+                }
                 return SizedBox(
                   width: 400.0,
                   height: 100.0,
@@ -1267,7 +1269,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification) scrolledPositions.add(notification.metrics.pixels);
+              if (notification is ScrollUpdateNotification) {
+                scrolledPositions.add(notification.metrics.pixels);
+              }
               return false;
             },
             child: ListWheelScrollView(
@@ -1315,7 +1319,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification) scrolledPositions.add(notification.metrics.pixels);
+              if (notification is ScrollUpdateNotification) {
+                scrolledPositions.add(notification.metrics.pixels);
+              }
               return false;
             },
             child: ListWheelScrollView(

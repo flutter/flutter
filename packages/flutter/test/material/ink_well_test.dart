@@ -169,9 +169,15 @@ void main() {
             height: 100,
             child: InkWell(
               overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) return const Color(0xff00ff00);
-                if (states.contains(MaterialState.focused)) return const Color(0xff0000ff);
-                if (states.contains(MaterialState.pressed)) return const Color(0xf00fffff);
+                if (states.contains(MaterialState.hovered)) {
+                  return const Color(0xff00ff00);
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return const Color(0xff0000ff);
+                }
+                if (states.contains(MaterialState.pressed)) {
+                  return const Color(0xf00fffff);
+                }
                 return const Color(0xffbadbad); // Shouldn't happen.
               }),
               onTap: () {},
@@ -249,9 +255,15 @@ void main() {
               child: InkWell(
                 focusNode: focusNode,
                 overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) return const Color(0xff00ff00);
-                  if (states.contains(MaterialState.focused)) return const Color(0xff0000ff);
-                  if (states.contains(MaterialState.pressed)) return const Color(0xf00fffff);
+                  if (states.contains(MaterialState.hovered)) {
+                    return const Color(0xff00ff00);
+                  }
+                  if (states.contains(MaterialState.focused)) {
+                    return const Color(0xff0000ff);
+                  }
+                  if (states.contains(MaterialState.pressed)) {
+                    return const Color(0xf00fffff);
+                  }
                   return const Color(0xffbadbad); // Shouldn't happen.
                 }),
                 highlightColor: const Color(0xf00fffff),
@@ -332,9 +344,15 @@ void main() {
                 height: 100,
                 child: InkWell(
                   overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered)) return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.focused)) return const Color(0xff0000ff);
-                    if (states.contains(MaterialState.pressed)) return splashColor;
+                    if (states.contains(MaterialState.hovered)) {
+                      return const Color(0xff00ff00);
+                    }
+                    if (states.contains(MaterialState.focused)) {
+                      return const Color(0xff0000ff);
+                    }
+                    if (states.contains(MaterialState.pressed)) {
+                      return splashColor;
+                    }
                     return const Color(0xffbadbad); // Shouldn't happen.
                   }),
                   onTap: () {},

@@ -858,8 +858,12 @@ class _TestAnnotatedLayer extends Layer {
     Offset localPosition, {
     required bool onlyFirst,
   }) {
-    if (S != int) return false;
-    if (size != null && !(offset & size!).contains(localPosition)) return false;
+    if (S != int) {
+      return false;
+    }
+    if (size != null && !(offset & size!).contains(localPosition)) {
+      return false;
+    }
     final Object untypedValue = value;
     final S typedValue = untypedValue as S;
     result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition));

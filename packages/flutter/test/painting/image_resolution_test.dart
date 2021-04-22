@@ -27,7 +27,9 @@ class TestAssetBundle extends CachingAssetBundle {
       return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(_assetBundleContents)).buffer);
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
-    if (key == 'one') return ByteData(1)..setInt8(0, 49);
+    if (key == 'one') {
+      return ByteData(1)..setInt8(0, 49);
+    }
     throw FlutterError('key not found');
   }
 }

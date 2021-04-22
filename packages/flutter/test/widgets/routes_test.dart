@@ -63,7 +63,9 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   bool didPop(String? result) {
     log('didPop $result');
     bool returnValue;
-    if (returnValue = super.didPop(result)) navigator!.finalizeRoute(this);
+    if (returnValue = super.didPop(result)) {
+      navigator!.finalizeRoute(this);
+    }
     return returnValue;
   }
 

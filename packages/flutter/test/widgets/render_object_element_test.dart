@@ -91,8 +91,12 @@ abstract class SwapperElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (stable != null) visitor(stable!);
-    if (swapper != null) visitor(swapper!);
+    if (stable != null) {
+      visitor(stable!);
+    }
+    if (swapper != null) {
+      visitor(swapper!);
+    }
   }
 
   @override
@@ -184,10 +188,16 @@ class RenderSwapper extends RenderBox {
   RenderBox? _stable;
   RenderBox? get stable => _stable;
   set stable(RenderBox? child) {
-    if (child == _stable) return;
-    if (_stable != null) dropChild(_stable!);
+    if (child == _stable) {
+      return;
+    }
+    if (_stable != null) {
+      dropChild(_stable!);
+    }
     _stable = child;
-    if (child != null) adoptChild(child);
+    if (child != null) {
+      adoptChild(child);
+    }
   }
 
   bool? _swapperIsOnTop;
@@ -198,16 +208,26 @@ class RenderSwapper extends RenderBox {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
     }
-    if (child == _swapper) return;
-    if (_swapper != null) dropChild(_swapper!);
+    if (child == _swapper) {
+      return;
+    }
+    if (_swapper != null) {
+      dropChild(_swapper!);
+    }
     _swapper = child;
-    if (child != null) adoptChild(child);
+    if (child != null) {
+      adoptChild(child);
+    }
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_stable != null) visitor(_stable!);
-    if (_swapper != null) visitor(_swapper!);
+    if (_stable != null) {
+      visitor(_stable!);
+    }
+    if (_swapper != null) {
+      visitor(_swapper!);
+    }
   }
 
   @override

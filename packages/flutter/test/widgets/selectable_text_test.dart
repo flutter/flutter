@@ -1645,7 +1645,9 @@ void main() {
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData') return <String, dynamic>{'text': clipboardContent};
+      else if (methodCall.method == 'Clipboard.getData') {
+        return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
     const String testValue = 'a big house\njumped over a mouse';

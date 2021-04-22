@@ -86,7 +86,9 @@ Rect getLabelRect(WidgetTester tester) {
 }
 
 InputBorder? getBorder(WidgetTester tester) {
-  if (!tester.any(findBorderPainter())) return null;
+  if (!tester.any(findBorderPainter())) {
+    return null;
+  }
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic /*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   final dynamic /*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;

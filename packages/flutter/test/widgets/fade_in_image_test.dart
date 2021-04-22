@@ -35,7 +35,9 @@ class FadeInImageParts {
   Element? get semanticsElement {
     Element? result;
     fadeInImageElement.visitChildren((Element child) {
-      if (child.widget is Semantics) result = child;
+      if (child.widget is Semantics) {
+        result = child;
+      }
     });
     return result;
   }

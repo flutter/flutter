@@ -240,7 +240,9 @@ class TestSemantics {
 
   static Matrix4 _applyRootChildScale(Matrix4? transform) {
     final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
-    if (transform != null) result.multiply(transform);
+    if (transform != null) {
+      result.multiply(transform);
+    }
     return result;
   }
 
@@ -263,8 +265,12 @@ class TestSemantics {
       return false;
     }
 
-    if (node == null) return fail('could not find node with id $id.');
-    if (!ignoreId && id != node.id) return fail('expected node id $id but found id ${node.id}.');
+    if (node == null) {
+      return fail('could not find node with id $id.');
+    }
+    if (!ignoreId && id != node.id) {
+      return fail('expected node id $id but found id ${node.id}.');
+    }
 
     final SemanticsData nodeData = node.getSemanticsData();
 
@@ -336,7 +342,9 @@ class TestSemantics {
         'expected node id $id to have ${children.length} child${children.length == 1 ? "" : "ren"} but found $childrenCount.',
       );
 
-    if (children.isEmpty) return true;
+    if (children.isEmpty) {
+      return true;
+    }
     bool result = true;
     final Iterator<TestSemantics> it = children.iterator;
     for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
@@ -365,28 +373,50 @@ class TestSemantics {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
     buf.writeln('$indent${objectRuntimeType(this, 'TestSemantics')}(');
-    if (id != null) buf.writeln('$indent  id: $id,');
+    if (id != null) {
+      buf.writeln('$indent  id: $id,');
+    }
     if (flags is int && flags != 0 || flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty)
       buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagExpression(flags)},');
     if (actions is int && actions != 0 ||
         actions is List<SemanticsAction> && (actions as List<SemanticsAction>).isNotEmpty)
       buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
-    if (label != null && label != '') buf.writeln("$indent  label: '$label',");
-    if (value != null && value != '') buf.writeln("$indent  value: '$value',");
-    if (increasedValue != null && increasedValue != '') buf.writeln("$indent  increasedValue: '$increasedValue',");
-    if (decreasedValue != null && decreasedValue != '') buf.writeln("$indent  decreasedValue: '$decreasedValue',");
-    if (hint != null && hint != '') buf.writeln("$indent  hint: '$hint',");
-    if (textDirection != null) buf.writeln('$indent  textDirection: $textDirection,');
+    if (label != null && label != '') {
+      buf.writeln("$indent  label: '$label',");
+    }
+    if (value != null && value != '') {
+      buf.writeln("$indent  value: '$value',");
+    }
+    if (increasedValue != null && increasedValue != '') {
+      buf.writeln("$indent  increasedValue: '$increasedValue',");
+    }
+    if (decreasedValue != null && decreasedValue != '') {
+      buf.writeln("$indent  decreasedValue: '$decreasedValue',");
+    }
+    if (hint != null && hint != '') {
+      buf.writeln("$indent  hint: '$hint',");
+    }
+    if (textDirection != null) {
+      buf.writeln('$indent  textDirection: $textDirection,');
+    }
     if (textSelection?.isValid == true)
       buf.writeln('$indent  textSelection:\n[${textSelection!.start}, ${textSelection!.end}],');
-    if (scrollIndex != null) buf.writeln('$indent scrollIndex: $scrollIndex,');
-    if (rect != null) buf.writeln('$indent  rect: $rect,');
+    if (scrollIndex != null) {
+      buf.writeln('$indent scrollIndex: $scrollIndex,');
+    }
+    if (rect != null) {
+      buf.writeln('$indent  rect: $rect,');
+    }
     if (transform != null)
       buf.writeln(
         '$indent  transform:\n${transform.toString().trim().split('\n').map<String>((String line) => '$indent    $line').join('\n')},',
       );
-    if (elevation != null) buf.writeln('$indent  elevation: $elevation,');
-    if (thickness != null) buf.writeln('$indent  thickness: $thickness,');
+    if (elevation != null) {
+      buf.writeln('$indent  elevation: $elevation,');
+    }
+    if (thickness != null) {
+      buf.writeln('$indent  thickness: $thickness,');
+    }
     buf.writeln('$indent  children: <TestSemantics>[');
     for (final TestSemantics child in children) {
       buf.writeln('${child.toString(indentAmount + 2)},');
@@ -457,23 +487,41 @@ class SemanticsTester {
     SemanticsNode? ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
-      if (label != null && node.label != label) return false;
-      if (value != null && node.value != value) return false;
-      if (hint != null && node.hint != hint) return false;
-      if (textDirection != null && node.textDirection != textDirection) return false;
+      if (label != null && node.label != label) {
+        return false;
+      }
+      if (value != null && node.value != value) {
+        return false;
+      }
+      if (hint != null && node.hint != hint) {
+        return false;
+      }
+      if (textDirection != null && node.textDirection != textDirection) {
+        return false;
+      }
       if (actions != null) {
         final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
         final int actualActions = node.getSemanticsData().actions;
-        if (expectedActions != actualActions) return false;
+        if (expectedActions != actualActions) {
+          return false;
+        }
       }
       if (flags != null) {
         final int expectedFlags = flags.fold<int>(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
-        if (expectedFlags != actualFlags) return false;
+        if (expectedFlags != actualFlags) {
+          return false;
+        }
       }
-      if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1)) return false;
-      if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1)) return false;
-      if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1)) return false;
+      if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1)) {
+        return false;
+      }
+      if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1)) {
+        return false;
+      }
+      if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1)) {
+        return false;
+      }
       if (currentValueLength != null && node.currentValueLength != currentValueLength) {
         return false;
       }
@@ -584,16 +632,26 @@ class SemanticsTester {
     int indentAmount,
     DebugSemanticsDumpOrder childOrder,
   ) {
-    if (node == null) return 'null';
+    if (node == null) {
+      return 'null';
+    }
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
     final bool isRoot = node.id == 0;
     buf.writeln('TestSemantics${isRoot ? '.root' : ''}(');
-    if (!isRoot) buf.writeln('  id: ${node.id},');
-    if (nodeData.tags != null) buf.writeln('  tags: ${_tagsToSemanticsTagExpression(nodeData.tags!)},');
-    if (nodeData.flags != 0) buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
-    if (nodeData.actions != 0) buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
+    if (!isRoot) {
+      buf.writeln('  id: ${node.id},');
+    }
+    if (nodeData.tags != null) {
+      buf.writeln('  tags: ${_tagsToSemanticsTagExpression(nodeData.tags!)},');
+    }
+    if (nodeData.flags != 0) {
+      buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
+    }
+    if (nodeData.actions != 0) {
+      buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
+    }
     if (node.label != null && node.label.isNotEmpty) {
       final String escapedLabel = node.label.replaceAll('\n', r'\n');
       if (escapedLabel != node.label) {
@@ -602,13 +660,19 @@ class SemanticsTester {
         buf.writeln("  label: '$escapedLabel',");
       }
     }
-    if (node.value != null && node.value.isNotEmpty) buf.writeln("  value: '${node.value}',");
+    if (node.value != null && node.value.isNotEmpty) {
+      buf.writeln("  value: '${node.value}',");
+    }
     if (node.increasedValue != null && node.increasedValue.isNotEmpty)
       buf.writeln("  increasedValue: '${node.increasedValue}',");
     if (node.decreasedValue != null && node.decreasedValue.isNotEmpty)
       buf.writeln("  decreasedValue: '${node.decreasedValue}',");
-    if (node.hint != null && node.hint.isNotEmpty) buf.writeln("  hint: '${node.hint}',");
-    if (node.textDirection != null) buf.writeln('  textDirection: ${node.textDirection},');
+    if (node.hint != null && node.hint.isNotEmpty) {
+      buf.writeln("  hint: '${node.hint}',");
+    }
+    if (node.textDirection != null) {
+      buf.writeln('  textDirection: ${node.textDirection},');
+    }
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
       for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {

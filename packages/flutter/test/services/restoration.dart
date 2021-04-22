@@ -19,7 +19,9 @@ class MockRestorationManager extends TestRestorationManager {
 
   @override
   void initChannels() {
-    if (enableChannels) super.initChannels();
+    if (enableChannels) {
+      super.initChannels();
+    }
   }
 
   @override
