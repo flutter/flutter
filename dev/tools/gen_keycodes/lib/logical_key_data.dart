@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:gen_keycodes/utils.dart';
 
+import 'constants.dart';
 import 'physical_key_data.dart';
 
 const int kNumpadPlane = 0x00200000000;
@@ -66,6 +67,7 @@ class LogicalKeyData {
         path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'ios_logical_to_physical.json')
       ).readAsStringSync()),
     );
+    _readFuchsiaKeyCodes(data, physicalKeyData);
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) =>
@@ -317,6 +319,24 @@ class LogicalKeyData {
     }
   }
 
+  static void _readFuchsiaKeyCodes(Map<String, LogicalKeyEntry> data, PhysicalKeyData physicalData) {
+    for (final LogicalKeyEntry entry in data.values) {
+      final int? value = (() {
+      final String? keyLabel = printable[entry.constantName];
+        if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
+          return kUnicodePlane | (keyLabel.codeUnitAt(0) & kValueMask);
+        } else {
+          final PhysicalKeyEntry? physicalEntry = physicalData.getEntryByName(entry.name);
+          if (physicalEntry != null) {
+            return kHidPlane | (physicalEntry.usbHidCode & kValueMask);
+          }
+        }
+      })();
+      if (value != null)
+        entry.fuchsiaValues.add(value);
+    }
+  }
+
   // Map Web key to the pair of key names
   static late final Map<String, _ModifierPair> chromeModifiers = () {
     final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'chromium_modifiers.json',)).readAsStringSync();
@@ -325,6 +345,13 @@ class LogicalKeyData {
       return MapEntry<String, _ModifierPair>(key, _ModifierPair(pair[0] as String, pair[1] as String));
     });
   }();
+
+  /// Returns the static map of printable representations.
+  static late final Map<String, String> printable = ((){
+    final String printableKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable.json',)).readAsStringSync();
+    return (json.decode(printableKeys) as Map<String, dynamic>)
+      .cast<String, String>();
+  })();
 
   // Map printable to corresponding numpad key name
   static late final Map<String, String> printableToNumpads = () {
@@ -352,6 +379,7 @@ class LogicalKeyData {
   })();
 }
 
+
 /// A single entry in the key data structure.
 ///
 /// Can be read from JSON with the [LogicalKeyEntry.fromJsonMapEntry] constructor, or
@@ -375,7 +403,8 @@ class LogicalKeyEntry {
         windowsNames = <String>[],
         windowsValues = <int>[],
         androidNames = <String>[],
-        androidValues = <int>[];
+        androidValues = <int>[],
+        fuchsiaValues = <int>[];
 
   LogicalKeyEntry.fromName({
     required int value,
@@ -403,6 +432,7 @@ class LogicalKeyEntry {
       windowsValues = _toNonEmptyArray<int>(map['values']['windows']),
       androidNames = _toNonEmptyArray<String>(map['names']['android']),
       androidValues = _toNonEmptyArray<int>(map['values']['android']),
+      fuchsiaValues = _toNonEmptyArray<int>(map['values']['fuchsia']),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
@@ -464,6 +494,8 @@ class LogicalKeyEntry {
   /// Android name in the Chromium data, and substituting the Android key code
   /// value.
   final List<int> androidValues;
+
+  final List<int> fuchsiaValues;
 
   final String? keyLabel;
 

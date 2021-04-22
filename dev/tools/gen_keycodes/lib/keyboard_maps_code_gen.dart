@@ -57,9 +57,8 @@ class _OutputLines<T extends Comparable<Object>> {
 /// Generates the keyboard_maps.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
-  KeyboardMapsCodeGenerator(PhysicalKeyData keyData, this.logicalData) : super(keyData);
-
-  final LogicalKeyData logicalData;
+  KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+    : super(keyData, logicalData);
 
   late final Set<String> logicalKeyNames = (() {
     return Set<String>.from(
@@ -68,7 +67,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   List<PhysicalKeyEntry> get numpadKeyData {
     return keyData.data.where((PhysicalKeyEntry entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
+      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.constantName);
     }).toList();
   }
 
@@ -81,7 +80,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   List<LogicalKeyEntry> get numpadLogicalKeyData {
     return logicalData.data.values.where((LogicalKeyEntry entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
+      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.constantName);
     }).toList();
   }
 
@@ -267,24 +266,24 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of iOS key codes to physical keys.
   String get iosScanCodeMap {
-    final StringBuffer iosScanCodeMap = StringBuffer();
+    final _OutputLines<int> lines = _OutputLines<int>('iOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.iosScanCode != null) {
-        iosScanCodeMap.writeln('  ${toHex(entry.iosScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.iosScanCode!, '  ${toHex(entry.iosScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
-    return iosScanCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of iOS number pad key codes to logical keys.
   String get iosNumpadMap {
-    final StringBuffer iosNumPadMap = StringBuffer();
+    final _OutputLines<int> lines = _OutputLines<int>('iOS numpad map');
     for (final PhysicalKeyEntry entry in numpadKeyData) {
       if (entry.iosScanCode != null) {
-        iosNumPadMap.writeln('  ${toHex(entry.iosScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.iosScanCode!,'  ${toHex(entry.iosScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
-    return iosNumPadMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of macOS key codes to physical keys.
@@ -300,14 +299,13 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Fuchsia key codes to logical keys.
   String get fuchsiaKeyCodeMap {
-    final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
-      if (entry.usbHidCode != null) {
-        if (logicalKeyNames.contains(entry.constantName))
-          fuchsiaKeyCodeMap.writeln('  ${toHex(entry.flutterId)}: LogicalKeyboardKey.${entry.constantName},');
+    final _OutputLines<int> lines = _OutputLines<int>('Fuchsia key code map');
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
+      for (final int value in entry.fuchsiaValues) {
+        lines.add(value, '  ${toHex(value)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
-    return fuchsiaKeyCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of Fuchsia USB HID codes to physical keys.

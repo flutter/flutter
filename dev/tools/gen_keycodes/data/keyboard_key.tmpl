@@ -26,7 +26,7 @@ abstract class KeyboardKey with Diagnosticable {
 }
 
 /// A class with static values that describe the keys that are returned from
-/// [RawKeyEvent.logicalKey] and [KeyEvent.logical].
+/// [RawKeyEvent.logicalKey].
 ///
 /// These represent *logical* keys, which are keys which are interpreted in the
 /// context of any modifiers, modes, or keyboard layouts which may be in effect.
@@ -222,16 +222,6 @@ class LogicalKeyboardKey extends KeyboardKey {
       return true;
     }());
     return result;
-  }
-
-  @override
-  bool active(KeyboardState state) {
-    return state.logicalPressed(this);
-  }
-
-  @override
-  bool fulfilled(KeyEvent event) {
-    return event.logical == this;
   }
 
   @override

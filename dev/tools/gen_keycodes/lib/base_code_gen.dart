@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'package:gen_keycodes/logical_key_data.dart';
 import 'package:path/path.dart' as path;
 
 import 'physical_key_data.dart';
@@ -26,7 +27,7 @@ String _injectDictionary(String template, Map<String, String> dictionary) {
 /// Subclasses must implement [templatePath] and [mappings].
 abstract class BaseCodeGenerator {
   /// Create a code generator while providing [keyData] to be used in [mappings].
-  BaseCodeGenerator(this.keyData);
+  BaseCodeGenerator(this.keyData, this.logicalData);
 
   /// Absolute path to the template file that this file is generated on.
   String get templatePath;
@@ -43,15 +44,18 @@ abstract class BaseCodeGenerator {
 
   /// The database of keys loaded from disk.
   final PhysicalKeyData keyData;
+
+  final LogicalKeyData logicalData;
 }
 
 /// A code generator which also defines platform-based behavior.
 abstract class PlatformCodeGenerator extends BaseCodeGenerator {
-  PlatformCodeGenerator(PhysicalKeyData keyData) : super(keyData);
+  PlatformCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+    : super(keyData, logicalData);
 
   // Used by platform code generators.
-  List<PhysicalKeyEntry> get numpadKeyData {
-    return keyData.data.where((PhysicalKeyEntry entry) {
+  List<LogicalKeyEntry> get numpadKeyData {
+    return logicalData.data.values.where((LogicalKeyEntry entry) {
       return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
     }).toList();
   }

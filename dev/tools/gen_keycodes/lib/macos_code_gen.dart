@@ -32,9 +32,8 @@ String _toConstantVariableName(String variableName) {
 /// Generates the key mapping of macOS, based on the information in the key
 /// data structure given to it.
 class MacOsCodeGenerator extends PlatformCodeGenerator {
-  MacOsCodeGenerator(PhysicalKeyData keyData, this.logicalData, this.maskConstants) : super(keyData);
-
-  final LogicalKeyData logicalData;
+  MacOsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData, this.maskConstants)
+    : super(keyData, logicalData);
 
   final List<MaskConstant> maskConstants;
 

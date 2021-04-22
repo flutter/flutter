@@ -15,9 +15,8 @@ import 'utils.dart';
 /// Generates the key mapping of Windows, based on the information in the key
 /// data structure given to it.
 class WindowsCodeGenerator extends PlatformCodeGenerator {
-  WindowsCodeGenerator(PhysicalKeyData physicalData, this.logicalData) : super(physicalData);
-
-  final LogicalKeyData logicalData;
+  WindowsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+    : super(keyData, logicalData);
 
   /// This generates the map of Windows scan codes to physical keys.
   String get _windowsScanCodeMap {

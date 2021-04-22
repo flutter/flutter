@@ -13,9 +13,8 @@ import 'utils.dart';
 /// Generates the key mapping of Android, based on the information in the key
 /// data structure given to it.
 class AndroidCodeGenerator extends PlatformCodeGenerator {
-  AndroidCodeGenerator(PhysicalKeyData physicalData, this.logicalData) : super(physicalData);
-
-  final LogicalKeyData logicalData;
+  AndroidCodeGenerator(PhysicalKeyData physicalData, LogicalKeyData logicalData)
+    : super(physicalData, logicalData);
 
   /// This generates the map of Android key codes to logical keys.
   String get _androidKeyCodeMap {

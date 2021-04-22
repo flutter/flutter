@@ -303,18 +303,6 @@ class PhysicalKeyEntry {
     });
   }
 
-  /// Returns the printable representation of this key, if any.
-  ///
-  /// If there is no printable representation, returns null.
-  String? get keyLabel => printable[constantName];
-
-  int get flutterId {
-    if (printable.containsKey(constantName) && !constantName.startsWith('numpad')) {
-      return unicodePlane | ((keyLabel?.codeUnitAt(0) ?? 0) & valueMask);
-    }
-    return hidPlane | (usbHidCode & valueMask);
-  }
-
   static String getCommentName(String constantName) {
     String upperCamel = lowerCamelToUpperCamel(constantName);
     upperCamel = upperCamel.replaceAllMapped(
@@ -361,13 +349,6 @@ class PhysicalKeyEntry {
         'iOSScanCode: ${toHex(iosScanCode)})';
   }
 
-  /// Returns the static map of printable representations.
-  static late final Map<String, String> printable = ((){
-    final String printableKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable.json',)).readAsStringSync();
-    return (json.decode(printableKeys) as Map<String, dynamic>)
-      .cast<String, String>();
-  })();
-
   /// Returns the static map of synonym representations.
   ///
   /// These include synonyms for keys which don't have printable
@@ -384,19 +365,6 @@ class PhysicalKeyEntry {
       return MapEntry<String, List<String>>(name, names);
     });
   })();
-
-  /// Mask for the 32-bit value portion of the code.
-  static const int valueMask = 0x000FFFFFFFF;
-
-  /// The code prefix for keys which have a Unicode representation.
-  static const int unicodePlane = 0x00000000000;
-
-  /// The code prefix for keys which do not have a Unicode representation, but
-  /// do have a USB HID ID.
-  static const int hidPlane = 0x00100000000;
-
-  /// The code prefix for pseudo-keys which represent collections of key synonyms.
-  static const int synonymPlane = 0x20000000000;
 
   static int compareByUsbHidCode(PhysicalKeyEntry a, PhysicalKeyEntry b) =>
       a.usbHidCode.compareTo(b.usbHidCode);

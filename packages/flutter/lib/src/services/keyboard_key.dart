@@ -26,7 +26,7 @@ abstract class KeyboardKey with Diagnosticable {
 }
 
 /// A class with static values that describe the keys that are returned from
-/// [RawKeyEvent.logicalKey] and [KeyEvent.logical].
+/// [RawKeyEvent.logicalKey].
 ///
 /// These represent *logical* keys, which are keys which are interpreted in the
 /// context of any modifiers, modes, or keyboard layouts which may be in effect.
@@ -222,16 +222,6 @@ class LogicalKeyboardKey extends KeyboardKey {
       return true;
     }());
     return result;
-  }
-
-  @override
-  bool active(KeyboardState state) {
-    return state.logicalPressed(this);
-  }
-
-  @override
-  bool fulfilled(KeyEvent event) {
-    return event.logical == this;
   }
 
   @override
@@ -2583,28 +2573,28 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey Shift = LogicalKeyboardKey(0x201000700e1);
+  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x2030000010d);
 
   /// Represents the logical "Meta" key on the keyboard.
   ///
   /// This key represents the union of the keys {metaLeft, metaRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey Meta = LogicalKeyboardKey(0x201000700e3);
+  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x20300000109);
 
   /// Represents the logical "Alt" key on the keyboard.
   ///
   /// This key represents the union of the keys {altLeft, altRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey Alt = LogicalKeyboardKey(0x201000700e2);
+  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x20300000102);
 
   /// Represents the logical "Control" key on the keyboard.
   ///
   /// This key represents the union of the keys {controlLeft, controlRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey Control = LogicalKeyboardKey(0x201000700e0);
+  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x20300000105);
 
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
@@ -3050,22 +3040,22 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0400000105: controlRight,
     0x0400000109: metaRight,
     0x040000010d: shiftRight,
-    0x201000700e1: Shift,
-    0x201000700e3: Meta,
-    0x201000700e2: Alt,
-    0x201000700e0: Control,
+    0x2030000010d: shift,
+    0x20300000109: meta,
+    0x20300000102: alt,
+    0x20300000105: control,
   };
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
   static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
-    shiftLeft: Shift,
-    shiftRight: Shift,
-    metaLeft: Meta,
-    metaRight: Meta,
-    altLeft: Alt,
-    altRight: Alt,
-    controlLeft: Control,
-    controlRight: Control,
+    shiftLeft: shift,
+    shiftRight: shift,
+    metaLeft: meta,
+    metaRight: meta,
+    altLeft: alt,
+    altRight: alt,
+    controlLeft: control,
+    controlRight: control,
   };
 
   static const Map<int, String> _keyLabels = <int, String>{
@@ -3510,10 +3500,10 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x00400000105: 'Control Right',
     0x00400000109: 'Meta Right',
     0x0040000010d: 'Shift Right',
-    0x201000700e1: 'Shift',
-    0x201000700e3: 'Meta',
-    0x201000700e2: 'Alt',
-    0x201000700e0: 'Control',
+    0x2030000010d: 'Shift',
+    0x20300000109: 'Meta',
+    0x20300000102: 'Alt',
+    0x20300000105: 'Control',
     };
 }
 

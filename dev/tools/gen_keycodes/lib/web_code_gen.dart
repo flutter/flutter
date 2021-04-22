@@ -15,9 +15,8 @@ import 'utils.dart';
 /// Generates the key mapping of Web, based on the information in the key
 /// data structure given to it.
 class WebCodeGenerator extends PlatformCodeGenerator {
-  WebCodeGenerator(PhysicalKeyData keyData, this.logicalData) : super(keyData);
-
-  final LogicalKeyData logicalData;
+  WebCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+    : super(keyData, logicalData);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {

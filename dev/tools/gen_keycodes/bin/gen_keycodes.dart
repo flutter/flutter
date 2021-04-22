@@ -11,10 +11,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:gen_keycodes/android_code_gen.dart';
 import 'package:gen_keycodes/base_code_gen.dart';
-import 'package:gen_keycodes/ios_code_gen.dart';
 import 'package:gen_keycodes/macos_code_gen.dart';
-import 'package:gen_keycodes/fuchsia_code_gen.dart';
-import 'package:gen_keycodes/glfw_code_gen.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
 import 'package:gen_keycodes/windows_code_gen.dart';
 import 'package:gen_keycodes/web_code_gen.dart';
@@ -292,11 +289,8 @@ Future<void> main(List<String> rawArguments) async {
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
 
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
-    'glfw': GlfwCodeGenerator(physicalData),
-    'fuchsia': FuchsiaCodeGenerator(physicalData),
     'android': AndroidCodeGenerator(physicalData, logicalData),
     'macos': MacOsCodeGenerator(physicalData, logicalData, maskConstants),
-    'ios': IosCodeGenerator(physicalData),
     'windows': WindowsCodeGenerator(physicalData, logicalData),
     'linux': GtkCodeGenerator(physicalData, logicalData),
     'web': WebCodeGenerator(physicalData, logicalData),

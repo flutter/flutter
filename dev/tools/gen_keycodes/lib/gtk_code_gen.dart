@@ -15,9 +15,8 @@ import 'utils.dart';
 /// Generates the key mapping of GTK, based on the information in the key
 /// data structure given to it.
 class GtkCodeGenerator extends PlatformCodeGenerator {
-  GtkCodeGenerator(PhysicalKeyData keyData, this.logicalData) : super(keyData);
-
-  final LogicalKeyData logicalData;
+  GtkCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+    : super(keyData, logicalData);
 
   /// This generates the map of XKB scan codes to Flutter physical keys.
   String get xkbScanCodeMap {
