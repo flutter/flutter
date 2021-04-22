@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -1247,6 +1247,21 @@ void main() {
     expect(paragraph.getMaxIntrinsicWidth(0.0), 200 + 4 * 16.0);
     // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
     expect(paragraph.getMinIntrinsicWidth(0.0), 200);
+  });
+
+  testWidgets('Text uses TextStyle.overflow', (WidgetTester tester) async {
+    const TextOverflow overflow = TextOverflow.fade;
+
+    await tester.pumpWidget( const Text(
+      'Hello World',
+      textDirection: TextDirection.ltr,
+      style: TextStyle(overflow: overflow),
+    ));
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+
+    expect(richText.overflow, overflow);
+    expect(richText.text.style!.overflow, overflow);
   });
 }
 

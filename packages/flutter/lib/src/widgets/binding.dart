@@ -290,7 +290,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
+    assert(() {
+      FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
+      return true;
+    }());
   }
 
   void _debugAddStackFilters() {
@@ -1184,6 +1187,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
     assert(_newWidget == null);
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
     try {
       _child = updateChild(_child, widget.child, _rootChildSlot);
