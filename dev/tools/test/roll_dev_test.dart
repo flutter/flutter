@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
-import 'package:platform/platform.dart';
-
-import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/roll_dev.dart';
+import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import './common.dart';

@@ -538,6 +538,78 @@ void main() {
     expect(yCenter(appBarKey), equals(yCenter(action1Key)));
   });
 
+  testWidgets('AppBar drawer icon has default size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+    final double iconSize = const IconThemeData.fallback().size!;
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(Size(iconSize, iconSize)),
+    );
+  });
+
+  testWidgets('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(size: 30),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(const Size(30, 30)),
+    );
+  });
+
+  testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+    final double iconSize = const IconThemeData.fallback().size!;
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(Size(iconSize, iconSize)),
+    );
+  });
+
+  testWidgets('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(size: 30),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+    expect(
+      tester.getSize(find.byIcon(Icons.menu)),
+      equals(const Size(30, 30)),
+    );
+  });
+
   testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
