@@ -94,7 +94,6 @@ class RawKeyEventDataIos extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
-    print('kC $keyCode kL $keyLabel');
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
