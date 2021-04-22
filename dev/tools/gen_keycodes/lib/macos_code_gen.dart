@@ -42,7 +42,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer scanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.macOsScanCode != null) {
-        scanCodeMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.usbHidCode)},    // ${entry.constantName}');
+        scanCodeMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.usbHidCode)},  // ${entry.constantName}');
       }
     }
     return scanCodeMap.toString().trimRight();
@@ -52,7 +52,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer result = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.macOsKeyCodeValues, entry.macOsKeyCodeNames, (int macOsValue, String macOsName) {
-        result.writeln('  @${toHex(macOsValue)} : @${toHex(entry.value, digits: 10)},    // $macOsName');
+        result.writeln('  @${toHex(macOsValue)} : @${toHex(entry.value, digits: 10)},  // $macOsName');
       });
     }
     return result.toString().trimRight();
