@@ -25,8 +25,8 @@ import 'package:mockito/mockito.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
-import '../src/context.dart' hide FakeOperatingSystemUtils;
-import '../src/fakes.dart';
+import '../src/context.dart';
+import '../src/fakes.dart' hide FakeOperatingSystemUtils;
 import '../src/pubspec_schema.dart';
 
 void main() {
