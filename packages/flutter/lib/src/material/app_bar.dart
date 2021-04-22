@@ -789,7 +789,7 @@ class _AppBarState extends State<AppBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
-    final ModalRoute<Object?>? parentRoute = ModalRoute.of(context);
+    final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
 
     final FlexibleSpaceBarSettings? settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
     final Set<MaterialState> states = <MaterialState>{
@@ -799,7 +799,7 @@ class _AppBarState extends State<AppBar> {
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
-    final bool useCloseButton = parentRoute is PageRoute<Object?> && parentRoute.fullscreenDialog;
+    final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
     final bool backwardsCompatibility = widget.backwardsCompatibility ?? appBarTheme.backwardsCompatibility ?? true;
@@ -865,6 +865,7 @@ class _AppBarState extends State<AppBar> {
       if (hasDrawer) {
         leading = IconButton(
           icon: const Icon(Icons.menu),
+          iconSize: overallIconTheme.size ?? 24,
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
@@ -938,6 +939,7 @@ class _AppBarState extends State<AppBar> {
     } else if (hasEndDrawer) {
       actions = IconButton(
         icon: const Icon(Icons.menu),
+        iconSize: overallIconTheme.size ?? 24,
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );

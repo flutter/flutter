@@ -296,46 +296,6 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class FakeOperatingSystemUtils implements OperatingSystemUtils {
-  FakeOperatingSystemUtils({this.hostPlatform = HostPlatform.linux_x64});
-
-  @override
-  ProcessResult makeExecutable(File file) => null;
-
-  @override
-  HostPlatform hostPlatform = HostPlatform.linux_x64;
-
-  @override
-  void chmod(FileSystemEntity entity, String mode) { }
-
-  @override
-  File which(String execName) => null;
-
-  @override
-  List<File> whichAll(String execName) => <File>[];
-
-  @override
-  File makePipe(String path) => null;
-
-  @override
-  void unzip(File file, Directory targetDirectory) { }
-
-  @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) { }
-
-  @override
-  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
-
-  @override
-  String get name => 'fake OS name and version';
-
-  @override
-  String get pathVarSeparator => ';';
-
-  @override
-  Future<int> findFreePort({bool ipv6 = false}) async => 12345;
-}
-
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {

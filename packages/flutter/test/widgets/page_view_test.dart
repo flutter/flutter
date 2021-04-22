@@ -985,4 +985,29 @@ void main() {
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
+
+  testWidgets('PageView.padEnds tests', (WidgetTester tester) async {
+    Finder viewportFinder() => find.byType(SliverFillViewport, skipOffstage: false);
+
+    // PageView() defaults to true.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        children: const <Widget>[],
+      ),
+    ));
+
+    expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, true);
+
+    // PageView(padEnds: false) is propagated properly.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        padEnds: false,
+        children: const <Widget>[],
+      ),
+    ));
+
+    expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
+  });
 }

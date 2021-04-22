@@ -24,6 +24,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 final Platform _kNoColorTerminalPlatform = FakePlatform(stdoutSupportsAnsi: false);
