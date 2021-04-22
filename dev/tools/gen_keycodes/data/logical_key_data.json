@@ -1,6 +1,6 @@
 {
-  "none": {
-    "constant": "none",
+  "None": {
+    "name": "None",
     "english": "None",
     "value": 0,
     "names": {
@@ -20,8 +20,8 @@
       ]
     }
   },
-  "unidentified": {
-    "constant": "unidentified",
+  "Unidentified": {
+    "name": "Unidentified",
     "english": "Unidentified",
     "value": 1,
     "names": {
@@ -35,8 +35,8 @@
       ]
     }
   },
-  "backspace": {
-    "constant": "backspace",
+  "Backspace": {
+    "name": "Backspace",
     "english": "Backspace",
     "value": 8,
     "keyLabel": "\b",
@@ -81,8 +81,8 @@
       ]
     }
   },
-  "tab": {
-    "constant": "tab",
+  "Tab": {
+    "name": "Tab",
     "english": "Tab",
     "value": 9,
     "keyLabel": "\t",
@@ -119,8 +119,8 @@
       ]
     }
   },
-  "enter": {
-    "constant": "enter",
+  "Enter": {
+    "name": "Enter",
     "english": "Enter",
     "value": 13,
     "keyLabel": "\r",
@@ -157,8 +157,8 @@
       ]
     }
   },
-  "escape": {
-    "constant": "escape",
+  "Escape": {
+    "name": "Escape",
     "english": "Escape",
     "value": 27,
     "keyLabel": "\u001b",
@@ -203,8 +203,8 @@
       ]
     }
   },
-  "space": {
-    "constant": "space",
+  "Space": {
+    "name": "Space",
     "english": "Space",
     "value": 32,
     "keyLabel": " ",
@@ -237,8 +237,8 @@
       ]
     }
   },
-  "exclamation": {
-    "constant": "exclamation",
+  "Exclamation": {
+    "name": "Exclamation",
     "english": "Exclamation",
     "value": 33,
     "keyLabel": "!",
@@ -253,8 +253,8 @@
       ]
     }
   },
-  "quote": {
-    "constant": "quote",
+  "Quote": {
+    "name": "Quote",
     "english": "Quote",
     "value": 34,
     "keyLabel": "\"",
@@ -281,8 +281,8 @@
       ]
     }
   },
-  "numberSign": {
-    "constant": "numberSign",
+  "NumberSign": {
+    "name": "NumberSign",
     "english": "Number Sign",
     "value": 35,
     "keyLabel": "#",
@@ -297,8 +297,8 @@
       ]
     }
   },
-  "dollar": {
-    "constant": "dollar",
+  "Dollar": {
+    "name": "Dollar",
     "english": "Dollar",
     "value": 36,
     "keyLabel": "$",
@@ -313,8 +313,8 @@
       ]
     }
   },
-  "percent": {
-    "constant": "percent",
+  "Percent": {
+    "name": "Percent",
     "english": "Percent",
     "value": 37,
     "keyLabel": "%",
@@ -329,8 +329,8 @@
       ]
     }
   },
-  "ampersand": {
-    "constant": "ampersand",
+  "Ampersand": {
+    "name": "Ampersand",
     "english": "Ampersand",
     "value": 38,
     "keyLabel": "&",
@@ -345,8 +345,8 @@
       ]
     }
   },
-  "quoteSingle": {
-    "constant": "quoteSingle",
+  "QuoteSingle": {
+    "name": "QuoteSingle",
     "english": "Quote Single",
     "value": 39,
     "keyLabel": "'",
@@ -361,8 +361,8 @@
       ]
     }
   },
-  "parenthesisLeft": {
-    "constant": "parenthesisLeft",
+  "ParenthesisLeft": {
+    "name": "ParenthesisLeft",
     "english": "Parenthesis Left",
     "value": 40,
     "keyLabel": "(",
@@ -377,8 +377,8 @@
       ]
     }
   },
-  "parenthesisRight": {
-    "constant": "parenthesisRight",
+  "ParenthesisRight": {
+    "name": "ParenthesisRight",
     "english": "Parenthesis Right",
     "value": 41,
     "keyLabel": ")",
@@ -393,8 +393,8 @@
       ]
     }
   },
-  "asterisk": {
-    "constant": "asterisk",
+  "Asterisk": {
+    "name": "Asterisk",
     "english": "Asterisk",
     "value": 42,
     "keyLabel": "*",
@@ -409,8 +409,8 @@
       ]
     }
   },
-  "add": {
-    "constant": "add",
+  "Add": {
+    "name": "Add",
     "english": "Add",
     "value": 43,
     "keyLabel": "+",
@@ -425,8 +425,8 @@
       ]
     }
   },
-  "comma": {
-    "constant": "comma",
+  "Comma": {
+    "name": "Comma",
     "english": "Comma",
     "value": 44,
     "keyLabel": ",",
@@ -453,8 +453,8 @@
       ]
     }
   },
-  "minus": {
-    "constant": "minus",
+  "Minus": {
+    "name": "Minus",
     "english": "Minus",
     "value": 45,
     "keyLabel": "-",
@@ -481,8 +481,8 @@
       ]
     }
   },
-  "period": {
-    "constant": "period",
+  "Period": {
+    "name": "Period",
     "english": "Period",
     "value": 46,
     "keyLabel": ".",
@@ -515,8 +515,8 @@
       ]
     }
   },
-  "slash": {
-    "constant": "slash",
+  "Slash": {
+    "name": "Slash",
     "english": "Slash",
     "value": 47,
     "keyLabel": "/",
@@ -543,8 +543,8 @@
       ]
     }
   },
-  "digit0": {
-    "constant": "digit0",
+  "Digit0": {
+    "name": "Digit0",
     "english": "Digit 0",
     "value": 48,
     "keyLabel": "0",
@@ -565,8 +565,8 @@
       ]
     }
   },
-  "digit1": {
-    "constant": "digit1",
+  "Digit1": {
+    "name": "Digit1",
     "english": "Digit 1",
     "value": 49,
     "keyLabel": "1",
@@ -587,8 +587,8 @@
       ]
     }
   },
-  "digit2": {
-    "constant": "digit2",
+  "Digit2": {
+    "name": "Digit2",
     "english": "Digit 2",
     "value": 50,
     "keyLabel": "2",
@@ -609,8 +609,8 @@
       ]
     }
   },
-  "digit3": {
-    "constant": "digit3",
+  "Digit3": {
+    "name": "Digit3",
     "english": "Digit 3",
     "value": 51,
     "keyLabel": "3",
@@ -631,8 +631,8 @@
       ]
     }
   },
-  "digit4": {
-    "constant": "digit4",
+  "Digit4": {
+    "name": "Digit4",
     "english": "Digit 4",
     "value": 52,
     "keyLabel": "4",
@@ -653,8 +653,8 @@
       ]
     }
   },
-  "digit5": {
-    "constant": "digit5",
+  "Digit5": {
+    "name": "Digit5",
     "english": "Digit 5",
     "value": 53,
     "keyLabel": "5",
@@ -675,8 +675,8 @@
       ]
     }
   },
-  "digit6": {
-    "constant": "digit6",
+  "Digit6": {
+    "name": "Digit6",
     "english": "Digit 6",
     "value": 54,
     "keyLabel": "6",
@@ -697,8 +697,8 @@
       ]
     }
   },
-  "digit7": {
-    "constant": "digit7",
+  "Digit7": {
+    "name": "Digit7",
     "english": "Digit 7",
     "value": 55,
     "keyLabel": "7",
@@ -719,8 +719,8 @@
       ]
     }
   },
-  "digit8": {
-    "constant": "digit8",
+  "Digit8": {
+    "name": "Digit8",
     "english": "Digit 8",
     "value": 56,
     "keyLabel": "8",
@@ -741,8 +741,8 @@
       ]
     }
   },
-  "digit9": {
-    "constant": "digit9",
+  "Digit9": {
+    "name": "Digit9",
     "english": "Digit 9",
     "value": 57,
     "keyLabel": "9",
@@ -763,8 +763,8 @@
       ]
     }
   },
-  "colon": {
-    "constant": "colon",
+  "Colon": {
+    "name": "Colon",
     "english": "Colon",
     "value": 58,
     "keyLabel": ":",
@@ -779,8 +779,8 @@
       ]
     }
   },
-  "semicolon": {
-    "constant": "semicolon",
+  "Semicolon": {
+    "name": "Semicolon",
     "english": "Semicolon",
     "value": 59,
     "keyLabel": ";",
@@ -807,8 +807,8 @@
       ]
     }
   },
-  "less": {
-    "constant": "less",
+  "Less": {
+    "name": "Less",
     "english": "Less",
     "value": 60,
     "keyLabel": "<",
@@ -823,8 +823,8 @@
       ]
     }
   },
-  "equal": {
-    "constant": "equal",
+  "Equal": {
+    "name": "Equal",
     "english": "Equal",
     "value": 61,
     "keyLabel": "=",
@@ -851,8 +851,8 @@
       ]
     }
   },
-  "greater": {
-    "constant": "greater",
+  "Greater": {
+    "name": "Greater",
     "english": "Greater",
     "value": 62,
     "keyLabel": ">",
@@ -867,8 +867,8 @@
       ]
     }
   },
-  "question": {
-    "constant": "question",
+  "Question": {
+    "name": "Question",
     "english": "Question",
     "value": 63,
     "keyLabel": "?",
@@ -883,8 +883,8 @@
       ]
     }
   },
-  "at": {
-    "constant": "at",
+  "At": {
+    "name": "At",
     "english": "At",
     "value": 64,
     "keyLabel": "@",
@@ -899,8 +899,8 @@
       ]
     }
   },
-  "bracketLeft": {
-    "constant": "bracketLeft",
+  "BracketLeft": {
+    "name": "BracketLeft",
     "english": "Bracket Left",
     "value": 91,
     "keyLabel": "[",
@@ -927,8 +927,8 @@
       ]
     }
   },
-  "backslash": {
-    "constant": "backslash",
+  "Backslash": {
+    "name": "Backslash",
     "english": "Backslash",
     "value": 92,
     "keyLabel": "\\",
@@ -955,8 +955,8 @@
       ]
     }
   },
-  "bracketRight": {
-    "constant": "bracketRight",
+  "BracketRight": {
+    "name": "BracketRight",
     "english": "Bracket Right",
     "value": 93,
     "keyLabel": "]",
@@ -983,8 +983,8 @@
       ]
     }
   },
-  "caret": {
-    "constant": "caret",
+  "Caret": {
+    "name": "Caret",
     "english": "Caret",
     "value": 94,
     "keyLabel": "^",
@@ -999,8 +999,8 @@
       ]
     }
   },
-  "underscore": {
-    "constant": "underscore",
+  "Underscore": {
+    "name": "Underscore",
     "english": "Underscore",
     "value": 95,
     "keyLabel": "_",
@@ -1015,8 +1015,8 @@
       ]
     }
   },
-  "backquote": {
-    "constant": "backquote",
+  "Backquote": {
+    "name": "Backquote",
     "english": "Backquote",
     "value": 96,
     "keyLabel": "`",
@@ -1043,8 +1043,8 @@
       ]
     }
   },
-  "keyA": {
-    "constant": "keyA",
+  "KeyA": {
+    "name": "KeyA",
     "english": "Key A",
     "value": 97,
     "keyLabel": "a",
@@ -1065,8 +1065,8 @@
       ]
     }
   },
-  "keyB": {
-    "constant": "keyB",
+  "KeyB": {
+    "name": "KeyB",
     "english": "Key B",
     "value": 98,
     "keyLabel": "b",
@@ -1087,8 +1087,8 @@
       ]
     }
   },
-  "keyC": {
-    "constant": "keyC",
+  "KeyC": {
+    "name": "KeyC",
     "english": "Key C",
     "value": 99,
     "keyLabel": "c",
@@ -1109,8 +1109,8 @@
       ]
     }
   },
-  "keyD": {
-    "constant": "keyD",
+  "KeyD": {
+    "name": "KeyD",
     "english": "Key D",
     "value": 100,
     "keyLabel": "d",
@@ -1131,8 +1131,8 @@
       ]
     }
   },
-  "keyE": {
-    "constant": "keyE",
+  "KeyE": {
+    "name": "KeyE",
     "english": "Key E",
     "value": 101,
     "keyLabel": "e",
@@ -1153,8 +1153,8 @@
       ]
     }
   },
-  "keyF": {
-    "constant": "keyF",
+  "KeyF": {
+    "name": "KeyF",
     "english": "Key F",
     "value": 102,
     "keyLabel": "f",
@@ -1175,8 +1175,8 @@
       ]
     }
   },
-  "keyG": {
-    "constant": "keyG",
+  "KeyG": {
+    "name": "KeyG",
     "english": "Key G",
     "value": 103,
     "keyLabel": "g",
@@ -1197,8 +1197,8 @@
       ]
     }
   },
-  "keyH": {
-    "constant": "keyH",
+  "KeyH": {
+    "name": "KeyH",
     "english": "Key H",
     "value": 104,
     "keyLabel": "h",
@@ -1219,8 +1219,8 @@
       ]
     }
   },
-  "keyI": {
-    "constant": "keyI",
+  "KeyI": {
+    "name": "KeyI",
     "english": "Key I",
     "value": 105,
     "keyLabel": "i",
@@ -1241,8 +1241,8 @@
       ]
     }
   },
-  "keyJ": {
-    "constant": "keyJ",
+  "KeyJ": {
+    "name": "KeyJ",
     "english": "Key J",
     "value": 106,
     "keyLabel": "j",
@@ -1263,8 +1263,8 @@
       ]
     }
   },
-  "keyK": {
-    "constant": "keyK",
+  "KeyK": {
+    "name": "KeyK",
     "english": "Key K",
     "value": 107,
     "keyLabel": "k",
@@ -1285,8 +1285,8 @@
       ]
     }
   },
-  "keyL": {
-    "constant": "keyL",
+  "KeyL": {
+    "name": "KeyL",
     "english": "Key L",
     "value": 108,
     "keyLabel": "l",
@@ -1307,8 +1307,8 @@
       ]
     }
   },
-  "keyM": {
-    "constant": "keyM",
+  "KeyM": {
+    "name": "KeyM",
     "english": "Key M",
     "value": 109,
     "keyLabel": "m",
@@ -1329,8 +1329,8 @@
       ]
     }
   },
-  "keyN": {
-    "constant": "keyN",
+  "KeyN": {
+    "name": "KeyN",
     "english": "Key N",
     "value": 110,
     "keyLabel": "n",
@@ -1351,8 +1351,8 @@
       ]
     }
   },
-  "keyO": {
-    "constant": "keyO",
+  "KeyO": {
+    "name": "KeyO",
     "english": "Key O",
     "value": 111,
     "keyLabel": "o",
@@ -1373,8 +1373,8 @@
       ]
     }
   },
-  "keyP": {
-    "constant": "keyP",
+  "KeyP": {
+    "name": "KeyP",
     "english": "Key P",
     "value": 112,
     "keyLabel": "p",
@@ -1395,8 +1395,8 @@
       ]
     }
   },
-  "keyQ": {
-    "constant": "keyQ",
+  "KeyQ": {
+    "name": "KeyQ",
     "english": "Key Q",
     "value": 113,
     "keyLabel": "q",
@@ -1417,8 +1417,8 @@
       ]
     }
   },
-  "keyR": {
-    "constant": "keyR",
+  "KeyR": {
+    "name": "KeyR",
     "english": "Key R",
     "value": 114,
     "keyLabel": "r",
@@ -1439,8 +1439,8 @@
       ]
     }
   },
-  "keyS": {
-    "constant": "keyS",
+  "KeyS": {
+    "name": "KeyS",
     "english": "Key S",
     "value": 115,
     "keyLabel": "s",
@@ -1461,8 +1461,8 @@
       ]
     }
   },
-  "keyT": {
-    "constant": "keyT",
+  "KeyT": {
+    "name": "KeyT",
     "english": "Key T",
     "value": 116,
     "keyLabel": "t",
@@ -1483,8 +1483,8 @@
       ]
     }
   },
-  "keyU": {
-    "constant": "keyU",
+  "KeyU": {
+    "name": "KeyU",
     "english": "Key U",
     "value": 117,
     "keyLabel": "u",
@@ -1505,8 +1505,8 @@
       ]
     }
   },
-  "keyV": {
-    "constant": "keyV",
+  "KeyV": {
+    "name": "KeyV",
     "english": "Key V",
     "value": 118,
     "keyLabel": "v",
@@ -1527,8 +1527,8 @@
       ]
     }
   },
-  "keyW": {
-    "constant": "keyW",
+  "KeyW": {
+    "name": "KeyW",
     "english": "Key W",
     "value": 119,
     "keyLabel": "w",
@@ -1549,8 +1549,8 @@
       ]
     }
   },
-  "keyX": {
-    "constant": "keyX",
+  "KeyX": {
+    "name": "KeyX",
     "english": "Key X",
     "value": 120,
     "keyLabel": "x",
@@ -1571,8 +1571,8 @@
       ]
     }
   },
-  "keyY": {
-    "constant": "keyY",
+  "KeyY": {
+    "name": "KeyY",
     "english": "Key Y",
     "value": 121,
     "keyLabel": "y",
@@ -1593,8 +1593,8 @@
       ]
     }
   },
-  "keyZ": {
-    "constant": "keyZ",
+  "KeyZ": {
+    "name": "KeyZ",
     "english": "Key Z",
     "value": 122,
     "keyLabel": "z",
@@ -1615,8 +1615,8 @@
       ]
     }
   },
-  "braceLeft": {
-    "constant": "braceLeft",
+  "BraceLeft": {
+    "name": "BraceLeft",
     "english": "Brace Left",
     "value": 123,
     "keyLabel": "{",
@@ -1631,8 +1631,8 @@
       ]
     }
   },
-  "bar": {
-    "constant": "bar",
+  "Bar": {
+    "name": "Bar",
     "english": "Bar",
     "value": 124,
     "keyLabel": "|",
@@ -1647,8 +1647,8 @@
       ]
     }
   },
-  "braceRight": {
-    "constant": "braceRight",
+  "BraceRight": {
+    "name": "BraceRight",
     "english": "Brace Right",
     "value": 125,
     "keyLabel": "}",
@@ -1663,8 +1663,8 @@
       ]
     }
   },
-  "tilde": {
-    "constant": "tilde",
+  "Tilde": {
+    "name": "Tilde",
     "english": "Tilde",
     "value": 126,
     "keyLabel": "~",
@@ -1679,8 +1679,8 @@
       ]
     }
   },
-  "delete": {
-    "constant": "delete",
+  "Delete": {
+    "name": "Delete",
     "english": "Delete",
     "value": 127,
     "keyLabel": "",
@@ -1725,8 +1725,8 @@
       ]
     }
   },
-  "accel": {
-    "constant": "accel",
+  "Accel": {
+    "name": "Accel",
     "english": "Accel",
     "value": 257,
     "names": {
@@ -1740,8 +1740,8 @@
       ]
     }
   },
-  "altGraph": {
-    "constant": "altGraph",
+  "AltGraph": {
+    "name": "AltGraph",
     "english": "Alt Graph",
     "value": 259,
     "names": {
@@ -1755,8 +1755,8 @@
       ]
     }
   },
-  "capsLock": {
-    "constant": "capsLock",
+  "CapsLock": {
+    "name": "CapsLock",
     "english": "Caps Lock",
     "value": 260,
     "names": {
@@ -1800,8 +1800,8 @@
       ]
     }
   },
-  "fn": {
-    "constant": "fn",
+  "Fn": {
+    "name": "Fn",
     "english": "Fn",
     "value": 262,
     "names": {
@@ -1827,8 +1827,8 @@
       ]
     }
   },
-  "fnLock": {
-    "constant": "fnLock",
+  "FnLock": {
+    "name": "FnLock",
     "english": "Fn Lock",
     "value": 263,
     "names": {
@@ -1842,8 +1842,8 @@
       ]
     }
   },
-  "hyper": {
-    "constant": "hyper",
+  "Hyper": {
+    "name": "Hyper",
     "english": "Hyper",
     "value": 264,
     "names": {
@@ -1865,8 +1865,8 @@
       ]
     }
   },
-  "numLock": {
-    "constant": "numLock",
+  "NumLock": {
+    "name": "NumLock",
     "english": "Num Lock",
     "value": 266,
     "names": {
@@ -1910,8 +1910,8 @@
       ]
     }
   },
-  "scrollLock": {
-    "constant": "scrollLock",
+  "ScrollLock": {
+    "name": "ScrollLock",
     "english": "Scroll Lock",
     "value": 268,
     "names": {
@@ -1943,8 +1943,8 @@
       ]
     }
   },
-  "superKey": {
-    "constant": "superKey",
+  "Super": {
+    "name": "Super",
     "english": "Super",
     "value": 270,
     "names": {
@@ -1966,8 +1966,8 @@
       ]
     }
   },
-  "symbol": {
-    "constant": "symbol",
+  "Symbol": {
+    "name": "Symbol",
     "english": "Symbol",
     "value": 271,
     "names": {
@@ -1987,8 +1987,8 @@
       ]
     }
   },
-  "symbolLock": {
-    "constant": "symbolLock",
+  "SymbolLock": {
+    "name": "SymbolLock",
     "english": "Symbol Lock",
     "value": 272,
     "names": {
@@ -2002,8 +2002,8 @@
       ]
     }
   },
-  "shiftLevel5": {
-    "constant": "shiftLevel5",
+  "ShiftLevel5": {
+    "name": "ShiftLevel5",
     "english": "Shift Level 5",
     "value": 273,
     "names": {
@@ -2017,8 +2017,8 @@
       ]
     }
   },
-  "altGraphLatch": {
-    "constant": "altGraphLatch",
+  "AltGraphLatch": {
+    "name": "AltGraphLatch",
     "english": "Alt Graph Latch",
     "value": 274,
     "names": {
@@ -2032,8 +2032,8 @@
       ]
     }
   },
-  "arrowDown": {
-    "constant": "arrowDown",
+  "ArrowDown": {
+    "name": "ArrowDown",
     "english": "Arrow Down",
     "value": 769,
     "names": {
@@ -2077,8 +2077,8 @@
       ]
     }
   },
-  "arrowLeft": {
-    "constant": "arrowLeft",
+  "ArrowLeft": {
+    "name": "ArrowLeft",
     "english": "Arrow Left",
     "value": 770,
     "names": {
@@ -2122,8 +2122,8 @@
       ]
     }
   },
-  "arrowRight": {
-    "constant": "arrowRight",
+  "ArrowRight": {
+    "name": "ArrowRight",
     "english": "Arrow Right",
     "value": 771,
     "names": {
@@ -2167,8 +2167,8 @@
       ]
     }
   },
-  "arrowUp": {
-    "constant": "arrowUp",
+  "ArrowUp": {
+    "name": "ArrowUp",
     "english": "Arrow Up",
     "value": 772,
     "names": {
@@ -2212,8 +2212,8 @@
       ]
     }
   },
-  "end": {
-    "constant": "end",
+  "End": {
+    "name": "End",
     "english": "End",
     "value": 773,
     "names": {
@@ -2257,8 +2257,8 @@
       ]
     }
   },
-  "home": {
-    "constant": "home",
+  "Home": {
+    "name": "Home",
     "english": "Home",
     "value": 774,
     "names": {
@@ -2302,8 +2302,8 @@
       ]
     }
   },
-  "pageDown": {
-    "constant": "pageDown",
+  "PageDown": {
+    "name": "PageDown",
     "english": "Page Down",
     "value": 775,
     "names": {
@@ -2347,8 +2347,8 @@
       ]
     }
   },
-  "pageUp": {
-    "constant": "pageUp",
+  "PageUp": {
+    "name": "PageUp",
     "english": "Page Up",
     "value": 776,
     "names": {
@@ -2392,8 +2392,8 @@
       ]
     }
   },
-  "clear": {
-    "constant": "clear",
+  "Clear": {
+    "name": "Clear",
     "english": "Clear",
     "value": 1025,
     "names": {
@@ -2425,8 +2425,8 @@
       ]
     }
   },
-  "copy": {
-    "constant": "copy",
+  "Copy": {
+    "name": "Copy",
     "english": "Copy",
     "value": 1026,
     "names": {
@@ -2454,8 +2454,8 @@
       ]
     }
   },
-  "crSel": {
-    "constant": "crSel",
+  "CrSel": {
+    "name": "CrSel",
     "english": "Cr Sel",
     "value": 1027,
     "names": {
@@ -2469,8 +2469,8 @@
       ]
     }
   },
-  "cut": {
-    "constant": "cut",
+  "Cut": {
+    "name": "Cut",
     "english": "Cut",
     "value": 1028,
     "names": {
@@ -2496,8 +2496,8 @@
       ]
     }
   },
-  "eraseEof": {
-    "constant": "eraseEof",
+  "EraseEof": {
+    "name": "EraseEof",
     "english": "Erase Eof",
     "value": 1029,
     "names": {
@@ -2517,8 +2517,8 @@
       ]
     }
   },
-  "exSel": {
-    "constant": "exSel",
+  "ExSel": {
+    "name": "ExSel",
     "english": "Ex Sel",
     "value": 1030,
     "names": {
@@ -2538,8 +2538,8 @@
       ]
     }
   },
-  "insert": {
-    "constant": "insert",
+  "Insert": {
+    "name": "Insert",
     "english": "Insert",
     "value": 1031,
     "names": {
@@ -2583,8 +2583,8 @@
       ]
     }
   },
-  "paste": {
-    "constant": "paste",
+  "Paste": {
+    "name": "Paste",
     "english": "Paste",
     "value": 1032,
     "names": {
@@ -2610,8 +2610,8 @@
       ]
     }
   },
-  "redo": {
-    "constant": "redo",
+  "Redo": {
+    "name": "Redo",
     "english": "Redo",
     "value": 1033,
     "names": {
@@ -2631,8 +2631,8 @@
       ]
     }
   },
-  "undo": {
-    "constant": "undo",
+  "Undo": {
+    "name": "Undo",
     "english": "Undo",
     "value": 1034,
     "names": {
@@ -2652,8 +2652,8 @@
       ]
     }
   },
-  "accept": {
-    "constant": "accept",
+  "Accept": {
+    "name": "Accept",
     "english": "Accept",
     "value": 1281,
     "names": {
@@ -2673,8 +2673,8 @@
       ]
     }
   },
-  "again": {
-    "constant": "again",
+  "Again": {
+    "name": "Again",
     "english": "Again",
     "value": 1282,
     "names": {
@@ -2688,8 +2688,8 @@
       ]
     }
   },
-  "attn": {
-    "constant": "attn",
+  "Attn": {
+    "name": "Attn",
     "english": "Attn",
     "value": 1283,
     "names": {
@@ -2715,8 +2715,8 @@
       ]
     }
   },
-  "cancel": {
-    "constant": "cancel",
+  "Cancel": {
+    "name": "Cancel",
     "english": "Cancel",
     "value": 1284,
     "names": {
@@ -2742,8 +2742,8 @@
       ]
     }
   },
-  "contextMenu": {
-    "constant": "contextMenu",
+  "ContextMenu": {
+    "name": "ContextMenu",
     "english": "Context Menu",
     "value": 1285,
     "names": {
@@ -2787,8 +2787,8 @@
       ]
     }
   },
-  "execute": {
-    "constant": "execute",
+  "Execute": {
+    "name": "Execute",
     "english": "Execute",
     "value": 1286,
     "names": {
@@ -2814,8 +2814,8 @@
       ]
     }
   },
-  "find": {
-    "constant": "find",
+  "Find": {
+    "name": "Find",
     "english": "Find",
     "value": 1287,
     "names": {
@@ -2835,8 +2835,8 @@
       ]
     }
   },
-  "help": {
-    "constant": "help",
+  "Help": {
+    "name": "Help",
     "english": "Help",
     "value": 1288,
     "names": {
@@ -2868,8 +2868,8 @@
       ]
     }
   },
-  "pause": {
-    "constant": "pause",
+  "Pause": {
+    "name": "Pause",
     "english": "Pause",
     "value": 1289,
     "names": {
@@ -2901,8 +2901,8 @@
       ]
     }
   },
-  "play": {
-    "constant": "play",
+  "Play": {
+    "name": "Play",
     "english": "Play",
     "value": 1290,
     "names": {
@@ -2922,8 +2922,8 @@
       ]
     }
   },
-  "props": {
-    "constant": "props",
+  "Props": {
+    "name": "Props",
     "english": "Props",
     "value": 1291,
     "names": {
@@ -2937,8 +2937,8 @@
       ]
     }
   },
-  "select": {
-    "constant": "select",
+  "Select": {
+    "name": "Select",
     "english": "Select",
     "value": 1292,
     "names": {
@@ -2970,8 +2970,8 @@
       ]
     }
   },
-  "zoomIn": {
-    "constant": "zoomIn",
+  "ZoomIn": {
+    "name": "ZoomIn",
     "english": "Zoom In",
     "value": 1293,
     "names": {
@@ -2997,8 +2997,8 @@
       ]
     }
   },
-  "zoomOut": {
-    "constant": "zoomOut",
+  "ZoomOut": {
+    "name": "ZoomOut",
     "english": "Zoom Out",
     "value": 1294,
     "names": {
@@ -3024,8 +3024,8 @@
       ]
     }
   },
-  "brightnessDown": {
-    "constant": "brightnessDown",
+  "BrightnessDown": {
+    "name": "BrightnessDown",
     "english": "Brightness Down",
     "value": 1537,
     "names": {
@@ -3051,8 +3051,8 @@
       ]
     }
   },
-  "brightnessUp": {
-    "constant": "brightnessUp",
+  "BrightnessUp": {
+    "name": "BrightnessUp",
     "english": "Brightness Up",
     "value": 1538,
     "names": {
@@ -3078,8 +3078,8 @@
       ]
     }
   },
-  "camera": {
-    "constant": "camera",
+  "Camera": {
+    "name": "Camera",
     "english": "Camera",
     "value": 1539,
     "names": {
@@ -3099,8 +3099,8 @@
       ]
     }
   },
-  "eject": {
-    "constant": "eject",
+  "Eject": {
+    "name": "Eject",
     "english": "Eject",
     "value": 1540,
     "names": {
@@ -3126,8 +3126,8 @@
       ]
     }
   },
-  "logOff": {
-    "constant": "logOff",
+  "LogOff": {
+    "name": "LogOff",
     "english": "Log Off",
     "value": 1541,
     "names": {
@@ -3147,8 +3147,8 @@
       ]
     }
   },
-  "power": {
-    "constant": "power",
+  "Power": {
+    "name": "Power",
     "english": "Power",
     "value": 1542,
     "names": {
@@ -3168,8 +3168,8 @@
       ]
     }
   },
-  "powerOff": {
-    "constant": "powerOff",
+  "PowerOff": {
+    "name": "PowerOff",
     "english": "Power Off",
     "value": 1543,
     "names": {
@@ -3189,8 +3189,8 @@
       ]
     }
   },
-  "printScreen": {
-    "constant": "printScreen",
+  "PrintScreen": {
+    "name": "PrintScreen",
     "english": "Print Screen",
     "value": 1544,
     "names": {
@@ -3216,8 +3216,8 @@
       ]
     }
   },
-  "hibernate": {
-    "constant": "hibernate",
+  "Hibernate": {
+    "name": "Hibernate",
     "english": "Hibernate",
     "value": 1545,
     "names": {
@@ -3231,8 +3231,8 @@
       ]
     }
   },
-  "standby": {
-    "constant": "standby",
+  "Standby": {
+    "name": "Standby",
     "english": "Standby",
     "value": 1546,
     "names": {
@@ -3252,8 +3252,8 @@
       ]
     }
   },
-  "wakeUp": {
-    "constant": "wakeUp",
+  "WakeUp": {
+    "name": "WakeUp",
     "english": "Wake Up",
     "value": 1547,
     "names": {
@@ -3279,8 +3279,8 @@
       ]
     }
   },
-  "allCandidates": {
-    "constant": "allCandidates",
+  "AllCandidates": {
+    "name": "AllCandidates",
     "english": "All Candidates",
     "value": 1793,
     "names": {
@@ -3294,8 +3294,8 @@
       ]
     }
   },
-  "alphanumeric": {
-    "constant": "alphanumeric",
+  "Alphanumeric": {
+    "name": "Alphanumeric",
     "english": "Alphanumeric",
     "value": 1794,
     "names": {
@@ -3309,8 +3309,8 @@
       ]
     }
   },
-  "codeInput": {
-    "constant": "codeInput",
+  "CodeInput": {
+    "name": "CodeInput",
     "english": "Code Input",
     "value": 1795,
     "names": {
@@ -3330,8 +3330,8 @@
       ]
     }
   },
-  "compose": {
-    "constant": "compose",
+  "Compose": {
+    "name": "Compose",
     "english": "Compose",
     "value": 1796,
     "names": {
@@ -3345,8 +3345,8 @@
       ]
     }
   },
-  "convert": {
-    "constant": "convert",
+  "Convert": {
+    "name": "Convert",
     "english": "Convert",
     "value": 1797,
     "names": {
@@ -3372,8 +3372,8 @@
       ]
     }
   },
-  "finalMode": {
-    "constant": "finalMode",
+  "FinalMode": {
+    "name": "FinalMode",
     "english": "Final Mode",
     "value": 1798,
     "names": {
@@ -3387,8 +3387,8 @@
       ]
     }
   },
-  "groupFirst": {
-    "constant": "groupFirst",
+  "GroupFirst": {
+    "name": "GroupFirst",
     "english": "Group First",
     "value": 1799,
     "names": {
@@ -3408,8 +3408,8 @@
       ]
     }
   },
-  "groupLast": {
-    "constant": "groupLast",
+  "GroupLast": {
+    "name": "GroupLast",
     "english": "Group Last",
     "value": 1800,
     "names": {
@@ -3429,8 +3429,8 @@
       ]
     }
   },
-  "groupNext": {
-    "constant": "groupNext",
+  "GroupNext": {
+    "name": "GroupNext",
     "english": "Group Next",
     "value": 1801,
     "names": {
@@ -3456,8 +3456,8 @@
       ]
     }
   },
-  "groupPrevious": {
-    "constant": "groupPrevious",
+  "GroupPrevious": {
+    "name": "GroupPrevious",
     "english": "Group Previous",
     "value": 1802,
     "names": {
@@ -3477,8 +3477,8 @@
       ]
     }
   },
-  "modeChange": {
-    "constant": "modeChange",
+  "ModeChange": {
+    "name": "ModeChange",
     "english": "Mode Change",
     "value": 1803,
     "names": {
@@ -3510,8 +3510,8 @@
       ]
     }
   },
-  "nextCandidate": {
-    "constant": "nextCandidate",
+  "NextCandidate": {
+    "name": "NextCandidate",
     "english": "Next Candidate",
     "value": 1804,
     "names": {
@@ -3525,8 +3525,8 @@
       ]
     }
   },
-  "nonConvert": {
-    "constant": "nonConvert",
+  "NonConvert": {
+    "name": "NonConvert",
     "english": "Non Convert",
     "value": 1805,
     "names": {
@@ -3546,8 +3546,8 @@
       ]
     }
   },
-  "previousCandidate": {
-    "constant": "previousCandidate",
+  "PreviousCandidate": {
+    "name": "PreviousCandidate",
     "english": "Previous Candidate",
     "value": 1806,
     "names": {
@@ -3567,8 +3567,8 @@
       ]
     }
   },
-  "process": {
-    "constant": "process",
+  "Process": {
+    "name": "Process",
     "english": "Process",
     "value": 1807,
     "names": {
@@ -3582,8 +3582,8 @@
       ]
     }
   },
-  "singleCandidate": {
-    "constant": "singleCandidate",
+  "SingleCandidate": {
+    "name": "SingleCandidate",
     "english": "Single Candidate",
     "value": 1808,
     "names": {
@@ -3603,8 +3603,8 @@
       ]
     }
   },
-  "hangulMode": {
-    "constant": "hangulMode",
+  "HangulMode": {
+    "name": "HangulMode",
     "english": "Hangul Mode",
     "value": 1809,
     "names": {
@@ -3624,8 +3624,8 @@
       ]
     }
   },
-  "hanjaMode": {
-    "constant": "hanjaMode",
+  "HanjaMode": {
+    "name": "HanjaMode",
     "english": "Hanja Mode",
     "value": 1810,
     "names": {
@@ -3645,8 +3645,8 @@
       ]
     }
   },
-  "junjaMode": {
-    "constant": "junjaMode",
+  "JunjaMode": {
+    "name": "JunjaMode",
     "english": "Junja Mode",
     "value": 1811,
     "names": {
@@ -3660,8 +3660,8 @@
       ]
     }
   },
-  "eisu": {
-    "constant": "eisu",
+  "Eisu": {
+    "name": "Eisu",
     "english": "Eisu",
     "value": 1812,
     "names": {
@@ -3687,8 +3687,8 @@
       ]
     }
   },
-  "hankaku": {
-    "constant": "hankaku",
+  "Hankaku": {
+    "name": "Hankaku",
     "english": "Hankaku",
     "value": 1813,
     "names": {
@@ -3708,8 +3708,8 @@
       ]
     }
   },
-  "hiragana": {
-    "constant": "hiragana",
+  "Hiragana": {
+    "name": "Hiragana",
     "english": "Hiragana",
     "value": 1814,
     "names": {
@@ -3729,8 +3729,8 @@
       ]
     }
   },
-  "hiraganaKatakana": {
-    "constant": "hiraganaKatakana",
+  "HiraganaKatakana": {
+    "name": "HiraganaKatakana",
     "english": "Hiragana Katakana",
     "value": 1815,
     "names": {
@@ -3756,8 +3756,8 @@
       ]
     }
   },
-  "kanaMode": {
-    "constant": "kanaMode",
+  "KanaMode": {
+    "name": "KanaMode",
     "english": "Kana Mode",
     "value": 1816,
     "names": {
@@ -3777,8 +3777,8 @@
       ]
     }
   },
-  "kanjiMode": {
-    "constant": "kanjiMode",
+  "KanjiMode": {
+    "name": "KanjiMode",
     "english": "Kanji Mode",
     "value": 1817,
     "names": {
@@ -3804,8 +3804,8 @@
       ]
     }
   },
-  "katakana": {
-    "constant": "katakana",
+  "Katakana": {
+    "name": "Katakana",
     "english": "Katakana",
     "value": 1818,
     "names": {
@@ -3825,8 +3825,8 @@
       ]
     }
   },
-  "romaji": {
-    "constant": "romaji",
+  "Romaji": {
+    "name": "Romaji",
     "english": "Romaji",
     "value": 1819,
     "names": {
@@ -3846,8 +3846,8 @@
       ]
     }
   },
-  "zenkaku": {
-    "constant": "zenkaku",
+  "Zenkaku": {
+    "name": "Zenkaku",
     "english": "Zenkaku",
     "value": 1820,
     "names": {
@@ -3867,8 +3867,8 @@
       ]
     }
   },
-  "zenkakuHankaku": {
-    "constant": "zenkakuHankaku",
+  "ZenkakuHankaku": {
+    "name": "ZenkakuHankaku",
     "english": "Zenkaku Hankaku",
     "value": 1821,
     "names": {
@@ -3894,8 +3894,8 @@
       ]
     }
   },
-  "f1": {
-    "constant": "f1",
+  "F1": {
+    "name": "F1",
     "english": "F1",
     "value": 2049,
     "names": {
@@ -3941,8 +3941,8 @@
       ]
     }
   },
-  "f2": {
-    "constant": "f2",
+  "F2": {
+    "name": "F2",
     "english": "F2",
     "value": 2050,
     "names": {
@@ -3988,8 +3988,8 @@
       ]
     }
   },
-  "f3": {
-    "constant": "f3",
+  "F3": {
+    "name": "F3",
     "english": "F3",
     "value": 2051,
     "names": {
@@ -4035,8 +4035,8 @@
       ]
     }
   },
-  "f4": {
-    "constant": "f4",
+  "F4": {
+    "name": "F4",
     "english": "F4",
     "value": 2052,
     "names": {
@@ -4082,8 +4082,8 @@
       ]
     }
   },
-  "f5": {
-    "constant": "f5",
+  "F5": {
+    "name": "F5",
     "english": "F5",
     "value": 2053,
     "names": {
@@ -4127,8 +4127,8 @@
       ]
     }
   },
-  "f6": {
-    "constant": "f6",
+  "F6": {
+    "name": "F6",
     "english": "F6",
     "value": 2054,
     "names": {
@@ -4172,8 +4172,8 @@
       ]
     }
   },
-  "f7": {
-    "constant": "f7",
+  "F7": {
+    "name": "F7",
     "english": "F7",
     "value": 2055,
     "names": {
@@ -4217,8 +4217,8 @@
       ]
     }
   },
-  "f8": {
-    "constant": "f8",
+  "F8": {
+    "name": "F8",
     "english": "F8",
     "value": 2056,
     "names": {
@@ -4262,8 +4262,8 @@
       ]
     }
   },
-  "f9": {
-    "constant": "f9",
+  "F9": {
+    "name": "F9",
     "english": "F9",
     "value": 2057,
     "names": {
@@ -4307,8 +4307,8 @@
       ]
     }
   },
-  "f10": {
-    "constant": "f10",
+  "F10": {
+    "name": "F10",
     "english": "F10",
     "value": 2058,
     "names": {
@@ -4352,8 +4352,8 @@
       ]
     }
   },
-  "f11": {
-    "constant": "f11",
+  "F11": {
+    "name": "F11",
     "english": "F11",
     "value": 2059,
     "names": {
@@ -4397,8 +4397,8 @@
       ]
     }
   },
-  "f12": {
-    "constant": "f12",
+  "F12": {
+    "name": "F12",
     "english": "F12",
     "value": 2060,
     "names": {
@@ -4442,8 +4442,8 @@
       ]
     }
   },
-  "f13": {
-    "constant": "f13",
+  "F13": {
+    "name": "F13",
     "english": "F13",
     "value": 2061,
     "names": {
@@ -4481,8 +4481,8 @@
       ]
     }
   },
-  "f14": {
-    "constant": "f14",
+  "F14": {
+    "name": "F14",
     "english": "F14",
     "value": 2062,
     "names": {
@@ -4520,8 +4520,8 @@
       ]
     }
   },
-  "f15": {
-    "constant": "f15",
+  "F15": {
+    "name": "F15",
     "english": "F15",
     "value": 2063,
     "names": {
@@ -4559,8 +4559,8 @@
       ]
     }
   },
-  "f16": {
-    "constant": "f16",
+  "F16": {
+    "name": "F16",
     "english": "F16",
     "value": 2064,
     "names": {
@@ -4598,8 +4598,8 @@
       ]
     }
   },
-  "f17": {
-    "constant": "f17",
+  "F17": {
+    "name": "F17",
     "english": "F17",
     "value": 2065,
     "names": {
@@ -4637,8 +4637,8 @@
       ]
     }
   },
-  "f18": {
-    "constant": "f18",
+  "F18": {
+    "name": "F18",
     "english": "F18",
     "value": 2066,
     "names": {
@@ -4676,8 +4676,8 @@
       ]
     }
   },
-  "f19": {
-    "constant": "f19",
+  "F19": {
+    "name": "F19",
     "english": "F19",
     "value": 2067,
     "names": {
@@ -4715,8 +4715,8 @@
       ]
     }
   },
-  "f20": {
-    "constant": "f20",
+  "F20": {
+    "name": "F20",
     "english": "F20",
     "value": 2068,
     "names": {
@@ -4754,8 +4754,8 @@
       ]
     }
   },
-  "f21": {
-    "constant": "f21",
+  "F21": {
+    "name": "F21",
     "english": "F21",
     "value": 2069,
     "names": {
@@ -4781,8 +4781,8 @@
       ]
     }
   },
-  "f22": {
-    "constant": "f22",
+  "F22": {
+    "name": "F22",
     "english": "F22",
     "value": 2070,
     "names": {
@@ -4808,8 +4808,8 @@
       ]
     }
   },
-  "f23": {
-    "constant": "f23",
+  "F23": {
+    "name": "F23",
     "english": "F23",
     "value": 2071,
     "names": {
@@ -4835,8 +4835,8 @@
       ]
     }
   },
-  "f24": {
-    "constant": "f24",
+  "F24": {
+    "name": "F24",
     "english": "F24",
     "value": 2072,
     "names": {
@@ -4862,8 +4862,8 @@
       ]
     }
   },
-  "soft1": {
-    "constant": "soft1",
+  "Soft1": {
+    "name": "Soft1",
     "english": "Soft 1",
     "value": 2305,
     "names": {
@@ -4877,8 +4877,8 @@
       ]
     }
   },
-  "soft2": {
-    "constant": "soft2",
+  "Soft2": {
+    "name": "Soft2",
     "english": "Soft 2",
     "value": 2306,
     "names": {
@@ -4892,8 +4892,8 @@
       ]
     }
   },
-  "soft3": {
-    "constant": "soft3",
+  "Soft3": {
+    "name": "Soft3",
     "english": "Soft 3",
     "value": 2307,
     "names": {
@@ -4907,8 +4907,8 @@
       ]
     }
   },
-  "soft4": {
-    "constant": "soft4",
+  "Soft4": {
+    "name": "Soft4",
     "english": "Soft 4",
     "value": 2308,
     "names": {
@@ -4922,8 +4922,8 @@
       ]
     }
   },
-  "soft5": {
-    "constant": "soft5",
+  "Soft5": {
+    "name": "Soft5",
     "english": "Soft 5",
     "value": 2309,
     "names": {
@@ -4937,8 +4937,8 @@
       ]
     }
   },
-  "soft6": {
-    "constant": "soft6",
+  "Soft6": {
+    "name": "Soft6",
     "english": "Soft 6",
     "value": 2310,
     "names": {
@@ -4952,8 +4952,8 @@
       ]
     }
   },
-  "soft7": {
-    "constant": "soft7",
+  "Soft7": {
+    "name": "Soft7",
     "english": "Soft 7",
     "value": 2311,
     "names": {
@@ -4967,8 +4967,8 @@
       ]
     }
   },
-  "soft8": {
-    "constant": "soft8",
+  "Soft8": {
+    "name": "Soft8",
     "english": "Soft 8",
     "value": 2312,
     "names": {
@@ -4982,8 +4982,8 @@
       ]
     }
   },
-  "close": {
-    "constant": "close",
+  "Close": {
+    "name": "Close",
     "english": "Close",
     "value": 2561,
     "names": {
@@ -5009,8 +5009,8 @@
       ]
     }
   },
-  "mailForward": {
-    "constant": "mailForward",
+  "MailForward": {
+    "name": "MailForward",
     "english": "Mail Forward",
     "value": 2562,
     "names": {
@@ -5030,8 +5030,8 @@
       ]
     }
   },
-  "mailReply": {
-    "constant": "mailReply",
+  "MailReply": {
+    "name": "MailReply",
     "english": "Mail Reply",
     "value": 2563,
     "names": {
@@ -5051,8 +5051,8 @@
       ]
     }
   },
-  "mailSend": {
-    "constant": "mailSend",
+  "MailSend": {
+    "name": "MailSend",
     "english": "Mail Send",
     "value": 2564,
     "names": {
@@ -5072,8 +5072,8 @@
       ]
     }
   },
-  "mediaPlayPause": {
-    "constant": "mediaPlayPause",
+  "MediaPlayPause": {
+    "name": "MediaPlayPause",
     "english": "Media Play Pause",
     "value": 2565,
     "names": {
@@ -5099,8 +5099,8 @@
       ]
     }
   },
-  "mediaStop": {
-    "constant": "mediaStop",
+  "MediaStop": {
+    "name": "MediaStop",
     "english": "Media Stop",
     "value": 2567,
     "names": {
@@ -5132,8 +5132,8 @@
       ]
     }
   },
-  "mediaTrackNext": {
-    "constant": "mediaTrackNext",
+  "MediaTrackNext": {
+    "name": "MediaTrackNext",
     "english": "Media Track Next",
     "value": 2568,
     "names": {
@@ -5159,8 +5159,8 @@
       ]
     }
   },
-  "mediaTrackPrevious": {
-    "constant": "mediaTrackPrevious",
+  "MediaTrackPrevious": {
+    "name": "MediaTrackPrevious",
     "english": "Media Track Previous",
     "value": 2569,
     "names": {
@@ -5186,8 +5186,8 @@
       ]
     }
   },
-  "newKey": {
-    "constant": "newKey",
+  "New": {
+    "name": "New",
     "english": "New",
     "value": 2570,
     "names": {
@@ -5207,8 +5207,8 @@
       ]
     }
   },
-  "open": {
-    "constant": "open",
+  "Open": {
+    "name": "Open",
     "english": "Open",
     "value": 2571,
     "names": {
@@ -5228,8 +5228,8 @@
       ]
     }
   },
-  "print": {
-    "constant": "print",
+  "Print": {
+    "name": "Print",
     "english": "Print",
     "value": 2572,
     "names": {
@@ -5255,8 +5255,8 @@
       ]
     }
   },
-  "save": {
-    "constant": "save",
+  "Save": {
+    "name": "Save",
     "english": "Save",
     "value": 2573,
     "names": {
@@ -5276,8 +5276,8 @@
       ]
     }
   },
-  "spellCheck": {
-    "constant": "spellCheck",
+  "SpellCheck": {
+    "name": "SpellCheck",
     "english": "Spell Check",
     "value": 2574,
     "names": {
@@ -5297,8 +5297,8 @@
       ]
     }
   },
-  "audioVolumeDown": {
-    "constant": "audioVolumeDown",
+  "AudioVolumeDown": {
+    "name": "AudioVolumeDown",
     "english": "Audio Volume Down",
     "value": 2575,
     "names": {
@@ -5342,8 +5342,8 @@
       ]
     }
   },
-  "audioVolumeUp": {
-    "constant": "audioVolumeUp",
+  "AudioVolumeUp": {
+    "name": "AudioVolumeUp",
     "english": "Audio Volume Up",
     "value": 2576,
     "names": {
@@ -5387,8 +5387,8 @@
       ]
     }
   },
-  "audioVolumeMute": {
-    "constant": "audioVolumeMute",
+  "AudioVolumeMute": {
+    "name": "AudioVolumeMute",
     "english": "Audio Volume Mute",
     "value": 2577,
     "names": {
@@ -5432,8 +5432,8 @@
       ]
     }
   },
-  "launchApplication2": {
-    "constant": "launchApplication2",
+  "LaunchApplication2": {
+    "name": "LaunchApplication2",
     "english": "Launch Application 2",
     "value": 2817,
     "names": {
@@ -5447,8 +5447,8 @@
       ]
     }
   },
-  "launchCalendar": {
-    "constant": "launchCalendar",
+  "LaunchCalendar": {
+    "name": "LaunchCalendar",
     "english": "Launch Calendar",
     "value": 2818,
     "names": {
@@ -5474,8 +5474,8 @@
       ]
     }
   },
-  "launchMail": {
-    "constant": "launchMail",
+  "LaunchMail": {
+    "name": "LaunchMail",
     "english": "Launch Mail",
     "value": 2819,
     "names": {
@@ -5507,8 +5507,8 @@
       ]
     }
   },
-  "launchMediaPlayer": {
-    "constant": "launchMediaPlayer",
+  "LaunchMediaPlayer": {
+    "name": "LaunchMediaPlayer",
     "english": "Launch Media Player",
     "value": 2820,
     "names": {
@@ -5522,8 +5522,8 @@
       ]
     }
   },
-  "launchMusicPlayer": {
-    "constant": "launchMusicPlayer",
+  "LaunchMusicPlayer": {
+    "name": "LaunchMusicPlayer",
     "english": "Launch Music Player",
     "value": 2821,
     "names": {
@@ -5543,8 +5543,8 @@
       ]
     }
   },
-  "launchApplication1": {
-    "constant": "launchApplication1",
+  "LaunchApplication1": {
+    "name": "LaunchApplication1",
     "english": "Launch Application 1",
     "value": 2822,
     "names": {
@@ -5558,8 +5558,8 @@
       ]
     }
   },
-  "launchScreenSaver": {
-    "constant": "launchScreenSaver",
+  "LaunchScreenSaver": {
+    "name": "LaunchScreenSaver",
     "english": "Launch Screen Saver",
     "value": 2823,
     "names": {
@@ -5579,8 +5579,8 @@
       ]
     }
   },
-  "launchSpreadsheet": {
-    "constant": "launchSpreadsheet",
+  "LaunchSpreadsheet": {
+    "name": "LaunchSpreadsheet",
     "english": "Launch Spreadsheet",
     "value": 2824,
     "names": {
@@ -5594,8 +5594,8 @@
       ]
     }
   },
-  "launchWebBrowser": {
-    "constant": "launchWebBrowser",
+  "LaunchWebBrowser": {
+    "name": "LaunchWebBrowser",
     "english": "Launch Web Browser",
     "value": 2825,
     "names": {
@@ -5615,8 +5615,8 @@
       ]
     }
   },
-  "launchWebCam": {
-    "constant": "launchWebCam",
+  "LaunchWebCam": {
+    "name": "LaunchWebCam",
     "english": "Launch Web Cam",
     "value": 2826,
     "names": {
@@ -5630,8 +5630,8 @@
       ]
     }
   },
-  "launchWordProcessor": {
-    "constant": "launchWordProcessor",
+  "LaunchWordProcessor": {
+    "name": "LaunchWordProcessor",
     "english": "Launch Word Processor",
     "value": 2827,
     "names": {
@@ -5645,8 +5645,8 @@
       ]
     }
   },
-  "launchContacts": {
-    "constant": "launchContacts",
+  "LaunchContacts": {
+    "name": "LaunchContacts",
     "english": "Launch Contacts",
     "value": 2828,
     "names": {
@@ -5666,8 +5666,8 @@
       ]
     }
   },
-  "launchPhone": {
-    "constant": "launchPhone",
+  "LaunchPhone": {
+    "name": "LaunchPhone",
     "english": "Launch Phone",
     "value": 2829,
     "names": {
@@ -5687,8 +5687,8 @@
       ]
     }
   },
-  "launchAssistant": {
-    "constant": "launchAssistant",
+  "LaunchAssistant": {
+    "name": "LaunchAssistant",
     "english": "Launch Assistant",
     "value": 2830,
     "names": {
@@ -5708,8 +5708,8 @@
       ]
     }
   },
-  "launchControlPanel": {
-    "constant": "launchControlPanel",
+  "LaunchControlPanel": {
+    "name": "LaunchControlPanel",
     "english": "Launch Control Panel",
     "value": 2831,
     "names": {
@@ -5723,8 +5723,8 @@
       ]
     }
   },
-  "browserBack": {
-    "constant": "browserBack",
+  "BrowserBack": {
+    "name": "BrowserBack",
     "english": "Browser Back",
     "value": 3073,
     "names": {
@@ -5750,8 +5750,8 @@
       ]
     }
   },
-  "browserFavorites": {
-    "constant": "browserFavorites",
+  "BrowserFavorites": {
+    "name": "BrowserFavorites",
     "english": "Browser Favorites",
     "value": 3074,
     "names": {
@@ -5783,8 +5783,8 @@
       ]
     }
   },
-  "browserForward": {
-    "constant": "browserForward",
+  "BrowserForward": {
+    "name": "BrowserForward",
     "english": "Browser Forward",
     "value": 3075,
     "names": {
@@ -5816,8 +5816,8 @@
       ]
     }
   },
-  "browserHome": {
-    "constant": "browserHome",
+  "BrowserHome": {
+    "name": "BrowserHome",
     "english": "Browser Home",
     "value": 3076,
     "names": {
@@ -5843,8 +5843,8 @@
       ]
     }
   },
-  "browserRefresh": {
-    "constant": "browserRefresh",
+  "BrowserRefresh": {
+    "name": "BrowserRefresh",
     "english": "Browser Refresh",
     "value": 3077,
     "names": {
@@ -5870,8 +5870,8 @@
       ]
     }
   },
-  "browserSearch": {
-    "constant": "browserSearch",
+  "BrowserSearch": {
+    "name": "BrowserSearch",
     "english": "Browser Search",
     "value": 3078,
     "names": {
@@ -5903,8 +5903,8 @@
       ]
     }
   },
-  "browserStop": {
-    "constant": "browserStop",
+  "BrowserStop": {
+    "name": "BrowserStop",
     "english": "Browser Stop",
     "value": 3079,
     "names": {
@@ -5930,8 +5930,8 @@
       ]
     }
   },
-  "audioBalanceLeft": {
-    "constant": "audioBalanceLeft",
+  "AudioBalanceLeft": {
+    "name": "AudioBalanceLeft",
     "english": "Audio Balance Left",
     "value": 3329,
     "names": {
@@ -5945,8 +5945,8 @@
       ]
     }
   },
-  "audioBalanceRight": {
-    "constant": "audioBalanceRight",
+  "AudioBalanceRight": {
+    "name": "AudioBalanceRight",
     "english": "Audio Balance Right",
     "value": 3330,
     "names": {
@@ -5960,8 +5960,8 @@
       ]
     }
   },
-  "audioBassBoostDown": {
-    "constant": "audioBassBoostDown",
+  "AudioBassBoostDown": {
+    "name": "AudioBassBoostDown",
     "english": "Audio Bass Boost Down",
     "value": 3331,
     "names": {
@@ -5975,8 +5975,8 @@
       ]
     }
   },
-  "audioBassBoostUp": {
-    "constant": "audioBassBoostUp",
+  "AudioBassBoostUp": {
+    "name": "AudioBassBoostUp",
     "english": "Audio Bass Boost Up",
     "value": 3332,
     "names": {
@@ -5990,8 +5990,8 @@
       ]
     }
   },
-  "audioFaderFront": {
-    "constant": "audioFaderFront",
+  "AudioFaderFront": {
+    "name": "AudioFaderFront",
     "english": "Audio Fader Front",
     "value": 3333,
     "names": {
@@ -6005,8 +6005,8 @@
       ]
     }
   },
-  "audioFaderRear": {
-    "constant": "audioFaderRear",
+  "AudioFaderRear": {
+    "name": "AudioFaderRear",
     "english": "Audio Fader Rear",
     "value": 3334,
     "names": {
@@ -6020,8 +6020,8 @@
       ]
     }
   },
-  "audioSurroundModeNext": {
-    "constant": "audioSurroundModeNext",
+  "AudioSurroundModeNext": {
+    "name": "AudioSurroundModeNext",
     "english": "Audio Surround Mode Next",
     "value": 3335,
     "names": {
@@ -6035,8 +6035,8 @@
       ]
     }
   },
-  "avrInput": {
-    "constant": "avrInput",
+  "AVRInput": {
+    "name": "AVRInput",
     "english": "AVR Input",
     "value": 3336,
     "names": {
@@ -6056,8 +6056,8 @@
       ]
     }
   },
-  "avrPower": {
-    "constant": "avrPower",
+  "AVRPower": {
+    "name": "AVRPower",
     "english": "AVR Power",
     "value": 3337,
     "names": {
@@ -6077,8 +6077,8 @@
       ]
     }
   },
-  "channelDown": {
-    "constant": "channelDown",
+  "ChannelDown": {
+    "name": "ChannelDown",
     "english": "Channel Down",
     "value": 3338,
     "names": {
@@ -6098,8 +6098,8 @@
       ]
     }
   },
-  "channelUp": {
-    "constant": "channelUp",
+  "ChannelUp": {
+    "name": "ChannelUp",
     "english": "Channel Up",
     "value": 3339,
     "names": {
@@ -6119,8 +6119,8 @@
       ]
     }
   },
-  "colorF0Red": {
-    "constant": "colorF0Red",
+  "ColorF0Red": {
+    "name": "ColorF0Red",
     "english": "Color F0 Red",
     "value": 3340,
     "names": {
@@ -6140,8 +6140,8 @@
       ]
     }
   },
-  "colorF1Green": {
-    "constant": "colorF1Green",
+  "ColorF1Green": {
+    "name": "ColorF1Green",
     "english": "Color F1 Green",
     "value": 3341,
     "names": {
@@ -6161,8 +6161,8 @@
       ]
     }
   },
-  "colorF2Yellow": {
-    "constant": "colorF2Yellow",
+  "ColorF2Yellow": {
+    "name": "ColorF2Yellow",
     "english": "Color F2 Yellow",
     "value": 3342,
     "names": {
@@ -6182,8 +6182,8 @@
       ]
     }
   },
-  "colorF3Blue": {
-    "constant": "colorF3Blue",
+  "ColorF3Blue": {
+    "name": "ColorF3Blue",
     "english": "Color F3 Blue",
     "value": 3343,
     "names": {
@@ -6203,8 +6203,8 @@
       ]
     }
   },
-  "colorF4Grey": {
-    "constant": "colorF4Grey",
+  "ColorF4Grey": {
+    "name": "ColorF4Grey",
     "english": "Color F4 Grey",
     "value": 3344,
     "names": {
@@ -6218,8 +6218,8 @@
       ]
     }
   },
-  "colorF5Brown": {
-    "constant": "colorF5Brown",
+  "ColorF5Brown": {
+    "name": "ColorF5Brown",
     "english": "Color F5 Brown",
     "value": 3345,
     "names": {
@@ -6233,8 +6233,8 @@
       ]
     }
   },
-  "closedCaptionToggle": {
-    "constant": "closedCaptionToggle",
+  "ClosedCaptionToggle": {
+    "name": "ClosedCaptionToggle",
     "english": "Closed Caption Toggle",
     "value": 3346,
     "names": {
@@ -6254,8 +6254,8 @@
       ]
     }
   },
-  "dimmer": {
-    "constant": "dimmer",
+  "Dimmer": {
+    "name": "Dimmer",
     "english": "Dimmer",
     "value": 3347,
     "names": {
@@ -6269,8 +6269,8 @@
       ]
     }
   },
-  "displaySwap": {
-    "constant": "displaySwap",
+  "DisplaySwap": {
+    "name": "DisplaySwap",
     "english": "Display Swap",
     "value": 3348,
     "names": {
@@ -6284,8 +6284,8 @@
       ]
     }
   },
-  "exit": {
-    "constant": "exit",
+  "Exit": {
+    "name": "Exit",
     "english": "Exit",
     "value": 3349,
     "names": {
@@ -6299,8 +6299,8 @@
       ]
     }
   },
-  "favoriteClear0": {
-    "constant": "favoriteClear0",
+  "FavoriteClear0": {
+    "name": "FavoriteClear0",
     "english": "Favorite Clear 0",
     "value": 3350,
     "names": {
@@ -6314,8 +6314,8 @@
       ]
     }
   },
-  "favoriteClear1": {
-    "constant": "favoriteClear1",
+  "FavoriteClear1": {
+    "name": "FavoriteClear1",
     "english": "Favorite Clear 1",
     "value": 3351,
     "names": {
@@ -6329,8 +6329,8 @@
       ]
     }
   },
-  "favoriteClear2": {
-    "constant": "favoriteClear2",
+  "FavoriteClear2": {
+    "name": "FavoriteClear2",
     "english": "Favorite Clear 2",
     "value": 3352,
     "names": {
@@ -6344,8 +6344,8 @@
       ]
     }
   },
-  "favoriteClear3": {
-    "constant": "favoriteClear3",
+  "FavoriteClear3": {
+    "name": "FavoriteClear3",
     "english": "Favorite Clear 3",
     "value": 3353,
     "names": {
@@ -6359,8 +6359,8 @@
       ]
     }
   },
-  "favoriteRecall0": {
-    "constant": "favoriteRecall0",
+  "FavoriteRecall0": {
+    "name": "FavoriteRecall0",
     "english": "Favorite Recall 0",
     "value": 3354,
     "names": {
@@ -6374,8 +6374,8 @@
       ]
     }
   },
-  "favoriteRecall1": {
-    "constant": "favoriteRecall1",
+  "FavoriteRecall1": {
+    "name": "FavoriteRecall1",
     "english": "Favorite Recall 1",
     "value": 3355,
     "names": {
@@ -6389,8 +6389,8 @@
       ]
     }
   },
-  "favoriteRecall2": {
-    "constant": "favoriteRecall2",
+  "FavoriteRecall2": {
+    "name": "FavoriteRecall2",
     "english": "Favorite Recall 2",
     "value": 3356,
     "names": {
@@ -6404,8 +6404,8 @@
       ]
     }
   },
-  "favoriteRecall3": {
-    "constant": "favoriteRecall3",
+  "FavoriteRecall3": {
+    "name": "FavoriteRecall3",
     "english": "Favorite Recall 3",
     "value": 3357,
     "names": {
@@ -6419,8 +6419,8 @@
       ]
     }
   },
-  "favoriteStore0": {
-    "constant": "favoriteStore0",
+  "FavoriteStore0": {
+    "name": "FavoriteStore0",
     "english": "Favorite Store 0",
     "value": 3358,
     "names": {
@@ -6434,8 +6434,8 @@
       ]
     }
   },
-  "favoriteStore1": {
-    "constant": "favoriteStore1",
+  "FavoriteStore1": {
+    "name": "FavoriteStore1",
     "english": "Favorite Store 1",
     "value": 3359,
     "names": {
@@ -6449,8 +6449,8 @@
       ]
     }
   },
-  "favoriteStore2": {
-    "constant": "favoriteStore2",
+  "FavoriteStore2": {
+    "name": "FavoriteStore2",
     "english": "Favorite Store 2",
     "value": 3360,
     "names": {
@@ -6464,8 +6464,8 @@
       ]
     }
   },
-  "favoriteStore3": {
-    "constant": "favoriteStore3",
+  "FavoriteStore3": {
+    "name": "FavoriteStore3",
     "english": "Favorite Store 3",
     "value": 3361,
     "names": {
@@ -6479,8 +6479,8 @@
       ]
     }
   },
-  "guide": {
-    "constant": "guide",
+  "Guide": {
+    "name": "Guide",
     "english": "Guide",
     "value": 3362,
     "names": {
@@ -6500,8 +6500,8 @@
       ]
     }
   },
-  "guideNextDay": {
-    "constant": "guideNextDay",
+  "GuideNextDay": {
+    "name": "GuideNextDay",
     "english": "Guide Next Day",
     "value": 3363,
     "names": {
@@ -6515,8 +6515,8 @@
       ]
     }
   },
-  "guidePreviousDay": {
-    "constant": "guidePreviousDay",
+  "GuidePreviousDay": {
+    "name": "GuidePreviousDay",
     "english": "Guide Previous Day",
     "value": 3364,
     "names": {
@@ -6530,8 +6530,8 @@
       ]
     }
   },
-  "info": {
-    "constant": "info",
+  "Info": {
+    "name": "Info",
     "english": "Info",
     "value": 3365,
     "names": {
@@ -6551,8 +6551,8 @@
       ]
     }
   },
-  "instantReplay": {
-    "constant": "instantReplay",
+  "InstantReplay": {
+    "name": "InstantReplay",
     "english": "Instant Replay",
     "value": 3366,
     "names": {
@@ -6566,8 +6566,8 @@
       ]
     }
   },
-  "link": {
-    "constant": "link",
+  "Link": {
+    "name": "Link",
     "english": "Link",
     "value": 3367,
     "names": {
@@ -6581,8 +6581,8 @@
       ]
     }
   },
-  "listProgram": {
-    "constant": "listProgram",
+  "ListProgram": {
+    "name": "ListProgram",
     "english": "List Program",
     "value": 3368,
     "names": {
@@ -6596,8 +6596,8 @@
       ]
     }
   },
-  "liveContent": {
-    "constant": "liveContent",
+  "LiveContent": {
+    "name": "LiveContent",
     "english": "Live Content",
     "value": 3369,
     "names": {
@@ -6611,8 +6611,8 @@
       ]
     }
   },
-  "lock": {
-    "constant": "lock",
+  "Lock": {
+    "name": "Lock",
     "english": "Lock",
     "value": 3370,
     "names": {
@@ -6626,8 +6626,8 @@
       ]
     }
   },
-  "mediaApps": {
-    "constant": "mediaApps",
+  "MediaApps": {
+    "name": "MediaApps",
     "english": "Media Apps",
     "value": 3371,
     "names": {
@@ -6641,8 +6641,8 @@
       ]
     }
   },
-  "mediaFastForward": {
-    "constant": "mediaFastForward",
+  "MediaFastForward": {
+    "name": "MediaFastForward",
     "english": "Media Fast Forward",
     "value": 3372,
     "names": {
@@ -6668,8 +6668,8 @@
       ]
     }
   },
-  "mediaLast": {
-    "constant": "mediaLast",
+  "MediaLast": {
+    "name": "MediaLast",
     "english": "Media Last",
     "value": 3373,
     "names": {
@@ -6689,8 +6689,8 @@
       ]
     }
   },
-  "mediaPause": {
-    "constant": "mediaPause",
+  "MediaPause": {
+    "name": "MediaPause",
     "english": "Media Pause",
     "value": 3374,
     "names": {
@@ -6716,8 +6716,8 @@
       ]
     }
   },
-  "mediaPlay": {
-    "constant": "mediaPlay",
+  "MediaPlay": {
+    "name": "MediaPlay",
     "english": "Media Play",
     "value": 3375,
     "names": {
@@ -6745,8 +6745,8 @@
       ]
     }
   },
-  "mediaRecord": {
-    "constant": "mediaRecord",
+  "MediaRecord": {
+    "name": "MediaRecord",
     "english": "Media Record",
     "value": 3376,
     "names": {
@@ -6772,8 +6772,8 @@
       ]
     }
   },
-  "mediaRewind": {
-    "constant": "mediaRewind",
+  "MediaRewind": {
+    "name": "MediaRewind",
     "english": "Media Rewind",
     "value": 3377,
     "names": {
@@ -6799,8 +6799,8 @@
       ]
     }
   },
-  "mediaSkip": {
-    "constant": "mediaSkip",
+  "MediaSkip": {
+    "name": "MediaSkip",
     "english": "Media Skip",
     "value": 3378,
     "names": {
@@ -6814,8 +6814,8 @@
       ]
     }
   },
-  "nextFavoriteChannel": {
-    "constant": "nextFavoriteChannel",
+  "NextFavoriteChannel": {
+    "name": "NextFavoriteChannel",
     "english": "Next Favorite Channel",
     "value": 3379,
     "names": {
@@ -6829,8 +6829,8 @@
       ]
     }
   },
-  "nextUserProfile": {
-    "constant": "nextUserProfile",
+  "NextUserProfile": {
+    "name": "NextUserProfile",
     "english": "Next User Profile",
     "value": 3380,
     "names": {
@@ -6844,8 +6844,8 @@
       ]
     }
   },
-  "onDemand": {
-    "constant": "onDemand",
+  "OnDemand": {
+    "name": "OnDemand",
     "english": "On Demand",
     "value": 3381,
     "names": {
@@ -6859,13 +6859,13 @@
       ]
     }
   },
-  "pInPDown": {
-    "constant": "pInPDown",
+  "PInPDown": {
+    "name": "PInPDown",
     "english": "P In P Down",
     "value": 3382,
     "names": {
       "web": [
-        "PinPDown"
+        "PInPDown"
       ]
     },
     "values": {
@@ -6874,13 +6874,13 @@
       ]
     }
   },
-  "pInPMove": {
-    "constant": "pInPMove",
+  "PInPMove": {
+    "name": "PInPMove",
     "english": "P In P Move",
     "value": 3383,
     "names": {
       "web": [
-        "PinPMove"
+        "PInPMove"
       ]
     },
     "values": {
@@ -6889,13 +6889,13 @@
       ]
     }
   },
-  "pInPToggle": {
-    "constant": "pInPToggle",
+  "PInPToggle": {
+    "name": "PInPToggle",
     "english": "P In P Toggle",
     "value": 3384,
     "names": {
       "web": [
-        "PinPToggle"
+        "PInPToggle"
       ]
     },
     "values": {
@@ -6904,13 +6904,13 @@
       ]
     }
   },
-  "pInPUp": {
-    "constant": "pInPUp",
+  "PInPUp": {
+    "name": "PInPUp",
     "english": "P In P Up",
     "value": 3385,
     "names": {
       "web": [
-        "PinPUp"
+        "PInPUp"
       ]
     },
     "values": {
@@ -6919,8 +6919,8 @@
       ]
     }
   },
-  "playSpeedDown": {
-    "constant": "playSpeedDown",
+  "PlaySpeedDown": {
+    "name": "PlaySpeedDown",
     "english": "Play Speed Down",
     "value": 3386,
     "names": {
@@ -6934,8 +6934,8 @@
       ]
     }
   },
-  "playSpeedReset": {
-    "constant": "playSpeedReset",
+  "PlaySpeedReset": {
+    "name": "PlaySpeedReset",
     "english": "Play Speed Reset",
     "value": 3387,
     "names": {
@@ -6949,8 +6949,8 @@
       ]
     }
   },
-  "playSpeedUp": {
-    "constant": "playSpeedUp",
+  "PlaySpeedUp": {
+    "name": "PlaySpeedUp",
     "english": "Play Speed Up",
     "value": 3388,
     "names": {
@@ -6964,8 +6964,8 @@
       ]
     }
   },
-  "randomToggle": {
-    "constant": "randomToggle",
+  "RandomToggle": {
+    "name": "RandomToggle",
     "english": "Random Toggle",
     "value": 3389,
     "names": {
@@ -6979,8 +6979,8 @@
       ]
     }
   },
-  "rcLowBattery": {
-    "constant": "rcLowBattery",
+  "RcLowBattery": {
+    "name": "RcLowBattery",
     "english": "Rc Low Battery",
     "value": 3390,
     "names": {
@@ -6994,8 +6994,8 @@
       ]
     }
   },
-  "recordSpeedNext": {
-    "constant": "recordSpeedNext",
+  "RecordSpeedNext": {
+    "name": "RecordSpeedNext",
     "english": "Record Speed Next",
     "value": 3391,
     "names": {
@@ -7009,8 +7009,8 @@
       ]
     }
   },
-  "rfBypass": {
-    "constant": "rfBypass",
+  "RfBypass": {
+    "name": "RfBypass",
     "english": "Rf Bypass",
     "value": 3392,
     "names": {
@@ -7024,8 +7024,8 @@
       ]
     }
   },
-  "scanChannelsToggle": {
-    "constant": "scanChannelsToggle",
+  "ScanChannelsToggle": {
+    "name": "ScanChannelsToggle",
     "english": "Scan Channels Toggle",
     "value": 3393,
     "names": {
@@ -7039,8 +7039,8 @@
       ]
     }
   },
-  "screenModeNext": {
-    "constant": "screenModeNext",
+  "ScreenModeNext": {
+    "name": "ScreenModeNext",
     "english": "Screen Mode Next",
     "value": 3394,
     "names": {
@@ -7054,8 +7054,8 @@
       ]
     }
   },
-  "settings": {
-    "constant": "settings",
+  "Settings": {
+    "name": "Settings",
     "english": "Settings",
     "value": 3395,
     "names": {
@@ -7075,8 +7075,8 @@
       ]
     }
   },
-  "splitScreenToggle": {
-    "constant": "splitScreenToggle",
+  "SplitScreenToggle": {
+    "name": "SplitScreenToggle",
     "english": "Split Screen Toggle",
     "value": 3396,
     "names": {
@@ -7090,8 +7090,8 @@
       ]
     }
   },
-  "stbInput": {
-    "constant": "stbInput",
+  "STBInput": {
+    "name": "STBInput",
     "english": "STB Input",
     "value": 3397,
     "names": {
@@ -7111,8 +7111,8 @@
       ]
     }
   },
-  "stbPower": {
-    "constant": "stbPower",
+  "STBPower": {
+    "name": "STBPower",
     "english": "STB Power",
     "value": 3398,
     "names": {
@@ -7132,8 +7132,8 @@
       ]
     }
   },
-  "subtitle": {
-    "constant": "subtitle",
+  "Subtitle": {
+    "name": "Subtitle",
     "english": "Subtitle",
     "value": 3399,
     "names": {
@@ -7147,8 +7147,8 @@
       ]
     }
   },
-  "teletext": {
-    "constant": "teletext",
+  "Teletext": {
+    "name": "Teletext",
     "english": "Teletext",
     "value": 3400,
     "names": {
@@ -7168,8 +7168,8 @@
       ]
     }
   },
-  "tv": {
-    "constant": "tv",
+  "TV": {
+    "name": "TV",
     "english": "TV",
     "value": 3401,
     "names": {
@@ -7189,8 +7189,8 @@
       ]
     }
   },
-  "tvInput": {
-    "constant": "tvInput",
+  "TVInput": {
+    "name": "TVInput",
     "english": "TV Input",
     "value": 3402,
     "names": {
@@ -7210,8 +7210,8 @@
       ]
     }
   },
-  "tvPower": {
-    "constant": "tvPower",
+  "TVPower": {
+    "name": "TVPower",
     "english": "TV Power",
     "value": 3403,
     "names": {
@@ -7231,8 +7231,8 @@
       ]
     }
   },
-  "videoModeNext": {
-    "constant": "videoModeNext",
+  "VideoModeNext": {
+    "name": "VideoModeNext",
     "english": "Video Mode Next",
     "value": 3404,
     "names": {
@@ -7246,8 +7246,8 @@
       ]
     }
   },
-  "wink": {
-    "constant": "wink",
+  "Wink": {
+    "name": "Wink",
     "english": "Wink",
     "value": 3405,
     "names": {
@@ -7261,8 +7261,8 @@
       ]
     }
   },
-  "zoomToggle": {
-    "constant": "zoomToggle",
+  "ZoomToggle": {
+    "name": "ZoomToggle",
     "english": "Zoom Toggle",
     "value": 3406,
     "names": {
@@ -7282,8 +7282,8 @@
       ]
     }
   },
-  "dvr": {
-    "constant": "dvr",
+  "DVR": {
+    "name": "DVR",
     "english": "DVR",
     "value": 3407,
     "names": {
@@ -7303,8 +7303,8 @@
       ]
     }
   },
-  "mediaAudioTrack": {
-    "constant": "mediaAudioTrack",
+  "MediaAudioTrack": {
+    "name": "MediaAudioTrack",
     "english": "Media Audio Track",
     "value": 3408,
     "names": {
@@ -7324,8 +7324,8 @@
       ]
     }
   },
-  "mediaSkipBackward": {
-    "constant": "mediaSkipBackward",
+  "MediaSkipBackward": {
+    "name": "MediaSkipBackward",
     "english": "Media Skip Backward",
     "value": 3409,
     "names": {
@@ -7345,8 +7345,8 @@
       ]
     }
   },
-  "mediaSkipForward": {
-    "constant": "mediaSkipForward",
+  "MediaSkipForward": {
+    "name": "MediaSkipForward",
     "english": "Media Skip Forward",
     "value": 3410,
     "names": {
@@ -7366,8 +7366,8 @@
       ]
     }
   },
-  "mediaStepBackward": {
-    "constant": "mediaStepBackward",
+  "MediaStepBackward": {
+    "name": "MediaStepBackward",
     "english": "Media Step Backward",
     "value": 3411,
     "names": {
@@ -7387,8 +7387,8 @@
       ]
     }
   },
-  "mediaStepForward": {
-    "constant": "mediaStepForward",
+  "MediaStepForward": {
+    "name": "MediaStepForward",
     "english": "Media Step Forward",
     "value": 3412,
     "names": {
@@ -7408,8 +7408,8 @@
       ]
     }
   },
-  "mediaTopMenu": {
-    "constant": "mediaTopMenu",
+  "MediaTopMenu": {
+    "name": "MediaTopMenu",
     "english": "Media Top Menu",
     "value": 3413,
     "names": {
@@ -7429,8 +7429,8 @@
       ]
     }
   },
-  "navigateIn": {
-    "constant": "navigateIn",
+  "NavigateIn": {
+    "name": "NavigateIn",
     "english": "Navigate In",
     "value": 3414,
     "names": {
@@ -7450,8 +7450,8 @@
       ]
     }
   },
-  "navigateNext": {
-    "constant": "navigateNext",
+  "NavigateNext": {
+    "name": "NavigateNext",
     "english": "Navigate Next",
     "value": 3415,
     "names": {
@@ -7471,8 +7471,8 @@
       ]
     }
   },
-  "navigateOut": {
-    "constant": "navigateOut",
+  "NavigateOut": {
+    "name": "NavigateOut",
     "english": "Navigate Out",
     "value": 3416,
     "names": {
@@ -7492,8 +7492,8 @@
       ]
     }
   },
-  "navigatePrevious": {
-    "constant": "navigatePrevious",
+  "NavigatePrevious": {
+    "name": "NavigatePrevious",
     "english": "Navigate Previous",
     "value": 3417,
     "names": {
@@ -7513,8 +7513,8 @@
       ]
     }
   },
-  "pairing": {
-    "constant": "pairing",
+  "Pairing": {
+    "name": "Pairing",
     "english": "Pairing",
     "value": 3418,
     "names": {
@@ -7534,8 +7534,8 @@
       ]
     }
   },
-  "mediaClose": {
-    "constant": "mediaClose",
+  "MediaClose": {
+    "name": "MediaClose",
     "english": "Media Close",
     "value": 3419,
     "names": {
@@ -7549,8 +7549,8 @@
       ]
     }
   },
-  "audioBassBoostToggle": {
-    "constant": "audioBassBoostToggle",
+  "AudioBassBoostToggle": {
+    "name": "AudioBassBoostToggle",
     "english": "Audio Bass Boost Toggle",
     "value": 3586,
     "names": {
@@ -7564,8 +7564,8 @@
       ]
     }
   },
-  "audioTrebleDown": {
-    "constant": "audioTrebleDown",
+  "AudioTrebleDown": {
+    "name": "AudioTrebleDown",
     "english": "Audio Treble Down",
     "value": 3588,
     "names": {
@@ -7579,8 +7579,8 @@
       ]
     }
   },
-  "audioTrebleUp": {
-    "constant": "audioTrebleUp",
+  "AudioTrebleUp": {
+    "name": "AudioTrebleUp",
     "english": "Audio Treble Up",
     "value": 3589,
     "names": {
@@ -7594,8 +7594,8 @@
       ]
     }
   },
-  "microphoneToggle": {
-    "constant": "microphoneToggle",
+  "MicrophoneToggle": {
+    "name": "MicrophoneToggle",
     "english": "Microphone Toggle",
     "value": 3590,
     "names": {
@@ -7609,8 +7609,8 @@
       ]
     }
   },
-  "microphoneVolumeDown": {
-    "constant": "microphoneVolumeDown",
+  "MicrophoneVolumeDown": {
+    "name": "MicrophoneVolumeDown",
     "english": "Microphone Volume Down",
     "value": 3591,
     "names": {
@@ -7624,8 +7624,8 @@
       ]
     }
   },
-  "microphoneVolumeUp": {
-    "constant": "microphoneVolumeUp",
+  "MicrophoneVolumeUp": {
+    "name": "MicrophoneVolumeUp",
     "english": "Microphone Volume Up",
     "value": 3592,
     "names": {
@@ -7639,8 +7639,8 @@
       ]
     }
   },
-  "microphoneVolumeMute": {
-    "constant": "microphoneVolumeMute",
+  "MicrophoneVolumeMute": {
+    "name": "MicrophoneVolumeMute",
     "english": "Microphone Volume Mute",
     "value": 3593,
     "names": {
@@ -7660,8 +7660,8 @@
       ]
     }
   },
-  "speechCorrectionList": {
-    "constant": "speechCorrectionList",
+  "SpeechCorrectionList": {
+    "name": "SpeechCorrectionList",
     "english": "Speech Correction List",
     "value": 3841,
     "names": {
@@ -7675,8 +7675,8 @@
       ]
     }
   },
-  "speechInputToggle": {
-    "constant": "speechInputToggle",
+  "SpeechInputToggle": {
+    "name": "SpeechInputToggle",
     "english": "Speech Input Toggle",
     "value": 3842,
     "names": {
@@ -7690,8 +7690,8 @@
       ]
     }
   },
-  "appSwitch": {
-    "constant": "appSwitch",
+  "AppSwitch": {
+    "name": "AppSwitch",
     "english": "App Switch",
     "value": 4097,
     "names": {
@@ -7711,8 +7711,8 @@
       ]
     }
   },
-  "call": {
-    "constant": "call",
+  "Call": {
+    "name": "Call",
     "english": "Call",
     "value": 4098,
     "names": {
@@ -7732,8 +7732,8 @@
       ]
     }
   },
-  "cameraFocus": {
-    "constant": "cameraFocus",
+  "CameraFocus": {
+    "name": "CameraFocus",
     "english": "Camera Focus",
     "value": 4099,
     "names": {
@@ -7753,8 +7753,8 @@
       ]
     }
   },
-  "endCall": {
-    "constant": "endCall",
+  "EndCall": {
+    "name": "EndCall",
     "english": "End Call",
     "value": 4100,
     "names": {
@@ -7774,8 +7774,8 @@
       ]
     }
   },
-  "goBack": {
-    "constant": "goBack",
+  "GoBack": {
+    "name": "GoBack",
     "english": "Go Back",
     "value": 4101,
     "names": {
@@ -7795,8 +7795,8 @@
       ]
     }
   },
-  "goHome": {
-    "constant": "goHome",
+  "GoHome": {
+    "name": "GoHome",
     "english": "Go Home",
     "value": 4102,
     "names": {
@@ -7816,8 +7816,8 @@
       ]
     }
   },
-  "headsetHook": {
-    "constant": "headsetHook",
+  "HeadsetHook": {
+    "name": "HeadsetHook",
     "english": "Headset Hook",
     "value": 4103,
     "names": {
@@ -7837,8 +7837,8 @@
       ]
     }
   },
-  "lastNumberRedial": {
-    "constant": "lastNumberRedial",
+  "LastNumberRedial": {
+    "name": "LastNumberRedial",
     "english": "Last Number Redial",
     "value": 4104,
     "names": {
@@ -7852,8 +7852,8 @@
       ]
     }
   },
-  "notification": {
-    "constant": "notification",
+  "Notification": {
+    "name": "Notification",
     "english": "Notification",
     "value": 4105,
     "names": {
@@ -7873,8 +7873,8 @@
       ]
     }
   },
-  "mannerMode": {
-    "constant": "mannerMode",
+  "MannerMode": {
+    "name": "MannerMode",
     "english": "Manner Mode",
     "value": 4106,
     "names": {
@@ -7894,8 +7894,8 @@
       ]
     }
   },
-  "voiceDial": {
-    "constant": "voiceDial",
+  "VoiceDial": {
+    "name": "VoiceDial",
     "english": "Voice Dial",
     "value": 4107,
     "names": {
@@ -7909,8 +7909,8 @@
       ]
     }
   },
-  "tV3DMode": {
-    "constant": "tV3DMode",
+  "TV3DMode": {
+    "name": "TV3DMode",
     "english": "TV 3 D Mode",
     "value": 4353,
     "names": {
@@ -7924,8 +7924,8 @@
       ]
     }
   },
-  "tvAntennaCable": {
-    "constant": "tvAntennaCable",
+  "TVAntennaCable": {
+    "name": "TVAntennaCable",
     "english": "TV Antenna Cable",
     "value": 4354,
     "names": {
@@ -7945,8 +7945,8 @@
       ]
     }
   },
-  "tvAudioDescription": {
-    "constant": "tvAudioDescription",
+  "TVAudioDescription": {
+    "name": "TVAudioDescription",
     "english": "TV Audio Description",
     "value": 4355,
     "names": {
@@ -7966,8 +7966,8 @@
       ]
     }
   },
-  "tvAudioDescriptionMixDown": {
-    "constant": "tvAudioDescriptionMixDown",
+  "TVAudioDescriptionMixDown": {
+    "name": "TVAudioDescriptionMixDown",
     "english": "TV Audio Description Mix Down",
     "value": 4356,
     "names": {
@@ -7987,8 +7987,8 @@
       ]
     }
   },
-  "tvAudioDescriptionMixUp": {
-    "constant": "tvAudioDescriptionMixUp",
+  "TVAudioDescriptionMixUp": {
+    "name": "TVAudioDescriptionMixUp",
     "english": "TV Audio Description Mix Up",
     "value": 4357,
     "names": {
@@ -8008,8 +8008,8 @@
       ]
     }
   },
-  "tvContentsMenu": {
-    "constant": "tvContentsMenu",
+  "TVContentsMenu": {
+    "name": "TVContentsMenu",
     "english": "TV Contents Menu",
     "value": 4358,
     "names": {
@@ -8029,8 +8029,8 @@
       ]
     }
   },
-  "tvDataService": {
-    "constant": "tvDataService",
+  "TVDataService": {
+    "name": "TVDataService",
     "english": "TV Data Service",
     "value": 4359,
     "names": {
@@ -8050,8 +8050,8 @@
       ]
     }
   },
-  "tvInputComponent1": {
-    "constant": "tvInputComponent1",
+  "TVInputComponent1": {
+    "name": "TVInputComponent1",
     "english": "TV Input Component 1",
     "value": 4360,
     "names": {
@@ -8071,8 +8071,8 @@
       ]
     }
   },
-  "tvInputComponent2": {
-    "constant": "tvInputComponent2",
+  "TVInputComponent2": {
+    "name": "TVInputComponent2",
     "english": "TV Input Component 2",
     "value": 4361,
     "names": {
@@ -8092,8 +8092,8 @@
       ]
     }
   },
-  "tvInputComposite1": {
-    "constant": "tvInputComposite1",
+  "TVInputComposite1": {
+    "name": "TVInputComposite1",
     "english": "TV Input Composite 1",
     "value": 4362,
     "names": {
@@ -8113,8 +8113,8 @@
       ]
     }
   },
-  "tvInputComposite2": {
-    "constant": "tvInputComposite2",
+  "TVInputComposite2": {
+    "name": "TVInputComposite2",
     "english": "TV Input Composite 2",
     "value": 4363,
     "names": {
@@ -8134,8 +8134,8 @@
       ]
     }
   },
-  "tvInputHDMI1": {
-    "constant": "tvInputHDMI1",
+  "TVInputHDMI1": {
+    "name": "TVInputHDMI1",
     "english": "TV Input HDMI 1",
     "value": 4364,
     "names": {
@@ -8149,8 +8149,8 @@
       ]
     }
   },
-  "tvInputHDMI2": {
-    "constant": "tvInputHDMI2",
+  "TVInputHDMI2": {
+    "name": "TVInputHDMI2",
     "english": "TV Input HDMI 2",
     "value": 4365,
     "names": {
@@ -8164,8 +8164,8 @@
       ]
     }
   },
-  "tvInputHDMI3": {
-    "constant": "tvInputHDMI3",
+  "TVInputHDMI3": {
+    "name": "TVInputHDMI3",
     "english": "TV Input HDMI 3",
     "value": 4366,
     "names": {
@@ -8179,8 +8179,8 @@
       ]
     }
   },
-  "tvInputHDMI4": {
-    "constant": "tvInputHDMI4",
+  "TVInputHDMI4": {
+    "name": "TVInputHDMI4",
     "english": "TV Input HDMI 4",
     "value": 4367,
     "names": {
@@ -8194,8 +8194,8 @@
       ]
     }
   },
-  "tvInputVGA1": {
-    "constant": "tvInputVGA1",
+  "TVInputVGA1": {
+    "name": "TVInputVGA1",
     "english": "TV Input VGA 1",
     "value": 4368,
     "names": {
@@ -8209,8 +8209,8 @@
       ]
     }
   },
-  "tvMediaContext": {
-    "constant": "tvMediaContext",
+  "TVMediaContext": {
+    "name": "TVMediaContext",
     "english": "TV Media Context",
     "value": 4369,
     "names": {
@@ -8224,8 +8224,8 @@
       ]
     }
   },
-  "tvNetwork": {
-    "constant": "tvNetwork",
+  "TVNetwork": {
+    "name": "TVNetwork",
     "english": "TV Network",
     "value": 4370,
     "names": {
@@ -8245,8 +8245,8 @@
       ]
     }
   },
-  "tvNumberEntry": {
-    "constant": "tvNumberEntry",
+  "TVNumberEntry": {
+    "name": "TVNumberEntry",
     "english": "TV Number Entry",
     "value": 4371,
     "names": {
@@ -8266,8 +8266,8 @@
       ]
     }
   },
-  "tvRadioService": {
-    "constant": "tvRadioService",
+  "TVRadioService": {
+    "name": "TVRadioService",
     "english": "TV Radio Service",
     "value": 4372,
     "names": {
@@ -8287,8 +8287,8 @@
       ]
     }
   },
-  "tvSatellite": {
-    "constant": "tvSatellite",
+  "TVSatellite": {
+    "name": "TVSatellite",
     "english": "TV Satellite",
     "value": 4373,
     "names": {
@@ -8308,8 +8308,8 @@
       ]
     }
   },
-  "tvSatelliteBS": {
-    "constant": "tvSatelliteBS",
+  "TVSatelliteBS": {
+    "name": "TVSatelliteBS",
     "english": "TV Satellite BS",
     "value": 4374,
     "names": {
@@ -8323,8 +8323,8 @@
       ]
     }
   },
-  "tvSatelliteCS": {
-    "constant": "tvSatelliteCS",
+  "TVSatelliteCS": {
+    "name": "TVSatelliteCS",
     "english": "TV Satellite CS",
     "value": 4375,
     "names": {
@@ -8338,8 +8338,8 @@
       ]
     }
   },
-  "tvSatelliteToggle": {
-    "constant": "tvSatelliteToggle",
+  "TVSatelliteToggle": {
+    "name": "TVSatelliteToggle",
     "english": "TV Satellite Toggle",
     "value": 4376,
     "names": {
@@ -8359,8 +8359,8 @@
       ]
     }
   },
-  "tvTerrestrialAnalog": {
-    "constant": "tvTerrestrialAnalog",
+  "TVTerrestrialAnalog": {
+    "name": "TVTerrestrialAnalog",
     "english": "TV Terrestrial Analog",
     "value": 4377,
     "names": {
@@ -8380,8 +8380,8 @@
       ]
     }
   },
-  "tvTerrestrialDigital": {
-    "constant": "tvTerrestrialDigital",
+  "TVTerrestrialDigital": {
+    "name": "TVTerrestrialDigital",
     "english": "TV Terrestrial Digital",
     "value": 4378,
     "names": {
@@ -8401,8 +8401,8 @@
       ]
     }
   },
-  "tvTimer": {
-    "constant": "tvTimer",
+  "TVTimer": {
+    "name": "TVTimer",
     "english": "TV Timer",
     "value": 4379,
     "names": {
@@ -8422,8 +8422,8 @@
       ]
     }
   },
-  "key11": {
-    "constant": "key11",
+  "Key11": {
+    "name": "Key11",
     "english": "Key 11",
     "value": 4609,
     "names": {
@@ -8437,8 +8437,8 @@
       ]
     }
   },
-  "key12": {
-    "constant": "key12",
+  "Key12": {
+    "name": "Key12",
     "english": "Key 12",
     "value": 4610,
     "names": {
@@ -8452,8 +8452,8 @@
       ]
     }
   },
-  "gameButton1": {
-    "constant": "gameButton1",
+  "GameButton1": {
+    "name": "GameButton1",
     "english": "Game Button 1",
     "value": 392961,
     "names": {
@@ -8473,8 +8473,8 @@
       ]
     }
   },
-  "gameButton2": {
-    "constant": "gameButton2",
+  "GameButton2": {
+    "name": "GameButton2",
     "english": "Game Button 2",
     "value": 392962,
     "names": {
@@ -8494,8 +8494,8 @@
       ]
     }
   },
-  "gameButton3": {
-    "constant": "gameButton3",
+  "GameButton3": {
+    "name": "GameButton3",
     "english": "Game Button 3",
     "value": 392963,
     "names": {
@@ -8515,8 +8515,8 @@
       ]
     }
   },
-  "gameButton4": {
-    "constant": "gameButton4",
+  "GameButton4": {
+    "name": "GameButton4",
     "english": "Game Button 4",
     "value": 392964,
     "names": {
@@ -8536,8 +8536,8 @@
       ]
     }
   },
-  "gameButton5": {
-    "constant": "gameButton5",
+  "GameButton5": {
+    "name": "GameButton5",
     "english": "Game Button 5",
     "value": 392965,
     "names": {
@@ -8557,8 +8557,8 @@
       ]
     }
   },
-  "gameButton6": {
-    "constant": "gameButton6",
+  "GameButton6": {
+    "name": "GameButton6",
     "english": "Game Button 6",
     "value": 392966,
     "names": {
@@ -8578,8 +8578,8 @@
       ]
     }
   },
-  "gameButton7": {
-    "constant": "gameButton7",
+  "GameButton7": {
+    "name": "GameButton7",
     "english": "Game Button 7",
     "value": 392967,
     "names": {
@@ -8599,8 +8599,8 @@
       ]
     }
   },
-  "gameButton8": {
-    "constant": "gameButton8",
+  "GameButton8": {
+    "name": "GameButton8",
     "english": "Game Button 8",
     "value": 392968,
     "names": {
@@ -8626,8 +8626,8 @@
       ]
     }
   },
-  "gameButton9": {
-    "constant": "gameButton9",
+  "GameButton9": {
+    "name": "GameButton9",
     "english": "Game Button 9",
     "value": 392969,
     "names": {
@@ -8653,8 +8653,8 @@
       ]
     }
   },
-  "gameButton10": {
-    "constant": "gameButton10",
+  "GameButton10": {
+    "name": "GameButton10",
     "english": "Game Button 10",
     "value": 392970,
     "names": {
@@ -8680,8 +8680,8 @@
       ]
     }
   },
-  "gameButton11": {
-    "constant": "gameButton11",
+  "GameButton11": {
+    "name": "GameButton11",
     "english": "Game Button 11",
     "value": 392971,
     "names": {
@@ -8707,8 +8707,8 @@
       ]
     }
   },
-  "gameButton12": {
-    "constant": "gameButton12",
+  "GameButton12": {
+    "name": "GameButton12",
     "english": "Game Button 12",
     "value": 392972,
     "names": {
@@ -8734,8 +8734,8 @@
       ]
     }
   },
-  "gameButton13": {
-    "constant": "gameButton13",
+  "GameButton13": {
+    "name": "GameButton13",
     "english": "Game Button 13",
     "value": 392973,
     "names": {
@@ -8761,8 +8761,8 @@
       ]
     }
   },
-  "gameButton14": {
-    "constant": "gameButton14",
+  "GameButton14": {
+    "name": "GameButton14",
     "english": "Game Button 14",
     "value": 392974,
     "names": {
@@ -8788,8 +8788,8 @@
       ]
     }
   },
-  "gameButton15": {
-    "constant": "gameButton15",
+  "GameButton15": {
+    "name": "GameButton15",
     "english": "Game Button 15",
     "value": 392975,
     "names": {
@@ -8815,8 +8815,8 @@
       ]
     }
   },
-  "gameButton16": {
-    "constant": "gameButton16",
+  "GameButton16": {
+    "name": "GameButton16",
     "english": "Game Button 16",
     "value": 392976,
     "names": {
@@ -8842,8 +8842,8 @@
       ]
     }
   },
-  "gameButtonA": {
-    "constant": "gameButtonA",
+  "GameButtonA": {
+    "name": "GameButtonA",
     "english": "Game Button A",
     "value": 392977,
     "names": {
@@ -8863,8 +8863,8 @@
       ]
     }
   },
-  "gameButtonB": {
-    "constant": "gameButtonB",
+  "GameButtonB": {
+    "name": "GameButtonB",
     "english": "Game Button B",
     "value": 392978,
     "names": {
@@ -8884,8 +8884,8 @@
       ]
     }
   },
-  "gameButtonC": {
-    "constant": "gameButtonC",
+  "GameButtonC": {
+    "name": "GameButtonC",
     "english": "Game Button C",
     "value": 392979,
     "names": {
@@ -8905,8 +8905,8 @@
       ]
     }
   },
-  "gameButtonLeft1": {
-    "constant": "gameButtonLeft1",
+  "GameButtonLeft1": {
+    "name": "GameButtonLeft1",
     "english": "Game Button Left 1",
     "value": 392980,
     "names": {
@@ -8926,8 +8926,8 @@
       ]
     }
   },
-  "gameButtonLeft2": {
-    "constant": "gameButtonLeft2",
+  "GameButtonLeft2": {
+    "name": "GameButtonLeft2",
     "english": "Game Button Left 2",
     "value": 392981,
     "names": {
@@ -8947,8 +8947,8 @@
       ]
     }
   },
-  "gameButtonMode": {
-    "constant": "gameButtonMode",
+  "GameButtonMode": {
+    "name": "GameButtonMode",
     "english": "Game Button Mode",
     "value": 392982,
     "names": {
@@ -8968,8 +8968,8 @@
       ]
     }
   },
-  "gameButtonRight1": {
-    "constant": "gameButtonRight1",
+  "GameButtonRight1": {
+    "name": "GameButtonRight1",
     "english": "Game Button Right 1",
     "value": 392983,
     "names": {
@@ -8989,8 +8989,8 @@
       ]
     }
   },
-  "gameButtonRight2": {
-    "constant": "gameButtonRight2",
+  "GameButtonRight2": {
+    "name": "GameButtonRight2",
     "english": "Game Button Right 2",
     "value": 392984,
     "names": {
@@ -9010,8 +9010,8 @@
       ]
     }
   },
-  "gameButtonSelect": {
-    "constant": "gameButtonSelect",
+  "GameButtonSelect": {
+    "name": "GameButtonSelect",
     "english": "Game Button Select",
     "value": 392985,
     "names": {
@@ -9031,8 +9031,8 @@
       ]
     }
   },
-  "gameButtonStart": {
-    "constant": "gameButtonStart",
+  "GameButtonStart": {
+    "name": "GameButtonStart",
     "english": "Game Button Start",
     "value": 392986,
     "names": {
@@ -9052,8 +9052,8 @@
       ]
     }
   },
-  "gameButtonThumbLeft": {
-    "constant": "gameButtonThumbLeft",
+  "GameButtonThumbLeft": {
+    "name": "GameButtonThumbLeft",
     "english": "Game Button Thumb Left",
     "value": 392987,
     "names": {
@@ -9073,8 +9073,8 @@
       ]
     }
   },
-  "gameButtonThumbRight": {
-    "constant": "gameButtonThumbRight",
+  "GameButtonThumbRight": {
+    "name": "GameButtonThumbRight",
     "english": "Game Button Thumb Right",
     "value": 392988,
     "names": {
@@ -9094,8 +9094,8 @@
       ]
     }
   },
-  "gameButtonX": {
-    "constant": "gameButtonX",
+  "GameButtonX": {
+    "name": "GameButtonX",
     "english": "Game Button X",
     "value": 392989,
     "names": {
@@ -9115,8 +9115,8 @@
       ]
     }
   },
-  "gameButtonY": {
-    "constant": "gameButtonY",
+  "GameButtonY": {
+    "name": "GameButtonY",
     "english": "Game Button Y",
     "value": 392990,
     "names": {
@@ -9136,8 +9136,8 @@
       ]
     }
   },
-  "gameButtonZ": {
-    "constant": "gameButtonZ",
+  "GameButtonZ": {
+    "name": "GameButtonZ",
     "english": "Game Button Z",
     "value": 392991,
     "names": {
@@ -9157,8 +9157,8 @@
       ]
     }
   },
-  "suspend": {
-    "constant": "suspend",
+  "Suspend": {
+    "name": "Suspend",
     "english": "Suspend",
     "value": 4294967316,
     "names": {
@@ -9178,8 +9178,8 @@
       ]
     }
   },
-  "resume": {
-    "constant": "resume",
+  "Resume": {
+    "name": "Resume",
     "english": "Resume",
     "value": 4294967317,
     "names": {
@@ -9193,8 +9193,8 @@
       ]
     }
   },
-  "sleep": {
-    "constant": "sleep",
+  "Sleep": {
+    "name": "Sleep",
     "english": "Sleep",
     "value": 4295032962,
     "names": {
@@ -9226,8 +9226,8 @@
       ]
     }
   },
-  "intlBackslash": {
-    "constant": "intlBackslash",
+  "IntlBackslash": {
+    "name": "IntlBackslash",
     "english": "Intl Backslash",
     "value": 4295426148,
     "names": {
@@ -9241,8 +9241,8 @@
       ]
     }
   },
-  "intlRo": {
-    "constant": "intlRo",
+  "IntlRo": {
+    "name": "IntlRo",
     "english": "Intl Ro",
     "value": 4295426183,
     "names": {
@@ -9274,8 +9274,8 @@
       ]
     }
   },
-  "intlYen": {
-    "constant": "intlYen",
+  "IntlYen": {
+    "name": "IntlYen",
     "english": "Intl Yen",
     "value": 4295426185,
     "names": {
@@ -9313,8 +9313,8 @@
       ]
     }
   },
-  "lang1": {
-    "constant": "lang1",
+  "Lang1": {
+    "name": "Lang1",
     "english": "Lang 1",
     "value": 4295426192,
     "names": {
@@ -9350,8 +9350,8 @@
       ]
     }
   },
-  "lang2": {
-    "constant": "lang2",
+  "Lang2": {
+    "name": "Lang2",
     "english": "Lang 2",
     "value": 4295426193,
     "names": {
@@ -9377,8 +9377,8 @@
       ]
     }
   },
-  "lang3": {
-    "constant": "lang3",
+  "Lang3": {
+    "name": "Lang3",
     "english": "Lang 3",
     "value": 4295426194,
     "names": {
@@ -9398,8 +9398,8 @@
       ]
     }
   },
-  "lang4": {
-    "constant": "lang4",
+  "Lang4": {
+    "name": "Lang4",
     "english": "Lang 4",
     "value": 4295426195,
     "names": {
@@ -9419,8 +9419,8 @@
       ]
     }
   },
-  "lang5": {
-    "constant": "lang5",
+  "Lang5": {
+    "name": "Lang5",
     "english": "Lang 5",
     "value": 4295426196,
     "names": {
@@ -9440,8 +9440,8 @@
       ]
     }
   },
-  "abort": {
-    "constant": "abort",
+  "Abort": {
+    "name": "Abort",
     "english": "Abort",
     "value": 4295426203,
     "names": {
@@ -9455,8 +9455,8 @@
       ]
     }
   },
-  "numpadEnter": {
-    "constant": "numpadEnter",
+  "NumpadEnter": {
+    "name": "NumpadEnter",
     "english": "Numpad Enter",
     "value": 8589934605,
     "names": {
@@ -9488,8 +9488,8 @@
       ]
     }
   },
-  "numpadParenLeft": {
-    "constant": "numpadParenLeft",
+  "NumpadParenLeft": {
+    "name": "NumpadParenLeft",
     "english": "Numpad Paren Left",
     "value": 8589934632,
     "names": {
@@ -9503,8 +9503,8 @@
       ]
     }
   },
-  "numpadParenRight": {
-    "constant": "numpadParenRight",
+  "NumpadParenRight": {
+    "name": "NumpadParenRight",
     "english": "Numpad Paren Right",
     "value": 8589934633,
     "names": {
@@ -9518,8 +9518,8 @@
       ]
     }
   },
-  "numpadMultiply": {
-    "constant": "numpadMultiply",
+  "NumpadMultiply": {
+    "name": "NumpadMultiply",
     "english": "Numpad Multiply",
     "value": 8589934634,
     "names": {
@@ -9557,8 +9557,8 @@
       ]
     }
   },
-  "numpadAdd": {
-    "constant": "numpadAdd",
+  "NumpadAdd": {
+    "name": "NumpadAdd",
     "english": "Numpad Add",
     "value": 8589934635,
     "names": {
@@ -9596,8 +9596,8 @@
       ]
     }
   },
-  "numpadComma": {
-    "constant": "numpadComma",
+  "NumpadComma": {
+    "name": "NumpadComma",
     "english": "Numpad Comma",
     "value": 8589934636,
     "names": {
@@ -9623,8 +9623,8 @@
       ]
     }
   },
-  "numpadSubtract": {
-    "constant": "numpadSubtract",
+  "NumpadSubtract": {
+    "name": "NumpadSubtract",
     "english": "Numpad Subtract",
     "value": 8589934637,
     "names": {
@@ -9662,8 +9662,8 @@
       ]
     }
   },
-  "numpadDecimal": {
-    "constant": "numpadDecimal",
+  "NumpadDecimal": {
+    "name": "NumpadDecimal",
     "english": "Numpad Decimal",
     "value": 8589934638,
     "names": {
@@ -9701,8 +9701,8 @@
       ]
     }
   },
-  "numpadDivide": {
-    "constant": "numpadDivide",
+  "NumpadDivide": {
+    "name": "NumpadDivide",
     "english": "Numpad Divide",
     "value": 8589934639,
     "names": {
@@ -9740,8 +9740,8 @@
       ]
     }
   },
-  "numpad0": {
-    "constant": "numpad0",
+  "Numpad0": {
+    "name": "Numpad0",
     "english": "Numpad 0",
     "value": 8589934640,
     "names": {
@@ -9781,8 +9781,8 @@
       ]
     }
   },
-  "numpad1": {
-    "constant": "numpad1",
+  "Numpad1": {
+    "name": "Numpad1",
     "english": "Numpad 1",
     "value": 8589934641,
     "names": {
@@ -9822,8 +9822,8 @@
       ]
     }
   },
-  "numpad2": {
-    "constant": "numpad2",
+  "Numpad2": {
+    "name": "Numpad2",
     "english": "Numpad 2",
     "value": 8589934642,
     "names": {
@@ -9863,8 +9863,8 @@
       ]
     }
   },
-  "numpad3": {
-    "constant": "numpad3",
+  "Numpad3": {
+    "name": "Numpad3",
     "english": "Numpad 3",
     "value": 8589934643,
     "names": {
@@ -9904,8 +9904,8 @@
       ]
     }
   },
-  "numpad4": {
-    "constant": "numpad4",
+  "Numpad4": {
+    "name": "Numpad4",
     "english": "Numpad 4",
     "value": 8589934644,
     "names": {
@@ -9945,8 +9945,8 @@
       ]
     }
   },
-  "numpad5": {
-    "constant": "numpad5",
+  "Numpad5": {
+    "name": "Numpad5",
     "english": "Numpad 5",
     "value": 8589934645,
     "names": {
@@ -9984,8 +9984,8 @@
       ]
     }
   },
-  "numpad6": {
-    "constant": "numpad6",
+  "Numpad6": {
+    "name": "Numpad6",
     "english": "Numpad 6",
     "value": 8589934646,
     "names": {
@@ -10025,8 +10025,8 @@
       ]
     }
   },
-  "numpad7": {
-    "constant": "numpad7",
+  "Numpad7": {
+    "name": "Numpad7",
     "english": "Numpad 7",
     "value": 8589934647,
     "names": {
@@ -10066,8 +10066,8 @@
       ]
     }
   },
-  "numpad8": {
-    "constant": "numpad8",
+  "Numpad8": {
+    "name": "Numpad8",
     "english": "Numpad 8",
     "value": 8589934648,
     "names": {
@@ -10107,8 +10107,8 @@
       ]
     }
   },
-  "numpad9": {
-    "constant": "numpad9",
+  "Numpad9": {
+    "name": "Numpad9",
     "english": "Numpad 9",
     "value": 8589934649,
     "names": {
@@ -10148,8 +10148,8 @@
       ]
     }
   },
-  "numpadEqual": {
-    "constant": "numpadEqual",
+  "NumpadEqual": {
+    "name": "NumpadEqual",
     "english": "Numpad Equal",
     "value": 8589934653,
     "names": {
@@ -10187,8 +10187,8 @@
       ]
     }
   },
-  "altLeft": {
-    "constant": "altLeft",
+  "AltLeft": {
+    "name": "AltLeft",
     "english": "Alt Left",
     "value": 12884902146,
     "names": {
@@ -10226,8 +10226,8 @@
       ]
     }
   },
-  "controlLeft": {
-    "constant": "controlLeft",
+  "ControlLeft": {
+    "name": "ControlLeft",
     "english": "Control Left",
     "value": 12884902149,
     "names": {
@@ -10267,8 +10267,8 @@
       ]
     }
   },
-  "metaLeft": {
-    "constant": "metaLeft",
+  "MetaLeft": {
+    "name": "MetaLeft",
     "english": "Meta Left",
     "value": 12884902153,
     "names": {
@@ -10306,8 +10306,8 @@
       ]
     }
   },
-  "shiftLeft": {
-    "constant": "shiftLeft",
+  "ShiftLeft": {
+    "name": "ShiftLeft",
     "english": "Shift Left",
     "value": 12884902157,
     "names": {
@@ -10347,8 +10347,8 @@
       ]
     }
   },
-  "altRight": {
-    "constant": "altRight",
+  "AltRight": {
+    "name": "AltRight",
     "english": "Alt Right",
     "value": 17179869442,
     "names": {
@@ -10388,8 +10388,8 @@
       ]
     }
   },
-  "controlRight": {
-    "constant": "controlRight",
+  "ControlRight": {
+    "name": "ControlRight",
     "english": "Control Right",
     "value": 17179869445,
     "names": {
@@ -10427,8 +10427,8 @@
       ]
     }
   },
-  "metaRight": {
-    "constant": "metaRight",
+  "MetaRight": {
+    "name": "MetaRight",
     "english": "Meta Right",
     "value": 17179869449,
     "names": {
@@ -10466,8 +10466,8 @@
       ]
     }
   },
-  "shiftRight": {
-    "constant": "shiftRight",
+  "ShiftRight": {
+    "name": "ShiftRight",
     "english": "Shift Right",
     "value": 17179869453,
     "names": {

@@ -1,12 +1,12 @@
 {
-  "numpad0": "numpadInsert",
-  "numpad1": "numpadEnd",
-  "numpad2": "numpadDown",
-  "numpad3": "numpadPageDown",
-  "numpad4": "numpadLeft",
-  "numpad6": "numpadRight",
-  "numpad7": "numpadHome",
-  "numpad8": "numpadUp",
-  "numpad9": "numpadPageUp",
-  "numpadPeriod": "numpadDelete"
+  "Numpad0": "NumpadInsert",
+  "Numpad1": "NumpadEnd",
+  "Numpad2": "NumpadDown",
+  "Numpad3": "NumpadPageDown",
+  "Numpad4": "NumpadLeft",
+  "Numpad6": "NumpadRight",
+  "Numpad7": "NumpadHome",
+  "Numpad8": "NumpadUp",
+  "Numpad9": "NumpadPageUp",
+  "NumpadPeriod": "NumpadDelete"
 }

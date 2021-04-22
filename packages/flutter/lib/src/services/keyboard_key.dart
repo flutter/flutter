@@ -781,7 +781,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Super" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey superKey = LogicalKeyboardKey(0x0000000010e);
+  static const LogicalKeyboardKey super = LogicalKeyboardKey(0x0000000010e);
 
   /// Represents the logical "Symbol" key on the keyboard.
   ///
@@ -1366,7 +1366,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "New" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey newKey = LogicalKeyboardKey(0x00000000a0a);
+  static const LogicalKeyboardKey new = LogicalKeyboardKey(0x00000000a0a);
 
   /// Represents the logical "Open" key on the keyboard.
   ///
@@ -2574,28 +2574,28 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x201000700e1);
+  static const LogicalKeyboardKey Shift = LogicalKeyboardKey(0x201000700e1);
 
   /// Represents the logical "Meta" key on the keyboard.
   ///
   /// This key represents the union of the keys {metaLeft, metaRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x201000700e3);
+  static const LogicalKeyboardKey Meta = LogicalKeyboardKey(0x201000700e3);
 
   /// Represents the logical "Alt" key on the keyboard.
   ///
   /// This key represents the union of the keys {altLeft, altRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x201000700e2);
+  static const LogicalKeyboardKey Alt = LogicalKeyboardKey(0x201000700e2);
 
   /// Represents the logical "Control" key on the keyboard.
   ///
   /// This key represents the union of the keys {controlLeft, controlRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x201000700e0);
+  static const LogicalKeyboardKey Control = LogicalKeyboardKey(0x201000700e0);
 
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
@@ -2684,7 +2684,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000108: hyper,
     0x000000010a: numLock,
     0x000000010c: scrollLock,
-    0x000000010e: superKey,
+    0x000000010e: super,
     0x000000010f: symbol,
     0x0000000110: symbolLock,
     0x0000000111: shiftLevel5,
@@ -2801,7 +2801,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000a07: mediaStop,
     0x0000000a08: mediaTrackNext,
     0x0000000a09: mediaTrackPrevious,
-    0x0000000a0a: newKey,
+    0x0000000a0a: new,
     0x0000000a0b: open,
     0x0000000a0c: print,
     0x0000000a0d: save,
@@ -3042,22 +3042,22 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0400000105: controlRight,
     0x0400000109: metaRight,
     0x040000010d: shiftRight,
-    0x201000700e1: shift,
-    0x201000700e3: meta,
-    0x201000700e2: alt,
-    0x201000700e0: control,
+    0x201000700e1: Shift,
+    0x201000700e3: Meta,
+    0x201000700e2: Alt,
+    0x201000700e0: Control,
   };
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
   static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
-    shiftLeft: shift,
-    shiftRight: shift,
-    metaLeft: meta,
-    metaRight: meta,
-    altLeft: alt,
-    altRight: alt,
-    controlLeft: control,
-    controlRight: control,
+    shiftLeft: Shift,
+    shiftRight: Shift,
+    metaLeft: Meta,
+    metaRight: Meta,
+    altLeft: Alt,
+    altRight: Alt,
+    controlLeft: Control,
+    controlRight: Control,
   };
 
   static const Map<int, String> _keyLabels = <int, String>{

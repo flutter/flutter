@@ -31,6 +31,9 @@
       "chromium": "Fn"
     },
     "scanCodes": {
+      "android": [
+        464
+      ],
       "usb": 18,
       "macos": 63
     }
@@ -50,6 +53,9 @@
       "chromium": "Suspend"
     },
     "scanCodes": {
+      "android": [
+        205
+      ],
       "usb": 20
     }
   },
@@ -88,6 +94,9 @@
       "chromium": "Sleep"
     },
     "scanCodes": {
+      "android": [
+        142
+      ],
       "usb": 65666,
       "linux": 142,
       "xkb": 150,
@@ -100,6 +109,9 @@
       "chromium": "WakeUp"
     },
     "scanCodes": {
+      "android": [
+        143
+      ],
       "usb": 65667,
       "linux": 143,
       "xkb": 151,
@@ -123,6 +135,10 @@
       "chromium": "GameButton1"
     },
     "scanCodes": {
+      "android": [
+        256,
+        288
+      ],
       "usb": 392961
     }
   },
@@ -132,6 +148,10 @@
       "chromium": "GameButton2"
     },
     "scanCodes": {
+      "android": [
+        257,
+        289
+      ],
       "usb": 392962
     }
   },
@@ -141,6 +161,10 @@
       "chromium": "GameButton3"
     },
     "scanCodes": {
+      "android": [
+        258,
+        290
+      ],
       "usb": 392963
     }
   },
@@ -150,6 +174,10 @@
       "chromium": "GameButton4"
     },
     "scanCodes": {
+      "android": [
+        259,
+        291
+      ],
       "usb": 392964
     }
   },
@@ -159,6 +187,10 @@
       "chromium": "GameButton5"
     },
     "scanCodes": {
+      "android": [
+        260,
+        292
+      ],
       "usb": 392965
     }
   },
@@ -168,6 +200,10 @@
       "chromium": "GameButton6"
     },
     "scanCodes": {
+      "android": [
+        261,
+        293
+      ],
       "usb": 392966
     }
   },
@@ -177,6 +213,10 @@
       "chromium": "GameButton7"
     },
     "scanCodes": {
+      "android": [
+        262,
+        294
+      ],
       "usb": 392967
     }
   },
@@ -186,6 +226,10 @@
       "chromium": "GameButton8"
     },
     "scanCodes": {
+      "android": [
+        263,
+        295
+      ],
       "usb": 392968
     }
   },
@@ -195,6 +239,10 @@
       "chromium": "GameButton9"
     },
     "scanCodes": {
+      "android": [
+        264,
+        296
+      ],
       "usb": 392969
     }
   },
@@ -204,6 +252,10 @@
       "chromium": "GameButton10"
     },
     "scanCodes": {
+      "android": [
+        265,
+        297
+      ],
       "usb": 392970
     }
   },
@@ -213,6 +265,10 @@
       "chromium": "GameButton11"
     },
     "scanCodes": {
+      "android": [
+        266,
+        298
+      ],
       "usb": 392971
     }
   },
@@ -222,6 +278,10 @@
       "chromium": "GameButton12"
     },
     "scanCodes": {
+      "android": [
+        267,
+        299
+      ],
       "usb": 392972
     }
   },
@@ -231,6 +291,10 @@
       "chromium": "GameButton13"
     },
     "scanCodes": {
+      "android": [
+        268,
+        300
+      ],
       "usb": 392973
     }
   },
@@ -240,6 +304,10 @@
       "chromium": "GameButton14"
     },
     "scanCodes": {
+      "android": [
+        269,
+        301
+      ],
       "usb": 392974
     }
   },
@@ -249,6 +317,10 @@
       "chromium": "GameButton15"
     },
     "scanCodes": {
+      "android": [
+        270,
+        302
+      ],
       "usb": 392975
     }
   },
@@ -258,6 +330,10 @@
       "chromium": "GameButton16"
     },
     "scanCodes": {
+      "android": [
+        271,
+        303
+      ],
       "usb": 392976
     }
   },
@@ -267,6 +343,9 @@
       "chromium": "GameButtonA"
     },
     "scanCodes": {
+      "android": [
+        304
+      ],
       "usb": 392977
     }
   },
@@ -276,6 +355,9 @@
       "chromium": "GameButtonB"
     },
     "scanCodes": {
+      "android": [
+        305
+      ],
       "usb": 392978
     }
   },
@@ -285,6 +367,9 @@
       "chromium": "GameButtonC"
     },
     "scanCodes": {
+      "android": [
+        306
+      ],
       "usb": 392979
     }
   },
@@ -294,6 +379,9 @@
       "chromium": "GameButtonLeft1"
     },
     "scanCodes": {
+      "android": [
+        310
+      ],
       "usb": 392980
     }
   },
@@ -303,6 +391,9 @@
       "chromium": "GameButtonLeft2"
     },
     "scanCodes": {
+      "android": [
+        312
+      ],
       "usb": 392981
     }
   },
@@ -312,6 +403,9 @@
       "chromium": "GameButtonMode"
     },
     "scanCodes": {
+      "android": [
+        316
+      ],
       "usb": 392982
     }
   },
@@ -321,6 +415,9 @@
       "chromium": "GameButtonRight1"
     },
     "scanCodes": {
+      "android": [
+        311
+      ],
       "usb": 392983
     }
   },
@@ -330,6 +427,9 @@
       "chromium": "GameButtonRight2"
     },
     "scanCodes": {
+      "android": [
+        313
+      ],
       "usb": 392984
     }
   },
@@ -339,6 +439,9 @@
       "chromium": "GameButtonSelect"
     },
     "scanCodes": {
+      "android": [
+        314
+      ],
       "usb": 392985
     }
   },
@@ -348,6 +451,9 @@
       "chromium": "GameButtonStart"
     },
     "scanCodes": {
+      "android": [
+        315
+      ],
       "usb": 392986
     }
   },
@@ -357,6 +463,9 @@
       "chromium": "GameButtonThumbLeft"
     },
     "scanCodes": {
+      "android": [
+        317
+      ],
       "usb": 392987
     }
   },
@@ -366,6 +475,9 @@
       "chromium": "GameButtonThumbRight"
     },
     "scanCodes": {
+      "android": [
+        318
+      ],
       "usb": 392988
     }
   },
@@ -375,6 +487,9 @@
       "chromium": "GameButtonX"
     },
     "scanCodes": {
+      "android": [
+        307
+      ],
       "usb": 392989
     }
   },
@@ -384,6 +499,9 @@
       "chromium": "GameButtonY"
     },
     "scanCodes": {
+      "android": [
+        308
+      ],
       "usb": 392990
     }
   },
@@ -393,6 +511,9 @@
       "chromium": "GameButtonZ"
     },
     "scanCodes": {
+      "android": [
+        309
+      ],
       "usb": 392991
     }
   },
@@ -440,12 +561,20 @@
       "chromium": "KeyA"
     },
     "scanCodes": {
+      "android": [
+        30
+      ],
       "usb": 458756,
       "linux": 30,
       "xkb": 38,
       "windows": 30,
       "macos": 0,
       "ios": 4
+    },
+    "keyCodes": {
+      "glfw": [
+        65
+      ]
     }
   },
   "KeyB": {
@@ -454,12 +583,20 @@
       "chromium": "KeyB"
     },
     "scanCodes": {
+      "android": [
+        48
+      ],
       "usb": 458757,
       "linux": 48,
       "xkb": 56,
       "windows": 48,
       "macos": 11,
       "ios": 5
+    },
+    "keyCodes": {
+      "glfw": [
+        66
+      ]
     }
   },
   "KeyC": {
@@ -468,12 +605,20 @@
       "chromium": "KeyC"
     },
     "scanCodes": {
+      "android": [
+        46
+      ],
       "usb": 458758,
       "linux": 46,
       "xkb": 54,
       "windows": 46,
       "macos": 8,
       "ios": 6
+    },
+    "keyCodes": {
+      "glfw": [
+        67
+      ]
     }
   },
   "KeyD": {
@@ -482,12 +627,20 @@
       "chromium": "KeyD"
     },
     "scanCodes": {
+      "android": [
+        32
+      ],
       "usb": 458759,
       "linux": 32,
       "xkb": 40,
       "windows": 32,
       "macos": 2,
       "ios": 7
+    },
+    "keyCodes": {
+      "glfw": [
+        68
+      ]
     }
   },
   "KeyE": {
@@ -496,12 +649,20 @@
       "chromium": "KeyE"
     },
     "scanCodes": {
+      "android": [
+        18
+      ],
       "usb": 458760,
       "linux": 18,
       "xkb": 26,
       "windows": 18,
       "macos": 14,
       "ios": 8
+    },
+    "keyCodes": {
+      "glfw": [
+        69
+      ]
     }
   },
   "KeyF": {
@@ -510,12 +671,20 @@
       "chromium": "KeyF"
     },
     "scanCodes": {
+      "android": [
+        33
+      ],
       "usb": 458761,
       "linux": 33,
       "xkb": 41,
       "windows": 33,
       "macos": 3,
       "ios": 9
+    },
+    "keyCodes": {
+      "glfw": [
+        70
+      ]
     }
   },
   "KeyG": {
@@ -524,12 +693,20 @@
       "chromium": "KeyG"
     },
     "scanCodes": {
+      "android": [
+        34
+      ],
       "usb": 458762,
       "linux": 34,
       "xkb": 42,
       "windows": 34,
       "macos": 5,
       "ios": 10
+    },
+    "keyCodes": {
+      "glfw": [
+        71
+      ]
     }
   },
   "KeyH": {
@@ -538,12 +715,20 @@
       "chromium": "KeyH"
     },
     "scanCodes": {
+      "android": [
+        35
+      ],
       "usb": 458763,
       "linux": 35,
       "xkb": 43,
       "windows": 35,
       "macos": 4,
       "ios": 11
+    },
+    "keyCodes": {
+      "glfw": [
+        72
+      ]
     }
   },
   "KeyI": {
@@ -552,12 +737,20 @@
       "chromium": "KeyI"
     },
     "scanCodes": {
+      "android": [
+        23
+      ],
       "usb": 458764,
       "linux": 23,
       "xkb": 31,
       "windows": 23,
       "macos": 34,
       "ios": 12
+    },
+    "keyCodes": {
+      "glfw": [
+        73
+      ]
     }
   },
   "KeyJ": {
@@ -566,12 +759,20 @@
       "chromium": "KeyJ"
     },
     "scanCodes": {
+      "android": [
+        36
+      ],
       "usb": 458765,
       "linux": 36,
       "xkb": 44,
       "windows": 36,
       "macos": 38,
       "ios": 13
+    },
+    "keyCodes": {
+      "glfw": [
+        74
+      ]
     }
   },
   "KeyK": {
@@ -580,12 +781,20 @@
       "chromium": "KeyK"
     },
     "scanCodes": {
+      "android": [
+        37
+      ],
       "usb": 458766,
       "linux": 37,
       "xkb": 45,
       "windows": 37,
       "macos": 40,
       "ios": 14
+    },
+    "keyCodes": {
+      "glfw": [
+        75
+      ]
     }
   },
   "KeyL": {
@@ -594,12 +803,20 @@
       "chromium": "KeyL"
     },
     "scanCodes": {
+      "android": [
+        38
+      ],
       "usb": 458767,
       "linux": 38,
       "xkb": 46,
       "windows": 38,
       "macos": 37,
       "ios": 15
+    },
+    "keyCodes": {
+      "glfw": [
+        76
+      ]
     }
   },
   "KeyM": {
@@ -608,12 +825,20 @@
       "chromium": "KeyM"
     },
     "scanCodes": {
+      "android": [
+        50
+      ],
       "usb": 458768,
       "linux": 50,
       "xkb": 58,
       "windows": 50,
       "macos": 46,
       "ios": 16
+    },
+    "keyCodes": {
+      "glfw": [
+        77
+      ]
     }
   },
   "KeyN": {
@@ -622,12 +847,20 @@
       "chromium": "KeyN"
     },
     "scanCodes": {
+      "android": [
+        49
+      ],
       "usb": 458769,
       "linux": 49,
       "xkb": 57,
       "windows": 49,
       "macos": 45,
       "ios": 17
+    },
+    "keyCodes": {
+      "glfw": [
+        78
+      ]
     }
   },
   "KeyO": {
@@ -636,12 +869,20 @@
       "chromium": "KeyO"
     },
     "scanCodes": {
+      "android": [
+        24
+      ],
       "usb": 458770,
       "linux": 24,
       "xkb": 32,
       "windows": 24,
       "macos": 31,
       "ios": 18
+    },
+    "keyCodes": {
+      "glfw": [
+        79
+      ]
     }
   },
   "KeyP": {
@@ -650,12 +891,20 @@
       "chromium": "KeyP"
     },
     "scanCodes": {
+      "android": [
+        25
+      ],
       "usb": 458771,
       "linux": 25,
       "xkb": 33,
       "windows": 25,
       "macos": 35,
       "ios": 19
+    },
+    "keyCodes": {
+      "glfw": [
+        80
+      ]
     }
   },
   "KeyQ": {
@@ -664,12 +913,20 @@
       "chromium": "KeyQ"
     },
     "scanCodes": {
+      "android": [
+        16
+      ],
       "usb": 458772,
       "linux": 16,
       "xkb": 24,
       "windows": 16,
       "macos": 12,
       "ios": 20
+    },
+    "keyCodes": {
+      "glfw": [
+        81
+      ]
     }
   },
   "KeyR": {
@@ -678,12 +935,20 @@
       "chromium": "KeyR"
     },
     "scanCodes": {
+      "android": [
+        19
+      ],
       "usb": 458773,
       "linux": 19,
       "xkb": 27,
       "windows": 19,
       "macos": 15,
       "ios": 21
+    },
+    "keyCodes": {
+      "glfw": [
+        82
+      ]
     }
   },
   "KeyS": {
@@ -692,12 +957,20 @@
       "chromium": "KeyS"
     },
     "scanCodes": {
+      "android": [
+        31
+      ],
       "usb": 458774,
       "linux": 31,
       "xkb": 39,
       "windows": 31,
       "macos": 1,
       "ios": 22
+    },
+    "keyCodes": {
+      "glfw": [
+        83
+      ]
     }
   },
   "KeyT": {
@@ -706,12 +979,20 @@
       "chromium": "KeyT"
     },
     "scanCodes": {
+      "android": [
+        20
+      ],
       "usb": 458775,
       "linux": 20,
       "xkb": 28,
       "windows": 20,
       "macos": 17,
       "ios": 23
+    },
+    "keyCodes": {
+      "glfw": [
+        84
+      ]
     }
   },
   "KeyU": {
@@ -720,12 +1001,20 @@
       "chromium": "KeyU"
     },
     "scanCodes": {
+      "android": [
+        22
+      ],
       "usb": 458776,
       "linux": 22,
       "xkb": 30,
       "windows": 22,
       "macos": 32,
       "ios": 24
+    },
+    "keyCodes": {
+      "glfw": [
+        85
+      ]
     }
   },
   "KeyV": {
@@ -734,12 +1023,20 @@
       "chromium": "KeyV"
     },
     "scanCodes": {
+      "android": [
+        47
+      ],
       "usb": 458777,
       "linux": 47,
       "xkb": 55,
       "windows": 47,
       "macos": 9,
       "ios": 25
+    },
+    "keyCodes": {
+      "glfw": [
+        86
+      ]
     }
   },
   "KeyW": {
@@ -748,12 +1045,20 @@
       "chromium": "KeyW"
     },
     "scanCodes": {
+      "android": [
+        17
+      ],
       "usb": 458778,
       "linux": 17,
       "xkb": 25,
       "windows": 17,
       "macos": 13,
       "ios": 26
+    },
+    "keyCodes": {
+      "glfw": [
+        87
+      ]
     }
   },
   "KeyX": {
@@ -762,12 +1067,20 @@
       "chromium": "KeyX"
     },
     "scanCodes": {
+      "android": [
+        45
+      ],
       "usb": 458779,
       "linux": 45,
       "xkb": 53,
       "windows": 45,
       "macos": 7,
       "ios": 27
+    },
+    "keyCodes": {
+      "glfw": [
+        88
+      ]
     }
   },
   "KeyY": {
@@ -776,12 +1089,20 @@
       "chromium": "KeyY"
     },
     "scanCodes": {
+      "android": [
+        21
+      ],
       "usb": 458780,
       "linux": 21,
       "xkb": 29,
       "windows": 21,
       "macos": 16,
       "ios": 28
+    },
+    "keyCodes": {
+      "glfw": [
+        89
+      ]
     }
   },
   "KeyZ": {
@@ -790,12 +1111,20 @@
       "chromium": "KeyZ"
     },
     "scanCodes": {
+      "android": [
+        44
+      ],
       "usb": 458781,
       "linux": 44,
       "xkb": 52,
       "windows": 44,
       "macos": 6,
       "ios": 29
+    },
+    "keyCodes": {
+      "glfw": [
+        90
+      ]
     }
   },
   "Digit1": {
@@ -804,12 +1133,20 @@
       "chromium": "Digit1"
     },
     "scanCodes": {
+      "android": [
+        2
+      ],
       "usb": 458782,
       "linux": 2,
       "xkb": 10,
       "windows": 2,
       "macos": 18,
       "ios": 30
+    },
+    "keyCodes": {
+      "glfw": [
+        49
+      ]
     }
   },
   "Digit2": {
@@ -818,12 +1155,20 @@
       "chromium": "Digit2"
     },
     "scanCodes": {
+      "android": [
+        3
+      ],
       "usb": 458783,
       "linux": 3,
       "xkb": 11,
       "windows": 3,
       "macos": 19,
       "ios": 31
+    },
+    "keyCodes": {
+      "glfw": [
+        50
+      ]
     }
   },
   "Digit3": {
@@ -832,12 +1177,20 @@
       "chromium": "Digit3"
     },
     "scanCodes": {
+      "android": [
+        4
+      ],
       "usb": 458784,
       "linux": 4,
       "xkb": 12,
       "windows": 4,
       "macos": 20,
       "ios": 32
+    },
+    "keyCodes": {
+      "glfw": [
+        51
+      ]
     }
   },
   "Digit4": {
@@ -846,12 +1199,20 @@
       "chromium": "Digit4"
     },
     "scanCodes": {
+      "android": [
+        5
+      ],
       "usb": 458785,
       "linux": 5,
       "xkb": 13,
       "windows": 5,
       "macos": 21,
       "ios": 33
+    },
+    "keyCodes": {
+      "glfw": [
+        52
+      ]
     }
   },
   "Digit5": {
@@ -860,12 +1221,20 @@
       "chromium": "Digit5"
     },
     "scanCodes": {
+      "android": [
+        6
+      ],
       "usb": 458786,
       "linux": 6,
       "xkb": 14,
       "windows": 6,
       "macos": 23,
       "ios": 34
+    },
+    "keyCodes": {
+      "glfw": [
+        53
+      ]
     }
   },
   "Digit6": {
@@ -874,12 +1243,20 @@
       "chromium": "Digit6"
     },
     "scanCodes": {
+      "android": [
+        7
+      ],
       "usb": 458787,
       "linux": 7,
       "xkb": 15,
       "windows": 7,
       "macos": 22,
       "ios": 35
+    },
+    "keyCodes": {
+      "glfw": [
+        54
+      ]
     }
   },
   "Digit7": {
@@ -888,12 +1265,20 @@
       "chromium": "Digit7"
     },
     "scanCodes": {
+      "android": [
+        8
+      ],
       "usb": 458788,
       "linux": 8,
       "xkb": 16,
       "windows": 8,
       "macos": 26,
       "ios": 36
+    },
+    "keyCodes": {
+      "glfw": [
+        55
+      ]
     }
   },
   "Digit8": {
@@ -902,12 +1287,20 @@
       "chromium": "Digit8"
     },
     "scanCodes": {
+      "android": [
+        9
+      ],
       "usb": 458789,
       "linux": 9,
       "xkb": 17,
       "windows": 9,
       "macos": 28,
       "ios": 37
+    },
+    "keyCodes": {
+      "glfw": [
+        56
+      ]
     }
   },
   "Digit9": {
@@ -916,12 +1309,20 @@
       "chromium": "Digit9"
     },
     "scanCodes": {
+      "android": [
+        10
+      ],
       "usb": 458790,
       "linux": 10,
       "xkb": 18,
       "windows": 10,
       "macos": 25,
       "ios": 38
+    },
+    "keyCodes": {
+      "glfw": [
+        57
+      ]
     }
   },
   "Digit0": {
@@ -930,12 +1331,20 @@
       "chromium": "Digit0"
     },
     "scanCodes": {
+      "android": [
+        11
+      ],
       "usb": 458791,
       "linux": 11,
       "xkb": 19,
       "windows": 11,
       "macos": 29,
       "ios": 39
+    },
+    "keyCodes": {
+      "glfw": [
+        48
+      ]
     }
   },
   "Enter": {
@@ -944,12 +1353,20 @@
       "chromium": "Enter"
     },
     "scanCodes": {
+      "android": [
+        28
+      ],
       "usb": 458792,
       "linux": 28,
       "xkb": 36,
       "windows": 28,
       "macos": 36,
       "ios": 40
+    },
+    "keyCodes": {
+      "glfw": [
+        257
+      ]
     }
   },
   "Escape": {
@@ -958,12 +1375,20 @@
       "chromium": "Escape"
     },
     "scanCodes": {
+      "android": [
+        1
+      ],
       "usb": 458793,
       "linux": 1,
       "xkb": 9,
       "windows": 1,
       "macos": 53,
       "ios": 41
+    },
+    "keyCodes": {
+      "glfw": [
+        256
+      ]
     }
   },
   "Backspace": {
@@ -972,12 +1397,20 @@
       "chromium": "Backspace"
     },
     "scanCodes": {
+      "android": [
+        14
+      ],
       "usb": 458794,
       "linux": 14,
       "xkb": 22,
       "windows": 14,
       "macos": 51,
       "ios": 42
+    },
+    "keyCodes": {
+      "glfw": [
+        259
+      ]
     }
   },
   "Tab": {
@@ -986,12 +1419,20 @@
       "chromium": "Tab"
     },
     "scanCodes": {
+      "android": [
+        15
+      ],
       "usb": 458795,
       "linux": 15,
       "xkb": 23,
       "windows": 15,
       "macos": 48,
       "ios": 43
+    },
+    "keyCodes": {
+      "glfw": [
+        258
+      ]
     }
   },
   "Space": {
@@ -1000,12 +1441,20 @@
       "chromium": "Space"
     },
     "scanCodes": {
+      "android": [
+        57
+      ],
       "usb": 458796,
       "linux": 57,
       "xkb": 65,
       "windows": 57,
       "macos": 49,
       "ios": 44
+    },
+    "keyCodes": {
+      "glfw": [
+        32
+      ]
     }
   },
   "Minus": {
@@ -1014,12 +1463,20 @@
       "chromium": "Minus"
     },
     "scanCodes": {
+      "android": [
+        12
+      ],
       "usb": 458797,
       "linux": 12,
       "xkb": 20,
       "windows": 12,
       "macos": 27,
       "ios": 45
+    },
+    "keyCodes": {
+      "glfw": [
+        45
+      ]
     }
   },
   "Equal": {
@@ -1028,12 +1485,20 @@
       "chromium": "Equal"
     },
     "scanCodes": {
+      "android": [
+        13
+      ],
       "usb": 458798,
       "linux": 13,
       "xkb": 21,
       "windows": 13,
       "macos": 24,
       "ios": 46
+    },
+    "keyCodes": {
+      "glfw": [
+        61
+      ]
     }
   },
   "BracketLeft": {
@@ -1042,12 +1507,20 @@
       "chromium": "BracketLeft"
     },
     "scanCodes": {
+      "android": [
+        26
+      ],
       "usb": 458799,
       "linux": 26,
       "xkb": 34,
       "windows": 26,
       "macos": 33,
       "ios": 47
+    },
+    "keyCodes": {
+      "glfw": [
+        91
+      ]
     }
   },
   "BracketRight": {
@@ -1056,12 +1529,20 @@
       "chromium": "BracketRight"
     },
     "scanCodes": {
+      "android": [
+        27
+      ],
       "usb": 458800,
       "linux": 27,
       "xkb": 35,
       "windows": 27,
       "macos": 30,
       "ios": 48
+    },
+    "keyCodes": {
+      "glfw": [
+        93
+      ]
     }
   },
   "Backslash": {
@@ -1070,12 +1551,21 @@
       "chromium": "Backslash"
     },
     "scanCodes": {
+      "android": [
+        43,
+        86
+      ],
       "usb": 458801,
       "linux": 43,
       "xkb": 51,
       "windows": 43,
       "macos": 42,
       "ios": 49
+    },
+    "keyCodes": {
+      "glfw": [
+        92
+      ]
     }
   },
   "Semicolon": {
@@ -1084,12 +1574,20 @@
       "chromium": "Semicolon"
     },
     "scanCodes": {
+      "android": [
+        39
+      ],
       "usb": 458803,
       "linux": 39,
       "xkb": 47,
       "windows": 39,
       "macos": 41,
       "ios": 51
+    },
+    "keyCodes": {
+      "glfw": [
+        59
+      ]
     }
   },
   "Quote": {
@@ -1098,12 +1596,20 @@
       "chromium": "Quote"
     },
     "scanCodes": {
+      "android": [
+        40
+      ],
       "usb": 458804,
       "linux": 40,
       "xkb": 48,
       "windows": 40,
       "macos": 39,
       "ios": 52
+    },
+    "keyCodes": {
+      "glfw": [
+        39
+      ]
     }
   },
   "Backquote": {
@@ -1112,12 +1618,20 @@
       "chromium": "Backquote"
     },
     "scanCodes": {
+      "android": [
+        41
+      ],
       "usb": 458805,
       "linux": 41,
       "xkb": 49,
       "windows": 41,
       "macos": 50,
       "ios": 53
+    },
+    "keyCodes": {
+      "glfw": [
+        96
+      ]
     }
   },
   "Comma": {
@@ -1126,12 +1640,20 @@
       "chromium": "Comma"
     },
     "scanCodes": {
+      "android": [
+        51
+      ],
       "usb": 458806,
       "linux": 51,
       "xkb": 59,
       "windows": 51,
       "macos": 43,
       "ios": 54
+    },
+    "keyCodes": {
+      "glfw": [
+        44
+      ]
     }
   },
   "Period": {
@@ -1140,12 +1662,20 @@
       "chromium": "Period"
     },
     "scanCodes": {
+      "android": [
+        52
+      ],
       "usb": 458807,
       "linux": 52,
       "xkb": 60,
       "windows": 52,
       "macos": 47,
       "ios": 55
+    },
+    "keyCodes": {
+      "glfw": [
+        46
+      ]
     }
   },
   "Slash": {
@@ -1154,12 +1684,20 @@
       "chromium": "Slash"
     },
     "scanCodes": {
+      "android": [
+        53
+      ],
       "usb": 458808,
       "linux": 53,
       "xkb": 61,
       "windows": 53,
       "macos": 44,
       "ios": 56
+    },
+    "keyCodes": {
+      "glfw": [
+        47
+      ]
     }
   },
   "CapsLock": {
@@ -1168,12 +1706,20 @@
       "chromium": "CapsLock"
     },
     "scanCodes": {
+      "android": [
+        58
+      ],
       "usb": 458809,
       "linux": 58,
       "xkb": 66,
       "windows": 58,
       "macos": 57,
       "ios": 57
+    },
+    "keyCodes": {
+      "glfw": [
+        280
+      ]
     }
   },
   "F1": {
@@ -1182,12 +1728,20 @@
       "chromium": "F1"
     },
     "scanCodes": {
+      "android": [
+        59
+      ],
       "usb": 458810,
       "linux": 59,
       "xkb": 67,
       "windows": 59,
       "macos": 122,
       "ios": 58
+    },
+    "keyCodes": {
+      "glfw": [
+        290
+      ]
     }
   },
   "F2": {
@@ -1196,12 +1750,20 @@
       "chromium": "F2"
     },
     "scanCodes": {
+      "android": [
+        60
+      ],
       "usb": 458811,
       "linux": 60,
       "xkb": 68,
       "windows": 60,
       "macos": 120,
       "ios": 59
+    },
+    "keyCodes": {
+      "glfw": [
+        291
+      ]
     }
   },
   "F3": {
@@ -1210,12 +1772,20 @@
       "chromium": "F3"
     },
     "scanCodes": {
+      "android": [
+        61
+      ],
       "usb": 458812,
       "linux": 61,
       "xkb": 69,
       "windows": 61,
       "macos": 99,
       "ios": 60
+    },
+    "keyCodes": {
+      "glfw": [
+        292
+      ]
     }
   },
   "F4": {
@@ -1224,12 +1794,20 @@
       "chromium": "F4"
     },
     "scanCodes": {
+      "android": [
+        62
+      ],
       "usb": 458813,
       "linux": 62,
       "xkb": 70,
       "windows": 62,
       "macos": 118,
       "ios": 61
+    },
+    "keyCodes": {
+      "glfw": [
+        293
+      ]
     }
   },
   "F5": {
@@ -1238,12 +1816,20 @@
       "chromium": "F5"
     },
     "scanCodes": {
+      "android": [
+        63
+      ],
       "usb": 458814,
       "linux": 63,
       "xkb": 71,
       "windows": 63,
       "macos": 96,
       "ios": 62
+    },
+    "keyCodes": {
+      "glfw": [
+        294
+      ]
     }
   },
   "F6": {
@@ -1252,12 +1838,20 @@
       "chromium": "F6"
     },
     "scanCodes": {
+      "android": [
+        64
+      ],
       "usb": 458815,
       "linux": 64,
       "xkb": 72,
       "windows": 64,
       "macos": 97,
       "ios": 63
+    },
+    "keyCodes": {
+      "glfw": [
+        295
+      ]
     }
   },
   "F7": {
@@ -1266,12 +1860,20 @@
       "chromium": "F7"
     },
     "scanCodes": {
+      "android": [
+        65
+      ],
       "usb": 458816,
       "linux": 65,
       "xkb": 73,
       "windows": 65,
       "macos": 98,
       "ios": 64
+    },
+    "keyCodes": {
+      "glfw": [
+        296
+      ]
     }
   },
   "F8": {
@@ -1280,12 +1882,20 @@
       "chromium": "F8"
     },
     "scanCodes": {
+      "android": [
+        66
+      ],
       "usb": 458817,
       "linux": 66,
       "xkb": 74,
       "windows": 66,
       "macos": 100,
       "ios": 65
+    },
+    "keyCodes": {
+      "glfw": [
+        297
+      ]
     }
   },
   "F9": {
@@ -1294,12 +1904,20 @@
       "chromium": "F9"
     },
     "scanCodes": {
+      "android": [
+        67
+      ],
       "usb": 458818,
       "linux": 67,
       "xkb": 75,
       "windows": 67,
       "macos": 101,
       "ios": 66
+    },
+    "keyCodes": {
+      "glfw": [
+        298
+      ]
     }
   },
   "F10": {
@@ -1308,12 +1926,20 @@
       "chromium": "F10"
     },
     "scanCodes": {
+      "android": [
+        68
+      ],
       "usb": 458819,
       "linux": 68,
       "xkb": 76,
       "windows": 68,
       "macos": 109,
       "ios": 67
+    },
+    "keyCodes": {
+      "glfw": [
+        299
+      ]
     }
   },
   "F11": {
@@ -1322,12 +1948,20 @@
       "chromium": "F11"
     },
     "scanCodes": {
+      "android": [
+        87
+      ],
       "usb": 458820,
       "linux": 87,
       "xkb": 95,
       "windows": 87,
       "macos": 103,
       "ios": 68
+    },
+    "keyCodes": {
+      "glfw": [
+        300
+      ]
     }
   },
   "F12": {
@@ -1336,12 +1970,20 @@
       "chromium": "F12"
     },
     "scanCodes": {
+      "android": [
+        88
+      ],
       "usb": 458821,
       "linux": 88,
       "xkb": 96,
       "windows": 88,
       "macos": 111,
       "ios": 69
+    },
+    "keyCodes": {
+      "glfw": [
+        301
+      ]
     }
   },
   "PrintScreen": {
@@ -1350,11 +1992,19 @@
       "chromium": "PrintScreen"
     },
     "scanCodes": {
+      "android": [
+        99
+      ],
       "usb": 458822,
       "linux": 99,
       "xkb": 107,
       "windows": 57399,
       "ios": 70
+    },
+    "keyCodes": {
+      "glfw": [
+        283
+      ]
     }
   },
   "ScrollLock": {
@@ -1363,6 +2013,9 @@
       "chromium": "ScrollLock"
     },
     "scanCodes": {
+      "android": [
+        70
+      ],
       "usb": 458823,
       "linux": 70,
       "xkb": 78,
@@ -1376,11 +2029,20 @@
       "chromium": "Pause"
     },
     "scanCodes": {
+      "android": [
+        119,
+        411
+      ],
       "usb": 458824,
       "linux": 119,
       "xkb": 127,
       "windows": 69,
       "ios": 72
+    },
+    "keyCodes": {
+      "glfw": [
+        284
+      ]
     }
   },
   "Insert": {
@@ -1389,12 +2051,20 @@
       "chromium": "Insert"
     },
     "scanCodes": {
+      "android": [
+        110
+      ],
       "usb": 458825,
       "linux": 110,
       "xkb": 118,
       "windows": 57426,
       "macos": 114,
       "ios": 73
+    },
+    "keyCodes": {
+      "glfw": [
+        260
+      ]
     }
   },
   "Home": {
@@ -1403,12 +2073,20 @@
       "chromium": "Home"
     },
     "scanCodes": {
+      "android": [
+        102
+      ],
       "usb": 458826,
       "linux": 102,
       "xkb": 110,
       "windows": 57415,
       "macos": 115,
       "ios": 74
+    },
+    "keyCodes": {
+      "glfw": [
+        268
+      ]
     }
   },
   "PageUp": {
@@ -1417,12 +2095,21 @@
       "chromium": "PageUp"
     },
     "scanCodes": {
+      "android": [
+        104,
+        177
+      ],
       "usb": 458827,
       "linux": 104,
       "xkb": 112,
       "windows": 57417,
       "macos": 116,
       "ios": 75
+    },
+    "keyCodes": {
+      "glfw": [
+        266
+      ]
     }
   },
   "Delete": {
@@ -1431,12 +2118,20 @@
       "chromium": "Delete"
     },
     "scanCodes": {
+      "android": [
+        111
+      ],
       "usb": 458828,
       "linux": 111,
       "xkb": 119,
       "windows": 57427,
       "macos": 117,
       "ios": 76
+    },
+    "keyCodes": {
+      "glfw": [
+        261
+      ]
     }
   },
   "End": {
@@ -1445,12 +2140,20 @@
       "chromium": "End"
     },
     "scanCodes": {
+      "android": [
+        107
+      ],
       "usb": 458829,
       "linux": 107,
       "xkb": 115,
       "windows": 57423,
       "macos": 119,
       "ios": 77
+    },
+    "keyCodes": {
+      "glfw": [
+        269
+      ]
     }
   },
   "PageDown": {
@@ -1459,12 +2162,21 @@
       "chromium": "PageDown"
     },
     "scanCodes": {
+      "android": [
+        109,
+        178
+      ],
       "usb": 458830,
       "linux": 109,
       "xkb": 117,
       "windows": 57425,
       "macos": 121,
       "ios": 78
+    },
+    "keyCodes": {
+      "glfw": [
+        267
+      ]
     }
   },
   "ArrowRight": {
@@ -1473,12 +2185,20 @@
       "chromium": "ArrowRight"
     },
     "scanCodes": {
+      "android": [
+        106
+      ],
       "usb": 458831,
       "linux": 106,
       "xkb": 114,
       "windows": 57421,
       "macos": 124,
       "ios": 79
+    },
+    "keyCodes": {
+      "glfw": [
+        262
+      ]
     }
   },
   "ArrowLeft": {
@@ -1487,12 +2207,20 @@
       "chromium": "ArrowLeft"
     },
     "scanCodes": {
+      "android": [
+        105
+      ],
       "usb": 458832,
       "linux": 105,
       "xkb": 113,
       "windows": 57419,
       "macos": 123,
       "ios": 80
+    },
+    "keyCodes": {
+      "glfw": [
+        263
+      ]
     }
   },
   "ArrowDown": {
@@ -1501,12 +2229,20 @@
       "chromium": "ArrowDown"
     },
     "scanCodes": {
+      "android": [
+        108
+      ],
       "usb": 458833,
       "linux": 108,
       "xkb": 116,
       "windows": 57424,
       "macos": 125,
       "ios": 81
+    },
+    "keyCodes": {
+      "glfw": [
+        264
+      ]
     }
   },
   "ArrowUp": {
@@ -1515,12 +2251,20 @@
       "chromium": "ArrowUp"
     },
     "scanCodes": {
+      "android": [
+        103
+      ],
       "usb": 458834,
       "linux": 103,
       "xkb": 111,
       "windows": 57416,
       "macos": 126,
       "ios": 82
+    },
+    "keyCodes": {
+      "glfw": [
+        265
+      ]
     }
   },
   "NumLock": {
@@ -1529,12 +2273,20 @@
       "chromium": "NumLock"
     },
     "scanCodes": {
+      "android": [
+        69
+      ],
       "usb": 458835,
       "linux": 69,
       "xkb": 77,
       "windows": 57413,
       "macos": 71,
       "ios": 83
+    },
+    "keyCodes": {
+      "glfw": [
+        282
+      ]
     }
   },
   "NumpadDivide": {
@@ -1543,12 +2295,20 @@
       "chromium": "NumpadDivide"
     },
     "scanCodes": {
+      "android": [
+        98
+      ],
       "usb": 458836,
       "linux": 98,
       "xkb": 106,
       "windows": 57397,
       "macos": 75,
       "ios": 84
+    },
+    "keyCodes": {
+      "glfw": [
+        331
+      ]
     }
   },
   "NumpadMultiply": {
@@ -1557,12 +2317,20 @@
       "chromium": "NumpadMultiply"
     },
     "scanCodes": {
+      "android": [
+        55
+      ],
       "usb": 458837,
       "linux": 55,
       "xkb": 63,
       "windows": 55,
       "macos": 67,
       "ios": 85
+    },
+    "keyCodes": {
+      "glfw": [
+        332
+      ]
     }
   },
   "NumpadSubtract": {
@@ -1571,6 +2339,9 @@
       "chromium": "NumpadSubtract"
     },
     "scanCodes": {
+      "android": [
+        74
+      ],
       "usb": 458838,
       "linux": 74,
       "xkb": 82,
@@ -1585,12 +2356,20 @@
       "chromium": "NumpadAdd"
     },
     "scanCodes": {
+      "android": [
+        78
+      ],
       "usb": 458839,
       "linux": 78,
       "xkb": 86,
       "windows": 78,
       "macos": 69,
       "ios": 87
+    },
+    "keyCodes": {
+      "glfw": [
+        334
+      ]
     }
   },
   "NumpadEnter": {
@@ -1599,12 +2378,20 @@
       "chromium": "NumpadEnter"
     },
     "scanCodes": {
+      "android": [
+        96
+      ],
       "usb": 458840,
       "linux": 96,
       "xkb": 104,
       "windows": 57372,
       "macos": 76,
       "ios": 88
+    },
+    "keyCodes": {
+      "glfw": [
+        335
+      ]
     }
   },
   "Numpad1": {
@@ -1613,12 +2400,20 @@
       "chromium": "Numpad1"
     },
     "scanCodes": {
+      "android": [
+        79
+      ],
       "usb": 458841,
       "linux": 79,
       "xkb": 87,
       "windows": 79,
       "macos": 83,
       "ios": 89
+    },
+    "keyCodes": {
+      "glfw": [
+        321
+      ]
     }
   },
   "Numpad2": {
@@ -1627,12 +2422,20 @@
       "chromium": "Numpad2"
     },
     "scanCodes": {
+      "android": [
+        80
+      ],
       "usb": 458842,
       "linux": 80,
       "xkb": 88,
       "windows": 80,
       "macos": 84,
       "ios": 90
+    },
+    "keyCodes": {
+      "glfw": [
+        322
+      ]
     }
   },
   "Numpad3": {
@@ -1641,12 +2444,20 @@
       "chromium": "Numpad3"
     },
     "scanCodes": {
+      "android": [
+        81
+      ],
       "usb": 458843,
       "linux": 81,
       "xkb": 89,
       "windows": 81,
       "macos": 85,
       "ios": 91
+    },
+    "keyCodes": {
+      "glfw": [
+        323
+      ]
     }
   },
   "Numpad4": {
@@ -1655,12 +2466,20 @@
       "chromium": "Numpad4"
     },
     "scanCodes": {
+      "android": [
+        75
+      ],
       "usb": 458844,
       "linux": 75,
       "xkb": 83,
       "windows": 75,
       "macos": 86,
       "ios": 92
+    },
+    "keyCodes": {
+      "glfw": [
+        324
+      ]
     }
   },
   "Numpad5": {
@@ -1669,12 +2488,20 @@
       "chromium": "Numpad5"
     },
     "scanCodes": {
+      "android": [
+        76
+      ],
       "usb": 458845,
       "linux": 76,
       "xkb": 84,
       "windows": 76,
       "macos": 87,
       "ios": 93
+    },
+    "keyCodes": {
+      "glfw": [
+        325
+      ]
     }
   },
   "Numpad6": {
@@ -1683,12 +2510,20 @@
       "chromium": "Numpad6"
     },
     "scanCodes": {
+      "android": [
+        77
+      ],
       "usb": 458846,
       "linux": 77,
       "xkb": 85,
       "windows": 77,
       "macos": 88,
       "ios": 94
+    },
+    "keyCodes": {
+      "glfw": [
+        326
+      ]
     }
   },
   "Numpad7": {
@@ -1697,12 +2532,20 @@
       "chromium": "Numpad7"
     },
     "scanCodes": {
+      "android": [
+        71
+      ],
       "usb": 458847,
       "linux": 71,
       "xkb": 79,
       "windows": 71,
       "macos": 89,
       "ios": 95
+    },
+    "keyCodes": {
+      "glfw": [
+        327
+      ]
     }
   },
   "Numpad8": {
@@ -1711,12 +2554,20 @@
       "chromium": "Numpad8"
     },
     "scanCodes": {
+      "android": [
+        72
+      ],
       "usb": 458848,
       "linux": 72,
       "xkb": 80,
       "windows": 72,
       "macos": 91,
       "ios": 96
+    },
+    "keyCodes": {
+      "glfw": [
+        328
+      ]
     }
   },
   "Numpad9": {
@@ -1725,12 +2576,20 @@
       "chromium": "Numpad9"
     },
     "scanCodes": {
+      "android": [
+        73
+      ],
       "usb": 458849,
       "linux": 73,
       "xkb": 81,
       "windows": 73,
       "macos": 92,
       "ios": 97
+    },
+    "keyCodes": {
+      "glfw": [
+        329
+      ]
     }
   },
   "Numpad0": {
@@ -1739,12 +2598,20 @@
       "chromium": "Numpad0"
     },
     "scanCodes": {
+      "android": [
+        82
+      ],
       "usb": 458850,
       "linux": 82,
       "xkb": 90,
       "windows": 82,
       "macos": 82,
       "ios": 98
+    },
+    "keyCodes": {
+      "glfw": [
+        320
+      ]
     }
   },
   "NumpadDecimal": {
@@ -1753,12 +2620,20 @@
       "chromium": "NumpadDecimal"
     },
     "scanCodes": {
+      "android": [
+        83
+      ],
       "usb": 458851,
       "linux": 83,
       "xkb": 91,
       "windows": 83,
       "macos": 65,
       "ios": 99
+    },
+    "keyCodes": {
+      "glfw": [
+        330
+      ]
     }
   },
   "IntlBackslash": {
@@ -1781,12 +2656,21 @@
       "chromium": "ContextMenu"
     },
     "scanCodes": {
+      "android": [
+        127,
+        139
+      ],
       "usb": 458853,
       "linux": 127,
       "xkb": 135,
       "windows": 57437,
       "macos": 110,
       "ios": 101
+    },
+    "keyCodes": {
+      "glfw": [
+        348
+      ]
     }
   },
   "Power": {
@@ -1795,6 +2679,10 @@
       "chromium": "Power"
     },
     "scanCodes": {
+      "android": [
+        116,
+        152
+      ],
       "usb": 458854,
       "linux": 116,
       "xkb": 124,
@@ -1808,12 +2696,20 @@
       "chromium": "NumpadEqual"
     },
     "scanCodes": {
+      "android": [
+        117
+      ],
       "usb": 458855,
       "linux": 117,
       "xkb": 125,
       "windows": 89,
       "macos": 81,
       "ios": 103
+    },
+    "keyCodes": {
+      "glfw": [
+        336
+      ]
     }
   },
   "F13": {
@@ -1822,12 +2718,20 @@
       "chromium": "F13"
     },
     "scanCodes": {
+      "android": [
+        183
+      ],
       "usb": 458856,
       "linux": 183,
       "xkb": 191,
       "windows": 100,
       "macos": 105,
       "ios": 104
+    },
+    "keyCodes": {
+      "glfw": [
+        302
+      ]
     }
   },
   "F14": {
@@ -1836,12 +2740,20 @@
       "chromium": "F14"
     },
     "scanCodes": {
+      "android": [
+        184
+      ],
       "usb": 458857,
       "linux": 184,
       "xkb": 192,
       "windows": 101,
       "macos": 107,
       "ios": 105
+    },
+    "keyCodes": {
+      "glfw": [
+        303
+      ]
     }
   },
   "F15": {
@@ -1850,12 +2762,20 @@
       "chromium": "F15"
     },
     "scanCodes": {
+      "android": [
+        185
+      ],
       "usb": 458858,
       "linux": 185,
       "xkb": 193,
       "windows": 102,
       "macos": 113,
       "ios": 106
+    },
+    "keyCodes": {
+      "glfw": [
+        304
+      ]
     }
   },
   "F16": {
@@ -1864,12 +2784,20 @@
       "chromium": "F16"
     },
     "scanCodes": {
+      "android": [
+        186
+      ],
       "usb": 458859,
       "linux": 186,
       "xkb": 194,
       "windows": 103,
       "macos": 106,
       "ios": 107
+    },
+    "keyCodes": {
+      "glfw": [
+        305
+      ]
     }
   },
   "F17": {
@@ -1878,12 +2806,20 @@
       "chromium": "F17"
     },
     "scanCodes": {
+      "android": [
+        187
+      ],
       "usb": 458860,
       "linux": 187,
       "xkb": 195,
       "windows": 104,
       "macos": 64,
       "ios": 108
+    },
+    "keyCodes": {
+      "glfw": [
+        306
+      ]
     }
   },
   "F18": {
@@ -1892,12 +2828,20 @@
       "chromium": "F18"
     },
     "scanCodes": {
+      "android": [
+        188
+      ],
       "usb": 458861,
       "linux": 188,
       "xkb": 196,
       "windows": 105,
       "macos": 79,
       "ios": 109
+    },
+    "keyCodes": {
+      "glfw": [
+        307
+      ]
     }
   },
   "F19": {
@@ -1906,12 +2850,20 @@
       "chromium": "F19"
     },
     "scanCodes": {
+      "android": [
+        189
+      ],
       "usb": 458862,
       "linux": 189,
       "xkb": 197,
       "windows": 106,
       "macos": 80,
       "ios": 110
+    },
+    "keyCodes": {
+      "glfw": [
+        308
+      ]
     }
   },
   "F20": {
@@ -1920,12 +2872,20 @@
       "chromium": "F20"
     },
     "scanCodes": {
+      "android": [
+        190
+      ],
       "usb": 458863,
       "linux": 190,
       "xkb": 198,
       "windows": 107,
       "macos": 90,
       "ios": 111
+    },
+    "keyCodes": {
+      "glfw": [
+        309
+      ]
     }
   },
   "F21": {
@@ -1934,11 +2894,19 @@
       "chromium": "F21"
     },
     "scanCodes": {
+      "android": [
+        191
+      ],
       "usb": 458864,
       "linux": 191,
       "xkb": 199,
       "windows": 108,
       "ios": 112
+    },
+    "keyCodes": {
+      "glfw": [
+        310
+      ]
     }
   },
   "F22": {
@@ -1947,11 +2915,19 @@
       "chromium": "F22"
     },
     "scanCodes": {
+      "android": [
+        192
+      ],
       "usb": 458865,
       "linux": 192,
       "xkb": 200,
       "windows": 109,
       "ios": 113
+    },
+    "keyCodes": {
+      "glfw": [
+        311
+      ]
     }
   },
   "F23": {
@@ -1960,11 +2936,19 @@
       "chromium": "F23"
     },
     "scanCodes": {
+      "android": [
+        193
+      ],
       "usb": 458866,
       "linux": 193,
       "xkb": 201,
       "windows": 110,
       "ios": 114
+    },
+    "keyCodes": {
+      "glfw": [
+        312
+      ]
     }
   },
   "F24": {
@@ -1973,6 +2957,9 @@
       "chromium": "F24"
     },
     "scanCodes": {
+      "android": [
+        194
+      ],
       "usb": 458867,
       "linux": 194,
       "xkb": 202,
@@ -1986,6 +2973,9 @@
       "chromium": "Open"
     },
     "scanCodes": {
+      "android": [
+        134
+      ],
       "usb": 458868,
       "linux": 134,
       "xkb": 142,
@@ -1998,6 +2988,9 @@
       "chromium": "Help"
     },
     "scanCodes": {
+      "android": [
+        138
+      ],
       "usb": 458869,
       "linux": 138,
       "xkb": 146,
@@ -2011,6 +3004,9 @@
       "chromium": "Select"
     },
     "scanCodes": {
+      "android": [
+        353
+      ],
       "usb": 458871,
       "linux": 132,
       "xkb": 140,
@@ -2023,6 +3019,9 @@
       "chromium": "Again"
     },
     "scanCodes": {
+      "android": [
+        129
+      ],
       "usb": 458873,
       "linux": 129,
       "xkb": 137,
@@ -2035,6 +3034,9 @@
       "chromium": "Undo"
     },
     "scanCodes": {
+      "android": [
+        131
+      ],
       "usb": 458874,
       "linux": 131,
       "xkb": 139,
@@ -2048,6 +3050,9 @@
       "chromium": "Cut"
     },
     "scanCodes": {
+      "android": [
+        137
+      ],
       "usb": 458875,
       "linux": 137,
       "xkb": 145,
@@ -2061,6 +3066,9 @@
       "chromium": "Copy"
     },
     "scanCodes": {
+      "android": [
+        133
+      ],
       "usb": 458876,
       "linux": 133,
       "xkb": 141,
@@ -2074,6 +3082,9 @@
       "chromium": "Paste"
     },
     "scanCodes": {
+      "android": [
+        135
+      ],
       "usb": 458877,
       "linux": 135,
       "xkb": 143,
@@ -2087,6 +3098,9 @@
       "chromium": "Find"
     },
     "scanCodes": {
+      "android": [
+        136
+      ],
       "usb": 458878,
       "linux": 136,
       "xkb": 144,
@@ -2099,6 +3113,9 @@
       "chromium": "AudioVolumeMute"
     },
     "scanCodes": {
+      "android": [
+        113
+      ],
       "usb": 458879,
       "linux": 113,
       "xkb": 121,
@@ -2113,6 +3130,9 @@
       "chromium": "AudioVolumeUp"
     },
     "scanCodes": {
+      "android": [
+        115
+      ],
       "usb": 458880,
       "linux": 115,
       "xkb": 123,
@@ -2127,6 +3147,9 @@
       "chromium": "AudioVolumeDown"
     },
     "scanCodes": {
+      "android": [
+        114
+      ],
       "usb": 458881,
       "linux": 114,
       "xkb": 122,
@@ -2141,6 +3164,10 @@
       "chromium": "NumpadComma"
     },
     "scanCodes": {
+      "android": [
+        95,
+        121
+      ],
       "usb": 458885,
       "linux": 121,
       "xkb": 129,
@@ -2155,6 +3182,9 @@
       "chromium": "IntlRo"
     },
     "scanCodes": {
+      "android": [
+        89
+      ],
       "usb": 458887,
       "linux": 89,
       "xkb": 97,
@@ -2182,6 +3212,9 @@
       "chromium": "IntlYen"
     },
     "scanCodes": {
+      "android": [
+        124
+      ],
       "usb": 458889,
       "linux": 124,
       "xkb": 132,
@@ -2196,6 +3229,9 @@
       "chromium": "Convert"
     },
     "scanCodes": {
+      "android": [
+        92
+      ],
       "usb": 458890,
       "linux": 92,
       "xkb": 100,
@@ -2209,6 +3245,9 @@
       "chromium": "NonConvert"
     },
     "scanCodes": {
+      "android": [
+        94
+      ],
       "usb": 458891,
       "linux": 94,
       "xkb": 102,
@@ -2250,6 +3289,9 @@
       "chromium": "Lang3"
     },
     "scanCodes": {
+      "android": [
+        90
+      ],
       "usb": 458898,
       "linux": 90,
       "xkb": 98,
@@ -2263,6 +3305,9 @@
       "chromium": "Lang4"
     },
     "scanCodes": {
+      "android": [
+        91
+      ],
       "usb": 458899,
       "linux": 91,
       "xkb": 99,
@@ -2298,6 +3343,9 @@
       "chromium": "Props"
     },
     "scanCodes": {
+      "android": [
+        130
+      ],
       "usb": 458915,
       "ios": 163
     }
@@ -2308,6 +3356,9 @@
       "chromium": "NumpadParenLeft"
     },
     "scanCodes": {
+      "android": [
+        179
+      ],
       "usb": 458934,
       "linux": 179,
       "xkb": 187,
@@ -2320,6 +3371,9 @@
       "chromium": "NumpadParenRight"
     },
     "scanCodes": {
+      "android": [
+        180
+      ],
       "usb": 458935,
       "linux": 180,
       "xkb": 188,
@@ -2423,12 +3477,20 @@
       "chromium": "ControlLeft"
     },
     "scanCodes": {
+      "android": [
+        29
+      ],
       "usb": 458976,
       "linux": 29,
       "xkb": 37,
       "windows": 29,
       "macos": 59,
       "ios": 224
+    },
+    "keyCodes": {
+      "glfw": [
+        341
+      ]
     }
   },
   "ShiftLeft": {
@@ -2437,12 +3499,20 @@
       "chromium": "ShiftLeft"
     },
     "scanCodes": {
+      "android": [
+        42
+      ],
       "usb": 458977,
       "linux": 42,
       "xkb": 50,
       "windows": 42,
       "macos": 56,
       "ios": 225
+    },
+    "keyCodes": {
+      "glfw": [
+        340
+      ]
     }
   },
   "AltLeft": {
@@ -2451,12 +3521,20 @@
       "chromium": "AltLeft"
     },
     "scanCodes": {
+      "android": [
+        56
+      ],
       "usb": 458978,
       "linux": 56,
       "xkb": 64,
       "windows": 56,
       "macos": 58,
       "ios": 226
+    },
+    "keyCodes": {
+      "glfw": [
+        342
+      ]
     }
   },
   "MetaLeft": {
@@ -2465,12 +3543,20 @@
       "chromium": "MetaLeft"
     },
     "scanCodes": {
+      "android": [
+        125
+      ],
       "usb": 458979,
       "linux": 125,
       "xkb": 133,
       "windows": 57435,
       "macos": 55,
       "ios": 227
+    },
+    "keyCodes": {
+      "glfw": [
+        343
+      ]
     }
   },
   "ControlRight": {
@@ -2479,12 +3565,20 @@
       "chromium": "ControlRight"
     },
     "scanCodes": {
+      "android": [
+        97
+      ],
       "usb": 458980,
       "linux": 97,
       "xkb": 105,
       "windows": 57373,
       "macos": 62,
       "ios": 228
+    },
+    "keyCodes": {
+      "glfw": [
+        345
+      ]
     }
   },
   "ShiftRight": {
@@ -2493,12 +3587,20 @@
       "chromium": "ShiftRight"
     },
     "scanCodes": {
+      "android": [
+        54
+      ],
       "usb": 458981,
       "linux": 54,
       "xkb": 62,
       "windows": 54,
       "macos": 60,
       "ios": 229
+    },
+    "keyCodes": {
+      "glfw": [
+        344
+      ]
     }
   },
   "AltRight": {
@@ -2507,12 +3609,20 @@
       "chromium": "AltRight"
     },
     "scanCodes": {
+      "android": [
+        100
+      ],
       "usb": 458982,
       "linux": 100,
       "xkb": 108,
       "windows": 57400,
       "macos": 61,
       "ios": 230
+    },
+    "keyCodes": {
+      "glfw": [
+        346
+      ]
     }
   },
   "MetaRight": {
@@ -2521,12 +3631,20 @@
       "chromium": "MetaRight"
     },
     "scanCodes": {
+      "android": [
+        126
+      ],
       "usb": 458983,
       "linux": 126,
       "xkb": 134,
       "windows": 57436,
       "macos": 54,
       "ios": 231
+    },
+    "keyCodes": {
+      "glfw": [
+        347
+      ]
     }
   },
   "Info": {
@@ -2534,6 +3652,9 @@
       "name": "Info"
     },
     "scanCodes": {
+      "android": [
+        358
+      ],
       "usb": 786528,
       "linux": 358,
       "xkb": 366
@@ -2544,6 +3665,9 @@
       "name": "ClosedCaptionToggle"
     },
     "scanCodes": {
+      "android": [
+        370
+      ],
       "usb": 786529,
       "linux": 370,
       "xkb": 378
@@ -2555,6 +3679,9 @@
       "chromium": "BrightnessUp"
     },
     "scanCodes": {
+      "android": [
+        225
+      ],
       "usb": 786543,
       "linux": 225,
       "xkb": 233
@@ -2566,6 +3693,9 @@
       "chromium": "BrightnessDown"
     },
     "scanCodes": {
+      "android": [
+        224
+      ],
       "usb": 786544,
       "linux": 224,
       "xkb": 232
@@ -2636,6 +3766,9 @@
       "name": "MediaLast"
     },
     "scanCodes": {
+      "android": [
+        405
+      ],
       "usb": 786563,
       "linux": 405,
       "xkb": 413
@@ -2666,6 +3799,9 @@
       "name": "Exit"
     },
     "scanCodes": {
+      "android": [
+        174
+      ],
       "usb": 786580,
       "linux": 174,
       "xkb": 182
@@ -2676,6 +3812,9 @@
       "name": "ChannelUp"
     },
     "scanCodes": {
+      "android": [
+        402
+      ],
       "usb": 786588,
       "linux": 410,
       "xkb": 418
@@ -2686,6 +3825,9 @@
       "name": "ChannelDown"
     },
     "scanCodes": {
+      "android": [
+        403
+      ],
       "usb": 786589,
       "linux": 411,
       "xkb": 419
@@ -2697,6 +3839,10 @@
       "chromium": "MediaPlay"
     },
     "scanCodes": {
+      "android": [
+        200,
+        207
+      ],
       "usb": 786608,
       "linux": 207,
       "xkb": 215
@@ -2708,6 +3854,9 @@
       "chromium": "MediaPause"
     },
     "scanCodes": {
+      "android": [
+        201
+      ],
       "usb": 786609,
       "linux": 201,
       "xkb": 209
@@ -2719,6 +3868,9 @@
       "chromium": "MediaRecord"
     },
     "scanCodes": {
+      "android": [
+        167
+      ],
       "usb": 786610,
       "linux": 167,
       "xkb": 175
@@ -2730,6 +3882,9 @@
       "chromium": "MediaFastForward"
     },
     "scanCodes": {
+      "android": [
+        208
+      ],
       "usb": 786611,
       "linux": 208,
       "xkb": 216
@@ -2741,6 +3896,9 @@
       "chromium": "MediaRewind"
     },
     "scanCodes": {
+      "android": [
+        168
+      ],
       "usb": 786612,
       "linux": 168,
       "xkb": 176
@@ -2752,6 +3910,9 @@
       "chromium": "MediaTrackNext"
     },
     "scanCodes": {
+      "android": [
+        163
+      ],
       "usb": 786613,
       "linux": 163,
       "xkb": 171,
@@ -2764,6 +3925,9 @@
       "chromium": "MediaTrackPrevious"
     },
     "scanCodes": {
+      "android": [
+        165
+      ],
       "usb": 786614,
       "linux": 165,
       "xkb": 173,
@@ -2776,6 +3940,10 @@
       "chromium": "MediaStop"
     },
     "scanCodes": {
+      "android": [
+        128,
+        166
+      ],
       "usb": 786615,
       "linux": 166,
       "xkb": 174,
@@ -2788,6 +3956,10 @@
       "chromium": "Eject"
     },
     "scanCodes": {
+      "android": [
+        161,
+        162
+      ],
       "usb": 786616,
       "linux": 161,
       "xkb": 169,
@@ -2800,6 +3972,9 @@
       "chromium": "MediaPlayPause"
     },
     "scanCodes": {
+      "android": [
+        164
+      ],
       "usb": 786637,
       "linux": 164,
       "xkb": 172,
@@ -2821,6 +3996,9 @@
       "name": "BassBoost"
     },
     "scanCodes": {
+      "android": [
+        209
+      ],
       "usb": 786661,
       "linux": 209,
       "xkb": 217
@@ -2864,6 +4042,10 @@
       "chromium": "LaunchMail"
     },
     "scanCodes": {
+      "android": [
+        155,
+        215
+      ],
       "usb": 786826,
       "linux": 155,
       "xkb": 163,
@@ -2875,6 +4057,9 @@
       "name": "LaunchContacts"
     },
     "scanCodes": {
+      "android": [
+        429
+      ],
       "usb": 786829,
       "linux": 429,
       "xkb": 437
@@ -2885,6 +4070,9 @@
       "name": "LaunchCalendar"
     },
     "scanCodes": {
+      "android": [
+        397
+      ],
       "usb": 786830,
       "linux": 397,
       "xkb": 405
@@ -3023,6 +4211,9 @@
       "chromium": "LaunchAssistant"
     },
     "scanCodes": {
+      "android": [
+        583
+      ],
       "usb": 786891,
       "linux": 583,
       "xkb": 591
@@ -3043,6 +4234,10 @@
       "name": "Close"
     },
     "scanCodes": {
+      "android": [
+        160,
+        206
+      ],
       "usb": 786947,
       "linux": 206,
       "xkb": 214
@@ -3063,6 +4258,9 @@
       "name": "Print"
     },
     "scanCodes": {
+      "android": [
+        210
+      ],
       "usb": 786952,
       "linux": 210,
       "xkb": 218
@@ -3074,6 +4272,9 @@
       "chromium": "BrowserSearch"
     },
     "scanCodes": {
+      "android": [
+        217
+      ],
       "usb": 786977,
       "linux": 217,
       "xkb": 225,
@@ -3110,6 +4311,9 @@
       "chromium": "BrowserForward"
     },
     "scanCodes": {
+      "android": [
+        159
+      ],
       "usb": 786981,
       "linux": 159,
       "xkb": 167,
@@ -3146,6 +4350,9 @@
       "chromium": "BrowserFavorites"
     },
     "scanCodes": {
+      "android": [
+        156
+      ],
       "usb": 786986,
       "linux": 156,
       "xkb": 164,
@@ -3188,6 +4395,9 @@
       "name": "Redo"
     },
     "scanCodes": {
+      "android": [
+        182
+      ],
       "usb": 787065,
       "linux": 182,
       "xkb": 190

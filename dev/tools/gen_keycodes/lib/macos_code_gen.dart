@@ -11,19 +11,19 @@ import 'physical_key_data.dart';
 import 'utils.dart';
 
 const List<String> kModifiersOfInterest = <String>[
-  'shiftLeft',
-  'shiftRight',
-  'controlLeft',
-  'controlRight',
-  'altLeft',
-  'altRight',
-  'metaLeft',
-  'metaRight',
+  'ShiftLeft',
+  'ShiftRight',
+  'ControlLeft',
+  'ControlRight',
+  'AltLeft',
+  'AltRight',
+  'MetaLeft',
+  'MetaRight',
 ];
 
 // The name of keys that require special attention.
 const List<String> kSpecialPhysicalKeys = <String>['CapsLock'];
-const List<String> kSpecialLogicalKeys = <String>['capsLock'];
+const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 
 String _toConstantVariableName(String variableName) {
   return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';
