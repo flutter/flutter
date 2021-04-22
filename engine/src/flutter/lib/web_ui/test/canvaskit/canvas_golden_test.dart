@@ -271,14 +271,10 @@ void testMain() {
       ));
     });
 
-    // TODO(yjbanov): paragraph fontWeight doesn't seem to work.
-    //                https://github.com/flutter/flutter/issues/74338
     test('text styles - paragraph weight', () async {
       await testTextStyle('paragraph weight', paragraphFontWeight: ui.FontWeight.w900);
     });
 
-    // TODO(yjbanov): paragraph fontStyle doesn't seem to work.
-    //                https://github.com/flutter/flutter/issues/74338
     test('text style - paragraph font style', () async {
       await testTextStyle(
         'paragraph font style',
@@ -471,8 +467,6 @@ void testMain() {
       );
     });
 
-    // TODO(yjbanov): paragraph fontWeight doesn't seem to work.
-    //                https://github.com/flutter/flutter/issues/74338
     test('text style - override font weight', () async {
       await testTextStyle(
         'override font weight',
@@ -481,8 +475,6 @@ void testMain() {
       );
     });
 
-    // TODO(yjbanov): paragraph fontStyle doesn't seem to work.
-    //                https://github.com/flutter/flutter/issues/74338
     test('text style - override font style', () async {
       await testTextStyle(
         'override font style',
@@ -1155,8 +1147,8 @@ Future<void> testTextStyle(
       fontSize: paragraphFontSize,
       height: paragraphHeight,
       textHeightBehavior: paragraphTextHeightBehavior,
-      fontWeight: ui.FontWeight.normal,
-      fontStyle: ui.FontStyle.normal,
+      fontWeight: paragraphFontWeight,
+      fontStyle: paragraphFontStyle,
       strutStyle: paragraphStrutStyle,
       ellipsis: paragraphEllipsis,
       locale: paragraphLocale,
