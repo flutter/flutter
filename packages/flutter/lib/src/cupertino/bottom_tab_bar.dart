@@ -145,10 +145,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     assert(debugCheckHasMediaQuery(context));
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    final Color backgroundColor = CupertinoDynamicColor.resolve(
-      this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
-      context,
-    );
+    final Color backgroundColor = CupertinoDynamicColor.maybeResolve(this.backgroundColor, context)
+      ?? CupertinoTheme.of(context).barBackgroundColor;
 
     BorderSide resolveBorderSide(BorderSide side) {
       return side == BorderSide.none
