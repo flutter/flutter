@@ -13,12 +13,11 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('VsCodeInstallLocation equality', () {
-    const VsCodeInstallLocation installLocation1 = VsCodeInstallLocation('abc', 'zyx', edition: '123', isInsiders: true);
-    const VsCodeInstallLocation installLocation2 = VsCodeInstallLocation('abc', 'zyx', edition: '123', isInsiders: true);
-    const VsCodeInstallLocation installLocation3 = VsCodeInstallLocation('cba', 'zyx', edition: '123', isInsiders: true);
-    const VsCodeInstallLocation installLocation4 = VsCodeInstallLocation('abc', 'xyz', edition: '123', isInsiders: true);
-    const VsCodeInstallLocation installLocation5 = VsCodeInstallLocation('abc', 'xyz', edition: '321', isInsiders: true);
-    const VsCodeInstallLocation installLocation6 = VsCodeInstallLocation('abc', 'zyx', edition: '123', isInsiders: false);
+    const VsCodeInstallLocation installLocation1 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const VsCodeInstallLocation installLocation2 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const VsCodeInstallLocation installLocation3 = VsCodeInstallLocation('cba', 'zyx', edition: '123');
+    const VsCodeInstallLocation installLocation4 = VsCodeInstallLocation('abc', 'xyz', edition: '123');
+    const VsCodeInstallLocation installLocation5 = VsCodeInstallLocation('abc', 'xyz', edition: '321');
 
     expect(installLocation1, installLocation2);
     expect(installLocation1.hashCode, installLocation2.hashCode);
@@ -28,8 +27,6 @@ void main() {
     expect(installLocation1.hashCode, isNot(installLocation4.hashCode));
     expect(installLocation1, isNot(installLocation5));
     expect(installLocation1.hashCode, isNot(installLocation5.hashCode));
-    expect(installLocation1, isNot(installLocation6));
-    expect(installLocation1.hashCode, isNot(installLocation6.hashCode));
   });
 
   testWithoutContext('VsCode.fromDirectory does not crash when packages.json is malformed', () {
@@ -44,7 +41,7 @@ void main() {
     expect(vsCode.version, Version.unknown);
   });
 
-  testWithoutContext('can locate non-Insider installations on macOS', () {
+  testWithoutContext('can locate installations on macOS', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     const String home = '/home/me';
     final Platform platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{'HOME': home});
@@ -86,8 +83,7 @@ void main() {
     ]);
 
     final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
-    // Finds three non-Insider installations.
-    expect(installed.length, 3);
+    expect(installed.length, 6);
     expect(processManager, hasNoRemainingExpectations);
   });
 }

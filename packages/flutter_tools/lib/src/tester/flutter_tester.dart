@@ -167,9 +167,7 @@ class FlutterTesterDevice extends Device {
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
-      treeShakeIcons: buildInfo.treeShakeIcons,
       assetDirPath: assetDirectory.path,
     );
 

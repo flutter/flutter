@@ -30,6 +30,7 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -938,10 +939,18 @@ abstract class ResidentHandlers {
   /// If the device has a connected vmservice, this method will attempt to hide
   /// and restore the debug banner before taking the screenshot.
   ///
-  /// Throws an [AssertionError] if [Device.supportsScreenshot] is not true.
+  /// If the device type does not support a "native" screenshot, then this
+  /// will fallback to a rasterizer screenshot from the engine. This has the
+  /// downside of being unable to display the contents of platform views.
+  ///
+  /// This method will return without writing the screenshot file if any
+  /// RPC errors are encountered, printing them to stderr. This is true even
+  /// if an error occurs after the data has already been received, such as
+  /// from restoring the debug banner.
   Future<void> screenshot(FlutterDevice device) async {
-    assert(device.device.supportsScreenshot);
-
+    if (!device.device.supportsScreenshot && !supportsServiceProtocol) {
+      return;
+    }
     final Status status = logger.startProgress(
       'Taking screenshot for ${device.device.name}...',
     );
@@ -950,38 +959,16 @@ abstract class ResidentHandlers {
       'flutter',
       'png',
     );
-    List<FlutterView> views = <FlutterView>[];
-    Future<bool> setDebugBanner(bool value) async {
-      try {
-        for (final FlutterView view in views) {
-          await device.vmService.flutterDebugAllowBanner(
-            value,
-            isolateId: view.uiIsolate.id,
-          );
-        }
-        return true;
-      } on Exception catch (error) {
-        status.cancel();
-        logger.printError('Error communicating with Flutter on the device: $error');
-        return false;
-      }
-    }
 
     try {
-      if (supportsServiceProtocol && isRunningDebug) {
-        // Ensure that the vmService access is guarded by supportsServiceProtocol, it
-        // will be null in release mode.
-        views = await device.vmService.getFlutterViews();
-        if (!await setDebugBanner(false)) {
-          return;
-        }
+      bool result;
+      if (device.device.supportsScreenshot) {
+        result = await _toggleDebugBanner(device, () => device.device.takeScreenshot(outputFile));
+      } else {
+        result = await _takeVmServiceScreenshot(device, outputFile);
       }
-      try {
-        await device.device.takeScreenshot(outputFile);
-      } finally {
-        if (supportsServiceProtocol && isRunningDebug) {
-          await setDebugBanner(true);
-        }
+      if (!result) {
+        return;
       }
       final int sizeKB = outputFile.lengthSync() ~/ 1024;
       status.stop();
@@ -993,6 +980,57 @@ abstract class ResidentHandlers {
       logger.printError('Error taking screenshot: $error');
     }
   }
+
+  Future<bool> _takeVmServiceScreenshot(FlutterDevice device, File outputFile) async {
+    final bool isWebDevice = device.targetPlatform == TargetPlatform.web_javascript;
+    assert(supportsServiceProtocol);
+
+    return _toggleDebugBanner(device, () async {
+      final vm_service.Response response = isWebDevice
+        ? await device.vmService.callMethodWrapper('ext.dwds.screenshot')
+        : await device.vmService.screenshot();
+      if (response == null) {
+       throw Exception('Failed to take screenshot');
+      }
+      final String data = response.json[isWebDevice ? 'data' : 'screenshot'] as String;
+      outputFile.writeAsBytesSync(base64.decode(data));
+    });
+  }
+
+  Future<bool> _toggleDebugBanner(FlutterDevice device, Future<void> Function() cb) async {
+    List<vm_service.IsolateRef> views = <vm_service.IsolateRef>[];
+    if (supportsServiceProtocol) {
+      views = await device._getCurrentIsolates();
+    }
+
+    Future<bool> setDebugBanner(bool value) async {
+      try {
+        for (final vm_service.IsolateRef view in views) {
+          await device.vmService.flutterDebugAllowBanner(
+            value,
+            isolateId: view.id,
+          );
+        }
+        return true;
+      } on vm_service.RPCError catch (error) {
+        logger.printError('Error communicating with Flutter on the device: $error');
+        return false;
+      }
+    }
+    if (!await setDebugBanner(false)) {
+      return false;
+    }
+    bool succeeded = true;
+    try {
+      await cb();
+    } finally {
+      if (!await setDebugBanner(true)) {
+        succeeded = false;
+      }
+    }
+    return succeeded;
+  }
+
 
   /// Remove sigusr signal handlers.
   Future<void> cleanupAfterSignal();
@@ -1633,9 +1671,7 @@ class TerminalHandler {
         return true;
       case 's':
         for (final FlutterDevice device in residentRunner.flutterDevices) {
-          if (device.device.supportsScreenshot) {
-            await residentRunner.screenshot(device);
-          }
+          await residentRunner.screenshot(device);
         }
         return true;
       case 'S':

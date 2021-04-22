@@ -5,8 +5,8 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:mime/mime.dart' as mime;
+import 'package:process/process.dart';
 
 import '../../artifacts.dart';
 import '../../base/common.dart';

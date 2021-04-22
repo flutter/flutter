@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -41,11 +39,11 @@ String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
 /// A utility class for interacting with Xcode command line tools.
 class Xcode {
   Xcode({
-    @required Platform platform,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required XcodeProjectInterpreter xcodeProjectInterpreter,
   })  : _platform = platform,
         _fileSystem = fileSystem,
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
@@ -58,10 +56,10 @@ class Xcode {
   /// buffer logger, and test [XcodeProjectInterpreter].
   @visibleForTesting
   factory Xcode.test({
-    @required ProcessManager processManager,
-    XcodeProjectInterpreter xcodeProjectInterpreter,
-    Platform platform,
-    FileSystem fileSystem,
+    required ProcessManager processManager,
+    XcodeProjectInterpreter? xcodeProjectInterpreter,
+    Platform? platform,
+    FileSystem? fileSystem,
   }) {
     platform ??= FakePlatform(
       operatingSystem: 'macos',
@@ -83,8 +81,8 @@ class Xcode {
 
   bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
-  String _xcodeSelectPath;
-  String get xcodeSelectPath {
+  String? _xcodeSelectPath;
+  String? get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
         _xcodeSelectPath = _processUtils.runSync(
@@ -101,11 +99,11 @@ class Xcode {
 
   bool get isInstalled => _xcodeProjectInterpreter.isInstalled;
 
-  Version get currentVersion => _xcodeProjectInterpreter.version;
+  Version? get currentVersion => _xcodeProjectInterpreter.version;
 
-  String get versionText => _xcodeProjectInterpreter.versionText;
+  String? get versionText => _xcodeProjectInterpreter.versionText;
 
-  bool _eulaSigned;
+  bool? _eulaSigned;
   /// Has the EULA been signed?
   bool get eulaSigned {
     if (_eulaSigned == null) {
@@ -124,10 +122,10 @@ class Xcode {
         _eulaSigned = false;
       }
     }
-    return _eulaSigned;
+    return _eulaSigned ?? false;
   }
 
-  bool _isSimctlInstalled;
+  bool? _isSimctlInstalled;
 
   /// Verifies that simctl is installed by trying to run it.
   bool get isSimctlInstalled {
@@ -143,21 +141,23 @@ class Xcode {
         _isSimctlInstalled = false;
       }
     }
-    return _isSimctlInstalled;
+    return _isSimctlInstalled ?? false;
   }
 
   bool get isRequiredVersionSatisfactory {
-    if (!_xcodeProjectInterpreter.isInstalled) {
+    final Version? version = currentVersion;
+    if (version == null) {
       return false;
     }
-    return currentVersion >= xcodeRequiredVersion;
+    return version >= xcodeRequiredVersion;
   }
 
   bool get isRecommendedVersionSatisfactory {
-    if (!_xcodeProjectInterpreter.isInstalled) {
+    final Version? version = currentVersion;
+    if (version == null) {
       return false;
     }
-    return currentVersion >= xcodeRecommendedVersion;
+    return version >= xcodeRecommendedVersion;
   }
 
   /// See [XcodeProjectInterpreter.xcrunCommand].
@@ -188,21 +188,17 @@ class Xcode {
     return runResult.stdout.trim();
   }
 
-  String getSimulatorPath() {
-    if (xcodeSelectPath == null) {
+  String? getSimulatorPath() {
+    final String? selectPath = xcodeSelectPath;
+    if (selectPath == null) {
       return null;
     }
-    final List<String> searchPaths = <String>[
-      _fileSystem.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
-    ];
-    return searchPaths.where((String p) => p != null).firstWhere(
-      (String p) => _fileSystem.directory(p).existsSync(),
-      orElse: () => null,
-    );
+    final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
+    return _fileSystem.directory(appPath).existsSync() ? appPath : null;
   }
 }
 
-EnvironmentType environmentTypeFromSdkroot(Directory sdkroot) {
+EnvironmentType? environmentTypeFromSdkroot(Directory sdkroot) {
   assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = sdkroot.basename.toLowerCase();
