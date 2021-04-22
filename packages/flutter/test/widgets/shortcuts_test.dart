@@ -96,39 +96,44 @@ void main() {
         LogicalKeyboardKey.keyD,
       });
       expect(
-          set1.keys,
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.keyA,
-          }));
+        set1.keys,
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.keyA,
+        }),
+      );
       expect(
-          set2.keys,
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.keyA,
-            LogicalKeyboardKey.keyB,
-          }));
+        set2.keys,
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.keyA,
+          LogicalKeyboardKey.keyB,
+        }),
+      );
       expect(
-          set3.keys,
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.keyA,
-            LogicalKeyboardKey.keyB,
-            LogicalKeyboardKey.keyC,
-          }));
+        set3.keys,
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.keyA,
+          LogicalKeyboardKey.keyB,
+          LogicalKeyboardKey.keyC,
+        }),
+      );
       expect(
-          set4.keys,
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.keyA,
-            LogicalKeyboardKey.keyB,
-            LogicalKeyboardKey.keyC,
-            LogicalKeyboardKey.keyD,
-          }));
+        set4.keys,
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.keyA,
+          LogicalKeyboardKey.keyB,
+          LogicalKeyboardKey.keyC,
+          LogicalKeyboardKey.keyD,
+        }),
+      );
       expect(
-          setFromSet.keys,
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.keyA,
-            LogicalKeyboardKey.keyB,
-            LogicalKeyboardKey.keyC,
-            LogicalKeyboardKey.keyD,
-          }));
+        setFromSet.keys,
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.keyA,
+          LogicalKeyboardKey.keyB,
+          LogicalKeyboardKey.keyC,
+          LogicalKeyboardKey.keyD,
+        }),
+      );
     });
     test('LogicalKeySet works as a map key.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
@@ -821,7 +826,7 @@ void main() {
           LogicalKeySet(
             LogicalKeyboardKey.shift,
             LogicalKeyboardKey.arrowRight,
-          ): const DirectionalFocusIntent(TraversalDirection.right)
+          ): const DirectionalFocusIntent(TraversalDirection.right),
         },
         child: const SizedBox(),
       ).debugFillProperties(builder);
@@ -834,7 +839,7 @@ void main() {
       expect(
           description[0],
           equalsIgnoringHashCodes(
-              'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000}'));
+              'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000}',),);
     });
     test('Shortcuts diagnostics work when debugLabel specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -890,7 +895,7 @@ void main() {
               orderedIntents: <Intent>[
                 ActivateIntent(),
                 ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
-              ]
+              ],
             ),
             LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
             LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
@@ -912,7 +917,7 @@ void main() {
                   Container(
                     color: Colors.blue,
                     height: 1000,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -926,7 +931,7 @@ void main() {
         equalsIgnoringHashCodes('FocusScopeNode#00000(_ModalScopeState<dynamic> Focus Scope [PRIMARY FOCUS])'),
       );
       final ScrollController controller = PrimaryScrollController.of(
-        tester.element(find.byType(ListView))
+        tester.element(find.byType(ListView)),
       )!;
       expect(controller.position.pixels, 0.0);
       expect(value, isTrue);

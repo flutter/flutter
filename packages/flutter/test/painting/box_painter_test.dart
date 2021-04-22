@@ -101,11 +101,9 @@ void main() {
     final BoxShadow shadow4 = BoxShadow.lerp(shadow2, shadow3, 0.5)!;
     expect(shadow4.blurRadius, equals(2.0));
 
-    List<BoxShadow> shadowList = BoxShadow.lerpList(
-        <BoxShadow>[shadow2, shadow1], <BoxShadow>[shadow3], 0.5)!;
+    List<BoxShadow> shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2, shadow1], <BoxShadow>[shadow3], 0.5)!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
-    shadowList = BoxShadow.lerpList(
-        <BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5)!;
+    shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5)!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
   });
 

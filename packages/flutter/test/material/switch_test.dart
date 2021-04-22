@@ -297,30 +297,32 @@ void main() {
     );
 
     expect(
-        Material.of(tester.element(find.byType(Switch))),
-        paints
-          ..rrect(
-              color: const Color(0x52000000), // Black with 32% opacity
-              rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
-          ..circle(color: const Color(0x33000000))
-          ..circle(color: const Color(0x24000000))
-          ..circle(color: const Color(0x1f000000))
-          ..circle(color: Colors.grey.shade50),
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x52000000), // Black with 32% opacity
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.grey.shade50),
       reason: 'Inactive enabled switch should match these colors',
     );
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
     await tester.pump();
 
     expect(
-        Material.of(tester.element(find.byType(Switch))),
-        paints
-          ..rrect(
-              color: Colors.blue[600]!.withAlpha(0x80),
-              rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
-          ..circle(color: const Color(0x33000000))
-          ..circle(color: const Color(0x24000000))
-          ..circle(color: const Color(0x1f000000))
-          ..circle(color: Colors.blue[600]),
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.blue[600]!.withAlpha(0x80),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.blue[600]),
       reason: 'Active enabled switch should match these colors',
     );
   });
@@ -349,7 +351,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -380,7 +383,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -423,7 +427,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.blue[500],
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -437,7 +442,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.green[500],
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -744,7 +750,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -762,7 +769,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x52000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -780,7 +788,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -812,7 +821,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..circle(color: Colors.orange[500], radius: splashRadius)
+      paints..circle(color: Colors.orange[500], radius: splashRadius),
     );
   });
 
@@ -845,7 +854,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -865,7 +875,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -881,7 +892,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x1f000000),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1122,7 +1134,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1138,7 +1151,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1154,7 +1168,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x52000000), // Black with 32% opacity,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1170,7 +1185,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
@@ -1227,7 +1243,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1248,7 +1265,8 @@ void main() {
       paints
         ..rrect(
             color: const Color(0x801e88e5),
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x1f000000))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -1306,7 +1324,8 @@ void main() {
       paints
         ..rrect(
             color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive disabled switch track should use this value',
     );
 
@@ -1318,7 +1337,8 @@ void main() {
       paints
         ..rrect(
             color: activeDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Active disabled switch should match these colors',
     );
 
@@ -1330,7 +1350,8 @@ void main() {
       paints
         ..rrect(
             color: inactiveEnabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1342,7 +1363,8 @@ void main() {
       paints
         ..rrect(
             color: inactiveDisabledTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive disabled switch should match these colors',
     );
   });
@@ -1395,7 +1417,8 @@ void main() {
       paints
         ..rrect(
             color: focusedTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1411,7 +1434,8 @@ void main() {
       paints
         ..rrect(
             color: hoveredTrackColor,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))),
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          ),
       reason: 'Inactive enabled switch should match these colors',
     );
   });
@@ -1461,7 +1485,8 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)))
+            rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+          )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))

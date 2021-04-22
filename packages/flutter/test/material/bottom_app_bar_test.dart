@@ -96,7 +96,7 @@ void main() {
                 bottomNavigationBar: BottomAppBar(),
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -119,11 +119,11 @@ void main() {
                   onPressed: null,
                 ),
                 bottomNavigationBar: BottomAppBar(
-                  color: Color(0xff0000ff)
+                  color: Color(0xff0000ff),
                 ),
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -143,7 +143,7 @@ void main() {
             color: const ColorScheme.dark().surface,
           ),
         ),
-      )
+      ),
     );
 
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));

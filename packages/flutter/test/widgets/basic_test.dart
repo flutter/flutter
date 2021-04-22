@@ -75,7 +75,7 @@ void main() {
                 width: 100.0,
                 height: 100.0,
                 child: Container(
-                  color: const Color(0xFF0000FF)
+                  color: const Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -105,7 +105,7 @@ void main() {
                 width: 100.0,
                 height: 100.0,
                 child: Container(
-                  color: const Color(0xFF0000FF)
+                  color: const Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -135,7 +135,7 @@ void main() {
                 width: 100.0,
                 height: 100.0,
                 child: Container(
-                  color: const Color(0xFF0000FF)
+                  color: const Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -184,7 +184,7 @@ void main() {
               ),
             );
           },
-        )
+        ),
       );
 
       expect(
@@ -502,7 +502,7 @@ void main() {
                         onExit: (_) { logs.add('exit3'); },
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -580,7 +580,7 @@ void main() {
                         onExit: (_) { logs.add('exit3'); },
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -639,7 +639,7 @@ class HitsRenderBox extends Matcher {
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox
+      (HitTestEntry entry) => entry.target == renderBox,
     ).isNotEmpty;
   }
 }
@@ -659,7 +659,7 @@ class DoesNotHitRenderBox extends Matcher {
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox
+      (HitTestEntry entry) => entry.target == renderBox,
     ).isEmpty;
   }
 }

@@ -52,9 +52,9 @@ void main() {
 
   Future<void> preparePicker(
     WidgetTester tester,
-    Future<void> Function(Future<DateTimeRange?> date) callback,
-    { TextDirection textDirection = TextDirection.ltr }
-  ) async {
+    Future<void> Function(Future<DateTimeRange?> date) callback, {
+    TextDirection textDirection = TextDirection.ltr,
+  }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -118,13 +118,12 @@ void main() {
       await tester.tap(find.text('SAVE'));
       expect(await range, DateTimeRange(
         start: DateTime(2016, DateTime.january, 15),
-        end: DateTime(2016, DateTime.january, 25)
-      ));
+        end: DateTime(2016, DateTime.january, 25),
+      ),);
     });
   });
 
-  testWidgets('Last month header should be visible if last date is selected',
-      (WidgetTester tester) async {
+  testWidgets('Last month header should be visible if last date is selected', (WidgetTester tester) async {
     firstDate = DateTime(2015, DateTime.january, 1);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
@@ -138,8 +137,7 @@ void main() {
     });
   });
 
-  testWidgets('First month header should be visible if first date is selected',
-      (WidgetTester tester) async {
+  testWidgets('First month header should be visible if first date is selected', (WidgetTester tester) async {
     firstDate = DateTime(2015, DateTime.january, 1);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
@@ -154,8 +152,7 @@ void main() {
     });
   });
 
-  testWidgets('Current month header should be visible if no date is selected',
-      (WidgetTester tester) async {
+  testWidgets('Current month header should be visible if no date is selected', (WidgetTester tester) async {
     firstDate = DateTime(2015, DateTime.january, 1);
     lastDate = DateTime(2016, DateTime.december, 31);
     currentDate = DateTime(2016, DateTime.september, 1);
@@ -612,8 +609,7 @@ void main() {
           start: DateTime(2016, DateTime.january, 19),
           end: DateTime(2016, DateTime.january, 21),
         ));
-      },
-      textDirection: TextDirection.rtl);
+      }, textDirection: TextDirection.rtl);
     });
   });
 
@@ -984,7 +980,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
         _dateRangePickerRoute,
         arguments: <String, dynamic>{
           'datePickerEntryMode': widget.datePickerEntryMode.index,
-        }
+        },
       );
     },
   );

@@ -996,7 +996,7 @@ void main() {
                   child: TextButton(
                     style: TextButton.styleFrom(padding: const EdgeInsets.all(22)),
                     onPressed: () {},
-                    child: const Text('TextButton')
+                    child: const Text('TextButton'),
                   ),
                 ),
               ),

@@ -90,7 +90,7 @@ void main() {
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}');
-          }
+          },
         );
 
         return Scaffold(
@@ -227,7 +227,7 @@ void main() {
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
-          }
+          },
         );
 
         return Scaffold(
@@ -344,7 +344,7 @@ void main() {
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
-          }
+          },
         );
 
         return Scaffold(

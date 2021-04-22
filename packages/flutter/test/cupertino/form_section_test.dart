@@ -52,17 +52,16 @@ void main() {
     // retrieved should have 3 items for an input [children] param with 1 child.
     final Column childrenColumn = tester.widget(find.byType(Column).at(1));
     expect(childrenColumn.children.length, 3);
-  });
+  },);
 
-  testWidgets('Shows long dividers in edge-to-edge section part 2',
-      (WidgetTester tester) async {
+  testWidgets('Shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoFormSection(
             children: <Widget>[
               CupertinoTextFormFieldRow(),
-              CupertinoTextFormFieldRow()
+              CupertinoTextFormFieldRow(),
             ],
           ),
         ),
@@ -76,8 +75,7 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgets('Does not show long dividers in insetGrouped section part 1',
-      (WidgetTester tester) async {
+  testWidgets('Does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -95,8 +93,7 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgets('Does not show long dividers in insetGrouped section part 2',
-      (WidgetTester tester) async {
+  testWidgets('Does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'App',
@@ -104,7 +101,7 @@ void main() {
           child: CupertinoFormSection.insetGrouped(
             children: <Widget>[
               CupertinoTextFormFieldRow(),
-              CupertinoTextFormFieldRow()
+              CupertinoTextFormFieldRow(),
             ],
           ),
         ),
@@ -141,8 +138,7 @@ void main() {
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgets('Setting clipBehavior clips children section',
-      (WidgetTester tester) async {
+  testWidgets('Setting clipBehavior clips children section', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -157,8 +153,7 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgets('Not setting clipBehavior does not clip children section',
-      (WidgetTester tester) async {
+  testWidgets('Not setting clipBehavior does not clip children section', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(

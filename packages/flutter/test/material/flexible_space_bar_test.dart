@@ -186,7 +186,7 @@ void main() {
                                   rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHeader,
-                                    SemanticsFlag.namesRoute
+                                    SemanticsFlag.namesRoute,
                                   ],
                                   label: 'Title',
                                   textDirection: TextDirection.ltr,
@@ -292,7 +292,7 @@ void main() {
                                   rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHeader,
-                                    SemanticsFlag.namesRoute
+                                    SemanticsFlag.namesRoute,
                                   ],
                                   label: 'Title',
                                   textDirection: TextDirection.ltr,
@@ -417,7 +417,7 @@ void main() {
                   ),
                 ],
               );
-            }
+            },
           ),
         ),
       ),

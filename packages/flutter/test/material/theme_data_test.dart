@@ -25,8 +25,11 @@ void main() {
     for (final TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = ThemeData(platform: platform);
       final Typography typography = Typography.material2018(platform: platform);
-      expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
-          reason: 'Not using default typography for $platform');
+      expect(
+        theme.textTheme,
+        typography.black.apply(decoration: TextDecoration.none),
+        reason: 'Not using default typography for $platform',
+      );
     }
   });
 
