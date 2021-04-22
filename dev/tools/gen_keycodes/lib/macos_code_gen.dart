@@ -59,27 +59,6 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     return result.toString().trimRight();
   }
 
-  /// This generates the map of macOS number pad key codes to logical keys.
-  // String get _numpadMap {
-  //   final StringBuffer numPadMap = StringBuffer();
-  //   for (final PhysicalKeyEntry entry in numpadKeyData) {
-  //     if (entry.macOsScanCode != null) {
-  //       numPadMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
-  //     }
-  //   }
-  //   return numPadMap.toString().trimRight();
-  // }
-
-  // String get _functionKeyMap {
-  //   final StringBuffer functionKeyMap = StringBuffer();
-  //   for (final PhysicalKeyEntry entry in functionKeyData) {
-  //     if (entry.macOsScanCode != null) {
-  //       functionKeyMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
-  //     }
-  //   }
-  //   return functionKeyMap.toString().trimRight();
-  // }
-
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
     final StringBuffer buffer = StringBuffer();

@@ -28,19 +28,6 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     return androidKeyCodeMap.toString().trimRight();
   }
 
-  // /// This generates the map of Android number pad key codes to logical keys.
-  // String get _androidNumpadMap {
-  //   final StringBuffer androidKeyCodeMap = StringBuffer();
-  //   // for (final PhysicalKeyEntry entry in numpadKeyData) {
-  //   //   if (entry.androidKeyCodes != null) {
-  //   //     for (final int code in entry.androidKeyCodes.cast<int>()) {
-  //   //       androidKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
-  //   //     }
-  //   //   }
-  //   // }
-  //   return androidKeyCodeMap.toString().trimRight();
-  // }
-
   /// This generates the map of Android scan codes to physical keys.
   String get _androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
@@ -66,7 +53,6 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     return <String, String>{
       'ANDROID_SCAN_CODE_MAP': _androidScanCodeMap,
       'ANDROID_KEY_CODE_MAP': _androidKeyCodeMap,
-      // 'ANDROID_NUMPAD_MAP': _androidNumpadMap,
     };
   }
 }

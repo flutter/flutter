@@ -11,6 +11,20 @@ import 'package:flutter/foundation.dart';
 // Edit the template dev/tools/gen_keycodes/data/keyboard_key.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
+/// A base class for all keyboard key types.
+///
+/// See also:
+///
+///  * [PhysicalKeyboardKey], a class with static values that describe the keys
+///    that are returned from [RawKeyEvent.physicalKey].
+///  * [LogicalKeyboardKey], a class with static values that describe the keys
+///    that are returned from [RawKeyEvent.logicalKey].
+abstract class KeyboardKey with Diagnosticable {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const KeyboardKey();
+}
+
 /// A class with static values that describe the keys that are returned from
 /// [RawKeyEvent.logicalKey] and [KeyEvent.logical].
 ///

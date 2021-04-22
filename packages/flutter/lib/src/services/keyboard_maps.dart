@@ -512,7 +512,26 @@ const Map<int, PhysicalKeyboardKey> kAndroidToPhysicalKey = <int, PhysicalKeyboa
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
 const Map<int, LogicalKeyboardKey> kAndroidNumPadMap = <int, LogicalKeyboardKey>{
-
+  144: LogicalKeyboardKey.numpad0,
+  145: LogicalKeyboardKey.numpad1,
+  146: LogicalKeyboardKey.numpad2,
+  147: LogicalKeyboardKey.numpad3,
+  148: LogicalKeyboardKey.numpad4,
+  149: LogicalKeyboardKey.numpad5,
+  150: LogicalKeyboardKey.numpad6,
+  151: LogicalKeyboardKey.numpad7,
+  152: LogicalKeyboardKey.numpad8,
+  153: LogicalKeyboardKey.numpad9,
+  154: LogicalKeyboardKey.numpadDivide,
+  155: LogicalKeyboardKey.numpadMultiply,
+  156: LogicalKeyboardKey.numpadSubtract,
+  157: LogicalKeyboardKey.numpadAdd,
+  158: LogicalKeyboardKey.numpadDecimal,
+  159: LogicalKeyboardKey.numpadComma,
+  160: LogicalKeyboardKey.numpadEnter,
+  161: LogicalKeyboardKey.numpadEqual,
+  162: LogicalKeyboardKey.numpadParenLeft,
+  163: LogicalKeyboardKey.numpadParenRight,
 };
 
 /// Maps Fuchsia-specific IDs to the matching [LogicalKeyboardKey].
@@ -1867,7 +1886,32 @@ const Map<int, LogicalKeyboardKey> kGtkToLogicalKey = <int, LogicalKeyboardKey>{
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
 const Map<int, LogicalKeyboardKey> kGtkNumpadMap = <int, LogicalKeyboardKey>{
-
+  65421: LogicalKeyboardKey.numpadEnter,
+  65429: LogicalKeyboardKey.numpad7,
+  65430: LogicalKeyboardKey.numpad4,
+  65431: LogicalKeyboardKey.numpad8,
+  65432: LogicalKeyboardKey.numpad6,
+  65433: LogicalKeyboardKey.numpad2,
+  65434: LogicalKeyboardKey.numpad9,
+  65435: LogicalKeyboardKey.numpad3,
+  65436: LogicalKeyboardKey.numpad1,
+  65438: LogicalKeyboardKey.numpad0,
+  65439: LogicalKeyboardKey.numpadDecimal,
+  65450: LogicalKeyboardKey.numpadMultiply,
+  65451: LogicalKeyboardKey.numpadAdd,
+  65453: LogicalKeyboardKey.numpadSubtract,
+  65455: LogicalKeyboardKey.numpadDivide,
+  65456: LogicalKeyboardKey.numpad0,
+  65457: LogicalKeyboardKey.numpad1,
+  65458: LogicalKeyboardKey.numpad2,
+  65459: LogicalKeyboardKey.numpad3,
+  65460: LogicalKeyboardKey.numpad4,
+  65461: LogicalKeyboardKey.numpad5,
+  65462: LogicalKeyboardKey.numpad6,
+  65463: LogicalKeyboardKey.numpad7,
+  65464: LogicalKeyboardKey.numpad8,
+  65465: LogicalKeyboardKey.numpad9,
+  65469: LogicalKeyboardKey.numpadEqual,
 };
 
 /// Maps XKB specific key code values representing [PhysicalKeyboardKey].
@@ -3128,5 +3172,20 @@ const Map<int, PhysicalKeyboardKey> kWindowsToPhysicalKey = <int, PhysicalKeyboa
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
 const Map<int, LogicalKeyboardKey> kWindowsNumPadMap = <int, LogicalKeyboardKey>{
-
+  96: LogicalKeyboardKey.numpad0,
+  97: LogicalKeyboardKey.numpad1,
+  98: LogicalKeyboardKey.numpad2,
+  99: LogicalKeyboardKey.numpad3,
+  100: LogicalKeyboardKey.numpad4,
+  101: LogicalKeyboardKey.numpad5,
+  102: LogicalKeyboardKey.numpad6,
+  103: LogicalKeyboardKey.numpad7,
+  104: LogicalKeyboardKey.numpad8,
+  105: LogicalKeyboardKey.numpad9,
+  106: LogicalKeyboardKey.numpadMultiply,
+  107: LogicalKeyboardKey.numpadAdd,
+  109: LogicalKeyboardKey.numpadSubtract,
+  110: LogicalKeyboardKey.numpadDecimal,
+  111: LogicalKeyboardKey.numpadDivide,
+  146: LogicalKeyboardKey.numpadEqual,
 };
