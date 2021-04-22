@@ -57,7 +57,7 @@ void main() {
         // Let `idevicescreenshot` fail with exit code 1.
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
-            'Artifact.idevicescreenshot.TargetPlatform.ios',
+            'HostArtifact.idevicescreenshot',
             outputFile.path,
             '--udid',
             '1234',
@@ -86,7 +86,7 @@ void main() {
       testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
-            'Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234',
+            'HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234',
           ],
           environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
         ));
@@ -109,7 +109,7 @@ void main() {
       testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
-            'Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234', '--network',
+            'HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234', '--network',
           ],
           environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
         ));
