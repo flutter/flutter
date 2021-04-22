@@ -20,9 +20,6 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
-
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -48,9 +45,6 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
-
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('empty-input'));
     expect(finder, findsOneWidget);
@@ -75,9 +69,6 @@ void main() {
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // This text will show no-enter initially. It will have 'enter-pressed'
     // after `onFieldSubmitted` of TextField is triggered.
@@ -112,9 +103,6 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
-
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -146,9 +134,6 @@ void main() {
   testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -196,9 +181,6 @@ void main() {
     const String text = 'Lorem ipsum dolor sit amet';
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Select something from the selectable text.
     final Finder finder = find.byKey(const Key('selectable'));

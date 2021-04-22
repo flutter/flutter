@@ -92,8 +92,7 @@ void main() {
     expect(events[0], isA<PointerHoverEvent>());
     expect(events[1], isA<PointerHoverEvent>());
     expect(events[2], isA<PointerHoverEvent>());
-    expect(pointerRouterEvents.length, 6,
-        reason: 'pointerRouterEvents contains: $pointerRouterEvents');
+    expect(pointerRouterEvents.length, 6, reason: 'pointerRouterEvents contains: $pointerRouterEvents');
     expect(pointerRouterEvents[0], isA<PointerAddedEvent>());
     expect(pointerRouterEvents[1], isA<PointerHoverEvent>());
     expect(pointerRouterEvents[2], isA<PointerHoverEvent>());
@@ -151,8 +150,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -170,8 +168,7 @@ void main() {
         ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 2);
     expect(events[0], isA<PointerAddedEvent>());
@@ -191,8 +188,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -224,8 +220,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(
-        packet.data, ui.window.devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -254,8 +249,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -285,8 +279,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(
-        packet.data, ui.window.devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());

@@ -78,7 +78,7 @@ Future<void> main() async {
       r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -145,7 +145,7 @@ Future<void> main() async {
       r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
-      r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'(.+\n)+', // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -158,8 +158,7 @@ Future<void> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final Object exception = NoSuchMethodError.withInvocation(5,
-        Invocation.method(#foo, <dynamic>[2, 4]));
+    final Object exception = NoSuchMethodError.withInvocation(5, Invocation.method(#foo, <dynamic>[2, 4]));
 
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
@@ -174,8 +173,10 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: exception,
     ));
-    expect(console.join('\n'),
-      'Another exception was thrown: NoSuchMethodError: int has no foo method accepting arguments (_, _)');
+    expect(
+      console.join('\n'),
+      'Another exception was thrown: NoSuchMethodError: int has no foo method accepting arguments (_, _)',
+    );
     console.clear();
     FlutterError.resetErrorCount();
   });
