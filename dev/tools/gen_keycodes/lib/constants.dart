@@ -20,6 +20,9 @@ const int kValueMask =          0x000FFFFFFFF;
 // The next 8 bits represent where the values come from, consequently how to
 // interpret them.
 
+/// Mask for bit #39-32 portion of the code, indicating the source of the value.
+const int kSourceMask =         0x0FF00000000;
+
 /// The code prefix for keys that have a Unicode representation, generated from
 /// their code points.
 ///
@@ -73,6 +76,9 @@ const int kUnprintablePlane =   0x01000000000;
 /* Bit 43-40: Key variation */
 // The next 4 bits represent keys that have multiple variations, such as a left
 // and right variation of a modifier key, or a Numpad variation of a digit key.
+
+/// Mask for bit #43-40 portion of the code, indicating the variation of the key.
+const int kVariationMask =      0xF0000000000;
 
 /// The code prefix for pseudo-keys which represent collections of key synonyms,
 /// such as Control.

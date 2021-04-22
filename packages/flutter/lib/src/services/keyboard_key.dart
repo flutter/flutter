@@ -2573,28 +2573,28 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x3000000010d);
+  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x2000000010d);
 
   /// Represents the logical "Meta" key on the keyboard.
   ///
   /// This key represents the union of the keys {metaLeft, metaRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x30000000109);
+  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x20000000109);
 
   /// Represents the logical "Alt" key on the keyboard.
   ///
   /// This key represents the union of the keys {altLeft, altRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x30000000102);
+  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x20000000102);
 
   /// Represents the logical "Control" key on the keyboard.
   ///
   /// This key represents the union of the keys {controlLeft, controlRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x30000000105);
+  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x20000000105);
 
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
@@ -3040,10 +3040,10 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x50000000038: numpad8,
     0x50000000039: numpad9,
     0x5000000003d: numpadEqual,
-    0x3000000010d: shift,
-    0x30000000109: meta,
-    0x30000000102: alt,
-    0x30000000105: control,
+    0x2000000010d: shift,
+    0x20000000109: meta,
+    0x20000000102: alt,
+    0x20000000105: control,
   };
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
@@ -3500,10 +3500,10 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x50000000038: 'Numpad 8',
     0x50000000039: 'Numpad 9',
     0x5000000003d: 'Numpad Equal',
-    0x3000000010d: 'Shift',
-    0x30000000109: 'Meta',
-    0x30000000102: 'Alt',
-    0x30000000105: 'Control',
+    0x2000000010d: 'Shift',
+    0x20000000109: 'Meta',
+    0x20000000102: 'Alt',
+    0x20000000105: 'Control',
     };
 }
 

@@ -26,7 +26,7 @@ class SynonymKeyInfo {
   // It won't end up being the same value because it'll be in the pseudo-key
   // plane.
   LogicalKeyEntry get primaryKey => keys[0];
-  int get value => primaryKey.value | kSynonymPlane;
+  int get value => (primaryKey.value & ~kVariationMask) + kSynonymPlane;
   String get constantName => upperCamelToLowerCamel(name);
 }
 
