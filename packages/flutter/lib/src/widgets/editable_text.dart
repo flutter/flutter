@@ -42,6 +42,8 @@ typedef SelectionChangedCallback = void Function(TextSelection selection, Select
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 
+/// Signature for the generator function that produces an InlineSpan for replacement
+/// in a TextEditingInlineSpanReplacement.
 typedef InlineSpanGenerator = InlineSpan Function(String, TextRange);
 
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -96,7 +98,8 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// ```
 /// {@end-tool}
 class TextEditingInlineSpanReplacement {
-
+  /// Constructs a replacement that replaces matches of the [pattern] with the
+  /// output of the [generator].
   TextEditingInlineSpanReplacement(this.pattern, this.generator);
 
   /// The [Pattern] to match.
@@ -364,6 +367,16 @@ class ReplacementTextEditingController extends TextEditingController {
     this.composingRegionPrioritized = false
   }) : assert(replacements.isNotEmpty), super.fromValue(value);
 
+  /// The [TextEditingInlineSpanReplacment]s that are evaluated on the editing value.
+  ///
+  /// Each replacement is evaluated in order from first to last. If multiple replacement
+  /// [TextEditingInlineSpanReplacement.pattern]s match against the same range of text,
+  /// the first replacement will be used and any additional matches that overlap will
+  /// be ignored.
+  /// 
+  /// For example, if given replacements with patterns of '{[hello]}' and
+  /// '[hello]', only the first replacement will be used as the second one is always
+  /// overlapping with the first.
   final List<TextEditingInlineSpanReplacement> replacements;
 
   /// If composing regions should be matched against for replacements.
@@ -432,8 +445,8 @@ class ReplacementTextEditingController extends TextEditingController {
       );
     }
     // Sort the matches by start index. Since no overlapping exists, this is safe.
-    List<TextRange> sortedRanges = rangeSpanMapping.keys.toList();
-    sortedRanges.sort((a, b) => a.start.compareTo(b.start));
+    final List<TextRange> sortedRanges = rangeSpanMapping.keys.toList();
+    sortedRanges.sort((TextRange a, TextRange b) => a.start.compareTo(b.start));
     // Create TextSpans for non-replaced text ranges and insert the replacements spans
     // for any ranges that are marked to be replaced.
     final List<InlineSpan> spans = <InlineSpan>[];

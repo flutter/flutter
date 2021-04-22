@@ -7525,7 +7525,7 @@ void main() {
         TextEditingInlineSpanReplacement(
           '{hi}',
           (String value, TextRange range) {
-            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+            return const TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
           }
         ),
       ],
@@ -7569,14 +7569,14 @@ void main() {
         TextEditingInlineSpanReplacement(
           RegExp(r'\[[\w]+\]'),
           (String value, TextRange range) {
-            double size = double.parse(value.substring(1, value.length - 1));
+            final double size = double.parse(value.substring(1, value.length - 1));
             return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
           }
         ),
       ],
     );
 
-    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+    final TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: const TextStyle(), withComposing: true);
 
     expect(spans.children!.length, 6);
     WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
@@ -7603,21 +7603,21 @@ void main() {
         TextEditingInlineSpanReplacement(
           RegExp(r'\[[\w]+\]'),
           (String value, TextRange range) {
-            double size = double.parse(value.substring(1, value.length - 1));
+            final double size = double.parse(value.substring(1, value.length - 1));
             return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
           }
         ),
       ],
     );
 
-    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+    final TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: const TextStyle(), withComposing: true);
 
     expect(spans.children!.length, 7);
     WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
     expect((widgetSpan.child as SizedBox).width, 10);
     expect((widgetSpan.child as SizedBox).height, 10);
 
-    TextSpan textSpan = spans.children![4] as TextSpan;
+    final TextSpan textSpan = spans.children![4] as TextSpan;
     expect(textSpan.text, 'hello');
 
     widgetSpan = spans.children![5] as WidgetSpan;
@@ -7640,20 +7640,20 @@ void main() {
         TextEditingInlineSpanReplacement(
           RegExp(r'\[[\w]+\]'),
           (String value, TextRange range) {
-            double size = double.parse(value.substring(1, value.length - 1));
+            final double size = double.parse(value.substring(1, value.length - 1));
             return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
           }
         ),
         TextEditingInlineSpanReplacement(
           '{hi}',
           (String value, TextRange range) {
-            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+            return const TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
           }
         ),
       ],
     );
 
-    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+    final TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: const TextStyle(), withComposing: true);
 
     expect(spans.children!.length, 9);
     TextSpan textSpan = spans.children![3] as TextSpan;
@@ -7687,33 +7687,33 @@ void main() {
         TextEditingInlineSpanReplacement(
           RegExp(r'\[[\w]+\]'),
           (String value, TextRange range) {
-            double size = double.parse(value.substring(1, value.length - 1));
+            final double size = double.parse(value.substring(1, value.length - 1));
             return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
           }
         ),
         TextEditingInlineSpanReplacement(
           '[10]',
           (String value, TextRange range) {
-            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+            return const TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
           }
         ),
         TextEditingInlineSpanReplacement(
           ' [10]hello[20]',
           (String value, TextRange range) {
-            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+            return const TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
           }
         ),
       ],
     );
 
-    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+    final TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: const TextStyle(), withComposing: true);
 
     expect(spans.children!.length, 7);
     WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
     expect((widgetSpan.child as SizedBox).width, 10);
     expect((widgetSpan.child as SizedBox).height, 10);
 
-    TextSpan textSpan = spans.children![4] as TextSpan;
+    final TextSpan textSpan = spans.children![4] as TextSpan;
     expect(textSpan.text, 'hello');
 
     widgetSpan = spans.children![5] as WidgetSpan;
@@ -7736,26 +7736,26 @@ void main() {
         TextEditingInlineSpanReplacement(
           ' [10]hello[20]',
           (String value, TextRange range) {
-            return WidgetSpan(child: SizedBox(width: 15, height: 15), range: range);
+            return WidgetSpan(child: const SizedBox(width: 15, height: 15), range: range);
           }
         ),
         TextEditingInlineSpanReplacement(
           '[10]',
           (String value, TextRange range) {
-            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+            return const TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
           }
         ),
         TextEditingInlineSpanReplacement(
           RegExp(r'\[[\w]+\]'),
           (String value, TextRange range) {
-            double size = double.parse(value.substring(1, value.length - 1));
+            final double size = double.parse(value.substring(1, value.length - 1));
             return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
           }
         ),
       ],
     );
 
-    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+    final TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: const TextStyle(), withComposing: true);
 
     expect(spans.children!.length, 5);
     WidgetSpan widgetSpan = spans.children![3] as WidgetSpan;
@@ -7778,26 +7778,26 @@ void main() {
         TextEditingInlineSpanReplacement(
           'posi',
           (String value, TextRange range) {
-            return WidgetSpan(child: SizedBox(width: 15, height: 15), range: range);
+            return WidgetSpan(child: const SizedBox(width: 15, height: 15), range: range);
           }
         ),
         TextEditingInlineSpanReplacement(
           '[10]',
           (String value, TextRange range) {
-            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+            return const TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
           }
         ),
         TextEditingInlineSpanReplacement(
           RegExp(r'\[[\w]+\]'),
           (String value, TextRange range) {
-            double size = double.parse(value.substring(1, value.length - 1));
+            final double size = double.parse(value.substring(1, value.length - 1));
             return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
           }
         ),
       ],
     );
 
-    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+    final TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: const TextStyle(), withComposing: true);
 
     expect(spans.children!.length, 7);
     TextSpan textSpan = spans.children![0] as TextSpan;
@@ -7836,19 +7836,19 @@ void main() {
         TextEditingInlineSpanReplacement(
           'posi',
           (String value, TextRange range) {
-            return WidgetSpan(child: SizedBox(width: 15, height: 15), range: range);
+            return WidgetSpan(child: const SizedBox(width: 15, height: 15), range: range);
           }
         ),
         TextEditingInlineSpanReplacement(
           '[10]',
           (String value, TextRange range) {
-            return TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
+            return const TextSpan(text: 'hi', style: TextStyle(fontSize: 20));
           }
         ),
         TextEditingInlineSpanReplacement(
           RegExp(r'\[[\w]+\]'),
           (String value, TextRange range) {
-            double size = double.parse(value.substring(1, value.length - 1));
+            final double size = double.parse(value.substring(1, value.length - 1));
             return WidgetSpan(child: SizedBox(width: size, height: size), range: range);
           }
         ),
@@ -7856,7 +7856,7 @@ void main() {
       composingRegionPrioritized: true,
     );
 
-    TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: TextStyle(), withComposing: true);
+    final TextSpan spans = controller.buildTextSpan(context: LeafRenderObjectElement(ErrorWidget(1)), style: const TextStyle(), withComposing: true);
 
     expect(spans.children!.length, 7);
     TextSpan textSpan = spans.children![0] as TextSpan;

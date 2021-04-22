@@ -316,7 +316,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   late List<PlaceholderSpan> _placeholderSpans;
   void _extractPlaceholderSpans(InlineSpan? span) {
     _placeholderSpans = <PlaceholderSpan>[];
-    if (span == null) return;
+    if (span == null) {
+      return;
+    }
     span.visitChildren((InlineSpan span) {
       if (span is PlaceholderSpan) {
         _placeholderSpans.add(span);
@@ -3789,6 +3791,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _placeholderDimensions = _layoutChildren(constraints);
+    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _setParentData();
     _computeCaretPrototype();

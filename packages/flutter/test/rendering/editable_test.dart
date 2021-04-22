@@ -3565,11 +3565,11 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: TextSpan(
-        style: TextStyle(
+        style: const TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
         children: <InlineSpan>[
-          TextSpan(text: 'test'),
+          const TextSpan(text: 'test'),
           WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
         ],
       ),
@@ -3582,7 +3582,7 @@ void main() {
     pumpFrame();
 
     final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 5))!;
-    expect(composingRect, Rect.fromLTRB(40.0, 0.0, 54.0, 14.0));
+    expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 54.0, 14.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('able to render multiple WidgetSpans', () async {
@@ -3608,11 +3608,11 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: TextSpan(
-        style: TextStyle(
+        style: const TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
         children: <InlineSpan>[
-          TextSpan(text: 'test'),
+          const TextSpan(text: 'test'),
           WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
           WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
           WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
@@ -3627,7 +3627,7 @@ void main() {
     pumpFrame();
 
     final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 7))!;
-    expect(composingRect, Rect.fromLTRB(40.0, 0.0, 82.0, 14.0));
+    expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 82.0, 14.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('able to render WidgetSpans with line wrap', () async {
@@ -3652,7 +3652,7 @@ void main() {
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      text: TextSpan(
+      text: const TextSpan(
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
@@ -3675,9 +3675,9 @@ void main() {
     pumpFrame();
 
     Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 6))!;
-    expect(composingRect, Rect.fromLTRB(40.0, 0.0, 68.0, 14.0));
+    expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 68.0, 14.0));
     composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7))!;
-    expect(composingRect, Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
+    expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
   test('able to render WidgetSpans with line wrap alternating spans', () async {
@@ -3703,7 +3703,7 @@ void main() {
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      text: TextSpan(
+      text: const TextSpan(
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
@@ -3728,15 +3728,15 @@ void main() {
     pumpFrame();
 
     Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 6))!;
-    expect(composingRect, Rect.fromLTRB(40.0, 0.0, 68.0, 14.0));
+    expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 68.0, 14.0));
     composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7))!;
-    expect(composingRect, Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
+    expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
     composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8))!; // H
-    expect(composingRect, Rect.fromLTRB(14.0, 18.0, 24.0, 28.0));
+    expect(composingRect, const Rect.fromLTRB(14.0, 18.0, 24.0, 28.0));
     composingRect = editable.getRectForComposingRange(const TextRange(start: 8, end: 9))!; // I
-    expect(composingRect, Rect.fromLTRB(24.0, 18.0, 34.0, 28.0));
+    expect(composingRect, const Rect.fromLTRB(24.0, 18.0, 34.0, 28.0));
     composingRect = editable.getRectForComposingRange(const TextRange(start: 9, end: 10))!;
-    expect(composingRect, Rect.fromLTRB(34.0, 14.0, 48.0, 28.0));
+    expect(composingRect, const Rect.fromLTRB(34.0, 14.0, 48.0, 28.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 }
 

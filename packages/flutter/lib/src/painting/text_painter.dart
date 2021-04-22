@@ -99,6 +99,10 @@ class PlaceholderDimensions {
   ///  * [ui.PlaceholderAlignment.middle]
   final TextBaseline? baseline;
 
+  /// The range of text that this placeholder replaces.
+  ///
+  /// This value is only relevant when used in TextFields/Editable widgets
+  /// as replacements for strings of regular text.
   final TextRange? range;
 
   @override
