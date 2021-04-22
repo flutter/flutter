@@ -10,18 +10,17 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
-
-class MockIosProject extends Mock implements IosProject {}
 
 void main() {
   BufferLogger logger;
@@ -414,12 +413,9 @@ Exited (sigterm)''',
       'another line';
 
     testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
-      final MockIosProject project = MockIosProject();
       final File pbxprojFile = MemoryFileSystem.test().file('project.pbxproj')
         ..writeAsStringSync(flutterAssetPbxProjLines);
-
-      when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
-      when(project.hostAppBundleName(any)).thenAnswer((_) => Future<String>.value('UnitTestRunner.app'));
+      final FakeIosProject project = FakeIosProject(pbxprojFile);
 
       bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
@@ -487,4 +483,16 @@ Exited (sigterm)''',
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+}
+
+class FakeIosProject extends Fake implements IosProject {
+  FakeIosProject(this.xcodeProjectInfoFile);
+  @override
+  final File xcodeProjectInfoFile;
+
+  @override
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'UnitTestRunner.app';
+
+  @override
+  final Directory xcodeProject = null;
 }
