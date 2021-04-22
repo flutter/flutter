@@ -3731,9 +3731,9 @@ void main() {
     expect(composingRect, Rect.fromLTRB(40.0, 0.0, 68.0, 14.0));
     composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7))!;
     expect(composingRect, Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
-    composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8))!;
+    composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8))!; // H
     expect(composingRect, Rect.fromLTRB(14.0, 18.0, 24.0, 28.0));
-    composingRect = editable.getRectForComposingRange(const TextRange(start: 8, end: 9))!;
+    composingRect = editable.getRectForComposingRange(const TextRange(start: 8, end: 9))!; // I
     expect(composingRect, Rect.fromLTRB(24.0, 18.0, 34.0, 28.0));
     composingRect = editable.getRectForComposingRange(const TextRange(start: 9, end: 10))!;
     expect(composingRect, Rect.fromLTRB(34.0, 14.0, 48.0, 28.0));

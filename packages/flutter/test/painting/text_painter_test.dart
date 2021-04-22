@@ -744,6 +744,122 @@ void main() {
     expect(painter.inlinePlaceholderBoxes![13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
 
+  test('TextPainter widget span with replacement ranges', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'tests';
+    painter.text = const TextSpan(
+      text: text,
+      children: <InlineSpan>[
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 0, end: 5)),
+        TextSpan(text: text),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 10, end: 15)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 15, end: 20)),
+        TextSpan(text: text),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 25, end: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 30, end: 35)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 35, end: 40)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 40, end: 45)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 45, end: 50)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 50, end: 55)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 55, end: 60)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 60, end: 65)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 65, end: 70)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 70, end: 75)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30), range: TextRange(start: 75, end: 80)),
+      ],
+    );
+
+    // We provide dimensions for the widgets
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 0, end: 5)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 10, end: 15)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 15, end: 20)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 25, end: 30)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 30, end: 35)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 35, end: 40)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 40, end: 45)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 45, end: 50)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 50, end: 55)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 55, end: 60)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 60, end: 65)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 65, end: 70)),
+      PlaceholderDimensions(size: Size(51, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 70, end: 75)),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom, range: TextRange(start: 75, end: 80)),
+    ]);
+
+    painter.layout(maxWidth: 500);
+
+    // Now, each of the WidgetSpans will have their own placeholder 'hole'.
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 5), ui.Rect.zero);
+    expect(caretOffset.dx, 14);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
+    expect(caretOffset.dx, 14);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 3), ui.Rect.zero);
+    expect(caretOffset.dx, 14);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 6), ui.Rect.zero);
+    expect(caretOffset.dx, 28);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 7), ui.Rect.zero);
+    expect(caretOffset.dx, 42);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 8), ui.Rect.zero);
+    expect(caretOffset.dx, 56);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 9), ui.Rect.zero);
+    expect(caretOffset.dx, 70);
+
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 10), ui.Rect.zero);
+    expect(caretOffset.dx, 120);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 11), ui.Rect.zero);
+    expect(caretOffset.dx, 120);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 12), ui.Rect.zero);
+    expect(caretOffset.dx, 120);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 13), ui.Rect.zero);
+    expect(caretOffset.dx, 120);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 14), ui.Rect.zero);
+    expect(caretOffset.dx, 120);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 15), ui.Rect.zero);
+    expect(caretOffset.dx, 134);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 16), ui.Rect.zero);
+    expect(caretOffset.dx, 134);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 17), ui.Rect.zero);
+    expect(caretOffset.dx, 134);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 18), ui.Rect.zero);
+    expect(caretOffset.dx, 134);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
+    expect(caretOffset.dx, 134);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 20), ui.Rect.zero);
+    expect(caretOffset.dx, 148);
+
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 24), ui.Rect.zero);
+    expect(caretOffset.dx, 240);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 25), ui.Rect.zero);
+    expect(caretOffset.dx, 290);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 26), ui.Rect.zero);
+    expect(caretOffset.dx, 290);
+
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 29), ui.Rect.zero);
+    expect(caretOffset.dx, 290);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 30), ui.Rect.zero);
+    expect(caretOffset.dx, 304);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 31), ui.Rect.zero);
+    expect(caretOffset.dx, 304);
+
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 34), ui.Rect.zero);
+    expect(caretOffset.dx, 304);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 35), ui.Rect.zero);
+    expect(caretOffset.dx, 318);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 36), ui.Rect.zero);
+    expect(caretOffset.dx, 318);
+
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42086
+
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
     final TextPainter painter = TextPainter(textHeightBehavior: null)
