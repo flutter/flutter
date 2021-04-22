@@ -320,7 +320,7 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61024
+  });
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
