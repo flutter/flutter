@@ -9,7 +9,7 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 3.1.2
-  args: 2.0.0
+  args: 2.1.0
   dds: 1.7.6
   dwds: 10.0.1
   completion: 1.0.0
@@ -34,7 +34,7 @@ dependencies:
   yaml: 3.1.0
   native_stack_traces: 0.4.0
   shelf: 1.1.0
-  vm_snapshot_analysis: 0.6.0
+  vm_snapshot_analysis: 0.7.0
   uuid: 3.0.4
   web_socket_channel: 2.0.0
   stream_channel: 2.1.0
@@ -108,4 +108,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 8355
+# PUBSPEC CHECKSUM: 5b57
