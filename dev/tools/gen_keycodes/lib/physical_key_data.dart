@@ -47,25 +47,18 @@ class PhysicalKeyData {
     return PhysicalKeyData._(data);
   }
 
-  PhysicalKeyData._(this._dataByName);
+  PhysicalKeyData._(this.data);
 
-  Iterable<PhysicalKeyEntry> get data => _dataByName.values;
-  /// Keys mapped from their constant names.
-  final Map<String, PhysicalKeyEntry> _dataByName;
+  final Map<String, PhysicalKeyEntry> data;
 
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [PhysicalKeyData.fromJson].
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> outputMap = <String, dynamic>{};
-    for (final PhysicalKeyEntry entry in _dataByName.values) {
+    for (final PhysicalKeyEntry entry in data.values) {
       outputMap[entry.name] = entry.toJson();
     }
     return outputMap;
-  }
-
-  /// The list of keys.
-  PhysicalKeyEntry? getEntryByName(String name) {
-    return _dataByName[name];
   }
 
   /// Parses entries from Androids Generic.kl scan code data file.

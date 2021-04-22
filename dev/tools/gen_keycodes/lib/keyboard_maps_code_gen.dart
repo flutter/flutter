@@ -66,14 +66,14 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   })();
 
   List<PhysicalKeyEntry> get numpadKeyData {
-    return keyData.data.where((PhysicalKeyEntry entry) {
+    return keyData.data.values.where((PhysicalKeyEntry entry) {
       return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.constantName);
     }).toList();
   }
 
   List<PhysicalKeyEntry> get functionKeyData {
     final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
-    return keyData.data.where((PhysicalKeyEntry entry) {
+    return keyData.data.values.where((PhysicalKeyEntry entry) {
       return functionKeyRe.hasMatch(entry.constantName);
     }).toList();
   }
@@ -105,7 +105,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of GLFW key codes to logical keys.
   String get glfwKeyCodeMap {
     final StringBuffer glfwKeyCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       for (final int code in entry.glfwKeyCodes) {
         glfwKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -138,7 +138,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of XKB USB HID codes to physical keys.
   String get xkbScanCodeMap {
     final StringBuffer xkbScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.xKbScanCode != null) {
         xkbScanCodeMap.writeln('  ${toHex(entry.xKbScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -171,7 +171,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of Android scan codes to physical keys.
   String get androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.androidScanCodes != null) {
         for (final int code in entry.androidScanCodes) {
           androidScanCodeMap.writeln('  $code: PhysicalKeyboardKey.${entry.constantName},');
@@ -184,7 +184,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of Windows scan codes to physical keys.
   String get windowsScanCodeMap {
     final StringBuffer windowsScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.windowsScanCode != null) {
         windowsScanCodeMap.writeln('  ${toHex(entry.windowsScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -224,7 +224,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of macOS key codes to physical keys.
   String get macOsScanCodeMap {
     final StringBuffer macOsScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.macOsScanCode != null) {
         macOsScanCodeMap.writeln('  ${toHex(entry.macOsScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -267,7 +267,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of iOS key codes to physical keys.
   String get iosScanCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('iOS scancode map');
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.iosScanCode != null) {
         lines.add(entry.iosScanCode!, '  ${toHex(entry.iosScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -311,7 +311,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of Fuchsia USB HID codes to physical keys.
   String get fuchsiaHidCodeMap {
     final StringBuffer fuchsiaScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.usbHidCode != null) {
         fuchsiaScanCodeMap.writeln('  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -333,7 +333,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to physical keys.
   String get webPhysicalKeyMap {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
       }

@@ -30,7 +30,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Android scan codes to physical keys.
   String get _androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.androidScanCodes != null) {
         for (final int code in entry.androidScanCodes.cast<int>()) {
           androidScanCodeMap.writeln('      put(${toHex(code, digits: 10)}L, ${toHex(entry.usbHidCode, digits: 10)}L);    // ${entry.constantName}');

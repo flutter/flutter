@@ -40,7 +40,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
     final StringBuffer scanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.macOsScanCode != null) {
         scanCodeMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.usbHidCode)},    // ${entry.constantName}');
       }
@@ -95,7 +95,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _specialKeyConstants {
     final StringBuffer specialKeyConstants = StringBuffer();
     for (final String keyName in kSpecialPhysicalKeys) {
-      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.getEntryByName(keyName)!.usbHidCode)};');
+      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.data[keyName]!.usbHidCode)};');
     }
     for (final String keyName in kSpecialLogicalKeys) {
       specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.data[keyName]!.value)};');

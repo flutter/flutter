@@ -63,7 +63,7 @@ abstract class PlatformCodeGenerator extends BaseCodeGenerator {
   // Used by platform code generators.
   List<PhysicalKeyEntry> get functionKeyData {
     final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
-    return keyData.data.where((PhysicalKeyEntry entry) {
+    return keyData.data.values.where((PhysicalKeyEntry entry) {
       return functionKeyRe.hasMatch(entry.constantName);
     }).toList();
   }

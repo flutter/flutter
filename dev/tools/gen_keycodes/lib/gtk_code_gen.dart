@@ -21,7 +21,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of XKB scan codes to Flutter physical keys.
   String get xkbScanCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.xKbScanCode != null) {
         result.writeln('  insert_record(table, ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)});  // ${entry.constantName}');
       }
@@ -66,7 +66,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   data->physical_keys = physical_keys;
   data->is_caps_lock = ${physicalNames.first == 'CapsLock' ? 'true' : 'false'};''');
       for (final String physicalName in physicalNames) {
-        final PhysicalKeyEntry? entry = physicalData.getEntryByName(physicalName);
+        final PhysicalKeyEntry? entry = physicalData.data[physicalName];
         if (entry == null) {
           print('Unrecognized physical key $physicalName specified for $debugFunctionName.');
           return;

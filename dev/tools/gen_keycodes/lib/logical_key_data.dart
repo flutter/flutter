@@ -190,7 +190,7 @@ class LogicalKeyData {
         (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for macOS'); });
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
-      final PhysicalKeyEntry? physicalEntry = physicalKeyData.getEntryByName(physicalKeyName);
+      final PhysicalKeyEntry? physicalEntry = physicalKeyData.data[physicalKeyName];
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
       if (physicalEntry == null || physicalEntry.macOsScanCode == null) {
         print('Unexpected physical key $physicalKeyName specified for macOS keyCodeToLogicalMap.');
@@ -215,7 +215,7 @@ class LogicalKeyData {
         (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for iOS'); });
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
-      final PhysicalKeyEntry? physicalEntry = physicalKeyData.getEntryByName(physicalKeyName);
+      final PhysicalKeyEntry? physicalEntry = physicalKeyData.data[physicalKeyName];
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
       if (physicalEntry == null || physicalEntry.iosScanCode == null) {
         print('Unexpected physical key $physicalKeyName specified for iOS keyCodeToLogicalMap.');
@@ -326,7 +326,7 @@ class LogicalKeyData {
         if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
           return kUnicodePlane | (keyLabel.codeUnitAt(0) & kValueMask);
         } else {
-          final PhysicalKeyEntry? physicalEntry = physicalData.getEntryByName(entry.name);
+          final PhysicalKeyEntry? physicalEntry = physicalData.data[entry.name];
           if (physicalEntry != null) {
             return kHidPlane | (physicalEntry.usbHidCode & kValueMask);
           }

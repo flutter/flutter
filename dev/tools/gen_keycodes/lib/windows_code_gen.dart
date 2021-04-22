@@ -21,7 +21,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Windows scan codes to physical keys.
   String get _windowsScanCodeMap {
     final StringBuffer windowsScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.windowsScanCode != null) {
         windowsScanCodeMap.writeln('        {${toHex(entry.windowsScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
@@ -51,7 +51,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
     ).readAsStringSync()) as Map<String, dynamic>;
     final StringBuffer result = StringBuffer();
     source.forEach((String scanCodeName, dynamic logicalName) {
-      final PhysicalKeyEntry? physicalEntry = keyData.getEntryByName(scanCodeName);
+      final PhysicalKeyEntry? physicalEntry = keyData.data[scanCodeName];
       final int? logicalValue = logicalData.data[logicalName]?.value;
       if (physicalEntry == null) {
         print('Unexpected scan code $scanCodeName specified for scanCodeToLogicalMap.');

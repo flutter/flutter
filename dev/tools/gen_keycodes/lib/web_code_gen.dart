@@ -32,7 +32,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
   String get _webPhysicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
       }
