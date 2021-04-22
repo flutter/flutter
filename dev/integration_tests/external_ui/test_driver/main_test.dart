@@ -42,11 +42,11 @@ Future<void> main() async {
       await driver.tap(fab);
 
       final String statsSlow = await driver.getText(summary);
-      final Match? matchSlow = statsRegExp.matchAsPrefix(statsSlow);
+      final Match matchSlow = statsRegExp.matchAsPrefix(statsSlow)!;
       expect(matchSlow, isNotNull);
-      expect(double.parse(matchSlow?.group(1) ?? '0'), closeTo(flutterFrameRate / 2.0, 5.0));
-      expect(double.parse(matchSlow?.group(2) ?? '0'), closeTo(flutterFrameRate / 2.0, 5.0));
-      expect(int.parse(matchSlow?.group(3) ?? '0'), 1);
+      expect(double.parse(matchSlow.group(1)!), closeTo(flutterFrameRate / 2.0, 5.0));
+      expect(double.parse(matchSlow.group(2)!), closeTo(flutterFrameRate / 2.0, 5.0));
+      expect(int.parse(matchSlow.group(3)!), 1);
 
       // Texture frame stats at 2.0x Flutter frame rate
       await driver.tap(fab);
