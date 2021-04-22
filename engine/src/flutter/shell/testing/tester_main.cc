@@ -53,10 +53,13 @@ class TesterExternalViewEmbedder : public ExternalViewEmbedder {
       std::unique_ptr<EmbeddedViewParams> params) override {}
 
   // |ExternalViewEmbedder|
-  std::vector<SkCanvas*> GetCurrentCanvases() override { return {}; }
+  std::vector<SkCanvas*> GetCurrentCanvases() override { return {&canvas_}; }
 
   // |ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id) override { return nullptr; }
+  SkCanvas* CompositeEmbeddedView(int view_id) override { return &canvas_; }
+
+ private:
+  SkCanvas canvas_;
 };
 
 class TesterPlatformView : public PlatformView,
