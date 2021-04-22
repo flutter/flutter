@@ -1172,7 +1172,7 @@ Future<void> _checkConsumerDependencies() async {
   final String signature = base64.encode(digest.bytes);
 
   // Do not change this signature without following the directions in
-  // dev/bots/allowlist.dar
+  // dev/bots/allowlist.dart
   const String kExpected = 'QnuXnTSwemf+qT+LAU8K8Bb0l9L20z4qT1PUEQlBrVg=';
 
   if (disallowed.isNotEmpty) {
