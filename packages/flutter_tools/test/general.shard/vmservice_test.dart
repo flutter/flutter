@@ -543,6 +543,58 @@ void main() {
       expect(isolateRef.id, '2');
     });
 
+    testWithoutContext('does not rethrow a sentinel exception if the initially queried flutter view disappears', () async {
+      const String otherExtensionName = 'ext.flutter.test.otherExtension';
+      final vm_service.Isolate isolate2 = vm_service.Isolate.parse(
+        isolate.toJson()
+          ..['id'] = '2'
+          ..['extensionRPCs'] = <String>[otherExtensionName],
+      );
+
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+        FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              fakeFlutterView.toJson(),
+            ],
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+        // Assume a different isolate returns.
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            kind: vm_service.EventKind.kServiceExtensionAdded,
+            extensionRPC: otherExtensionName,
+            timestamp: 1,
+            isolate: isolate2,
+          ),
+        ),
+        const FakeVmServiceRequest(
+          method: 'streamCancel',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          },
+        ),
+      ]);
+
+      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
+      expect(isolateRef.id, '2');
+    });
+
     testWithoutContext('when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
