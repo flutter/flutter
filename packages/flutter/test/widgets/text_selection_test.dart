@@ -624,6 +624,44 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
   });
 
+  testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+
+    // Reconfigure the RenderEditable for multi-line.
+    renderEditable.maxLines = null;
+    renderEditable.offset = ViewportOffset.fixed(20.0);
+    renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(renderEditable.selectPositionAtCalled, isFalse);
+
+    await gesture.moveTo(const Offset(300.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(renderEditable.selectPositionAtCalled, isTrue);
+    expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 200.0));
+    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
+
+    // Move the viewport offset (scroll).
+    renderEditable.offset = ViewportOffset.fixed(150.0);
+    renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(const Offset(300.0, 400.0));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(renderEditable.selectPositionAtCalled, isTrue);
+    expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 70.0));
+    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 400.0));
+  });
+
   testWidgets('test TextSelectionGestureDetectorBuilder selection disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
     final TestGesture gesture = await tester.startGesture(
@@ -863,9 +901,13 @@ class FakeRenderEditable extends RenderEditable {
   }
 
   bool selectPositionAtCalled = false;
+  Offset? selectPositionAtFrom;
+  Offset? selectPositionAtTo;
   @override
   void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     selectPositionAtCalled = true;
+    selectPositionAtFrom = from;
+    selectPositionAtTo = to;
   }
 
   bool selectWordCalled = false;
