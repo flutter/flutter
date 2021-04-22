@@ -237,7 +237,7 @@ abstract class Source {
   /// The source is provided by an [HostArtifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
-  const factory Source.hostArtifact(HostArtifact artifact) = _HostArifactSource;
+  const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -279,12 +279,10 @@ class _ArtifactSource implements Source {
   bool get implicit => false;
 }
 
-class _HostArifactSource implements Source {
-  const _HostArifactSource(this.artifact, { this.platform, this.mode });
+class _HostArtifactSource implements Source {
+  const _HostArtifactSource(this.artifact);
 
   final HostArtifact artifact;
-  final TargetPlatform platform;
-  final BuildMode mode;
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
