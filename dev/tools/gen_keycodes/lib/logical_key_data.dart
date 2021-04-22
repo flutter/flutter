@@ -144,12 +144,14 @@ class LogicalKeyData {
           value: value + kLeftModifierPlane,
           name: pair.left,
           keyLabel: null, // Modifier keys don't have keyLabels
-        );
+        )..webNames.add(pair.left)
+         ..webValues.add(value + kLeftModifierPlane);
         data[pair.right] = LogicalKeyEntry.fromName(
           value: value + kRightModifierPlane,
           name: pair.right,
           keyLabel: null, // Modifier keys don't have keyLabels
-        );
+        )..webNames.add(pair.right)
+         ..webValues.add(value + kRightModifierPlane);
         continue;
       }
 
@@ -161,18 +163,21 @@ class LogicalKeyData {
           value: char.codeUnitAt(0) + kNumpadPlane,
           name: numpadName,
           keyLabel: null, // Don't add keyLabel for numpad counterparts
-        );
+        )..webNames.add(numpadName)
+         ..webValues.add(char.codeUnitAt(0) + kNumpadPlane);
         unusedNumpad.remove(char);
       }
 
-      final LogicalKeyEntry entry = data.putIfAbsent(name, () => LogicalKeyEntry.fromName(
-        value: value,
-        name: name,
-        keyLabel: keyLabel,
-      ));
-      entry
-        ..webNames.add(webName)
-        ..webValues.add(value);
+      data.putIfAbsent(name, () {
+        final bool isPrintable = keyLabel != null ||
+          printable.containsKey(upperCamelToLowerCamel(name));
+        return LogicalKeyEntry.fromName(
+          value: value + (isPrintable ? kUnicodePlane : kUnprintablePlane),
+          name: name,
+          keyLabel: keyLabel,
+        )..webNames.add(webName)
+         ..webValues.add(value);
+      });
     }
 
     // Make sure every Numpad keys that we care have been defined.

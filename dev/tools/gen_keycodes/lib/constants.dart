@@ -8,5 +8,7 @@ const int kUnicodePlane = 0x00000000000;
 /// do have a USB HID ID.
 const int kHidPlane = 0x00100000000;
 
+const int kUnprintablePlane = 0x00200000000;
+
 /// The code prefix for pseudo-keys which represent collections of key synonyms.
 const int kSynonymPlane = 0x20000000000;

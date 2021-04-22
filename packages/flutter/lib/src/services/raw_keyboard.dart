@@ -638,6 +638,7 @@ class RawKeyboard {
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
     bool shouldDispatch = true;
+    print(event);
     if (event is RawKeyDownEvent) {
       if (event.data.shouldDispatchEvent()) {
         _keysPressed[event.physicalKey] = event.logicalKey;

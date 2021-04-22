@@ -94,6 +94,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
+    print('kC $keyCode kL $keyLabel');
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
@@ -107,6 +108,14 @@ class RawKeyEventDataIos extends RawKeyEventData {
     if (newKey != null) {
       return newKey;
     }
+
+    // Keys that can't be derived with characterIgnoringModifiers will be
+    // derived from their key codes using this map.
+    final LogicalKeyboardKey? knownKey = kIosToLogicalKey[keyCode];
+    if (knownKey != null) {
+      return knownKey;
+    }
+
     // If this key is printable, generate the LogicalKeyboardKey from its
     // Unicode value. Control keys such as ESC, CRTL, and SHIFT are not
     // printable. HOME, DEL, arrow keys, and function keys are considered
