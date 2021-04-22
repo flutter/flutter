@@ -2437,22 +2437,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   String _cachedText = '';
   Rect? _cachedFirstRect;
   Size _cachedSize = Size.zero;
+  int _cachedPlaceholder = -1;
 
   void _updateSelectionRects() {
     if (defaultTargetPlatform != TargetPlatform.iOS)
       return;
-    final TextSpan textSpan = buildTextSpan();
-    final StringBuffer text = StringBuffer();
-    textSpan.computeToPlainText(text);
+    final String text = buildTextSpan().toPlainText(includeSemanticsLabels: false, includePlaceholders: false);
     final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
     final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection = _scrollController?.position.userScrollDirection ?? ScrollDirection.idle;
     final Size size = renderEditable.size;
-    if (scrollDirection == ScrollDirection.idle && (text.toString() != _cachedText ||
-        _cachedFirstRect != firstRect || _cachedSize != size)) {
-      _cachedText = text.toString();
+    if (scrollDirection == ScrollDirection.idle && (text != _cachedText ||
+        _cachedFirstRect != firstRect || _cachedSize != size ||
+        _cachedPlaceholder != _placeholderLocation)) {
+      _cachedText = text;
       _cachedFirstRect = firstRect;
       _cachedSize = size;
+      _cachedPlaceholder = _placeholderLocation;
       final List<SelectionRect> rects = List<SelectionRect>.generate(
         _cachedText.characters.length,
         (int i) {
