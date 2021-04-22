@@ -12,9 +12,13 @@ import 'package:gen_keycodes/utils.dart';
 import 'constants.dart';
 import 'physical_key_data.dart';
 
-const int kNumpadPlane = 0x00200000000;
-const int kLeftModifierPlane = 0x00300000000;
-const int kRightModifierPlane = 0x00400000000;
+bool _isControlCharacter(String label) {
+  if (label.length != 1) {
+    return false;
+  }
+  final int codeUnit = label.codeUnitAt(0);
+  return (codeUnit <= 0x1f && codeUnit >= 0x00) || (codeUnit >= 0x7f && codeUnit <= 0x9f);
+}
 
 /// A pair of strings that represents left and right modifiers.
 class _ModifierPair {
@@ -169,8 +173,9 @@ class LogicalKeyData {
       }
 
       data.putIfAbsent(name, () {
-        final bool isPrintable = keyLabel != null ||
-          printable.containsKey(upperCamelToLowerCamel(name));
+        final bool isPrintable = (keyLabel != null && !_isControlCharacter(keyLabel))
+          || printable.containsKey(name)
+          || value == 0; // "None" key
         return LogicalKeyEntry.fromName(
           value: value + (isPrintable ? kUnicodePlane : kUnprintablePlane),
           name: name,
@@ -327,7 +332,9 @@ class LogicalKeyData {
   static void _readFuchsiaKeyCodes(Map<String, LogicalKeyEntry> data, PhysicalKeyData physicalData) {
     for (final LogicalKeyEntry entry in data.values) {
       final int? value = (() {
-      final String? keyLabel = printable[entry.constantName];
+        if (entry.value == 0) // "None" key
+          return 0;
+        final String? keyLabel = printable[entry.constantName];
         if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
           return kUnicodePlane | (keyLabel.codeUnitAt(0) & kValueMask);
         } else {

@@ -29,11 +29,11 @@ void main() {
   group(LogicalKeyboardKey, () {
     test('Various classes of keys can be looked up by code', () async {
       // Check a letter key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x0000000061), equals(LogicalKeyboardKey.keyA));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.keyA.keyId), equals(LogicalKeyboardKey.keyA));
       // Check a control key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x0100070029), equals(LogicalKeyboardKey.escape));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.escape.keyId), equals(LogicalKeyboardKey.escape));
       // Check a modifier key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x01000700e1), equals(LogicalKeyboardKey.shiftLeft));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.shiftLeft.keyId), equals(LogicalKeyboardKey.shiftLeft));
     });
     test('Control characters are recognized as such', () async {
       // Check some common control characters

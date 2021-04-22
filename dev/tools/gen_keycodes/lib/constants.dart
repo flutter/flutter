@@ -10,5 +10,9 @@ const int kHidPlane = 0x00100000000;
 
 const int kUnprintablePlane = 0x00200000000;
 
+const int kLeftModifierPlane = 0x00300000000;
+const int kRightModifierPlane = 0x00400000000;
+const int kNumpadPlane = 0x00500000000;
+
 /// The code prefix for pseudo-keys which represent collections of key synonyms.
 const int kSynonymPlane = 0x20000000000;

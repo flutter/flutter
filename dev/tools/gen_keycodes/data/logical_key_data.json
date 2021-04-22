@@ -1,177 +1,24 @@
 {
-  "Backspace": {
-    "name": "Backspace",
-    "value": 8,
-    "keyLabel": "\b",
+  "None": {
+    "name": "None",
+    "value": 0,
     "names": {
       "web": [
-        "Backspace"
-      ],
-      "macOs": [
-        "Backspace"
-      ],
-      "ios": [
-        "Backspace"
-      ],
-      "gtk": [
-        "BackSpace"
-      ],
-      "windows": [
-        "BACK"
+        "None"
       ],
       "android": [
-        "DEL"
+        "UNKNOWN"
       ]
     },
     "values": {
       "web": [
-        8
-      ],
-      "macOs": [
-        51
-      ],
-      "ios": [
-        42
-      ],
-      "gtk": [
-        65288
-      ],
-      "windows": [
-        8
+        0
       ],
       "android": [
-        67
+        0
       ],
       "fuchsia": [
-        4295426090
-      ]
-    }
-  },
-  "Tab": {
-    "name": "Tab",
-    "value": 9,
-    "keyLabel": "\t",
-    "names": {
-      "web": [
-        "Tab"
-      ],
-      "gtk": [
-        "Tab",
-        "KP_Tab",
-        "ISO_Left_Tab"
-      ],
-      "windows": [
-        "TAB"
-      ],
-      "android": [
-        "TAB"
-      ]
-    },
-    "values": {
-      "web": [
-        9
-      ],
-      "gtk": [
-        65289,
-        65417,
-        65056
-      ],
-      "windows": [
-        9
-      ],
-      "android": [
-        61
-      ],
-      "fuchsia": [
-        4295426091
-      ]
-    }
-  },
-  "Enter": {
-    "name": "Enter",
-    "value": 13,
-    "keyLabel": "\r",
-    "names": {
-      "web": [
-        "Enter"
-      ],
-      "gtk": [
-        "Return",
-        "ISO_Enter",
-        "3270_Enter"
-      ],
-      "windows": [
-        "RETURN"
-      ],
-      "android": [
-        "ENTER"
-      ]
-    },
-    "values": {
-      "web": [
-        13
-      ],
-      "gtk": [
-        65293,
-        65076,
-        64798
-      ],
-      "windows": [
-        13
-      ],
-      "android": [
-        66
-      ],
-      "fuchsia": [
-        4295426088
-      ]
-    }
-  },
-  "Escape": {
-    "name": "Escape",
-    "value": 27,
-    "keyLabel": "\u001b",
-    "names": {
-      "web": [
-        "Escape"
-      ],
-      "macOs": [
-        "Escape"
-      ],
-      "ios": [
-        "Escape"
-      ],
-      "gtk": [
-        "Escape"
-      ],
-      "windows": [
-        "ESCAPE"
-      ],
-      "android": [
-        "ESCAPE"
-      ]
-    },
-    "values": {
-      "web": [
-        27
-      ],
-      "macOs": [
-        53
-      ],
-      "ios": [
-        41
-      ],
-      "gtk": [
-        65307
-      ],
-      "windows": [
-        27
-      ],
-      "android": [
-        111
-      ],
-      "fuchsia": [
-        4295426089
+        0
       ]
     }
   },
@@ -207,7 +54,7 @@
         62
       ],
       "fuchsia": [
-        32
+        4295426092
       ]
     }
   },
@@ -252,7 +99,7 @@
         75
       ],
       "fuchsia": [
-        39
+        4295426100
       ]
     }
   },
@@ -417,7 +264,7 @@
         55
       ],
       "fuchsia": [
-        44
+        4295426102
       ]
     }
   },
@@ -447,7 +294,7 @@
         69
       ],
       "fuchsia": [
-        45
+        4295426093
       ]
     }
   },
@@ -483,7 +330,7 @@
         56
       ],
       "fuchsia": [
-        46
+        4295426103
       ]
     }
   },
@@ -513,7 +360,7 @@
         76
       ],
       "fuchsia": [
-        47
+        4295426104
       ]
     }
   },
@@ -537,7 +384,7 @@
         7
       ],
       "fuchsia": [
-        48
+        4295426087
       ]
     }
   },
@@ -561,7 +408,7 @@
         8
       ],
       "fuchsia": [
-        49
+        4295426078
       ]
     }
   },
@@ -585,7 +432,7 @@
         9
       ],
       "fuchsia": [
-        50
+        4295426079
       ]
     }
   },
@@ -609,7 +456,7 @@
         10
       ],
       "fuchsia": [
-        51
+        4295426080
       ]
     }
   },
@@ -633,7 +480,7 @@
         11
       ],
       "fuchsia": [
-        52
+        4295426081
       ]
     }
   },
@@ -657,7 +504,7 @@
         12
       ],
       "fuchsia": [
-        53
+        4295426082
       ]
     }
   },
@@ -681,7 +528,7 @@
         13
       ],
       "fuchsia": [
-        54
+        4295426083
       ]
     }
   },
@@ -705,7 +552,7 @@
         14
       ],
       "fuchsia": [
-        55
+        4295426084
       ]
     }
   },
@@ -729,7 +576,7 @@
         15
       ],
       "fuchsia": [
-        56
+        4295426085
       ]
     }
   },
@@ -753,7 +600,7 @@
         16
       ],
       "fuchsia": [
-        57
+        4295426086
       ]
     }
   },
@@ -798,7 +645,7 @@
         74
       ],
       "fuchsia": [
-        59
+        4295426099
       ]
     }
   },
@@ -843,7 +690,7 @@
         70
       ],
       "fuchsia": [
-        61
+        4295426094
       ]
     }
   },
@@ -918,7 +765,7 @@
         71
       ],
       "fuchsia": [
-        91
+        4295426095
       ]
     }
   },
@@ -948,7 +795,7 @@
         73
       ],
       "fuchsia": [
-        92
+        4295426097
       ]
     }
   },
@@ -978,7 +825,7 @@
         72
       ],
       "fuchsia": [
-        93
+        4295426096
       ]
     }
   },
@@ -1038,7 +885,7 @@
         68
       ],
       "fuchsia": [
-        96
+        4295426101
       ]
     }
   },
@@ -1062,7 +909,7 @@
         29
       ],
       "fuchsia": [
-        97
+        4295426052
       ]
     }
   },
@@ -1086,7 +933,7 @@
         30
       ],
       "fuchsia": [
-        98
+        4295426053
       ]
     }
   },
@@ -1110,7 +957,7 @@
         31
       ],
       "fuchsia": [
-        99
+        4295426054
       ]
     }
   },
@@ -1134,7 +981,7 @@
         32
       ],
       "fuchsia": [
-        100
+        4295426055
       ]
     }
   },
@@ -1158,7 +1005,7 @@
         33
       ],
       "fuchsia": [
-        101
+        4295426056
       ]
     }
   },
@@ -1182,7 +1029,7 @@
         34
       ],
       "fuchsia": [
-        102
+        4295426057
       ]
     }
   },
@@ -1206,7 +1053,7 @@
         35
       ],
       "fuchsia": [
-        103
+        4295426058
       ]
     }
   },
@@ -1230,7 +1077,7 @@
         36
       ],
       "fuchsia": [
-        104
+        4295426059
       ]
     }
   },
@@ -1254,7 +1101,7 @@
         37
       ],
       "fuchsia": [
-        105
+        4295426060
       ]
     }
   },
@@ -1278,7 +1125,7 @@
         38
       ],
       "fuchsia": [
-        106
+        4295426061
       ]
     }
   },
@@ -1302,7 +1149,7 @@
         39
       ],
       "fuchsia": [
-        107
+        4295426062
       ]
     }
   },
@@ -1326,7 +1173,7 @@
         40
       ],
       "fuchsia": [
-        108
+        4295426063
       ]
     }
   },
@@ -1350,7 +1197,7 @@
         41
       ],
       "fuchsia": [
-        109
+        4295426064
       ]
     }
   },
@@ -1374,7 +1221,7 @@
         42
       ],
       "fuchsia": [
-        110
+        4295426065
       ]
     }
   },
@@ -1398,7 +1245,7 @@
         43
       ],
       "fuchsia": [
-        111
+        4295426066
       ]
     }
   },
@@ -1422,7 +1269,7 @@
         44
       ],
       "fuchsia": [
-        112
+        4295426067
       ]
     }
   },
@@ -1446,7 +1293,7 @@
         45
       ],
       "fuchsia": [
-        113
+        4295426068
       ]
     }
   },
@@ -1470,7 +1317,7 @@
         46
       ],
       "fuchsia": [
-        114
+        4295426069
       ]
     }
   },
@@ -1494,7 +1341,7 @@
         47
       ],
       "fuchsia": [
-        115
+        4295426070
       ]
     }
   },
@@ -1518,7 +1365,7 @@
         48
       ],
       "fuchsia": [
-        116
+        4295426071
       ]
     }
   },
@@ -1542,7 +1389,7 @@
         49
       ],
       "fuchsia": [
-        117
+        4295426072
       ]
     }
   },
@@ -1566,7 +1413,7 @@
         50
       ],
       "fuchsia": [
-        118
+        4295426073
       ]
     }
   },
@@ -1590,7 +1437,7 @@
         51
       ],
       "fuchsia": [
-        119
+        4295426074
       ]
     }
   },
@@ -1614,7 +1461,7 @@
         52
       ],
       "fuchsia": [
-        120
+        4295426075
       ]
     }
   },
@@ -1638,7 +1485,7 @@
         53
       ],
       "fuchsia": [
-        121
+        4295426076
       ]
     }
   },
@@ -1662,7 +1509,7 @@
         54
       ],
       "fuchsia": [
-        122
+        4295426077
       ]
     }
   },
@@ -1726,9 +1573,199 @@
       ]
     }
   },
+  "Unidentified": {
+    "name": "Unidentified",
+    "value": 8589934593,
+    "names": {
+      "web": [
+        "Unidentified"
+      ]
+    },
+    "values": {
+      "web": [
+        1
+      ]
+    }
+  },
+  "Backspace": {
+    "name": "Backspace",
+    "value": 8589934600,
+    "keyLabel": "\b",
+    "names": {
+      "web": [
+        "Backspace"
+      ],
+      "macOs": [
+        "Backspace"
+      ],
+      "ios": [
+        "Backspace"
+      ],
+      "gtk": [
+        "BackSpace"
+      ],
+      "windows": [
+        "BACK"
+      ],
+      "android": [
+        "DEL"
+      ]
+    },
+    "values": {
+      "web": [
+        8
+      ],
+      "macOs": [
+        51
+      ],
+      "ios": [
+        42
+      ],
+      "gtk": [
+        65288
+      ],
+      "windows": [
+        8
+      ],
+      "android": [
+        67
+      ],
+      "fuchsia": [
+        4295426090
+      ]
+    }
+  },
+  "Tab": {
+    "name": "Tab",
+    "value": 8589934601,
+    "keyLabel": "\t",
+    "names": {
+      "web": [
+        "Tab"
+      ],
+      "gtk": [
+        "Tab",
+        "KP_Tab",
+        "ISO_Left_Tab"
+      ],
+      "windows": [
+        "TAB"
+      ],
+      "android": [
+        "TAB"
+      ]
+    },
+    "values": {
+      "web": [
+        9
+      ],
+      "gtk": [
+        65289,
+        65417,
+        65056
+      ],
+      "windows": [
+        9
+      ],
+      "android": [
+        61
+      ],
+      "fuchsia": [
+        4295426091
+      ]
+    }
+  },
+  "Enter": {
+    "name": "Enter",
+    "value": 8589934605,
+    "keyLabel": "\r",
+    "names": {
+      "web": [
+        "Enter"
+      ],
+      "gtk": [
+        "Return",
+        "ISO_Enter",
+        "3270_Enter"
+      ],
+      "windows": [
+        "RETURN"
+      ],
+      "android": [
+        "ENTER"
+      ]
+    },
+    "values": {
+      "web": [
+        13
+      ],
+      "gtk": [
+        65293,
+        65076,
+        64798
+      ],
+      "windows": [
+        13
+      ],
+      "android": [
+        66
+      ],
+      "fuchsia": [
+        4295426088
+      ]
+    }
+  },
+  "Escape": {
+    "name": "Escape",
+    "value": 8589934619,
+    "keyLabel": "\u001b",
+    "names": {
+      "web": [
+        "Escape"
+      ],
+      "macOs": [
+        "Escape"
+      ],
+      "ios": [
+        "Escape"
+      ],
+      "gtk": [
+        "Escape"
+      ],
+      "windows": [
+        "ESCAPE"
+      ],
+      "android": [
+        "ESCAPE"
+      ]
+    },
+    "values": {
+      "web": [
+        27
+      ],
+      "macOs": [
+        53
+      ],
+      "ios": [
+        41
+      ],
+      "gtk": [
+        65307
+      ],
+      "windows": [
+        27
+      ],
+      "android": [
+        111
+      ],
+      "fuchsia": [
+        4295426089
+      ]
+    }
+  },
   "Delete": {
     "name": "Delete",
-    "value": 127,
+    "value": 8589934719,
     "keyLabel": "",
     "names": {
       "web": [
@@ -1771,935 +1808,6 @@
       ],
       "fuchsia": [
         4295426124
-      ]
-    }
-  },
-  "None": {
-    "name": "None",
-    "value": 8589934592,
-    "names": {
-      "web": [
-        "None"
-      ],
-      "android": [
-        "UNKNOWN"
-      ]
-    },
-    "values": {
-      "web": [
-        0
-      ],
-      "android": [
-        0
-      ],
-      "fuchsia": [
-        4294967296
-      ]
-    }
-  },
-  "Unidentified": {
-    "name": "Unidentified",
-    "value": 8589934593,
-    "names": {
-      "web": [
-        "Unidentified"
-      ]
-    },
-    "values": {
-      "web": [
-        1
-      ]
-    }
-  },
-  "NumpadEnter": {
-    "name": "NumpadEnter",
-    "value": 8589934605,
-    "names": {
-      "web": [
-        "NumpadEnter"
-      ],
-      "macOs": [
-        "NumpadEnter"
-      ],
-      "ios": [
-        "NumpadEnter"
-      ],
-      "gtk": [
-        "KP_Enter"
-      ],
-      "android": [
-        "NUMPAD_ENTER"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934605
-      ],
-      "macOs": [
-        76
-      ],
-      "ios": [
-        88
-      ],
-      "gtk": [
-        65421
-      ],
-      "android": [
-        160
-      ],
-      "fuchsia": [
-        4295426136
-      ]
-    }
-  },
-  "NumpadParenLeft": {
-    "name": "NumpadParenLeft",
-    "value": 8589934632,
-    "names": {
-      "web": [
-        "NumpadParenLeft"
-      ],
-      "android": [
-        "NUMPAD_LEFT_PAREN"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934632
-      ],
-      "android": [
-        162
-      ],
-      "fuchsia": [
-        4295426230
-      ]
-    }
-  },
-  "NumpadParenRight": {
-    "name": "NumpadParenRight",
-    "value": 8589934633,
-    "names": {
-      "web": [
-        "NumpadParenRight"
-      ],
-      "android": [
-        "NUMPAD_RIGHT_PAREN"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934633
-      ],
-      "android": [
-        163
-      ],
-      "fuchsia": [
-        4295426231
-      ]
-    }
-  },
-  "NumpadMultiply": {
-    "name": "NumpadMultiply",
-    "value": 8589934634,
-    "names": {
-      "web": [
-        "NumpadMultiply"
-      ],
-      "macOs": [
-        "NumpadMultiply"
-      ],
-      "ios": [
-        "NumpadMultiply"
-      ],
-      "gtk": [
-        "KP_Multiply"
-      ],
-      "windows": [
-        "MULTIPLY"
-      ],
-      "android": [
-        "NUMPAD_MULTIPLY"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934634
-      ],
-      "macOs": [
-        67
-      ],
-      "ios": [
-        85
-      ],
-      "gtk": [
-        65450
-      ],
-      "windows": [
-        106
-      ],
-      "android": [
-        155
-      ],
-      "fuchsia": [
-        4295426133
-      ]
-    }
-  },
-  "NumpadAdd": {
-    "name": "NumpadAdd",
-    "value": 8589934635,
-    "names": {
-      "web": [
-        "NumpadAdd"
-      ],
-      "macOs": [
-        "NumpadAdd"
-      ],
-      "ios": [
-        "NumpadAdd"
-      ],
-      "gtk": [
-        "KP_Add"
-      ],
-      "windows": [
-        "ADD"
-      ],
-      "android": [
-        "NUMPAD_ADD"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934635
-      ],
-      "macOs": [
-        69
-      ],
-      "ios": [
-        87
-      ],
-      "gtk": [
-        65451
-      ],
-      "windows": [
-        107
-      ],
-      "android": [
-        157
-      ],
-      "fuchsia": [
-        4295426135
-      ]
-    }
-  },
-  "NumpadComma": {
-    "name": "NumpadComma",
-    "value": 8589934636,
-    "names": {
-      "web": [
-        "NumpadComma"
-      ],
-      "macOs": [
-        "NumpadComma"
-      ],
-      "ios": [
-        "NumpadComma"
-      ],
-      "android": [
-        "NUMPAD_COMMA"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934636
-      ],
-      "macOs": [
-        95
-      ],
-      "ios": [
-        133
-      ],
-      "android": [
-        159
-      ],
-      "fuchsia": [
-        4295426181
-      ]
-    }
-  },
-  "NumpadSubtract": {
-    "name": "NumpadSubtract",
-    "value": 8589934637,
-    "names": {
-      "web": [
-        "NumpadSubtract"
-      ],
-      "macOs": [
-        "NumpadSubtract"
-      ],
-      "ios": [
-        "NumpadSubtract"
-      ],
-      "gtk": [
-        "KP_Subtract"
-      ],
-      "windows": [
-        "SUBTRACT"
-      ],
-      "android": [
-        "NUMPAD_SUBTRACT"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934637
-      ],
-      "macOs": [
-        78
-      ],
-      "ios": [
-        86
-      ],
-      "gtk": [
-        65453
-      ],
-      "windows": [
-        109
-      ],
-      "android": [
-        156
-      ],
-      "fuchsia": [
-        4295426134
-      ]
-    }
-  },
-  "NumpadDecimal": {
-    "name": "NumpadDecimal",
-    "value": 8589934638,
-    "names": {
-      "web": [
-        "NumpadDecimal"
-      ],
-      "macOs": [
-        "NumpadDecimal"
-      ],
-      "ios": [
-        "NumpadDecimal"
-      ],
-      "gtk": [
-        "KP_Delete"
-      ],
-      "windows": [
-        "DECIMAL"
-      ],
-      "android": [
-        "NUMPAD_DOT"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934638
-      ],
-      "macOs": [
-        65
-      ],
-      "ios": [
-        99
-      ],
-      "gtk": [
-        65439
-      ],
-      "windows": [
-        110
-      ],
-      "android": [
-        158
-      ],
-      "fuchsia": [
-        4295426147
-      ]
-    }
-  },
-  "NumpadDivide": {
-    "name": "NumpadDivide",
-    "value": 8589934639,
-    "names": {
-      "web": [
-        "NumpadDivide"
-      ],
-      "macOs": [
-        "NumpadDivide"
-      ],
-      "ios": [
-        "NumpadDivide"
-      ],
-      "gtk": [
-        "KP_Divide"
-      ],
-      "windows": [
-        "DIVIDE"
-      ],
-      "android": [
-        "NUMPAD_DIVIDE"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934639
-      ],
-      "macOs": [
-        75
-      ],
-      "ios": [
-        84
-      ],
-      "gtk": [
-        65455
-      ],
-      "windows": [
-        111
-      ],
-      "android": [
-        154
-      ],
-      "fuchsia": [
-        4295426132
-      ]
-    }
-  },
-  "Numpad0": {
-    "name": "Numpad0",
-    "value": 8589934640,
-    "names": {
-      "web": [
-        "Numpad0"
-      ],
-      "macOs": [
-        "Numpad0"
-      ],
-      "ios": [
-        "Numpad0"
-      ],
-      "gtk": [
-        "KP_Insert",
-        "KP_0"
-      ],
-      "windows": [
-        "NUMPAD0"
-      ],
-      "android": [
-        "NUMPAD_0"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934640
-      ],
-      "macOs": [
-        82
-      ],
-      "ios": [
-        98
-      ],
-      "gtk": [
-        65438,
-        65456
-      ],
-      "windows": [
-        96
-      ],
-      "android": [
-        144
-      ],
-      "fuchsia": [
-        4295426146
-      ]
-    }
-  },
-  "Numpad1": {
-    "name": "Numpad1",
-    "value": 8589934641,
-    "names": {
-      "web": [
-        "Numpad1"
-      ],
-      "macOs": [
-        "Numpad1"
-      ],
-      "ios": [
-        "Numpad1"
-      ],
-      "gtk": [
-        "KP_End",
-        "KP_1"
-      ],
-      "windows": [
-        "NUMPAD1"
-      ],
-      "android": [
-        "NUMPAD_1"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934641
-      ],
-      "macOs": [
-        83
-      ],
-      "ios": [
-        89
-      ],
-      "gtk": [
-        65436,
-        65457
-      ],
-      "windows": [
-        97
-      ],
-      "android": [
-        145
-      ],
-      "fuchsia": [
-        4295426137
-      ]
-    }
-  },
-  "Numpad2": {
-    "name": "Numpad2",
-    "value": 8589934642,
-    "names": {
-      "web": [
-        "Numpad2"
-      ],
-      "macOs": [
-        "Numpad2"
-      ],
-      "ios": [
-        "Numpad2"
-      ],
-      "gtk": [
-        "KP_Down",
-        "KP_2"
-      ],
-      "windows": [
-        "NUMPAD2"
-      ],
-      "android": [
-        "NUMPAD_2"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934642
-      ],
-      "macOs": [
-        84
-      ],
-      "ios": [
-        90
-      ],
-      "gtk": [
-        65433,
-        65458
-      ],
-      "windows": [
-        98
-      ],
-      "android": [
-        146
-      ],
-      "fuchsia": [
-        4295426138
-      ]
-    }
-  },
-  "Numpad3": {
-    "name": "Numpad3",
-    "value": 8589934643,
-    "names": {
-      "web": [
-        "Numpad3"
-      ],
-      "macOs": [
-        "Numpad3"
-      ],
-      "ios": [
-        "Numpad3"
-      ],
-      "gtk": [
-        "KP_Page_Down",
-        "KP_3"
-      ],
-      "windows": [
-        "NUMPAD3"
-      ],
-      "android": [
-        "NUMPAD_3"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934643
-      ],
-      "macOs": [
-        85
-      ],
-      "ios": [
-        91
-      ],
-      "gtk": [
-        65435,
-        65459
-      ],
-      "windows": [
-        99
-      ],
-      "android": [
-        147
-      ],
-      "fuchsia": [
-        4295426139
-      ]
-    }
-  },
-  "Numpad4": {
-    "name": "Numpad4",
-    "value": 8589934644,
-    "names": {
-      "web": [
-        "Numpad4"
-      ],
-      "macOs": [
-        "Numpad4"
-      ],
-      "ios": [
-        "Numpad4"
-      ],
-      "gtk": [
-        "KP_Left",
-        "KP_4"
-      ],
-      "windows": [
-        "NUMPAD4"
-      ],
-      "android": [
-        "NUMPAD_4"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934644
-      ],
-      "macOs": [
-        86
-      ],
-      "ios": [
-        92
-      ],
-      "gtk": [
-        65430,
-        65460
-      ],
-      "windows": [
-        100
-      ],
-      "android": [
-        148
-      ],
-      "fuchsia": [
-        4295426140
-      ]
-    }
-  },
-  "Numpad5": {
-    "name": "Numpad5",
-    "value": 8589934645,
-    "names": {
-      "web": [
-        "Numpad5"
-      ],
-      "macOs": [
-        "Numpad5"
-      ],
-      "ios": [
-        "Numpad5"
-      ],
-      "gtk": [
-        "KP_5"
-      ],
-      "windows": [
-        "NUMPAD5"
-      ],
-      "android": [
-        "NUMPAD_5"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934645
-      ],
-      "macOs": [
-        87
-      ],
-      "ios": [
-        93
-      ],
-      "gtk": [
-        65461
-      ],
-      "windows": [
-        101
-      ],
-      "android": [
-        149
-      ],
-      "fuchsia": [
-        4295426141
-      ]
-    }
-  },
-  "Numpad6": {
-    "name": "Numpad6",
-    "value": 8589934646,
-    "names": {
-      "web": [
-        "Numpad6"
-      ],
-      "macOs": [
-        "Numpad6"
-      ],
-      "ios": [
-        "Numpad6"
-      ],
-      "gtk": [
-        "KP_Right",
-        "KP_6"
-      ],
-      "windows": [
-        "NUMPAD6"
-      ],
-      "android": [
-        "NUMPAD_6"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934646
-      ],
-      "macOs": [
-        88
-      ],
-      "ios": [
-        94
-      ],
-      "gtk": [
-        65432,
-        65462
-      ],
-      "windows": [
-        102
-      ],
-      "android": [
-        150
-      ],
-      "fuchsia": [
-        4295426142
-      ]
-    }
-  },
-  "Numpad7": {
-    "name": "Numpad7",
-    "value": 8589934647,
-    "names": {
-      "web": [
-        "Numpad7"
-      ],
-      "macOs": [
-        "Numpad7"
-      ],
-      "ios": [
-        "Numpad7"
-      ],
-      "gtk": [
-        "KP_Home",
-        "KP_7"
-      ],
-      "windows": [
-        "NUMPAD7"
-      ],
-      "android": [
-        "NUMPAD_7"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934647
-      ],
-      "macOs": [
-        89
-      ],
-      "ios": [
-        95
-      ],
-      "gtk": [
-        65429,
-        65463
-      ],
-      "windows": [
-        103
-      ],
-      "android": [
-        151
-      ],
-      "fuchsia": [
-        4295426143
-      ]
-    }
-  },
-  "Numpad8": {
-    "name": "Numpad8",
-    "value": 8589934648,
-    "names": {
-      "web": [
-        "Numpad8"
-      ],
-      "macOs": [
-        "Numpad8"
-      ],
-      "ios": [
-        "Numpad8"
-      ],
-      "gtk": [
-        "KP_Up",
-        "KP_8"
-      ],
-      "windows": [
-        "NUMPAD8"
-      ],
-      "android": [
-        "NUMPAD_8"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934648
-      ],
-      "macOs": [
-        91
-      ],
-      "ios": [
-        96
-      ],
-      "gtk": [
-        65431,
-        65464
-      ],
-      "windows": [
-        104
-      ],
-      "android": [
-        152
-      ],
-      "fuchsia": [
-        4295426144
-      ]
-    }
-  },
-  "Numpad9": {
-    "name": "Numpad9",
-    "value": 8589934649,
-    "names": {
-      "web": [
-        "Numpad9"
-      ],
-      "macOs": [
-        "Numpad9"
-      ],
-      "ios": [
-        "Numpad9"
-      ],
-      "gtk": [
-        "KP_Page_Up",
-        "KP_9"
-      ],
-      "windows": [
-        "NUMPAD9"
-      ],
-      "android": [
-        "NUMPAD_9"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934649
-      ],
-      "macOs": [
-        92
-      ],
-      "ios": [
-        97
-      ],
-      "gtk": [
-        65434,
-        65465
-      ],
-      "windows": [
-        105
-      ],
-      "android": [
-        153
-      ],
-      "fuchsia": [
-        4295426145
-      ]
-    }
-  },
-  "NumpadEqual": {
-    "name": "NumpadEqual",
-    "value": 8589934653,
-    "names": {
-      "web": [
-        "NumpadEqual"
-      ],
-      "macOs": [
-        "NumpadEqual"
-      ],
-      "ios": [
-        "NumpadEqual"
-      ],
-      "gtk": [
-        "KP_Equal"
-      ],
-      "windows": [
-        "OEM_NEC_EQUAL"
-      ],
-      "android": [
-        "NUMPAD_EQUALS"
-      ]
-    },
-    "values": {
-      "web": [
-        8589934653
-      ],
-      "macOs": [
-        81
-      ],
-      "ios": [
-        103
-      ],
-      "gtk": [
-        65469
-      ],
-      "windows": [
-        146
-      ],
-      "android": [
-        161
-      ],
-      "fuchsia": [
-        4295426151
       ]
     }
   },
@@ -10964,6 +10072,898 @@
       ],
       "fuchsia": [
         4295426277
+      ]
+    }
+  },
+  "NumpadEnter": {
+    "name": "NumpadEnter",
+    "value": 21474836493,
+    "names": {
+      "web": [
+        "NumpadEnter"
+      ],
+      "macOs": [
+        "NumpadEnter"
+      ],
+      "ios": [
+        "NumpadEnter"
+      ],
+      "gtk": [
+        "KP_Enter"
+      ],
+      "android": [
+        "NUMPAD_ENTER"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836493
+      ],
+      "macOs": [
+        76
+      ],
+      "ios": [
+        88
+      ],
+      "gtk": [
+        65421
+      ],
+      "android": [
+        160
+      ],
+      "fuchsia": [
+        4295426136
+      ]
+    }
+  },
+  "NumpadParenLeft": {
+    "name": "NumpadParenLeft",
+    "value": 21474836520,
+    "names": {
+      "web": [
+        "NumpadParenLeft"
+      ],
+      "android": [
+        "NUMPAD_LEFT_PAREN"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836520
+      ],
+      "android": [
+        162
+      ],
+      "fuchsia": [
+        4295426230
+      ]
+    }
+  },
+  "NumpadParenRight": {
+    "name": "NumpadParenRight",
+    "value": 21474836521,
+    "names": {
+      "web": [
+        "NumpadParenRight"
+      ],
+      "android": [
+        "NUMPAD_RIGHT_PAREN"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836521
+      ],
+      "android": [
+        163
+      ],
+      "fuchsia": [
+        4295426231
+      ]
+    }
+  },
+  "NumpadMultiply": {
+    "name": "NumpadMultiply",
+    "value": 21474836522,
+    "names": {
+      "web": [
+        "NumpadMultiply"
+      ],
+      "macOs": [
+        "NumpadMultiply"
+      ],
+      "ios": [
+        "NumpadMultiply"
+      ],
+      "gtk": [
+        "KP_Multiply"
+      ],
+      "windows": [
+        "MULTIPLY"
+      ],
+      "android": [
+        "NUMPAD_MULTIPLY"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836522
+      ],
+      "macOs": [
+        67
+      ],
+      "ios": [
+        85
+      ],
+      "gtk": [
+        65450
+      ],
+      "windows": [
+        106
+      ],
+      "android": [
+        155
+      ],
+      "fuchsia": [
+        4295426133
+      ]
+    }
+  },
+  "NumpadAdd": {
+    "name": "NumpadAdd",
+    "value": 21474836523,
+    "names": {
+      "web": [
+        "NumpadAdd"
+      ],
+      "macOs": [
+        "NumpadAdd"
+      ],
+      "ios": [
+        "NumpadAdd"
+      ],
+      "gtk": [
+        "KP_Add"
+      ],
+      "windows": [
+        "ADD"
+      ],
+      "android": [
+        "NUMPAD_ADD"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836523
+      ],
+      "macOs": [
+        69
+      ],
+      "ios": [
+        87
+      ],
+      "gtk": [
+        65451
+      ],
+      "windows": [
+        107
+      ],
+      "android": [
+        157
+      ],
+      "fuchsia": [
+        4295426135
+      ]
+    }
+  },
+  "NumpadComma": {
+    "name": "NumpadComma",
+    "value": 21474836524,
+    "names": {
+      "web": [
+        "NumpadComma"
+      ],
+      "macOs": [
+        "NumpadComma"
+      ],
+      "ios": [
+        "NumpadComma"
+      ],
+      "android": [
+        "NUMPAD_COMMA"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836524
+      ],
+      "macOs": [
+        95
+      ],
+      "ios": [
+        133
+      ],
+      "android": [
+        159
+      ],
+      "fuchsia": [
+        4295426181
+      ]
+    }
+  },
+  "NumpadSubtract": {
+    "name": "NumpadSubtract",
+    "value": 21474836525,
+    "names": {
+      "web": [
+        "NumpadSubtract"
+      ],
+      "macOs": [
+        "NumpadSubtract"
+      ],
+      "ios": [
+        "NumpadSubtract"
+      ],
+      "gtk": [
+        "KP_Subtract"
+      ],
+      "windows": [
+        "SUBTRACT"
+      ],
+      "android": [
+        "NUMPAD_SUBTRACT"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836525
+      ],
+      "macOs": [
+        78
+      ],
+      "ios": [
+        86
+      ],
+      "gtk": [
+        65453
+      ],
+      "windows": [
+        109
+      ],
+      "android": [
+        156
+      ],
+      "fuchsia": [
+        4295426134
+      ]
+    }
+  },
+  "NumpadDecimal": {
+    "name": "NumpadDecimal",
+    "value": 21474836526,
+    "names": {
+      "web": [
+        "NumpadDecimal"
+      ],
+      "macOs": [
+        "NumpadDecimal"
+      ],
+      "ios": [
+        "NumpadDecimal"
+      ],
+      "gtk": [
+        "KP_Delete"
+      ],
+      "windows": [
+        "DECIMAL"
+      ],
+      "android": [
+        "NUMPAD_DOT"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836526
+      ],
+      "macOs": [
+        65
+      ],
+      "ios": [
+        99
+      ],
+      "gtk": [
+        65439
+      ],
+      "windows": [
+        110
+      ],
+      "android": [
+        158
+      ],
+      "fuchsia": [
+        4295426147
+      ]
+    }
+  },
+  "NumpadDivide": {
+    "name": "NumpadDivide",
+    "value": 21474836527,
+    "names": {
+      "web": [
+        "NumpadDivide"
+      ],
+      "macOs": [
+        "NumpadDivide"
+      ],
+      "ios": [
+        "NumpadDivide"
+      ],
+      "gtk": [
+        "KP_Divide"
+      ],
+      "windows": [
+        "DIVIDE"
+      ],
+      "android": [
+        "NUMPAD_DIVIDE"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836527
+      ],
+      "macOs": [
+        75
+      ],
+      "ios": [
+        84
+      ],
+      "gtk": [
+        65455
+      ],
+      "windows": [
+        111
+      ],
+      "android": [
+        154
+      ],
+      "fuchsia": [
+        4295426132
+      ]
+    }
+  },
+  "Numpad0": {
+    "name": "Numpad0",
+    "value": 21474836528,
+    "names": {
+      "web": [
+        "Numpad0"
+      ],
+      "macOs": [
+        "Numpad0"
+      ],
+      "ios": [
+        "Numpad0"
+      ],
+      "gtk": [
+        "KP_Insert",
+        "KP_0"
+      ],
+      "windows": [
+        "NUMPAD0"
+      ],
+      "android": [
+        "NUMPAD_0"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836528
+      ],
+      "macOs": [
+        82
+      ],
+      "ios": [
+        98
+      ],
+      "gtk": [
+        65438,
+        65456
+      ],
+      "windows": [
+        96
+      ],
+      "android": [
+        144
+      ],
+      "fuchsia": [
+        4295426146
+      ]
+    }
+  },
+  "Numpad1": {
+    "name": "Numpad1",
+    "value": 21474836529,
+    "names": {
+      "web": [
+        "Numpad1"
+      ],
+      "macOs": [
+        "Numpad1"
+      ],
+      "ios": [
+        "Numpad1"
+      ],
+      "gtk": [
+        "KP_End",
+        "KP_1"
+      ],
+      "windows": [
+        "NUMPAD1"
+      ],
+      "android": [
+        "NUMPAD_1"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836529
+      ],
+      "macOs": [
+        83
+      ],
+      "ios": [
+        89
+      ],
+      "gtk": [
+        65436,
+        65457
+      ],
+      "windows": [
+        97
+      ],
+      "android": [
+        145
+      ],
+      "fuchsia": [
+        4295426137
+      ]
+    }
+  },
+  "Numpad2": {
+    "name": "Numpad2",
+    "value": 21474836530,
+    "names": {
+      "web": [
+        "Numpad2"
+      ],
+      "macOs": [
+        "Numpad2"
+      ],
+      "ios": [
+        "Numpad2"
+      ],
+      "gtk": [
+        "KP_Down",
+        "KP_2"
+      ],
+      "windows": [
+        "NUMPAD2"
+      ],
+      "android": [
+        "NUMPAD_2"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836530
+      ],
+      "macOs": [
+        84
+      ],
+      "ios": [
+        90
+      ],
+      "gtk": [
+        65433,
+        65458
+      ],
+      "windows": [
+        98
+      ],
+      "android": [
+        146
+      ],
+      "fuchsia": [
+        4295426138
+      ]
+    }
+  },
+  "Numpad3": {
+    "name": "Numpad3",
+    "value": 21474836531,
+    "names": {
+      "web": [
+        "Numpad3"
+      ],
+      "macOs": [
+        "Numpad3"
+      ],
+      "ios": [
+        "Numpad3"
+      ],
+      "gtk": [
+        "KP_Page_Down",
+        "KP_3"
+      ],
+      "windows": [
+        "NUMPAD3"
+      ],
+      "android": [
+        "NUMPAD_3"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836531
+      ],
+      "macOs": [
+        85
+      ],
+      "ios": [
+        91
+      ],
+      "gtk": [
+        65435,
+        65459
+      ],
+      "windows": [
+        99
+      ],
+      "android": [
+        147
+      ],
+      "fuchsia": [
+        4295426139
+      ]
+    }
+  },
+  "Numpad4": {
+    "name": "Numpad4",
+    "value": 21474836532,
+    "names": {
+      "web": [
+        "Numpad4"
+      ],
+      "macOs": [
+        "Numpad4"
+      ],
+      "ios": [
+        "Numpad4"
+      ],
+      "gtk": [
+        "KP_Left",
+        "KP_4"
+      ],
+      "windows": [
+        "NUMPAD4"
+      ],
+      "android": [
+        "NUMPAD_4"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836532
+      ],
+      "macOs": [
+        86
+      ],
+      "ios": [
+        92
+      ],
+      "gtk": [
+        65430,
+        65460
+      ],
+      "windows": [
+        100
+      ],
+      "android": [
+        148
+      ],
+      "fuchsia": [
+        4295426140
+      ]
+    }
+  },
+  "Numpad5": {
+    "name": "Numpad5",
+    "value": 21474836533,
+    "names": {
+      "web": [
+        "Numpad5"
+      ],
+      "macOs": [
+        "Numpad5"
+      ],
+      "ios": [
+        "Numpad5"
+      ],
+      "gtk": [
+        "KP_5"
+      ],
+      "windows": [
+        "NUMPAD5"
+      ],
+      "android": [
+        "NUMPAD_5"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836533
+      ],
+      "macOs": [
+        87
+      ],
+      "ios": [
+        93
+      ],
+      "gtk": [
+        65461
+      ],
+      "windows": [
+        101
+      ],
+      "android": [
+        149
+      ],
+      "fuchsia": [
+        4295426141
+      ]
+    }
+  },
+  "Numpad6": {
+    "name": "Numpad6",
+    "value": 21474836534,
+    "names": {
+      "web": [
+        "Numpad6"
+      ],
+      "macOs": [
+        "Numpad6"
+      ],
+      "ios": [
+        "Numpad6"
+      ],
+      "gtk": [
+        "KP_Right",
+        "KP_6"
+      ],
+      "windows": [
+        "NUMPAD6"
+      ],
+      "android": [
+        "NUMPAD_6"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836534
+      ],
+      "macOs": [
+        88
+      ],
+      "ios": [
+        94
+      ],
+      "gtk": [
+        65432,
+        65462
+      ],
+      "windows": [
+        102
+      ],
+      "android": [
+        150
+      ],
+      "fuchsia": [
+        4295426142
+      ]
+    }
+  },
+  "Numpad7": {
+    "name": "Numpad7",
+    "value": 21474836535,
+    "names": {
+      "web": [
+        "Numpad7"
+      ],
+      "macOs": [
+        "Numpad7"
+      ],
+      "ios": [
+        "Numpad7"
+      ],
+      "gtk": [
+        "KP_Home",
+        "KP_7"
+      ],
+      "windows": [
+        "NUMPAD7"
+      ],
+      "android": [
+        "NUMPAD_7"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836535
+      ],
+      "macOs": [
+        89
+      ],
+      "ios": [
+        95
+      ],
+      "gtk": [
+        65429,
+        65463
+      ],
+      "windows": [
+        103
+      ],
+      "android": [
+        151
+      ],
+      "fuchsia": [
+        4295426143
+      ]
+    }
+  },
+  "Numpad8": {
+    "name": "Numpad8",
+    "value": 21474836536,
+    "names": {
+      "web": [
+        "Numpad8"
+      ],
+      "macOs": [
+        "Numpad8"
+      ],
+      "ios": [
+        "Numpad8"
+      ],
+      "gtk": [
+        "KP_Up",
+        "KP_8"
+      ],
+      "windows": [
+        "NUMPAD8"
+      ],
+      "android": [
+        "NUMPAD_8"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836536
+      ],
+      "macOs": [
+        91
+      ],
+      "ios": [
+        96
+      ],
+      "gtk": [
+        65431,
+        65464
+      ],
+      "windows": [
+        104
+      ],
+      "android": [
+        152
+      ],
+      "fuchsia": [
+        4295426144
+      ]
+    }
+  },
+  "Numpad9": {
+    "name": "Numpad9",
+    "value": 21474836537,
+    "names": {
+      "web": [
+        "Numpad9"
+      ],
+      "macOs": [
+        "Numpad9"
+      ],
+      "ios": [
+        "Numpad9"
+      ],
+      "gtk": [
+        "KP_Page_Up",
+        "KP_9"
+      ],
+      "windows": [
+        "NUMPAD9"
+      ],
+      "android": [
+        "NUMPAD_9"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836537
+      ],
+      "macOs": [
+        92
+      ],
+      "ios": [
+        97
+      ],
+      "gtk": [
+        65434,
+        65465
+      ],
+      "windows": [
+        105
+      ],
+      "android": [
+        153
+      ],
+      "fuchsia": [
+        4295426145
+      ]
+    }
+  },
+  "NumpadEqual": {
+    "name": "NumpadEqual",
+    "value": 21474836541,
+    "names": {
+      "web": [
+        "NumpadEqual"
+      ],
+      "macOs": [
+        "NumpadEqual"
+      ],
+      "ios": [
+        "NumpadEqual"
+      ],
+      "gtk": [
+        "KP_Equal"
+      ],
+      "windows": [
+        "OEM_NEC_EQUAL"
+      ],
+      "android": [
+        "NUMPAD_EQUALS"
+      ]
+    },
+    "values": {
+      "web": [
+        21474836541
+      ],
+      "macOs": [
+        81
+      ],
+      "ios": [
+        103
+      ],
+      "gtk": [
+        65469
+      ],
+      "windows": [
+        146
+      ],
+      "android": [
+        161
+      ],
+      "fuchsia": [
+        4295426151
       ]
     }
   }

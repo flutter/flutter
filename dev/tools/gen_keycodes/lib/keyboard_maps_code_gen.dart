@@ -62,7 +62,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   List<PhysicalKeyEntry> get _numpadKeyData {
     return keyData.data.values.where((PhysicalKeyEntry entry) {
-      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.constantName);
+      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.name);
     }).toList();
   }
 
@@ -75,7 +75,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   List<LogicalKeyEntry> get _numpadLogicalKeyData {
     return logicalData.data.values.where((LogicalKeyEntry entry) {
-      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.constantName);
+      return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.name);
     }).toList();
   }
 

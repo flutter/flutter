@@ -362,25 +362,10 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// HID Usage codes.
   static const int hidPlane = 0x00100000000;
 
-  /// Represents the logical "Backspace" key on the keyboard.
+  /// Represents the logical "None" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey backspace = LogicalKeyboardKey(0x00000000008);
-
-  /// Represents the logical "Tab" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tab = LogicalKeyboardKey(0x00000000009);
-
-  /// Represents the logical "Enter" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey enter = LogicalKeyboardKey(0x0000000000d);
-
-  /// Represents the logical "Escape" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0000000001b);
+  static const LogicalKeyboardKey none = LogicalKeyboardKey(0x00000000000);
 
   /// Represents the logical "Space" key on the keyboard.
   ///
@@ -727,120 +712,35 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey tilde = LogicalKeyboardKey(0x0000000007e);
 
-  /// Represents the logical "Delete" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0000000007f);
-
-  /// Represents the logical "None" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey none = LogicalKeyboardKey(0x00200000000);
-
   /// Represents the logical "Unidentified" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey unidentified = LogicalKeyboardKey(0x00200000001);
 
-  /// Represents the logical "Numpad Enter" key on the keyboard.
+  /// Represents the logical "Backspace" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadEnter = LogicalKeyboardKey(0x0020000000d);
+  static const LogicalKeyboardKey backspace = LogicalKeyboardKey(0x00200000008);
 
-  /// Represents the logical "Numpad Paren Left" key on the keyboard.
+  /// Represents the logical "Tab" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadParenLeft = LogicalKeyboardKey(0x00200000028);
+  static const LogicalKeyboardKey tab = LogicalKeyboardKey(0x00200000009);
 
-  /// Represents the logical "Numpad Paren Right" key on the keyboard.
+  /// Represents the logical "Enter" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadParenRight = LogicalKeyboardKey(0x00200000029);
+  static const LogicalKeyboardKey enter = LogicalKeyboardKey(0x0020000000d);
 
-  /// Represents the logical "Numpad Multiply" key on the keyboard.
+  /// Represents the logical "Escape" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadMultiply = LogicalKeyboardKey(0x0020000002a);
+  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0020000001b);
 
-  /// Represents the logical "Numpad Add" key on the keyboard.
+  /// Represents the logical "Delete" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadAdd = LogicalKeyboardKey(0x0020000002b);
-
-  /// Represents the logical "Numpad Comma" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadComma = LogicalKeyboardKey(0x0020000002c);
-
-  /// Represents the logical "Numpad Subtract" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadSubtract = LogicalKeyboardKey(0x0020000002d);
-
-  /// Represents the logical "Numpad Decimal" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadDecimal = LogicalKeyboardKey(0x0020000002e);
-
-  /// Represents the logical "Numpad Divide" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadDivide = LogicalKeyboardKey(0x0020000002f);
-
-  /// Represents the logical "Numpad 0" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad0 = LogicalKeyboardKey(0x00200000030);
-
-  /// Represents the logical "Numpad 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad1 = LogicalKeyboardKey(0x00200000031);
-
-  /// Represents the logical "Numpad 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad2 = LogicalKeyboardKey(0x00200000032);
-
-  /// Represents the logical "Numpad 3" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad3 = LogicalKeyboardKey(0x00200000033);
-
-  /// Represents the logical "Numpad 4" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad4 = LogicalKeyboardKey(0x00200000034);
-
-  /// Represents the logical "Numpad 5" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad5 = LogicalKeyboardKey(0x00200000035);
-
-  /// Represents the logical "Numpad 6" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad6 = LogicalKeyboardKey(0x00200000036);
-
-  /// Represents the logical "Numpad 7" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad7 = LogicalKeyboardKey(0x00200000037);
-
-  /// Represents the logical "Numpad 8" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad8 = LogicalKeyboardKey(0x00200000038);
-
-  /// Represents the logical "Numpad 9" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpad9 = LogicalKeyboardKey(0x00200000039);
-
-  /// Represents the logical "Numpad Equal" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x0020000003d);
+  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0020000007f);
 
   /// Represents the logical "Accel" key on the keyboard.
   ///
@@ -2568,6 +2468,106 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey shiftRight = LogicalKeyboardKey(0x0040000010d);
 
+  /// Represents the logical "Numpad Enter" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadEnter = LogicalKeyboardKey(0x0050000000d);
+
+  /// Represents the logical "Numpad Paren Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadParenLeft = LogicalKeyboardKey(0x00500000028);
+
+  /// Represents the logical "Numpad Paren Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadParenRight = LogicalKeyboardKey(0x00500000029);
+
+  /// Represents the logical "Numpad Multiply" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadMultiply = LogicalKeyboardKey(0x0050000002a);
+
+  /// Represents the logical "Numpad Add" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadAdd = LogicalKeyboardKey(0x0050000002b);
+
+  /// Represents the logical "Numpad Comma" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadComma = LogicalKeyboardKey(0x0050000002c);
+
+  /// Represents the logical "Numpad Subtract" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadSubtract = LogicalKeyboardKey(0x0050000002d);
+
+  /// Represents the logical "Numpad Decimal" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadDecimal = LogicalKeyboardKey(0x0050000002e);
+
+  /// Represents the logical "Numpad Divide" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadDivide = LogicalKeyboardKey(0x0050000002f);
+
+  /// Represents the logical "Numpad 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad0 = LogicalKeyboardKey(0x00500000030);
+
+  /// Represents the logical "Numpad 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad1 = LogicalKeyboardKey(0x00500000031);
+
+  /// Represents the logical "Numpad 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad2 = LogicalKeyboardKey(0x00500000032);
+
+  /// Represents the logical "Numpad 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad3 = LogicalKeyboardKey(0x00500000033);
+
+  /// Represents the logical "Numpad 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad4 = LogicalKeyboardKey(0x00500000034);
+
+  /// Represents the logical "Numpad 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad5 = LogicalKeyboardKey(0x00500000035);
+
+  /// Represents the logical "Numpad 6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad6 = LogicalKeyboardKey(0x00500000036);
+
+  /// Represents the logical "Numpad 7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad7 = LogicalKeyboardKey(0x00500000037);
+
+  /// Represents the logical "Numpad 8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad8 = LogicalKeyboardKey(0x00500000038);
+
+  /// Represents the logical "Numpad 9" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad9 = LogicalKeyboardKey(0x00500000039);
+
+  /// Represents the logical "Numpad Equal" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x0050000003d);
+
   /// Represents the logical "Shift" key on the keyboard.
   ///
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
@@ -2599,10 +2599,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
-    0x0000000008: backspace,
-    0x0000000009: tab,
-    0x000000000d: enter,
-    0x000000001b: escape,
+    0x0000000000: none,
     0x0000000020: space,
     0x0000000021: exclamation,
     0x0000000022: quote,
@@ -2672,29 +2669,12 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x000000007c: bar,
     0x000000007d: braceRight,
     0x000000007e: tilde,
-    0x000000007f: delete,
-    0x0200000000: none,
     0x0200000001: unidentified,
-    0x020000000d: numpadEnter,
-    0x0200000028: numpadParenLeft,
-    0x0200000029: numpadParenRight,
-    0x020000002a: numpadMultiply,
-    0x020000002b: numpadAdd,
-    0x020000002c: numpadComma,
-    0x020000002d: numpadSubtract,
-    0x020000002e: numpadDecimal,
-    0x020000002f: numpadDivide,
-    0x0200000030: numpad0,
-    0x0200000031: numpad1,
-    0x0200000032: numpad2,
-    0x0200000033: numpad3,
-    0x0200000034: numpad4,
-    0x0200000035: numpad5,
-    0x0200000036: numpad6,
-    0x0200000037: numpad7,
-    0x0200000038: numpad8,
-    0x0200000039: numpad9,
-    0x020000003d: numpadEqual,
+    0x0200000008: backspace,
+    0x0200000009: tab,
+    0x020000000d: enter,
+    0x020000001b: escape,
+    0x020000007f: delete,
     0x0200000101: accel,
     0x0200000103: altGraph,
     0x0200000104: capsLock,
@@ -3040,6 +3020,26 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0400000105: controlRight,
     0x0400000109: metaRight,
     0x040000010d: shiftRight,
+    0x050000000d: numpadEnter,
+    0x0500000028: numpadParenLeft,
+    0x0500000029: numpadParenRight,
+    0x050000002a: numpadMultiply,
+    0x050000002b: numpadAdd,
+    0x050000002c: numpadComma,
+    0x050000002d: numpadSubtract,
+    0x050000002e: numpadDecimal,
+    0x050000002f: numpadDivide,
+    0x0500000030: numpad0,
+    0x0500000031: numpad1,
+    0x0500000032: numpad2,
+    0x0500000033: numpad3,
+    0x0500000034: numpad4,
+    0x0500000035: numpad5,
+    0x0500000036: numpad6,
+    0x0500000037: numpad7,
+    0x0500000038: numpad8,
+    0x0500000039: numpad9,
+    0x050000003d: numpadEqual,
     0x2030000010d: shift,
     0x20300000109: meta,
     0x20300000102: alt,
@@ -3059,10 +3059,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   };
 
   static const Map<int, String> _keyLabels = <int, String>{
-    0x00000000008: 'Backspace',
-    0x00000000009: 'Tab',
-    0x0000000000d: 'Enter',
-    0x0000000001b: 'Escape',
+    0x00000000000: 'None',
     0x00000000020: 'Space',
     0x00000000021: 'Exclamation',
     0x00000000022: 'Quote',
@@ -3132,29 +3129,12 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000007c: 'Bar',
     0x0000000007d: 'Brace Right',
     0x0000000007e: 'Tilde',
-    0x0000000007f: 'Delete',
-    0x00200000000: 'None',
     0x00200000001: 'Unidentified',
-    0x0020000000d: 'Numpad Enter',
-    0x00200000028: 'Numpad Paren Left',
-    0x00200000029: 'Numpad Paren Right',
-    0x0020000002a: 'Numpad Multiply',
-    0x0020000002b: 'Numpad Add',
-    0x0020000002c: 'Numpad Comma',
-    0x0020000002d: 'Numpad Subtract',
-    0x0020000002e: 'Numpad Decimal',
-    0x0020000002f: 'Numpad Divide',
-    0x00200000030: 'Numpad 0',
-    0x00200000031: 'Numpad 1',
-    0x00200000032: 'Numpad 2',
-    0x00200000033: 'Numpad 3',
-    0x00200000034: 'Numpad 4',
-    0x00200000035: 'Numpad 5',
-    0x00200000036: 'Numpad 6',
-    0x00200000037: 'Numpad 7',
-    0x00200000038: 'Numpad 8',
-    0x00200000039: 'Numpad 9',
-    0x0020000003d: 'Numpad Equal',
+    0x00200000008: 'Backspace',
+    0x00200000009: 'Tab',
+    0x0020000000d: 'Enter',
+    0x0020000001b: 'Escape',
+    0x0020000007f: 'Delete',
     0x00200000101: 'Accel',
     0x00200000103: 'Alt Graph',
     0x00200000104: 'Caps Lock',
@@ -3500,6 +3480,26 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x00400000105: 'Control Right',
     0x00400000109: 'Meta Right',
     0x0040000010d: 'Shift Right',
+    0x0050000000d: 'Numpad Enter',
+    0x00500000028: 'Numpad Paren Left',
+    0x00500000029: 'Numpad Paren Right',
+    0x0050000002a: 'Numpad Multiply',
+    0x0050000002b: 'Numpad Add',
+    0x0050000002c: 'Numpad Comma',
+    0x0050000002d: 'Numpad Subtract',
+    0x0050000002e: 'Numpad Decimal',
+    0x0050000002f: 'Numpad Divide',
+    0x00500000030: 'Numpad 0',
+    0x00500000031: 'Numpad 1',
+    0x00500000032: 'Numpad 2',
+    0x00500000033: 'Numpad 3',
+    0x00500000034: 'Numpad 4',
+    0x00500000035: 'Numpad 5',
+    0x00500000036: 'Numpad 6',
+    0x00500000037: 'Numpad 7',
+    0x00500000038: 'Numpad 8',
+    0x00500000039: 'Numpad 9',
+    0x0050000003d: 'Numpad Equal',
     0x2030000010d: 'Shift',
     0x20300000109: 'Meta',
     0x20300000102: 'Alt',
