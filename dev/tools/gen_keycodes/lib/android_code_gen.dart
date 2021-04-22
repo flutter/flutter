@@ -21,7 +21,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer androidKeyCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       for (final int code in entry.androidValues) {
-        androidKeyCodeMap.writeln('      put(${toHex(code, digits: 10)}L, ${toHex(entry.value, digits: 10)}L);    // ${entry.constantName}');
+        androidKeyCodeMap.writeln('          put(${toHex(code, digits: 10)}L, ${toHex(entry.value, digits: 10)}L); // ${entry.constantName}');
       }
     }
     return androidKeyCodeMap.toString().trimRight();
@@ -33,7 +33,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.androidScanCodes != null) {
         for (final int code in entry.androidScanCodes.cast<int>()) {
-          androidScanCodeMap.writeln('      put(${toHex(code, digits: 10)}L, ${toHex(entry.usbHidCode, digits: 10)}L);    // ${entry.constantName}');
+          androidScanCodeMap.writeln('          put(${toHex(code, digits: 10)}L, ${toHex(entry.usbHidCode, digits: 10)}L); // ${entry.constantName}');
         }
       }
     }

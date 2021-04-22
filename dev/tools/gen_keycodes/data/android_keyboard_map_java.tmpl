@@ -14,17 +14,21 @@ package io.flutter.embedding.android;
 import java.util.HashMap;
 
 public class KeyboardMap {
-  public static final HashMap<Long, Long> scanCodeToPhysical = new HashMap<Long, Long>() {
-    private static final long serialVersionUID = 1L;
-    {
-@@@ANDROID_SCAN_CODE_MAP@@@
-    }
-  };
+  public static final HashMap<Long, Long> scanCodeToPhysical =
+      new HashMap<Long, Long>() {
+        private static final long serialVersionUID = 1L;
 
-  public static final HashMap<Long, Long> keyCodeToLogical  = new HashMap<Long, Long>() {
-    private static final long serialVersionUID = 1L;
-    {
+        {
+@@@ANDROID_SCAN_CODE_MAP@@@
+        }
+      };
+
+  public static final HashMap<Long, Long> keyCodeToLogical =
+      new HashMap<Long, Long>() {
+        private static final long serialVersionUID = 1L;
+
+        {
 @@@ANDROID_KEY_CODE_MAP@@@
-    }
-  };
+        }
+      };
 }
