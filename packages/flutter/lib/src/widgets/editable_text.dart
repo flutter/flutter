@@ -342,7 +342,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 }
 
 /// A [TextEditingController] that contains a list of [TextEditingInlineSpanReplacement]s that
-/// insert custom [InlineSpans] in place of matched [Pattern]s.
+/// insert custom [InlineSpan]s in place of matched [Pattern]s.
 ///
 /// This controller should be passed [TextEditingInlineSpanReplacement], each of which contains a
 /// a [Pattern] to match with and a generator function to generate an [InlineSpan] to replace
@@ -370,12 +370,12 @@ class ReplacementTextEditingController extends TextEditingController {
   /// The [TextEditingInlineSpanReplacment]s that are evaluated on the editing value.
   ///
   /// Each replacement is evaluated in order from first to last. If multiple replacement
-  /// [TextEditingInlineSpanReplacement.pattern]s match against the same range of text,
+  /// [Pattern]s match against the same range of text,
   /// the first replacement will be used and any additional matches that overlap will
   /// be ignored.
-  /// 
-  /// For example, if given replacements with patterns of '{[hello]}' and
-  /// '[hello]', only the first replacement will be used as the second one is always
+  ///
+  /// For example, if given replacements with patterns of '{hello}' and
+  /// 'hello', only the first replacement will be used as the second one is always
   /// overlapping with the first.
   final List<TextEditingInlineSpanReplacement> replacements;
 
