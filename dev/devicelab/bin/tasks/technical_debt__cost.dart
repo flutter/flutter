@@ -82,6 +82,43 @@ Future<double> findCostsForRepo() async {
   return total;
 }
 
+Future<int> findGlobalsForTool() async {
+  final Process git = await startProcess(
+    'git',
+    <String>['ls-files', '--full-name', path.join(flutterDirectory.path, 'packages', 'flutter_tools')],
+    workingDirectory: flutterDirectory.path,
+  );
+  int total = 0;
+  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
+    total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
+  final int gitExitCode = await git.exitCode;
+  if (gitExitCode != 0)
+    throw Exception('git exit with unexpected error code $gitExitCode');
+  return total;
+}
+
+Future<int> countDependencies() async {
+  final List<String> lines = (await evalFlutter(
+    'update-packages',
+    options: <String>['--transitive-closure'],
+  )).split('\n');
+  final int count = lines.where((String line) => line.contains('->')).length;
+  if (count < 2) // we'll always have flutter and flutter_test, at least...
+    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+  return count;
+}
+
+Future<int> countConsumerDependencies() async {
+  final List<String> lines = (await evalFlutter(
+    'update-packages',
+    options: <String>['--transitive-closure', '--consumer-only'],
+  )).split('\n');
+  final int count = lines.where((String line) => line.contains('->')).length;
+  if (count < 2) // we'll always have flutter and flutter_test, at least...
+    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+  return count;
+}
+
 const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
 const String _kNumberOfDependenciesKey = 'dependencies_count';
 const String _kNumberOfConsumerDependenciesKey = 'consumer_dependencies_count';
@@ -92,6 +129,9 @@ Future<void> main() async {
     return TaskResult.success(
       <String, dynamic>{
         _kCostBenchmarkKey: await findCostsForRepo(),
+        _kNumberOfDependenciesKey: await countDependencies(),
+        _kNumberOfConsumerDependenciesKey: await countConsumerDependencies(),
+        _kNumberOfFlutterToolGlobals: await findGlobalsForTool(),
       },
       benchmarkScoreKeys: <String>[
         _kCostBenchmarkKey,
