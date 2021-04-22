@@ -70,11 +70,11 @@ Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependenc
 
 Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
-  final String packagesFile = globals.fs.path.join(
+  final FileSystem fs = project.directory.fileSystem;
+  final String packagesFile = fs.path.join(
     project.directory.path,
     '.packages',
   );
-  final FileSystem fs = project.directory.fileSystem;
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fs.file(packagesFile),
     logger: globals.logger,
