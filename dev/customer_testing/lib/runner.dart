@@ -15,14 +15,14 @@ Future<bool> runTests({
   bool verbose = false,
   int numberShards = 1,
   int shardIndex = 0,
-  List<File>? files,
+  required List<File> files,
 }) async {
   if (verbose)
     print('Starting run_tests.dart...');
 
   // Best attempt at evenly splitting tests among the shards
   final List<File> shardedFiles = <File>[];
-  for (int i = shardIndex; i < files!.length; i += numberShards) {
+  for (int i = shardIndex; i < files.length; i += numberShards) {
     shardedFiles.add(files[i]);
   }
 
