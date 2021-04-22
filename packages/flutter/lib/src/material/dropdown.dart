@@ -97,6 +97,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
     required this.buttonRect,
     required this.constraints,
     required this.itemIndex,
+    required this.enableFeedback,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -104,6 +105,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   final Rect buttonRect;
   final BoxConstraints constraints;
   final int itemIndex;
+  final bool enableFeedback;
 
   @override
   _DropdownMenuItemButtonState<T> createState() => _DropdownMenuItemButtonState<T>();
@@ -173,6 +175,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     if (dropdownMenuItem.enabled) {
       child = InkWell(
         autofocus: widget.itemIndex == widget.route.selectedIndex,
+        enableFeedback: widget.enableFeedback,
         child: child,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
@@ -197,6 +200,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     required this.buttonRect,
     required this.constraints,
     this.dropdownColor,
+    required this.enableFeedback,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -204,6 +208,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final Rect buttonRect;
   final BoxConstraints constraints;
   final Color? dropdownColor;
+  final bool enableFeedback;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -253,6 +258,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           buttonRect: widget.buttonRect,
           constraints: widget.constraints,
           itemIndex: itemIndex,
+          enableFeedback: widget.enableFeedback,
         ),
       ];
 
@@ -411,6 +417,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.itemHeight,
     this.dropdownColor,
     this.menuMaxHeight,
+    required this.enableFeedback,
   }) : assert(style != null),
        itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
@@ -424,7 +431,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final double? itemHeight;
   final Color? dropdownColor;
   final double? menuMaxHeight;
-
+  final bool enableFeedback;
 
   final List<double> itemHeights;
   ScrollController? scrollController;
@@ -456,6 +463,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           capturedThemes: capturedThemes,
           style: style,
           dropdownColor: dropdownColor,
+          enableFeedback: enableFeedback,
         );
       },
     );
@@ -551,6 +559,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     required this.capturedThemes,
     this.style,
     required this.dropdownColor,
+    required this.enableFeedback,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -563,6 +572,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final CapturedThemes capturedThemes;
   final TextStyle? style;
   final Color? dropdownColor;
+  final bool enableFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -586,6 +596,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       buttonRect: buttonRect,
       constraints: constraints,
       dropdownColor: dropdownColor,
+      enableFeedback: enableFeedback,
     );
 
     return MediaQuery.removePadding(
@@ -854,6 +865,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.autofocus = false,
     this.dropdownColor,
     this.menuMaxHeight,
+    this.enableFeedback,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1114,6 +1126,18 @@ class DropdownButton<T> extends StatefulWidget {
   /// and bottom of the menu by at one menu item's height.
   final double? menuMaxHeight;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// By default, platform-specific feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 }
@@ -1266,6 +1290,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       itemHeight: widget.itemHeight,
       dropdownColor: widget.dropdownColor,
       menuMaxHeight: widget.menuMaxHeight,
+      enableFeedback: widget.enableFeedback ?? true,
     );
 
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {

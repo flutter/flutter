@@ -2,19 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 
-const String kIncrement = 'increment';
-const String kCommit = 'commit';
-const String kRemoteName = 'remote';
-const String kJustPrint = 'just-print';
-const String kYes = 'yes';
-const String kForce = 'force';
-const String kSkipTagging = 'skip-tagging';
-
 const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
+
+const String gsutilBinary = 'gsutil.py';
 
 const List<String> kReleaseChannels = <String>[
   'stable',
@@ -22,6 +17,12 @@ const List<String> kReleaseChannels = <String>[
   'dev',
   'master',
 ];
+
+const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
+
+final RegExp releaseCandidateBranchRegex = RegExp(
+  r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
+);
 
 /// Cast a dynamic to String and trim.
 String stdoutToString(dynamic input) {
@@ -85,4 +86,65 @@ bool assertsEnabled() {
     return true;
   }());
   return assertsEnabled;
+}
+
+/// Either return the value from [env] or fall back to [argResults].
+///
+/// If the key does not exist in either the environment or CLI args, throws a
+/// [ConductorException].
+///
+/// The environment is favored over CLI args since the latter can have a default
+/// value, which the environment should be able to override.
+String getValueFromEnvOrArgs(
+  String name,
+  ArgResults argResults,
+  Map<String, String> env,
+) {
+  final String envName = fromArgToEnvName(name);
+  if (env[envName] != null ) {
+    return env[envName];
+  }
+  final String argValue = argResults[name] as String;
+  if (argValue != null) {
+    return argValue;
+  }
+
+  throw ConductorException(
+    'Expected either the CLI arg --$name or the environment variable $envName '
+    'to be provided!');
+}
+
+/// Return multiple values from the environment or fall back to [argResults].
+///
+/// Values read from an environment variable are assumed to be comma-delimited.
+///
+/// If the key does not exist in either the CLI args or environment, throws a
+/// [ConductorException].
+///
+/// The environment is favored over CLI args since the latter can have a default
+/// value, which the environment should be able to override.
+List<String> getValuesFromEnvOrArgs(
+  String name,
+  ArgResults argResults,
+  Map<String, String> env,
+) {
+  final String envName = fromArgToEnvName(name);
+  if (env[envName] != null && env[envName] != '') {
+    return env[envName].split(',');
+  }
+  final List<String> argValues = argResults[name] as List<String>;
+  if (argValues != null) {
+    return argValues;
+  }
+
+  throw ConductorException(
+    'Expected either the CLI arg --$name or the environment variable $envName '
+    'to be provided!');
+}
+
+/// Translate CLI arg names to env variable names.
+///
+/// For example, 'state-file' -> 'STATE_FILE'.
+String fromArgToEnvName(String argName) {
+  return argName.toUpperCase().replaceAll(r'-', r'_');
 }
