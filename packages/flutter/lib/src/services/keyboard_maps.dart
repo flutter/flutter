@@ -2822,6 +2822,31 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'ShowAllWindows': PhysicalKeyboardKey.showAllWindows,
 };
 
+/// A map of Web KeyboardEvent codes which have printable representations, but appear
+/// on the number pad. Used to provide different key objects for keys like
+/// KEY_EQUALS and NUMPAD_EQUALS.
+const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKey>{
+  'NumpadParenLeft': LogicalKeyboardKey.numpadParenLeft,
+  'NumpadParenRight': LogicalKeyboardKey.numpadParenRight,
+  'NumpadMultiply': LogicalKeyboardKey.numpadMultiply,
+  'NumpadAdd': LogicalKeyboardKey.numpadAdd,
+  'NumpadComma': LogicalKeyboardKey.numpadComma,
+  'NumpadSubtract': LogicalKeyboardKey.numpadSubtract,
+  'NumpadDecimal': LogicalKeyboardKey.numpadDecimal,
+  'NumpadDivide': LogicalKeyboardKey.numpadDivide,
+  'Numpad0': LogicalKeyboardKey.numpad0,
+  'Numpad1': LogicalKeyboardKey.numpad1,
+  'Numpad2': LogicalKeyboardKey.numpad2,
+  'Numpad3': LogicalKeyboardKey.numpad3,
+  'Numpad4': LogicalKeyboardKey.numpad4,
+  'Numpad5': LogicalKeyboardKey.numpad5,
+  'Numpad6': LogicalKeyboardKey.numpad6,
+  'Numpad7': LogicalKeyboardKey.numpad7,
+  'Numpad8': LogicalKeyboardKey.numpad8,
+  'Numpad9': LogicalKeyboardKey.numpad9,
+  'NumpadEqual': LogicalKeyboardKey.numpadEqual,
+};
+
 /// A map of Web KeyboardEvent keys which needs to be decided based on location,
 /// typically for numpad kyes and modifier keys. Used to provide different key
 /// objects for keys like KEY_EQUALS and NUMPAD_EQUALS.

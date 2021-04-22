@@ -341,6 +341,16 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return result.toString().trimRight();
   }
 
+  String get webNumpadMap {
+    final StringBuffer result = StringBuffer();
+    for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
   /// This generates the map of Web number pad codes to logical keys.
   String get webLocationMap {
     final String jsonRaw = File(path.join(
@@ -386,6 +396,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'XKB_SCAN_CODE_MAP': xkbScanCodeMap,
       'WEB_LOGICAL_KEY_MAP': webLogicalKeyMap,
       'WEB_PHYSICAL_KEY_MAP': webPhysicalKeyMap,
+      'WEB_NUMPAD_MAP': webNumpadMap,
       'WEB_LOCATION_MAP': webLocationMap,
       'WINDOWS_LOGICAL_KEY_MAP': windowsKeyCodeMap,
       'WINDOWS_PHYSICAL_KEY_MAP': windowsScanCodeMap,

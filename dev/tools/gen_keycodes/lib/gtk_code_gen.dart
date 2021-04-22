@@ -95,7 +95,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'gtk_key_mapping_cc.tmpl');
 
   @override
-  String outputPath(String _) => path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', 'linux', 'key_mapping.cc'));
+  String outputPath(String platform) => path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', 'linux', 'key_mapping.cc'));
 
   @override
   Map<String, String> mappings() {
