@@ -60,41 +60,29 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
     : super(keyData, logicalData);
 
-  late final Set<String> logicalKeyNames = (() {
-    return Set<String>.from(
-      logicalData.data.values.map<String>((LogicalKeyEntry entry) => entry.constantName));
-  })();
-
-  List<PhysicalKeyEntry> get numpadKeyData {
+  List<PhysicalKeyEntry> get _numpadKeyData {
     return keyData.data.values.where((PhysicalKeyEntry entry) {
       return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.constantName);
     }).toList();
   }
 
-  List<PhysicalKeyEntry> get functionKeyData {
+  List<PhysicalKeyEntry> get _functionKeyData {
     final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
     return keyData.data.values.where((PhysicalKeyEntry entry) {
       return functionKeyRe.hasMatch(entry.constantName);
     }).toList();
   }
 
-  List<LogicalKeyEntry> get numpadLogicalKeyData {
+  List<LogicalKeyEntry> get _numpadLogicalKeyData {
     return logicalData.data.values.where((LogicalKeyEntry entry) {
       return entry.constantName.startsWith('numpad') && LogicalKeyData.printable.containsKey(entry.constantName);
-    }).toList();
-  }
-
-  List<LogicalKeyEntry> get functionLogicalKeyData {
-    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
-    return logicalData.data.values.where((LogicalKeyEntry entry) {
-      return functionKeyRe.hasMatch(entry.constantName);
     }).toList();
   }
 
   /// This generates the map of GLFW number pad key codes to logical keys.
-  String get glfwNumpadMap {
+  String get _glfwNumpadMap {
     final StringBuffer glfwNumpadMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in _numpadKeyData) {
       for (final int code in entry.glfwKeyCodes) {
         glfwNumpadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -103,7 +91,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of GLFW key codes to logical keys.
-  String get glfwKeyCodeMap {
+  String get _glfwKeyCodeMap {
     final StringBuffer glfwKeyCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       for (final int code in entry.glfwKeyCodes) {
@@ -114,9 +102,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of GTK number pad key codes to logical keys.
-  String get gtkNumpadMap {
+  String get _gtkNumpadMap {
     final _OutputLines<int> lines = _OutputLines<int>('GTK numpad map');
-    for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
+    for (final LogicalKeyEntry entry in _numpadLogicalKeyData) {
       for (final int code in entry.gtkValues) {
         lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -125,7 +113,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of GTK key codes to logical keys.
-  String get gtkKeyCodeMap {
+  String get _gtkKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('GTK key code map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       for (final int code in entry.gtkValues) {
@@ -136,7 +124,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of XKB USB HID codes to physical keys.
-  String get xkbScanCodeMap {
+  String get _xkbScanCodeMap {
     final StringBuffer xkbScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.xKbScanCode != null) {
@@ -147,7 +135,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Android key codes to logical keys.
-  String get androidKeyCodeMap {
+  String get _androidKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('Android key code map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       for (final int code in entry.androidValues) {
@@ -158,9 +146,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Android number pad key codes to logical keys.
-  String get androidNumpadMap {
+  String get _androidNumpadMap {
     final _OutputLines<int> lines = _OutputLines<int>('Android numpad map');
-    for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
+    for (final LogicalKeyEntry entry in _numpadLogicalKeyData) {
       for (final int code in entry.androidValues) {
         lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -169,7 +157,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Android scan codes to physical keys.
-  String get androidScanCodeMap {
+  String get _androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.androidScanCodes != null) {
@@ -182,7 +170,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Windows scan codes to physical keys.
-  String get windowsScanCodeMap {
+  String get _windowsScanCodeMap {
     final StringBuffer windowsScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.windowsScanCode != null) {
@@ -193,9 +181,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Windows number pad key codes to logical keys.
-  String get windowsNumpadMap {
+  String get _windowsNumpadMap {
     final _OutputLines<int> lines = _OutputLines<int>('Windows numpad map');
-    for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
+    for (final LogicalKeyEntry entry in _numpadLogicalKeyData) {
       for (final int code in entry.windowsValues) {
         lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -204,7 +192,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Windows key codes to logical keys.
-  String get windowsKeyCodeMap {
+  String get _windowsKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('Windows key code map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       // Letter keys on Windows are not recorded in logical_key_data.json,
@@ -222,7 +210,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of macOS key codes to physical keys.
-  String get macOsScanCodeMap {
+  String get _macOsScanCodeMap {
     final StringBuffer macOsScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.macOsScanCode != null) {
@@ -233,9 +221,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of macOS number pad key codes to logical keys.
-  String get macOsNumpadMap {
+  String get _macOsNumpadMap {
     final StringBuffer macOsNumPadMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in _numpadKeyData) {
       if (entry.macOsScanCode != null) {
         macOsNumPadMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -243,9 +231,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return macOsNumPadMap.toString().trimRight();
   }
 
-  String get macOsFunctionKeyMap {
+  String get _macOsFunctionKeyMap {
     final StringBuffer macOsFunctionKeyMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in functionKeyData) {
+    for (final PhysicalKeyEntry entry in _functionKeyData) {
       if (entry.macOsScanCode != null) {
         macOsFunctionKeyMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -254,7 +242,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of macOS key codes to physical keys.
-  String get macOsKeyCodeMap {
+  String get _macOsKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('MacOS key code map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       for (final int code in entry.macOsKeyCodeValues) {
@@ -265,7 +253,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of iOS key codes to physical keys.
-  String get iosScanCodeMap {
+  String get _iosScanCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('iOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.iosScanCode != null) {
@@ -276,9 +264,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of iOS number pad key codes to logical keys.
-  String get iosNumpadMap {
+  String get _iosNumpadMap {
     final _OutputLines<int> lines = _OutputLines<int>('iOS numpad map');
-    for (final PhysicalKeyEntry entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in _numpadKeyData) {
       if (entry.iosScanCode != null) {
         lines.add(entry.iosScanCode!,'  ${toHex(entry.iosScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -287,7 +275,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of macOS key codes to physical keys.
-  String get iosKeyCodeMap {
+  String get _iosKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('iOS key code map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       for (final int code in entry.iosKeyCodeValues) {
@@ -298,7 +286,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Fuchsia key codes to logical keys.
-  String get fuchsiaKeyCodeMap {
+  String get _fuchsiaKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('Fuchsia key code map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       for (final int value in entry.fuchsiaValues) {
@@ -309,7 +297,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Fuchsia USB HID codes to physical keys.
-  String get fuchsiaHidCodeMap {
+  String get _fuchsiaHidCodeMap {
     final StringBuffer fuchsiaScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.usbHidCode != null) {
@@ -320,7 +308,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Web KeyboardEvent codes to logical keys.
-  String get webLogicalKeyMap {
+  String get _webLogicalKeyMap {
     final _OutputLines<String> lines = _OutputLines<String>('Web logical key map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       for (final String name in entry.webNames) {
@@ -331,7 +319,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Web KeyboardEvent codes to physical keys.
-  String get webPhysicalKeyMap {
+  String get _webPhysicalKeyMap {
     final StringBuffer result = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.name != null) {
@@ -341,9 +329,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return result.toString().trimRight();
   }
 
-  String get webNumpadMap {
+  String get _webNumpadMap {
     final StringBuffer result = StringBuffer();
-    for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
+    for (final LogicalKeyEntry entry in _numpadLogicalKeyData) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
       }
@@ -352,7 +340,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Web number pad codes to logical keys.
-  String get webLocationMap {
+  String get _webLocationMap {
     final String jsonRaw = File(path.join(
       flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_logical_location_mapping.json')).readAsStringSync();
     final Map<String, List<String?>> locationMap = parseMapOfListOfNullableString(jsonRaw);
@@ -377,30 +365,30 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   @override
   Map<String, String> mappings() {
     return <String, String>{
-      'ANDROID_SCAN_CODE_MAP': androidScanCodeMap,
-      'ANDROID_KEY_CODE_MAP': androidKeyCodeMap,
-      'ANDROID_NUMPAD_MAP': androidNumpadMap,
-      'FUCHSIA_SCAN_CODE_MAP': fuchsiaHidCodeMap,
-      'FUCHSIA_KEY_CODE_MAP': fuchsiaKeyCodeMap,
-      'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
-      'MACOS_NUMPAD_MAP': macOsNumpadMap,
-      'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
-      'MACOS_KEY_CODE_MAP': macOsKeyCodeMap,
-      'IOS_SCAN_CODE_MAP': iosScanCodeMap,
-      'IOS_NUMPAD_MAP': iosNumpadMap,
-      'IOS_KEY_CODE_MAP': iosKeyCodeMap,
-      'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
-      'GLFW_NUMPAD_MAP': glfwNumpadMap,
-      'GTK_KEY_CODE_MAP': gtkKeyCodeMap,
-      'GTK_NUMPAD_MAP': gtkNumpadMap,
-      'XKB_SCAN_CODE_MAP': xkbScanCodeMap,
-      'WEB_LOGICAL_KEY_MAP': webLogicalKeyMap,
-      'WEB_PHYSICAL_KEY_MAP': webPhysicalKeyMap,
-      'WEB_NUMPAD_MAP': webNumpadMap,
-      'WEB_LOCATION_MAP': webLocationMap,
-      'WINDOWS_LOGICAL_KEY_MAP': windowsKeyCodeMap,
-      'WINDOWS_PHYSICAL_KEY_MAP': windowsScanCodeMap,
-      'WINDOWS_NUMPAD_MAP': windowsNumpadMap,
+      'ANDROID_SCAN_CODE_MAP': _androidScanCodeMap,
+      'ANDROID_KEY_CODE_MAP': _androidKeyCodeMap,
+      'ANDROID_NUMPAD_MAP': _androidNumpadMap,
+      'FUCHSIA_SCAN_CODE_MAP': _fuchsiaHidCodeMap,
+      'FUCHSIA_KEY_CODE_MAP': _fuchsiaKeyCodeMap,
+      'MACOS_SCAN_CODE_MAP': _macOsScanCodeMap,
+      'MACOS_NUMPAD_MAP': _macOsNumpadMap,
+      'MACOS_FUNCTION_KEY_MAP': _macOsFunctionKeyMap,
+      'MACOS_KEY_CODE_MAP': _macOsKeyCodeMap,
+      'IOS_SCAN_CODE_MAP': _iosScanCodeMap,
+      'IOS_NUMPAD_MAP': _iosNumpadMap,
+      'IOS_KEY_CODE_MAP': _iosKeyCodeMap,
+      'GLFW_KEY_CODE_MAP': _glfwKeyCodeMap,
+      'GLFW_NUMPAD_MAP': _glfwNumpadMap,
+      'GTK_KEY_CODE_MAP': _gtkKeyCodeMap,
+      'GTK_NUMPAD_MAP': _gtkNumpadMap,
+      'XKB_SCAN_CODE_MAP': _xkbScanCodeMap,
+      'WEB_LOGICAL_KEY_MAP': _webLogicalKeyMap,
+      'WEB_PHYSICAL_KEY_MAP': _webPhysicalKeyMap,
+      'WEB_NUMPAD_MAP': _webNumpadMap,
+      'WEB_LOCATION_MAP': _webLocationMap,
+      'WINDOWS_LOGICAL_KEY_MAP': _windowsKeyCodeMap,
+      'WINDOWS_PHYSICAL_KEY_MAP': _windowsScanCodeMap,
+      'WINDOWS_NUMPAD_MAP': _windowsNumpadMap,
     };
   }
 }
