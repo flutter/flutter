@@ -53,21 +53,6 @@ abstract class PlatformCodeGenerator extends BaseCodeGenerator {
   PlatformCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
     : super(keyData, logicalData);
 
-  // Used by platform code generators.
-  List<LogicalKeyEntry> get numpadKeyData {
-    return logicalData.data.values.where((LogicalKeyEntry entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
-    }).toList();
-  }
-
-  // Used by platform code generators.
-  List<PhysicalKeyEntry> get functionKeyData {
-    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
-    return keyData.data.values.where((PhysicalKeyEntry entry) {
-      return functionKeyRe.hasMatch(entry.constantName);
-    }).toList();
-  }
-
   /// Absolute path to the output file.
   ///
   /// How this value will be used is based on the callee.
