@@ -25,6 +25,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 const String _pubspecContents = '''
@@ -331,7 +332,6 @@ dev_dependencies:
     ]);
 
     expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
-    expect(fakePackageTest.lastArgs, contains('--no-chain-stack-traces'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),

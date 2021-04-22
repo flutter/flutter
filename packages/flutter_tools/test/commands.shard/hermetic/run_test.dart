@@ -11,7 +11,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -32,8 +31,9 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('run', () {
@@ -384,7 +384,7 @@ void main() {
         )));
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
-        Cache: () => Cache.test(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -506,6 +506,16 @@ void main() {
       'run',
       '--no-pub',
     ]), throwsA(isA<RPCError>()));
+  });
+
+  testUsingContext('Passes sksl bundle info the build options', () async {
+    final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '--no-pub',
+      '--bundle-sksl-path=foo.json',
+    ]), throwsA(isA<ToolExit>().having((ToolExit exit) => exit.message, 'message', contains('No SkSL shader bundle found at foo.json'))));
   });
 }
 

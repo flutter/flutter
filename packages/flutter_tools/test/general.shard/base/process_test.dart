@@ -6,15 +6,16 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:mockito/mockito.dart';
-import 'package:fake_async/fake_async.dart';
+
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/mocks.dart' show MockProcessManager,
                                    flakyProcessFactory;
@@ -25,7 +26,7 @@ void main() {
     ProcessUtils processUtils;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       processUtils = ProcessUtils(
         processManager: fakeProcessManager,
         logger: BufferLogger.test(),
@@ -114,7 +115,7 @@ void main() {
       // MockProcessManager has an implementation of start() that returns the
       // result of processFactory.
       flakyProcessManager = MockProcessManager();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       processUtils = ProcessUtils(
         processManager: fakeProcessManager,
         logger: BufferLogger.test(),
@@ -258,7 +259,7 @@ void main() {
     BufferLogger testLogger;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),

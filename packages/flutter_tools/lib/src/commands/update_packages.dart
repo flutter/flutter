@@ -125,6 +125,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Use cached packages instead of accessing the network.',
         defaultsTo: false,
         negatable: false,
+      )
+      ..addFlag(
+        'crash',
+        help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
+        defaultsTo: false,
+        negatable: false,
       );
   }
 
@@ -179,28 +185,52 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
+    final bool crash = boolArg('crash');
+
+    if (crash) {
+      throw StateError('test crash please ignore.');
+    }
 
     if (upgrade && offline) {
       throwToolExit(
           '--force-upgrade cannot be used with the --offline flag'
       );
     }
+    if (isConsumerOnly && !isPrintTransitiveClosure) {
+      throwToolExit(
+        '--consumer-only can only be used with the --transitive-closure flag'
+      );
+    }
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations, integration_test).
-    if (isConsumerOnly) {
-      if (!isPrintTransitiveClosure) {
-        throwToolExit(
-          '--consumer-only can only be used with the --transitive-closure flag'
-        );
-      }
+    if (isPrintTransitiveClosure) {
       // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
       const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations', 'integration_test'];
-      // ensure we only get flutter/packages
-      packages.retainWhere((Directory directory) {
-        return consumerPackages.any((String package) {
-          return directory.path.endsWith('packages${globals.fs.path.separator}$package');
-        });
+
+      final PubDependencyTree tree = PubDependencyTree();
+      for (final Directory package in packages) {
+        final String packageName = globals.fs.path.basename(package.path);
+        if (!consumerPackages.contains(packageName) && isConsumerOnly) {
+          continue;
+        }
+        await pub.batch(
+          <String>['get'],
+          context: PubContext.updatePackages,
+          directory: package.path,
+          retry: false, // errors here are usually fatal since we're not hitting the network
+        );
+        await pub.batch(
+          <String>['deps', '--style=compact'],
+          context: PubContext.updatePackages,
+          directory: package.path,
+          filter: tree.fill,
+          retry: false, // errors here are usually fatal since we're not hitting the network
+        );
+      }
+      tree._dependencyTree.forEach((String from, Set<String> to) {
+        globals.printStatus('$from -> $to');
       });
+      return FlutterCommandResult.success();
     }
 
     if (isVerifyOnly) {

@@ -31,7 +31,7 @@ import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'macos/macos_workflow.dart';
-import 'macos/xcode.dart';
+import 'macos/xcdevice.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
@@ -3400,6 +3400,62 @@ void main() {
 
     // No other tab got instantiated during the animation.
     expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
+  });
+
+  testWidgets('TabController\'s animation value should be updated when TabController\'s index >= tabs\'s length', (WidgetTester tester) async {
+    // This is a regression test for the issue brought up here
+    // https://github.com/flutter/flutter/issues/79226
+
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  bottom: TabBar(
+                    tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Remove Last Tab'),
+                      onPressed: () {
+                        setState(() {
+                          tabs.removeLast();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                body: TabBarView(
+                  children: tabs.map<Widget>((String tab) => Tab(text: 'Tab child $tab')).toList(),
+                ),
+              )
+            );
+          },
+        ),
+      ),
+    );
+
+    TabController getController() => DefaultTabController.of(tester.element(find.text('B')))!;
+    TabController controller = getController();
+
+    controller.animateTo(2, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    controller = getController();
+    expect(controller.index, 2);
+    expect(controller.animation!.value, 2);
+
+    await tester.tap(find.text('Remove Last Tab'));
+    await tester.pumpAndSettle();
+
+    controller = getController();
+    expect(controller.index, 1);
+    expect(controller.animation!.value, 1);
   });
 }
 

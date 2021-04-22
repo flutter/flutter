@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -1046,7 +1046,7 @@ void main() {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
-        scrollBehavior: MockScrollBehavior(),
+        scrollBehavior: const MockScrollBehavior(),
         home: Builder(
           builder: (BuildContext context) {
             capturedContext = context;
@@ -1062,6 +1062,8 @@ void main() {
 }
 
 class MockScrollBehavior extends ScrollBehavior {
+  const MockScrollBehavior();
+
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }

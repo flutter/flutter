@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/semantics.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -3082,6 +3082,18 @@ void main() {
     );
 
     expect(tester.widget<MetaData>(find.byType(MetaData)).behavior, hitTestBehavior);
+  });
+
+  testWidgets('LongPressDraggable.dragAnchorStrategy', (WidgetTester tester) async {
+    const Widget widget1 = Placeholder(key: ValueKey<int>(1));
+    const Widget widget2 = Placeholder(key: ValueKey<int>(2));
+    Offset dummyStrategy(Draggable<Object> draggable, BuildContext context, Offset position) => Offset.zero;
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2), isA<Draggable<int>>());
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).child, widget1);
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).feedback, widget2);
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.child).dragAnchor, DragAnchor.child);
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.pointer).dragAnchor, DragAnchor.pointer);
+    expect(LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchorStrategy: dummyStrategy).dragAnchorStrategy, dummyStrategy);
   });
 }
 

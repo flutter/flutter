@@ -14,17 +14,16 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
-import '../src/testbed.dart';
 
 void main() {
   // TODO(jonahwilliams): remove once FlutterProject is fully refactored.
@@ -814,6 +813,7 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
   transfer(Cache(
     fileSystem: globals.fs,
     logger: logger,
+    artifacts: <ArtifactSet>[],
     osUtils: OperatingSystemUtils(
       fileSystem: globals.fs,
       logger: logger,
@@ -858,6 +858,7 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
         fileSystem: testFileSystem,
         osUtils: globals.os,
         platform: globals.platform,
+        artifacts: <ArtifactSet>[],
       ),
       FlutterProjectFactory: () => FlutterProjectFactory(
         fileSystem: testFileSystem,

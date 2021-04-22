@@ -306,7 +306,7 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [maybeOf], which is a similar function, but it will return null instead
   ///    of throwing an exception if no [Router] ancestor exists.
-  static Router<dynamic> of(BuildContext context) {
+  static Router<T> of<T extends Object?>(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
     assert(() {
       if (scope == null) {
@@ -318,7 +318,7 @@ class Router<T> extends StatefulWidget {
       }
       return true;
     }());
-    return scope!.routerState.widget;
+    return scope!.routerState.widget as Router<T>;
   }
 
   /// Retrieves the immediate [Router] ancestor from the given context.
@@ -334,9 +334,9 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [of], a similar method that returns a non-nullable value, and will
   ///    throw if no [Router] ancestor exists.
-  static Router<dynamic>? maybeOf(BuildContext context) {
+  static Router<T>? maybeOf<T extends Object?>(BuildContext context) {
     final _RouterScope? scope = context.dependOnInheritedWidgetOfExactType<_RouterScope>();
-    return scope?.routerState.widget;
+    return scope?.routerState.widget as Router<T>?;
   }
 
   /// Forces the [Router] to run the [callback] and reports the route
@@ -704,9 +704,9 @@ class _RouterScope extends InheritedWidget {
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
-  final RouteInformationParser<dynamic>? routeInformationParser;
-  final RouterDelegate<dynamic> routerDelegate;
-  final _RouterState<dynamic> routerState;
+  final RouteInformationParser<Object?>? routeInformationParser;
+  final RouterDelegate<Object?> routerDelegate;
+  final _RouterState<Object?> routerState;
 
   @override
   bool updateShouldNotify(_RouterScope oldWidget) {
@@ -760,6 +760,7 @@ class _CallbackHookProvider<T> {
   /// Exceptions thrown by callbacks will be caught and reported using
   /// [FlutterError.reportError].
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   T invokeCallback(T defaultValue) {
     if (_callbacks.isEmpty)
       return defaultValue;
@@ -773,7 +774,7 @@ class _CallbackHookProvider<T> {
         context: ErrorDescription('while invoking the callback for $runtimeType'),
         informationCollector: () sync* {
           yield DiagnosticsProperty<_CallbackHookProvider<T>>(
-            'The $runtimeType that invoked the callback was:',
+            'The $runtimeType that invoked the callback was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
           );
@@ -996,6 +997,75 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
     if (!hasCallbacks)
       parent.forget(this);
   }
+}
+
+/// A convenience widget that registers a callback for when the back button is pressed.
+///
+/// In order to use this widget, there must be an ancestor [Router] widget in the tree
+/// that has a [RootBackButtonDispatcher]. e.g. The [Router] widget created by the
+/// [MaterialApp.router] has a built-in [RootBackButtonDispatcher] by default.
+///
+/// It only applies to platforms that accept back button clicks, such as Android.
+///
+/// It can be useful for scenarios, in which you create a different state in your
+/// screen but don't want to use a new page for that.
+class BackButtonListener extends StatefulWidget {
+  /// Creates a BackButtonListener widget .
+  ///
+  /// The [child] and [onBackButtonPressed] arguments must not be null.
+  const BackButtonListener({
+    Key? key,
+    required this.child,
+    required this.onBackButtonPressed,
+  }) : super(key: key);
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// The callback function that will be called when the back button is pressed.
+  ///
+  /// It must return a boolean future with true if this child will handle the request;
+  /// otherwise, return a boolean future with false.
+  final ValueGetter<Future<bool>> onBackButtonPressed;
+
+  @override
+  _BackButtonListenerState createState() => _BackButtonListenerState();
+}
+
+class _BackButtonListenerState extends State<BackButtonListener> {
+  BackButtonDispatcher? dispatcher;
+
+  @override
+  void didChangeDependencies() {
+    dispatcher?.removeCallback(widget.onBackButtonPressed);
+
+    final BackButtonDispatcher? rootBackDispatcher = Router.of(context).backButtonDispatcher;
+    assert(rootBackDispatcher != null, 'The parent router must have a backButtonDispatcher to use this widget');
+
+    dispatcher = rootBackDispatcher!.createChildBackButtonDispatcher()
+      ..addCallback(widget.onBackButtonPressed)
+      ..takePriority();
+    super.didChangeDependencies();
+  }
+
+  @override
+  void didUpdateWidget(covariant BackButtonListener oldWidget) {
+    if (oldWidget.onBackButtonPressed != widget.onBackButtonPressed) {
+      dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
+      dispatcher?.addCallback(widget.onBackButtonPressed);
+      dispatcher?.takePriority();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    dispatcher?.removeCallback(widget.onBackButtonPressed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// A delegate that is used by the [Router] widget to parse a route information

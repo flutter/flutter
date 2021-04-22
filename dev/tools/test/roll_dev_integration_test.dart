@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/roll_dev.dart' show rollDev;
+import 'package:dev_tools/version.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-
-import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/roll_dev.dart' show rollDev;
-import 'package:dev_tools/repository.dart';
-import 'package:dev_tools/version.dart';
 
 import './common.dart';
 
@@ -25,15 +23,17 @@ void main() {
     Checkouts checkouts;
     FrameworkRepository frameworkUpstream;
     FrameworkRepository framework;
+    Directory tempDir;
 
     setUp(() {
       platform = const LocalPlatform();
       fileSystem = const LocalFileSystem();
       processManager = const LocalProcessManager();
       stdio = TestStdio(verbose: true);
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_checkouts');
       checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: localFlutterRoot.parent,
+        parentDirectory: tempDir,
         platform: platform,
         processManager: processManager,
         stdio: stdio,
@@ -45,7 +45,7 @@ void main() {
       framework = FrameworkRepository(
         checkouts,
         name: 'test-framework',
-        upstream: 'file://${frameworkUpstream.checkoutDirectory.path}/',
+        fetchRemote: Remote(name: RemoteName.upstream, url: 'file://${frameworkUpstream.checkoutDirectory.path}/'),
       );
     });
 
@@ -59,7 +59,7 @@ void main() {
         commit: latestCommit,
         // Ensure this test passes after a dev release with hotfixes
         force: true,
-        remote: 'origin',
+        remote: 'upstream',
       );
 
       expect(
@@ -96,7 +96,7 @@ void main() {
         commit: latestCommit,
         // Ensure this test passes after a dev release with hotfixes
         force: true,
-        remote: 'origin',
+        remote: 'upstream',
       );
 
       expect(

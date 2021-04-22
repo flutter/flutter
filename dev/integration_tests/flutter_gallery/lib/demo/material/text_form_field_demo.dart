@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../../gallery/demo.dart';
 
@@ -143,7 +143,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     if (form == null || !_formWasEdited || form.validate())
       return true;
 
-    return showDialog<bool>(
+    final bool? result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -161,7 +161,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           ],
         );
       },
-    ) as Future<bool>;
+    );
+    return result!;
   }
 
   @override

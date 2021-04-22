@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -15,11 +15,13 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
+import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
+import 'sliver_prototype_extent_list.dart';
 import 'viewport.dart';
 
 // Examples can assume:
@@ -83,6 +85,7 @@ abstract class ScrollView extends StatelessWidget {
     this.controller,
     bool? primary,
     ScrollPhysics? physics,
+    this.scrollBehavior,
     this.shrinkWrap = false,
     this.center,
     this.anchor = 0.0,
@@ -205,7 +208,19 @@ abstract class ScrollView extends StatelessWidget {
   /// inefficient to speculatively create this object each frame to see if the
   /// physics should be updated.)
   /// {@endtemplate}
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
   final ScrollPhysics? physics;
+
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  final ScrollBehavior? scrollBehavior;
 
   /// {@template flutter.widgets.scroll_view.shrinkWrap}
   /// Whether the extent of the scroll view in the [scrollDirection] should be
@@ -380,6 +395,7 @@ abstract class ScrollView extends StatelessWidget {
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
+      scrollBehavior: scrollBehavior,
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
@@ -610,6 +626,7 @@ class CustomScrollView extends ScrollView {
     ScrollController? controller,
     bool? primary,
     ScrollPhysics? physics,
+    ScrollBehavior? scrollBehavior,
     bool shrinkWrap = false,
     Key? center,
     double anchor = 0.0,
@@ -627,6 +644,7 @@ class CustomScrollView extends ScrollView {
     controller: controller,
     primary: primary,
     physics: physics,
+    scrollBehavior: scrollBehavior,
     shrinkWrap: shrinkWrap,
     center: center,
     anchor: anchor,
@@ -744,10 +762,18 @@ abstract class BoxScrollView extends ScrollView {
 /// children are required to fill the [ListView].
 ///
 /// If non-null, the [itemExtent] forces the children to have the given extent
-/// in the scroll direction. Specifying an [itemExtent] is more efficient than
+/// in the scroll direction.
+///
+/// If non-null, the [prototypeItem] forces the children to have the same extent
+/// as the given widget in the scroll direction.
+///
+/// Specifying an [itemExtent] or an [prototypeItem] is more efficient than
 /// letting the children determine their own extent because the scrolling
 /// machinery can make use of the foreknowledge of the children's extent to save
 /// work, for example when the scroll position changes drastically.
+///
+/// You can't specify both [itemExtent] and [prototypeItem], only one or none of
+/// them.
 ///
 /// There are four options for constructing a [ListView]:
 ///
@@ -934,9 +960,10 @@ abstract class BoxScrollView extends ScrollView {
 /// and [shrinkWrap] properties on [ListView] map directly to the identically
 /// named properties on [CustomScrollView].
 ///
-/// The [CustomScrollView.slivers] property should be a list containing either a
-/// [SliverList] or a [SliverFixedExtentList]; the former if [itemExtent] on the
-/// [ListView] was null, and the latter if [itemExtent] was not null.
+/// The [CustomScrollView.slivers] property should be a list containing either:
+///  * a [SliverList] if both [itemExtent] and [prototypeItem] were null;
+///  * a [SliverFixedExtentList] if [itemExtent] was not null; or
+///  * a [SliverPrototypeExtentList] if [prototypeItem] was not null.
 ///
 /// The [childrenDelegate] property on [ListView] corresponds to the
 /// [SliverList.delegate] (or [SliverFixedExtentList.delegate]) property. The
@@ -1087,6 +1114,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry? padding,
     this.itemExtent,
+    this.prototypeItem,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1097,7 +1125,11 @@ class ListView extends BoxScrollView {
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
-  }) : childrenDelegate = SliverChildListDelegate(
+  }) : assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both.',
+       ),
+       childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1161,6 +1193,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry? padding,
     this.itemExtent,
+    this.prototypeItem,
     required IndexedWidgetBuilder itemBuilder,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1174,6 +1207,10 @@ class ListView extends BoxScrollView {
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount!),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both.',
+       ),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
@@ -1269,6 +1306,7 @@ class ListView extends BoxScrollView {
        assert(separatorBuilder != null),
        assert(itemCount != null && itemCount >= 0),
        itemExtent = null,
+       prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
@@ -1408,6 +1446,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry? padding,
     this.itemExtent,
+    this.prototypeItem,
     required this.childrenDelegate,
     double? cacheExtent,
     int? semanticChildCount,
@@ -1416,6 +1455,10 @@ class ListView extends BoxScrollView {
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(childrenDelegate != null),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both',
+       ),
        super(
          key: key,
          scrollDirection: scrollDirection,
@@ -1440,7 +1483,32 @@ class ListView extends BoxScrollView {
   /// determine their own extent because the scrolling machinery can make use of
   /// the foreknowledge of the children's extent to save work, for example when
   /// the scroll position changes drastically.
+  ///
+  /// See also:
+  ///
+  ///  * [SliverFixedExtentList], the sliver used internally when this property
+  ///    is provided. It constrains its box children to have a specific given
+  ///    extent along the main axis.
+  ///  * The [prototypeItem] property, which allows forcing the children's
+  ///    extent to be the same as the given widget.
   final double? itemExtent;
+
+  /// If non-null, forces the children to have the same extent as the given
+  /// widget in the scroll direction.
+  ///
+  /// Specifying an [prototypeItem] is more efficient than letting the children
+  /// determine their own extent because the scrolling machinery can make use of
+  /// the foreknowledge of the children's extent to save work, for example when
+  /// the scroll position changes drastically.
+  ///
+  /// See also:
+  ///
+  ///  * [SliverPrototypeExtentList], the sliver used internally when this
+  ///    property is provided. It constrains its box children to have the same
+  ///    extent as a prototype item along the main axis.
+  ///  * The [itemExtent] property, which allows forcing the children's extent
+  ///    to a given value.
+  final Widget? prototypeItem;
 
   /// A delegate that provides the children for the [ListView].
   ///
@@ -1456,6 +1524,11 @@ class ListView extends BoxScrollView {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent!,
+      );
+    } else if (prototypeItem != null) {
+      return SliverPrototypeExtentList(
+        delegate: childrenDelegate,
+        prototypeItem: prototypeItem!,
       );
     }
     return SliverList(delegate: childrenDelegate);

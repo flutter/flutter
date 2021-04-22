@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {

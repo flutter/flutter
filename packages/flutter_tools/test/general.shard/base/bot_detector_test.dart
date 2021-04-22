@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -19,9 +17,9 @@ final Uri azureUrl = Uri.parse('http://169.254.169.254/metadata/instance');
 
 void main() {
   group('BotDetector', () {
-    FakePlatform fakePlatform;
-    FakeStdio fakeStdio;
-    PersistentToolState persistentToolState;
+    late FakePlatform fakePlatform;
+    late FakeStdio fakeStdio;
+    late PersistentToolState persistentToolState;
 
     setUp(() {
       fakePlatform = FakePlatform()..environment = <String, String>{};
@@ -42,6 +40,24 @@ void main() {
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
         );
+
+        expect(await botDetector.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isFalse);
+      });
+
+      testWithoutContext('does not cache BOT environment variable', () async {
+        fakePlatform.environment['BOT'] = 'true';
+
+        final BotDetector botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.any(),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isTrue);
+
+        fakePlatform.environment['BOT'] = 'false';
 
         expect(await botDetector.isRunningOnBot, isFalse);
         expect(persistentToolState.isRunningOnBot, isFalse);

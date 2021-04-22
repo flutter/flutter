@@ -6,14 +6,13 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
-import 'package:matcher/matcher.dart';
-import 'package:fake_async/fake_async.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 

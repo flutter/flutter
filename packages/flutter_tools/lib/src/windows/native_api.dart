@@ -7,17 +7,7 @@
 abstract class NativeApi {
   const NativeApi();
 
-  /// Launch the native windows application with the given [amuid].
-  ApplicationInstance launchApp(String amuid);
-}
-
-/// A running Windows UWP instance.
-abstract class ApplicationInstance {
-  /// The application identifier.
-  ///
-  /// This is not valid after calling [dispose].
-  int get id;
-
-  /// Close the application.
-  void dispose();
+  /// Launch the native windows application with the given [amuid], returning the PID
+  /// if successful.
+  int launchApp(String amuid);
 }

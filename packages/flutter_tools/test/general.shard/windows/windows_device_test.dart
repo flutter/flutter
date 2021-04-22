@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
+import 'package:flutter_tools/src/windows/native_api.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -40,6 +41,24 @@ void main() {
     expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
+  testWithoutContext('WindowsUwpDevice defaults', () async {
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice();
+    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
+
+    expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
+    expect(windowsDevice.name, 'Windows (UWP)');
+    expect(await windowsDevice.installApp(windowsApp), true);
+    expect(await windowsDevice.uninstallApp(windowsApp), true);
+    expect(await windowsDevice.isLatestBuildInstalled(windowsApp), true);
+    expect(await windowsDevice.isAppInstalled(windowsApp), true);
+    expect(windowsDevice.category, Category.desktop);
+
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.debug), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.profile), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.release), true);
+    expect(windowsDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
+  });
+
   testWithoutContext('WindowsDevices does not list devices if the workflow is unsupported', () async {
     expect(await WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
@@ -51,6 +70,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
+      nativeApi: FakeNativeApi(),
     ).devices, <Device>[]);
   });
 
@@ -65,6 +85,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+      nativeApi: FakeNativeApi(),
     ).devices, hasLength(1));
   });
 
@@ -80,6 +101,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: featureFlags,
+      nativeApi: FakeNativeApi(),
     ).devices, hasLength(2));
   });
 
@@ -94,6 +116,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+      nativeApi: FakeNativeApi(),
     );
     // Timeout ignored.
     final List<Device> devices = await windowsDevices.discoverDevices(timeout: const Duration(seconds: 10));
@@ -164,7 +187,22 @@ WindowsDevice setUpWindowsDevice({
   );
 }
 
+WindowsUWPDevice setUpWindowsUwpDevice({
+  FileSystem fileSystem,
+  Logger logger,
+  ProcessManager processManager,
+}) {
+  return WindowsUWPDevice(
+    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    logger: logger ?? BufferLogger.test(),
+    processManager: processManager ?? FakeProcessManager.any(),
+    operatingSystemUtils: FakeOperatingSystemUtils(),
+  );
+}
+
 class FakeWindowsApp extends Fake implements WindowsApp {
   @override
   String executable(BuildMode buildMode) => '${buildMode.name}/executable';
 }
+
+class FakeNativeApi extends Fake implements NativeApi {}

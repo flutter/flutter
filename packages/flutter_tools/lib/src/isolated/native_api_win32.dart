@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
@@ -21,7 +20,7 @@ class Win32NativeApi extends NativeApi {
   const Win32NativeApi();
 
   @override
-  ApplicationInstance launchApp(String amuid) {
+  int launchApp(String amuid) {
     int hResult = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
     if (FAILED(hResult)) {
       throw WindowsException(hResult);
@@ -35,24 +34,11 @@ class Win32NativeApi extends NativeApi {
     if (FAILED(hResult)) {
       throw WindowsException(hResult);
     }
+    final int id = processId.value;
     free(aumid);
-    return _Win32ApplicationInstance(processId, aam);
-  }
-}
-
-class _Win32ApplicationInstance extends ApplicationInstance {
-  _Win32ApplicationInstance(this.processId, this.aam);
-
-  final Pointer<Uint32> processId;
-  final ApplicationActivationManager aam;
-
-  @override
-  int get id => processId.value;
-
-  @override
-  void dispose() {
     free(processId);
     free(aam.ptr);
     CoUninitialize();
+    return id;
   }
 }

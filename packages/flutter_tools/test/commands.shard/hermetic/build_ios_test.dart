@@ -15,6 +15,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
@@ -170,6 +171,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

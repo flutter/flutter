@@ -12,7 +12,7 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../linux/build_linux.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -68,7 +68,7 @@ class BuildLinuxCommand extends BuildSubCommand {
             != getNameForTargetPlatformArch(targetPlatform);
 
     if (!featureFlags.isLinuxEnabled) {
-      throwToolExit('"build linux" is not currently supported.');
+      throwToolExit('"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".');
     }
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');

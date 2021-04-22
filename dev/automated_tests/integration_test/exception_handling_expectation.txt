@@ -30,7 +30,7 @@ The following message was thrown running a test:
 Who lives, who dies, who tells your story\?
 
 When the exception was thrown, this was the stack:
-.*(TODO\(jiahaog\): Remove --no-chain-stack-traces and replace this with the actual stack once https://github.com/dart-lang/stack_trace/issues/106 is fixed)?
+#2      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]integration_test[/\\]exception_handling_test\.dart:16:5\)
 <<skip until matching line>>
 The test description was:
 Exception handling in test harness - uncaught Future error

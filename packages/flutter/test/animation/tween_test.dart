@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
 
@@ -28,7 +28,7 @@ void main() {
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
       'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
       'The type Object might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
-      'There may be a dedicated "ObjectTween" for this type, or you may need to create one.'
+      'There may be a dedicated "ObjectTween" for this type, or you may need to create one.',
     ]);
   });
 
@@ -59,7 +59,7 @@ void main() {
   test('throws flutter error when tweening types that do not fully satisfy tween requirements - Rect', () {
     final Tween<Rect> rectTween = Tween<Rect>(
       begin: const Rect.fromLTWH(0, 0, 10, 10),
-      end: const Rect.fromLTWH(2, 2, 2, 2)
+      end: const Rect.fromLTWH(2, 2, 2, 2),
     );
 
     FlutterError? error;
@@ -139,6 +139,17 @@ void main() {
     expect(animation.toStringDetails(), hasOneLineDescription);
   });
 
+  test('BorderTween nullable test', () {
+    BorderTween tween = BorderTween();
+    expect(tween.lerp(0.0),  null);
+    expect(tween.lerp(1.0),  null);
+
+    tween = BorderTween(begin: null, end: const Border(top: BorderSide()));
+    expect(tween.lerp(0.0),  const Border());
+    expect(tween.lerp(0.5),  const Border(top: BorderSide(width: 0.5)));
+    expect(tween.lerp(1.0),  const Border(top: BorderSide()));
+  });
+
   test('SizeTween', () {
     final SizeTween tween = SizeTween(begin: Size.zero, end: const Size(20.0, 30.0));
     expect(tween.lerp(0.5), equals(const Size(10.0, 15.0)));
@@ -174,9 +185,7 @@ void main() {
     expect(rotationTween.lerp(0.0), equals(a));
     expect(rotationTween.lerp(1.0), equals(c));
     expect(
-      rotationTween.lerp(0.5).absoluteError(
-        a.clone()..rotateZ(0.5)
-      ),
+      rotationTween.lerp(0.5).absoluteError(a.clone()..rotateZ(0.5)),
       moreOrLessEquals(0.0),
     );
   }, skip: isWindows); // floating point math not quite deterministic on Windows?
@@ -199,7 +208,7 @@ void main() {
   test('ColorTween', () {
     final ColorTween tween = ColorTween(
       begin: const Color(0xff000000),
-      end: const Color(0xffffffff)
+      end: const Color(0xffffffff),
     );
     expect(tween.lerp(0.0), const Color(0xff000000));
     expect(tween.lerp(0.5), const Color(0xff7f7f7f));
@@ -218,5 +227,12 @@ void main() {
     expect(tween.transform(0.0), 0.0);
     expect(tween.transform(0.5), 0.31640625);
     expect(tween.transform(1.0), 1.0);
+  });
+
+  test('BorderRadiusTween nullable test', () {
+    final BorderRadiusTween tween = BorderRadiusTween(begin: null, end: null);
+    expect(tween.transform(0.0), null);
+    expect(tween.transform(1.0), null);
+    expect(tween.lerp(0.0), null);
   });
 }

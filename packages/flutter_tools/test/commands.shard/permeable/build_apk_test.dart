@@ -4,26 +4,25 @@
 
 // @dart = 2.8
 
-import 'dart:io';
+import 'dart:io' hide Directory;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
+import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' hide MockAndroidSdk;
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
@@ -376,7 +375,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'gradle-r8-failure',
           parameters: <String, String>{},
         ),
@@ -442,7 +441,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-not-using-android-x',
           parameters: <String, String>{},
         ),
@@ -499,7 +498,7 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'apk',
+          'gradle',
           label: 'app-using-android-x',
           parameters: <String, String>{},
         ),
@@ -537,3 +536,21 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+
+/// Creates a mock process that returns with the given [exitCode], [stdout] and [stderr].
+Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
+  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
+    utf8.encode(stdout),
+  ]);
+  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
+    utf8.encode(stderr),
+  ]);
+  final Process process = _MockBasicProcess();
+
+  when(process.stdout).thenAnswer((_) => stdoutStream);
+  when(process.stderr).thenAnswer((_) => stderrStream);
+  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
+  return process;
+}
+
+class _MockBasicProcess extends Mock implements Process {}

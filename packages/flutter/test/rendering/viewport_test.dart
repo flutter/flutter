@@ -7,10 +7,10 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
@@ -1788,24 +1788,27 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            GridView(
-              shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 3,
-                  mainAxisSpacing: 3,
-                  crossAxisSpacing: 3),
-              children: const <Widget>[
-                Text('a'),
-                Text('b'),
-                Text('c'),
-              ],
-            ),
-          ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              GridView(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 3,
+                    mainAxisSpacing: 3,
+                    crossAxisSpacing: 3),
+                children: const <Widget>[
+                  Text('a'),
+                  Text('b'),
+                  Text('c'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

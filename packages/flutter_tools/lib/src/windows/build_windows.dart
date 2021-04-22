@@ -15,10 +15,11 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
-import '../plugins.dart';
 import '../project.dart';
+import 'install_manifest.dart';
 import 'visual_studio.dart';
 
 // From https://cmake.org/cmake/help/v3.15/manual/cmake-generators.7.html#visual-studio-generators
@@ -120,6 +121,7 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
   String target,
   VisualStudio visualStudioOverride,
 }) async {
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
   if (!windowsProject.existsSync()) {
     throwToolExit(
       'No Windows UWP desktop project configured. See '
@@ -132,6 +134,40 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
       'The Windows UWP project template and build process has changed. In order to build '
       'you must delete the winuwp directory and re-create the project.',
     );
+  }
+   // Ensure that necessary ephemeral files are generated and up to date.
+  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
+  createPluginSymlinks(windowsProject.parent);
+  await createManifest(
+    buildDirectory: buildDirectory,
+    logger: globals.logger,
+    platform: globals.platform,
+    project: windowsProject,
+    buildInfo: buildInfo,
+    fileSystem: globals.fs,
+  );
+
+  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    logger: globals.logger,
+    processManager: globals.processManager,
+  );
+  final String cmakePath = visualStudio.cmakePath;
+  if (cmakePath == null) {
+    throwToolExit('Unable to find suitable Visual Studio toolchain. '
+        'Please run `flutter doctor` for more details.');
+  }
+
+  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+  final Status status = globals.logger.startProgress(
+    'Building Windows application...',
+  );
+  try {
+    await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
+  } finally {
+    status.cancel();
   }
   throwToolExit('Windows UWP builds are not implemented.');
 }
@@ -163,7 +199,12 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
   globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeName) async {
+Future<void> _runBuild(
+  String cmakePath,
+  Directory buildDir,
+  String buildModeName,
+  { bool install = true }
+) async {
   final Stopwatch sw = Stopwatch()..start();
 
   // MSBuild sends all output to stdout, including build errors. This surfaces
@@ -179,8 +220,8 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
         buildDir.path,
         '--config',
         toTitleCase(buildModeName),
-        '--target',
-        'INSTALL',
+        if (install)
+          ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)
           '--verbose'
       ],

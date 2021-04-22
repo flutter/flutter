@@ -20,7 +20,8 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fake_vm_services.dart';
 
 void main() {
   FakeProcessManager processManager;
@@ -30,8 +31,8 @@ void main() {
   String ideviceSyslogPath;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
-    fakeCache = Cache.test();
+    processManager = FakeProcessManager.empty();
+    fakeCache = Cache.test(processManager: FakeProcessManager.any());
     artifacts = Artifacts.test();
     logger = BufferLogger.test();
     ideviceSyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios);

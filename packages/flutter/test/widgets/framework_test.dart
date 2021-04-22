@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 
 typedef ElementRebuildCallback = void Function(StatefulElement element);
 
@@ -1572,6 +1572,22 @@ void main() {
     await tester.pumpWidget(Container());
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
   });
+
+  testWidgets('Widget and State properties are nulled out when unmounted', (WidgetTester tester) async {
+    await tester.pumpWidget(const _StatefulLeaf());
+    final StatefulElement element = tester.element<StatefulElement>(find.byType(_StatefulLeaf));
+    expect(element.state, isA<State<_StatefulLeaf>>());
+    expect(element.widget, isA<_StatefulLeaf>());
+    // Replace the widget tree to unmount the element.
+    await tester.pumpWidget(Container());
+    // Accessing state/widget now throws a CastError because they have been
+    // nulled out to reduce severity of memory leaks when an Element (e.g. in
+    // the form of a BuildContext) is retained past its useful life. See also
+    // https://github.com/flutter/flutter/issues/79605 for examples why this may
+    // occur.
+    expect(() => element.state, throwsA(isA<TypeError>()));
+    expect(() => element.widget, throwsA(isA<TypeError>()));
+  }, skip: kIsWeb);
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
