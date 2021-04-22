@@ -196,22 +196,41 @@ class UpdatePackagesCommand extends FlutterCommand {
           '--force-upgrade cannot be used with the --offline flag'
       );
     }
+    if (isConsumerOnly && !isPrintTransitiveClosure) {
+      throwToolExit(
+        '--consumer-only can only be used with the --transitive-closure flag'
+      );
+    }
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations, integration_test).
-    if (isConsumerOnly) {
-      if (!isPrintTransitiveClosure) {
-        throwToolExit(
-          '--consumer-only can only be used with the --transitive-closure flag'
-        );
-      }
+    if (isPrintTransitiveClosure) {
       // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
       const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations', 'integration_test'];
-      // ensure we only get flutter/packages
-      packages.retainWhere((Directory directory) {
-        return consumerPackages.any((String package) {
-          return directory.path.endsWith('packages${globals.fs.path.separator}$package');
-        });
+
+      final PubDependencyTree tree = PubDependencyTree();
+      for (final Directory package in packages) {
+        final String packageName = globals.fs.path.basename(package.path);
+        if (!consumerPackages.contains(packageName) && isConsumerOnly) {
+          continue;
+        }
+        await pub.batch(
+          <String>['get'],
+          context: PubContext.updatePackages,
+          directory: package.path,
+          retry: false, // errors here are usually fatal since we're not hitting the network
+        );
+        await pub.batch(
+          <String>['deps', '--style=compact'],
+          context: PubContext.updatePackages,
+          directory: package.path,
+          filter: tree.fill,
+          retry: false, // errors here are usually fatal since we're not hitting the network
+        );
+      }
+      tree._dependencyTree.forEach((String from, Set<String> to) {
+        globals.printStatus('$from -> $to');
       });
+      return FlutterCommandResult.success();
     }
 
     if (isVerifyOnly) {
@@ -329,7 +348,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       try {
         final File fakePackage = _pubspecFor(tempDir);
         fakePackage.createSync();
-        fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values, isPrintTransitiveClosure));
+        fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // Create a synthetic flutter SDK so that transitive flutter SDK
         // constraints are not affected by this upgrade.
         Directory temporaryFlutterSdk;
@@ -1269,12 +1288,12 @@ File _pubspecFor(Directory directory) {
 
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
-String _generateFakePubspec(Iterable<PubspecDependency> dependencies, bool transitiveClosure) {
+String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.12.0 <3.0.0'");
+  result.writeln("  sdk: '>=2.10.0 <3.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (_kManuallyPinnedDependencies.isNotEmpty) {
@@ -1285,7 +1304,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies, bool trans
     };
     for (final String package in _kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
-      if (!allTransitive.contains(package) && !transitiveClosure) {
+      if (!allTransitive.contains(package)) {
         globals.printStatus('Skipping $package because it was not transitive');
         continue;
       }
