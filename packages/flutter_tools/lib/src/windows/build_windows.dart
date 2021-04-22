@@ -164,7 +164,7 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
     'Building Windows application...',
   );
   try {
-    // The Cmake re-entrant build does work for UWP, so the flutter build is
+    // The Cmake re-entrant build does not work for UWP, so the flutter build is
     // run in advance.
     await _runFlutterBuild(buildDirectory, buildInfo, target);
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
@@ -172,7 +172,6 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
   } finally {
     status.cancel();
   }
-  throwToolExit('Windows UWP builds are not implemented.');
 }
 
 const Map<BuildMode, String> _targets = <BuildMode, String>{
