@@ -1054,6 +1054,27 @@ class TextSelectionGestureDetectorBuilder {
       editableText.showToolbar();
   }
 
+  /// Handler for [TextSelectionGestureDetector.onSingleTapDown].
+  ///
+  /// By default, it sets the position of the cursor the cursor down if enabled
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onSingleTapDown], which triggers
+  ///    this callback.
+  @protected
+  void onSingleTapDown(TapDownDetails details) {
+    // @TODO: changing the cursor position for onSingleTapDown may only apply to
+    // web and desktop platforms. We may need to conditionally handle this for
+    // desktop/web platforms to preserve proper mobile behavior.
+    if (delegate.selectionEnabled) {
+      renderEditable.selectPositionAt(
+        from: details.globalPosition,
+        cause: SelectionChangedCause.tap,
+      );
+    }
+  }
+
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
   ///
   /// By default, it selects word edge if selection is enabled.
@@ -1173,7 +1194,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.tap);
+      renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
       if (shouldShowSelectionToolbar)
         editableText.showToolbar();
     }
@@ -1215,10 +1236,7 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
 
-    renderEditable.selectPositionAt(
-      from: details.globalPosition,
-      cause: SelectionChangedCause.drag,
-    );
+    renderEditable.handleDragSelectionStart();
 
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
@@ -1242,9 +1260,8 @@ class TextSelectionGestureDetectorBuilder {
         ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
         : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
 
-    renderEditable.selectPositionAt(
-      from: startDetails.globalPosition - startOffset,
-      to: updateDetails.globalPosition,
+    renderEditable.extendSelectionToOffset(
+      to: updateDetails.globalPosition - startOffset,
       cause: SelectionChangedCause.drag,
     );
   }
@@ -1276,6 +1293,7 @@ class TextSelectionGestureDetectorBuilder {
       onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
       onSecondaryTap: onSecondaryTap,
       onSecondaryTapDown: onSecondaryTapDown,
+      onSingleTapDown: onSingleTapDown,
       onSingleTapUp: onSingleTapUp,
       onSingleTapCancel: onSingleTapCancel,
       onSingleLongTapStart: onSingleLongTapStart,
@@ -1316,6 +1334,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onForcePressEnd,
     this.onSecondaryTap,
     this.onSecondaryTapDown,
+    this.onSingleTapDown,
     this.onSingleTapUp,
     this.onSingleTapCancel,
     this.onSingleLongTapStart,
@@ -1349,6 +1368,11 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// Called for a tap down event with the secondary mouse button.
   final GestureTapDownCallback? onSecondaryTapDown;
+
+  /// Called immediately on the first tap down of a tap gesture.
+  /// For example for a single, double, or triple tap, this will be called on
+  /// the first tap of the sequence.
+  final GestureTapDownCallback? onSingleTapDown;
 
   /// Called for each distinct tap except for every second tap of a double tap.
   /// For example, if the detector was configured with [onTapDown] and
@@ -1428,6 +1452,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // onTapDown is fired in all situations because the text editing
     // implementation needs to react to single/double/triple tap in sequence
     widget.onTapDown?.call(details);
+
+    if (_consecutiveTapDownCount == 0) {
+      widget.onSingleTapDown?.call(details);
+    }
 
     // This isn't detected in the gesture recognizer because each single tap may
     // do different things depending on whether it's a single tap, the first tap

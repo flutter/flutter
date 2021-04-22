@@ -600,6 +600,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection && cause != SelectionChangedCause.keyboard && !focusingEmpty) {
       return;
     }
+    _lastSelectionChangedCause = cause;
     onSelectionChanged?.call(nextSelection, this, cause);
   }
 
@@ -930,15 +931,30 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return selection.copyWith(extentOffset: nextExtent);
   }
 
-  // Later to use for a more accurate drag-to-extend-selection implementation
-  // In place of selectParagraphAt
+  // When a drag is started, we want to extend the initial selection in the case
+  // that a word, paragraph, etc, was selected.
   TextSelection? _dragStartInitialSelection;
-  void setDragStartInitialSelection() {
+  // A wokaround to keep track of the type of selection (position/word/paragraph)
+  // when dragging to extend the selection
+  SelectionChangedCause? _dragStartInitialSelectionCause;
+
+  void handleDragSelectionStart() {
+    _dragStartInitialSelectionCause = _lastSelectionChangedCause;
     _dragStartInitialSelection = selection;
   }
+
   void extendSelectionToOffset({required Offset to, required SelectionChangedCause cause}) {
     assert(to != null);
     assert(cause != null);
+
+    _BoundaryHandler getBoundaryHandler(SelectionChangedCause? cause) {
+      if (cause == SelectionChangedCause.tripleTap)
+        return _getParagraphAtOffset;
+      else if (cause == SelectionChangedCause.doubleTap)
+        return _textPainter.getWordBoundary;
+      else
+        return (TextPosition p) => TextSelection.fromPosition(p);
+    }
 
     final TextSelection? initialSelection = _dragStartInitialSelection;
     if (initialSelection == null)
@@ -950,7 +966,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection newSelection = _selectionExtendedTo(
       from: initialSelection,
       to: toPosition,
-      getBoundary: _textPainter.getWordBoundary,
+      getBoundary: getBoundaryHandler(_dragStartInitialSelectionCause),
     );
 
     _setSelection(newSelection, cause);
@@ -3244,6 +3260,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   Offset? _lastTapDownPosition;
   Offset? _lastSecondaryTapDownPosition;
+  SelectionChangedCause? _lastSelectionChangedCause;
 
   /// The position of the most recent secondary tap down event on this text
   /// input.
@@ -4248,23 +4265,28 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
 // Keeping supporting code isolated here for now
 // Can figure out how to organize the code below once I get some feedback
 
+typedef _BoundaryHandler = TextRange Function(TextPosition position);
+
 // Later can use this when dragging to extend a selection
 TextSelection _selectionExtendedTo({
   required TextSelection from,
   required TextPosition to,
-  required TextRange Function(TextPosition position) getBoundary,
+  required _BoundaryHandler getBoundary,
 }) {
   final int positionOffset = to.offset;
   final int baseOffset = from.baseOffset;
   final int extentOffset = from.extentOffset;
 
   if (positionOffset > extentOffset) {
+    // Expand the from selection to the right
     final TextRange range = getBoundary(to);
     return TextSelection(baseOffset: baseOffset, extentOffset: range.end);
   } else if (positionOffset < baseOffset) {
+    // Expand the from selection to the left
     final TextRange range = getBoundary(to);
     return TextSelection(baseOffset: range.start, extentOffset: extentOffset);
   } else {
+    // The minimum selection we can have is the starting selection
     return from;
   }
 }
