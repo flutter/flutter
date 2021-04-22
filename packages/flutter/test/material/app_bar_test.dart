@@ -2435,23 +2435,6 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
 
-  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(),
-        endDrawer: const Drawer(),
-      ),
-    ));
-
-    final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
-    await tester.tap(endDrawerFinder);
-    await tester.pump();
-
-    final Finder appBarFinder = find.byType(NavigationToolbar);
-    NavigationToolbar getAppBarWidget(Finder finder) => tester.widget<NavigationToolbar>(finder);
-    expect(getAppBarWidget(appBarFinder).leading, null);
-  });
-
   testWidgets('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2874,5 +2857,43 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/80256
+  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+      key: const ValueKey<String>('1'),
+      child: Scaffold(
+        key: const ValueKey<String>('1'),
+        appBar: AppBar(),
+        endDrawer: const Drawer(),
+      )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+      key: const ValueKey<String>('2'),
+      child: Scaffold(
+        key: const ValueKey<String>('2'),
+        appBar: AppBar(),
+        endDrawer: const Drawer(),
+      )
+    );
+    final List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<Object?> route, Object? result) => false,
+        ),
+      ),
+    );
+
+    // The page2 should have a back button.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
   });
 }
