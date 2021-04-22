@@ -18,6 +18,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'collection',
   'fake_async',
   'file',
+  'frontend_server_client',
   'intl',
   'meta',
   'path',
@@ -72,11 +73,5 @@ const Set<String> kCorePackageAllowList = <String>{
   'flutter_driver',
   'flutter_localizations',
   'flutter_test',
-  'integration_test',
-  'flutter_goldens',
-  'flutter_goldens_client',
-  'fuchsia_remote_debug_protocol',
-  'platform',
-  'process',
-  'sky_engine',
+  'integration_test'
 };
