@@ -164,12 +164,72 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
     'Building Windows application...',
   );
   try {
+    // The Cmake re-entrant build does not work for UWP, so the flutter build is
+    // run in advance.
+    await _runFlutterBuild(buildDirectory, buildInfo, target);
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
     await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
   } finally {
     status.cancel();
   }
-  throwToolExit('Windows UWP builds are not implemented.');
+}
+
+const Map<BuildMode, String> _targets = <BuildMode, String>{
+  BuildMode.debug: 'debug_bundle_windows_assets_uwp',
+  BuildMode.profile: 'profile_bundle_windows_assets_uwp',
+  BuildMode.release: 'release_bundle_windows_assets_uwp',
+};
+
+Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, String targetFile) async {
+  await buildDirectory.create(recursive: true);
+  int result;
+  String flutterEngine;
+  String localEngine;
+  if (globals.artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    flutterEngine = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
+    localEngine = globals.fs.path.basename(engineOutPath);
+  }
+  try {
+    result = await globals.processUtils.stream(
+      <String>[
+        globals.fs.path.join(Cache.flutterRoot, 'bin', 'flutter'),
+        if (globals.logger.isVerbose)
+          '--verbose',
+        if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
+        if (localEngine != null) '--local-engine=$localEngine',
+        'assemble',
+        '--no-version-check',
+        '--output=build',
+        '-dTargetPlatform=windows-uwp-x64',
+        '-dTrackWidgetCreation=${buildInfo.trackWidgetCreation}',
+        '-dBuildMode=${getNameForBuildMode(buildInfo.mode)}',
+        '-dTargetFile=$targetFile',
+        '-dTreeShakeIcons="${buildInfo.treeShakeIcons}"',
+        '-dDartObfuscation=${buildInfo.dartObfuscation}',
+        if (buildInfo.bundleSkSLPath != null)
+          '-iBundleSkSLPath=${buildInfo.bundleSkSLPath}',
+        if (buildInfo.codeSizeDirectory != null)
+          '-dCodeSizeDirectory=${buildInfo.codeSizeDirectory}',
+        if (buildInfo.splitDebugInfoPath != null)
+          '-dSplitDebugInfo=${buildInfo.splitDebugInfoPath}',
+        if (buildInfo.dartDefines != null && buildInfo.dartDefines.isNotEmpty)
+          '--DartDefines=${encodeDartDefines(buildInfo.dartDefines)}',
+        if (buildInfo.extraGenSnapshotOptions != null && buildInfo.extraGenSnapshotOptions.isNotEmpty)
+          '--ExtraGenSnapshotOptions=${buildInfo.extraGenSnapshotOptions}',
+        if (buildInfo.extraFrontEndOptions != null && buildInfo.extraFrontEndOptions.isNotEmpty)
+          '--ExtraFrontEndOptions=${buildInfo.extraFrontEndOptions}',
+        _targets[buildInfo.mode],
+      ],
+      trace: true,
+    );
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
+  }
+  if (result != 0) {
+    throwToolExit('Unable to generate build files');
+  }
 }
 
 Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {

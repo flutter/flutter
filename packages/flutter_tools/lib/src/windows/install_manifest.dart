@@ -51,5 +51,5 @@ Future<void> createManifest({
   outputs.add(project.ephemeralDirectory.childFile('icudtl.dat'));
   project.ephemeralDirectory.childFile('install_manifest')
     ..createSync(recursive: true)
-    ..writeAsStringSync(outputs.map((File file) => file.absolute.path).join('\n'));
+    ..writeAsStringSync(outputs.map((File file) => file.absolute.uri.path.substring(1)).join('\n'));
 }
