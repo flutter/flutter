@@ -6,15 +6,12 @@ import 'dart:convert';
 import 'dart:io' hide Platform;
 
 import 'package:args/args.dart';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
-
 import 'package:gen_keycodes/android_code_gen.dart';
 import 'package:gen_keycodes/base_code_gen.dart';
 import 'package:gen_keycodes/macos_code_gen.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
-import 'package:gen_keycodes/windows_code_gen.dart';
-import 'package:gen_keycodes/web_code_gen.dart';
+import 'package:gen_keycodes/ios_code_gen.dart';
+import 'package:gen_keycodes/key_data.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
 import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/physical_key_data.dart';
