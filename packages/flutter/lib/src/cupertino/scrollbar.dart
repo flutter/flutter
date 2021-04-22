@@ -50,6 +50,10 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
+///     thickness: 6.0,
+///     thicknessWhileDragging: 10,
+///     radius: const Radius.circular(34),
+///     radiusWhileDragging: const Radius.circular(0),
 ///     child: ListView.builder(
 ///       itemCount: 120,
 ///       itemBuilder: (BuildContext context, int index) {
