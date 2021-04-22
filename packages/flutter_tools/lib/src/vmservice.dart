@@ -545,7 +545,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpApp',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpRenderTree({
@@ -556,7 +556,7 @@ class FlutterVmService {
       isolateId: isolateId,
       args: <String, Object>{}
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpLayerTree({
@@ -566,7 +566,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpLayerTree',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInTraversalOrder({
@@ -576,7 +576,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInInverseHitTestOrder({
@@ -586,7 +586,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<Map<String, dynamic>> _flutterToggle(String name, {
@@ -701,15 +701,26 @@ class FlutterVmService {
   ///
   /// This method is only supported by certain embedders. This is
   /// described by [Device.supportsFlutterExit].
-  Future<void> flutterExit({
+  Future<bool> flutterExit({
     @required String isolateId,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
-      'ext.flutter.exit',
-      isolateId: isolateId,
-    ).catchError((dynamic error, StackTrace stackTrace) {
-      // Do nothing on sentinel or exception, the isolate already exited.
-    }, test: (dynamic error) => error is vm_service.SentinelException || error is vm_service.RPCError);
+  }) async {
+    try {
+      final Map<String, Object> result = await invokeFlutterExtensionRpcRaw(
+        'ext.flutter.exit',
+        isolateId: isolateId,
+      );
+      // A response of `null` indicates that `invokeFlutterExtensionRpcRaw` caught an RPCError
+      // with a missing method code. This can happen when attempting to quit a flutter app
+      // that never registered the methods in the bindings.
+      if (result == null) {
+        return false;
+      }
+    } on vm_service.SentinelException {
+      // Do nothing on sentinel, the isolate already exited.
+    } on vm_service.RPCError {
+      // Do nothing on RPCError, the isolate already exited.
+    }
+    return true;
   }
 
   /// Return the current platform override for the flutter view running with

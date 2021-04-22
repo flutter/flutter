@@ -331,6 +331,101 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('flutterDebugDumpSemanticsTreeInTraversalOrder handles missing method', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
+          args: <String, Object>{
+            'isolateId': '1'
+          },
+          errorCode: RPCErrorCodes.kMethodNotFound,
+        ),
+      ]
+    );
+
+    expect(await fakeVmServiceHost.vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+      isolateId: '1',
+    ), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('flutterDebugDumpSemanticsTreeInInverseHitTestOrder handles missing method', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
+          args: <String, Object>{
+            'isolateId': '1'
+          },
+          errorCode: RPCErrorCodes.kMethodNotFound,
+        ),
+      ]
+    );
+
+    expect(await fakeVmServiceHost.vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+      isolateId: '1',
+    ), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('flutterDebugDumpLayerTree handles missing method', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpLayerTree',
+          args: <String, Object>{
+            'isolateId': '1'
+          },
+          errorCode: RPCErrorCodes.kMethodNotFound,
+        ),
+      ]
+    );
+
+    expect(await fakeVmServiceHost.vmService.flutterDebugDumpLayerTree(
+      isolateId: '1',
+    ), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('flutterDebugDumpRenderTree handles missing method', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpRenderTree',
+          args: <String, Object>{
+            'isolateId': '1'
+          },
+          errorCode: RPCErrorCodes.kMethodNotFound,
+        ),
+      ]
+    );
+
+    expect(await fakeVmServiceHost.vmService.flutterDebugDumpRenderTree(
+      isolateId: '1',
+    ), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('flutterDebugDumpApp handles missing method', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{
+            'isolateId': '1'
+          },
+          errorCode: RPCErrorCodes.kMethodNotFound,
+        ),
+      ]
+    );
+
+    expect(await fakeVmServiceHost.vmService.flutterDebugDumpApp(
+      isolateId: '1',
+    ), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('Framework service extension invocations return null if service disappears ', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[

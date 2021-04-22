@@ -364,10 +364,16 @@ class FlutterDevice {
     }
     for (final FlutterView view in views) {
       if (view != null && view.uiIsolate != null) {
-        // If successful, there will be no response from flutterExit.
+        // If successful, there will be no response from flutterExit. If the exit
+        // method is not registered, this will complete with `false`.
         unawaited(vmService.flutterExit(
           isolateId: view.uiIsolate.id,
-        ));
+        ).then((bool exited) async {
+          // If exiting the app failed, fall back to stopApp
+          if (!exited) {
+            await device.stopApp(package, userIdentifier: userIdentifier);
+          }
+        }));
       }
     }
     return vmService.service.onDone
@@ -378,10 +384,6 @@ class FlutterDevice {
          );
       })
       .timeout(timeoutDelay, onTimeout: () {
-        // TODO(jonahwilliams): this only seems to fail on CI in the
-        // flutter_attach_android_test. This log should help verify this
-        // is where the tool is getting stuck.
-        globals.logger.printTrace('error: vm service shutdown failed');
         return device.stopApp(package, userIdentifier: userIdentifier);
       });
   }
