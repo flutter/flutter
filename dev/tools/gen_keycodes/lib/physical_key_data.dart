@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
-
-import 'package:path/path.dart' as path;
 
 import 'package:gen_keycodes/utils.dart';
 
@@ -249,7 +246,7 @@ class PhysicalKeyEntry {
       windowsScanCode: map['scanCodes']['windows'] as int?,
       macOsScanCode: map['scanCodes']['macos'] as int?,
       iosScanCode: map['scanCodes']['ios'] as int?,
-      glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
+      glfwKeyCodes: (map['keyCodes']?['glfw'] as List<dynamic>?)?.cast<int>() ?? <int>[],
     );
   }
 
@@ -348,23 +345,6 @@ class PhysicalKeyEntry {
         'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumCode '
         'iOSScanCode: ${toHex(iosScanCode)})';
   }
-
-  /// Returns the static map of synonym representations.
-  ///
-  /// These include synonyms for keys which don't have printable
-  /// representations, and appear in more than one place on the keyboard (e.g.
-  /// SHIFT, ALT, etc.).
-  static late final Map<String, List<String>> synonyms = ((){
-    final String synonymKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'synonyms.json',)).readAsStringSync();
-    final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
-    return dynamicSynonym.map((String name, dynamic values) {
-      // The keygen and algorithm of macOS relies on synonyms being pairs.
-      // See siblingKeyMap in macos_code_gen.dart.
-      final List<String> names = (values as List<dynamic>).whereType<String>().toList();
-      assert(names.length == 2);
-      return MapEntry<String, List<String>>(name, names);
-    });
-  })();
 
   static int compareByUsbHidCode(PhysicalKeyEntry a, PhysicalKeyEntry b) =>
       a.usbHidCode.compareTo(b.usbHidCode);

@@ -520,6 +520,7 @@ class LogicalKeyEntry {
         'gtk': gtkValues,
         'windows': windowsValues,
         'android': androidValues,
+        'fuchsia': fuchsiaValues,
       },
     });
   }
