@@ -53,7 +53,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
           print('Error during web location map: $value is not a valid logical key.');
           return null;
         }
-        return value == null ? 'null' : toHex(logicalData.data[value].value, digits: 10);
+        return value == null ? 'null' : toHex(logicalData.data[value]?.value, digits: 10);
       }).join(', ');
       result.writeln("  '$webKey': <int?>[$valuesString],");
     });

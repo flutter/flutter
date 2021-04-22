@@ -1,4 +1,4 @@
 {
-  "LOCK": ["capsLock", "CapsLock"],
-  "MOD2": ["numLock", "NumLock"]
+  "LOCK": ["CapsLock", "CapsLock"],
+  "MOD2": ["NumLock", "NumLock"]
 }

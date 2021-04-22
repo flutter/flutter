@@ -11,7 +11,7 @@ import 'utils.dart';
 String _injectDictionary(String template, Map<String, String> dictionary) {
   String result = template;
   for (final String key in dictionary.keys) {
-    result = result.replaceAll('@@@$key@@@', dictionary[key]);
+    result = result.replaceAll('@@@$key@@@', dictionary[key] ?? '@@@$key@@@');
   }
   return result;
 }

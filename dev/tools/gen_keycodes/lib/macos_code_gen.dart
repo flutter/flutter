@@ -10,20 +10,20 @@ import 'mask_constants.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-const List<String> kModifiersOfInterest = [
-  'shiftLeft',
-  'shiftRight',
-  'controlLeft',
-  'controlRight',
-  'altLeft',
-  'altRight',
-  'metaLeft',
-  'metaRight',
+const List<String> kModifiersOfInterest = <String>[
+  'ShiftLeft',
+  'ShiftRight',
+  'ControlLeft',
+  'ControlRight',
+  'AltLeft',
+  'AltRight',
+  'MetaLeft',
+  'MetaRight',
 ];
 
 // The name of keys that require special attention.
 const List<String> kSpecialPhysicalKeys = <String>['CapsLock'];
-const List<String> kSpecialLogicalKeys = <String>['capsLock'];
+const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 
 String _toConstantVariableName(String variableName) {
   return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';
@@ -95,28 +95,11 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     return buffer.toString().trimRight();
   }
 
-  /// This generates a map between the physical code of sibling keys, such as
-  /// left and right shift, including both directions.
-  // String get _siblingKeyMap {
-  //   final StringBuffer siblingKeyMap = StringBuffer();
-  //   PhysicalKeyEntry.synonyms.forEach((String name, List<String> keyNames) {
-  //     assert(keyNames.length == 2);
-  //     final int first = keyData.getEntryByName(keyNames[0]).macOsScanCode;
-  //     final int second = keyData.getEntryByName(keyNames[1]).macOsScanCode;
-  //     if (first == null || second == null) {
-  //       print('Invalid sibling key: $name, $keyNames');
-  //     }
-  //     siblingKeyMap.writeln('  @${toHex(first)} : @${toHex(second)}, // $name');
-  //     siblingKeyMap.writeln('  @${toHex(second)} : @${toHex(first)}, // $name');
-  //   });
-  //   return siblingKeyMap.toString().trimRight();
-  // }
-
-  /// This generates a map from the key code of a modifier flag.
+  /// This generates a map from the key code to a modifier flag.
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  @${toHex(logicalData.data[name].macOsKeyCodeValues[0])} : @(kModifierFlag${lowerCamelToUpperCamel(name)}),');
+      modifierKeyMap.writeln('  @${toHex(logicalData.data[name]!.macOsKeyCodeValues[0])} : @(kModifierFlag${lowerCamelToUpperCamel(name)}),');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -125,7 +108,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  @(kModifierFlag${lowerCamelToUpperCamel(name)}) : @${toHex(logicalData.data[name].macOsKeyCodeValues[0])},');
+      modifierKeyMap.writeln('  @(kModifierFlag${lowerCamelToUpperCamel(name)}) : @${toHex(logicalData.data[name]!.macOsKeyCodeValues[0])},');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -134,10 +117,10 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _specialKeyConstants {
     final StringBuffer specialKeyConstants = StringBuffer();
     for (final String keyName in kSpecialPhysicalKeys) {
-      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.getEntryByName(keyName).usbHidCode)};');
+      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.getEntryByName(keyName)!.usbHidCode)};');
     }
     for (final String keyName in kSpecialLogicalKeys) {
-      specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.data[keyName].value)};');
+      specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.data[keyName]!.value)};');
     }
     return specialKeyConstants.toString().trimRight();
   }
@@ -157,7 +140,6 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
       'MACOS_SCAN_CODE_MAP': _scanCodeMap,
       'MACOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
       'MASK_CONSTANTS': _maskConstants,
-      // 'SIBLING_KEY_MAP': _siblingKeyMap,
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,

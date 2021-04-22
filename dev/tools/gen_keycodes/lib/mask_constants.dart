@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 class MaskConstant {
-  const MaskConstant({this.name, this.value, this.description});
+  const MaskConstant._({required this.name, required this.value, required this.description});
 
   factory MaskConstant.fromJsonMapEntry(String name, Map<String, dynamic> map) {
     dynamic getNonNull(String key) {
-      dynamic value = map[key];
+      final dynamic value = map[key];
       assert(value != null);
       return value;
     }
 
-    return MaskConstant(
+    return MaskConstant._(
       name: name,
       value: getNonNull('value') as String,
       description: <String>[for (dynamic element in getNonNull('description') as List<dynamic>)

@@ -11,12 +11,12 @@ import 'package:path/path.dart' as path;
 /// this script.
 final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
 
-/// Converts `FOO_BAR` to `fooBar`.
-String shoutingToLowerCamel(String shouting) {
-  final RegExp initialLetter = RegExp(r'_([^_])([^_]*)');
+/// Converts `FOO_BAR` to `FooBar`.
+String shoutingToUpperCamel(String shouting) {
+  final RegExp initialLetter = RegExp(r'(?:_|^)([^_])([^_]*)');
   final String snake = shouting.toLowerCase();
   final String result = snake.replaceAllMapped(initialLetter, (Match match) {
-    return match.group(1).toUpperCase() + match.group(2).toLowerCase();
+    return match.group(1)!.toUpperCase() + match.group(2)!.toLowerCase();
   });
   return result;
 }
@@ -28,7 +28,7 @@ String shoutingToLowerCamel(String shouting) {
 String upperCamelToLowerCamel(String upperCamel) {
   final RegExp initialGroup = RegExp(r'^([A-Z]([A-Z]*|[^A-Z]*))([A-Z]([^A-Z]|$)|$)');
   return upperCamel.replaceFirstMapped(initialGroup, (Match match) {
-    return match.group(1).toLowerCase() + (match.group(3) ?? '');
+    return match.group(1)!.toLowerCase() + (match.group(3) ?? '');
   });
 }
 
@@ -104,7 +104,7 @@ const List<String> kDartReservedWords = <String>[
 ];
 
 /// Converts an integer into a hex string with the given number of digits.
-String toHex(int value, {int digits = 8}) {
+String toHex(int? value, {int digits = 8}) {
   if (value == null) {
     return 'null';
   }
@@ -118,7 +118,7 @@ int getHex(String input) {
 
 /// Given an [input] string, wraps the text at 80 characters and prepends each
 /// line with the [prefix] string. Use for generated comments.
-String wrapString(String input, {String prefix}) {
+String wrapString(String input, {required String prefix}) {
   final int wrapWidth = 80 - prefix.length;
   final StringBuffer result = StringBuffer();
   final List<String> words = input.split(RegExp(r'\s+'));
@@ -146,7 +146,7 @@ String wrapString(String input, {String prefix}) {
 void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1, T2) fn) {
   if (list1 == null && list2 == null)
     return;
-  if ((list1?.length ?? 0) != (list2?.length ?? 0)) {
+  if (list1.length != list2.length) {
     print('Mismatched lists $list1 to $list2');
     return;
   }
@@ -163,6 +163,13 @@ Map<String, List<String>> parseMapOfListOfString(String jsonString) {
   final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
   return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {
     return MapEntry<String, List<String>>(key, value.cast<String>());
+  });
+}
+
+Map<String, List<String?>> parseMapOfListOfNullableString(String jsonString) {
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  return dynamicMap.map<String, List<String?>>((String key, List<dynamic> value) {
+    return MapEntry<String, List<String?>>(key, value.cast<String?>());
   });
 }
 
@@ -185,6 +192,16 @@ Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, vo
 ///
 /// Will modify the input map.
 Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
-  return map..removeWhere((String key, dynamic value) =>
-      value == null || (value is List<dynamic> && value.isEmpty));
+  return map..removeWhere((String key, dynamic value) {
+    if (value == null)
+      return true;
+    if (value is Map<String, dynamic>) {
+      final Map<String, dynamic> regularizedMap = removeEmptyValues(value);
+      return regularizedMap.isEmpty;
+    }
+    if (value is Iterable<dynamic>) {
+      return value.isEmpty;
+    }
+    return false;
+  });
 }
