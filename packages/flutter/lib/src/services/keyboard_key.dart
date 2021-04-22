@@ -798,11 +798,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey shiftLevel5 = LogicalKeyboardKey(0x00000000111);
 
-  /// Represents the logical "Alt Graph Latch" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey altGraphLatch = LogicalKeyboardKey(0x00000000112);
-
   /// Represents the logical "Arrow Down" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -2071,7 +2066,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "TV 3 D Mode" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tV3DMode = LogicalKeyboardKey(0x00000001101);
+  static const LogicalKeyboardKey tv3DMode = LogicalKeyboardKey(0x00000001101);
 
   /// Represents the logical "TV Antenna Cable" key on the keyboard.
   ///
@@ -2688,7 +2683,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x000000010f: symbol,
     0x0000000110: symbolLock,
     0x0000000111: shiftLevel5,
-    0x0000000112: altGraphLatch,
     0x0000000301: arrowDown,
     0x0000000302: arrowLeft,
     0x0000000303: arrowRight,
@@ -2942,7 +2936,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000001009: notification,
     0x000000100a: mannerMode,
     0x000000100b: voiceDial,
-    0x0000001101: tV3DMode,
+    0x0000001101: tv3DMode,
     0x0000001102: tvAntennaCable,
     0x0000001103: tvAudioDescription,
     0x0000001104: tvAudioDescriptionMixDown,
@@ -3149,7 +3143,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000010f: 'Symbol',
     0x00000000110: 'Symbol Lock',
     0x00000000111: 'Shift Level 5',
-    0x00000000112: 'Alt Graph Latch',
     0x00000000301: 'Arrow Down',
     0x00000000302: 'Arrow Left',
     0x00000000303: 'Arrow Right',

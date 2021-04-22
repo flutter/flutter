@@ -126,24 +126,24 @@ class LogicalKeyData {
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
     for (final Match match in domKeyRegExp.allMatches(input)) {
-      if (match == null) {
+      final String webName = match.group(2)!;
+      // ".AltGraphLatch"  is consumed internally and not expressed to the Web.
+      if (webName.startsWith('.')) {
         continue;
       }
-      final String name = LogicalKeyEntry.computeName(
-        match.group(2)!.replaceAll(RegExp('[^A-Za-z0-9]'), ''),
-      );
+      final String name = LogicalKeyEntry.computeName(webName.replaceAll(RegExp('[^A-Za-z0-9]'), ''));
       final int value = match.group(4) != null ? getHex(match.group(4)!) : match.group(5)!.codeUnitAt(0);
       final String? keyLabel = match.group(1)! == 'UNI' ? String.fromCharCode(value) : null;
       // If it's a modifier key, add left and right keys instead.
       // Don't add web names and values; they're solved with locations.
       if (chromeModifiers.containsKey(name)) {
         final _ModifierPair pair = chromeModifiers[name]!;
-        data[LogicalKeyEntry.computeName(pair.left)] = LogicalKeyEntry.fromName(
+        data[pair.left] = LogicalKeyEntry.fromName(
           value: value + kLeftModifierPlane,
           name: pair.left,
           keyLabel: null, // Modifier keys don't have keyLabels
         );
-        data[LogicalKeyEntry.computeName(pair.right)] = LogicalKeyEntry.fromName(
+        data[pair.right] = LogicalKeyEntry.fromName(
           value: value + kRightModifierPlane,
           name: pair.right,
           keyLabel: null, // Modifier keys don't have keyLabels
@@ -155,7 +155,7 @@ class LogicalKeyData {
       final String? char = value < 256 ? String.fromCharCode(value) : null;
       if (char != null && printableToNumpads.containsKey(char)) {
         final String numpadName = printableToNumpads[char]!;
-        data[LogicalKeyEntry.computeName(numpadName)] = LogicalKeyEntry.fromName(
+        data[numpadName] = LogicalKeyEntry.fromName(
           value: char.codeUnitAt(0) + kNumpadPlane,
           name: numpadName,
           keyLabel: null, // Don't add keyLabel for numpad counterparts
@@ -163,13 +163,13 @@ class LogicalKeyData {
         unusedNumpad.remove(char);
       }
 
-      final LogicalKeyEntry entry = data.putIfAbsent(LogicalKeyEntry.computeName(name), () => LogicalKeyEntry.fromName(
+      final LogicalKeyEntry entry = data.putIfAbsent(name, () => LogicalKeyEntry.fromName(
         value: value,
         name: name,
         keyLabel: keyLabel,
       ));
       entry
-        ..webNames.add(name)
+        ..webNames.add(webName)
         ..webValues.add(value);
     }
 
@@ -383,7 +383,7 @@ class LogicalKeyEntry {
     String? keyLabel,
   })  : this(
           value: value,
-          name: LogicalKeyEntry.computeName(name),
+          name: name,
           keyLabel: keyLabel,
         );
 
@@ -409,10 +409,10 @@ class LogicalKeyEntry {
 
   final String name;
 
-  String get constantName => upperCamelToLowerCamel(name);
-
   /// The name of the key suitable for placing in comments.
   String get commentName => computeCommentName(name);
+
+  String get constantName => computeConstantName(commentName);
 
   /// The name of the key, mostly derived from the DomKey name in Chromium,
   /// but where there was no DomKey representation, derived from the Chromium
@@ -528,6 +528,14 @@ class LogicalKeyEntry {
       // 'Foo1' => 'Foo 1'
       .replaceAllMapped(RegExp(r'([a-z])([0-9])'), (Match match) => '${match.group(1)} ${match.group(2)}')
       .trim();
+  }
+
+  static String computeConstantName(String commentName) {
+    // Convert the first word in the comment name.
+    final String lowerCamelSpace = commentName.replaceFirstMapped(RegExp(r'^[^ ]+'),
+      (Match match) => match[0]!.toLowerCase(),
+    );
+    return lowerCamelSpace.replaceAll(' ', '');
   }
 
   static int compareByValue(LogicalKeyEntry a, LogicalKeyEntry b) =>
