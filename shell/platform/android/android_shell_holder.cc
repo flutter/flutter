@@ -55,21 +55,14 @@ AndroidShellHolder::AndroidShellHolder(
   Shell::CreateCallback<PlatformView> on_create_platform_view =
       [is_background_view, &jni_facade, &weak_platform_view](Shell& shell) {
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
-        if (is_background_view) {
-          platform_view_android = std::make_unique<PlatformViewAndroid>(
-              shell,                   // delegate
-              shell.GetTaskRunners(),  // task runners
-              jni_facade               // JNI interop
-          );
-        } else {
-          platform_view_android = std::make_unique<PlatformViewAndroid>(
-              shell,                   // delegate
-              shell.GetTaskRunners(),  // task runners
-              jni_facade,              // JNI interop
-              shell.GetSettings()
-                  .enable_software_rendering  // use software rendering
-          );
-        }
+        platform_view_android = std::make_unique<PlatformViewAndroid>(
+            shell,                   // delegate
+            shell.GetTaskRunners(),  // task runners
+            jni_facade,              // JNI interop
+            shell.GetSettings()
+                .enable_software_rendering,  // use software rendering
+            !is_background_view              // create onscreen surface
+        );
         weak_platform_view = platform_view_android->GetWeakPtr();
         auto display = Display(jni_facade->GetDisplayRefreshRate());
         shell.OnDisplayUpdates(DisplayUpdateType::kStartup, {display});
