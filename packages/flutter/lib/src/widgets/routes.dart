@@ -225,7 +225,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void didReplace(Route<dynamic>? oldRoute) {
+  void didReplace(Route<Object?>? oldRoute) {
     assert(_controller != null, '$runtimeType.didReplace called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute)
@@ -243,7 +243,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void didPopNext(Route<dynamic> nextRoute) {
+  void didPopNext(Route<Object?> nextRoute) {
     assert(_controller != null, '$runtimeType.didPopNext called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _updateSecondaryAnimation(nextRoute);
@@ -251,7 +251,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void didChangeNext(Route<dynamic>? nextRoute) {
+  void didChangeNext(Route<Object?>? nextRoute) {
     assert(_controller != null, '$runtimeType.didChangeNext called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _updateSecondaryAnimation(nextRoute);
@@ -265,14 +265,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   // caller must reset this property to null after it is called.
   VoidCallback? _trainHoppingListenerRemover;
 
-  void _updateSecondaryAnimation(Route<dynamic>? nextRoute) {
+  void _updateSecondaryAnimation(Route<Object?>? nextRoute) {
     // There is an existing train hopping in progress. Unfortunately, we cannot
     // dispose current train hopping animation until we replace it with a new
     // animation.
     final VoidCallback? previousTrainHoppingListenerRemover = _trainHoppingListenerRemover;
     _trainHoppingListenerRemover = null;
 
-    if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
+    if (nextRoute is TransitionRoute<Object?> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       final Animation<double>? current = _secondaryAnimation.parent;
       if (current != null) {
         final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
@@ -348,11 +348,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
-  void _setSecondaryAnimation(Animation<double>? animation, [Future<dynamic>? disposed]) {
+  void _setSecondaryAnimation(Animation<double>? animation, [Future<Object?>? disposed]) {
     _secondaryAnimation.parent = animation;
     // Releases the reference to the next route's animation when that route
     // is disposed.
-    disposed?.then((dynamic _) {
+    disposed?.then((Object? _) {
       if (_secondaryAnimation.parent == animation) {
         _secondaryAnimation.parent = kAlwaysDismissedAnimation;
         if (animation is TrainHoppingAnimation) {
@@ -386,7 +386,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   ///  * [canTransitionFrom], which must be true for [nextRoute] for the
   ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => true;
+  bool canTransitionTo(TransitionRoute<Object?> nextRoute) => true;
 
   /// Returns true if [previousRoute] should animate when this route
   /// is pushed on top of it or when then this route is popped off of it.
@@ -411,7 +411,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   ///  * [canTransitionTo], which must be true for [previousRoute] for its
   ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
+  bool canTransitionFrom(TransitionRoute<Object?> previousRoute) => true;
 
   @override
   void dispose() {
@@ -437,7 +437,7 @@ class LocalHistoryEntry {
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
   final VoidCallback? onRemove;
 
-  LocalHistoryRoute<dynamic>? _owner;
+  LocalHistoryRoute<Object?>? _owner;
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
@@ -660,7 +660,7 @@ class _DismissModalAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    final ModalRoute<dynamic> route = ModalRoute.of<dynamic>(context)!;
+    final ModalRoute<Object?> route = ModalRoute.of<Object?>(context)!;
     return route.barrierDismissible;
   }
 
@@ -685,7 +685,7 @@ class _ModalScopeStatus extends InheritedWidget {
 
   final bool isCurrent;
   final bool canPop;
-  final Route<dynamic> route;
+  final Route<Object?> route;
 
   @override
   bool updateShouldNotify(_ModalScopeStatus old) {
@@ -934,7 +934,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// This function is typically used with [Navigator.popUntil()].
   static RoutePredicate withName(String name) {
-    return (Route<dynamic> route) {
+    return (Route<Object?> route) {
       return !route.willHandlePopInternally
           && route is ModalRoute
           && route.settings.name == name;
@@ -1391,7 +1391,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// [State.didChangeDependencies] callback:
   ///
   /// ```dart
-  /// ModalRoute<dynamic> _route;
+  /// ModalRoute<Object?> _route;
   ///
   /// @override
   /// void didChangeDependencies() {
@@ -1464,7 +1464,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void didChangePrevious(Route<dynamic>? previousRoute) {
+  void didChangePrevious(Route<Object?>? previousRoute) {
     super.didChangePrevious(previousRoute);
     changedInternalState();
   }
@@ -1613,9 +1613,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// as `always_specify_types`, the Dart analyzer will require that certain types
 /// be given with their type arguments. Since the [Route] class and its
 /// subclasses have a type argument, this includes the arguments passed to this
-/// class. Consider using `dynamic` to specify the entire class of routes rather
+/// class. Consider using `Object?` to specify the entire class of routes rather
 /// than only specific subtypes. For example, to watch for all [ModalRoute]
-/// variants, the `RouteObserver<ModalRoute<dynamic>>` type may be used.
+/// variants, the `RouteObserver<ModalRoute<Object?>>` type may be used.
 ///
 /// {@tool snippet}
 ///
@@ -1670,7 +1670,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// }
 /// ```
 /// {@end-tool}
-class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
+class RouteObserver<R extends Route<Object?>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 
   /// Subscribe [routeAware] to be informed about changes to [route].
@@ -1700,7 +1700,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPop(Route<Object?> route, Route<Object?>? previousRoute) {
     if (route is R && previousRoute is R) {
       final List<RouteAware>? previousSubscribers = _listeners[previousRoute]?.toList();
 
@@ -1721,7 +1721,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   }
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route<Object?> route, Route<Object?>? previousRoute) {
     if (route is R && previousRoute is R) {
       final Set<RouteAware>? previousSubscribers = _listeners[previousRoute];
 

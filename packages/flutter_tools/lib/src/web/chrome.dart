@@ -218,7 +218,7 @@ class ChromiumLauncher {
       url,
     ];
 
-    final Process? process = await _spawnChromiumProcess(args);
+    final Process? process = await _spawnChromiumProcess(args, chromeExecutable);
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (process != null && cacheDir != null) {
@@ -235,7 +235,18 @@ class ChromiumLauncher {
     ), skipCheck);
   }
 
-  Future<Process?> _spawnChromiumProcess(List<String> args) async {
+  Future<Process?> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+      final ProcessResult result = _processManager.runSync(<String>['file', chromeExecutable]);
+      // Check if ARM Chrome is installed.
+      // Mach-O 64-bit executable arm64
+      if ((result.stdout as String).contains('arm64')) {
+        _logger.printTrace('Found ARM Chrome installation at $chromeExecutable, forcing native launch.');
+        // If so, force Chrome to launch natively.
+        args.insertAll(0, <String>['/usr/bin/arch', '-arm64']);
+      }
+    }
+
     // Keep attempting to launch the browser until one of:
     // - Chrome launched successfully, in which case we just return from the loop.
     // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.

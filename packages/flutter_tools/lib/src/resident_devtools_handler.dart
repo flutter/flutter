@@ -208,6 +208,8 @@ NoOpDevtoolsHandler createNoOpHandler(DevtoolsLauncher launcher, ResidentRunner 
 
 @visibleForTesting
 class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
+  bool wasShutdown = false;
+
   @override
   DevToolsServerAddress get activeDevToolsServer => null;
 
@@ -223,6 +225,7 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   Future<void> shutdown() async {
+    wasShutdown = true;
     return;
   }
 }
