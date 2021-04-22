@@ -27,10 +27,10 @@ enum FrameState { initial, slow, afterSlow, fast, afterFast }
 
 class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   int _widgetBuilds = 0;
-  late FrameState _state;
+  FrameState _state = FrameState.initial;
   String _summary = '';
   IconData? _icon;
-  double? _flutterFrameRate;
+  double _flutterFrameRate = 0;
 
   Future<void> _summarizeStats() async {
     final double? framesProduced = await channel.invokeMethod('getProducedFrameRate');
@@ -49,7 +49,7 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at .5x speed...';
         _state = FrameState.slow;
         _icon = Icons.stop;
-        channel.invokeMethod<void>('start', _flutterFrameRate! ~/ 2);
+        channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
         break;
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
@@ -64,7 +64,7 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at 2x speed...';
         _state = FrameState.fast;
         _icon = Icons.stop;
-        channel.invokeMethod<void>('start', (_flutterFrameRate! * 2).toInt());
+        channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
         break;
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
@@ -107,9 +107,9 @@ Widget builds: $_widgetBuilds''';
         ticker?.dispose();
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
-          debugPrint('Calibrated: frame rate ${_flutterFrameRate?.toStringAsFixed(1)}fps.');
+          debugPrint('Calibrated: frame rate ${_flutterFrameRate.toStringAsFixed(1)}fps.');
           _summary = '''
-Flutter frame rate is ${_flutterFrameRate?.toStringAsFixed(1)}fps.
+Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.
 Press play to produce texture frames.''';
           _icon = Icons.play_arrow;
           _state = FrameState.initial;
