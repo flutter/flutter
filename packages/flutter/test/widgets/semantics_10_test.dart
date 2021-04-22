@@ -10,28 +10,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+  testWidgets(
+    'can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once',
+    (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(
-      buildTestWidgets(
-        excludeSemantics: false,
-        label: 'label',
-        isSemanticsBoundary: true,
-      ),
-    );
+      await tester.pumpWidget(
+        buildTestWidgets(
+          excludeSemantics: false,
+          label: 'label',
+          isSemanticsBoundary: true,
+        ),
+      );
 
-    // The following should not trigger an assert.
-    await tester.pumpWidget(
-      buildTestWidgets(
-        excludeSemantics: true,
-        label: 'label CHANGED',
-        isSemanticsBoundary: false,
-      ),
-    );
+      // The following should not trigger an assert.
+      await tester.pumpWidget(
+        buildTestWidgets(
+          excludeSemantics: true,
+          label: 'label CHANGED',
+          isSemanticsBoundary: false,
+        ),
+      );
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+    },
+  );
 }
 
 Widget buildTestWidgets({
@@ -92,34 +95,28 @@ class TestWidget extends SingleChildRenderObjectWidget {
 }
 
 class RenderTest extends RenderProxyBox {
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (!_isSemanticBoundary)
-      return;
+    if (!_isSemanticBoundary) return;
 
     config
       ..isSemanticBoundary = _isSemanticBoundary
       ..label = _label
       ..textDirection = TextDirection.ltr;
-
   }
 
   String _label = '<>';
   set label(String value) {
-    if (value == _label)
-      return;
+    if (value == _label) return;
     _label = value;
     markNeedsSemanticsUpdate();
   }
 
-
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
-    if (_isSemanticBoundary == value)
-      return;
+    if (_isSemanticBoundary == value) return;
     _isSemanticBoundary = value;
     markNeedsSemanticsUpdate();
   }

@@ -25,16 +25,19 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          label: 'test1',
-          rect: TestSemantics.fullScreen,
-          flags: SemanticsFlag.isSelected.index,
-        ),
-      ],
-    )));
+    expect(
+      semantics,
+      hasSemantics(TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            label: 'test1',
+            rect: TestSemantics.fullScreen,
+            flags: SemanticsFlag.isSelected.index,
+          ),
+        ],
+      )),
+    );
 
     // control for forking
     await tester.pumpWidget(
@@ -67,16 +70,19 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          label: 'child1',
-          rect: TestSemantics.fullScreen,
-          flags: SemanticsFlag.isSelected.index,
-        ),
-      ],
-    )));
+    expect(
+      semantics,
+      hasSemantics(TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            label: 'child1',
+            rect: TestSemantics.fullScreen,
+            flags: SemanticsFlag.isSelected.index,
+          ),
+        ],
+      )),
+    );
 
     // forking semantics
     await tester.pumpWidget(
@@ -109,28 +115,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          rect: TestSemantics.fullScreen,
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
-              id: 2,
-              label: 'child1',
-              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlag.isSelected.index,
-            ),
-            TestSemantics(
-              id: 3,
-              label: 'child2',
-              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlag.isSelected.index,
+            TestSemantics.rootChild(
+              id: 1,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  label: 'child1',
+                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+                  flags: SemanticsFlag.isSelected.index,
+                ),
+                TestSemantics(
+                  id: 3,
+                  label: 'child2',
+                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+                  flags: SemanticsFlag.isSelected.index,
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ), ignoreTransform: true));
+        ignoreTransform: true,
+      ),
+    );
 
     // toggle a branch off
     await tester.pumpWidget(
@@ -163,16 +175,19 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          label: 'child1',
-          rect: TestSemantics.fullScreen,
-          flags: SemanticsFlag.isSelected.index,
-        ),
-      ],
-    )));
+    expect(
+      semantics,
+      hasSemantics(TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            label: 'child1',
+            rect: TestSemantics.fullScreen,
+            flags: SemanticsFlag.isSelected.index,
+          ),
+        ],
+      )),
+    );
 
     // toggle a branch back on
     await tester.pumpWidget(
@@ -205,28 +220,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          rect: TestSemantics.fullScreen,
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
-              id: 4,
-              label: 'child1',
-              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlag.isSelected.index,
-            ),
-            TestSemantics(
-              id: 3,
-              label: 'child2',
-              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlag.isSelected.index,
+            TestSemantics.rootChild(
+              id: 1,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 4,
+                  label: 'child1',
+                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+                  flags: SemanticsFlag.isSelected.index,
+                ),
+                TestSemantics(
+                  id: 3,
+                  label: 'child2',
+                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+                  flags: SemanticsFlag.isSelected.index,
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ), ignoreTransform: true));
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   });

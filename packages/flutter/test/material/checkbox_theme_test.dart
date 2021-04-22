@@ -40,9 +40,9 @@ void main() {
     const CheckboxThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -60,9 +60,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(click))');
     expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
@@ -179,52 +179,52 @@ void main() {
     const VisualDensity visualDensity = VisualDensity.standard;
 
     Widget buildCheckbox({bool selected = false, bool autofocus = false}) {
-        return MaterialApp(
-          theme: ThemeData(
-            checkboxTheme: CheckboxThemeData(
-              mouseCursor: MaterialStateProperty.all(themeMouseCursor),
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
-                  return themeSelectedFillColor;
-                }
-                return themeDefaultFillColor;
-              }),
-              checkColor: MaterialStateProperty.all(themeCheckColor),
-              overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.focused)) {
-                  return themeFocusOverlayColor;
-                }
-                if (states.contains(MaterialState.hovered)) {
-                  return themeHoverOverlayColor;
-                }
-                return null;
-              }),
-              splashRadius: themeSplashRadius,
-              materialTapTargetSize: themeMaterialTapTargetSize,
-              visualDensity: themeVisualDensity,
-            ),
+      return MaterialApp(
+        theme: ThemeData(
+          checkboxTheme: CheckboxThemeData(
+            mouseCursor: MaterialStateProperty.all(themeMouseCursor),
+            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return themeSelectedFillColor;
+              }
+              return themeDefaultFillColor;
+            }),
+            checkColor: MaterialStateProperty.all(themeCheckColor),
+            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.focused)) {
+                return themeFocusOverlayColor;
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return themeHoverOverlayColor;
+              }
+              return null;
+            }),
+            splashRadius: themeSplashRadius,
+            materialTapTargetSize: themeMaterialTapTargetSize,
+            visualDensity: themeVisualDensity,
           ),
-          home: Scaffold(
-            body: Checkbox(
-              onChanged: (bool? value) { },
-              value: selected,
-              autofocus: autofocus,
-              mouseCursor: mouseCursor,
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
-                  return selectedFillColor;
-                }
-                return defaultFillColor;
-              }),
-              checkColor: checkColor,
-              focusColor: focusColor,
-              hoverColor: hoverColor,
-              splashRadius: splashRadius,
-              materialTapTargetSize: materialTapTargetSize,
-              visualDensity: visualDensity,
-            ),
+        ),
+        home: Scaffold(
+          body: Checkbox(
+            onChanged: (bool? value) {},
+            value: selected,
+            autofocus: autofocus,
+            mouseCursor: mouseCursor,
+            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return selectedFillColor;
+              }
+              return defaultFillColor;
+            }),
+            checkColor: checkColor,
+            focusColor: focusColor,
+            hoverColor: hoverColor,
+            splashRadius: splashRadius,
+            materialTapTargetSize: materialTapTargetSize,
+            visualDensity: visualDensity,
           ),
-        );
+        ),
+      );
     }
 
     // Checkbox.
@@ -259,25 +259,25 @@ void main() {
     const Color selectedFillColor = Color(0xfffffff6);
 
     Widget buildCheckbox({bool selected = false}) {
-        return MaterialApp(
-          theme: ThemeData(
-            checkboxTheme: CheckboxThemeData(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
-                  return themeSelectedFillColor;
-                }
-                return themeDefaultFillColor;
-              }),
-            ),
+      return MaterialApp(
+        theme: ThemeData(
+          checkboxTheme: CheckboxThemeData(
+            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return themeSelectedFillColor;
+              }
+              return themeDefaultFillColor;
+            }),
           ),
-          home: Scaffold(
-            body: Checkbox(
-              onChanged: (bool? value) { },
-              value: selected,
-              activeColor: selectedFillColor,
-            ),
+        ),
+        home: Scaffold(
+          body: Checkbox(
+            onChanged: (bool? value) {},
+            value: selected,
+            activeColor: selectedFillColor,
           ),
-        );
+        ),
+      );
     }
 
     // Unselected checkbox.
@@ -304,6 +304,7 @@ void main() {
       }
       return null;
     }
+
     const double splashRadius = 24.0;
 
     Widget buildCheckbox({required bool active}) {
@@ -317,7 +318,7 @@ void main() {
         home: Scaffold(
           body: Checkbox(
             value: active,
-            onChanged: (_) { },
+            onChanged: (_) {},
           ),
         ),
       );

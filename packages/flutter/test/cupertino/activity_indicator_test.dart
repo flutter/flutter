@@ -82,8 +82,7 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child:
-                const CupertinoActivityIndicator.partiallyRevealed(progress: 0),
+            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 0),
           ),
         ),
       ),
@@ -125,8 +124,7 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child:
-                const CupertinoActivityIndicator.partiallyRevealed(progress: 1),
+            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 1),
           ),
         ),
       ),
@@ -150,8 +148,7 @@ void main() {
     // first tick was changed to be at 12 o'clock.
     expect(
       find.byType(CupertinoActivityIndicator),
-      paints
-        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
+      paints..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
     );
   });
 }

@@ -27,7 +27,7 @@ void main() {
     Size size = tester.getSize(title);
     expect(center.dx, lessThan(400.0 - size.width / 2.0));
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       // Clear the widget tree to avoid animating between platforms.
       await tester.pumpWidget(Container(key: UniqueKey()));
 
@@ -65,7 +65,7 @@ void main() {
       child: AppBar(
         flexibleSpace: const FlexibleSpaceBar(
           title: Text('title'),
-          background:  Text('X2'),
+          background: Text('X2'),
           collapseMode: CollapseMode.pin,
         ),
       ),
@@ -239,7 +239,6 @@ void main() {
                               label: 'Item 3',
                               textDirection: TextDirection.ltr,
                             ),
-
                           ],
                         ),
                       ],
@@ -367,8 +366,6 @@ void main() {
                               label: 'Item 6',
                               textDirection: TextDirection.ltr,
                             ),
-
-
                           ],
                         ),
                       ],
@@ -485,7 +482,6 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
-
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
@@ -558,7 +554,6 @@ void main() {
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
-
   const TestDelegate({
     required this.settings,
   });

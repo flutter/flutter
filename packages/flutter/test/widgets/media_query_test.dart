@@ -22,7 +22,7 @@ void main() {
     expect(tested, isTrue);
     final dynamic exception = tester.takeException();
     expect(exception, isNotNull);
-    expect(exception ,isFlutterError);
+    expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 5);
     expect(error.diagnostics.last, isA<ErrorHint>());
@@ -103,7 +103,10 @@ void main() {
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(WidgetsBinding.instance!.window.physicalSize / WidgetsBinding.instance!.window.devicePixelRatio));
+    expect(
+      data.size,
+      equals(WidgetsBinding.instance!.window.physicalSize / WidgetsBinding.instance!.window.devicePixelRatio),
+    );
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);

@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 // The top of the bottom widget is at 550 (the top of the top widget
 // is at 0). The top of the bottom widget is 500 when it has been
 // scrolled completely into view.
-Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController }) {
+Widget buildFrame(ScrollPhysics physics, {ScrollController? scrollController}) {
   return SingleChildScrollView(
     key: UniqueKey(),
     physics: physics,
@@ -33,7 +33,6 @@ Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController })
 
 void main() {
   testWidgets('ClampingScrollPhysics', (WidgetTester tester) async {
-
     // Scroll the target text widget by offset and then return its origin
     // in global coordinates.
     Future<Offset> locationAfterScroll(String target, Offset offset) async {
@@ -51,7 +50,6 @@ void main() {
     origin = await locationAfterScroll('bottom', const Offset(0.0, -400.0));
     expect(origin.dy, lessThan(500.0));
 
-
     await tester.pumpWidget(buildFrame(const ClampingScrollPhysics()));
     origin = await locationAfterScroll('top', const Offset(0.0, 400.0));
     expect(origin.dy, equals(0.0));
@@ -60,7 +58,6 @@ void main() {
   });
 
   testWidgets('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {
-
     // BouncingScrollPhysics
 
     await tester.pumpWidget(buildFrame(const BouncingScrollPhysics()));

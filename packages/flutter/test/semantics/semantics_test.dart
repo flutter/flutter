@@ -8,7 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../rendering/rendering_tester.dart';
 
-const int kMaxFrameworkAccessibilityIdentifier = (1<<16) - 1;
+const int kMaxFrameworkAccessibilityIdentifier = (1 << 16) - 1;
 
 void main() {
   setUp(() {
@@ -64,8 +64,7 @@ void main() {
     });
 
     test('mutate existing semantic node list errors', () {
-      final SemanticsNode node = SemanticsNode()
-        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
 
       final SemanticsConfiguration config = SemanticsConfiguration()
         ..isSemanticBoundary = true
@@ -98,12 +97,15 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error.toString(), equalsIgnoringHashCodes(
-          'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
-          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
-          'Error details:\n'
-          "The list's length has changed from 1 to 2.",
-        ));
+        expect(
+          error.toString(),
+          equalsIgnoringHashCodes(
+            'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
+            'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
+            'Error details:\n'
+            "The list's length has changed from 1 to 2.",
+          ),
+        );
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
@@ -138,21 +140,24 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error.toStringDeep(), equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   Failed to replace child semantics nodes because the list of\n'
-          '   `SemanticsNode`s was mutated.\n'
-          '   Instead of mutating the existing list, create a new list\n'
-          '   containing the desired `SemanticsNode`s.\n'
-          '   Error details:\n'
-          '   Child node at position 0 was replaced:\n'
-          '   Previous child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
-          '\n'
-          '   Child node at position 1 was replaced:\n'
-          '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n',
-        ));
+        expect(
+          error.toStringDeep(),
+          equalsIgnoringHashCodes(
+            'FlutterError\n'
+            '   Failed to replace child semantics nodes because the list of\n'
+            '   `SemanticsNode`s was mutated.\n'
+            '   Instead of mutating the existing list, create a new list\n'
+            '   containing the desired `SemanticsNode`s.\n'
+            '   Error details:\n'
+            '   Child node at position 0 was replaced:\n'
+            '   Previous child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
+            '   New child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
+            '\n'
+            '   Child node at position 1 was replaced:\n'
+            '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
+            '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n',
+          ),
+        );
 
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
@@ -163,56 +168,62 @@ void main() {
       }
     });
 
-    test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
-      renderer.pipelineOwner.ensureSemantics();
+    test(
+      'after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations',
+      () {
+        renderer.pipelineOwner.ensureSemantics();
 
-      TestRender middle;
-      final TestRender root = TestRender(
-        hasTapAction: true,
-        isSemanticBoundary: true,
-        child: TestRender(
-          hasLongPressAction: true,
-          isSemanticBoundary: false,
-          child: middle = TestRender(
-            hasScrollLeftAction: true,
+        TestRender middle;
+        final TestRender root = TestRender(
+          hasTapAction: true,
+          isSemanticBoundary: true,
+          child: TestRender(
+            hasLongPressAction: true,
             isSemanticBoundary: false,
-            child: TestRender(
-              hasScrollRightAction: true,
+            child: middle = TestRender(
+              hasScrollLeftAction: true,
               isSemanticBoundary: false,
               child: TestRender(
-                hasScrollUpAction: true,
-                isSemanticBoundary: true,
+                hasScrollRightAction: true,
+                isSemanticBoundary: false,
+                child: TestRender(
+                  hasScrollUpAction: true,
+                  isSemanticBoundary: true,
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      layout(root);
-      pumpFrame(phase: EnginePhase.flushSemantics);
+        layout(root);
+        pumpFrame(phase: EnginePhase.flushSemantics);
 
-      int expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollLeft.index | SemanticsAction.scrollRight.index;
-      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
+        int expectedActions = SemanticsAction.tap.index |
+            SemanticsAction.longPress.index |
+            SemanticsAction.scrollLeft.index |
+            SemanticsAction.scrollRight.index;
+        expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
 
-      middle
-        ..hasScrollLeftAction = false
-        ..hasScrollDownAction = true;
-      middle.markNeedsSemanticsUpdate();
+        middle
+          ..hasScrollLeftAction = false
+          ..hasScrollDownAction = true;
+        middle.markNeedsSemanticsUpdate();
 
-      pumpFrame(phase: EnginePhase.flushSemantics);
+        pumpFrame(phase: EnginePhase.flushSemantics);
 
-      expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollDown.index | SemanticsAction.scrollRight.index;
-      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
-    });
+        expectedActions = SemanticsAction.tap.index |
+            SemanticsAction.longPress.index |
+            SemanticsAction.scrollDown.index |
+            SemanticsAction.scrollRight.index;
+        expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
+      },
+    );
   });
 
   test('toStringDeep() does not throw with transform == null', () {
-    final SemanticsNode child1 = SemanticsNode()
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
-    final SemanticsNode child2 = SemanticsNode()
-      ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
-    final SemanticsNode root = SemanticsNode()
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+    final SemanticsNode child1 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
+    final SemanticsNode child2 = SemanticsNode()..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
+    final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -289,7 +300,7 @@ void main() {
       <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'bar'), OrdinalSortKey(0.0, name: 'foo')],
       <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'bar'), OrdinalSortKey(1.0, name: 'foo')],
     ];
-    final List<int> expectedResults = <int>[ -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1];
+    final List<int> expectedResults = <int>[-1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1];
     assert(tests.length == expectedResults.length);
     final List<int> results = <int>[
       for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
@@ -298,12 +309,9 @@ void main() {
   });
 
   test('toStringDeep respects childOrder parameter', () {
-    final SemanticsNode child1 = SemanticsNode()
-      ..rect = const Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
-    final SemanticsNode child2 = SemanticsNode()
-      ..rect = const Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
-    final SemanticsNode root = SemanticsNode()
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
+    final SemanticsNode child1 = SemanticsNode()..rect = const Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
+    final SemanticsNode child2 = SemanticsNode()..rect = const Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
+    final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -344,23 +352,19 @@ void main() {
       '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
-    final SemanticsNode child3 = SemanticsNode()
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+    final SemanticsNode child3 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     child3.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[
-        SemanticsNode()
-          ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
-        SemanticsNode()
-          ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
+        SemanticsNode()..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
+        SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
       ],
     );
 
-    final SemanticsNode rootComplex = SemanticsNode()
-      ..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
+    final SemanticsNode rootComplex = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
-        config: null,
-        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
+      config: null,
+      childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
     );
 
     expect(
@@ -474,9 +478,9 @@ void main() {
     final SemanticsConfiguration config = SemanticsConfiguration()
       ..isSemanticBoundary = true
       ..isMergingSemanticsOfDescendants = true
-      ..onScrollUp = () { }
-      ..onLongPress = () { }
-      ..onShowOnScreen = () { }
+      ..onScrollUp = () {}
+      ..onLongPress = () {}
+      ..onShowOnScreen = () {}
       ..isChecked = false
       ..isSelected = true
       ..isButton = true
@@ -529,9 +533,9 @@ void main() {
     const CustomSemanticsAction action2 = CustomSemanticsAction(label: 'action2');
     const CustomSemanticsAction action3 = CustomSemanticsAction(label: 'action3');
     configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
-      action1: () { },
-      action2: () { },
-      action3: () { },
+      action1: () {},
+      action2: () {},
+      action3: () {},
     };
     final SemanticsNode actionNode = SemanticsNode();
     actionNode.updateWith(config: configuration);
@@ -589,8 +593,7 @@ void main() {
   });
 
   test('Tags show up in debug properties', () {
-    final SemanticsNode actionNode = SemanticsNode()
-      ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
+    final SemanticsNode actionNode = SemanticsNode()..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
 
     expect(
       actionNode.toStringDeep(),
@@ -637,18 +640,18 @@ void main() {
     config.isFocused = true;
     config.isTextField = true;
 
-    void onShowOnScreen() { }
-    void onScrollDown() { }
-    void onScrollUp() { }
-    void onScrollLeft() { }
-    void onScrollRight() { }
-    void onLongPress() { }
-    void onDecrease() { }
-    void onIncrease() { }
-    void onMoveCursorForwardByCharacter(bool _) { }
-    void onMoveCursorBackwardByCharacter(bool _) { }
-    void onTap() { }
-    void onCustomAction() { }
+    void onShowOnScreen() {}
+    void onScrollDown() {}
+    void onScrollUp() {}
+    void onScrollLeft() {}
+    void onScrollRight() {}
+    void onLongPress() {}
+    void onDecrease() {}
+    void onIncrease() {}
+    void onMoveCursorForwardByCharacter(bool _) {}
+    void onMoveCursorBackwardByCharacter(bool _) {}
+    void onTap() {}
+    void onCustomAction() {}
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;
@@ -690,7 +693,6 @@ void main() {
 }
 
 class TestRender extends RenderProxyBox {
-
   TestRender({
     this.hasTapAction = false,
     this.hasLongPressAction = false,
@@ -715,18 +717,12 @@ class TestRender extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isSemanticBoundary;
-    if (hasTapAction)
-      config.onTap = () { };
-    if (hasLongPressAction)
-      config.onLongPress = () { };
-    if (hasScrollLeftAction)
-      config.onScrollLeft = () { };
-    if (hasScrollRightAction)
-      config.onScrollRight = () { };
-    if (hasScrollUpAction)
-      config.onScrollUp = () { };
-    if (hasScrollDownAction)
-      config.onScrollDown = () { };
+    if (hasTapAction) config.onTap = () {};
+    if (hasLongPressAction) config.onLongPress = () {};
+    if (hasScrollLeftAction) config.onScrollLeft = () {};
+    if (hasScrollRightAction) config.onScrollRight = () {};
+    if (hasScrollUpAction) config.onScrollUp = () {};
+    if (hasScrollDownAction) config.onScrollDown = () {};
   }
 }
 

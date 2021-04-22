@@ -33,7 +33,7 @@ class FakeMissingSizeRenderBox extends RenderBox {
 
 class MissingSetSizeRenderBox extends RenderBox {
   @override
-  void performLayout() { }
+  void performLayout() {}
 }
 
 void main() {
@@ -58,7 +58,7 @@ void main() {
     late FlutterError result;
     try {
       MissingPerformLayoutRenderBox().performLayout();
-    }  on FlutterError catch (e) {
+    } on FlutterError catch (e) {
       result = e;
     }
     expect(result, isNotNull);
@@ -136,7 +136,6 @@ void main() {
       'of applyPaintTransform that supports the specific ParentData subclass '
       'used by its children (which apparently is ParentData).',
     );
-
   });
 
   test('Set size error messages', () {
@@ -395,7 +394,8 @@ void main() {
     });
 
     test('throws if the resulting constraints are not normalized', () {
-      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 0));
+      final RenderConstrainedBox child =
+          RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 0));
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
@@ -409,7 +409,8 @@ void main() {
     });
 
     test('overflow is reported when insufficient size is given', () {
-      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: double.maxFinite));
+      final RenderConstrainedBox child =
+          RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: double.maxFinite));
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
@@ -444,7 +445,7 @@ void main() {
     });
   });
 
-  test ('getMinIntrinsicWidth error handling', () {
+  test('getMinIntrinsicWidth error handling', () {
     final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
@@ -580,11 +581,11 @@ void main() {
       unconstrained.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderUnconstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-          '   parentData: MISSING\n'
-          '   constraints: MISSING\n'
-          '   size: MISSING\n'
-          '   alignment: Alignment.center\n'
-          '   textDirection: ltr\n',
+        '   parentData: MISSING\n'
+        '   constraints: MISSING\n'
+        '   size: MISSING\n'
+        '   alignment: Alignment.center\n'
+        '   textDirection: ltr\n',
       ),
     );
   });
@@ -615,7 +616,7 @@ void main() {
 
   test('UnconstrainedBox honors constrainedAxis=Axis.vertical', () {
     final RenderConstrainedBox flexible =
-    RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(width: 200.0));
+        RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(width: 200.0));
     final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       constrainedAxis: Axis.vertical,
       textDirection: TextDirection.ltr,
@@ -653,10 +654,10 @@ void main() {
 
     for (final Clip clip in Clip.values) {
       final RenderUnconstrainedBox box = RenderUnconstrainedBox(
-          alignment: Alignment.center,
-          textDirection: TextDirection.ltr,
-          child: box200x200,
-          clipBehavior: clip,
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        child: box200x200,
+        clipBehavior: clip,
       );
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
       box.paint(context, Offset.zero);
@@ -671,8 +672,7 @@ void main() {
       final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
       final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
 
-      final HitTestResult wrapped = MyHitTestResult()
-        ..publicPushTransform(transform);
+      final HitTestResult wrapped = MyHitTestResult()..publicPushTransform(transform);
       wrapped.add(entry1);
       expect(wrapped.path, equals(<HitTestEntry>[entry1]));
       expect(entry1.transform, transform);
@@ -1073,10 +1073,15 @@ void main() {
     });
 
     test('localToGlobal with ancestor', () {
-      final RenderConstrainedBox innerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
+      final RenderConstrainedBox innerConstrained =
+          RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
       final RenderPositionedBox innerCenter = RenderPositionedBox(alignment: Alignment.center, child: innerConstrained);
-      final RenderConstrainedBox outerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 100), child: innerCenter);
-      final RenderPositionedBox outerCentered = RenderPositionedBox(alignment: Alignment.center, child: outerConstrained);
+      final RenderConstrainedBox outerConstrained = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 100),
+        child: innerCenter,
+      );
+      final RenderPositionedBox outerCentered =
+          RenderPositionedBox(alignment: Alignment.center, child: outerConstrained);
 
       layout(outerCentered);
 
@@ -1099,15 +1104,15 @@ void main() {
     expect(errorDetails, isNotNull);
 
     // Check the ErrorDetails without the stack trace.
-    final List<String> lines =  errorDetails.toString().split('\n');
+    final List<String> lines = errorDetails.toString().split('\n');
     expect(
       lines.take(5).join('\n'),
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞══════════════════════\n'
-          'The following assertion was thrown during performLayout():\n'
-          'RenderBox did not set its size during layout.\n'
-          'Because this RenderBox has sizedByParent set to false, it must\n'
-          'set its size in performLayout().',
+        'The following assertion was thrown during performLayout():\n'
+        'RenderBox did not set its size during layout.\n'
+        'Because this RenderBox has sizedByParent set to false, it must\n'
+        'set its size in performLayout().',
       ),
     );
   });

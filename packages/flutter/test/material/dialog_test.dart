@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textScaleFactor = 1.0 }) {
+MaterialApp _buildAppWithDialog(Widget dialog, {ThemeData? theme, double textScaleFactor = 1.0}) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -43,7 +43,9 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(Dialog), matching: find.text(text))).renderObject! as RenderParagraph;
+  return tester
+      .element<StatelessElement>(find.descendant(of: find.byType(Dialog), matching: find.text(text)))
+      .renderObject! as RenderParagraph;
 }
 
 // What was the AlertDialog's ButtonBar when many of these tests were written,
@@ -66,10 +68,10 @@ void main() {
       ),
       actions: <Widget>[
         TextButton(
-            onPressed: () {
-              didPressOk = true;
-            },
-            child: const Text('OK'),
+          onPressed: () {
+            didPressOk = true;
+          },
+          child: const Text('OK'),
         ),
       ],
     );
@@ -87,7 +89,7 @@ void main() {
     const Color customColor = Colors.pink;
     const AlertDialog dialog = AlertDialog(
       backgroundColor: customColor,
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)));
 
@@ -102,7 +104,7 @@ void main() {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)));
 
@@ -118,7 +120,7 @@ void main() {
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
     const AlertDialog dialog = AlertDialog(
-      actions: <Widget>[ ],
+      actions: <Widget>[],
       elevation: customElevation,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
@@ -136,7 +138,7 @@ void main() {
     const AlertDialog dialog = AlertDialog(
       title: Text(titleText),
       titleTextStyle: titleTextStyle,
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -153,7 +155,7 @@ void main() {
     const AlertDialog dialog = AlertDialog(
       content: Text(contentText),
       contentTextStyle: contentTextStyle,
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -194,9 +196,9 @@ void main() {
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+        RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const AlertDialog dialog = AlertDialog(
-      actions: <Widget>[ ],
+      actions: <Widget>[],
       shape: customBorder,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
@@ -210,7 +212,7 @@ void main() {
 
   testWidgets('Null dialog shape', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
-      actions: <Widget>[ ],
+      actions: <Widget>[],
       shape: null,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
@@ -225,7 +227,7 @@ void main() {
   testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
     const ShapeBorder customBorder = Border();
     const AlertDialog dialog = AlertDialog(
-      actions: <Widget>[ ],
+      actions: <Widget>[],
       shape: customBorder,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
@@ -404,7 +406,6 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);
-
   });
 
   testWidgets('Barrier color', (WidgetTester tester) async {
@@ -497,10 +498,12 @@ void main() {
     // The first [Material] child of [AlertDialog] is the actual dialog
     // itself.
     final Size dialogSize = tester.getSize(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(Material),
-      ).first,
+      find
+          .descendant(
+            of: find.byType(AlertDialog),
+            matching: find.byType(Material),
+          )
+          .first,
     );
     final Size actionsSize = tester.getSize(_findButtonBar());
 
@@ -531,10 +534,12 @@ void main() {
     // The first [Material] child of [AlertDialog] is the actual dialog
     // itself.
     final Size dialogSize = tester.getSize(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(Material),
-      ).first,
+      find
+          .descendant(
+            of: find.byType(AlertDialog),
+            matching: find.byType(Material),
+          )
+          .first,
     );
     final Size actionsSize = tester.getSize(_findButtonBar());
 
@@ -759,7 +764,7 @@ void main() {
     }
 
     void expectVerticalInnerPadding(
-    WidgetTester tester, {
+      WidgetTester tester, {
       required Finder top,
       required Finder bottom,
       required double value,
@@ -792,270 +797,285 @@ void main() {
       SimpleDialogOption(
         key: childrenKey,
         child: const Text('child'),
-        onPressed: () { },
+        onPressed: () {},
       ),
     ];
 
     for (final double textScaleFactor in textScaleFactors) {
-      testWidgets('AlertDialog padding is correct when only title and actions are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
-        final AlertDialog dialog = AlertDialog(
-          title: title,
-          actions: actions,
-        );
+      testWidgets(
+        'AlertDialog padding is correct when only title and actions are specified [textScaleFactor]=$textScaleFactor}',
+        (WidgetTester tester) async {
+          final AlertDialog dialog = AlertDialog(
+            title: title,
+            actions: actions,
+          );
 
-        await openDialog(tester, dialog, textScaleFactor);
+          await openDialog(tester, dialog, textScaleFactor);
 
-        expectTopEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectVerticalInnerPadding(
-          tester,
-          top: titleFinder,
-          bottom: actionsFinder,
-          value: 20.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectBottomEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-      });
+          expectTopEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectVerticalInnerPadding(
+            tester,
+            top: titleFinder,
+            bottom: actionsFinder,
+            value: 20.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectBottomEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+        },
+      );
 
-      testWidgets('AlertDialog padding is correct when only content and actions are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
-        final AlertDialog dialog = AlertDialog(
-          content: content,
-          actions: actions,
-        );
+      testWidgets(
+        'AlertDialog padding is correct when only content and actions are specified [textScaleFactor]=$textScaleFactor}',
+        (WidgetTester tester) async {
+          final AlertDialog dialog = AlertDialog(
+            content: content,
+            actions: actions,
+          );
 
-        await openDialog(tester, dialog, textScaleFactor);
+          await openDialog(tester, dialog, textScaleFactor);
 
-        expectTopEdgePadding(
-          tester,
-          finder: contentFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 20.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: contentFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: contentFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectVerticalInnerPadding(
-          tester,
-          top: contentFinder,
-          bottom: actionsFinder,
-          value: 24.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectBottomEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-      });
+          expectTopEdgePadding(
+            tester,
+            finder: contentFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 20.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: contentFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: contentFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectVerticalInnerPadding(
+            tester,
+            top: contentFinder,
+            bottom: actionsFinder,
+            value: 24.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectBottomEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+        },
+      );
 
-      testWidgets('AlertDialog padding is correct when title, content, and actions are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
-        final AlertDialog dialog = AlertDialog(
-          title: title,
-          content: content,
-          actions: actions,
-        );
+      testWidgets(
+        'AlertDialog padding is correct when title, content, and actions are specified [textScaleFactor]=$textScaleFactor}',
+        (WidgetTester tester) async {
+          final AlertDialog dialog = AlertDialog(
+            title: title,
+            content: content,
+            actions: actions,
+          );
 
-        await openDialog(tester, dialog, textScaleFactor);
+          await openDialog(tester, dialog, textScaleFactor);
 
-        expectTopEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectVerticalInnerPadding(
-          tester,
-          top: titleFinder,
-          bottom: contentFinder,
-          value: 20.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: contentFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: contentFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectVerticalInnerPadding(
-          tester,
-          top: contentFinder,
-          bottom: actionsFinder,
-          value: 24.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectBottomEdgePadding(
-          tester,
-          finder: actionsFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-      });
+          expectTopEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectVerticalInnerPadding(
+            tester,
+            top: titleFinder,
+            bottom: contentFinder,
+            value: 20.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: contentFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: contentFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectVerticalInnerPadding(
+            tester,
+            top: contentFinder,
+            bottom: actionsFinder,
+            value: 24.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectBottomEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+        },
+      );
 
-      testWidgets('SimpleDialog padding is correct when only children are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
-        final SimpleDialog dialog = SimpleDialog(
-          children: children,
-        );
+      testWidgets(
+        'SimpleDialog padding is correct when only children are specified [textScaleFactor]=$textScaleFactor}',
+        (WidgetTester tester) async {
+          final SimpleDialog dialog = SimpleDialog(
+            children: children,
+          );
 
-        await openDialog(tester, dialog, textScaleFactor);
+          await openDialog(tester, dialog, textScaleFactor);
 
-        expectTopEdgePadding(
-          tester,
-          finder: childrenFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 12.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: childrenFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: childrenFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectBottomEdgePadding(
-          tester,
-          finder: childrenFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 16.0,
-        );
-      });
+          expectTopEdgePadding(
+            tester,
+            finder: childrenFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 12.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: childrenFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: childrenFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectBottomEdgePadding(
+            tester,
+            finder: childrenFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 16.0,
+          );
+        },
+      );
 
-      testWidgets('SimpleDialog padding is correct when title and children are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
-        final SimpleDialog dialog = SimpleDialog(
-          title: title,
-          children: children,
-        );
+      testWidgets(
+        'SimpleDialog padding is correct when title and children are specified [textScaleFactor]=$textScaleFactor}',
+        (WidgetTester tester) async {
+          final SimpleDialog dialog = SimpleDialog(
+            title: title,
+            children: children,
+          );
 
-        await openDialog(tester, dialog, textScaleFactor);
+          await openDialog(tester, dialog, textScaleFactor);
 
-        expectTopEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: titleFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 24.0,
-        );
-        expectVerticalInnerPadding(
-          tester,
-          top: titleFinder,
-          bottom: childrenFinder,
-          value: 12.0,
-        );
-        expectLeftEdgePadding(
-          tester,
-          finder: childrenFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectRightEdgePadding(
-          tester,
-          finder: childrenFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 0.0,
-        );
-        expectBottomEdgePadding(
-          tester,
-          finder: childrenFinder,
-          textScaleFactor: textScaleFactor,
-          unscaledValue: 16.0,
-        );
-      });
+          expectTopEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: titleFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectVerticalInnerPadding(
+            tester,
+            top: titleFinder,
+            bottom: childrenFinder,
+            value: 12.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: childrenFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: childrenFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectBottomEdgePadding(
+            tester,
+            finder: childrenFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 16.0,
+          );
+        },
+      );
     }
   });
 
@@ -1241,12 +1261,14 @@ void main() {
         ),
       ),
     );
-    expect( // no change because this is an animation
+    expect(
+      // no change because this is an animation
       tester.getRect(find.byType(Placeholder)),
       const Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
     );
     await tester.pump(const Duration(seconds: 1));
-    expect( // animation finished
+    expect(
+      // animation finished
       tester.getRect(find.byType(Placeholder)),
       const Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
     );
@@ -1327,18 +1349,24 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
+    expect(
+      semantics,
+      isNot(includesNodeWith(
+        label: 'Title',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      )),
+    );
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    ));
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Title',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1353,48 +1381,53 @@ void main() {
         home: const AlertDialog(
           title: Text('title'),
           content: Text('content'),
-          actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
+          actions: <Widget>[TextButton(onPressed: null, child: Text('action'))],
         ),
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          id: 1,
-          textDirection: TextDirection.ltr,
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
-              id: 2,
+              id: 1,
+              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
-                  id: 3,
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  id: 2,
                   children: <TestSemantics>[
                     TestSemantics(
-                      id: 4,
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-                          label: 'title',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        // The content semantics does not merge into the semantics
-                        // node 4.
-                        TestSemantics(
-                          id: 6,
-                          label: 'content',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          id: 7,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isButton,
-                            SemanticsFlag.hasEnabledState,
+                          id: 4,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                              label: 'title',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            // The content semantics does not merge into the semantics
+                            // node 4.
+                            TestSemantics(
+                              id: 6,
+                              label: 'content',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 7,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                              ],
+                              label: 'action',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
-                          label: 'action',
-                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),
@@ -1404,8 +1437,11 @@ void main() {
             ),
           ],
         ),
-      ],
-    ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1442,26 +1478,38 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Alert',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
-    )));
+    expect(
+      semantics,
+      isNot(includesNodeWith(
+        label: 'Title',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      )),
+    );
+    expect(
+      semantics,
+      isNot(includesNodeWith(
+        label: 'Alert',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+      )),
+    );
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
     // It does not use 'Title' as route semantics
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
-    expect(semantics, includesNodeWith(
-      label: 'Alert',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
-    ));
+    expect(
+      semantics,
+      isNot(includesNodeWith(
+        label: 'Title',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      )),
+    );
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Alert',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1500,10 +1548,13 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
     // A scope route is not focusable in accessibility service.
-    expect(semantics, includesNodeWith(
-      label: 'label',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
-    ));
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'label',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1525,47 +1576,52 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          id: 1,
-          textDirection: TextDirection.ltr,
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
-              id: 2,
+              id: 1,
+              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
-                  id: 3,
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  id: 2,
                   children: <TestSemantics>[
                     TestSemantics(
-                      id: 4,
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        // Title semantics does not merge into the semantics
-                        // node 4.
                         TestSemantics(
-                          id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-                          label: 'title',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          id: 6,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          id: 4,
                           children: <TestSemantics>[
+                            // Title semantics does not merge into the semantics
+                            // node 4.
                             TestSemantics(
-                              id: 7,
-                              label: 'content',
+                              id: 5,
+                              flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                              label: 'title',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              id: 8,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
+                              id: 6,
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 7,
+                                  label: 'content',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  id: 8,
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isButton,
+                                    SemanticsFlag.hasEnabledState,
+                                  ],
+                                  label: 'action',
+                                  textDirection: TextDirection.ltr,
+                                ),
                               ],
-                              label: 'action',
-                              textDirection: TextDirection.ltr,
                             ),
                           ],
                         ),
@@ -1577,8 +1633,11 @@ void main() {
             ),
           ],
         ),
-      ],
-    ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1588,7 +1647,7 @@ void main() {
     final List<int> dismissedItems = <int>[];
 
     // Dismiss is confirmed IFF confirmDismiss() returns true.
-    Future<bool?> confirmDismiss (DismissDirection dismissDirection) async {
+    Future<bool?> confirmDismiss(DismissDirection dismissDirection) async {
       return showDialog<bool>(
         context: _scaffoldKey.currentContext!,
         barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
@@ -1641,8 +1700,9 @@ void main() {
                 child: ListView(
                   itemExtent: 100.0,
                   children: <int>[0, 1, 2, 3, 4]
-                    .where((int i) => !dismissedItems.contains(i))
-                    .map<Widget>((int item) => buildDismissibleItem(item, setState)).toList(),
+                      .where((int i) => !dismissedItems.contains(i))
+                      .map<Widget>((int item) => buildDismissibleItem(item, setState))
+                      .toList(),
                 ),
               ),
             );
@@ -2031,10 +2091,13 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Custom label',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
+    expect(
+      semantics,
+      isNot(includesNodeWith(
+        label: 'Custom label',
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      )),
+    );
   });
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {

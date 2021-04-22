@@ -326,17 +326,17 @@ void main() {
 Map<String, dynamic> _createRawDataSet() {
   return <String, dynamic>{
     valuesMapKey: <String, dynamic>{
-      'value1' : 10,
-      'value2' : 'Hello',
+      'value1': 10,
+      'value2': 'Hello',
     },
     childrenMapKey: <String, dynamic>{
-      'child1' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
+      'child1': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{
           'foo': 22,
         },
       },
-      'child2' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
+      'child2': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{
           'bar': 33,
         },
       },

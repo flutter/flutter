@@ -54,36 +54,39 @@ void main() {
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
   });
 
-  testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
-    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
-      color: Color(0xFFE5E5E5),
-      darkColor: Color(0xF3E5E5E5),
-    );
+  testWidgets(
+    'Opaque background does not add blur effects, non-opaque background adds blur effects',
+    (WidgetTester tester) async {
+      const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFE5E5E5),
+        darkColor: Color(0xF3E5E5E5),
+      );
 
-    await tester.pumpWidget(
-      const CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.light),
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
-          backgroundColor: background,
+      await tester.pumpWidget(
+        const CupertinoApp(
+          theme: CupertinoThemeData(brightness: Brightness.light),
+          home: CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
         ),
-      ),
-    );
-    expect(find.byType(BackdropFilter), findsNothing);
-    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
 
-    await tester.pumpWidget(
-      const CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
-          backgroundColor: background,
+      await tester.pumpWidget(
+        const CupertinoApp(
+          theme: CupertinoThemeData(brightness: Brightness.dark),
+          home: CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
         ),
-      ),
-    );
-    expect(find.byType(BackdropFilter), findsOneWidget);
-    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
-  });
+      );
+      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
+    },
+  );
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -179,9 +182,8 @@ void main() {
       ),
     );
 
-    final AnnotatedRegion<SystemUiOverlayStyle> region1 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
+    final AnnotatedRegion<SystemUiOverlayStyle> region1 =
+        tester.allWidgets.whereType<AnnotatedRegion<SystemUiOverlayStyle>>().single;
     expect(region1.value, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
@@ -193,9 +195,8 @@ void main() {
       ),
     );
 
-    final AnnotatedRegion<SystemUiOverlayStyle> region2 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
+    final AnnotatedRegion<SystemUiOverlayStyle> region2 =
+        tester.allWidgets.whereType<AnnotatedRegion<SystemUiOverlayStyle>>().single;
     expect(region2.value, SystemUiOverlayStyle.dark);
 
     await tester.pumpWidget(
@@ -212,9 +213,8 @@ void main() {
       ),
     );
 
-    final AnnotatedRegion<SystemUiOverlayStyle> region3 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
+    final AnnotatedRegion<SystemUiOverlayStyle> region3 =
+        tester.allWidgets.whereType<AnnotatedRegion<SystemUiOverlayStyle>>().single;
     expect(region3.value, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
@@ -231,9 +231,8 @@ void main() {
       ),
     );
 
-    final AnnotatedRegion<SystemUiOverlayStyle> region4 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
+    final AnnotatedRegion<SystemUiOverlayStyle> region4 =
+        tester.allWidgets.whereType<AnnotatedRegion<SystemUiOverlayStyle>>().single;
     expect(region4.value, SystemUiOverlayStyle.dark);
   });
 
@@ -273,12 +272,12 @@ void main() {
       CupertinoApp(
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () { },
+            onPressed: () {},
             child: _ExpectStyles(color: CupertinoColors.systemBlue.color, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.black, index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () { },
+            onPressed: () {},
             child: _ExpectStyles(color: CupertinoColors.systemBlue.color, index: 0x010000),
           ),
         ),
@@ -294,12 +293,12 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () { },
+            onPressed: () {},
             child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () { },
+            onPressed: () {},
             child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x010000),
           ),
         ),
@@ -315,12 +314,12 @@ void main() {
         theme: const CupertinoThemeData(primaryColor: Color(0xFF001122)),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () { },
+            onPressed: () {},
             child: const _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
           ),
           middle: const _ExpectStyles(color: Color(0xFF000000), index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () { },
+            onPressed: () {},
             child: const _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
           ),
         ),
@@ -420,20 +419,19 @@ void main() {
 
     expect(find.text('Title'), findsNWidgets(2)); // Though only one is visible.
 
-    List<Element> titles = tester.elementList(find.text('Title'))
-        .toList()
-        ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
-        });
+    List<Element> titles = tester.elementList(find.text('Title')).toList()
+      ..sort((Element a, Element b) {
+        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+        return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
+      });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
-    expect(opacities, <double> [
+    expect(opacities, <double>[
       0.0, // Initially the smaller font title is invisible.
       1.0, // The larger font title is visible.
     ]);
@@ -445,20 +443,19 @@ void main() {
     await tester.pump(); // Once to trigger the opacity animation.
     await tester.pump(const Duration(milliseconds: 300));
 
-    titles = tester.elementList(find.text('Title'))
-        .toList()
-        ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
-        });
+    titles = tester.elementList(find.text('Title')).toList()
+      ..sort((Element a, Element b) {
+        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+        return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
+      });
 
     opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
-    expect(opacities, <double> [
+    expect(opacities, <double>[
       1.0, // Smaller font title now visible
       0.0, // Larger font title invisible.
     ]);
@@ -490,7 +487,7 @@ void main() {
                       0: Text('Option A'),
                       1: Text('Option B'),
                     },
-                    onValueChanged: (int selected) { },
+                    onValueChanged: (int selected) {},
                     groupValue: 0,
                   ),
                 ),
@@ -578,8 +575,7 @@ void main() {
     await tester.pump(); // Once to trigger the opacity animation.
     await tester.pump(const Duration(milliseconds: 300));
 
-    largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    largeTitleOpacity = tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -619,13 +615,13 @@ void main() {
     expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
-      fullscreenDialog: true,
-      builder: (BuildContext context) {
-        return const CupertinoNavigationBar(
-          middle: Text('Dialog page'),
-        );
-      },
-    ));
+          fullscreenDialog: true,
+          builder: (BuildContext context) {
+            return const CupertinoNavigationBar(
+              middle: Text('Dialog page'),
+            );
+          },
+        ));
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -700,10 +696,12 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
-      of: find.byType(CupertinoNavigationBar),
-      matching: find.byType(DecoratedBox),
-    )).first as DecoratedBox;
+    final DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
@@ -728,10 +726,12 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
-      of: find.byType(CupertinoNavigationBar),
-      matching: find.byType(DecoratedBox),
-    )).first as DecoratedBox;
+    final DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
@@ -752,10 +752,12 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
-      of: find.byType(CupertinoNavigationBar),
-      matching: find.byType(DecoratedBox),
-    )).first as DecoratedBox;
+    final DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
@@ -777,10 +779,12 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
-      of: find.byType(CupertinoSliverNavigationBar),
-      matching: find.byType(DecoratedBox),
-    )).first as DecoratedBox;
+    final DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoSliverNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
@@ -806,10 +810,12 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
-      of: find.byType(CupertinoSliverNavigationBar),
-      matching: find.byType(DecoratedBox),
-    )).first as DecoratedBox;
+    final DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoSliverNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
@@ -832,11 +838,14 @@ void main() {
       ),
     ));
 
-    expect(semantics.nodesWith(
-      label: 'Large Title',
-      flags: <SemanticsFlag>[SemanticsFlag.isHeader],
-      textDirection: TextDirection.ltr,
-    ), hasLength(1));
+    expect(
+      semantics.nodesWith(
+        label: 'Large Title',
+        flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+        textDirection: TextDirection.ltr,
+      ),
+      hasLength(1),
+    );
 
     semantics.dispose();
   });
@@ -853,11 +862,14 @@ void main() {
       ),
     ));
 
-    expect(semantics.nodesWith(
-      label: 'Fixed Title',
-      flags: <SemanticsFlag>[SemanticsFlag.isHeader],
-      textDirection: TextDirection.ltr,
-    ), hasLength(1));
+    expect(
+      semantics.nodesWith(
+        label: 'Fixed Title',
+        flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+        textDirection: TextDirection.ltr,
+      ),
+      hasLength(1),
+    );
 
     semantics.dispose();
   });
@@ -883,10 +895,12 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
-      of: find.byType(CupertinoSliverNavigationBar),
-      matching: find.byType(DecoratedBox),
-    )).first as DecoratedBox;
+    final DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoSliverNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
@@ -994,48 +1008,63 @@ void main() {
     expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
   });
 
-  testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
-    await tester.pumpWidget(const CupertinoNavigationBarBackButton());
+  testWidgets(
+    'CupertinoNavigationBarBackButton shows an error when manually added outside a route',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const CupertinoNavigationBarBackButton());
 
-    final dynamic exception = tester.takeException();
-    expect(exception, isAssertionError);
-    expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
-  });
+      final dynamic exception = tester.takeException();
+      expect(exception, isAssertionError);
+      expect(
+        exception.toString(),
+        contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'),
+      );
+    },
+  );
 
-  testWidgets('CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const CupertinoApp(
-        home: CupertinoNavigationBarBackButton(),
-      ),
-    );
-
-    final dynamic exception = tester.takeException();
-    expect(exception, isAssertionError);
-    expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
-  });
-
-  testWidgets('CupertinoNavigationBarBackButton with a custom onPressed callback can be placed anywhere', (WidgetTester tester) async {
-    bool backPressed = false;
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: CupertinoNavigationBarBackButton(
-          onPressed: () => backPressed = true,
+  testWidgets(
+    'CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CupertinoNavigationBarBackButton(),
         ),
-      ),
-    );
+      );
 
-    expect(tester.takeException(), isNull);
-    expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
+      final dynamic exception = tester.takeException();
+      expect(exception, isAssertionError);
+      expect(
+        exception.toString(),
+        contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'),
+      );
+    },
+  );
 
-    await tester.tap(find.byType(CupertinoNavigationBarBackButton));
+  testWidgets(
+    'CupertinoNavigationBarBackButton with a custom onPressed callback can be placed anywhere',
+    (WidgetTester tester) async {
+      bool backPressed = false;
 
-    expect(backPressed, true);
-  });
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoNavigationBarBackButton(
+            onPressed: () => backPressed = true,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
+
+      await tester.tap(find.byType(CupertinoNavigationBarBackButton));
+
+      expect(backPressed, true);
+    },
+  );
 
   testWidgets(
     'Manually inserted CupertinoNavigationBarBackButton still automatically '
-        'show previous page title when possible',
+    'show previous page title when possible',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
@@ -1044,28 +1073,28 @@ void main() {
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
-          title: 'An iPod',
-          builder: (BuildContext context) {
-            return const CupertinoPageScaffold(
-              navigationBar: CupertinoNavigationBar(),
-              child: Placeholder(),
-            );
-          },
-        ),
-      );
+            CupertinoPageRoute<void>(
+              title: 'An iPod',
+              builder: (BuildContext context) {
+                return const CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(),
+                  child: Placeholder(),
+                );
+              },
+            ),
+          );
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
-          title: 'A Phone',
-          builder: (BuildContext context) {
-            return const CupertinoNavigationBarBackButton();
-          },
-        ),
-      );
+            CupertinoPageRoute<void>(
+              title: 'A Phone',
+              builder: (BuildContext context) {
+                return const CupertinoNavigationBarBackButton();
+              },
+            ),
+          );
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -1085,35 +1114,35 @@ void main() {
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
-          title: 'An iPod',
-          builder: (BuildContext context) {
-            return const CupertinoPageScaffold(
-              navigationBar: CupertinoNavigationBar(),
-              child: Placeholder(),
-            );
-          },
-        ),
-      );
+            CupertinoPageRoute<void>(
+              title: 'An iPod',
+              builder: (BuildContext context) {
+                return const CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(),
+                  child: Placeholder(),
+                );
+              },
+            ),
+          );
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
-          title: 'A Phone',
-          builder: (BuildContext context) {
-            return CupertinoPageScaffold(
-              navigationBar: CupertinoNavigationBar(
-                leading: CupertinoNavigationBarBackButton(
-                  onPressed: () => backPressed = true,
-                ),
-              ),
-              child: const Placeholder(),
-            );
-          },
-        ),
-      );
+            CupertinoPageRoute<void>(
+              title: 'A Phone',
+              builder: (BuildContext context) {
+                return CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(
+                    leading: CupertinoNavigationBarBackButton(
+                      onPressed: () => backPressed = true,
+                    ),
+                  ),
+                  child: const Placeholder(),
+                );
+              },
+            ),
+          );
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -1177,24 +1206,24 @@ void main() {
 
     // Also works with implicitly added widgets.
     tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
-      title: 'title',
-      builder: (BuildContext context) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
-          child: const CupertinoPageScaffold(
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverNavigationBar(
-                  automaticallyImplyLeading: true,
-                  automaticallyImplyTitle: true,
-                  previousPageTitle: 'previous title',
+          title: 'title',
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+              child: const CupertinoPageScaffold(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    CupertinoSliverNavigationBar(
+                      automaticallyImplyLeading: true,
+                      automaticallyImplyTitle: true,
+                      previousPageTitle: 'previous title',
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        );
-      },
-    ));
+              ),
+            );
+          },
+        ));
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -1240,13 +1269,15 @@ void main() {
       final Finder trailingTextFinder = find.byWidget(trailingText).first;
       final Finder titleTextFinder = find.byWidget(titleText).first;
 
-      final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset initialTrailingTextToLargeTitleOffset =
+          tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
       // Drag for overscroll
       await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
       await tester.pump();
 
-      final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset stretchedTrailingTextToLargeTitleOffset =
+          tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
       expect(
         stretchedTrailingTextToLargeTitleOffset.dy.abs(),
@@ -1256,7 +1287,8 @@ void main() {
       // Ensure overscroll retracts to original size after releasing gesture
       await tester.pumpAndSettle();
 
-      final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset finalTrailingTextToLargeTitleOffset =
+          tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
       expect(
         finalTrailingTextToLargeTitleOffset.dy.abs(),
@@ -1295,13 +1327,15 @@ void main() {
       final Finder trailingTextFinder = find.byWidget(trailingText).first;
       final Finder titleTextFinder = find.byWidget(titleText).first;
 
-      final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset initialTrailingTextToLargeTitleOffset =
+          tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
       // Drag for overscroll
       await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
       await tester.pump();
 
-      final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset stretchedTrailingTextToLargeTitleOffset =
+          tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
       expect(
         stretchedTrailingTextToLargeTitleOffset.dy.abs(),
@@ -1311,7 +1345,8 @@ void main() {
       // Ensure overscroll is zero after releasing gesture
       await tester.pumpAndSettle();
 
-      final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+      final Offset finalTrailingTextToLargeTitleOffset =
+          tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
       expect(
         finalTrailingTextToLargeTitleOffset.dy.abs(),

@@ -380,7 +380,7 @@ void main() {
       canceledPressed = true;
     }
 
-    Widget builder(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
+    Widget builder(BuildContext context, {VoidCallback? onStepContinue, VoidCallback? onStepCancel}) {
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ConstrainedBox(
@@ -488,7 +488,7 @@ void main() {
               steps: <Step>[
                 Step(
                   title: const Text('Step 2'),
-                  content:  Stepper(
+                  content: Stepper(
                     type: StepperType.vertical,
                     steps: const <Step>[
                       Step(
@@ -521,23 +521,31 @@ void main() {
     final List<String> lines = fullErrorMessage.split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
-    final String errorMessage = lines.takeWhile(
-      (String line) => line != '',
-    ).join('\n');
+    final String errorMessage = lines
+        .takeWhile(
+          (String line) => line != '',
+        )
+        .join('\n');
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
-    expect(errorMessage, startsWith(
-      '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
-      'The following assertion was thrown building Stepper(',
-    ));
+    expect(
+      errorMessage,
+      startsWith(
+        '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
+        'The following assertion was thrown building Stepper(',
+      ),
+    );
     // The description string of the stepper looks slightly different depending
     // on the platform and is omitted here.
-    expect(errorMessage, endsWith(
-      '):\n'
-      'Steppers must not be nested.\n'
-      'The material specification advises that one should avoid\n'
-      'embedding steppers within steppers.\n'
-      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
-    ));
+    expect(
+      errorMessage,
+      endsWith(
+        '):\n'
+        'Steppers must not be nested.\n'
+        'The material specification advises that one should avoid\n'
+        'embedding steppers within steppers.\n'
+        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
+      ),
+    );
   });
 
   ///https://github.com/flutter/flutter/issues/16920
@@ -656,8 +664,7 @@ void main() {
   });
 
   testWidgets('Stepper header title should not overflow', (WidgetTester tester) async {
-    const String longText =
-        'A long long long long long long long long long long long long text';
+    const String longText = 'A long long long long long long long long long long long long text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -682,8 +689,7 @@ void main() {
   });
 
   testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
-    const String longText =
-        'A long long long long long long long long long long long long text';
+    const String longText = 'A long long long long long long long long long long long long text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -715,8 +721,8 @@ void main() {
         home: Material(
           child: Stepper(
             type: StepperType.horizontal,
-            onStepCancel: () { },
-            onStepContinue: () { },
+            onStepCancel: () {},
+            onStepContinue: () {},
             steps: const <Step>[
               Step(
                 title: Text('step1'),
@@ -758,7 +764,7 @@ void main() {
     await tester.pumpAndSettle(); // Complete the theme animation.
 
     expect(buttonMaterial('CONTINUE').color!.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle!.color!.value,  0xffffffff);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
 
@@ -817,7 +823,7 @@ void main() {
   testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
     const ScrollPhysics physics = NeverScrollableScrollPhysics();
 
-    for(final StepperType type in StepperType.values) {
+    for (final StepperType type in StepperType.values) {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -838,14 +844,15 @@ void main() {
         ),
       );
 
-      final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
+      final ListView listView =
+          tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
       expect(listView.physics, physics);
     }
   });
 
   testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/77732
-    Widget buildFrame({ bool isActive = true, Brightness? brightness }) {
+    Widget buildFrame({bool isActive = true, Brightness? brightness}) {
       return MaterialApp(
         theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light(),
         home: Scaffold(

@@ -17,8 +17,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null)
-      callback?.call(event);
+    if (callback != null) callback?.call(event);
   }
 }
 
@@ -71,14 +70,14 @@ void main() {
 
   test('Pointer hover events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
-        data: <ui.PointerData>[
-          ui.PointerData(change: ui.PointerChange.add),
-          ui.PointerData(change: ui.PointerChange.hover),
-          ui.PointerData(change: ui.PointerChange.hover),
-          ui.PointerData(change: ui.PointerChange.remove),
-          ui.PointerData(change: ui.PointerChange.add),
-          ui.PointerData(change: ui.PointerChange.hover),
-        ],
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
+        ui.PointerData(change: ui.PointerChange.hover),
+        ui.PointerData(change: ui.PointerChange.hover),
+        ui.PointerData(change: ui.PointerChange.remove),
+        ui.PointerData(change: ui.PointerChange.add),
+        ui.PointerData(change: ui.PointerChange.hover),
+      ],
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
@@ -129,8 +128,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     _binding!.callback = (PointerEvent event) {
       events.add(event);
-      if (event is PointerDownEvent)
-        _binding!.cancelPointer(event.pointer);
+      if (event is PointerDownEvent) _binding!.cancelPointer(event.pointer);
     };
 
     ui.window.onPointerDataPacket?.call(packet);
@@ -162,10 +160,10 @@ void main() {
 
   test('Can expand pointer scroll events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
-        data: <ui.PointerData>[
-          ui.PointerData(change: ui.PointerChange.add),
-          ui.PointerData(change: ui.PointerChange.hover, signalKind: ui.PointerSignalKind.scroll),
-        ],
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
+        ui.PointerData(change: ui.PointerChange.hover, signalKind: ui.PointerSignalKind.scroll),
+      ],
     );
 
     final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
@@ -209,13 +207,18 @@ void main() {
       PointerDeviceKind.stylus,
       PointerDeviceKind.invertedStylus,
     ]) {
-
       final ui.PointerDataPacket packet = ui.PointerDataPacket(
         data: <ui.PointerData>[
           ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
           ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
           ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
-          ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryStylusButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(
+            change: ui.PointerChange.move,
+            buttons: kSecondaryStylusButton,
+            kind: kind,
+            physicalX: location.dx,
+            physicalY: location.dy,
+          ),
           ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ],
       );
@@ -273,8 +276,20 @@ void main() {
         data: <ui.PointerData>[
           ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
           ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
-          ui.PointerData(change: ui.PointerChange.down, kind: kind, buttons: kMiddleMouseButton, physicalX: location.dx, physicalY: location.dy),
-          ui.PointerData(change: ui.PointerChange.move, kind: kind, buttons: kMiddleMouseButton | kSecondaryMouseButton, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(
+            change: ui.PointerChange.down,
+            kind: kind,
+            buttons: kMiddleMouseButton,
+            physicalX: location.dx,
+            physicalY: location.dy,
+          ),
+          ui.PointerData(
+            change: ui.PointerChange.move,
+            kind: kind,
+            buttons: kMiddleMouseButton | kSecondaryMouseButton,
+            physicalX: location.dx,
+            physicalY: location.dy,
+          ),
           ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
         ],
       );

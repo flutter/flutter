@@ -105,8 +105,7 @@ void main() {
       );
 
       expect(
-        tester.getTopLeft(find.text('initial')) -
-            tester.getTopLeft(find.byType(CupertinoSearchTextField)),
+        tester.getTopLeft(find.text('initial')) - tester.getTopLeft(find.byType(CupertinoSearchTextField)),
         const Offset(29.8, 8.0),
       );
     },
@@ -249,9 +248,7 @@ void main() {
       expect(
         tester.getTopRight(find.byType(EditableText)).dx,
         tester.getTopRight(find.byType(CupertinoSearchTextField)).dx -
-            tester
-                .getSize(find.byIcon(CupertinoIcons.xmark_circle_fill))
-                .width -
+            tester.getSize(find.byIcon(CupertinoIcons.xmark_circle_fill)).width -
             10.0,
       );
     },

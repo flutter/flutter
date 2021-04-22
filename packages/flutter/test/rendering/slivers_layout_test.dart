@@ -67,5 +67,4 @@ void main() {
     expect(layouts, 1);
     expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 600.0 - 190.0));
   });
-
 }

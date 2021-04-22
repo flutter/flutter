@@ -18,7 +18,7 @@ void main() {
           theme: ThemeData.light(),
           home: Center(
             child: RaisedButton(
-              onPressed: () { }, // button.enabled == true
+              onPressed: () {}, // button.enabled == true
               child: const Text('button'),
             ),
           ),
@@ -76,7 +76,7 @@ void main() {
           theme: ThemeData.light(),
           home: Center(
             child: FlatButton(
-              onPressed: () { }, // button.enabled == true
+              onPressed: () {}, // button.enabled == true
               child: const Text('button'),
             ),
           ),
@@ -134,7 +134,7 @@ void main() {
           theme: ThemeData.light(),
           home: Center(
             child: OutlineButton(
-              onPressed: () { }, // button.enabled == true
+              onPressed: () {}, // button.enabled == true
               // Causes the button to be filled with the theme's canvasColor
               // instead of Colors.transparent before the button material's
               // elevation is animated to 2.0.
@@ -165,7 +165,7 @@ void main() {
           theme: ThemeData.light(),
           home: Center(
             child: OutlineButton(
-              onPressed: () { }, // button.enabled == true
+              onPressed: () {}, // button.enabled == true
               child: const Text('button'),
             ),
           ),
@@ -224,10 +224,10 @@ void main() {
         MaterialApp(
           theme: ThemeData.light(),
           home: Center(
-              child: FloatingActionButton(
-                onPressed: () { }, // button.enabled == true
-                child: const Icon(Icons.add),
-              ),
+            child: FloatingActionButton(
+              onPressed: () {}, // button.enabled == true
+              child: const Icon(Icons.add),
+            ),
           ),
         ),
       );
@@ -251,10 +251,10 @@ void main() {
         MaterialApp(
           theme: ThemeData.light(),
           home: const Center(
-              child: FloatingActionButton(
-                onPressed: null, // button.enabled == false
-                child: Icon(Icons.add),
-              ),
+            child: FloatingActionButton(
+              onPressed: null, // button.enabled == false
+              child: Icon(Icons.add),
+            ),
           ),
         ),
       );

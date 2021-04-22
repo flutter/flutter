@@ -68,5 +68,4 @@ void main() {
     expect(approx(fit.coefficients[2], 0.0), isTrue);
     expect(approx(fit.confidence, 1.0), isTrue);
   });
-
 }

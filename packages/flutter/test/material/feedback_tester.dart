@@ -11,10 +11,8 @@ import 'package:flutter/services.dart';
 class FeedbackTester {
   FeedbackTester() {
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'HapticFeedback.vibrate')
-        _hapticCount++;
-      if (methodCall.method == 'SystemSound.play' &&
-          methodCall.arguments == SystemSoundType.click.toString())
+      if (methodCall.method == 'HapticFeedback.vibrate') _hapticCount++;
+      if (methodCall.method == 'SystemSound.play' && methodCall.arguments == SystemSoundType.click.toString())
         _clickSoundCount++;
     });
   }

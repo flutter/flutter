@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
-
 void main() {
   test('BottomNavigationBarThemeData copyWith, ==, hashCode basics', () {
     expect(const BottomNavigationBarThemeData(), const BottomNavigationBarThemeData().copyWith());
@@ -28,7 +27,8 @@ void main() {
     expect(themeData.showUnselectedLabels, null);
     expect(themeData.type, null);
 
-    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
+    const BottomNavigationBarTheme theme =
+        BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
     expect(theme.data.elevation, null);
     expect(theme.data.selectedIconTheme, null);
@@ -286,7 +286,6 @@ void main() {
       ),
     );
 
-
     final Finder findOpacity = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(Opacity),
@@ -324,7 +323,6 @@ void main() {
       ),
     );
 
-
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(FadeTransition),
@@ -360,7 +358,6 @@ void main() {
         ),
       ),
     );
-
 
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),

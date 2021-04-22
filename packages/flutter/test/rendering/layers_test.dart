@@ -229,7 +229,8 @@ void main() {
     layer.debugFillProperties(builder);
     return builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
@@ -450,7 +451,7 @@ void main() {
         color: const Color(0x00000000),
         shadowColor: const Color(0x00000000),
       );
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
+      final PhysicalModelLayer layerB = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
         elevation: 2.0,
         color: const Color(0x00000000),
@@ -474,7 +475,7 @@ void main() {
         color: const Color(0x00000000),
         shadowColor: const Color(0x00000000),
       );
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
+      final PhysicalModelLayer layerB = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
         elevation: 2.0,
         color: const Color(0x00000000),
@@ -496,7 +497,7 @@ void main() {
         color: const Color(0x00000000),
         shadowColor: const Color(0x00000000),
       );
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
+      final PhysicalModelLayer layerB = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 2.0,
         color: const Color(0x00000000),
@@ -528,7 +529,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       ));
 
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
+      final PhysicalModelLayer layerB = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 2.0,
         color: const Color(0x00000000),
@@ -563,7 +564,7 @@ void main() {
         shadowColor: const Color(0x00000000),
       ));
 
-      final PhysicalModelLayer layerB =PhysicalModelLayer(
+      final PhysicalModelLayer layerB = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 4.0,
         color: const Color(0x00000000),
@@ -574,23 +575,27 @@ void main() {
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
   });
 
-  test('ContainerLayer.toImage can render interior layer', () {
-    final OffsetLayer parent = OffsetLayer();
-    final OffsetLayer child = OffsetLayer();
-    final OffsetLayer grandChild = OffsetLayer();
-    child.append(grandChild);
-    parent.append(child);
+  test(
+    'ContainerLayer.toImage can render interior layer',
+    () {
+      final OffsetLayer parent = OffsetLayer();
+      final OffsetLayer child = OffsetLayer();
+      final OffsetLayer grandChild = OffsetLayer();
+      child.append(grandChild);
+      parent.append(child);
 
-    // This renders the layers and generates engine layers.
-    parent.buildScene(SceneBuilder());
+      // This renders the layers and generates engine layers.
+      parent.buildScene(SceneBuilder());
 
-    // Causes grandChild to pass its engine layer as `oldLayer`
-    grandChild.toImage(const Rect.fromLTRB(0, 0, 10, 10));
+      // Causes grandChild to pass its engine layer as `oldLayer`
+      grandChild.toImage(const Rect.fromLTRB(0, 0, 10, 10));
 
-    // Ensure we can render the same scene again after rendering an interior
-    // layer.
-    parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
+      // Ensure we can render the same scene again after rendering an interior
+      // layer.
+      parent.buildScene(SceneBuilder());
+    },
+    skip: isBrowser,
+  ); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
 }
 
 class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {

@@ -84,7 +84,9 @@ void main() {
     expect(scopeState.autofillClients, <EditableTextState>[clientState1]);
 
     // Add to scope.
-    setState(() { client2 = const TextField(autofillHints: <String>['2']); });
+    setState(() {
+      client2 = const TextField(autofillHints: <String>['2']);
+    });
 
     await tester.pump();
 
@@ -93,7 +95,9 @@ void main() {
     expect(scopeState.autofillClients.length, 2);
 
     // Remove from scope again.
-    setState(() { client2 = const TextField(autofillHints: <String>[]); });
+    setState(() {
+      client2 = const TextField(autofillHints: <String>[]);
+    });
 
     await tester.pump();
 
@@ -173,7 +177,7 @@ void main() {
     const Key group3 = Key('group3');
     const TextField placeholder = TextField(autofillHints: <String>[AutofillHints.name]);
 
-    List<Widget> children = const <Widget> [
+    List<Widget> children = const <Widget>[
       AutofillGroup(
         key: group1,
         onDisposeAction: AutofillContextAction.commit,
@@ -209,7 +213,7 @@ void main() {
 
     // Remove the first topmost group group1. Should commit.
     setState(() {
-      children = const <Widget> [
+      children = const <Widget>[
         AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
         AutofillGroup(
           key: group3,
@@ -230,7 +234,7 @@ void main() {
 
     // Remove the topmost group group2. Should cancel.
     setState(() {
-      children = const <Widget> [
+      children = const <Widget>[
         AutofillGroup(
           key: group3,
           onDisposeAction: AutofillContextAction.commit,
@@ -250,7 +254,7 @@ void main() {
 
     // Remove the inner group within group3. No action.
     setState(() {
-      children = const <Widget> [
+      children = const <Widget>[
         AutofillGroup(
           key: group3,
           onDisposeAction: AutofillContextAction.commit,
@@ -270,8 +274,7 @@ void main() {
 
     // Remove the topmosts group group3. Should commit.
     setState(() {
-      children = const <Widget> [
-      ];
+      children = const <Widget>[];
     });
 
     await tester.pump();

@@ -19,13 +19,13 @@ class FakeEditableTextState with TextSelectionDelegate {
   TextEditingValue textEditingValue = TextEditingValue.empty;
 
   @override
-  void hideToolbar([bool hideHandles = true]) { }
+  void hideToolbar([bool hideHandles = true]) {}
 
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) { }
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {}
 
   @override
-  void bringIntoView(TextPosition position) { }
+  void bringIntoView(TextPosition position) {}
 }
 
 void main() {
@@ -160,7 +160,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -186,10 +188,14 @@ void main() {
     editable.showCursor = showCursor;
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rect(
-      color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: const Rect.fromLTWH(40, 0, 1, 10),
-    ));
+    expect(
+      editable,
+      paints
+        ..rect(
+          color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+          rect: const Rect.fromLTWH(40, 0, 1, 10),
+        ),
+    );
 
     // Now change to a rounded caret.
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
@@ -197,25 +203,33 @@ void main() {
     editable.cursorRadius = const Radius.circular(3);
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(40, 0, 4, 10),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+      editable,
+      paints
+        ..rrect(
+          color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTWH(40, 0, 4, 10),
+            const Radius.circular(3),
+          ),
+        ),
+    );
 
     editable.textScaleFactor = 2;
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(80, 0, 4, 20),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+      editable,
+      paints
+        ..rrect(
+          color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTWH(80, 0, 4, 20),
+            const Radius.circular(3),
+          ),
+        ),
+    );
 
     // Can turn off caret.
     showCursor.value = false;
@@ -262,7 +276,9 @@ void main() {
       text: const TextSpan(
         text: '中文测试文本是否正确',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -284,10 +300,14 @@ void main() {
     editable.showCursor = showCursor;
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rect(
-      color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: const Rect.fromLTWH(40, 0, 1, 10),
-    ));
+    expect(
+      editable,
+      paints
+        ..rect(
+          color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+          rect: const Rect.fromLTWH(40, 0, 1, 10),
+        ),
+    );
 
     // Now change to a rounded caret.
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
@@ -295,25 +315,33 @@ void main() {
     editable.cursorRadius = const Radius.circular(3);
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(40, 0, 4, 10),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+      editable,
+      paints
+        ..rrect(
+          color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTWH(40, 0, 4, 10),
+            const Radius.circular(3),
+          ),
+        ),
+    );
 
     editable.textScaleFactor = 2;
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(80, 0, 4, 20),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+      editable,
+      paints
+        ..rrect(
+          color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTWH(80, 0, 4, 20),
+            const Radius.circular(3),
+          ),
+        ),
+    );
 
     // Can turn off caret.
     showCursor.value = false;
@@ -334,7 +362,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -375,7 +405,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -427,7 +459,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -480,7 +514,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -522,14 +558,14 @@ void main() {
     // Move over by one character.
     editable.handleTapDown(TapDownDetails(globalPosition: const Offset(10, 2)));
     pumpFrame();
-    editable.selectPosition(cause:SelectionChangedCause.tap);
+    editable.selectPosition(cause: SelectionChangedCause.tap);
     pumpFrame();
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 6);
 
     editable.handleTapDown(TapDownDetails(globalPosition: const Offset(20, 2)));
     pumpFrame();
-    editable.selectWord(cause:SelectionChangedCause.longPress);
+    editable.selectWord(cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
@@ -537,7 +573,7 @@ void main() {
 
     // Select one more character down but since it's still part of the same
     // word, the same word is selected.
-    editable.selectWordsInRange(from: const Offset(30, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(30, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
@@ -569,7 +605,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -580,7 +618,7 @@ void main() {
     layout(editable);
 
     // Select the second white space, where the text position = 1.
-    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(10, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 1);
@@ -612,7 +650,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -623,7 +663,7 @@ void main() {
     layout(editable);
 
     // Select the second white space, where the text position = 1.
-    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(10, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 1);
@@ -655,7 +695,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -666,7 +708,7 @@ void main() {
     layout(editable);
 
     // Select the second white space, where the text position = 1.
-    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(10, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 1);
@@ -693,7 +735,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -719,7 +763,9 @@ void main() {
     const TextSpan span = TextSpan(
       text: text,
       style: TextStyle(
-        height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        height: 1.0,
+        fontSize: 10.0,
+        fontFamily: 'Ahem',
       ),
     );
 
@@ -848,7 +894,9 @@ void main() {
       text: const TextSpan(
         text: '撒地方加咖啡哈金凤凰卡号方式剪坏算法发挥福建垃\nasfjafjajfjaslfjaskjflasjfksajf撒分开建安路口附近拉设\n计费可使肌肤撒附近埃里克圾房卡设计费"',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Roboto',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Roboto',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -881,9 +929,9 @@ void main() {
     const String text = 'one two three\n\nfour five six';
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(
-          text: text,
-          selection: TextSelection.collapsed(offset: 0),
-        );
+        text: text,
+        selection: TextSelection.collapsed(offset: 0),
+      );
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
 
@@ -903,7 +951,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -962,9 +1012,9 @@ void main() {
   test('arrow keys and delete handle simple text correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(
-          text: 'test',
-          selection: TextSelection.collapsed(offset: 0),
-        );
+        text: 'test',
+        selection: TextSelection.collapsed(offset: 0),
+      );
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
 
@@ -984,7 +1034,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -1014,9 +1066,9 @@ void main() {
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(
-          text: '0123😆6789',
-          selection: TextSelection.collapsed(offset: 0),
-        );
+        text: '0123😆6789',
+        selection: TextSelection.collapsed(offset: 0),
+      );
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -1035,7 +1087,9 @@ void main() {
       text: const TextSpan(
         text: '0123😆6789',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -1064,9 +1118,9 @@ void main() {
   test('arrow keys and delete handle grapheme clusters correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(
-          text: '0123👨‍👩‍👦2345',
-          selection: TextSelection.collapsed(offset: 0),
-        );
+        text: '0123👨‍👩‍👦2345',
+        selection: TextSelection.collapsed(offset: 0),
+      );
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -1085,7 +1139,9 @@ void main() {
       text: const TextSpan(
         text: '0123👨‍👩‍👦2345',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -1131,9 +1187,11 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: text,  // Thumbs up
+        text: text, // Thumbs up
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -1163,9 +1221,9 @@ void main() {
   test('arrow keys work after detaching the widget and attaching it again', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(
-          text: 'W Szczebrzeszynie chrząszcz brzmi w trzcinie',
-          selection: TextSelection.collapsed(offset: 0),
-        );
+        text: 'W Szczebrzeszynie chrząszcz brzmi w trzcinie',
+        selection: TextSelection.collapsed(offset: 0),
+      );
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
@@ -1182,7 +1240,9 @@ void main() {
       text: const TextSpan(
         text: 'W Szczebrzeszynie chrząszcz brzmi w trzcinie',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -1211,7 +1271,7 @@ void main() {
     expect(editable.selection?.isCollapsed, true);
     expect(editable.selection?.baseOffset, 3);
 
-     editable.deleteForward(SelectionChangedCause.keyboard);
+    editable.deleteForward(SelectionChangedCause.keyboard);
     expect(delegate.textEditingValue.text, 'W Sczebrzeszynie chrząszcz brzmi w trzcinie');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
@@ -1238,7 +1298,9 @@ void main() {
       text: const TextSpan(
         text: 'how are you',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -1273,7 +1335,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: text,  // Thumbs up
+        text: text, // Thumbs up
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       ),
       selection: const TextSelection.collapsed(
@@ -1333,7 +1395,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: text,  // Thumbs up
+        text: text, // Thumbs up
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       ),
       selection: const TextSelection.collapsed(
@@ -1397,7 +1459,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: text,  // Thumbs up
+        text: text, // Thumbs up
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       ),
       selection: const TextSelection.collapsed(
@@ -1422,8 +1484,7 @@ void main() {
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
 
-    final LogicalKeyboardKey wordModifier =
-        Platform.isMacOS ? LogicalKeyboardKey.alt : LogicalKeyboardKey.control;
+    final LogicalKeyboardKey wordModifier = Platform.isMacOS ? LogicalKeyboardKey.alt : LogicalKeyboardKey.control;
 
     await simulateKeyDownEvent(wordModifier);
 
@@ -1443,9 +1504,9 @@ void main() {
     test('when as a non-collapsed selection, it should delete a selection', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection(baseOffset: 1, extentOffset: 3),
-          );
+          text: 'test',
+          selection: TextSelection(baseOffset: 1, extentOffset: 3),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1460,7 +1521,9 @@ void main() {
         text: const TextSpan(
           text: 'test',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection(baseOffset: 1, extentOffset: 3),
@@ -1479,9 +1542,9 @@ void main() {
     test('when as simple text, it should delete the character to the left', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1496,7 +1559,9 @@ void main() {
         text: const TextSpan(
           text: 'test',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: 3),
@@ -1515,9 +1580,9 @@ void main() {
     test('when has surrogate pairs, it should delete the pair', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: '\u{1F44D}',
-            selection: TextSelection.collapsed(offset: 2),
-          );
+          text: '\u{1F44D}',
+          selection: TextSelection.collapsed(offset: 2),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1530,9 +1595,11 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
-          text: '\u{1F44D}',  // Thumbs up
+          text: '\u{1F44D}', // Thumbs up
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: 2),
@@ -1551,9 +1618,9 @@ void main() {
     test('when has grapheme clusters, it should delete the grapheme cluster', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: '0123👨‍👩‍👦2345',
-            selection: TextSelection.collapsed(offset: 12),
-          );
+          text: '0123👨‍👩‍👦2345',
+          selection: TextSelection.collapsed(offset: 12),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1568,7 +1635,9 @@ void main() {
         text: const TextSpan(
           text: '0123👨‍👩‍👦2345',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: 12),
@@ -1587,9 +1656,9 @@ void main() {
     test('when is at the start of the text, it should be a no-op', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 0),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 0),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1604,7 +1673,9 @@ void main() {
         text: const TextSpan(
           text: 'test',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: 0),
@@ -1642,7 +1713,9 @@ void main() {
         text: const TextSpan(
           text: '****',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: 4),
@@ -1659,51 +1732,53 @@ void main() {
     }, skip: isBrowser);
 
     test('when using cjk characters', () async {
-        const String text = '用多個塊測試';
-        const int offset = 4;
-        final TextSelectionDelegate delegate = FakeEditableTextState()
-          ..textEditingValue = const TextEditingValue(
-              text: text,
-              selection: TextSelection.collapsed(offset: offset),
-            );
-        final ViewportOffset viewportOffset = ViewportOffset.zero();
-        final RenderEditable editable = RenderEditable(
-          backgroundCursorColor: Colors.grey,
-          selectionColor: Colors.black,
-          textDirection: TextDirection.ltr,
-          cursorColor: Colors.red,
-          offset: viewportOffset,
-          textSelectionDelegate: delegate,
-          onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
-          startHandleLayerLink: LayerLink(),
-          endHandleLayerLink: LayerLink(),
-          text: const TextSpan(
-            text: text,
-            style: TextStyle(
-              height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-            ),
-          ),
-          selection: const TextSelection.collapsed(offset: offset),
+      const String text = '用多個塊測試';
+      const int offset = 4;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
         );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
 
-        layout(editable);
-        editable.hasFocus = true;
-        pumpFrame();
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
 
-        editable.delete(SelectionChangedCause.keyboard);
-        expect(delegate.textEditingValue.text, '用多個測試');
-        expect(delegate.textEditingValue.selection.isCollapsed, true);
-        expect(delegate.textEditingValue.selection.baseOffset, 3);
-      }, skip: isBrowser);
+      editable.delete(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, '用多個測試');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 3);
+    }, skip: isBrowser);
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = text.length;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1718,7 +1793,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -1741,9 +1818,9 @@ void main() {
       const int offset = 8;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1758,7 +1835,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -1779,9 +1858,9 @@ void main() {
       const int offset = 10;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1796,7 +1875,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -1817,9 +1898,9 @@ void main() {
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -1834,7 +1915,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -1850,128 +1933,16 @@ void main() {
       expect(delegate.textEditingValue.selection.baseOffset, 5);
     }, skip: isBrowser);
 
-    test('when cursor is preceeded by white spaces, it should delete the spaces and the next word to the left', () async {
-      const String text = 'test with   multiple blocks';
-      const int offset = 12;
-      final TextSelectionDelegate delegate = FakeEditableTextState()
-        ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
-      final ViewportOffset viewportOffset = ViewportOffset.zero();
-      final RenderEditable editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
-        textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
-        offset: viewportOffset,
-        textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
-        startHandleLayerLink: LayerLink(),
-        endHandleLayerLink: LayerLink(),
-        text: const TextSpan(
-          text: text,
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
-        ),
-        selection: const TextSelection.collapsed(offset: offset),
-      );
-
-      layout(editable);
-      editable.hasFocus = true;
-      pumpFrame();
-
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
-      expect(delegate.textEditingValue.text, 'test multiple blocks');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
-
-    test('when cursor is preceeded by tabs spaces', () async {
-      const String text = 'test with\t\t\tmultiple blocks';
-      const int offset = 12;
-      final TextSelectionDelegate delegate = FakeEditableTextState()
-        ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
-      final ViewportOffset viewportOffset = ViewportOffset.zero();
-      final RenderEditable editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
-        textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
-        offset: viewportOffset,
-        textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
-        startHandleLayerLink: LayerLink(),
-        endHandleLayerLink: LayerLink(),
-        text: const TextSpan(
-          text: text,
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
-        ),
-        selection: const TextSelection.collapsed(offset: offset),
-      );
-
-      layout(editable);
-      editable.hasFocus = true;
-      pumpFrame();
-
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
-      expect(delegate.textEditingValue.text, 'test multiple blocks');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
-
-    test('when cursor is preceeded by break line, it should delete the breaking line and the word right before it', () async {
-      const String text = 'test with\nmultiple blocks';
-      const int offset = 10;
-      final TextSelectionDelegate delegate = FakeEditableTextState()
-        ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
-      final ViewportOffset viewportOffset = ViewportOffset.zero();
-      final RenderEditable editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
-        textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
-        offset: viewportOffset,
-        textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
-        startHandleLayerLink: LayerLink(),
-        endHandleLayerLink: LayerLink(),
-        text: const TextSpan(
-          text: text,
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
-        ),
-        selection: const TextSelection.collapsed(offset: offset),
-      );
-
-      layout(editable);
-      editable.hasFocus = true;
-      pumpFrame();
-
-      editable.deleteByWord(SelectionChangedCause.keyboard, false);
-      expect(delegate.textEditingValue.text, 'test multiple blocks');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 5);
-    }, skip: isBrowser);
-
-    test('when using cjk characters', () async {
-        const String text = '用多個塊測試';
-        const int offset = 4;
+    test(
+      'when cursor is preceeded by white spaces, it should delete the spaces and the next word to the left',
+      () async {
+        const String text = 'test with   multiple blocks';
+        const int offset = 12;
         final TextSelectionDelegate delegate = FakeEditableTextState()
           ..textEditingValue = const TextEditingValue(
-              text: text,
-              selection: TextSelection.collapsed(offset: offset),
-            );
+            text: text,
+            selection: TextSelection.collapsed(offset: offset),
+          );
         final ViewportOffset viewportOffset = ViewportOffset.zero();
         final RenderEditable editable = RenderEditable(
           backgroundCursorColor: Colors.grey,
@@ -1986,7 +1957,9 @@ void main() {
           text: const TextSpan(
             text: text,
             style: TextStyle(
-              height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+              height: 1.0,
+              fontSize: 10.0,
+              fontFamily: 'Ahem',
             ),
           ),
           selection: const TextSelection.collapsed(offset: offset),
@@ -1997,19 +1970,145 @@ void main() {
         pumpFrame();
 
         editable.deleteByWord(SelectionChangedCause.keyboard, false);
-        expect(delegate.textEditingValue.text, '用多個測試');
+        expect(delegate.textEditingValue.text, 'test multiple blocks');
         expect(delegate.textEditingValue.selection.isCollapsed, true);
-        expect(delegate.textEditingValue.selection.baseOffset, 3);
-      }, skip: isBrowser);
+        expect(delegate.textEditingValue.selection.baseOffset, 5);
+      },
+      skip: isBrowser,
+    );
+
+    test('when cursor is preceeded by tabs spaces', () async {
+      const String text = 'test with\t\t\tmultiple blocks';
+      const int offset = 12;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      expect(delegate.textEditingValue.text, 'test multiple blocks');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 5);
+    }, skip: isBrowser);
+
+    test(
+      'when cursor is preceeded by break line, it should delete the breaking line and the word right before it',
+      () async {
+        const String text = 'test with\nmultiple blocks';
+        const int offset = 10;
+        final TextSelectionDelegate delegate = FakeEditableTextState()
+          ..textEditingValue = const TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: offset),
+          );
+        final ViewportOffset viewportOffset = ViewportOffset.zero();
+        final RenderEditable editable = RenderEditable(
+          backgroundCursorColor: Colors.grey,
+          selectionColor: Colors.black,
+          textDirection: TextDirection.ltr,
+          cursorColor: Colors.red,
+          offset: viewportOffset,
+          textSelectionDelegate: delegate,
+          onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          text: const TextSpan(
+            text: text,
+            style: TextStyle(
+              height: 1.0,
+              fontSize: 10.0,
+              fontFamily: 'Ahem',
+            ),
+          ),
+          selection: const TextSelection.collapsed(offset: offset),
+        );
+
+        layout(editable);
+        editable.hasFocus = true;
+        pumpFrame();
+
+        editable.deleteByWord(SelectionChangedCause.keyboard, false);
+        expect(delegate.textEditingValue.text, 'test multiple blocks');
+        expect(delegate.textEditingValue.selection.isCollapsed, true);
+        expect(delegate.textEditingValue.selection.baseOffset, 5);
+      },
+      skip: isBrowser,
+    );
+
+    test('when using cjk characters', () async {
+      const String text = '用多個塊測試';
+      const int offset = 4;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteByWord(SelectionChangedCause.keyboard, false);
+      expect(delegate.textEditingValue.text, '用多個測試');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 3);
+    }, skip: isBrowser);
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = text.length;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2024,7 +2123,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2063,7 +2164,9 @@ void main() {
         text: const TextSpan(
           text: '****',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2086,9 +2189,9 @@ void main() {
       const int offset = text.length;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2103,7 +2206,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2124,9 +2229,9 @@ void main() {
       const int offset = 8;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2141,7 +2246,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2162,9 +2269,9 @@ void main() {
       const int offset = 10;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2179,7 +2286,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2200,9 +2309,9 @@ void main() {
       const int offset = 22;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2217,7 +2326,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2256,7 +2367,9 @@ void main() {
         text: const TextSpan(
           text: '****',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2277,9 +2390,9 @@ void main() {
     test('when as a non-collapsed selection, it should delete a selection', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection(baseOffset: 1, extentOffset: 3),
-          );
+          text: 'test',
+          selection: TextSelection(baseOffset: 1, extentOffset: 3),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2294,7 +2407,9 @@ void main() {
         text: const TextSpan(
           text: 'test',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection(baseOffset: 1, extentOffset: 3),
@@ -2315,9 +2430,9 @@ void main() {
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2332,7 +2447,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2351,9 +2468,9 @@ void main() {
     test('when at the end of a text, it should be a no-op', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 4),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 4),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2368,7 +2485,9 @@ void main() {
         text: const TextSpan(
           text: 'test',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: 4),
@@ -2406,7 +2525,9 @@ void main() {
         text: const TextSpan(
           text: '****',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: 0),
@@ -2423,92 +2544,13 @@ void main() {
     }, skip: isBrowser);
 
     test('when using cjk characters', () async {
-        const String text = '用多個塊測試';
-        const int offset = 0;
-        final TextSelectionDelegate delegate = FakeEditableTextState()
-          ..textEditingValue = const TextEditingValue(
-              text: text,
-              selection: TextSelection.collapsed(offset: offset),
-            );
-        final ViewportOffset viewportOffset = ViewportOffset.zero();
-        final RenderEditable editable = RenderEditable(
-          backgroundCursorColor: Colors.grey,
-          selectionColor: Colors.black,
-          textDirection: TextDirection.ltr,
-          cursorColor: Colors.red,
-          offset: viewportOffset,
-          textSelectionDelegate: delegate,
-          onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
-          startHandleLayerLink: LayerLink(),
-          endHandleLayerLink: LayerLink(),
-          text: const TextSpan(
-            text: text,
-            style: TextStyle(
-              height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-            ),
-          ),
-          selection: const TextSelection.collapsed(offset: offset),
-        );
-
-        layout(editable);
-        editable.hasFocus = true;
-        pumpFrame();
-
-        editable.deleteForward(SelectionChangedCause.keyboard);
-        expect(delegate.textEditingValue.text, '多個塊測試');
-        expect(delegate.textEditingValue.selection.isCollapsed, true);
-        expect(delegate.textEditingValue.selection.baseOffset, 0);
-      }, skip: isBrowser);
-
-    test('when using rtl', () async {
-      const String text = 'برنامج أهلا بالعالم';
+      const String text = '用多個塊測試';
       const int offset = 0;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
-      final ViewportOffset viewportOffset = ViewportOffset.zero();
-      final RenderEditable editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
-        textDirection: TextDirection.rtl,
-        cursorColor: Colors.red,
-        offset: viewportOffset,
-        textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
-        startHandleLayerLink: LayerLink(),
-        endHandleLayerLink: LayerLink(),
-        text: const TextSpan(
           text: text,
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
-        ),
-        selection: const TextSelection.collapsed(offset: offset),
-      );
-
-      layout(editable);
-      editable.hasFocus = true;
-      pumpFrame();
-
-      editable.deleteForward(SelectionChangedCause.keyboard);
-      expect(delegate.textEditingValue.text, 'رنامج أهلا بالعالم');
-      expect(delegate.textEditingValue.selection.isCollapsed, true);
-      expect(delegate.textEditingValue.selection.baseOffset, 0);
-    }, skip: isBrowser);
-
-  });
-
-  group('deleteForwardByWord', () {
-    test('when cursor is on the middle of a word, it should delete the next part of the word', () async {
-      const String text = 'test with multiple blocks';
-      const int offset = 6;
-      final TextSelectionDelegate delegate = FakeEditableTextState()
-        ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2523,7 +2565,91 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteForward(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, '多個塊測試');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 0);
+    }, skip: isBrowser);
+
+    test('when using rtl', () async {
+      const String text = 'برنامج أهلا بالعالم';
+      const int offset = 0;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.rtl,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      editable.deleteForward(SelectionChangedCause.keyboard);
+      expect(delegate.textEditingValue.text, 'رنامج أهلا بالعالم');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 0);
+    }, skip: isBrowser);
+  });
+
+  group('deleteForwardByWord', () {
+    test('when cursor is on the middle of a word, it should delete the next part of the word', () async {
+      const String text = 'test with multiple blocks';
+      const int offset = 6;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2544,9 +2670,9 @@ void main() {
       const int offset = 10;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2561,7 +2687,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2582,9 +2710,9 @@ void main() {
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2599,7 +2727,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2620,9 +2750,9 @@ void main() {
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2637,7 +2767,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2658,9 +2790,9 @@ void main() {
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2675,7 +2807,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2692,51 +2826,53 @@ void main() {
     }, skip: isBrowser);
 
     test('when using cjk characters', () async {
-        const String text = '用多個塊測試';
-        const int offset = 0;
-        final TextSelectionDelegate delegate = FakeEditableTextState()
-          ..textEditingValue = const TextEditingValue(
-              text: text,
-              selection: TextSelection.collapsed(offset: offset),
-            );
-        final ViewportOffset viewportOffset = ViewportOffset.zero();
-        final RenderEditable editable = RenderEditable(
-          backgroundCursorColor: Colors.grey,
-          selectionColor: Colors.black,
-          textDirection: TextDirection.ltr,
-          cursorColor: Colors.red,
-          offset: viewportOffset,
-          textSelectionDelegate: delegate,
-          onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
-          startHandleLayerLink: LayerLink(),
-          endHandleLayerLink: LayerLink(),
-          text: const TextSpan(
-            text: text,
-            style: TextStyle(
-              height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-            ),
-          ),
-          selection: const TextSelection.collapsed(offset: offset),
+      const String text = '用多個塊測試';
+      const int offset = 0;
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
         );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: offset),
+      );
 
-        layout(editable);
-        editable.hasFocus = true;
-        pumpFrame();
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
 
-        editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
-        expect(delegate.textEditingValue.text, '多個塊測試');
-        expect(delegate.textEditingValue.selection.isCollapsed, true);
-        expect(delegate.textEditingValue.selection.baseOffset, offset);
-      }, skip: isBrowser);
+      editable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      expect(delegate.textEditingValue.text, '多個塊測試');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, offset);
+    }, skip: isBrowser);
 
     test('when using rtl', () async {
       const String text = 'برنامج أهلا بالعالم';
       const int offset = 0;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2751,7 +2887,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2790,7 +2928,9 @@ void main() {
         text: const TextSpan(
           text: '****',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2813,9 +2953,9 @@ void main() {
       const int offset = 4;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2830,7 +2970,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2851,9 +2993,9 @@ void main() {
       const int offset = 8;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2868,7 +3010,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2889,9 +3033,9 @@ void main() {
       const int offset = 9;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2906,7 +3050,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2927,9 +3073,9 @@ void main() {
       const int offset = 2;
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: text,
-            selection: TextSelection.collapsed(offset: offset),
-          );
+          text: text,
+          selection: TextSelection.collapsed(offset: offset),
+        );
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
         backgroundCursorColor: Colors.grey,
@@ -2944,7 +3090,9 @@ void main() {
         text: const TextSpan(
           text: text,
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -2983,7 +3131,9 @@ void main() {
         text: const TextSpan(
           text: '****',
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
         ),
         selection: const TextSelection.collapsed(offset: offset),
@@ -3015,7 +3165,8 @@ void main() {
     );
     editable.layout(BoxConstraints.loose(const Size(100, 100)));
     final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
-      const TextSelection(baseOffset: 0, extentOffset: 1),);
+      const TextSelection(baseOffset: 0, extentOffset: 1),
+    );
     expect(endpoints[0].point.dx, 0);
   });
 
@@ -3190,7 +3341,9 @@ void main() {
       ),
     );
 
-    setUp(() { EditableText.debugDeterministicCursor = true; });
+    setUp(() {
+      EditableText.debugDeterministicCursor = true;
+    });
     tearDown(() {
       EditableText.debugDeterministicCursor = false;
       _TestRenderEditablePainter.paintHistory.clear();
@@ -3199,8 +3352,7 @@ void main() {
       editable.paintCount = 0;
 
       final AbstractNode? parent = editable.parent;
-      if (parent is RenderConstrainedBox)
-        parent.child = null;
+      if (parent is RenderConstrainedBox) parent.child = null;
     });
 
     test('paints in the correct order', () {
@@ -3310,9 +3462,12 @@ void main() {
       FlutterErrorDetails? errorDetails;
       editable.painter = painter;
       editable.foregroundPainter = painter;
-      pumpFrame(phase: EnginePhase.paint, onErrors: () {
-        errorDetails = renderer.takeFlutterErrorDetails();
-      });
+      pumpFrame(
+        phase: EnginePhase.paint,
+        onErrors: () {
+          errorDetails = renderer.takeFlutterErrorDetails();
+        },
+      );
       expect(errorDetails, isNull);
 
       expect(
@@ -3387,14 +3542,14 @@ class _TestRenderEditable extends RenderEditable {
     required LayerLink endHandleLayerLink,
     TextSelection? selection,
   }) : super(
-      textDirection: textDirection,
-      offset: offset,
-      textSelectionDelegate: textSelectionDelegate,
-      text: text,
-      startHandleLayerLink: startHandleLayerLink,
-      endHandleLayerLink: endHandleLayerLink,
-      selection: selection,
-    );
+          textDirection: textDirection,
+          offset: offset,
+          textSelectionDelegate: textSelectionDelegate,
+          text: text,
+          startHandleLayerLink: startHandleLayerLink,
+          endHandleLayerLink: endHandleLayerLink,
+          selection: selection,
+        );
 
   int paintCount = 0;
 

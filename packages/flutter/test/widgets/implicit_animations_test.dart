@@ -13,8 +13,8 @@ class MockOnEndFunction {
   }
 }
 
-const Duration animationDuration = Duration(milliseconds:1000);
-const Duration additionalDelay = Duration(milliseconds:1);
+const Duration animationDuration = Duration(milliseconds: 1000);
+const Duration additionalDelay = Duration(milliseconds: 1);
 
 void main() {
   late MockOnEndFunction mockOnEndFunction;
@@ -201,10 +201,12 @@ void main() {
 
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(FadeTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
     );
 
     await tester.tap(switchFinder);
@@ -218,7 +220,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
     expect(opacityWidget.opacity.value, equals(1.0));
   });
-
 
   testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(TestAnimatedWidget(
@@ -249,10 +250,12 @@ void main() {
 
     final Finder switchFinder = find.byKey(switchKey);
     final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(SliverFadeTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(SliverFadeTransition),
+          )
+          .first,
     );
 
     await tester.tap(switchFinder);
@@ -421,8 +424,7 @@ class _TestAnimatedPaddingWidgetState extends _TestAnimatedWidgetState {
       child: child,
       duration: duration,
       onEnd: widget.callback,
-      padding:
-      toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
+      padding: toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
     );
   }
 }
@@ -517,9 +519,7 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
       child: child,
       duration: duration,
       onEnd: widget.callback,
-      style: toggle
-        ? const TextStyle(fontStyle: FontStyle.italic)
-        : const TextStyle(fontStyle: FontStyle.normal),
+      style: toggle ? const TextStyle(fontStyle: FontStyle.italic) : const TextStyle(fontStyle: FontStyle.normal),
     );
   }
 }

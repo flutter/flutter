@@ -20,11 +20,14 @@ void main() {
     expect(border1.verticalInside, const BorderSide(width: 1.0, color: Color(0xFF000000)));
     expect(border1.dimensions, const EdgeInsets.symmetric(horizontal: 1.0));
     expect(border1.isUniform, isFalse);
-    expect(border1.scale(2.0), const TableBorder(
-      left: BorderSide(width: 2.0),
-      right: BorderSide(width: 2.0, color: Color(0xFF00FF00)),
-      verticalInside: BorderSide(width: 2.0),
-    ));
+    expect(
+      border1.scale(2.0),
+      const TableBorder(
+        left: BorderSide(width: 2.0),
+        right: BorderSide(width: 2.0, color: Color(0xFF00FF00)),
+        verticalInside: BorderSide(width: 2.0),
+      ),
+    );
   });
 
   test('TableBorder.all constructor', () {
@@ -56,10 +59,13 @@ void main() {
     expect(border3.verticalInside, const BorderSide(width: 3.0));
     expect(border3.dimensions, const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0));
     expect(border3.isUniform, isFalse);
-    expect(border3.scale(0.0), TableBorder.symmetric(
-      inside: BorderSide.none,
-      outside: const BorderSide(width: 0.0, color: Color(0xFFFF0000), style: BorderStyle.none),
-    ));
+    expect(
+      border3.scale(0.0),
+      TableBorder.symmetric(
+        inside: BorderSide.none,
+        outside: const BorderSide(width: 0.0, color: Color(0xFFFF0000), style: BorderStyle.none),
+      ),
+    );
   });
 
   test('TableBorder.lerp', () {

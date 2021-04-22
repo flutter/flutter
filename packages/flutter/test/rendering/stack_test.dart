@@ -74,11 +74,12 @@ void main() {
     for (final Clip clip in Clip.values) {
       final RenderBox child = box200x200;
       final RenderStack stack = RenderStack(
-          textDirection: TextDirection.ltr,
-          children: <RenderBox>[child],
-          clipBehavior: clip,
+        textDirection: TextDirection.ltr,
+        children: <RenderBox>[child],
+        clipBehavior: clip,
       );
-      { // Make sure that the child is positioned so the stack will consider it as overflowed.
+      {
+        // Make sure that the child is positioned so the stack will consider it as overflowed.
         final StackParentData parentData = child.parentData! as StackParentData;
         parentData.left = parentData.right = 0;
       }
@@ -115,7 +116,6 @@ void main() {
       expect(visitedChildren, hasLength(1));
       expect(visitedChildren.first, child2);
     });
-
   });
 
   // More tests in ../widgets/stack_test.dart

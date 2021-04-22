@@ -11,120 +11,138 @@ const double expandedAppbarHeight = 250.0;
 final Key appbarContainerKey = UniqueKey();
 
 void main() {
-  testWidgets('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
-        home: Scaffold(
-          body: CustomScrollView(
-            key: blockKey,
-            slivers: <Widget>[
-              SliverAppBar(
-                expandedHeight: expandedAppbarHeight,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    key: appbarContainerKey,
+  testWidgets(
+    'FlexibleSpaceBar collapse mode none',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+          home: Scaffold(
+            body: CustomScrollView(
+              key: blockKey,
+              slivers: <Widget>[
+                SliverAppBar(
+                  expandedHeight: expandedAppbarHeight,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      key: appbarContainerKey,
+                    ),
+                    collapseMode: CollapseMode.none,
                   ),
-                  collapseMode: CollapseMode.none,
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 10000.0,
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 10000.0,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final Finder appbarContainer = find.byKey(appbarContainerKey);
-    final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
-    await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
-    final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
+      final Finder appbarContainer = find.byKey(appbarContainerKey);
+      final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
+      await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
+      final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
 
-    expect(topBeforeScroll.dy, equals(0.0));
-    expect(topAfterScroll.dy, equals(0.0));
-  }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet()));
+      expect(topBeforeScroll.dy, equals(0.0));
+      expect(topAfterScroll.dy, equals(0.0));
+    },
+    variant: TargetPlatformVariant(
+      TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet(),
+    ),
+  );
 
-  testWidgets('FlexibleSpaceBar collapse mode pin', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
-        home: Scaffold(
-          body: CustomScrollView(
-            key: blockKey,
-            slivers: <Widget>[
-              SliverAppBar(
-                expandedHeight: expandedAppbarHeight,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    key: appbarContainerKey,
+  testWidgets(
+    'FlexibleSpaceBar collapse mode pin',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+          home: Scaffold(
+            body: CustomScrollView(
+              key: blockKey,
+              slivers: <Widget>[
+                SliverAppBar(
+                  expandedHeight: expandedAppbarHeight,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      key: appbarContainerKey,
+                    ),
+                    collapseMode: CollapseMode.pin,
                   ),
-                  collapseMode: CollapseMode.pin,
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 10000.0,
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 10000.0,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final Finder appbarContainer = find.byKey(appbarContainerKey);
-    final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
-    await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
-    final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
+      final Finder appbarContainer = find.byKey(appbarContainerKey);
+      final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
+      await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
+      final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
 
-    expect(topBeforeScroll.dy, equals(0.0));
-    expect(topAfterScroll.dy, equals(-100.0));
-  }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet()));
+      expect(topBeforeScroll.dy, equals(0.0));
+      expect(topAfterScroll.dy, equals(-100.0));
+    },
+    variant: TargetPlatformVariant(
+      TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet(),
+    ),
+  );
 
-  testWidgets('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
-        home: Scaffold(
-          body: CustomScrollView(
-            key: blockKey,
-            slivers: <Widget>[
-              SliverAppBar(
-                expandedHeight: expandedAppbarHeight,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    key: appbarContainerKey,
+  testWidgets(
+    'FlexibleSpaceBar collapse mode parallax',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+          home: Scaffold(
+            body: CustomScrollView(
+              key: blockKey,
+              slivers: <Widget>[
+                SliverAppBar(
+                  expandedHeight: expandedAppbarHeight,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      key: appbarContainerKey,
+                    ),
+                    collapseMode: CollapseMode.parallax,
                   ),
-                  collapseMode: CollapseMode.parallax,
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 10000.0,
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 10000.0,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final Finder appbarContainer = find.byKey(appbarContainerKey);
-    final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
-    await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
-    final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
+      final Finder appbarContainer = find.byKey(appbarContainerKey);
+      final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
+      await slowDrag(tester, blockKey, const Offset(0.0, -100.0));
+      final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
 
-    expect(topBeforeScroll.dy, equals(0.0));
-    expect(topAfterScroll.dy, lessThan(10.0));
-    expect(topAfterScroll.dy, greaterThan(-50.0));
-  }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet()));
+      expect(topBeforeScroll.dy, equals(0.0));
+      expect(topAfterScroll.dy, lessThan(10.0));
+      expect(topAfterScroll.dy, greaterThan(-50.0));
+    },
+    variant: TargetPlatformVariant(
+      TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet(),
+    ),
+  );
 }
 
 Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {

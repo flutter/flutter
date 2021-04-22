@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag { }
+class TestDrag extends Drag {}
 
 void main() {
   setUp(ensureGestureBinding);
@@ -63,8 +63,7 @@ void main() {
   });
 
   testGesture('MultiDrag: can filter based on device kind', (GestureTester tester) {
-    final DelayedMultiDragGestureRecognizer drag =
-        DelayedMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+    final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartDrag = false;
     drag.onStart = (Offset position) {

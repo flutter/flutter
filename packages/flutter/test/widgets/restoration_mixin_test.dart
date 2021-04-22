@@ -645,7 +645,6 @@ void _clearLogs(_TestRestorableWidgetState state) {
 }
 
 class _TestRestorableWidget extends StatefulWidget {
-
   const _TestRestorableWidget({Key? key, this.restorationId}) : super(key: key);
 
   final String? restorationId;
@@ -718,17 +717,17 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
 Map<String, dynamic> _createRawDataSet() {
   return <String, dynamic>{
     valuesMapKey: <String, dynamic>{
-      'value1' : 10,
-      'value2' : 'Hello',
+      'value1': 10,
+      'value2': 'Hello',
     },
     childrenMapKey: <String, dynamic>{
-      'child1' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
+      'child1': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{
           'foo': 22,
         },
       },
-      'child2' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
+      'child2': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{
           'bar': 33,
         },
       },
@@ -765,6 +764,7 @@ class _TestRestorableProperty extends RestorableProperty<Object?> {
     assert(isRegistered);
     return _value;
   }
+
   Object? _value;
   set value(Object? value) {
     _value = value;

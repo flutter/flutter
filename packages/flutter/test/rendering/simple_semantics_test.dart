@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-
 void main() {
   test('only send semantics update if semantics have changed', () {
     final TestRender testRender = TestRender()

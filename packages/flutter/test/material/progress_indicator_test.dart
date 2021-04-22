@@ -10,45 +10,50 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
 
-  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has empty semantics by default', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            width: 200.0,
-            child: LinearProgressIndicator(value: 0.0),
+  testWidgets(
+    'LinearProgressIndicator(value: 0.0) can be constructed and has empty semantics by default',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(value: 0.0),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
-    handle.dispose();
-  });
+      expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
+      handle.dispose();
+    },
+  );
 
-  testWidgets('LinearProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.rtl,
-        child: Center(
-          child: SizedBox(
-            width: 200.0,
-            child: LinearProgressIndicator(value: null),
+  testWidgets(
+    'LinearProgressIndicator(value: null) can be constructed and has empty semantics by default',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(value: null),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
-    handle.dispose();
-  });
+      expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
+      handle.dispose();
+    },
+  );
 
   testWidgets('LinearProgressIndicator custom minHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -131,8 +136,8 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 300));
-    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0))
-      .transform(300.0 / 1800.0);
+    final double animationValue =
+        const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0)).transform(300.0 / 1800.0);
 
     expect(
       find.byType(LinearProgressIndicator),
@@ -158,8 +163,8 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 300));
-    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0))
-      .transform(300.0 / 1800.0);
+    final double animationValue =
+        const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0)).transform(300.0 / 1800.0);
 
     expect(
       find.byType(LinearProgressIndicator),
@@ -278,35 +283,44 @@ void main() {
     );
   });
 
-  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: CircularProgressIndicator(value: 0.0),
+  testWidgets(
+    'CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: CircularProgressIndicator(value: 0.0),
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
-      value: '0%',
-      textDirection: TextDirection.ltr,
-    ));
-    handle.dispose();
-  });
+      expect(
+        tester.getSemantics(find.byType(CircularProgressIndicator)),
+        matchesSemantics(
+          value: '0%',
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      handle.dispose();
+    },
+  );
 
-  testWidgets('CircularProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      const Center(
-        child: CircularProgressIndicator(value: null),
-      ),
-    );
+  testWidgets(
+    'CircularProgressIndicator(value: null) can be constructed and has empty semantics by default',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const Center(
+          child: CircularProgressIndicator(value: null),
+        ),
+      );
 
-    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
-    handle.dispose();
-  });
+      expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
+      handle.dispose();
+    },
+  );
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
@@ -369,31 +383,34 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(color: green)..arc(color: blue));
   });
 
-  testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/13782
+  testWidgets(
+    'Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/13782
 
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            width: 200.0,
-            child: RefreshProgressIndicator(),
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: RefreshProgressIndicator(),
+            ),
           ),
         ),
-      ),
-    );
-    expect(tester.hasRunningAnimations, isTrue);
+      );
+      expect(tester.hasRunningAnimations, isTrue);
 
-    await tester.pump(const Duration(seconds: 5));
-    expect(tester.hasRunningAnimations, isTrue);
+      await tester.pump(const Duration(seconds: 5));
+      expect(tester.hasRunningAnimations, isTrue);
 
-    await tester.pump(const Duration(milliseconds: 1));
-    expect(tester.hasRunningAnimations, isTrue);
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(tester.hasRunningAnimations, isTrue);
 
-    await tester.pump(const Duration(days: 9999));
-    expect(tester.hasRunningAnimations, isTrue);
-  });
+      await tester.pump(const Duration(days: 9999));
+      expect(tester.hasRunningAnimations, isTrue);
+    },
+  );
 
   testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
     double? progressValue;
@@ -413,11 +430,15 @@ void main() {
     );
     expect(tester.hasRunningAnimations, isTrue);
 
-    setState(() { progressValue = 1.0; });
+    setState(() {
+      progressValue = 1.0;
+    });
     await tester.pump(const Duration(milliseconds: 1));
     expect(tester.hasRunningAnimations, isFalse);
 
-    setState(() { progressValue = null; });
+    setState(() {
+      progressValue = null;
+    });
     await tester.pump(const Duration(milliseconds: 1));
     expect(tester.hasRunningAnimations, isTrue);
   });
@@ -436,10 +457,10 @@ void main() {
       ),
     );
     expect(
-        find.byType(LinearProgressIndicator),
-        paints
-          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 12.0))
-          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 12.0)),
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 12.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 12.0)),
     );
     expect(tester.binding.transientCallbackCount, 0);
   });
@@ -458,10 +479,10 @@ void main() {
       ),
     );
     expect(
-        find.byType(LinearProgressIndicator),
-        paints
-          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 3.0))
-          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 3.0)),
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 3.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 3.0)),
     );
     expect(tester.binding.transientCallbackCount, 0);
   });
@@ -480,10 +501,10 @@ void main() {
       ),
     );
     expect(
-        find.byType(LinearProgressIndicator),
-        paints
-          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 4.0))
-          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 4.0)),
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 4.0)),
     );
     expect(tester.binding.transientCallbackCount, 0);
   });
@@ -505,11 +526,14 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      textDirection: TextDirection.ltr,
-      label: label,
-      value: value,
-    ));
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      matchesSemantics(
+        textDirection: TextDirection.ltr,
+        label: label,
+        value: value,
+      ),
+    );
 
     handle.dispose();
   });
@@ -529,32 +553,38 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      textDirection: TextDirection.ltr,
-      label: label,
-      value: '25%',
-    ));
-
-    handle.dispose();
-  });
-
-  testWidgets('LinearProgressIndicator that is determinate does not default a11y value when label is null', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(
-      Directionality(
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      matchesSemantics(
         textDirection: TextDirection.ltr,
-        child: LinearProgressIndicator(
-          key: key,
-          value: 0.25,
-        ),
+        label: label,
+        value: '25%',
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(key)), matchesSemantics());
-
     handle.dispose();
   });
+
+  testWidgets(
+    'LinearProgressIndicator that is determinate does not default a11y value when label is null',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: LinearProgressIndicator(
+            key: key,
+            value: 0.25,
+          ),
+        ),
+      );
+
+      expect(tester.getSemantics(find.byKey(key)), matchesSemantics());
+
+      handle.dispose();
+    },
+  );
 
   testWidgets('LinearProgressIndicator that is indeterminate does not default a11y value', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -571,10 +601,13 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      textDirection: TextDirection.ltr,
-      label: label,
-    ));
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      matchesSemantics(
+        textDirection: TextDirection.ltr,
+        label: label,
+      ),
+    );
 
     handle.dispose();
   });
@@ -596,11 +629,14 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      textDirection: TextDirection.ltr,
-      label: label,
-      value: value,
-    ));
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      matchesSemantics(
+        textDirection: TextDirection.ltr,
+        label: label,
+        value: value,
+      ),
+    );
 
     handle.dispose();
   });
@@ -621,11 +657,14 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
-      textDirection: TextDirection.ltr,
-      label: label,
-      value: value,
-    ));
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      matchesSemantics(
+        textDirection: TextDirection.ltr,
+        label: label,
+        value: value,
+      ),
+    );
 
     handle.dispose();
   });
@@ -633,15 +672,18 @@ void main() {
   testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
 
-    await tester.pumpFrames(animationSheet.record(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Padding(
-          padding: EdgeInsets.all(4),
-          child: CircularProgressIndicator(),
+    await tester.pumpFrames(
+      animationSheet.record(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: CircularProgressIndicator(),
+          ),
         ),
       ),
-    ), const Duration(seconds: 2));
+      const Duration(seconds: 2),
+    );
 
     tester.binding.setSurfaceSize(animationSheet.sheetSize());
 
@@ -669,7 +711,7 @@ void main() {
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform> {
+    variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
@@ -690,7 +732,7 @@ void main() {
 
       expect(find.byType(CupertinoActivityIndicator), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform> {
+    variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.fuchsia,
       TargetPlatform.windows,

@@ -6,19 +6,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestGestureRecognizer extends GestureRecognizer {
-  TestGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
+  TestGestureRecognizer({Object? debugOwner}) : super(debugOwner: debugOwner);
 
   @override
   String get debugDescription => 'debugDescription content';
 
   @override
-  void addPointer(PointerDownEvent event) { }
+  void addPointer(PointerDownEvent event) {}
 
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(int pointer) {}
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(int pointer) {}
 }
 
 void main() {
@@ -48,6 +48,5 @@ void main() {
     final OffsetPair difference = offset2 - offset1;
     expect(difference.local, const Offset(40, 40));
     expect(difference.global, const Offset(40, 40));
-
   });
 }

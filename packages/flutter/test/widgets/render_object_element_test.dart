@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
+  const Swapper({Key? key, this.stable, this.swapper}) : super(key: key);
 
   final Widget? stable;
   final Widget? swapper;
@@ -91,10 +91,8 @@ abstract class SwapperElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (stable != null)
-      visitor(stable!);
-    if (swapper != null)
-      visitor(swapper!);
+    if (stable != null) visitor(stable!);
+    if (swapper != null) visitor(swapper!);
   }
 
   @override
@@ -186,13 +184,10 @@ class RenderSwapper extends RenderBox {
   RenderBox? _stable;
   RenderBox? get stable => _stable;
   set stable(RenderBox? child) {
-    if (child == _stable)
-      return;
-    if (_stable != null)
-      dropChild(_stable!);
+    if (child == _stable) return;
+    if (_stable != null) dropChild(_stable!);
     _stable = child;
-    if (child != null)
-      adoptChild(child);
+    if (child != null) adoptChild(child);
   }
 
   bool? _swapperIsOnTop;
@@ -203,21 +198,16 @@ class RenderSwapper extends RenderBox {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
     }
-    if (child == _swapper)
-      return;
-    if (_swapper != null)
-      dropChild(_swapper!);
+    if (child == _swapper) return;
+    if (_swapper != null) dropChild(_swapper!);
     _swapper = child;
-    if (child != null)
-      adoptChild(child);
+    if (child != null) adoptChild(child);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_stable != null)
-      visitor(_stable!);
-    if (_swapper != null)
-      visitor(_swapper!);
+    if (_stable != null) visitor(_stable!);
+    if (_swapper != null) visitor(_swapper!);
   }
 
   @override
@@ -277,112 +267,121 @@ class RenderSwapper extends RenderBox {
 BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
 
 void main() {
-  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
-    const Key redKey = ValueKey<String>('red');
-    const Key blueKey = ValueKey<String>('blue');
-    Widget widget() {
-      return SwapperWithProperOverrides(
-        stable: ColoredBox(
-          key: redKey,
-          color: Color(nonconst(0xffff0000)),
-        ),
-        swapper: ColoredBox(
-          key: blueKey,
-          color: Color(nonconst(0xff0000ff)),
-        ),
-      );
-    }
+  testWidgets(
+    'RenderObjectElement *RenderObjectChild methods get called with correct arguments',
+    (WidgetTester tester) async {
+      const Key redKey = ValueKey<String>('red');
+      const Key blueKey = ValueKey<String>('blue');
+      Widget widget() {
+        return SwapperWithProperOverrides(
+          stable: ColoredBox(
+            key: redKey,
+            color: Color(nonconst(0xffff0000)),
+          ),
+          swapper: ColoredBox(
+            key: blueKey,
+            color: Color(nonconst(0xff0000ff)),
+          ),
+        );
+      }
 
-    await tester.pumpWidget(widget());
-    final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
-    final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
-    final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.insertSlots, contains('stable'));
-    expect(swapper.insertSlots, contains(true));
-    expect(swapper.moveSlots, isEmpty);
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, const Offset(0, 300));
-    expect(parentDataFor(blueBox).offset, Offset.zero);
-    await tester.pumpWidget(widget());
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.moveSlots, contains(const Pair<bool>(true, false)));
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, Offset.zero);
-    expect(parentDataFor(blueBox).offset, const Offset(0, 300));
-    await tester.pumpWidget(const SwapperWithProperOverrides());
-    expect(redBox.attached, false);
-    expect(blueBox.attached, false);
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.removeSlots.length, 2);
-    expect(swapper.removeSlots, contains('stable'));
-    expect(swapper.removeSlots, contains(false));
-  });
+      await tester.pumpWidget(widget());
+      final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
+      final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
+      final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
+      expect(swapper.insertSlots.length, 2);
+      expect(swapper.insertSlots, contains('stable'));
+      expect(swapper.insertSlots, contains(true));
+      expect(swapper.moveSlots, isEmpty);
+      expect(swapper.removeSlots, isEmpty);
+      expect(parentDataFor(redBox).offset, const Offset(0, 300));
+      expect(parentDataFor(blueBox).offset, Offset.zero);
+      await tester.pumpWidget(widget());
+      expect(swapper.insertSlots.length, 2);
+      expect(swapper.moveSlots.length, 1);
+      expect(swapper.moveSlots, contains(const Pair<bool>(true, false)));
+      expect(swapper.removeSlots, isEmpty);
+      expect(parentDataFor(redBox).offset, Offset.zero);
+      expect(parentDataFor(blueBox).offset, const Offset(0, 300));
+      await tester.pumpWidget(const SwapperWithProperOverrides());
+      expect(redBox.attached, false);
+      expect(blueBox.attached, false);
+      expect(swapper.insertSlots.length, 2);
+      expect(swapper.moveSlots.length, 1);
+      expect(swapper.removeSlots.length, 2);
+      expect(swapper.removeSlots, contains('stable'));
+      expect(swapper.removeSlots, contains(false));
+    },
+  );
 
-  testWidgets('RenderObjectElement *RenderObjectChild methods delegate to deprecated methods', (WidgetTester tester) async {
-    const Key redKey = ValueKey<String>('red');
-    const Key blueKey = ValueKey<String>('blue');
-    Widget widget() {
-      return SwapperWithDeprecatedOverrides(
-        stable: ColoredBox(
-          key: redKey,
-          color: Color(nonconst(0xffff0000)),
-        ),
-        swapper: ColoredBox(
-          key: blueKey,
-          color: Color(nonconst(0xff0000ff)),
-        ),
-      );
-    }
+  testWidgets(
+    'RenderObjectElement *RenderObjectChild methods delegate to deprecated methods',
+    (WidgetTester tester) async {
+      const Key redKey = ValueKey<String>('red');
+      const Key blueKey = ValueKey<String>('blue');
+      Widget widget() {
+        return SwapperWithDeprecatedOverrides(
+          stable: ColoredBox(
+            key: redKey,
+            color: Color(nonconst(0xffff0000)),
+          ),
+          swapper: ColoredBox(
+            key: blueKey,
+            color: Color(nonconst(0xff0000ff)),
+          ),
+        );
+      }
 
-    await tester.pumpWidget(widget());
-    final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithDeprecatedOverrides));
-    final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
-    final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.insertSlots, contains('stable'));
-    expect(swapper.insertSlots, contains(true));
-    expect(swapper.moveSlots, isEmpty);
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, const Offset(0, 300));
-    expect(parentDataFor(blueBox).offset, Offset.zero);
-    await tester.pumpWidget(widget());
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.moveSlots, contains(const Pair<bool>(null, false)));
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, Offset.zero);
-    expect(parentDataFor(blueBox).offset, const Offset(0, 300));
-    await tester.pumpWidget(const SwapperWithDeprecatedOverrides());
-    expect(redBox.attached, false);
-    expect(blueBox.attached, false);
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.removeSlots.length, 2);
-    expect(swapper.removeSlots, <bool?>[null,null]);
-  });
+      await tester.pumpWidget(widget());
+      final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithDeprecatedOverrides));
+      final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
+      final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
+      expect(swapper.insertSlots.length, 2);
+      expect(swapper.insertSlots, contains('stable'));
+      expect(swapper.insertSlots, contains(true));
+      expect(swapper.moveSlots, isEmpty);
+      expect(swapper.removeSlots, isEmpty);
+      expect(parentDataFor(redBox).offset, const Offset(0, 300));
+      expect(parentDataFor(blueBox).offset, Offset.zero);
+      await tester.pumpWidget(widget());
+      expect(swapper.insertSlots.length, 2);
+      expect(swapper.moveSlots.length, 1);
+      expect(swapper.moveSlots, contains(const Pair<bool>(null, false)));
+      expect(swapper.removeSlots, isEmpty);
+      expect(parentDataFor(redBox).offset, Offset.zero);
+      expect(parentDataFor(blueBox).offset, const Offset(0, 300));
+      await tester.pumpWidget(const SwapperWithDeprecatedOverrides());
+      expect(redBox.attached, false);
+      expect(blueBox.attached, false);
+      expect(swapper.insertSlots.length, 2);
+      expect(swapper.moveSlots.length, 1);
+      expect(swapper.removeSlots.length, 2);
+      expect(swapper.removeSlots, <bool?>[null, null]);
+    },
+  );
 
-  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message', (WidgetTester tester) async {
-    const Key redKey = ValueKey<String>('red');
-    const Key blueKey = ValueKey<String>('blue');
-    Widget widget() {
-      return SwapperWithNoOverrides(
-        stable: ColoredBox(
-          key: redKey,
-          color: Color(nonconst(0xffff0000)),
-        ),
-        swapper: ColoredBox(
-          key: blueKey,
-          color: Color(nonconst(0xff0000ff)),
-        ),
-      );
-    }
+  testWidgets(
+    'RenderObjectElement *ChildRenderObject methods fail with deprecation message',
+    (WidgetTester tester) async {
+      const Key redKey = ValueKey<String>('red');
+      const Key blueKey = ValueKey<String>('blue');
+      Widget widget() {
+        return SwapperWithNoOverrides(
+          stable: ColoredBox(
+            key: redKey,
+            color: Color(nonconst(0xffff0000)),
+          ),
+          swapper: ColoredBox(
+            key: blueKey,
+            color: Color(nonconst(0xff0000ff)),
+          ),
+        );
+      }
 
-    await tester.pumpWidget(widget());
-    final FlutterError error = tester.takeException() as FlutterError;
-    final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
-    expect(summary.toString(), contains('deprecated'));
-  });
+      await tester.pumpWidget(widget());
+      final FlutterError error = tester.takeException() as FlutterError;
+      final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
+      expect(summary.toString(), contains('deprecated'));
+    },
+  );
 }

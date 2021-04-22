@@ -213,7 +213,8 @@ void main() {
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
-      final RenderWrap wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200], clipBehavior: clip);
+      final RenderWrap wrap =
+          RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200], clipBehavior: clip);
       layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
       wrap.paint(context, Offset.zero);
       expect(context.clipBehavior, equals(clip));

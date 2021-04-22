@@ -14,7 +14,7 @@ void main() {
     // Regression test for b/151732341.
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Directionality(
-    textDirection: TextDirection.ltr,
+      textDirection: TextDirection.ltr,
       child: Text.rich(
         TextSpan(
           text: 'Hallo ',
@@ -37,7 +37,7 @@ void main() {
     final Map<String, int> labelToNodeId = <String, int>{};
     node.visitChildren((SemanticsNode node) {
       labelToNodeId[node.label] = node.id;
-       return true;
+      return true;
     });
     expect(node.id, 1);
     expect(labelToNodeId['Hallo '], 2);

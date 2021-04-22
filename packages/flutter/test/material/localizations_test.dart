@@ -120,11 +120,14 @@ void main() {
       ),
     );
 
-    expect(() => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No MaterialLocalizations found'),
-    )));
+    expect(
+      () => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        contains('No MaterialLocalizations found'),
+      )),
+    );
 
     expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
   });

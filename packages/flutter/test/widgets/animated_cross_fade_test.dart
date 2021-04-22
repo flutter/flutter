@@ -262,7 +262,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(325.0, 175.0));
   });
 
-  Widget crossFadeWithWatcher({ bool towardsSecond = false }) {
+  Widget crossFadeWithWatcher({bool towardsSecond = false}) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AnimatedCrossFade(
@@ -287,35 +287,38 @@ void main() {
     }
   });
 
-  testWidgets('AnimatedCrossFade switches off TickerMode and semantics on faded out widget', (WidgetTester tester) async {
-    ExcludeSemantics findSemantics() {
-      return tester.widget(find.descendant(
-        of: find.byKey(const ValueKey<CrossFadeState>(CrossFadeState.showFirst)),
-        matching: find.byType(ExcludeSemantics),
-      ));
-    }
+  testWidgets(
+    'AnimatedCrossFade switches off TickerMode and semantics on faded out widget',
+    (WidgetTester tester) async {
+      ExcludeSemantics findSemantics() {
+        return tester.widget(find.descendant(
+          of: find.byKey(const ValueKey<CrossFadeState>(CrossFadeState.showFirst)),
+          matching: find.byType(ExcludeSemantics),
+        ));
+      }
 
-    await tester.pumpWidget(crossFadeWithWatcher());
+      await tester.pumpWidget(crossFadeWithWatcher());
 
-    final _TickerWatchingWidgetState state = tester.state(find.byType(_TickerWatchingWidget));
-    expect(state.ticker.muted, false);
-    expect(findSemantics().excluding, false);
-
-    await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
-    for (int i = 0; i < 2; i += 1) {
-      await tester.pump(const Duration(milliseconds: 25));
-      // Animations are kept alive in the middle of cross-fade
+      final _TickerWatchingWidgetState state = tester.state(find.byType(_TickerWatchingWidget));
       expect(state.ticker.muted, false);
-      // Semantics are turned off immediately on the widget that's fading out
-      expect(findSemantics().excluding, true);
-    }
+      expect(findSemantics().excluding, false);
 
-    // In the final state both animations and semantics should be off on the
-    // widget that's faded out.
-    await tester.pump(const Duration(milliseconds: 25));
-    expect(state.ticker.muted, true);
-    expect(findSemantics().excluding, true);
-  });
+      await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
+      for (int i = 0; i < 2; i += 1) {
+        await tester.pump(const Duration(milliseconds: 25));
+        // Animations are kept alive in the middle of cross-fade
+        expect(state.ticker.muted, false);
+        // Semantics are turned off immediately on the widget that's fading out
+        expect(findSemantics().excluding, true);
+      }
+
+      // In the final state both animations and semantics should be off on the
+      // widget that's faded out.
+      await tester.pump(const Duration(milliseconds: 25));
+      expect(state.ticker.muted, true);
+      expect(findSemantics().excluding, true);
+    },
+  );
 
   testWidgets('AnimatedCrossFade.layoutBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -375,7 +378,7 @@ class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with Singl
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((_) { })..start();
+    ticker = createTicker((_) {})..start();
   }
 
   @override

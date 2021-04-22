@@ -93,40 +93,43 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('Tapping outside a modal BottomSheet should dismiss it when isDismissible=true', (WidgetTester tester) async {
-    late BuildContext savedContext;
+  testWidgets(
+    'Tapping outside a modal BottomSheet should dismiss it when isDismissible=true',
+    (WidgetTester tester) async {
+      late BuildContext savedContext;
 
-    await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
-      ),
-    ));
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ));
 
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
+      await tester.pump();
+      expect(find.text('BottomSheet'), findsNothing);
 
-    bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<void>(
-      context: savedContext,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-      isDismissible: true,
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
+      bool showBottomSheetThenCalled = false;
+      showModalBottomSheet<void>(
+        context: savedContext,
+        builder: (BuildContext context) => const Text('BottomSheet'),
+        isDismissible: true,
+      ).then<void>((void value) {
+        showBottomSheetThenCalled = true;
+      });
 
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap above the bottom sheet to dismiss it.
-    await tester.tapAt(const Offset(20.0, 20.0));
-    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
-    expect(showBottomSheetThenCalled, isTrue);
-    expect(find.text('BottomSheet'), findsNothing);
-  });
+      // Tap above the bottom sheet to dismiss it.
+      await tester.tapAt(const Offset(20.0, 20.0));
+      await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+      expect(showBottomSheetThenCalled, isTrue);
+      expect(find.text('BottomSheet'), findsNothing);
+    },
+  );
 
   testWidgets('Verify that the BottomSheet animates non-linearly', (WidgetTester tester) async {
     late BuildContext savedContext;
@@ -160,42 +163,45 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('Tapping outside a modal BottomSheet should not dismiss it when isDismissible=false', (WidgetTester tester) async {
-    late BuildContext savedContext;
+  testWidgets(
+    'Tapping outside a modal BottomSheet should not dismiss it when isDismissible=false',
+    (WidgetTester tester) async {
+      late BuildContext savedContext;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            savedContext = context;
-            return Container();
-          },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              savedContext = context;
+              return Container();
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
+      await tester.pump();
+      expect(find.text('BottomSheet'), findsNothing);
 
-    bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<void>(
-      context: savedContext,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-      isDismissible: false,
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
+      bool showBottomSheetThenCalled = false;
+      showModalBottomSheet<void>(
+        context: savedContext,
+        builder: (BuildContext context) => const Text('BottomSheet'),
+        isDismissible: false,
+      ).then<void>((void value) {
+        showBottomSheetThenCalled = true;
+      });
 
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap above the bottom sheet, attempting to dismiss it.
-    await tester.tapAt(const Offset(20.0, 20.0));
-    await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
-    expect(showBottomSheetThenCalled, isFalse);
-    expect(find.text('BottomSheet'), findsOneWidget);
-  });
+      // Tap above the bottom sheet, attempting to dismiss it.
+      await tester.tapAt(const Offset(20.0, 20.0));
+      await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
+      expect(showBottomSheetThenCalled, isFalse);
+      expect(find.text('BottomSheet'), findsOneWidget);
+    },
+  );
 
   testWidgets('Swiping down a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
     late BuildContext savedContext;
@@ -232,77 +238,83 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('Swiping down a modal BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
-    late BuildContext savedContext;
+  testWidgets(
+    'Swiping down a modal BottomSheet should not dismiss it when enableDrag is false',
+    (WidgetTester tester) async {
+      late BuildContext savedContext;
 
-    await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
-      ),
-    ));
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ));
 
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
+      await tester.pump();
+      expect(find.text('BottomSheet'), findsNothing);
 
-    bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<void>(
-      context: savedContext,
-      isDismissible: false,
-      enableDrag: false,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
+      bool showBottomSheetThenCalled = false;
+      showModalBottomSheet<void>(
+        context: savedContext,
+        isDismissible: false,
+        enableDrag: false,
+        builder: (BuildContext context) => const Text('BottomSheet'),
+      ).then<void>((void value) {
+        showBottomSheetThenCalled = true;
+      });
 
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      expect(showBottomSheetThenCalled, isFalse);
 
-    // Swipe the bottom sheet, attempting to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
-    await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
-    expect(showBottomSheetThenCalled, isFalse);
-    expect(find.text('BottomSheet'), findsOneWidget);
-  });
+      // Swipe the bottom sheet, attempting to dismiss it.
+      await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+      await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
+      expect(showBottomSheetThenCalled, isFalse);
+      expect(find.text('BottomSheet'), findsOneWidget);
+    },
+  );
 
-  testWidgets('Swiping down a modal BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
-    late BuildContext savedContext;
+  testWidgets(
+    'Swiping down a modal BottomSheet should dismiss it when enableDrag is true',
+    (WidgetTester tester) async {
+      late BuildContext savedContext;
 
-    await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
-      ),
-    ));
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ));
 
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
+      await tester.pump();
+      expect(find.text('BottomSheet'), findsNothing);
 
-    bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<void>(
-      context: savedContext,
-      isDismissible: false,
-      enableDrag: true,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
+      bool showBottomSheetThenCalled = false;
+      showModalBottomSheet<void>(
+        context: savedContext,
+        isDismissible: false,
+        enableDrag: true,
+        builder: (BuildContext context) => const Text('BottomSheet'),
+      ).then<void>((void value) {
+        showBottomSheetThenCalled = true;
+      });
 
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      expect(showBottomSheetThenCalled, isFalse);
 
-    // Swipe the bottom sheet to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
-    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
-    expect(showBottomSheetThenCalled, isTrue);
-    expect(find.text('BottomSheet'), findsNothing);
-  });
+      // Swipe the bottom sheet to dismiss it.
+      await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+      await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+      expect(showBottomSheetThenCalled, isTrue);
+      expect(find.text('BottomSheet'), findsNothing);
+    },
+  );
 
   testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
     late BuildContext savedContext;
@@ -350,14 +362,17 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return Container(
-        margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet'),
-      );
-    }).closed.whenComplete(() {
-      showBottomSheetThenCalled = true;
-    });
+    scaffoldKey.currentState!
+        .showBottomSheet<void>((BuildContext context) {
+          return Container(
+            margin: const EdgeInsets.all(40.0),
+            child: const Text('BottomSheet'),
+          );
+        })
+        .closed
+        .whenComplete(() {
+          showBottomSheetThenCalled = true;
+        });
 
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
@@ -485,41 +500,51 @@ void main() {
       ),
     ));
 
-
-    showModalBottomSheet<void>(context: scaffoldKey.currentContext!, builder: (BuildContext context) {
-      return const Text('BottomSheet');
-    });
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
 
     await tester.pump(); // bottom sheet show animation starts
     await tester.pump(const Duration(seconds: 1)); // animation done
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
+            TestSemantics.rootChild(
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Dialog',
-                  textDirection: TextDirection.ltr,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'BottomSheet',
+                      label: 'Dialog',
                       textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
+                      ],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'BottomSheet',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
+                TestSemantics(),
               ],
             ),
-            TestSemantics(),
           ],
         ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -574,7 +599,6 @@ void main() {
       ),
     ));
 
-
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {
@@ -593,48 +617,58 @@ void main() {
     await tester.pump(); // bottom sheet show animation starts
     await tester.pump(const Duration(seconds: 1)); // animation done
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
+            TestSemantics.rootChild(
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Dialog',
-                  textDirection: TextDirection.ltr,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                      actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+                      label: 'Dialog',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.scopesRoute,
+                        SemanticsFlag.namesRoute,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: 'BottomSheet',
-                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'BottomSheet',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
+                TestSemantics(),
               ],
             ),
-            TestSemantics(),
           ],
         ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
     semantics.dispose();
   });
 
   testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
-          return const _TestPage();
-        })),
+        body: Navigator(
+          onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
+            return const _TestPage();
+          }),
+        ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -661,9 +695,11 @@ void main() {
   testWidgets('showModalBottomSheet uses root Navigator when specified', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
-          return const _TestPage(useRootNavigator: true);
-        })),
+        body: Navigator(
+          onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
+            return const _TestPage(useRootNavigator: true);
+          }),
+        ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -833,7 +869,6 @@ void main() {
   });
 
   group('constraints', () {
-
     testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
@@ -842,8 +877,7 @@ void main() {
         ),
       ));
       expect(find.text('BottomSheet'), findsOneWidget);
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(0, 586, 154, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(0, 586, 154, 600));
     });
 
     testWidgets('No constraints by default for showBottomSheet', (WidgetTester tester) async {
@@ -854,9 +888,7 @@ void main() {
               child: ElevatedButton(
                 child: const Text('Press me'),
                 onPressed: () {
-                  Scaffold.of(context).showBottomSheet<void>(
-                    (BuildContext context) => const Text('BottomSheet')
-                  );
+                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) => const Text('BottomSheet'));
                 },
               ),
             );
@@ -867,8 +899,7 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(0, 586, 154, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(0, 586, 154, 600));
     });
 
     testWidgets('No constraints by default for showModalBottomSheet', (WidgetTester tester) async {
@@ -893,8 +924,7 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(0, 586, 800, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(0, 586, 800, 600));
     });
 
     testWidgets('Theme constraints used for bottomSheet property', (WidgetTester tester) async {
@@ -902,7 +932,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: const Scaffold(
           body: Center(child: Text('body')),
@@ -911,8 +941,7 @@ void main() {
       ));
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(360, 558, 440, 600));
     });
 
     testWidgets('Theme constraints used for showBottomSheet', (WidgetTester tester) async {
@@ -920,7 +949,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -928,9 +957,7 @@ void main() {
               child: ElevatedButton(
                 child: const Text('Press me'),
                 onPressed: () {
-                  Scaffold.of(context).showBottomSheet<void>(
-                    (BuildContext context) => const Text('BottomSheet')
-                  );
+                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) => const Text('BottomSheet'));
                 },
               ),
             );
@@ -942,8 +969,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(360, 558, 440, 600));
     });
 
     testWidgets('Theme constraints used for showModalBottomSheet', (WidgetTester tester) async {
@@ -951,7 +977,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -974,8 +1000,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(360, 558, 440, 600));
     });
 
     testWidgets('constraints param overrides theme for showBottomSheet', (WidgetTester tester) async {
@@ -983,7 +1008,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -1006,8 +1031,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 100dp wide instead of 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(350, 572, 450, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(350, 572, 450, 600));
     });
 
     testWidgets('constraints param overrides theme for showModalBottomSheet', (WidgetTester tester) async {
@@ -1015,7 +1039,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -1039,10 +1063,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 100dp instead of 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-          const Rect.fromLTRB(350, 572, 450, 600));
+      expect(tester.getRect(find.text('BottomSheet')), const Rect.fromLTRB(350, 572, 450, 600));
     });
-
   });
 }
 

@@ -22,7 +22,9 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             splashColor: splashColor,
-            onPressed: () { pressed = true; },
+            onPressed: () {
+              pressed = true;
+            },
             child: const Text('BUTTON'),
           ),
         ),
@@ -56,7 +58,9 @@ void main() {
             child: RawMaterialButton(
               splashColor: splashColor,
               focusNode: focusNode,
-              onPressed: () { pressed = true; },
+              onPressed: () {
+                pressed = true;
+              },
               child: const Text('BUTTON'),
             ),
           ),
@@ -133,7 +137,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: RawMaterialButton(
-            onPressed: () { },
+            onPressed: () {},
             constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
             materialTapTargetSize: MaterialTapTargetSize.padded,
             child: const Text('+'),
@@ -142,29 +146,32 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isButton,
-              SemanticsFlag.isEnabled,
-              SemanticsFlag.isFocusable,
-            ],
-            actions: <SemanticsAction>[
-              SemanticsAction.tap,
-            ],
-            label: '+',
-            textDirection: TextDirection.ltr,
-            rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-            children: <TestSemantics>[],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              label: '+',
+              textDirection: TextDirection.ltr,
+              rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+              children: <TestSemantics>[],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
       ),
-      ignoreTransform: true,
-    ));
+    );
 
     semantics.dispose();
   });
@@ -180,7 +187,7 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
+            onPressed: () {},
             fillColor: fillColor,
             highlightColor: highlightColor,
             splashColor: splashColor,
@@ -212,7 +219,7 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
+            onPressed: () {},
             fillColor: fillColor,
             highlightColor: highlightColor,
             splashColor: splashColor,
@@ -240,7 +247,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               child: SizedBox(
                 width: 400.0,
                 height: 400.0,
@@ -271,7 +278,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               child: SizedBox(
                 key: key,
                 width: 8.0,
@@ -297,7 +304,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               key: key,
-              onPressed: () { },
+              onPressed: () {},
               child: const SizedBox(),
             ),
           ],
@@ -438,80 +445,95 @@ void main() {
     expect(box, paints..rect(color: hoverColor));
   });
 
-  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgets(
+    'RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null',
+    (WidgetTester tester) async {
+      bool wasPressed;
+      Finder rawMaterialButton;
 
-    bool wasPressed;
-    Finder rawMaterialButton;
+      Widget buildFrame({VoidCallback? onPressed, VoidCallback? onLongPress}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: RawMaterialButton(
+            child: const Text('button'),
+            onPressed: onPressed,
+            onLongPress: onLongPress,
+          ),
+        );
+      }
 
-    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: RawMaterialButton(
-          child: const Text('button'),
-          onPressed: onPressed,
-          onLongPress: onLongPress,
+      // onPressed not null, onLongPress null.
+      wasPressed = false;
+      await tester.pumpWidget(
+        buildFrame(
+          onPressed: () {
+            wasPressed = true;
+          },
+          onLongPress: null,
         ),
       );
-    }
+      rawMaterialButton = find.byType(RawMaterialButton);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+      await tester.tap(rawMaterialButton);
+      expect(wasPressed, true);
 
-    // onPressed not null, onLongPress null.
-    wasPressed = false;
-    await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
-    );
-    rawMaterialButton = find.byType(RawMaterialButton);
-    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
-    await tester.tap(rawMaterialButton);
-    expect(wasPressed, true);
-
-    // onPressed null, onLongPress not null.
-    wasPressed = false;
-    await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
-    );
-    rawMaterialButton = find.byType(RawMaterialButton);
-    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
-    await tester.longPress(rawMaterialButton);
-    expect(wasPressed, true);
-
-    // onPressed null, onLongPress null.
-    await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
-    );
-    rawMaterialButton = find.byType(RawMaterialButton);
-    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
-  });
-
-  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
-    bool didPressButton = false;
-    bool didLongPressButton = false;
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: RawMaterialButton(
-          onPressed: () {
-            didPressButton = true;
-          },
+      // onPressed null, onLongPress not null.
+      wasPressed = false;
+      await tester.pumpWidget(
+        buildFrame(
+          onPressed: null,
           onLongPress: () {
-            didLongPressButton = true;
+            wasPressed = true;
           },
-          child: const Text('button'),
         ),
-      ),
-    );
+      );
+      rawMaterialButton = find.byType(RawMaterialButton);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+      await tester.longPress(rawMaterialButton);
+      expect(wasPressed, true);
 
-    final Finder rawMaterialButton = find.byType(RawMaterialButton);
-    expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+      // onPressed null, onLongPress null.
+      await tester.pumpWidget(
+        buildFrame(onPressed: null, onLongPress: null),
+      );
+      rawMaterialButton = find.byType(RawMaterialButton);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
+    },
+  );
 
-    expect(didPressButton, isFalse);
-    await tester.tap(rawMaterialButton);
-    expect(didPressButton, isTrue);
+  testWidgets(
+    'RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized',
+    (WidgetTester tester) async {
+      bool didPressButton = false;
+      bool didLongPressButton = false;
 
-    expect(didLongPressButton, isFalse);
-    await tester.longPress(rawMaterialButton);
-    expect(didLongPressButton, isTrue);
-  });
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: RawMaterialButton(
+            onPressed: () {
+              didPressButton = true;
+            },
+            onLongPress: () {
+              didLongPressButton = true;
+            },
+            child: const Text('button'),
+          ),
+        ),
+      );
+
+      final Finder rawMaterialButton = find.byType(RawMaterialButton);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
+
+      expect(didPressButton, isFalse);
+      await tester.tap(rawMaterialButton);
+      expect(didPressButton, isTrue);
+
+      expect(didLongPressButton, isFalse);
+      await tester.longPress(rawMaterialButton);
+      expect(didLongPressButton, isTrue);
+    },
+  );
 
   testWidgets('RawMaterialButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
@@ -527,7 +549,9 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
               ),
             ),
           ),

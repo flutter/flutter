@@ -24,9 +24,8 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length)
-      return;
+  void createChild(int index, {required RenderBox? after}) {
+    if (index < 0 || index >= children.length) return;
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject.insert(children[index], after: after);
@@ -63,7 +62,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  void setDidUnderflow(bool value) { }
+  void setDidUnderflow(bool value) {}
 }
 
 class ViewportOffsetSpy extends ViewportOffset {

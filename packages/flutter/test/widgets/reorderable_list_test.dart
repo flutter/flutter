@@ -98,7 +98,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {
+    void check({List<int> visible = const <int>[], List<int> hidden = const <int>[]}) {
       for (final int i in visible) {
         expect(find.text('item $i'), findsOneWidget);
       }
@@ -157,21 +157,27 @@ void main() {
     const Color iconColor = Color(0xff0000ff);
 
     TextStyle getIconStyle() {
-      return tester.widget<RichText>(
-        find.descendant(
-          of: find.byType(Icon),
-          matching: find.byType(RichText),
-        ),
-      ).text.style!;
+      return tester
+          .widget<RichText>(
+            find.descendant(
+              of: find.byType(Icon),
+              matching: find.byType(RichText),
+            ),
+          )
+          .text
+          .style!;
     }
 
     TextStyle getTextStyle() {
-      return tester.widget<RichText>(
-        find.descendant(
-          of: find.text('item 0'),
-          matching: find.byType(RichText),
-        ),
-      ).text.style!;
+      return tester
+          .widget<RichText>(
+            find.descendant(
+              of: find.text('item 0'),
+              matching: find.byType(RichText),
+            ),
+          )
+          .text
+          .style!;
     }
 
     // This SliverReorderableList has just one item: "item 0".
@@ -212,10 +218,10 @@ void main() {
       TestList(
         items: List<int>.from(<int>[0, 1, 2, 3]),
         proxyDecorator: (
-            Widget child,
-            int index,
-            Animation<double> animation,
-            ) {
+          Widget child,
+          int index,
+          Animation<double> animation,
+        ) {
           return AnimatedBuilder(
             animation: animation,
             builder: (BuildContext context, Widget? child) {

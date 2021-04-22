@@ -858,10 +858,8 @@ class _TestAnnotatedLayer extends Layer {
     Offset localPosition, {
     required bool onlyFirst,
   }) {
-    if (S != int)
-      return false;
-    if (size != null && !(offset & size!).contains(localPosition))
-      return false;
+    if (S != int) return false;
+    if (size != null && !(offset & size!).contains(localPosition)) return false;
     final Object untypedValue = value;
     final S typedValue = untypedValue as S;
     result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition));
@@ -882,9 +880,9 @@ Matcher _equalToAnnotationResult<T>(
   return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(
     list,
     (AnnotationEntry<int> a, AnnotationEntry<int> b) {
-      return a.annotation == b.annotation
-          && _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff)
-          && _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
+      return a.annotation == b.annotation &&
+          _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff) &&
+          _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
     },
     'equal to',
   );

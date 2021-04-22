@@ -248,8 +248,7 @@ void main() {
       ),
     );
 
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
@@ -265,17 +264,28 @@ void main() {
       ),
     );
 
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform!;
     expect(transform.storage, <dynamic>[
-      moreOrLessEquals(0.0), 1.0, 0.0, 0.0,
-      -1.0, moreOrLessEquals(0.0), 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      700.0, -100.0, 0.0, 1.0,
+      moreOrLessEquals(0.0),
+      1.0,
+      0.0,
+      0.0,
+      -1.0,
+      moreOrLessEquals(0.0),
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      700.0,
+      -100.0,
+      0.0,
+      1.0,
     ]);
   });
 
@@ -306,8 +316,7 @@ void main() {
     );
 
     // This should not cause a transform layer to be inserted.
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 1); // only the render view
     expect(tester.getTopLeft(find.byType(Container)), const Offset(100.0, 50.0));
   });
@@ -320,8 +329,7 @@ void main() {
       ),
     );
 
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
@@ -376,7 +384,7 @@ void main() {
   testWidgets(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
-      for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
+      for (double angle = 0; angle <= math.pi / 4; angle += 0.01) {
         await tester.pumpWidget(RepaintBoundary(child: _generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
@@ -398,6 +406,7 @@ class TestRectPainter extends CustomPainter {
       Paint()..color = const Color(0xFFFF0000),
     );
   }
+
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

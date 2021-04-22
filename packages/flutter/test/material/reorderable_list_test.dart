@@ -174,7 +174,7 @@ void main() {
             ),
           ],
           scrollDirection: Axis.vertical,
-          onReorder: (int oldIndex, int newIndex) { },
+          onReorder: (int oldIndex, int newIndex) {},
         );
         await tester.pumpWidget(MaterialApp(
           home: SizedBox(
@@ -245,7 +245,7 @@ void main() {
               color: Colors.green,
             ),
           ],
-          onReorder: (int oldIndex, int newIndex) { },
+          onReorder: (int oldIndex, int newIndex) {},
         );
         await tester.pumpWidget(MaterialApp(
           home: Container(
@@ -288,11 +288,13 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
+          return find
+              .byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
               .findAncestorStateOfType<_StatefulState>()!;
         }
+
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
             children: <Widget>[
@@ -300,7 +302,7 @@ void main() {
               _Stateful(key: const Key('B')),
               _Stateful(key: const Key('C')),
             ],
-            onReorder: (int oldIndex, int newIndex) { },
+            onReorder: (int oldIndex, int newIndex) {},
           ),
         ));
         await tester.tap(find.byKey(const Key('A')));
@@ -317,7 +319,7 @@ void main() {
               _Stateful(key: const Key('C')),
               _Stateful(key: const Key('A')),
             ],
-            onReorder: (int oldIndex, int newIndex) { },
+            onReorder: (int oldIndex, int newIndex) {},
           ),
         ));
         // Only the 'A' widget should be checked.
@@ -363,7 +365,7 @@ void main() {
             SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
             SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
           ],
-          onReorder: (int oldIndex, int newIndex) { },
+          onReorder: (int oldIndex, int newIndex) {},
         );
 
         Widget buildWithScrollController(ScrollController controller) {
@@ -406,7 +408,7 @@ void main() {
                 height: 150,
                 child: ReorderableListView(
                   scrollController: customController,
-                  onReorder: (int oldIndex, int newIndex) { },
+                  onReorder: (int oldIndex, int newIndex) {},
                   children: const <Widget>[
                     SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: firstBox),
                     SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: secondBox),
@@ -463,7 +465,7 @@ void main() {
             SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
             SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
           ],
-          onReorder: (int oldIndex, int newIndex) { },
+          onReorder: (int oldIndex, int newIndex) {},
         );
         final Widget overlay = Overlay(
           initialEntries: <OverlayEntry>[
@@ -476,7 +478,7 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child:SizedBox(
+          child: SizedBox(
             width: 100.0,
             height: 100.0,
             child: Directionality(
@@ -494,10 +496,14 @@ void main() {
 
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
-          final Semantics semantics = find.ancestor(
-            of: find.byKey(Key(listItems[index])),
-            matching: find.byType(Semantics),
-          ).evaluate().first.widget as Semantics;
+          final Semantics semantics = find
+              .ancestor(
+                of: find.byKey(Key(listItems[index])),
+                matching: find.byType(Semantics),
+              )
+              .evaluate()
+              .first
+              .widget as Semantics;
           return semantics.properties.customSemanticsActions!;
         }
 
@@ -514,29 +520,90 @@ void main() {
 
             // The first item can be moved down or to the end.
             final Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
-            expect(firstSemanticsActions.length, 2, reason: 'The first list item should have 2 custom actions with $direction.');
-            expect(firstSemanticsActions.containsKey(moveToStart), false, reason: 'The first item cannot `Move to the start` with $direction.');
-            expect(firstSemanticsActions.containsKey(moveUp), false, reason: 'The first item cannot `Move up` with $direction.');
-            expect(firstSemanticsActions.containsKey(moveDown), true, reason: 'The first item should be able to `Move down` with $direction.');
-            expect(firstSemanticsActions.containsKey(moveToEnd), true, reason: 'The first item should be able to `Move to the end` with $direction.');
+            expect(
+              firstSemanticsActions.length,
+              2,
+              reason: 'The first list item should have 2 custom actions with $direction.',
+            );
+            expect(
+              firstSemanticsActions.containsKey(moveToStart),
+              false,
+              reason: 'The first item cannot `Move to the start` with $direction.',
+            );
+            expect(
+              firstSemanticsActions.containsKey(moveUp),
+              false,
+              reason: 'The first item cannot `Move up` with $direction.',
+            );
+            expect(
+              firstSemanticsActions.containsKey(moveDown),
+              true,
+              reason: 'The first item should be able to `Move down` with $direction.',
+            );
+            expect(
+              firstSemanticsActions.containsKey(moveToEnd),
+              true,
+              reason: 'The first item should be able to `Move to the end` with $direction.',
+            );
 
             // Items in the middle can be moved to the start, end, up or down.
             for (int i = 1; i < listItems.length - 1; i += 1) {
               final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions = getSemanticsActions(i);
-              expect(ithSemanticsActions.length, 4, reason: 'List item $i should have 4 custom actions with $direction.');
-              expect(ithSemanticsActions.containsKey(moveToStart), true, reason: 'List item $i should be able to `Move to the start` with $direction.');
-              expect(ithSemanticsActions.containsKey(moveUp), true, reason: 'List item $i should be able to `Move up` with $direction.');
-              expect(ithSemanticsActions.containsKey(moveDown), true, reason: 'List item $i should be able to `Move down` with $direction.');
-              expect(ithSemanticsActions.containsKey(moveToEnd), true, reason: 'List item $i should be able to `Move to the end` with $direction.');
+              expect(
+                ithSemanticsActions.length,
+                4,
+                reason: 'List item $i should have 4 custom actions with $direction.',
+              );
+              expect(
+                ithSemanticsActions.containsKey(moveToStart),
+                true,
+                reason: 'List item $i should be able to `Move to the start` with $direction.',
+              );
+              expect(
+                ithSemanticsActions.containsKey(moveUp),
+                true,
+                reason: 'List item $i should be able to `Move up` with $direction.',
+              );
+              expect(
+                ithSemanticsActions.containsKey(moveDown),
+                true,
+                reason: 'List item $i should be able to `Move down` with $direction.',
+              );
+              expect(
+                ithSemanticsActions.containsKey(moveToEnd),
+                true,
+                reason: 'List item $i should be able to `Move to the end` with $direction.',
+              );
             }
 
             // The last item can be moved up or to the start.
-            final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-            expect(lastSemanticsActions.length, 2, reason: 'The last list item should have 2 custom actions with $direction.');
-            expect(lastSemanticsActions.containsKey(moveToStart), true, reason: 'The last item should be able to `Move to the start` with $direction.');
-            expect(lastSemanticsActions.containsKey(moveUp), true, reason: 'The last item should be able to `Move up` with $direction.');
-            expect(lastSemanticsActions.containsKey(moveDown), false, reason: 'The last item cannot `Move down` with $direction.');
-            expect(lastSemanticsActions.containsKey(moveToEnd), false, reason: 'The last item cannot `Move to the end` with $direction.');
+            final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions =
+                getSemanticsActions(listItems.length - 1);
+            expect(
+              lastSemanticsActions.length,
+              2,
+              reason: 'The last list item should have 2 custom actions with $direction.',
+            );
+            expect(
+              lastSemanticsActions.containsKey(moveToStart),
+              true,
+              reason: 'The last item should be able to `Move to the start` with $direction.',
+            );
+            expect(
+              lastSemanticsActions.containsKey(moveUp),
+              true,
+              reason: 'The last item should be able to `Move up` with $direction.',
+            );
+            expect(
+              lastSemanticsActions.containsKey(moveDown),
+              false,
+              reason: 'The last item cannot `Move down` with $direction.',
+            );
+            expect(
+              lastSemanticsActions.containsKey(moveToEnd),
+              false,
+              reason: 'The last item cannot `Move to the end` with $direction.',
+            );
           }
           handle.dispose();
         });
@@ -634,7 +701,7 @@ void main() {
                   child: SwitchListTile(
                     title: const Text('Switch tile'),
                     value: true,
-                    onChanged: (bool? newValue) { },
+                    onChanged: (bool? newValue) {},
                   ),
                 ),
               ),
@@ -645,7 +712,7 @@ void main() {
               ),
             ],
             scrollDirection: Axis.vertical,
-            onReorder: (int oldIndex, int newIndex) { },
+            onReorder: (int oldIndex, int newIndex) {},
           );
           await tester.pumpWidget(MaterialApp(
             home: SizedBox(
@@ -658,21 +725,24 @@ void main() {
           final SemanticsNode semanticsNode = tester.getSemantics(find.byKey(const Key('Switch tile')));
 
           // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
-          expect(semanticsNode, matchesSemantics(
-            hasToggledState: true,
-            isToggled: true,
-            isEnabled: true,
-            isFocusable: true,
-            hasEnabledState: true,
-            label: 'Switch tile',
-            hasTapAction: true,
-            customActions: const <CustomSemanticsAction>[
-              CustomSemanticsAction(label: 'Move up'),
-              CustomSemanticsAction(label: 'Move down'),
-              CustomSemanticsAction(label: 'Move to the end'),
-              CustomSemanticsAction(label: 'Move to the start'),
-            ],
-          ));
+          expect(
+            semanticsNode,
+            matchesSemantics(
+              hasToggledState: true,
+              isToggled: true,
+              isEnabled: true,
+              isFocusable: true,
+              hasEnabledState: true,
+              label: 'Switch tile',
+              hasTapAction: true,
+              customActions: const <CustomSemanticsAction>[
+                CustomSemanticsAction(label: 'Move up'),
+                CustomSemanticsAction(label: 'Move down'),
+                CustomSemanticsAction(label: 'Move to the end'),
+                CustomSemanticsAction(label: 'Move to the start'),
+              ],
+            ),
+          );
           handle.dispose();
         });
       });
@@ -785,7 +855,7 @@ void main() {
             ),
           ],
           scrollDirection: Axis.horizontal,
-          onReorder: (int oldIndex, int newIndex) { },
+          onReorder: (int oldIndex, int newIndex) {},
         );
         await tester.pumpWidget(MaterialApp(
           home: SizedBox(
@@ -857,7 +927,7 @@ void main() {
             ),
           ],
           scrollDirection: Axis.horizontal,
-          onReorder: (int oldIndex, int newIndex) { },
+          onReorder: (int oldIndex, int newIndex) {},
         );
         await tester.pumpWidget(MaterialApp(
           home: Container(
@@ -900,11 +970,13 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
+          return find
+              .byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
               .findAncestorStateOfType<_StatefulState>()!;
         }
+
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
             children: <Widget>[
@@ -912,7 +984,7 @@ void main() {
               _Stateful(key: const Key('B')),
               _Stateful(key: const Key('C')),
             ],
-            onReorder: (int oldIndex, int newIndex) { },
+            onReorder: (int oldIndex, int newIndex) {},
             scrollDirection: Axis.horizontal,
           ),
         ));
@@ -930,7 +1002,7 @@ void main() {
               _Stateful(key: const Key('C')),
               _Stateful(key: const Key('A')),
             ],
-            onReorder: (int oldIndex, int newIndex) { },
+            onReorder: (int oldIndex, int newIndex) {},
             scrollDirection: Axis.horizontal,
           ),
         ));
@@ -971,10 +1043,14 @@ void main() {
 
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
-          final Semantics semantics = find.ancestor(
-            of: find.byKey(Key(listItems[index])),
-            matching: find.byType(Semantics),
-          ).evaluate().first.widget as Semantics;
+          final Semantics semantics = find
+              .ancestor(
+                of: find.byKey(Key(listItems[index])),
+                matching: find.byType(Semantics),
+              )
+              .evaluate()
+              .first
+              .widget as Semantics;
           return semantics.properties.customSemanticsActions!;
         }
 
@@ -991,65 +1067,146 @@ void main() {
           // The first item can be moved right or to the end.
           final Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
           expect(firstSemanticsActions.length, 2, reason: 'The first list item should have 2 custom actions.');
-          expect(firstSemanticsActions.containsKey(moveToStart), false, reason: 'The first item cannot `Move to the start`.');
+          expect(
+            firstSemanticsActions.containsKey(moveToStart),
+            false,
+            reason: 'The first item cannot `Move to the start`.',
+          );
           expect(firstSemanticsActions.containsKey(moveLeft), false, reason: 'The first item cannot `Move left`.');
-          expect(firstSemanticsActions.containsKey(moveRight), true, reason: 'The first item should be able to `Move right`.');
-          expect(firstSemanticsActions.containsKey(moveToEnd), true, reason: 'The first item should be able to `Move to the end`.');
+          expect(
+            firstSemanticsActions.containsKey(moveRight),
+            true,
+            reason: 'The first item should be able to `Move right`.',
+          );
+          expect(
+            firstSemanticsActions.containsKey(moveToEnd),
+            true,
+            reason: 'The first item should be able to `Move to the end`.',
+          );
 
           // Items in the middle can be moved to the start, end, left or right.
           for (int i = 1; i < listItems.length - 1; i += 1) {
             final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions = getSemanticsActions(i);
             expect(ithSemanticsActions.length, 4, reason: 'List item $i should have 4 custom actions.');
-            expect(ithSemanticsActions.containsKey(moveToStart), true, reason: 'List item $i should be able to `Move to the start`.');
-            expect(ithSemanticsActions.containsKey(moveLeft), true, reason: 'List item $i should be able to `Move left`.');
-            expect(ithSemanticsActions.containsKey(moveRight), true, reason: 'List item $i should be able to `Move right`.');
-            expect(ithSemanticsActions.containsKey(moveToEnd), true, reason: 'List item $i should be able to `Move to the end`.');
+            expect(
+              ithSemanticsActions.containsKey(moveToStart),
+              true,
+              reason: 'List item $i should be able to `Move to the start`.',
+            );
+            expect(
+              ithSemanticsActions.containsKey(moveLeft),
+              true,
+              reason: 'List item $i should be able to `Move left`.',
+            );
+            expect(
+              ithSemanticsActions.containsKey(moveRight),
+              true,
+              reason: 'List item $i should be able to `Move right`.',
+            );
+            expect(
+              ithSemanticsActions.containsKey(moveToEnd),
+              true,
+              reason: 'List item $i should be able to `Move to the end`.',
+            );
           }
 
           // The last item can be moved left or to the start.
-          final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions =
+              getSemanticsActions(listItems.length - 1);
           expect(lastSemanticsActions.length, 2, reason: 'The last list item should have 2 custom actions.');
-          expect(lastSemanticsActions.containsKey(moveToStart), true, reason: 'The last item should be able to `Move to the start`.');
-          expect(lastSemanticsActions.containsKey(moveLeft), true, reason: 'The last item should be able to `Move left`.');
+          expect(
+            lastSemanticsActions.containsKey(moveToStart),
+            true,
+            reason: 'The last item should be able to `Move to the start`.',
+          );
+          expect(
+            lastSemanticsActions.containsKey(moveLeft),
+            true,
+            reason: 'The last item should be able to `Move left`.',
+          );
           expect(lastSemanticsActions.containsKey(moveRight), false, reason: 'The last item cannot `Move right`.');
           expect(lastSemanticsActions.containsKey(moveToEnd), false, reason: 'The last item cannot `Move to the end`.');
           handle.dispose();
         });
 
-        testWidgets('Provides the correct accessibility actions in Right-To-Left directionality', (WidgetTester tester) async {
-          // In RTL mode, the right is the start and the left is the end.
-          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
-          final SemanticsHandle handle = tester.ensureSemantics();
+        testWidgets(
+          'Provides the correct accessibility actions in Right-To-Left directionality',
+          (WidgetTester tester) async {
+            // In RTL mode, the right is the start and the left is the end.
+            // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+            final SemanticsHandle handle = tester.ensureSemantics();
 
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
 
-          // The first item can be moved right or to the end.
-          final Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
-          expect(firstSemanticsActions.length, 2, reason: 'The first list item should have 2 custom actions.');
-          expect(firstSemanticsActions.containsKey(moveToStart), false, reason: 'The first item cannot `Move to the start`.');
-          expect(firstSemanticsActions.containsKey(moveRight), false, reason: 'The first item cannot `Move right`.');
-          expect(firstSemanticsActions.containsKey(moveLeft), true, reason: 'The first item should be able to `Move left`.');
-          expect(firstSemanticsActions.containsKey(moveToEnd), true, reason: 'The first item should be able to `Move to the end`.');
+            // The first item can be moved right or to the end.
+            final Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+            expect(firstSemanticsActions.length, 2, reason: 'The first list item should have 2 custom actions.');
+            expect(
+              firstSemanticsActions.containsKey(moveToStart),
+              false,
+              reason: 'The first item cannot `Move to the start`.',
+            );
+            expect(firstSemanticsActions.containsKey(moveRight), false, reason: 'The first item cannot `Move right`.');
+            expect(
+              firstSemanticsActions.containsKey(moveLeft),
+              true,
+              reason: 'The first item should be able to `Move left`.',
+            );
+            expect(
+              firstSemanticsActions.containsKey(moveToEnd),
+              true,
+              reason: 'The first item should be able to `Move to the end`.',
+            );
 
-          // Items in the middle can be moved to the start, end, left or right.
-          for (int i = 1; i < listItems.length - 1; i += 1) {
-            final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions = getSemanticsActions(i);
-            expect(ithSemanticsActions.length, 4, reason: 'List item $i should have 4 custom actions.');
-            expect(ithSemanticsActions.containsKey(moveToStart), true, reason: 'List item $i should be able to `Move to the start`.');
-            expect(ithSemanticsActions.containsKey(moveRight), true, reason: 'List item $i should be able to `Move right`.');
-            expect(ithSemanticsActions.containsKey(moveLeft), true, reason: 'List item $i should be able to `Move left`.');
-            expect(ithSemanticsActions.containsKey(moveToEnd), true, reason: 'List item $i should be able to `Move to the end`.');
-          }
+            // Items in the middle can be moved to the start, end, left or right.
+            for (int i = 1; i < listItems.length - 1; i += 1) {
+              final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions = getSemanticsActions(i);
+              expect(ithSemanticsActions.length, 4, reason: 'List item $i should have 4 custom actions.');
+              expect(
+                ithSemanticsActions.containsKey(moveToStart),
+                true,
+                reason: 'List item $i should be able to `Move to the start`.',
+              );
+              expect(
+                ithSemanticsActions.containsKey(moveRight),
+                true,
+                reason: 'List item $i should be able to `Move right`.',
+              );
+              expect(
+                ithSemanticsActions.containsKey(moveLeft),
+                true,
+                reason: 'List item $i should be able to `Move left`.',
+              );
+              expect(
+                ithSemanticsActions.containsKey(moveToEnd),
+                true,
+                reason: 'List item $i should be able to `Move to the end`.',
+              );
+            }
 
-          // The last item can be moved left or to the start.
-          final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          expect(lastSemanticsActions.length, 2, reason: 'The last list item should have 2 custom actions.');
-          expect(lastSemanticsActions.containsKey(moveToStart), true, reason: 'The last item should be able to `Move to the start`.');
-          expect(lastSemanticsActions.containsKey(moveRight), true, reason: 'The last item should be able to `Move right`.');
-          expect(lastSemanticsActions.containsKey(moveLeft), false, reason: 'The last item cannot `Move left`.');
-          expect(lastSemanticsActions.containsKey(moveToEnd), false, reason: 'The last item cannot `Move to the end`.');
-          handle.dispose();
-        });
+            // The last item can be moved left or to the start.
+            final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions =
+                getSemanticsActions(listItems.length - 1);
+            expect(lastSemanticsActions.length, 2, reason: 'The last list item should have 2 custom actions.');
+            expect(
+              lastSemanticsActions.containsKey(moveToStart),
+              true,
+              reason: 'The last item should be able to `Move to the start`.',
+            );
+            expect(
+              lastSemanticsActions.containsKey(moveRight),
+              true,
+              reason: 'The last item should be able to `Move right`.',
+            );
+            expect(lastSemanticsActions.containsKey(moveLeft), false, reason: 'The last item cannot `Move left`.');
+            expect(
+              lastSemanticsActions.containsKey(moveToEnd),
+              false,
+              reason: 'The last item cannot `Move to the end`.',
+            );
+            handle.dispose();
+          },
+        );
 
         testWidgets('First item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
@@ -1072,28 +1229,31 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('First item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
-          // In RTL mode, the right is the start and the left is the end.
-          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
-          final SemanticsHandle handle = tester.ensureSemantics();
-          expect(listItems, orderedEquals(originalListItems));
+        testWidgets(
+          'First item accessibility (a11y) actions work in Right-To-Left directionality',
+          (WidgetTester tester) async {
+            // In RTL mode, the right is the start and the left is the end.
+            // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+            final SemanticsHandle handle = tester.ensureSemantics();
+            expect(listItems, orderedEquals(originalListItems));
 
-          // Test out move to end: move Item 1 to the end of the list.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveToEnd]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+            // Test out move to end: move Item 1 to the end of the list.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+            firstSemanticsActions[moveToEnd]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
 
-          // Test out move after: move Item 2 (the current first item) one space to the left.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveLeft]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
+            // Test out move after: move Item 2 (the current first item) one space to the left.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            firstSemanticsActions = getSemanticsActions(0);
+            firstSemanticsActions[moveLeft]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
 
-          handle.dispose();
-        });
+            handle.dispose();
+          },
+        );
 
         testWidgets('Middle item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
@@ -1130,42 +1290,45 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Middle item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
-          // In RTL mode, the right is the start and the left is the end.
-          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
-          final SemanticsHandle handle = tester.ensureSemantics();
-          expect(listItems, orderedEquals(originalListItems));
+        testWidgets(
+          'Middle item accessibility (a11y) actions work in Right-To-Left directionality',
+          (WidgetTester tester) async {
+            // In RTL mode, the right is the start and the left is the end.
+            // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+            final SemanticsHandle handle = tester.ensureSemantics();
+            expect(listItems, orderedEquals(originalListItems));
 
-          // Test out move to end: move Item 2 to the end of the list.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveToEnd]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+            // Test out move to end: move Item 2 to the end of the list.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
+            middleSemanticsActions[moveToEnd]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
-          // Test out move after: move Item 3 (the current second item) one space to the left.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveLeft]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
+            // Test out move after: move Item 3 (the current second item) one space to the left.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            middleSemanticsActions = getSemanticsActions(1);
+            middleSemanticsActions[moveLeft]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
 
-          // Test out move after: move Item 3 (the current third item) one space to the right.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveRight]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+            // Test out move after: move Item 3 (the current third item) one space to the right.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            middleSemanticsActions = getSemanticsActions(2);
+            middleSemanticsActions[moveRight]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
-          // Test out move to start: move Item 4 (the current third item) to the start of the list.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveToStart]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+            // Test out move to start: move Item 4 (the current third item) to the start of the list.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            middleSemanticsActions = getSemanticsActions(2);
+            middleSemanticsActions[moveToStart]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
-          handle.dispose();
-        });
+            handle.dispose();
+          },
+        );
 
         testWidgets('Last item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
@@ -1188,41 +1351,45 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Last item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
-          // In RTL mode, the right is the start and the left is the end.
-          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
-          final SemanticsHandle handle = tester.ensureSemantics();
-          expect(listItems, orderedEquals(originalListItems));
+        testWidgets(
+          'Last item accessibility (a11y) actions work in Right-To-Left directionality',
+          (WidgetTester tester) async {
+            // In RTL mode, the right is the start and the left is the end.
+            // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+            final SemanticsHandle handle = tester.ensureSemantics();
+            expect(listItems, orderedEquals(originalListItems));
 
-          // Test out move to start: move Item 4 to the start of the list.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveToStart]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
+            // Test out move to start: move Item 4 to the start of the list.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+            lastSemanticsActions[moveToStart]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
 
-          // Test out move before: move Item 3 (the current last item) one space to the right.
-          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
-          lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveRight]!();
-          await tester.pumpAndSettle();
-          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+            // Test out move before: move Item 3 (the current last item) one space to the right.
+            await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+            lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+            lastSemanticsActions[moveRight]!();
+            await tester.pumpAndSettle();
+            expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
-          handle.dispose();
-        });
+            handle.dispose();
+          },
+        );
       });
-
     });
 
-
     testWidgets('ReorderableListView.builder asserts on negative childCount', (WidgetTester tester) async {
-      expect(() => ReorderableListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return const SizedBox();
-        },
-        itemCount: -1,
-        onReorder: (int from, int to) {},
-      ), throwsAssertionError);
+      expect(
+        () => ReorderableListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return const SizedBox();
+          },
+          itemCount: -1,
+          onReorder: (int from, int to) {},
+        ),
+        throwsAssertionError,
+      );
     });
 
     testWidgets('ReorderableListView.builder only creates the children it needs', (WidgetTester tester) async {
@@ -1282,7 +1449,9 @@ void main() {
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(164, 20, 212, 560));
 
         // Horizontal, reversed
-        await tester.pumpWidget(build(padding: padding, header: horizontalHeader, scrollDirection: Axis.horizontal, reverse: true));
+        await tester.pumpWidget(
+          build(padding: padding, header: horizontalHeader, scrollDirection: Axis.horizontal, reverse: true),
+        );
         expect(tester.getRect(find.byKey(headerKey)), const Rect.fromLTRB(760, 20, 770, 560));
         expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(712, 20, 760, 560));
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(568, 20, 616, 560));
@@ -1306,7 +1475,7 @@ void main() {
           ),
         ],
         reverse: true,
-        onReorder: (int oldIndex, int newIndex) { },
+        onReorder: (int oldIndex, int newIndex) {},
       );
       await tester.pumpWidget(MaterialApp(
         home: reorderableListView,
@@ -1335,7 +1504,7 @@ void main() {
           ),
         ],
         scrollDirection: Axis.vertical,
-        onReorder: (int oldIndex, int newIndex) { },
+        onReorder: (int oldIndex, int newIndex) {},
       );
       await tester.pumpWidget(MaterialApp(
         home: SizedBox(
@@ -1348,6 +1517,7 @@ void main() {
         final RenderBox testItem = tester.renderObject<RenderBox>(find.byKey(testItemKey));
         return testItem.localToGlobal(Offset.zero);
       }
+
       // Before pick it up.
       final Offset startPosition = getTestItemPosition();
 
@@ -1390,89 +1560,95 @@ void main() {
     });
   });
 
-  testWidgets('ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag', (WidgetTester tester) async {
-    // See https://github.com/flutter/flutter/issues/74840 for more details.
-    final List<int> items = List<int>.generate(100, (int index) => index);
+  testWidgets(
+    'ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag',
+    (WidgetTester tester) async {
+      // See https://github.com/flutter/flutter/issues/74840 for more details.
+      final List<int> items = List<int>.generate(100, (int index) => index);
 
-    void handleReorder(int fromIndex, int toIndex) {
-      if (toIndex > fromIndex) {
-        toIndex -= 1;
+      void handleReorder(int fromIndex, int toIndex) {
+        if (toIndex > fromIndex) {
+          toIndex -= 1;
+        }
+        items.insert(toIndex, items.removeAt(fromIndex));
       }
-      items.insert(toIndex, items.removeAt(fromIndex));
-    }
 
-    // The list is 800x600, 8 items, each item is 800x100 with
-    // an "item $index" text widget at the item's origin.  Drags are initiated by
-    // a simple press on the text widget.
-    await tester.pumpWidget(MaterialApp(
-      home: ReorderableListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return SizedBox(
-            key: ValueKey<int>(items[index]),
-            height: 100,
-            child: ReorderableDragStartListener(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('item ${items[index]}'),
-                ],
+      // The list is 800x600, 8 items, each item is 800x100 with
+      // an "item $index" text widget at the item's origin.  Drags are initiated by
+      // a simple press on the text widget.
+      await tester.pumpWidget(MaterialApp(
+        home: ReorderableListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              key: ValueKey<int>(items[index]),
+              height: 100,
+              child: ReorderableDragStartListener(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('item ${items[index]}'),
+                  ],
+                ),
+                index: index,
               ),
-              index: index,
-            ),
-          );
+            );
+          },
+          itemCount: items.length,
+          onReorder: handleReorder,
+        ),
+      ));
+
+      // Drag item 0 downwards and force an auto scroll off the end of the list
+      // far enough that item zeros original entry in the list is unmounted.
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+      // Off the bottom of the screen, which should autoscroll until we hit the
+      // end of the list
+      await drag.moveBy(const Offset(0, 700));
+      await tester.pump(const Duration(seconds: 30));
+      await tester.pumpAndSettle();
+      // Ensure we made it to the bottom (only 4 should be showing as there should
+      // be a gap at the end for the drop area of the dragged item.
+      for (final int i in <int>[95, 96, 97, 98, 99]) {
+        expect(find.text('item $i'), findsOneWidget);
+      }
+
+      // Drag back to off the top of the list, which should autoscroll until
+      // we hit the beginning of the list. This should cause the first item's
+      // entry to be rebuilt. However, the contents should not be in both places.
+      await drag.moveBy(const Offset(0, -1400));
+      await tester.pump(const Duration(seconds: 30));
+      await tester.pumpAndSettle();
+      // Release back at the top so item 0 should drop where it was
+      await drag.up();
+      await tester.pumpAndSettle();
+
+      // Should not have changed anything
+      for (final int i in <int>[0, 1, 2, 3, 4, 5]) {
+        expect(find.text('item $i'), findsOneWidget);
+      }
+      expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
+    },
+  );
+
+  testWidgets(
+    'ReorderableListView throws an error when key is not passed to its children',
+    (WidgetTester tester) async {
+      final Widget reorderableListView = ReorderableListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(child: Text('Item $index'));
         },
-        itemCount: items.length,
-        onReorder: handleReorder,
-      ),
-    ));
-
-    // Drag item 0 downwards and force an auto scroll off the end of the list
-    // far enough that item zeros original entry in the list is unmounted.
-    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
-    await tester.pump(kPressTimeout);
-    // Off the bottom of the screen, which should autoscroll until we hit the
-    // end of the list
-    await drag.moveBy(const Offset(0, 700));
-    await tester.pump(const Duration(seconds: 30));
-    await tester.pumpAndSettle();
-    // Ensure we made it to the bottom (only 4 should be showing as there should
-    // be a gap at the end for the drop area of the dragged item.
-    for (final int i in <int>[95, 96, 97, 98, 99]) {
-      expect(find.text('item $i'), findsOneWidget);
-    }
-
-    // Drag back to off the top of the list, which should autoscroll until
-    // we hit the beginning of the list. This should cause the first item's
-    // entry to be rebuilt. However, the contents should not be in both places.
-    await drag.moveBy(const Offset(0, -1400));
-    await tester.pump(const Duration(seconds: 30));
-    await tester.pumpAndSettle();
-    // Release back at the top so item 0 should drop where it was
-    await drag.up();
-    await tester.pumpAndSettle();
-
-    // Should not have changed anything
-    for (final int i in <int>[0, 1, 2, 3, 4, 5]) {
-      expect(find.text('item $i'), findsOneWidget);
-    }
-    expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
-  });
-
-  testWidgets('ReorderableListView throws an error when key is not passed to its children', (WidgetTester tester) async {
-    final Widget reorderableListView = ReorderableListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return SizedBox(child: Text('Item $index'));
-      },
-      itemCount: 3,
-      onReorder: (int oldIndex, int newIndex) { },
-    );
-    await tester.pumpWidget(MaterialApp(
-      home: reorderableListView,
-    ));
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
-  });
+        itemCount: 3,
+        onReorder: (int oldIndex, int newIndex) {},
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: reorderableListView,
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
+    },
+  );
 
   testWidgets('Throws an error if no overlay present', (WidgetTester tester) async {
     final Widget reorderableList = ReorderableListView(
@@ -1481,7 +1657,7 @@ void main() {
         SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
         SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
       ],
-      onReorder: (int oldIndex, int newIndex) { },
+      onReorder: (int oldIndex, int newIndex) {},
     );
     final Widget boilerplate = Localizations(
       locale: const Locale('en'),
@@ -1489,7 +1665,7 @@ void main() {
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child:SizedBox(
+      child: SizedBox(
         width: 100.0,
         height: 100.0,
         child: Directionality(

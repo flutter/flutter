@@ -449,7 +449,8 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isFalse);
-    final CurvedAnimation position = (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
+    final CurvedAnimation position =
+        (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
     expect(position.value, lessThan(0.5));
     await tester.pump();
     await tester.pumpAndSettle();

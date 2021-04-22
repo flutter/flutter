@@ -27,4 +27,5 @@ void main() {
   }, skip: !kIsWeb);
 }
 
-class TestRenderBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {}
+class TestRenderBinding extends BindingBase
+    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {}

@@ -93,7 +93,7 @@ void main() {
     testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
         Center(
-          child: SizedBox (
+          child: SizedBox(
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
@@ -115,7 +115,7 @@ void main() {
       // Attempt to animate beyond the outer SizedBox.
       await tester.pumpWidget(
         Center(
-          child: SizedBox (
+          child: SizedBox(
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
@@ -142,7 +142,7 @@ void main() {
         await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({ double? size, RenderAnimatedSizeState? state }) {
+      void verify({double? size, RenderAnimatedSizeState? state}) {
         assert(size != null || state != null);
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {
@@ -298,7 +298,7 @@ void main() {
       final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
       expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-      for(final Clip clip in Clip.values) {
+      for (final Clip clip in Clip.values) {
         await tester.pumpWidget(
           Center(
             child: AnimatedSize(

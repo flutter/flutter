@@ -38,8 +38,7 @@ void main() {
         ),
       );
 
-      final RenderPhysicalShape renderPhysicalShape =
-        tester.renderObject(find.byType(PhysicalShape));
+      final RenderPhysicalShape renderPhysicalShape = tester.renderObject(find.byType(PhysicalShape));
 
       // The viewport is 800x600, the CircleBorder is centered and fits
       // the shortest edge, so we get a circle of radius 300, centered at
@@ -53,7 +52,6 @@ void main() {
       expect(tester.hitTestOnBinding(const Offset(100.0, 299.0)), doesNotHit(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 301.0)), doesNotHit(renderPhysicalShape));
     });
-
   });
 
   group('FractionalTranslation', () {
@@ -190,22 +188,49 @@ void main() {
       expect(
         tester.getSemantics(find.byKey(textKey)).transform,
         Matrix4(
-          3.0, 0.0, 0.0, 0.0,
-          0.0, 3.0, 0.0, 0.0,
-          0.0, 0.0, 1.0, 0.0,
-          1170.0, 870.0, 0.0, 1.0,
+          3.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          3.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1170.0,
+          870.0,
+          0.0,
+          1.0,
         ),
       );
 
-      await tester.tap(find.byKey(fractionalTranslationKey), warnIfMissed: false); // RenderFractionalTranslation can't be hit
+      await tester.tap(
+        find.byKey(fractionalTranslationKey),
+        warnIfMissed: false,
+      ); // RenderFractionalTranslation can't be hit
       await tester.pump();
       expect(
         tester.getSemantics(find.byKey(textKey)).transform,
         Matrix4(
-          3.0, 0.0, 0.0, 0.0,
-          0.0, 3.0, 0.0, 0.0,
-          0.0, 0.0, 1.0, 0.0,
-          1290.0, 990.0, 0.0, 1.0,
+          3.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          3.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1290.0,
+          990.0,
+          0.0,
+          1.0,
         ),
       );
     });
@@ -225,11 +250,13 @@ void main() {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: <Widget>[
-                Text('big text',
+                Text(
+                  'big text',
                   key: key1,
                   style: const TextStyle(fontSize: fontSize1),
                 ),
-                Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                Text(
+                  'one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
                   style: const TextStyle(fontSize: fontSize2),
                 ),
@@ -280,11 +307,13 @@ void main() {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: <Widget>[
-                Text('big text',
+                Text(
+                  'big text',
                   key: key1,
                   style: const TextStyle(fontSize: fontSize1),
                 ),
-                Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                Text(
+                  'one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
                   style: const TextStyle(fontSize: fontSize2),
                 ),
@@ -326,14 +355,19 @@ void main() {
     );
 
     expect(
-      const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
+      const UnconstrainedBox(
+        constrainedAxis: Axis.horizontal,
+        textDirection: TextDirection.rtl,
+        alignment: Alignment.topRight,
+      ).toString(),
       equals('UnconstrainedBox(alignment: Alignment.topRight, constrainedAxis: horizontal, textDirection: rtl)'),
     );
   });
 
   testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
-    final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+    final RenderConstraintsTransformBox renderObject =
+        tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
@@ -354,7 +388,9 @@ void main() {
           alignment: Alignment.topRight,
           constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
         ).toString(),
-        equals('ConstraintsTransformBox(alignment: Alignment.topRight, textDirection: rtl, constraints transform: width constraints removed)'),
+        equals(
+          'ConstraintsTransformBox(alignment: Alignment.topRight, textDirection: rtl, constraints transform: width constraints removed)',
+        ),
       );
     });
   });
@@ -470,46 +506,64 @@ void main() {
   testWidgets('IgnorePointer ignores pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget target({required bool ignoring}) => Align(
-      alignment: Alignment.topLeft,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: Listener(
-            onPointerDown: (_) { logs.add('down1'); },
-            child: MouseRegion(
-              onEnter: (_) { logs.add('enter1'); },
-              onExit: (_) { logs.add('exit1'); },
-              cursor: SystemMouseCursors.forbidden,
-              child: Stack(
-                children: <Widget>[
-                  Listener(
-                    onPointerDown: (_) { logs.add('down2'); },
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      onEnter: (_) { logs.add('enter2'); },
-                      onExit: (_) { logs.add('exit2'); },
-                    ),
-                  ),
-                  IgnorePointer(
-                    ignoring: ignoring,
-                    child: Listener(
-                      onPointerDown: (_) { logs.add('down3'); },
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.text,
-                        onEnter: (_) { logs.add('enter3'); },
-                        onExit: (_) { logs.add('exit3'); },
+          alignment: Alignment.topLeft,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Listener(
+                onPointerDown: (_) {
+                  logs.add('down1');
+                },
+                child: MouseRegion(
+                  onEnter: (_) {
+                    logs.add('enter1');
+                  },
+                  onExit: (_) {
+                    logs.add('exit1');
+                  },
+                  cursor: SystemMouseCursors.forbidden,
+                  child: Stack(
+                    children: <Widget>[
+                      Listener(
+                        onPointerDown: (_) {
+                          logs.add('down2');
+                        },
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          onEnter: (_) {
+                            logs.add('enter2');
+                          },
+                          onExit: (_) {
+                            logs.add('exit2');
+                          },
+                        ),
                       ),
-                    ),
+                      IgnorePointer(
+                        ignoring: ignoring,
+                        child: Listener(
+                          onPointerDown: (_) {
+                            logs.add('down3');
+                          },
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.text,
+                            onEnter: (_) {
+                              logs.add('enter3');
+                            },
+                            onExit: (_) {
+                              logs.add('exit3');
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
 
     final TestGesture gesture = await tester.createGesture(pointer: 1, kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(200, 200));
@@ -548,46 +602,64 @@ void main() {
   testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget target({required bool absorbing}) => Align(
-      alignment: Alignment.topLeft,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: Listener(
-            onPointerDown: (_) { logs.add('down1'); },
-            child: MouseRegion(
-              onEnter: (_) { logs.add('enter1'); },
-              onExit: (_) { logs.add('exit1'); },
-              cursor: SystemMouseCursors.forbidden,
-              child: Stack(
-                children: <Widget>[
-                  Listener(
-                    onPointerDown: (_) { logs.add('down2'); },
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      onEnter: (_) { logs.add('enter2'); },
-                      onExit: (_) { logs.add('exit2'); },
-                    ),
-                  ),
-                  AbsorbPointer(
-                    absorbing: absorbing,
-                    child: Listener(
-                      onPointerDown: (_) { logs.add('down3'); },
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.text,
-                        onEnter: (_) { logs.add('enter3'); },
-                        onExit: (_) { logs.add('exit3'); },
+          alignment: Alignment.topLeft,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Listener(
+                onPointerDown: (_) {
+                  logs.add('down1');
+                },
+                child: MouseRegion(
+                  onEnter: (_) {
+                    logs.add('enter1');
+                  },
+                  onExit: (_) {
+                    logs.add('exit1');
+                  },
+                  cursor: SystemMouseCursors.forbidden,
+                  child: Stack(
+                    children: <Widget>[
+                      Listener(
+                        onPointerDown: (_) {
+                          logs.add('down2');
+                        },
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          onEnter: (_) {
+                            logs.add('enter2');
+                          },
+                          onExit: (_) {
+                            logs.add('exit2');
+                          },
+                        ),
                       ),
-                    ),
+                      AbsorbPointer(
+                        absorbing: absorbing,
+                        child: Listener(
+                          onPointerDown: (_) {
+                            logs.add('down3');
+                          },
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.text,
+                            onEnter: (_) {
+                              logs.add('enter3');
+                            },
+                            onExit: (_) {
+                              logs.add('exit3');
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
 
     final TestGesture gesture = await tester.createGesture(pointer: 1, kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(200, 200));
@@ -633,14 +705,16 @@ class HitsRenderBox extends Matcher {
 
   @override
   Description describe(Description description) =>
-    description.add('hit test result contains ').addDescriptionOf(renderBox);
+      description.add('hit test result contains ').addDescriptionOf(renderBox);
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
-    return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox,
-    ).isNotEmpty;
+    return hitTestResult.path
+        .where(
+          (HitTestEntry entry) => entry.target == renderBox,
+        )
+        .isNotEmpty;
   }
 }
 
@@ -653,14 +727,16 @@ class DoesNotHitRenderBox extends Matcher {
 
   @override
   Description describe(Description description) =>
-    description.add("hit test result doesn't contain ").addDescriptionOf(renderBox);
+      description.add("hit test result doesn't contain ").addDescriptionOf(renderBox);
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
-    return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox,
-    ).isEmpty;
+    return hitTestResult.path
+        .where(
+          (HitTestEntry entry) => entry.target == renderBox,
+        )
+        .isEmpty;
   }
 }
 

@@ -17,7 +17,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -39,7 +39,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -60,11 +60,11 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action 1'),
-              onPressed: () { },
+              onPressed: () {},
             ),
             TextButton(
               child: const Text('Action 2'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -87,7 +87,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -109,7 +109,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -122,28 +122,31 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
-  testWidgets('Single action laid out beside content but aligned to the trailing edge - RTL', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-        textDirection: TextDirection.rtl,
-          child: MaterialBanner(
-            content: const Text('Content'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Action'),
-                onPressed: () { },
-              ),
-            ],
+  testWidgets(
+    'Single action laid out beside content but aligned to the trailing edge - RTL',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: MaterialBanner(
+              content: const Text('Content'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Action'),
+                  onPressed: () {},
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
-    final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
-    expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
-  });
+      final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
+      final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
+      expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
+    },
+  );
 
   testWidgets('Actions laid out below content if forced override', (WidgetTester tester) async {
     const String contentText = 'Content';
@@ -156,7 +159,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -291,9 +294,12 @@ void main() {
 }
 
 Container _getContainerFromBanner(WidgetTester tester) {
-  return tester.widget<Container>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first);
+  return tester
+      .widget<Container>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first);
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(MaterialBanner), matching: find.text(text))).renderObject! as RenderParagraph;
+  return tester
+      .element<StatelessElement>(find.descendant(of: find.byType(MaterialBanner), matching: find.text(text)))
+      .renderObject! as RenderParagraph;
 }

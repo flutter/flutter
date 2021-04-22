@@ -7,74 +7,74 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   PointerEvent _createSimulatedPointerAddedEvent(
-      int timeStampUs,
-      double x,
-      double y,
+    int timeStampUs,
+    double x,
+    double y,
   ) {
     return PointerAddedEvent(
-        timeStamp: Duration(microseconds: timeStampUs),
-        position: Offset(x, y),
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
     );
   }
 
   PointerEvent _createSimulatedPointerRemovedEvent(
-      int timeStampUs,
-      double x,
-      double y,
+    int timeStampUs,
+    double x,
+    double y,
   ) {
     return PointerRemovedEvent(
-        timeStamp: Duration(microseconds: timeStampUs),
-        position: Offset(x, y),
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
     );
   }
 
   PointerEvent _createSimulatedPointerDownEvent(
-      int timeStampUs,
-      double x,
-      double y,
+    int timeStampUs,
+    double x,
+    double y,
   ) {
     return PointerDownEvent(
-        timeStamp: Duration(microseconds: timeStampUs),
-        position: Offset(x, y),
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
     );
   }
 
   PointerEvent _createSimulatedPointerMoveEvent(
-      int timeStampUs,
-      double x,
-      double y,
-      double deltaX,
-      double deltaY,
+    int timeStampUs,
+    double x,
+    double y,
+    double deltaX,
+    double deltaY,
   ) {
     return PointerMoveEvent(
-        timeStamp: Duration(microseconds: timeStampUs),
-        position: Offset(x, y),
-        delta: Offset(deltaX, deltaY),
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
+      delta: Offset(deltaX, deltaY),
     );
   }
 
   PointerEvent _createSimulatedPointerHoverEvent(
-      int timeStampUs,
-      double x,
-      double y,
-      double deltaX,
-      double deltaY,
+    int timeStampUs,
+    double x,
+    double y,
+    double deltaX,
+    double deltaY,
   ) {
     return PointerHoverEvent(
-        timeStamp: Duration(microseconds: timeStampUs),
-        position: Offset(x, y),
-        delta: Offset(deltaX, deltaY),
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
+      delta: Offset(deltaX, deltaY),
     );
   }
 
   PointerEvent _createSimulatedPointerUpEvent(
-      int timeStampUs,
-      double x,
-      double y,
+    int timeStampUs,
+    double x,
+    double y,
   ) {
     return PointerUpEvent(
-        timeStamp: Duration(microseconds: timeStampUs),
-        position: Offset(x, y),
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
     );
   }
 
@@ -215,9 +215,7 @@ void main() {
     // No pointer event should have been returned yet.
     expect(result.isEmpty, true);
 
-    resampler
-      ..addEvent(event1)
-      ..addEvent(event2);
+    resampler..addEvent(event1)..addEvent(event2);
 
     resampler.sample(const Duration(microseconds: 500), Duration.zero, result.add);
 
@@ -263,9 +261,7 @@ void main() {
     expect(result[2].position.dx, 15.0);
     expect(result[2].position.dy, 35.0);
 
-    resampler
-      ..addEvent(event4)
-      ..addEvent(event5);
+    resampler..addEvent(event4)..addEvent(event5);
 
     resampler.sample(const Duration(microseconds: 2500), Duration.zero, result.add);
 
@@ -313,9 +309,7 @@ void main() {
     expect(result[5].position.dx, 35.0);
     expect(result[5].position.dy, 15.0);
 
-    resampler
-      ..addEvent(event7)
-      ..addEvent(event8);
+    resampler..addEvent(event7)..addEvent(event8);
 
     resampler.sample(const Duration(microseconds: 4500), Duration.zero, result.add);
 
@@ -373,11 +367,7 @@ void main() {
     final PointerEvent event2 = _createSimulatedPointerUpEvent(1000, 0.0, 0.0);
     final PointerEvent event3 = _createSimulatedPointerRemovedEvent(1000, 0.0, 0.0);
 
-    resampler
-      ..addEvent(event0)
-      ..addEvent(event1)
-      ..addEvent(event2)
-      ..addEvent(event3);
+    resampler..addEvent(event0)..addEvent(event1)..addEvent(event2)..addEvent(event3);
 
     final List<PointerEvent> result = <PointerEvent>[];
 
@@ -618,12 +608,7 @@ void main() {
     final PointerEvent event3 = _createSimulatedPointerUpEvent(4000, 30.0, 0.0);
     final PointerEvent event4 = _createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
 
-    resampler
-      ..addEvent(event0)
-      ..addEvent(event1)
-      ..addEvent(event2)
-      ..addEvent(event3)
-      ..addEvent(event4);
+    resampler..addEvent(event0)..addEvent(event1)..addEvent(event2)..addEvent(event3)..addEvent(event4);
 
     final List<PointerEvent> result = <PointerEvent>[];
 
@@ -731,12 +716,7 @@ void main() {
     final PointerEvent event3 = _createSimulatedPointerUpEvent(4000, 10.0, 0.0);
     final PointerEvent event4 = _createSimulatedPointerRemovedEvent(5000, 10.0, 0.0);
 
-    resampler
-      ..addEvent(event0)
-      ..addEvent(event1)
-      ..addEvent(event2)
-      ..addEvent(event3)
-      ..addEvent(event4);
+    resampler..addEvent(event0)..addEvent(event1)..addEvent(event2)..addEvent(event3)..addEvent(event4);
 
     final List<PointerEvent> result = <PointerEvent>[];
 

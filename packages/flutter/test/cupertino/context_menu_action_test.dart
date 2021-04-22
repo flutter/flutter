@@ -104,5 +104,4 @@ void main() {
     await tester.pumpWidget(_getApp(isDefaultAction: true));
     expect(_getTextStyle(tester).fontWeight, _kDefaultActionWeight);
   });
-
 }

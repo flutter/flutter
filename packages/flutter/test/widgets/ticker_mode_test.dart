@@ -117,7 +117,8 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
     super.initState();
     _ticker = createTicker((Duration _) {
       widget.onTick();
-    })..start();
+    })
+      ..start();
   }
 
   @override

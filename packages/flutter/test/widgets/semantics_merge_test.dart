@@ -36,22 +36,25 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            label: 'test1',
-          ),
-          TestSemantics.rootChild(
-            id: 2,
-            label: 'test2',
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              label: 'test1',
+            ),
+            TestSemantics.rootChild(
+              id: 2,
+              label: 'test2',
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+    );
 
     // merged
     await tester.pumpWidget(
@@ -74,18 +77,21 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 3,
-            label: 'test1\ntest2',
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 3,
+              label: 'test1\ntest2',
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+    );
 
     // not merged
     await tester.pumpWidget(
@@ -106,16 +112,19 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(id: 6, label: 'test1'),
-          TestSemantics.rootChild(id: 7, label: 'test2'),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(id: 6, label: 'test1'),
+            TestSemantics.rootChild(id: 7, label: 'test2'),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+    );
 
     semantics.dispose();
   });
@@ -146,8 +155,10 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
               id: 1,
@@ -157,10 +168,11 @@ void main() {
               label: 'test1\ntest2',
             ),
           ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+    );
 
     semantics.dispose();
   });

@@ -565,26 +565,32 @@ void main() {
       doubleTap.dispose();
     });
 
-    testGesture('A primary double tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
-      doubleTap.addPointer(down6);
-      tapSecondary.addPointer(down6);
-      tester.closeArena(down6.pointer);
+    testGesture(
+      'A primary double tap recognizer does not form competition with a secondary tap recognizer',
+      (GestureTester tester) {
+        doubleTap.addPointer(down6);
+        tapSecondary.addPointer(down6);
+        tester.closeArena(down6.pointer);
 
-      tester.route(down6);
-      expect(recognized, <String>['tapSecondary']);
-    });
+        tester.route(down6);
+        expect(recognized, <String>['tapSecondary']);
+      },
+    );
 
-    testGesture('A primary double tap recognizer forms competition with a primary tap recognizer', (GestureTester tester) {
-      doubleTap.addPointer(down1);
-      tapPrimary.addPointer(down1);
-      tester.closeArena(down1.pointer);
+    testGesture(
+      'A primary double tap recognizer forms competition with a primary tap recognizer',
+      (GestureTester tester) {
+        doubleTap.addPointer(down1);
+        tapPrimary.addPointer(down1);
+        tester.closeArena(down1.pointer);
 
-      tester.route(down1);
-      expect(recognized, <String>[]);
+        tester.route(down1);
+        expect(recognized, <String>[]);
 
-      tester.async.elapse(const Duration(milliseconds: 300));
-      expect(recognized, <String>['tapPrimary']);
-    });
+        tester.async.elapse(const Duration(milliseconds: 300));
+        expect(recognized, <String>['tapPrimary']);
+      },
+    );
   });
 
   testGesture('A secondary double tap should not trigger primary', (GestureTester tester) {
@@ -626,10 +632,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/73667
   testGesture('Unfinished DoubleTap does not prevent competing Tap', (GestureTester tester) {
     int tapCount = 0;
-    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
-      ..onDoubleTap = () {};
-    final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTap = () => tapCount++;
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()..onDoubleTap = () {};
+    final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () => tapCount++;
 
     // Open a arena with 2 members and holding.
     doubleTap.addPointer(down1);

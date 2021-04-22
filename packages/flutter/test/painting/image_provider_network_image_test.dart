@@ -18,8 +18,13 @@ import '../rendering/rendering_tester.dart';
 void main() {
   TestRenderingFlutterBinding();
 
-  Future<Codec>  _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-    return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+  Future<Codec> _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    return PaintingBinding.instance!.instantiateImageCodec(
+      bytes,
+      cacheWidth: cacheWidth,
+      cacheHeight: cacheHeight,
+      allowUpscaling: allowUpscaling ?? false,
+    );
   }
 
   late _FakeHttpClient httpClient;
@@ -52,10 +57,11 @@ void main() {
     expect(imageCache!.pendingImageCount, 1);
     expect(imageCache!.statusForKey(imageProvider).pending, true);
 
-    result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-    }, onError: (dynamic error, StackTrace? stackTrace) {
-      caughtError.complete(error);
-    }));
+    result.addListener(
+      ImageStreamListener((ImageInfo info, bool syncCall) {}, onError: (dynamic error, StackTrace? stackTrace) {
+        caughtError.complete(error);
+      }),
+    );
 
     final dynamic err = await caughtError.future;
 
@@ -65,8 +71,8 @@ void main() {
     expect(
       err,
       isA<NetworkImageLoadException>()
-        .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
-        .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
+          .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
+          .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
     );
     expect(httpClient.request.response.drained, true);
   }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
@@ -79,7 +85,7 @@ void main() {
       final NetworkImage networkImage = NetworkImage(nonconst('foo'));
       final ImageStreamCompleter completer = networkImage.load(networkImage, _basicDecoder);
       completer.addListener(ImageStreamListener(
-        (ImageInfo image, bool synchronousCall) { },
+        (ImageInfo image, bool synchronousCall) {},
         onError: (dynamic error, StackTrace? stackTrace) {
           capturedErrors.add(error);
         },
@@ -108,10 +114,11 @@ void main() {
         throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
-        caughtError.complete(true);
-      }));
+      result.addListener(
+        ImageStreamListener((ImageInfo info, bool syncCall) {}, onError: (dynamic error, StackTrace? stackTrace) {
+          caughtError.complete(true);
+        }),
+      );
       expect(await caughtError.future, true);
     }, zoneSpecification: ZoneSpecification(
       handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
@@ -207,7 +214,8 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer =
+        provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, url);
   });
@@ -225,6 +233,7 @@ class _FakeHttpClient extends Fake implements HttpClient {
     return request;
   }
 }
+
 class _FakeHttpClientRequest extends Fake implements HttpClientRequest {
   final _FakeHttpClientResponse response = _FakeHttpClientResponse();
 
@@ -249,7 +258,12 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   late List<List<int>> content;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
     return Stream<List<int>>.fromIterable(content).listen(
       onData,
       onDone: onDone,

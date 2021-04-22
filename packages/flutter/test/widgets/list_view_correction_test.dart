@@ -168,7 +168,6 @@ void main() {
     expect(tester.getTopLeft(findItemB).dy, 10.0);
     expect(tester.getBottomRight(findItemB).dy, 20.0);
 
-
     controller.jumpTo(1200.0);
     await tester.pump();
     expect(find.text('A'), findsNothing);
@@ -204,7 +203,6 @@ void main() {
     expect(controller.offset, greaterThan(0.0)); // RenderSliverList corrected the offset.
     expect(tester.getTopLeft(findItemB).dy, -180.0);
     expect(tester.getBottomRight(findItemB).dy, 20.0);
-
 
     controller.jumpTo(0.0);
     await tester.pump();

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Leaf extends StatefulWidget {
-  const Leaf({ required Key key, required this.child }) : super(key: key);
+  const Leaf({required Key key, required this.child}) : super(key: key);
   final Widget child;
   @override
   _LeafState createState() => _LeafState();
@@ -48,7 +48,7 @@ class _LeafState extends State<Leaf> {
   }
 }
 
-List<Widget> generateList(Widget child, { required bool impliedMode }) {
+List<Widget> generateList(Widget child, {required bool impliedMode}) {
   return List<Widget>.generate(
     100,
     (int index) {
@@ -56,15 +56,14 @@ List<Widget> generateList(Widget child, { required bool impliedMode }) {
         key: GlobalObjectKey<_LeafState>(index),
         child: child,
       );
-      if (impliedMode)
-        return result;
+      if (impliedMode) return result;
       return AutomaticKeepAlive(child: result);
     },
     growable: false,
   );
 }
 
-void tests({ required bool impliedMode }) {
+void tests({required bool impliedMode}) {
   testWidgets('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -217,8 +216,12 @@ void tests({ required bool impliedMode }) {
 }
 
 void main() {
-  group('Explicit automatic keep-alive', () { tests(impliedMode: false); });
-  group('Implied automatic keep-alive', () { tests(impliedMode: true); });
+  group('Explicit automatic keep-alive', () {
+    tests(impliedMode: false);
+  });
+  group('Implied automatic keep-alive', () {
+    tests(impliedMode: true);
+  });
 
   testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -507,44 +510,47 @@ void main() {
     expect(find.text('FooBar 2'), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: ListView.builder(
-        addSemanticIndexes: false,
-        itemCount: 250,
-        itemBuilder: (BuildContext context, int index) {
-          if (index.isEven) {
-            return _AlwaysKeepAlive(
-              key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
+  testWidgets(
+    'AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          addSemanticIndexes: false,
+          itemCount: 250,
+          itemBuilder: (BuildContext context, int index) {
+            if (index.isEven) {
+              return _AlwaysKeepAlive(
+                key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
+              );
+            }
+            return SizedBox(
+              height: 44.0,
+              child: Text('FooBar $index'),
             );
-          }
-          return SizedBox(
-            height: 44.0,
-            child: Text('FooBar $index'),
-          );
-        },
-      ),
-    ));
+          },
+        ),
+      ));
 
-    expect(find.text('keep me alive'), findsNWidgets(7));
-    expect(find.text('FooBar 1'), findsOneWidget);
-    expect(find.text('FooBar 3'), findsOneWidget);
+      expect(find.text('keep me alive'), findsNWidgets(7));
+      expect(find.text('FooBar 1'), findsOneWidget);
+      expect(find.text('FooBar 3'), findsOneWidget);
 
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
+      expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
 
-    final ScrollableState state = tester.state(find.byType(Scrollable));
-    final ScrollPosition position = state.position;
-    position.jumpTo(3025.0);
+      final ScrollableState state = tester.state(find.byType(Scrollable));
+      final ScrollPosition position = state.position;
+      position.jumpTo(3025.0);
 
-    await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0), skipOffstage: false), findsOneWidget);
+      await tester.pump();
+      expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0), skipOffstage: false), findsOneWidget);
 
-    expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(23));
-    expect(find.text('FooBar 1'), findsNothing);
-    expect(find.text('FooBar 3'), findsNothing);
-    expect(find.text('FooBar 73'), findsOneWidget);
-  });
+      expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(23));
+      expect(find.text('FooBar 1'), findsNothing);
+      expect(find.text('FooBar 3'), findsNothing);
+      expect(find.text('FooBar 73'), findsOneWidget);
+    },
+  );
 
   testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
     // We're just doing a basic test here to make sure that the functionality of
@@ -559,7 +565,7 @@ void main() {
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
-  const _AlwaysKeepAlive({ required Key key }) : super(key: key);
+  const _AlwaysKeepAlive({required Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AlwaysKeepAliveState();
@@ -583,7 +589,8 @@ class RenderBoxKeepAlive extends RenderBox {
   State<StatefulWidget> createState() => AlwaysKeepAliveRenderBoxState();
 }
 
-class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
+class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive>
+    with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
   @override
   bool get wantKeepAlive => true;
 
@@ -605,11 +612,8 @@ mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   bool keepAlive = false;
 }
 
-class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
-    KeepAliveParentDataMixinAlt,
-    RenderSliverHelpers,
-    RenderSliverWithKeepAliveMixin {
-
+class RenderSliverMultiBoxAdaptorAlt extends RenderSliver
+    with KeepAliveParentDataMixinAlt, RenderSliverHelpers, RenderSliverWithKeepAliveMixin {
   RenderSliverMultiBoxAdaptorAlt({
     RenderSliverBoxChildManager? childManager,
   }) : _childManager = childManager;
@@ -620,7 +624,7 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
 
   final List<RenderBox> children = <RenderBox>[];
 
-  void insert(RenderBox child, { RenderBox? after }) {
+  void insert(RenderBox child, {RenderBox? after}) {
     children.add(child);
   }
 
@@ -630,5 +634,5 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
   }
 
   @override
-  void performLayout() { }
+  void performLayout() {}
 }

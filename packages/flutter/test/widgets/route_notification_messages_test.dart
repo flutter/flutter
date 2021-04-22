@@ -40,17 +40,17 @@ void main() {
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
-          id: '/',
-          onTap: () {
-            Navigator.pushNamed(context, '/A');
-          },
-        ),
+            id: '/',
+            onTap: () {
+              Navigator.pushNamed(context, '/A');
+            },
+          ),
       '/A': (BuildContext context) => OnTapPage(
-          id: 'A',
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
+            id: 'A',
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
     };
 
     final List<MethodCall> log = <MethodCall>[];
@@ -144,17 +144,17 @@ void main() {
   testWidgets('Replace should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
-          id: '/',
-          onTap: () {
-            Navigator.pushNamed(context, '/A');
-          },
-        ),
+            id: '/',
+            onTap: () {
+              Navigator.pushNamed(context, '/A');
+            },
+          ),
       '/A': (BuildContext context) => OnTapPage(
-          id: 'A',
-          onTap: () {
-            Navigator.pushReplacementNamed(context, '/B');
-          },
-        ),
+            id: 'A',
+            onTap: () {
+              Navigator.pushReplacementNamed(context, '/B');
+            },
+          ),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
@@ -344,8 +344,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   RouteInformation? get currentConfiguration {
-    if (reportConfiguration)
-      return routeInformation;
+    if (reportConfiguration) return routeInformation;
     return null;
   }
 
@@ -357,8 +356,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Future<bool> popRoute() {
-    if (onPopRoute != null)
-      return onPopRoute!();
+    if (onPopRoute != null) return onPopRoute!();
     return SynchronousFuture<bool>(true);
   }
 
@@ -373,7 +371,8 @@ class TestPage extends Page<void> {
   Route<void> createRoute(BuildContext context) {
     return PageRouteBuilder<void>(
       settings: this,
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+          const Placeholder(),
     );
   }
 }

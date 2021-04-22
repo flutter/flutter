@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 late GestureVelocityTrackerBuilder lastCreatedBuilder;
+
 class TestScrollBehavior extends ScrollBehavior {
   const TestScrollBehavior(this.flag);
 
@@ -14,9 +15,7 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
-    return flag
-      ? const ClampingScrollPhysics()
-      : const BouncingScrollPhysics();
+    return flag ? const ClampingScrollPhysics() : const BouncingScrollPhysics();
   }
 
   @override
@@ -24,10 +23,10 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-      lastCreatedBuilder = flag
+    lastCreatedBuilder = flag
         ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
         : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
-      return lastCreatedBuilder;
+    return lastCreatedBuilder;
   }
 }
 

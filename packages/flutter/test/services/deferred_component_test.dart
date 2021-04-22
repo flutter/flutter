@@ -18,10 +18,13 @@ void main() {
     await DeferredComponent.installDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
-    expect(log.single, isMethodCall(
-      'installDeferredComponent',
-      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
-    ));
+    expect(
+      log.single,
+      isMethodCall(
+        'installDeferredComponent',
+        arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
+      ),
+    );
   });
 
   test('uninstallDeferredComponent test', () async {
@@ -34,9 +37,12 @@ void main() {
     await DeferredComponent.uninstallDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
-    expect(log.single, isMethodCall(
-      'uninstallDeferredComponent',
-      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
-    ));
+    expect(
+      log.single,
+      isMethodCall(
+        'uninstallDeferredComponent',
+        arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
+      ),
+    );
   });
 }

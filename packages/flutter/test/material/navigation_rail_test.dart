@@ -242,549 +242,570 @@ void main() {
     expect(_labelOpacity(tester, 'Jkl'), 0);
   });
 
-  testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        destinations: _destinations(),
-      ),
-    );
-
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - firstIconRenderBox.size.height) / 2.0,
+  testWidgets(
+    'Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          destinations: _destinations(),
         ),
-      ),
-    );
+      );
 
-    // The second destination is 72 below the first destination.
-    nextDestinationY += 72.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 72.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - firstIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The third destination is 72 below the second destination.
-    nextDestinationY += 72.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+      // The second destination is 72 below the first destination.
+      nextDestinationY += 72.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The fourth destination is 72 below the third destination.
-    nextDestinationY += 72.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
+      // The third destination is 72 below the second destination.
+      nextDestinationY += 72.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The fourth destination is 72 below the third destination.
+      nextDestinationY += 72.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0',
+    (WidgetTester tester) async {
+      // Since the rail is icon only, its destinations should not be affected by
+      // textScaleFactor.
+      await _pumpNavigationRail(
+        tester,
+        textScaleFactor: 3.0,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          destinations: _destinations(),
+        ),
+      );
+
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 72.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - firstIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The second destination is 72 below the first destination.
+      nextDestinationY += 72.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The third destination is 72 below the second destination.
+      nextDestinationY += 72.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The fourth destination is 72 below the third destination.
+      nextDestinationY += 72.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75',
+    (WidgetTester tester) async {
+      // Since the rail is icon only, its destinations should not be affected by
+      // textScaleFactor.
+      await _pumpNavigationRail(
+        tester,
+        textScaleFactor: 0.75,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          destinations: _destinations(),
+        ),
+      );
+
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 72.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - firstIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The second destination is 72 below the first destination.
+      nextDestinationY += 72.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The third destination is 72 below the second destination.
+      nextDestinationY += 72.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The fourth destination is 72 below the third destination.
+      nextDestinationY += 72.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          destinations: _destinations(),
+          labelType: NavigationRailLabelType.selected,
+        ),
+      );
+
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 72.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+      expect(
+        firstLabelRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstLabelRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 + firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The second destination is 72 below the first destination.
+      nextDestinationY += 72.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The third destination is 72 below the second destination.
+      nextDestinationY += 72.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The fourth destination is 72 below the third destination.
+      nextDestinationY += 72.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        textScaleFactor: 3.0,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          destinations: _destinations(),
+          labelType: NavigationRailLabelType.selected,
+        ),
+      );
+
+      // The rail and destinations sizes grow to fit the larger text labels.
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 142.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (142.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0,
+          ),
+        ),
+      );
+
+      // The first label sits right below the first icon.
+      final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
+      expect(
+        firstLabelRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (142.0 - firstLabelRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0 + firstIconRenderBox.size.height,
+          ),
+        ),
+      );
+
+      nextDestinationY += 16.0 + firstIconRenderBox.size.height + firstLabelRenderBox.size.height + 16.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (142.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 24.0,
+          ),
+        ),
+      );
+
+      nextDestinationY += 72.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (142.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 24.0,
+          ),
+        ),
+      );
+
+      nextDestinationY += 72.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (142.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 24.0,
+          ),
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        textScaleFactor: 0.75,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          destinations: _destinations(),
+          labelType: NavigationRailLabelType.selected,
+        ),
+      );
+
+      // A smaller textScaleFactor will not reduce the default width of the rail
+      // since there is a minWidth.
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 72.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+      expect(
+        firstLabelRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstLabelRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 + firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The second destination is 72 below the first destination.
+      nextDestinationY += 72.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The third destination is 72 below the second destination.
+      nextDestinationY += 72.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The fourth destination is 72 below the third destination.
+      nextDestinationY += 72.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(Offset(
           (72.0 - fourthIconRenderBox.size.width) / 2.0,
           nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
+        )),
+      );
+    },
+  );
+
+  testWidgets(
+    'Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          destinations: _destinations(),
+          labelType: NavigationRailLabelType.all,
         ),
-      ),
-    );
-  });
+      );
 
-  testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
-    // Since the rail is icon only, its destinations should not be affected by
-    // textScaleFactor.
-    await _pumpNavigationRail(
-      tester,
-      textScaleFactor: 3.0,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        destinations: _destinations(),
-      ),
-    );
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 72.0);
 
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - firstIconRenderBox.size.height) / 2.0,
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0,
+          ),
         ),
-      ),
-    );
-
-    // The second destination is 72 below the first destination.
-    nextDestinationY += 72.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+      );
+      expect(
+        firstLabelRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - firstLabelRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0 + firstIconRenderBox.size.height,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The third destination is 72 below the second destination.
-    nextDestinationY += 72.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+      // The second destination is 72 below the first destination.
+      nextDestinationY += 72.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      final RenderBox secondLabelRenderBox = _labelRenderBox(tester, 'Def');
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0,
+          ),
         ),
-      ),
-    );
-
-    // The fourth destination is 72 below the third destination.
-    nextDestinationY += 72.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
+      );
+      expect(
+        secondLabelRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - secondLabelRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0 + secondIconRenderBox.size.height,
+          ),
         ),
-      ),
-    );
-  });
+      );
 
-  testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
-    // Since the rail is icon only, its destinations should not be affected by
-    // textScaleFactor.
-    await _pumpNavigationRail(
-      tester,
-      textScaleFactor: 0.75,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        destinations: _destinations(),
-      ),
-    );
-
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - firstIconRenderBox.size.height) / 2.0,
+      // The third destination is 72 below the second destination.
+      nextDestinationY += 72.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      final RenderBox thirdLabelRenderBox = _labelRenderBox(tester, 'Ghi');
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0,
+          ),
         ),
-      ),
-    );
-
-    // The second destination is 72 below the first destination.
-    nextDestinationY += 72.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
+      );
+      expect(
+        thirdLabelRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - thirdLabelRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0 + thirdIconRenderBox.size.height,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The third destination is 72 below the second destination.
-    nextDestinationY += 72.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
+      // The fourth destination is 72 below the third destination.
+      nextDestinationY += 72.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      final RenderBox fourthLabelRenderBox = _labelRenderBox(tester, 'Jkl');
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0,
+          ),
         ),
-      ),
-    );
-
-    // The fourth destination is 72 below the third destination.
-    nextDestinationY += 72.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
+      );
+      expect(
+        fourthLabelRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (72.0 - fourthLabelRenderBox.size.width) / 2.0,
+            nextDestinationY + 16.0 + fourthIconRenderBox.size.height,
+          ),
         ),
-      ),
-    );
-  });
-
-  testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        destinations: _destinations(),
-        labelType: NavigationRailLabelType.selected,
-      ),
-    );
-
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-    expect(
-      firstLabelRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstLabelRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 + firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-
-    // The second destination is 72 below the first destination.
-    nextDestinationY += 72.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-
-    // The third destination is 72 below the second destination.
-    nextDestinationY += 72.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-
-    // The fourth destination is 72 below the third destination.
-    nextDestinationY += 72.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-  });
-
-  testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      textScaleFactor: 3.0,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        destinations: _destinations(),
-        labelType: NavigationRailLabelType.selected,
-      ),
-    );
-
-    // The rail and destinations sizes grow to fit the larger text labels.
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 142.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (142.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0,
-        ),
-      ),
-    );
-
-    // The first label sits right below the first icon.
-    final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
-    expect(
-      firstLabelRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (142.0 - firstLabelRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0 + firstIconRenderBox.size.height,
-        ),
-      ),
-    );
-
-    nextDestinationY += 16.0 + firstIconRenderBox.size.height + firstLabelRenderBox.size.height + 16.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (142.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 24.0,
-        ),
-      ),
-    );
-
-    nextDestinationY += 72.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (142.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 24.0,
-        ),
-      ),
-    );
-
-    nextDestinationY += 72.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (142.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 24.0,
-        ),
-      ),
-    );
-  });
-
-  testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      textScaleFactor: 0.75,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        destinations: _destinations(),
-        labelType: NavigationRailLabelType.selected,
-      ),
-    );
-
-    // A smaller textScaleFactor will not reduce the default width of the rail
-    // since there is a minWidth.
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-    expect(
-      firstLabelRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstLabelRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 + firstIconRenderBox.size.height - firstLabelRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-
-    // The second destination is 72 below the first destination.
-    nextDestinationY += 72.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - secondIconRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-
-    // The third destination is 72 below the second destination.
-    nextDestinationY += 72.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (72.0 - thirdIconRenderBox.size.height) / 2.0,
-        ),
-      ),
-    );
-
-    // The fourth destination is 72 below the third destination.
-    nextDestinationY += 72.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(Offset(
-        (72.0 - fourthIconRenderBox.size.width) / 2.0,
-        nextDestinationY + (72.0 - fourthIconRenderBox.size.height) / 2.0,
-      )),
-    );
-  });
-
-  testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        destinations: _destinations(),
-        labelType: NavigationRailLabelType.all,
-      ),
-    );
-
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    final RenderBox firstLabelRenderBox = _labelRenderBox(tester, 'Abc');
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0,
-        ),
-      ),
-    );
-    expect(
-      firstLabelRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - firstLabelRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0 + firstIconRenderBox.size.height,
-        ),
-      ),
-    );
-
-    // The second destination is 72 below the first destination.
-    nextDestinationY += 72.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    final RenderBox secondLabelRenderBox = _labelRenderBox(tester, 'Def');
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0,
-        ),
-      ),
-    );
-    expect(
-      secondLabelRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - secondLabelRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0 + secondIconRenderBox.size.height,
-        ),
-      ),
-    );
-
-    // The third destination is 72 below the second destination.
-    nextDestinationY += 72.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    final RenderBox thirdLabelRenderBox = _labelRenderBox(tester, 'Ghi');
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0,
-        ),
-      ),
-    );
-    expect(
-      thirdLabelRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - thirdLabelRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0 + thirdIconRenderBox.size.height,
-        ),
-      ),
-    );
-
-    // The fourth destination is 72 below the third destination.
-    nextDestinationY += 72.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    final RenderBox fourthLabelRenderBox = _labelRenderBox(tester, 'Jkl');
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0,
-        ),
-      ),
-    );
-    expect(
-      fourthLabelRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (72.0 - fourthLabelRenderBox.size.width) / 2.0,
-          nextDestinationY + 16.0 + fourthIconRenderBox.size.height,
-        ),
-      ),
-    );
-  });
+      );
+    },
+  );
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
     await _pumpNavigationRail(
@@ -1001,212 +1022,221 @@ void main() {
     );
   });
 
-  testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        minWidth: 56.0,
-        destinations: _destinations(),
-      ),
-    );
-
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 56.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
+  testWidgets(
+    'Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          minWidth: 56.0,
+          destinations: _destinations(),
         ),
-      ),
-    );
+      );
 
-    // The second destination is 56 below the first destination.
-    nextDestinationY += 56.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 56.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The third destination is 56 below the second destination.
-    nextDestinationY += 56.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
+      // The second destination is 56 below the first destination.
+      nextDestinationY += 56.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The fourth destination is 56 below the third destination.
-    nextDestinationY += 56.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
+      // The third destination is 56 below the second destination.
+      nextDestinationY += 56.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  });
+      );
 
-  testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=3.0', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      textScaleFactor: 3.0,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        minWidth: 56.0,
-        destinations: _destinations(),
-      ),
-    );
-
-    // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 56.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
+      // The fourth destination is 56 below the third destination.
+      nextDestinationY += 56.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    },
+  );
 
-    // The second destination is 56 below the first destination.
-    nextDestinationY += 56.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
+  testWidgets(
+    'Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=3.0',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        textScaleFactor: 3.0,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          minWidth: 56.0,
+          destinations: _destinations(),
         ),
-      ),
-    );
+      );
 
-    // The third destination is 56 below the second destination.
-    nextDestinationY += 56.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
+      // Since the rail is icon only, its preferred width should not be affected
+      // by  textScaleFactor.
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 56.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The fourth destination is 56 below the third destination.
-    nextDestinationY += 56.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
+      // The second destination is 56 below the first destination.
+      nextDestinationY += 56.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  });
+      );
 
-  testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=0.75', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      textScaleFactor: 3.0,
-      navigationRail: NavigationRail(
-        selectedIndex: 0,
-        minWidth: 56.0,
-        destinations: _destinations(),
-      ),
-    );
-
-    // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
-    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 56.0);
-
-    // The first destination is 8 from the top because of the default vertical
-    // padding at the to of the rail.
-    double nextDestinationY = 8.0;
-    final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-    expect(
-      firstIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - firstIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
+      // The third destination is 56 below the second destination.
+      nextDestinationY += 56.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
 
-    // The second destination is 56 below the first destination.
-    nextDestinationY += 56.0;
-    final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
+      // The fourth destination is 56 below the third destination.
+      nextDestinationY += 56.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    },
+  );
 
-    // The third destination is 56 below the second destination.
-    nextDestinationY += 56.0;
-    final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
+  testWidgets(
+    'Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=0.75',
+    (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        textScaleFactor: 3.0,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          minWidth: 56.0,
+          destinations: _destinations(),
         ),
-      ),
-    );
+      );
 
-    // The fourth destination is 56 below the third destination.
-    nextDestinationY += 56.0;
-    final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (56.0 - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
+      // Since the rail is icon only, its preferred width should not be affected
+      // by  textScaleFactor.
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 56.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  });
+      );
+
+      // The second destination is 56 below the first destination.
+      nextDestinationY += 56.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The third destination is 56 below the second destination.
+      nextDestinationY += 56.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The fourth destination is 56 below the third destination.
+      nextDestinationY += 56.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    },
+  );
 
   testWidgets('Group alignment works - [groupAlignment]=-1.0 (default)', (WidgetTester tester) async {
     await _pumpNavigationRail(
@@ -1400,8 +1430,8 @@ void main() {
       tester,
       navigationRail: NavigationRail(
         selectedIndex: 0,
-        leading: FloatingActionButton(onPressed: () { }),
-        trailing: FloatingActionButton(onPressed: () { }),
+        leading: FloatingActionButton(onPressed: () {}),
+        trailing: FloatingActionButton(onPressed: () {}),
         destinations: _destinations(),
       ),
     );
@@ -1618,7 +1648,7 @@ void main() {
       equals(
         Offset(
           800.0 - 72.0 - firstLabelRenderBox.size.width,
-          nextDestinationY + (72.0 - firstLabelRenderBox.size.height)  / 2.0,
+          nextDestinationY + (72.0 - firstLabelRenderBox.size.height) / 2.0,
         ),
       ),
     );
@@ -1641,7 +1671,7 @@ void main() {
       equals(
         Offset(
           800.0 - 72.0 - secondLabelRenderBox.size.width,
-          nextDestinationY + (72.0 - secondLabelRenderBox.size.height)  / 2.0,
+          nextDestinationY + (72.0 - secondLabelRenderBox.size.height) / 2.0,
         ),
       ),
     );
@@ -1664,7 +1694,7 @@ void main() {
       equals(
         Offset(
           800.0 - 72.0 - thirdLabelRenderBox.size.width,
-          nextDestinationY + (72.0 - thirdLabelRenderBox.size.height)  / 2.0,
+          nextDestinationY + (72.0 - thirdLabelRenderBox.size.height) / 2.0,
         ),
       ),
     );
@@ -1687,7 +1717,7 @@ void main() {
       equals(
         Offset(
           800.0 - 72.0 - fourthLabelRenderBox.size.width,
-          nextDestinationY + (72.0 - fourthLabelRenderBox.size.height)  / 2.0,
+          nextDestinationY + (72.0 - fourthLabelRenderBox.size.height) / 2.0,
         ),
       ),
     );
@@ -1869,7 +1899,7 @@ void main() {
                     leading: Builder(
                       builder: (BuildContext context) {
                         animation = NavigationRail.extendedAnimation(context);
-                        return FloatingActionButton(onPressed: () { });
+                        return FloatingActionButton(onPressed: () {});
                       },
                     ),
                     destinations: _destinations(),
@@ -2023,128 +2053,137 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.all', (WidgetTester tester) async {
-    const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
-    const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
-    const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
+  testWidgets(
+    'NavigationRailDestination padding properly applied - NavigationRailLabelType.all',
+    (WidgetTester tester) async {
+      const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
+      const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
+      const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
 
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        labelType: NavigationRailLabelType.all,
-        selectedIndex: 0,
-        destinations: const <NavigationRailDestination>[
-          NavigationRailDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: Text('Abc'),
-          ),
-          NavigationRailDestination(
-            icon: Icon(Icons.bookmark_border),
-            selectedIcon: Icon(Icons.bookmark),
-            label: Text('Def'),
-            padding: secondItemPadding,
-          ),
-          NavigationRailDestination(
-            icon: Icon(Icons.star_border),
-            selectedIcon: Icon(Icons.star),
-            label: Text('Ghi'),
-            padding: thirdItemPadding,
-          ),
-        ],
-      ),
-    );
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          labelType: NavigationRailLabelType.all,
+          selectedIndex: 0,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Def'),
+              padding: secondItemPadding,
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.star_border),
+              selectedIcon: Icon(Icons.star),
+              label: Text('Ghi'),
+              padding: thirdItemPadding,
+            ),
+          ],
+        ),
+      );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+      final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
+      final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
+      final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
 
-    expect(firstItem.padding, defaultPadding);
-    expect(secondItem.padding, secondItemPadding);
-    expect(thirdItem.padding, thirdItemPadding);
-  });
+      expect(firstItem.padding, defaultPadding);
+      expect(secondItem.padding, secondItemPadding);
+      expect(thirdItem.padding, thirdItemPadding);
+    },
+  );
 
-  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.selected', (WidgetTester tester) async {
-    const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
-    const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
-    const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
+  testWidgets(
+    'NavigationRailDestination padding properly applied - NavigationRailLabelType.selected',
+    (WidgetTester tester) async {
+      const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
+      const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
+      const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
 
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        labelType: NavigationRailLabelType.selected,
-        selectedIndex: 0,
-        destinations: const <NavigationRailDestination>[
-          NavigationRailDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: Text('Abc'),
-          ),
-          NavigationRailDestination(
-            icon: Icon(Icons.bookmark_border),
-            selectedIcon: Icon(Icons.bookmark),
-            label: Text('Def'),
-            padding: secondItemPadding,
-          ),
-          NavigationRailDestination(
-            icon: Icon(Icons.star_border),
-            selectedIcon: Icon(Icons.star),
-            label: Text('Ghi'),
-            padding: thirdItemPadding,
-          ),
-        ],
-      ),
-    );
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          labelType: NavigationRailLabelType.selected,
+          selectedIndex: 0,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Def'),
+              padding: secondItemPadding,
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.star_border),
+              selectedIcon: Icon(Icons.star),
+              label: Text('Ghi'),
+              padding: thirdItemPadding,
+            ),
+          ],
+        ),
+      );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+      final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
+      final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
+      final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
 
-    expect(firstItem.padding, defaultPadding);
-    expect(secondItem.padding, secondItemPadding);
-    expect(thirdItem.padding, thirdItemPadding);
-  });
+      expect(firstItem.padding, defaultPadding);
+      expect(secondItem.padding, secondItemPadding);
+      expect(thirdItem.padding, thirdItemPadding);
+    },
+  );
 
-  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.none', (WidgetTester tester) async {
-    const EdgeInsets defaultPadding = EdgeInsets.zero;
-    const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
-    const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
+  testWidgets(
+    'NavigationRailDestination padding properly applied - NavigationRailLabelType.none',
+    (WidgetTester tester) async {
+      const EdgeInsets defaultPadding = EdgeInsets.zero;
+      const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
+      const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
 
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        labelType: NavigationRailLabelType.none,
-        selectedIndex: 0,
-        destinations: const <NavigationRailDestination>[
-          NavigationRailDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: Text('Abc'),
-          ),
-          NavigationRailDestination(
-            icon: Icon(Icons.bookmark_border),
-            selectedIcon: Icon(Icons.bookmark),
-            label: Text('Def'),
-            padding: secondItemPadding,
-          ),
-          NavigationRailDestination(
-            icon: Icon(Icons.star_border),
-            selectedIcon: Icon(Icons.star),
-            label: Text('Ghi'),
-            padding: thirdItemPadding,
-          ),
-        ],
-      ),
-    );
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          labelType: NavigationRailLabelType.none,
+          selectedIndex: 0,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Def'),
+              padding: secondItemPadding,
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.star_border),
+              selectedIcon: Icon(Icons.star),
+              label: Text('Ghi'),
+              padding: thirdItemPadding,
+            ),
+          ],
+        ),
+      );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+      final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
+      final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
+      final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
 
-    expect(firstItem.padding, defaultPadding);
-    expect(secondItem.padding, secondItemPadding);
-    expect(thirdItem.padding, thirdItemPadding);
-  });
+      expect(firstItem.padding, defaultPadding);
+      expect(secondItem.padding, secondItemPadding);
+      expect(thirdItem.padding, thirdItemPadding);
+    },
+  );
 }
 
 TestSemantics _expectedSemantics() {
@@ -2252,7 +2291,11 @@ Future<void> _pumpNavigationRail(
   );
 }
 
-Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelType? labelType, bool extended = false }) async {
+Future<void> _pumpLocalizedTestRail(
+  WidgetTester tester, {
+  NavigationRailLabelType? labelType,
+  bool extended = false,
+}) async {
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
@@ -2300,12 +2343,15 @@ RenderBox _labelRenderBox(WidgetTester tester, String text) {
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
-  return tester.widget<RichText>(
-    find.descendant(
-      of: find.byIcon(icon),
-      matching: find.byType(RichText),
-    ),
-  ).text.style!;
+  return tester
+      .widget<RichText>(
+        find.descendant(
+          of: find.byIcon(icon),
+          matching: find.byType(RichText),
+        ),
+      )
+      .text
+      .style!;
 }
 
 Finder _opacityAboveLabel(String text) {

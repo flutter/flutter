@@ -92,6 +92,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(scaffoldWithBrightness(Brightness.light));
 
     expect(MediaQuery.of(childContext).padding.top, 0);
@@ -161,44 +162,47 @@ void main() {
     expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
-  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
-    const Widget child = CupertinoPageScaffold(
-      resizeToAvoidBottomInset: false,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text('Opaque'),
-        backgroundColor: Color(0xFFF8F8F8),
-      ),
-      child: Placeholder(),
-    );
-
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data:  MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
-          child: child,
+  testWidgets(
+    'Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden',
+    (WidgetTester tester) async {
+      const Widget child = CupertinoPageScaffold(
+        resizeToAvoidBottomInset: false,
+        navigationBar: CupertinoNavigationBar(
+          middle: Text('Opaque'),
+          backgroundColor: Color(0xFFF8F8F8),
         ),
-      ),
-    );
+        child: Placeholder(),
+      );
 
-    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
-    // Consume bottom padding - as if by the keyboard opening
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData(
-            padding: EdgeInsets.zero,
-            viewPadding: EdgeInsets.only(bottom: 20),
-            viewInsets: EdgeInsets.only(bottom: 300),
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
+            child: child,
           ),
-          child: child,
         ),
-      ),
-    );
-    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
-    expect(initialPoint, finalPoint);
-  });
+      );
+
+      final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+      // Consume bottom padding - as if by the keyboard opening
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(
+              padding: EdgeInsets.zero,
+              viewPadding: EdgeInsets.only(bottom: 20),
+              viewInsets: EdgeInsets.only(bottom: 300),
+            ),
+            child: child,
+          ),
+        ),
+      );
+      final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+      expect(initialPoint, finalPoint);
+    },
+  );
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
     const Center page1Center = Center();
@@ -222,12 +226,12 @@ void main() {
           tabBuilder: (BuildContext context, int index) {
             return index == 0
                 ? const CupertinoPageScaffold(
-                  navigationBar: CupertinoNavigationBar(
-                    backgroundColor: CupertinoColors.white,
-                    middle: Text('Title'),
-                  ),
-                  child: page1Center,
-                )
+                    navigationBar: CupertinoNavigationBar(
+                      backgroundColor: CupertinoColors.white,
+                      middle: Text('Title'),
+                    ),
+                    child: page1Center,
+                  )
                 : Stack();
           },
         ),
@@ -262,15 +266,15 @@ void main() {
             tabBuilder: (BuildContext context, int index) {
               return index == 0
                   ? CupertinoPageScaffold(
-                    navigationBar: const CupertinoNavigationBar(
-                      middle: Text('Title'),
-                    ),
-                    child: ListView(
-                      children: const <Widget>[
-                        content,
-                      ],
-                    ),
-                  )
+                      navigationBar: const CupertinoNavigationBar(
+                        middle: Text('Title'),
+                      ),
+                      child: ListView(
+                        children: const <Widget>[
+                          content,
+                        ],
+                      ),
+                    )
                   : Stack();
             },
           ),
@@ -282,7 +286,11 @@ void main() {
     expect(tester.getTopLeft(find.byWidget(content)).dy, 20.0 + 44.0);
 
     // Overscroll to the bottom.
-    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0), warnIfMissed: false); // can't be hit (it's empty) but we're aiming for the list really so it doesn't matter
+    await tester.drag(
+      find.byWidget(content),
+      const Offset(0.0, -400.0),
+      warnIfMissed: false,
+    ); // can't be hit (it's empty) but we're aiming for the list really so it doesn't matter
     // Let it bounce back.
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -496,9 +504,11 @@ void main() {
           ),
           child: CupertinoPageScaffold(
             resizeToAvoidBottomInset: true,
-            navigationBar: showNavigationBar ? const CupertinoNavigationBar(
-              middle: Text('Title'),
-            ) : null,
+            navigationBar: showNavigationBar
+                ? const CupertinoNavigationBar(
+                    middle: Text('Title'),
+                  )
+                : null,
             child: const Center(
               child: CupertinoTextField(),
             ),
@@ -557,6 +567,11 @@ void main() {
     expect(richTextList.length, greaterThan(0));
     expect(richTextList.any((RichText text) => text.textScaleFactor != 1), isFalse);
 
-    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaleFactor, 99);
+    expect(
+      tester
+          .widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText)))
+          .textScaleFactor,
+      99,
+    );
   });
 }

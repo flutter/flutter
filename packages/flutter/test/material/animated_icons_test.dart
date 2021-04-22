@@ -291,8 +291,7 @@ class PaintColorMatcher extends Matcher {
   final int expectedColor;
 
   @override
-  Description describe(Description description) =>
-    description.add('color was not $expectedColor');
+  Description describe(Description description) => description.add('color was not $expectedColor');
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {

@@ -103,7 +103,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     await tester.pumpAndSettle();
 
     expect(selectedResults, <String?>[null]);
@@ -544,7 +544,8 @@ void main() {
     const String searchHintText = 'Enter search terms';
     const TextStyle searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText, searchFieldStyle: searchFieldStyle);
+    final _TestSearchDelegate delegate =
+        _TestSearchDelegate(searchHint: searchHintText, searchFieldStyle: searchFieldStyle);
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
@@ -582,7 +583,7 @@ void main() {
   });
 
   group('contributes semantics', () {
-    TestSemantics buildExpected({ required String routeName }) {
+    TestSemantics buildExpected({required String routeName}) {
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -623,7 +624,8 @@ void main() {
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
                               if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                                debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                                  debugDefaultTargetPlatformOverride != TargetPlatform.macOS)
+                                SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
                               if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS)
@@ -676,12 +678,15 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(
-        buildExpected(routeName: 'Search'),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ));
+      expect(
+        semantics,
+        hasSemantics(
+          buildExpected(routeName: 'Search'),
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
 
       semantics.dispose();
     });
@@ -696,15 +701,18 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(
-        buildExpected(routeName: ''),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ));
+      expect(
+        semantics,
+        hasSemantics(
+          buildExpected(routeName: ''),
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
 
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
   });
 
   testWidgets('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {

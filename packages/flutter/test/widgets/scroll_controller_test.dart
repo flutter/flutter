@@ -96,7 +96,10 @@ void main() {
     expect(realOffset(), equals(controller2.offset));
 
     expect(() => controller.jumpTo(120.0), throwsAssertionError);
-    expect(() => controller.animateTo(132.0, duration: const Duration(milliseconds: 300), curve: Curves.ease), throwsAssertionError);
+    expect(
+      () => controller.animateTo(132.0, duration: const Duration(milliseconds: 300), curve: Curves.ease),
+      throwsAssertionError,
+    );
 
     await tester.pumpWidget(
       Directionality(
@@ -182,7 +185,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: <Widget>[ Container(height: 200000.0) ],
+          children: <Widget>[Container(height: 200000.0)],
         ),
       ),
     );
@@ -237,44 +240,50 @@ void main() {
 
   testWidgets('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
+    expect(
+      () => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear),
+      throwsAssertionError,
+    );
     expect(() => controller.jumpTo(1.0), throwsAssertionError);
   });
 
-  testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListView(
-          children: <Widget>[
-            Container(
-              constraints: const BoxConstraints(maxHeight: 500.0),
-              child: ListView(
-                controller: controller,
-                children: kStates.map<Widget>((String state) {
-                  return SizedBox(height: 200.0, child: Text(state));
-                }).toList(),
+  testWidgets(
+    'Write operations on ScrollControllers with more than one position do not throw',
+    (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            children: <Widget>[
+              Container(
+                constraints: const BoxConstraints(maxHeight: 500.0),
+                child: ListView(
+                  controller: controller,
+                  children: kStates.map<Widget>((String state) {
+                    return SizedBox(height: 200.0, child: Text(state));
+                  }).toList(),
+                ),
               ),
-            ),
-            Container(
-              constraints: const BoxConstraints(maxHeight: 500.0),
-              child: ListView(
-                controller: controller,
-                children: kStates.map<Widget>((String state) {
-                  return SizedBox(height: 200.0, child: Text(state));
-                }).toList(),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 500.0),
+                child: ListView(
+                  controller: controller,
+                  children: kStates.map<Widget>((String state) {
+                    return SizedBox(height: 200.0, child: Text(state));
+                  }).toList(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
 
-    controller.jumpTo(1.0);
-    controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
-    await tester.pumpAndSettle();
-  });
+      controller.jumpTo(1.0);
+      controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
+      await tester.pumpAndSettle();
+    },
+  );
 
   testWidgets('Scroll controllers notify when the position changes', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -301,7 +310,7 @@ void main() {
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -250.0));
 
-    expect(log, equals(<double>[ 20.0, 250.0 ]));
+    expect(log, equals(<double>[20.0, 250.0]));
     log.clear();
 
     controller.dispose();
@@ -360,6 +369,5 @@ void main() {
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 100.0);
     expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 1')), Offset.zero);
-
   });
 }

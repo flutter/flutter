@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
-Widget wrap({ required Widget child }) {
+Widget wrap({required Widget child}) {
   return MediaQuery(
     data: const MediaQueryData(),
     child: Directionality(
@@ -24,7 +24,9 @@ void main() {
     await tester.pumpWidget(wrap(
       child: CheckboxListTile(
         value: true,
-        onChanged: (bool? value) { log.add(value); },
+        onChanged: (bool? value) {
+          log.add(value);
+        },
         title: const Text('Hello'),
       ),
     ));
@@ -76,6 +78,7 @@ void main() {
         ),
       );
     }
+
     RenderBox getCheckboxListTileRenderer() {
       return tester.renderObject<RenderBox>(find.byType(CheckboxListTile));
     }
@@ -290,7 +293,7 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({Color? activeColor, Color? toggleableActiveColor}) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
           toggleableActiveColor: toggleableActiveColor,
@@ -302,7 +305,7 @@ void main() {
               selected: true,
               title: const Text('title'),
               value: true,
-              onChanged: (bool? value) { },
+              onChanged: (bool? value) {},
             ),
           ),
         ),

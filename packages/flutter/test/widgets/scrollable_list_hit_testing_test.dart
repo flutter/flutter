@@ -23,7 +23,9 @@ void main() {
               scrollDirection: Axis.horizontal,
               children: items.map<Widget>((int item) {
                 return GestureDetector(
-                  onTap: () { tapped.add(item); },
+                  onTap: () {
+                    tapped.add(item);
+                  },
                   child: Text('$item'),
                   dragStartBehavior: DragStartBehavior.down,
                 );
@@ -65,7 +67,9 @@ void main() {
               scrollDirection: Axis.vertical,
               children: items.map<Widget>((int item) {
                 return GestureDetector(
-                  onTap: () { tapped.add(item); },
+                  onTap: () {
+                    tapped.add(item);
+                  },
                   child: Text('$item'),
                   dragStartBehavior: DragStartBehavior.down,
                 );
@@ -106,7 +110,9 @@ void main() {
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map<Widget>((int item) {
             return GestureDetector(
-              onTap: () { tapped.add(item); },
+              onTap: () {
+                tapped.add(item);
+              },
               child: Text('$item'),
             );
           }).toList(),
@@ -139,7 +145,9 @@ void main() {
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map<Widget>((int item) {
             return GestureDetector(
-              onTap: () { tapped.add(item); },
+              onTap: () {
+                tapped.add(item);
+              },
               child: Text('$item'),
             );
           }).toList(),
@@ -171,7 +179,9 @@ void main() {
           itemExtent: 200.0,
           children: items.map<Widget>((int item) {
             return GestureDetector(
-              onTap: () { tapped.add(item); },
+              onTap: () {
+                tapped.add(item);
+              },
               child: Text('$item'),
             );
           }).toList(),

@@ -41,19 +41,19 @@ class ABCModel extends InheritedModel<String> {
 
   @override
   bool updateShouldNotifyDependent(ABCModel old, Set<String> dependencies) {
-    return !setEquals<String>(aspects, old.aspects)
-        || (a != old.a && dependencies.contains('a'))
-        || (b != old.b && dependencies.contains('b'))
-        || (c != old.c && dependencies.contains('c'));
+    return !setEquals<String>(aspects, old.aspects) ||
+        (a != old.a && dependencies.contains('a')) ||
+        (b != old.b && dependencies.contains('b')) ||
+        (c != old.c && dependencies.contains('c'));
   }
 
-  static ABCModel? of(BuildContext context, { String? fieldName }) {
+  static ABCModel? of(BuildContext context, {String? fieldName}) {
     return InheritedModel.inheritFrom<ABCModel>(context, aspect: fieldName);
   }
 }
 
 class ShowABCField extends StatefulWidget {
-  const ShowABCField({ Key? key, required this.fieldName }) : super(key: key);
+  const ShowABCField({Key? key, required this.fieldName}) : super(key: key);
 
   final String fieldName;
 
@@ -114,7 +114,9 @@ void main() {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showA because showA depends on the 'a' aspect
                           // of the ABCModel.
-                          setState(() { _a += 1; });
+                          setState(() {
+                            _a += 1;
+                          });
                         },
                       ),
                       ElevatedButton(
@@ -123,7 +125,9 @@ void main() {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showB because showB depends on the 'b' aspect
                           // of the ABCModel.
-                          setState(() { _b += 1; });
+                          setState(() {
+                            _b += 1;
+                          });
                         },
                       ),
                       ElevatedButton(
@@ -132,7 +136,9 @@ void main() {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showC because showC depends on the 'c' aspect
                           // of the ABCModel.
-                          setState(() { _c += 1; });
+                          setState(() {
+                            _c += 1;
+                          });
                         },
                       ),
                     ],
@@ -233,11 +239,13 @@ void main() {
         return Scaffold(
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return ABCModel( // The "outer" model
+              return ABCModel(
+                // The "outer" model
                 a: _a,
                 b: _b,
                 c: _c,
-                child: ABCModel( // The "inner" model
+                child: ABCModel(
+                  // The "inner" model
                   a: 100 + _a,
                   b: 100 + _b,
                   aspects: const <String>{'a'},
@@ -254,19 +262,25 @@ void main() {
                         ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
-                            setState(() { _a += 1; });
+                            setState(() {
+                              _a += 1;
+                            });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
-                            setState(() { _b += 1; });
+                            setState(() {
+                              _b += 1;
+                            });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
-                            setState(() { _c += 1; });
+                            setState(() {
+                              _c += 1;
+                            });
                           },
                         ),
                       ],
@@ -350,11 +364,13 @@ void main() {
         return Scaffold(
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return ABCModel( // The "outer" model
+              return ABCModel(
+                // The "outer" model
                 a: _a,
                 b: _b,
                 c: _c,
-                child: ABCModel( // The "inner" model
+                child: ABCModel(
+                  // The "inner" model
                   a: 100 + _a,
                   b: 100 + _b,
                   aspects: _innerModelAspects,
@@ -371,19 +387,25 @@ void main() {
                         ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
-                            setState(() { _a += 1; });
+                            setState(() {
+                              _a += 1;
+                            });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
-                            setState(() { _b += 1; });
+                            setState(() {
+                              _b += 1;
+                            });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
-                            setState(() { _c += 1; });
+                            setState(() {
+                              _c += 1;
+                            });
                           },
                         ),
                         ElevatedButton(

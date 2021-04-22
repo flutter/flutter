@@ -26,12 +26,10 @@ class TestScrollPhysics extends ScrollPhysics {
 
   @override
   String toString() {
-    if (parent == null)
-      return '${objectRuntimeType(this, 'TestScrollPhysics')}($name)';
+    if (parent == null) return '${objectRuntimeType(this, 'TestScrollPhysics')}($name)';
     return '${objectRuntimeType(this, 'TestScrollPhysics')}($name) -> $parent';
   }
 }
-
 
 void main() {
   test('ScrollPhysics applyTo()', () {
@@ -65,7 +63,8 @@ void main() {
     const ScrollPhysics always = AlwaysScrollableScrollPhysics();
     const ScrollPhysics page = PageScrollPhysics();
 
-    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) =>
+        value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -122,11 +121,11 @@ void main() {
 
     test('overscroll is progressively harder', () {
       final ScrollMetrics lessOverscrolledPosition = FixedScrollMetrics(
-          minScrollExtent: 0.0,
-          maxScrollExtent: 1000.0,
-          pixels: -20.0,
-          viewportDimension: 100.0,
-          axisDirection: AxisDirection.down,
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
       );
 
       final ScrollMetrics moreOverscrolledPosition = FixedScrollMetrics(
@@ -137,11 +136,9 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      final double lessOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
+      final double lessOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
 
-      final double moreOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
+      final double moreOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
 
       expect(lessOverscrollApplied, greaterThan(1.0));
       expect(lessOverscrollApplied, lessThan(20.0));
@@ -165,8 +162,7 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
 
       expect(easingApplied, lessThan(-1.0));
       expect(easingApplied, greaterThan(-10.0));
@@ -200,21 +196,19 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
-      final double tensioningApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double tensioningApplied = physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
 
       expect(easingApplied.abs(), greaterThan(tensioningApplied.abs()));
     });
 
     test('overscroll a small list and a big list works the same way', () {
       final ScrollMetrics smallListOverscrolledPosition = FixedScrollMetrics(
-          minScrollExtent: 0.0,
-          maxScrollExtent: 10.0,
-          pixels: -20.0,
-          viewportDimension: 100.0,
-          axisDirection: AxisDirection.down,
+        minScrollExtent: 0.0,
+        maxScrollExtent: 10.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
       );
 
       final ScrollMetrics bigListOverscrolledPosition = FixedScrollMetrics(

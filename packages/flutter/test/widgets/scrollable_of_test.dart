@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ScrollPositionListener extends StatefulWidget {
-  const ScrollPositionListener({ Key? key, required this.child, required this.log}) : super(key: key);
+  const ScrollPositionListener({Key? key, required this.child, required this.log}) : super(key: key);
 
   final Widget child;
   final ValueChanged<String> log;
@@ -39,7 +39,6 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   void listener() {
     widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
   }
-
 }
 
 void main() {
@@ -55,7 +54,9 @@ void main() {
         controller: controller,
         physics: physics,
         child: ScrollPositionListener(
-          log: (String s) { logValue = s; },
+          log: (String s) {
+            logValue = s;
+          },
           child: const SizedBox(height: 400.0),
         ),
       );

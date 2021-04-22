@@ -61,7 +61,11 @@ void main() {
         (ByteData? message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
-            return jsonMessage.encodeMessage(<dynamic>[<String>['${methodCall['args']}', 'world']]);
+            return jsonMessage.encodeMessage(
+              <dynamic>[
+                <String>['${methodCall['args']}', 'world'],
+              ],
+            );
           } else {
             return jsonMessage.encodeMessage(<dynamic>['unknown', null, null]);
           }
@@ -92,7 +96,11 @@ void main() {
         (ByteData? message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
-            return jsonMessage.encodeMessage(<dynamic>[<String, String>{'${methodCall['args']}': 'world'}]);
+            return jsonMessage.encodeMessage(
+              <dynamic>[
+                <String, String>{'${methodCall['args']}': 'world'},
+              ],
+            );
           } else {
             return jsonMessage.encodeMessage(<dynamic>['unknown', null, null]);
           }
@@ -281,6 +289,7 @@ void main() {
         (ByteData? reply) {},
       );
     }
+
     test('can receive event stream', () async {
       bool canceled = false;
       ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(

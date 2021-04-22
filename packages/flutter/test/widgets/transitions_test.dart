@@ -28,11 +28,13 @@ void main() {
         ),
         borderRadius: BorderRadius.zero,
         shape: BoxShape.rectangle,
-        boxShadow: const <BoxShadow> [BoxShadow(
-          color: Color(0x66000000),
-          blurRadius: 10.0,
-          spreadRadius: 4.0,
-        )],
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 10.0,
+            spreadRadius: 4.0,
+          ),
+        ],
       ),
       end: BoxDecoration(
         color: const Color(0xFF000000),
@@ -54,8 +56,7 @@ void main() {
     });
 
     testWidgets('decoration test', (WidgetTester tester) async {
-      final DecoratedBoxTransition transitionUnderTest =
-      DecoratedBoxTransition(
+      final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
         decoration: decorationTween.animate(controller),
         child: const Text(
           "Doesn't matter",
@@ -102,8 +103,7 @@ void main() {
     });
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
-      final Animation<Decoration> curvedDecorationAnimation =
-        decorationTween.animate(CurvedAnimation(
+      final Animation<Decoration> curvedDecorationAnimation = decorationTween.animate(CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,
       ));
@@ -199,7 +199,7 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget =  Directionality(
+    final Widget widget = Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         axis: Axis.vertical,
@@ -230,7 +230,7 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget =  Directionality(
+    final Widget widget = Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         axis: Axis.horizontal,
@@ -309,17 +309,20 @@ void main() {
   group('FadeTransition', () {
     double _getOpacity(WidgetTester tester, String textValue) {
       final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-        find.ancestor(
-          of: find.text(textValue),
-          matching: find.byType(FadeTransition),
-        ).first,
+        find
+            .ancestor(
+              of: find.text(textValue),
+              matching: find.byType(FadeTransition),
+            )
+            .first,
       );
       return opacityWidget.opacity.value;
     }
+
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-      final Widget widget =  Directionality(
+      final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: FadeTransition(
           opacity: animation,
@@ -352,13 +355,16 @@ void main() {
   group('SliverFadeTransition', () {
     double _getOpacity(WidgetTester tester, String textValue) {
       final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
-        find.ancestor(
-          of: find.text(textValue),
-          matching: find.byType(SliverFadeTransition),
-        ).first,
+        find
+            .ancestor(
+              of: find.text(textValue),
+              matching: find.byType(SliverFadeTransition),
+            )
+            .first,
       );
       return opacityWidget.opacity.value;
     }
+
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);

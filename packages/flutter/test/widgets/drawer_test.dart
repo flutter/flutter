@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-
   testWidgets('Drawer control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     late BuildContext savedContext;
@@ -92,9 +91,15 @@ void main() {
           body: Align(
             alignment: Alignment.topLeft,
             child: MouseRegion(
-              onEnter: (_) { logs.add('enter'); },
-              onHover: (_) { logs.add('hover'); },
-              onExit: (_) { logs.add('exit'); },
+              onEnter: (_) {
+                logs.add('enter');
+              },
+              onHover: (_) {
+                logs.add('hover');
+              },
+              onExit: (_) {
+                logs.add('exit');
+              },
               child: const SizedBox(width: 10, height: 10),
             ),
           ),
@@ -275,7 +280,9 @@ void main() {
               ),
               body: TextButton(
                 child: const Text('button'),
-                onPressed: () { buttonPressed = true; },
+                onPressed: () {
+                  buttonPressed = true;
+                },
               ),
             );
           },
@@ -325,35 +332,39 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Dismiss'));
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  testWidgets(
+    'Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)',
+    (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            return Scaffold(
-              key: scaffoldKey,
-              drawer: const Drawer(),
-              body: Container(),
-            );
-          },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                key: scaffoldKey,
+                drawer: const Drawer(),
+                body: Container(),
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    // Open the drawer.
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pump(const Duration(milliseconds: 100));
+      // Open the drawer.
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
-    expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
+      expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+      expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
 
-    semantics.dispose();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+      semantics.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
   testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -378,13 +389,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, includesNodeWith(
-      label: 'Navigation menu',
-      flags: <SemanticsFlag>[
-        SemanticsFlag.scopesRoute,
-        SemanticsFlag.namesRoute,
-      ],
-    ));
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Navigation menu',
+        flags: <SemanticsFlag>[
+          SemanticsFlag.scopesRoute,
+          SemanticsFlag.namesRoute,
+        ],
+      ),
+    );
 
     semantics.dispose();
   });

@@ -35,7 +35,13 @@ void main() {
     expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const MaterialApp(home: PhysicalShape(clipBehavior: Clip.antiAlias, color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()))),
+      const MaterialApp(
+        home: PhysicalShape(
+          clipBehavior: Clip.antiAlias,
+          color: Colors.red,
+          clipper: ShapeBorderClipper(shape: CircleBorder()),
+        ),
+      ),
     );
 
     expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));
@@ -118,9 +124,10 @@ void main() {
       FlutterError.onError = (FlutterErrorDetails details) {
         count++;
       };
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
             children: children,
           ),
         ),
@@ -160,7 +167,6 @@ void main() {
       expect(find.byType(Material), findsNWidgets(2));
     });
 
-
     // Tests:
     //
     //        ───────────────          (green rect, paints second)
@@ -192,7 +198,6 @@ void main() {
       expect(find.byType(Material), findsNWidgets(2));
     });
 
-
     // Tests:
     //
     //        ───────────────          (green rect, paints first)
@@ -223,7 +228,6 @@ void main() {
       await _testStackChildren(tester, children, expectedErrorCount: 1);
       expect(find.byType(Material), findsNWidgets(2));
     });
-
 
     // Tests:
     //
@@ -262,7 +266,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/52855
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52855
 
     // Tests:
     //
@@ -438,7 +442,6 @@ void main() {
     //         │           │
     // ────────────────────────────
     testWidgets('with a RenderTransform, non-overlapping', (WidgetTester tester) async {
-
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
           rect: const Rect.fromLTWH(140, 100, 140, 150),
@@ -470,7 +473,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/52855
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52855
 
     // Tests:
     //

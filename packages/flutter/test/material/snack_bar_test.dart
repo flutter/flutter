@@ -46,10 +46,15 @@ void main() {
     expect(find.text(helloSnackBar), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750)); // 2.25s
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text(helloSnackBar), findsOneWidget); // frame 0 of dismiss animation
-    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
+    await tester
+        .pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
     expect(find.text(helloSnackBar), findsNothing);
   });
 
@@ -91,10 +96,15 @@ void main() {
     expect(find.text(helloSnackBar), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750)); // 2.25s
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text(helloSnackBar), findsOneWidget); // frame 0 of dismiss animation
-    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
+    await tester
+        .pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
     expect(find.text(helloSnackBar), findsNothing);
   });
 
@@ -145,11 +155,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750)); // 2.25s
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(); // begin animation
@@ -164,11 +182,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750)); // 6.00s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
   });
@@ -220,11 +246,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750)); // 2.25s
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(); // begin animation
@@ -239,11 +273,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750)); // 6.00s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
   });
@@ -310,13 +352,18 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
+    await tester
+        .pump(const Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750)); // 15.25s
@@ -325,11 +372,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750)); // 16.00s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
   });
@@ -396,13 +451,18 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 750)); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
+    await tester
+        .pump(const Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750)); // 15.25s
@@ -411,11 +471,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750)); // 16.00s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(
+      const Duration(
+        milliseconds: 750,
+      ),
+    ); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
   });
@@ -604,7 +672,7 @@ void main() {
                       duration: const Duration(seconds: 2),
                       action: SnackBarAction(
                         label: 'ACTION',
-                        onPressed: () { },
+                        onPressed: () {},
                       ),
                     ),
                   );
@@ -646,7 +714,7 @@ void main() {
                       duration: const Duration(seconds: 2),
                       action: SnackBarAction(
                         label: 'ACTION',
-                        onPressed: () { },
+                        onPressed: () {},
                       ),
                     ),
                   );
@@ -788,7 +856,7 @@ void main() {
                       duration: const Duration(seconds: 2),
                       action: SnackBarAction(
                         label: 'ACTION',
-                        onPressed: () { },
+                        onPressed: () {},
                       ),
                     ),
                   );
@@ -899,52 +967,55 @@ void main() {
     );
   });
 
-  testWidgets('SnackbarBehavior.floating is positioned within safe area - ScaffoldMessenger', (WidgetTester tester) async {
-    const double viewPadding = 50.0;
-    const double floatingSnackBarDefaultBottomMargin = 10.0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(
-            // Simulate non-safe area.
-            viewPadding: EdgeInsets.only(bottom: viewPadding),
-          ),
-          child: Scaffold(
-            body: Builder(
-              builder: (BuildContext context) {
-                return GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('I am a snack bar.'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
-                  child: const Text('X'),
-                );
-              },
+  testWidgets(
+    'SnackbarBehavior.floating is positioned within safe area - ScaffoldMessenger',
+    (WidgetTester tester) async {
+      const double viewPadding = 50.0;
+      const double floatingSnackBarDefaultBottomMargin = 10.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              // Simulate non-safe area.
+              viewPadding: EdgeInsets.only(bottom: viewPadding),
+            ),
+            child: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('I am a snack bar.'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    child: const Text('X'),
+                  );
+                },
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.text('X'));
-    await tester.pump(); // Start animation
-    await tester.pump(const Duration(milliseconds: 750));
+      await tester.tap(find.text('X'));
+      await tester.pump(); // Start animation
+      await tester.pump(const Duration(milliseconds: 750));
 
-    final Finder materialFinder = find.descendant(
-      of: find.byType(SnackBar),
-      matching: find.byType(Material),
-    );
-    final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
-    expect(
-      snackBarBottomLeft.dy,
-      // Device height is 600.
-      600 - viewPadding - floatingSnackBarDefaultBottomMargin,
-    );
-  });
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+      expect(
+        snackBarBottomLeft.dy,
+        // Device height is 600.
+        600 - viewPadding - floatingSnackBarDefaultBottomMargin,
+      );
+    },
+  );
 
   testWidgets('Snackbar padding can be customized', (WidgetTester tester) async {
     const double padding = 20.0;
@@ -1045,7 +1116,7 @@ void main() {
                         textColor: Colors.lightBlue,
                         disabledTextColor: Colors.red,
                         label: 'ACTION',
-                        onPressed: () { },
+                        onPressed: () {},
                       ),
                     ),
                   );
@@ -1092,7 +1163,7 @@ void main() {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () { }),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
                   ));
                 },
                 child: const Text('X'),
@@ -1116,7 +1187,10 @@ void main() {
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0 + 40.0); // margin + bottom padding
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0 + 12.0); // action padding + margin
-    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 12.0 + 30.0); // action (padding + margin) + right padding
+    expect(
+      snackBarBottomRight.dx - actionTextBottomRight.dx,
+      24.0 + 12.0 + 30.0,
+    ); // action (padding + margin) + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0 + 40.0); // margin + bottom padding
   });
 
@@ -1171,7 +1245,10 @@ void main() {
       expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
       expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0); // margin (with no bottom padding)
       expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0 + 12.0); // action padding + margin
-      expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 12.0 + 30.0); // action (padding + margin) + right padding
+      expect(
+        snackBarBottomRight.dx - actionTextBottomRight.dx,
+        24.0 + 12.0 + 30.0,
+      ); // action (padding + margin) + right padding
       expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
     },
   );
@@ -1352,16 +1429,19 @@ void main() {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: const Text('snack'),
-                  duration: const Duration(seconds: 2),
-                  action: SnackBarAction(
-                    label: 'ACTION',
-                    onPressed: () {
-                      actionPressed = true;
-                    },
-                  ),
-                )).closed.then<void>((SnackBarClosedReason reason) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(
+                      content: const Text('snack'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () {
+                          actionPressed = true;
+                        },
+                      ),
+                    ))
+                    .closed
+                    .then<void>((SnackBarClosedReason reason) {
                   closedReason = reason;
                 });
               },
@@ -1435,7 +1515,7 @@ void main() {
                     duration: const Duration(seconds: 1),
                     action: SnackBarAction(
                       label: 'ACTION',
-                      onPressed: () { },
+                      onPressed: () {},
                     ),
                   ));
                 },
@@ -1477,7 +1557,7 @@ void main() {
                       duration: const Duration(seconds: 1),
                       action: SnackBarAction(
                         label: 'ACTION',
-                        onPressed: () { },
+                        onPressed: () {},
                       ),
                     ));
                   },
@@ -1519,7 +1599,7 @@ void main() {
                   duration: const Duration(seconds: 1),
                   action: SnackBarAction(
                     label: 'ACTION',
-                    onPressed: () { },
+                    onPressed: () {},
                   ),
                 ));
               },
@@ -1532,14 +1612,17 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    expect(tester.getSemantics(find.text('snack')), matchesSemantics(
-      isLiveRegion: true,
-      hasDismissAction: true,
-      hasScrollDownAction: true,
-      hasScrollUpAction: true,
-      label: 'snack',
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+      tester.getSemantics(find.text('snack')),
+      matchesSemantics(
+        isLiveRegion: true,
+        hasDismissAction: true,
+        hasScrollDownAction: true,
+        hasScrollUpAction: true,
+        label: 'snack',
+        textDirection: TextDirection.ltr,
+      ),
+    );
     handle.dispose();
   });
 
@@ -1561,7 +1644,7 @@ void main() {
                     duration: const Duration(seconds: 1),
                     action: SnackBarAction(
                       label: 'ACTION',
-                      onPressed: () { },
+                      onPressed: () {},
                     ),
                   ));
                 },
@@ -1575,14 +1658,17 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    expect(tester.getSemantics(find.text('snack')), matchesSemantics(
-      isLiveRegion: true,
-      hasDismissAction: true,
-      hasScrollDownAction: true,
-      hasScrollUpAction: true,
-      label: 'snack',
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+      tester.getSemantics(find.text('snack')),
+      matchesSemantics(
+        isLiveRegion: true,
+        hasDismissAction: true,
+        hasScrollDownAction: true,
+        hasScrollUpAction: true,
+        label: 'snack',
+        textDirection: TextDirection.ltr,
+      ),
+    );
     handle.dispose();
   });
 
@@ -1597,7 +1683,7 @@ void main() {
               key: tapTarget,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text(helloSnackBar),
+                  content: Text(helloSnackBar),
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -1617,7 +1703,8 @@ void main() {
     expect(find.text(helloSnackBar), findsOneWidget);
     await tester.pump(); // begin animation
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; four second timer starts here
+    await tester
+        .pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; four second timer starts here
     expect(find.text(helloSnackBar), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750)); // 1.50s
     expect(find.text(helloSnackBar), findsOneWidget);
@@ -1627,15 +1714,20 @@ void main() {
     expect(find.text(helloSnackBar), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750)); // 3.75s
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 1000)); // 4.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(
+      const Duration(
+        milliseconds: 1000,
+      ),
+    ); // 4.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text(helloSnackBar), findsOneWidget); // frame 0 of dismiss animation
-    await tester.pump(const Duration(milliseconds: 750)); // 5.50s // last frame of animation, snackbar removed from build
+    await tester
+        .pump(const Duration(milliseconds: 750)); // 5.50s // last frame of animation, snackbar removed from build
     expect(find.text(helloSnackBar), findsNothing);
   });
 
   testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
-    Future<void> boilerplate({ required bool accessibleNavigation }) {
+    Future<void> boilerplate({required bool accessibleNavigation}) {
       return tester.pumpWidget(MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(accessibleNavigation: accessibleNavigation),
@@ -1646,7 +1738,7 @@ void main() {
                   onTap: () {
                     Scaffold.of(context).showSnackBar(SnackBar(
                       content: const Text('test'),
-                      action: SnackBarAction(label: 'foo', onPressed: () { }),
+                      action: SnackBarAction(label: 'foo', onPressed: () {}),
                     ));
                   },
                   behavior: HitTestBehavior.opaque,
@@ -1683,7 +1775,7 @@ void main() {
   });
 
   testWidgets('SnackBar handles updates to accessibleNavigation - ScaffoldMessenger', (WidgetTester tester) async {
-    Future<void> boilerplate({ required bool accessibleNavigation }) {
+    Future<void> boilerplate({required bool accessibleNavigation}) {
       return tester.pumpWidget(MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(accessibleNavigation: accessibleNavigation),
@@ -1694,7 +1786,7 @@ void main() {
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: const Text('test'),
-                      action: SnackBarAction(label: 'foo', onPressed: () { }),
+                      action: SnackBarAction(label: 'foo', onPressed: () {}),
                     ));
                   },
                   behavior: HitTestBehavior.opaque,
@@ -2095,19 +2187,19 @@ void main() {
             home: Scaffold(
               body: Builder(
                 builder: (BuildContext context) {
-                    return GestureDetector(
-                      onTap: () {
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                          content: const Text('Some content'),
-                          behavior: SnackBarBehavior.fixed,
-                          action: SnackBarAction(
-                            label: 'ACTION',
-                            onPressed: () {},
-                          ),
-                        ));
-                      },
-                      child: const Text('X'),
-                    );
+                  return GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                        content: const Text('Some content'),
+                        behavior: SnackBarBehavior.fixed,
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          onPressed: () {},
+                        ),
+                      ));
+                    },
+                    child: const Text('X'),
+                  );
                 },
               ),
             ),
@@ -2132,19 +2224,19 @@ void main() {
             home: Scaffold(
               body: Builder(
                 builder: (BuildContext context) {
-                    return GestureDetector(
-                      onTap: () {
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                          content: const Text('Some content'),
-                          behavior: SnackBarBehavior.floating,
-                          action: SnackBarAction(
-                            label: 'ACTION',
-                            onPressed: () {},
-                          ),
-                        ));
-                      },
-                      child: const Text('X'),
-                    );
+                  return GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                        content: const Text('Some content'),
+                        behavior: SnackBarBehavior.floating,
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          onPressed: () {},
+                        ),
+                      ));
+                    },
+                    child: const Text('X'),
+                  );
                 },
               ),
             ),
@@ -2156,7 +2248,10 @@ void main() {
         final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
         final Offset actionTopRight = tester.getTopRight(find.byType(SnackBarAction));
 
-        expect(snackBarTopRight.dx - actionTopRight.dx, 8.0 + 15.0); // button margin + horizontal scaffold outside margin
+        expect(
+          snackBarTopRight.dx - actionTopRight.dx,
+          8.0 + 15.0,
+        ); // button margin + horizontal scaffold outside margin
       },
     );
   });
@@ -2170,7 +2265,7 @@ void main() {
 
     Widget _buildApp() {
       return MaterialApp(
-        routes: <String, WidgetBuilder> {
+        routes: <String, WidgetBuilder>{
           '/': (BuildContext context) {
             return Scaffold(
               appBar: AppBar(title: const Text(firstHeader)),
@@ -2200,6 +2295,7 @@ void main() {
         },
       );
     }
+
     await tester.pumpWidget(_buildApp());
 
     expect(find.text(snackBarText), findsNothing);
@@ -2230,38 +2326,41 @@ void main() {
     expect(find.text(secondHeader), findsOneWidget);
   });
 
-  testWidgets('SnackBars cannot be used by the Scaffold and ScaffoldMessenger at the same time', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(),
-    ));
+  testWidgets(
+    'SnackBars cannot be used by the Scaffold and ScaffoldMessenger at the same time',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(),
+      ));
 
-    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
-    scaffoldMessengerState.showSnackBar(SnackBar(
-      content: const Text('ScaffoldMessenger'),
-      duration: const Duration(seconds: 2),
-      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-      behavior: SnackBarBehavior.floating,
-    ));
-    final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-    scaffoldState.showSnackBar(SnackBar(
-      content: const Text('Scaffold'),
-      duration: const Duration(seconds: 2),
-      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-      behavior: SnackBarBehavior.floating,
-    ));
+      final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+      scaffoldMessengerState.showSnackBar(SnackBar(
+        content: const Text('ScaffoldMessenger'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+        behavior: SnackBarBehavior.floating,
+      ));
+      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+      scaffoldState.showSnackBar(SnackBar(
+        content: const Text('Scaffold'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+        behavior: SnackBarBehavior.floating,
+      ));
 
-    final List<dynamic> exceptions = <dynamic>[];
-    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      exceptions.add(details.exception);
-    };
-    await tester.pump();
-    FlutterError.onError = oldHandler;
+      final List<dynamic> exceptions = <dynamic>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        exceptions.add(details.exception);
+      };
+      await tester.pump();
+      FlutterError.onError = oldHandler;
 
-    expect(exceptions.length, 1);
-    final AssertionError error = exceptions.first as AssertionError;
-    expect(error.message, contains('Only one API should be used to manage SnackBars.'));
-  });
+      expect(exceptions.length, 1);
+      final AssertionError error = exceptions.first as AssertionError;
+      expect(error.message, contains('Only one API should be used to manage SnackBars.'));
+    },
+  );
 
   testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
@@ -2288,37 +2387,40 @@ void main() {
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.workWithBottomSheet.png'));
   });
 
-  testWidgets('ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: const Scaffold(),
-        floatingActionButton: FloatingActionButton(onPressed: () {}),
-      ),
-    ));
+  testWidgets(
+    'ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: const Scaffold(),
+          floatingActionButton: FloatingActionButton(onPressed: () {}),
+        ),
+      ));
 
-    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
-      find.byType(ScaffoldMessenger),
-    );
-    scaffoldMessengerState.showSnackBar(SnackBar(
-      content: const Text('ScaffoldMessenger'),
-      duration: const Duration(seconds: 2),
-      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-      behavior: SnackBarBehavior.floating,
-    ));
-    await tester.pumpAndSettle();
+      final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+        find.byType(ScaffoldMessenger),
+      );
+      scaffoldMessengerState.showSnackBar(SnackBar(
+        content: const Text('ScaffoldMessenger'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+        behavior: SnackBarBehavior.floating,
+      ));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(SnackBar), findsOneWidget);
-    // The FloatingActionButton helps us identify which Scaffold has the
-    // SnackBar here. Since the outer Scaffold contains a FAB, the SnackBar
-    // should be above it. If the inner Scaffold had the SnackBar, it would be
-    // overlapping the FAB.
-    await expectLater(
-      find.byType(MaterialApp),
-      matchesGoldenFile('snack_bar.scaffold.nested.png'),
-    );
-    final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
-    expect(snackBarTopRight.dy, 465.0);
-  });
+      expect(find.byType(SnackBar), findsOneWidget);
+      // The FloatingActionButton helps us identify which Scaffold has the
+      // SnackBar here. Since the outer Scaffold contains a FAB, the SnackBar
+      // should be above it. If the inner Scaffold had the SnackBar, it would be
+      // overlapping the FAB.
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('snack_bar.scaffold.nested.png'),
+      );
+      final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+      expect(snackBarTopRight.dy, 465.0);
+    },
+  );
 
   testWidgets('ScaffoldMessengerState clearSnackBars works as expected', (WidgetTester tester) async {
     final List<String> snackBars = <String>['Hello Snackbar', 'Hi Snackbar', 'Bye Snackbar'];

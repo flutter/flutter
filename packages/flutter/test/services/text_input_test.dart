@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
@@ -138,8 +137,7 @@ void main() {
       const TextInputType signed = TextInputType.numberWithOptions(signed: true);
       const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
       const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
-      const TextInputType signedDecimal =
-        TextInputType.numberWithOptions(signed: true, decimal: true);
+      const TextInputType signedDecimal = TextInputType.numberWithOptions(signed: true, decimal: true);
 
       expect(text.toString(), 'TextInputType(name: TextInputType.text, signed: null, decimal: null)');
       expect(number.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: false)');
@@ -270,8 +268,7 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
           jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abc"}}'),
@@ -296,8 +293,7 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
           jsonDecode('{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}'),
@@ -322,8 +318,7 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send onConnectionClosed message.
-      final ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.showAutocorrectionPromptRect',
       });
@@ -445,9 +440,8 @@ class FakeTextChannel implements MethodChannel {
   @override
   bool checkMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
 
-
   @override
-  void setMockMethodCallHandler(Future<void>? Function(MethodCall call)? handler)  => throw UnimplementedError();
+  void setMockMethodCallHandler(Future<void>? Function(MethodCall call)? handler) => throw UnimplementedError();
 
   @override
   bool checkMockMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
@@ -465,7 +459,8 @@ class FakeTextChannel implements MethodChannel {
         print(
           'Index $i did not match:\n'
           '  actual:   $outgoingString\n'
-          '  expected: $expectedString',);
+          '  expected: $expectedString',
+        );
         hasError = true;
       }
     }

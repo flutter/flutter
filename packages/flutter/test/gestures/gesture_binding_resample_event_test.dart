@@ -21,8 +21,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null)
-      callback?.call(event);
+    if (callback != null) callback?.call(event);
   }
 
   @override
@@ -67,49 +66,49 @@ void main() {
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(
-            change: ui.PointerChange.add,
-            physicalX: 0.0,
-            timeStamp: epoch + const Duration(milliseconds: 0),
+          change: ui.PointerChange.add,
+          physicalX: 0.0,
+          timeStamp: epoch + const Duration(milliseconds: 0),
         ),
         ui.PointerData(
-            change: ui.PointerChange.down,
-            physicalX: 0.0,
-            timeStamp: epoch + const Duration(milliseconds: 10),
+          change: ui.PointerChange.down,
+          physicalX: 0.0,
+          timeStamp: epoch + const Duration(milliseconds: 10),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 10.0,
-            timeStamp: epoch + const Duration(milliseconds: 20),
+          change: ui.PointerChange.move,
+          physicalX: 10.0,
+          timeStamp: epoch + const Duration(milliseconds: 20),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 20.0,
-            timeStamp: epoch + const Duration(milliseconds: 30),
+          change: ui.PointerChange.move,
+          physicalX: 20.0,
+          timeStamp: epoch + const Duration(milliseconds: 30),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 30.0,
-            timeStamp: epoch + const Duration(milliseconds: 40),
+          change: ui.PointerChange.move,
+          physicalX: 30.0,
+          timeStamp: epoch + const Duration(milliseconds: 40),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 40.0,
-            timeStamp: epoch + const Duration(milliseconds: 50),
+          change: ui.PointerChange.move,
+          physicalX: 40.0,
+          timeStamp: epoch + const Duration(milliseconds: 50),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 50.0,
-            timeStamp: epoch + const Duration(milliseconds: 60),
+          change: ui.PointerChange.move,
+          physicalX: 50.0,
+          timeStamp: epoch + const Duration(milliseconds: 60),
         ),
         ui.PointerData(
-            change: ui.PointerChange.up,
-            physicalX: 50.0,
-            timeStamp: epoch + const Duration(milliseconds: 70),
+          change: ui.PointerChange.up,
+          physicalX: 50.0,
+          timeStamp: epoch + const Duration(milliseconds: 70),
         ),
         ui.PointerData(
-            change: ui.PointerChange.remove,
-            physicalX: 50.0,
-            timeStamp: epoch + const Duration(milliseconds: 70),
+          change: ui.PointerChange.remove,
+          physicalX: 50.0,
+          timeStamp: epoch + const Duration(milliseconds: 70),
         ),
       ],
     );

@@ -57,7 +57,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -68,7 +68,10 @@ void main() {
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.color, const Color(0xffffffff));
     // Default value for ThemeData.typography is Typography.material2014()
-    expect(content.text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2));
+    expect(
+      content.text.style,
+      Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2),
+    );
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
@@ -83,7 +86,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -122,7 +125,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),
@@ -153,7 +156,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ],
         ),

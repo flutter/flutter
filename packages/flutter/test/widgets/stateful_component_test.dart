@@ -10,7 +10,6 @@ import 'test_widgets.dart';
 
 void main() {
   testWidgets('Stateful widget smoke test', (WidgetTester tester) async {
-
     void checkTree(BoxDecoration expectedDecoration) {
       final SingleChildRenderObjectElement element = tester.element(
         find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement),

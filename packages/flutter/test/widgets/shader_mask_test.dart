@@ -14,7 +14,6 @@ Shader createShader(Rect bounds) {
   ).createShader(bounds);
 }
 
-
 void main() {
   testWidgets('Can be constructed', (WidgetTester tester) async {
     const Widget child = SizedBox(width: 100.0, height: 100.0);
@@ -45,7 +44,6 @@ void main() {
     expect(shaderBounds, equals(const Rect.fromLTWH(0.0, 0.0, 400.0, 400.0)));
   });
 
-
   testWidgets('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
     final Widget widgetBottomRight = Container(
       width: 400,
@@ -58,7 +56,7 @@ void main() {
             shaderCallback: (Rect bounds) => const RadialGradient(
               center: Alignment.center,
               radius: 0.05,
-              colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
+              colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
             ).createShader(bounds),
             child: Container(
@@ -88,7 +86,7 @@ void main() {
             shaderCallback: (Rect bounds) => const RadialGradient(
               center: Alignment.center,
               radius: 0.05,
-              colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
+              colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
             ).createShader(bounds),
             child: Container(

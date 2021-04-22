@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget _boilerplate(VoidCallback? onButtonPressed, {
+  Widget _boilerplate(
+    VoidCallback? onButtonPressed, {
     int itemCount = 100,
     double initialChildSize = .5,
     double maxChildSize = 1.0,
@@ -139,34 +140,38 @@ void main() {
         expect(find.text('Item 29').hitTestable(), findsNothing);
       }, variant: TargetPlatformVariant.all());
 
-      testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (WidgetTester tester) async {
-        int taps = 0;
-        await tester.pumpWidget(_boilerplate(() => taps++));
+      testWidgets(
+        'Can be dragged up and cover its container and scroll in single motion, and then dragged back down',
+        (WidgetTester tester) async {
+          int taps = 0;
+          await tester.pumpWidget(_boilerplate(() => taps++));
 
-        expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
-        expect(taps, 1);
-        expect(find.text('Item 1'), findsOneWidget);
-        expect(find.text('Item 21'), findsOneWidget);
-        expect(find.text('Item 36'), findsNothing);
+          expect(find.text('TapHere'), findsOneWidget);
+          await tester.tap(find.text('TapHere'));
+          expect(taps, 1);
+          expect(find.text('Item 1'), findsOneWidget);
+          expect(find.text('Item 21'), findsOneWidget);
+          expect(find.text('Item 36'), findsNothing);
 
-        await tester.drag(find.text('Item 1'), const Offset(0, -325));
-        await tester.pumpAndSettle();
-        expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'), warnIfMissed: false);
-        expect(taps, 1);
-        expect(find.text('Item 1'), findsOneWidget);
-        expect(find.text('Item 21'), findsOneWidget);
-        expect(find.text('Item 36'), findsOneWidget);
+          await tester.drag(find.text('Item 1'), const Offset(0, -325));
+          await tester.pumpAndSettle();
+          expect(find.text('TapHere'), findsOneWidget);
+          await tester.tap(find.text('TapHere'), warnIfMissed: false);
+          expect(taps, 1);
+          expect(find.text('Item 1'), findsOneWidget);
+          expect(find.text('Item 21'), findsOneWidget);
+          expect(find.text('Item 36'), findsOneWidget);
 
-        await tester.dragFrom(const Offset(20, 20), const Offset(0, 325));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('TapHere'));
-        expect(taps, 2);
-        expect(find.text('Item 1'), findsOneWidget);
-        expect(find.text('Item 18'), findsOneWidget);
-        expect(find.text('Item 36'), findsNothing);
-      }, variant: TargetPlatformVariant.all());
+          await tester.dragFrom(const Offset(20, 20), const Offset(0, 325));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('TapHere'));
+          expect(taps, 2);
+          expect(find.text('Item 1'), findsOneWidget);
+          expect(find.text('Item 18'), findsOneWidget);
+          expect(find.text('Item 36'), findsNothing);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
 
       testWidgets('Can be flung up gently', (WidgetTester tester) async {
         int taps = 0;
@@ -267,26 +272,29 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
 
-    testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
-      final List<Type> notificationTypes = <Type>[];
-      await tester.pumpWidget(_boilerplate(
-        null,
-        onScrollNotification: (ScrollNotification notification) {
-          notificationTypes.add(notification.runtimeType);
-          return false;
-        },
-      ));
+    testWidgets(
+      'ScrollNotification correctly dispatched when flung without covering its container',
+      (WidgetTester tester) async {
+        final List<Type> notificationTypes = <Type>[];
+        await tester.pumpWidget(_boilerplate(
+          null,
+          onScrollNotification: (ScrollNotification notification) {
+            notificationTypes.add(notification.runtimeType);
+            return false;
+          },
+        ));
 
-      await tester.fling(find.text('Item 1'), const Offset(0, -200), 200);
-      await tester.pumpAndSettle();
+        await tester.fling(find.text('Item 1'), const Offset(0, -200), 200);
+        await tester.pumpAndSettle();
 
-      // TODO(itome): Make sure UserScrollNotification and ScrollUpdateNotification are called correctly.
-      final List<Type> types = <Type>[
-        ScrollStartNotification,
-        ScrollEndNotification,
-      ];
-      expect(notificationTypes, equals(types));
-    });
+        // TODO(itome): Make sure UserScrollNotification and ScrollUpdateNotification are called correctly.
+        final List<Type> types = <Type>[
+          ScrollStartNotification,
+          ScrollEndNotification,
+        ];
+        expect(notificationTypes, equals(types));
+      },
+    );
 
     testWidgets('ScrollNotification correctly dispatched when flung with contents scroll', (WidgetTester tester) async {
       final List<Type> notificationTypes = <Type>[];

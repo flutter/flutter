@@ -537,63 +537,66 @@ void main() {
     });
 
     // Arguably, this isn't correct behavior, but it is what happens now.
-    testWidgets("Removing focused widget doesn't move focus to next widget within FocusScope", (WidgetTester tester) async {
-      final GlobalKey<TestFocusState> keyA = GlobalKey();
-      final GlobalKey<TestFocusState> keyB = GlobalKey();
-      final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope');
+    testWidgets(
+      "Removing focused widget doesn't move focus to next widget within FocusScope",
+      (WidgetTester tester) async {
+        final GlobalKey<TestFocusState> keyA = GlobalKey();
+        final GlobalKey<TestFocusState> keyB = GlobalKey();
+        final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope');
 
-      await tester.pumpWidget(
-        FocusScope(
-          debugLabel: 'Parent Scope',
-          node: parentFocusScope,
-          autofocus: true,
-          child: Column(
-            children: <Widget>[
-              TestFocus(
-                debugLabel: 'Widget A',
-                key: keyA,
-                name: 'a',
-              ),
-              TestFocus(
-                debugLabel: 'Widget B',
-                key: keyB,
-                name: 'b',
-              ),
-            ],
+        await tester.pumpWidget(
+          FocusScope(
+            debugLabel: 'Parent Scope',
+            node: parentFocusScope,
+            autofocus: true,
+            child: Column(
+              children: <Widget>[
+                TestFocus(
+                  debugLabel: 'Widget A',
+                  key: keyA,
+                  name: 'a',
+                ),
+                TestFocus(
+                  debugLabel: 'Widget B',
+                  key: keyB,
+                  name: 'b',
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
-      final FocusScopeNode scope = FocusScope.of(keyA.currentContext!);
-      FocusManager.instance.rootScope.setFirstFocus(scope);
+        FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
+        final FocusScopeNode scope = FocusScope.of(keyA.currentContext!);
+        FocusManager.instance.rootScope.setFirstFocus(scope);
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(keyA.currentState!.focusNode.hasFocus, isTrue);
-      expect(find.text('A FOCUSED'), findsOneWidget);
-      expect(keyB.currentState!.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+        expect(keyA.currentState!.focusNode.hasFocus, isTrue);
+        expect(find.text('A FOCUSED'), findsOneWidget);
+        expect(keyB.currentState!.focusNode.hasFocus, isFalse);
+        expect(find.text('b'), findsOneWidget);
 
-      await tester.pumpWidget(
-        FocusScope(
-          node: parentFocusScope,
-          child: Column(
-            children: <Widget>[
-              TestFocus(
-                key: keyB,
-                name: 'b',
-              ),
-            ],
+        await tester.pumpWidget(
+          FocusScope(
+            node: parentFocusScope,
+            child: Column(
+              children: <Widget>[
+                TestFocus(
+                  key: keyB,
+                  name: 'b',
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pump();
+        await tester.pump();
 
-      expect(keyB.currentState!.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
-    });
+        expect(keyB.currentState!.focusNode.hasFocus, isFalse);
+        expect(find.text('b'), findsOneWidget);
+      },
+    );
 
     testWidgets('Removing a FocusScope removes its node from the tree', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
@@ -659,173 +662,179 @@ void main() {
     });
 
     // By "pinned", it means kept in the tree by a GlobalKey.
-    testWidgets("Removing pinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
-      final GlobalKey<TestFocusState> keyA = GlobalKey();
-      final GlobalKey<TestFocusState> keyB = GlobalKey();
-      final GlobalKey<TestFocusState> scopeKeyA = GlobalKey();
-      final GlobalKey<TestFocusState> scopeKeyB = GlobalKey();
-      final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
-      final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
+    testWidgets(
+      "Removing pinned focused scope doesn't move focus to focused widget within next FocusScope",
+      (WidgetTester tester) async {
+        final GlobalKey<TestFocusState> keyA = GlobalKey();
+        final GlobalKey<TestFocusState> keyB = GlobalKey();
+        final GlobalKey<TestFocusState> scopeKeyA = GlobalKey();
+        final GlobalKey<TestFocusState> scopeKeyB = GlobalKey();
+        final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
+        final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
 
-      await tester.pumpWidget(
-        FocusTraversalGroup(
-          child: Column(
-            children: <Widget>[
-              FocusScope(
-                key: scopeKeyA,
-                node: parentFocusScope1,
-                child: Column(
-                  children: <Widget>[
-                    TestFocus(
-                      debugLabel: 'Child A',
-                      key: keyA,
-                      name: 'a',
-                    ),
-                  ],
+        await tester.pumpWidget(
+          FocusTraversalGroup(
+            child: Column(
+              children: <Widget>[
+                FocusScope(
+                  key: scopeKeyA,
+                  node: parentFocusScope1,
+                  child: Column(
+                    children: <Widget>[
+                      TestFocus(
+                        debugLabel: 'Child A',
+                        key: keyA,
+                        name: 'a',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              FocusScope(
-                key: scopeKeyB,
-                node: parentFocusScope2,
-                child: Column(
-                  children: <Widget>[
-                    TestFocus(
-                      debugLabel: 'Child B',
-                      key: keyB,
-                      name: 'b',
-                    ),
-                  ],
+                FocusScope(
+                  key: scopeKeyB,
+                  node: parentFocusScope2,
+                  child: Column(
+                    children: <Widget>[
+                      TestFocus(
+                        debugLabel: 'Child B',
+                        key: keyB,
+                        name: 'b',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      FocusScope.of(keyB.currentContext!).requestFocus(keyB.currentState!.focusNode);
-      FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
-      final FocusScopeNode bScope = FocusScope.of(keyB.currentContext!);
-      final FocusScopeNode aScope = FocusScope.of(keyA.currentContext!);
-      FocusManager.instance.rootScope.setFirstFocus(bScope);
-      FocusManager.instance.rootScope.setFirstFocus(aScope);
+        FocusScope.of(keyB.currentContext!).requestFocus(keyB.currentState!.focusNode);
+        FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
+        final FocusScopeNode bScope = FocusScope.of(keyB.currentContext!);
+        final FocusScopeNode aScope = FocusScope.of(keyA.currentContext!);
+        FocusManager.instance.rootScope.setFirstFocus(bScope);
+        FocusManager.instance.rootScope.setFirstFocus(aScope);
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(FocusScope.of(keyA.currentContext!).isFirstFocus, isTrue);
-      expect(keyA.currentState!.focusNode.hasFocus, isTrue);
-      expect(find.text('A FOCUSED'), findsOneWidget);
-      expect(keyB.currentState!.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+        expect(FocusScope.of(keyA.currentContext!).isFirstFocus, isTrue);
+        expect(keyA.currentState!.focusNode.hasFocus, isTrue);
+        expect(find.text('A FOCUSED'), findsOneWidget);
+        expect(keyB.currentState!.focusNode.hasFocus, isFalse);
+        expect(find.text('b'), findsOneWidget);
 
-      await tester.pumpWidget(
-        FocusTraversalGroup(
-          child: Column(
-            children: <Widget>[
-              FocusScope(
-                key: scopeKeyB,
-                node: parentFocusScope2,
-                child: Column(
-                  children: <Widget>[
-                    TestFocus(
-                      debugLabel: 'Child B',
-                      key: keyB,
-                      name: 'b',
-                      autofocus: true,
-                    ),
-                  ],
+        await tester.pumpWidget(
+          FocusTraversalGroup(
+            child: Column(
+              children: <Widget>[
+                FocusScope(
+                  key: scopeKeyB,
+                  node: parentFocusScope2,
+                  child: Column(
+                    children: <Widget>[
+                      TestFocus(
+                        debugLabel: 'Child B',
+                        key: keyB,
+                        name: 'b',
+                        autofocus: true,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pump();
+        await tester.pump();
 
-      expect(keyB.currentState!.focusNode.hasFocus, isTrue);
-      expect(find.text('B FOCUSED'), findsOneWidget);
-    });
+        expect(keyB.currentState!.focusNode.hasFocus, isTrue);
+        expect(find.text('B FOCUSED'), findsOneWidget);
+      },
+    );
 
-    testWidgets("Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
-      final GlobalKey<TestFocusState> keyA = GlobalKey();
-      final GlobalKey<TestFocusState> keyB = GlobalKey();
-      final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
-      final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
+    testWidgets(
+      "Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope",
+      (WidgetTester tester) async {
+        final GlobalKey<TestFocusState> keyA = GlobalKey();
+        final GlobalKey<TestFocusState> keyB = GlobalKey();
+        final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
+        final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
 
-      await tester.pumpWidget(
-        FocusTraversalGroup(
-          child: Column(
-            children: <Widget>[
-              FocusScope(
-                node: parentFocusScope1,
-                child: Column(
-                  children: <Widget>[
-                    TestFocus(
-                      debugLabel: 'Child A',
-                      key: keyA,
-                      name: 'a',
-                    ),
-                  ],
+        await tester.pumpWidget(
+          FocusTraversalGroup(
+            child: Column(
+              children: <Widget>[
+                FocusScope(
+                  node: parentFocusScope1,
+                  child: Column(
+                    children: <Widget>[
+                      TestFocus(
+                        debugLabel: 'Child A',
+                        key: keyA,
+                        name: 'a',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              FocusScope(
-                node: parentFocusScope2,
-                child: Column(
-                  children: <Widget>[
-                    TestFocus(
-                      debugLabel: 'Child B',
-                      key: keyB,
-                      name: 'b',
-                    ),
-                  ],
+                FocusScope(
+                  node: parentFocusScope2,
+                  child: Column(
+                    children: <Widget>[
+                      TestFocus(
+                        debugLabel: 'Child B',
+                        key: keyB,
+                        name: 'b',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      FocusScope.of(keyB.currentContext!).requestFocus(keyB.currentState!.focusNode);
-      FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
-      final FocusScopeNode bScope = FocusScope.of(keyB.currentContext!);
-      final FocusScopeNode aScope = FocusScope.of(keyA.currentContext!);
-      FocusManager.instance.rootScope.setFirstFocus(bScope);
-      FocusManager.instance.rootScope.setFirstFocus(aScope);
+        FocusScope.of(keyB.currentContext!).requestFocus(keyB.currentState!.focusNode);
+        FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
+        final FocusScopeNode bScope = FocusScope.of(keyB.currentContext!);
+        final FocusScopeNode aScope = FocusScope.of(keyA.currentContext!);
+        FocusManager.instance.rootScope.setFirstFocus(bScope);
+        FocusManager.instance.rootScope.setFirstFocus(aScope);
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(FocusScope.of(keyA.currentContext!).isFirstFocus, isTrue);
-      expect(keyA.currentState!.focusNode.hasFocus, isTrue);
-      expect(find.text('A FOCUSED'), findsOneWidget);
-      expect(keyB.currentState!.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+        expect(FocusScope.of(keyA.currentContext!).isFirstFocus, isTrue);
+        expect(keyA.currentState!.focusNode.hasFocus, isTrue);
+        expect(find.text('A FOCUSED'), findsOneWidget);
+        expect(keyB.currentState!.focusNode.hasFocus, isFalse);
+        expect(find.text('b'), findsOneWidget);
 
-      await tester.pumpWidget(
-        FocusTraversalGroup(
-          child: Column(
-            children: <Widget>[
-              FocusScope(
-                node: parentFocusScope2,
-                child: Column(
-                  children: <Widget>[
-                    TestFocus(
-                      debugLabel: 'Child B',
-                      key: keyB,
-                      name: 'b',
-                      autofocus: true,
-                    ),
-                  ],
+        await tester.pumpWidget(
+          FocusTraversalGroup(
+            child: Column(
+              children: <Widget>[
+                FocusScope(
+                  node: parentFocusScope2,
+                  child: Column(
+                    children: <Widget>[
+                      TestFocus(
+                        debugLabel: 'Child B',
+                        key: keyB,
+                        name: 'b',
+                        autofocus: true,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-      await tester.pump();
+        );
+        await tester.pump();
 
-      expect(keyB.currentState!.focusNode.hasFocus, isTrue);
-      expect(find.text('B FOCUSED'), findsOneWidget);
-    });
+        expect(keyB.currentState!.focusNode.hasFocus, isTrue);
+        expect(find.text('B FOCUSED'), findsOneWidget);
+      },
+    );
 
     testWidgets('Moving widget from one scope to another retains focus', (WidgetTester tester) async {
       final FocusScopeNode parentFocusScope1 = FocusScopeNode();
@@ -1613,7 +1622,8 @@ void main() {
 
       await tester.pumpWidget(
         Focus(
-          onKey: (FocusNode node, RawKeyEvent event) { // The updated handler handles the key.
+          onKey: (FocusNode node, RawKeyEvent event) {
+            // The updated handler handles the key.
             keyEventHandled = true;
             return KeyEventResult.handled;
           },

@@ -11,8 +11,8 @@ void main() {
   test('TextSpan equals', () {
     const TextSpan a1 = TextSpan(text: 'a');
     const TextSpan a2 = TextSpan(text: 'a');
-    const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
-    const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
+    const TextSpan b1 = TextSpan(children: <TextSpan>[a1]);
+    const TextSpan b2 = TextSpan(children: <TextSpan>[a2]);
     const TextSpan c1 = TextSpan(text: null);
     const TextSpan c2 = TextSpan(text: null);
 
@@ -62,28 +62,34 @@ void main() {
         ),
       ],
     );
-    expect(test.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  inherit: true\n'
-      '  size: 10.0\n'
-      '  "a"\n'
-      '  TextSpan:\n'
-      '    "b"\n'
-      '    TextSpan:\n'
-      '      (empty)\n'
-      '  TextSpan:\n'
-      '    "c"\n',
-    ));
+    expect(
+      test.toStringDeep(),
+      equals(
+        'TextSpan:\n'
+        '  inherit: true\n'
+        '  size: 10.0\n'
+        '  "a"\n'
+        '  TextSpan:\n'
+        '    "b"\n'
+        '    TextSpan:\n'
+        '      (empty)\n'
+        '  TextSpan:\n'
+        '    "c"\n',
+      ),
+    );
   });
 
   test('TextSpan toStringDeep for mouse', () {
     const TextSpan test1 = TextSpan(
       text: 'a',
     );
-    expect(test1.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  "a"\n',
-    ));
+    expect(
+      test1.toStringDeep(),
+      equals(
+        'TextSpan:\n'
+        '  "a"\n',
+      ),
+    );
 
     final TextSpan test2 = TextSpan(
       text: 'a',
@@ -91,14 +97,16 @@ void main() {
       onExit: (_) {},
       mouseCursor: SystemMouseCursors.forbidden,
     );
-    expect(test2.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  "a"\n'
-      '  callbacks: enter, exit\n'
-      '  mouseCursor: SystemMouseCursor(forbidden)\n',
-    ));
+    expect(
+      test2.toStringDeep(),
+      equals(
+        'TextSpan:\n'
+        '  "a"\n'
+        '  callbacks: enter, exit\n'
+        '  mouseCursor: SystemMouseCursor(forbidden)\n',
+      ),
+    );
   });
-
 
   test('TextSpan toPlainText', () {
     const TextSpan textSpan = TextSpan(
@@ -363,5 +371,4 @@ void main() {
     expect(logEvents.length, 2);
     expect(logEvents[1], isA<PointerExitEvent>());
   });
-
 }

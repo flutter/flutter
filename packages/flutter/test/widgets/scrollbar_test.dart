@@ -131,7 +131,7 @@ void main() {
         scrollMetrics: defaultMetrics,
       );
 
-      final List<ScrollMetrics> metricsList = <ScrollMetrics> [
+      final List<ScrollMetrics> metricsList = <ScrollMetrics>[
         startingMetrics.copyWith(pixels: 0.01),
         ...List<ScrollMetrics>.generate(
           (maxExtent / viewportDimension).round(),
@@ -146,14 +146,17 @@ void main() {
         painter.paint(testCanvas, size);
 
         final Rect rect = captureRect();
-        final double newCoefficient = metrics.pixels/rect.top;
+        final double newCoefficient = metrics.pixels / rect.top;
         lastCoefficient = newCoefficient;
 
         expect(rect.top >= 0, true);
         expect(rect.bottom <= maxExtent, true);
         expect(rect.left, size.width - _kThickness);
         expect(rect.width, _kThickness);
-        expect(nearEqual(rect.height, viewportDimension * viewportDimension / (viewportDimension + maxExtent), 0.001), true);
+        expect(
+          nearEqual(rect.height, viewportDimension * viewportDimension / (viewportDimension + maxExtent), 0.001),
+          true,
+        );
         expect(nearEqual(lastCoefficient, newCoefficient, 0.001), true);
       }
     },
@@ -171,7 +174,7 @@ void main() {
       const Size size = Size(600, viewportDimension);
       const double minLen = 0;
 
-      const List<double> margins = <double> [-10, 1, viewportDimension/2 - 0.01];
+      const List<double> margins = <double>[-10, 1, viewportDimension / 2 - 0.01];
       for (final double margin in margins) {
         painter = _buildPainter(
           mainAxisMargin: margin,
@@ -233,9 +236,7 @@ void main() {
             case AxisDirection.down:
               expect(
                 margin,
-                textDirection == TextDirection.ltr
-                  ? size.width - rect.right
-                  : rect.left,
+                textDirection == TextDirection.ltr ? size.width - rect.right : rect.left,
               );
               break;
             case AxisDirection.left:
@@ -460,7 +461,8 @@ void main() {
     expect(captureRect().height, minOverscrollLength);
   });
 
-  test('should scroll towards the right direction',
+  test(
+    'should scroll towards the right direction',
     () {
       const Size size = Size(60, 80);
       const double maxScrollExtent = 240;
@@ -484,8 +486,7 @@ void main() {
         final Iterable<ScrollMetrics> metricsList = Iterable<ScrollMetrics>.generate(
           9999,
           (int index) => startingMetrics.copyWith(pixels: minScrollExtent + index * size.height / 3),
-        )
-        .takeWhile((ScrollMetrics metrics) => !metrics.outOfRange);
+        ).takeWhile((ScrollMetrics metrics) => !metrics.outOfRange);
 
         Rect? previousRect;
 
@@ -573,7 +574,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 240.0, 800.0, 600.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     // Tap on the track area above the thumb.
@@ -588,7 +589,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
   });
 
@@ -618,7 +619,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     await tester.pump(const Duration(seconds: 3));
@@ -631,7 +632,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     await gesture.up();
@@ -646,7 +647,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x4fbcbcbc),
-      ),
+        ),
     );
   });
 
@@ -676,7 +677,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
@@ -693,7 +694,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
   });
 
@@ -726,7 +727,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     // Drag the thumb down to scroll down.
@@ -748,61 +749,64 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
   });
 
-  testWidgets('Scrollbar thumb cannot be dragged into overscroll if the physics do not allow', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: PrimaryScrollController(
-            controller: scrollController,
-            child: RawScrollbar(
-              isAlwaysShown: true,
+  testWidgets(
+    'Scrollbar thumb cannot be dragged into overscroll if the physics do not allow',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: PrimaryScrollController(
               controller: scrollController,
-              child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0),
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, 0.0);
-    expect(
-      find.byType(RawScrollbar),
-      paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
-        ..rect(
-          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
-          color: const Color(0x66BCBCBC),
-        ),
-    );
+      );
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, 0.0);
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(
+            rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+            color: const Color(0x66BCBCBC),
+          ),
+      );
 
-    // Try to drag the thumb into overscroll.
-    const double scrollAmount = -10.0;
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
-    await tester.pumpAndSettle();
-    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-    await tester.pumpAndSettle();
+      // Try to drag the thumb into overscroll.
+      const double scrollAmount = -10.0;
+      final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+      await tester.pumpAndSettle();
+      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+      await tester.pumpAndSettle();
 
-    // The physics should not have allowed us to enter overscroll.
-    expect(scrollController.offset, 0.0);
-    expect(
-      find.byType(RawScrollbar),
-      paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
-        ..rect(
-          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
-          color: const Color(0x66BCBCBC),
-        ),
-    );
-  });
+      // The physics should not have allowed us to enter overscroll.
+      expect(scrollController.offset, 0.0);
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(
+            rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+            color: const Color(0x66BCBCBC),
+          ),
+      );
+    },
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/66444
   testWidgets("RawScrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {

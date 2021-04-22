@@ -12,7 +12,6 @@ void main() {
   testWidgets(
     'RichText TextSpan styles with different locales',
     (WidgetTester tester) async {
-
       await tester.pumpWidget(
         MaterialApp(
           supportedLocales: const <Locale>[
@@ -147,5 +146,4 @@ void main() {
       );
     },
   );
-
 }

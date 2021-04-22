@@ -38,8 +38,7 @@ class StructuredErrorTestService extends TestWidgetInspectorService {
       // what it was after WidgetInspectorService::initServiceExtensions ran.
       FlutterError.onError = inspectorServiceErrorHandler;
 
-      List<Map<Object, Object?>> flutterErrorEvents =
-          service.getEventsDispatched('Flutter.Error');
+      List<Map<Object, Object?>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
       expect(flutterErrorEvents, hasLength(0));
 
       // Create an error.

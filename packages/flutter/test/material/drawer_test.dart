@@ -72,20 +72,23 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(semantics, includesNodeWith(
-      label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
-      actions: <SemanticsAction>[SemanticsAction.tap],
-    ));
+    expect(
+      semantics,
+      includesNodeWith(
+        label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
+        actions: <SemanticsAction>[SemanticsAction.tap],
+      ),
+    );
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Drawer dismiss barrier has no label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-            drawer: Drawer(),
+          drawer: Drawer(),
         ),
       ),
     );
@@ -96,10 +99,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(semantics, isNot(includesNodeWith(
-      label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
-      actions: <SemanticsAction>[SemanticsAction.tap],
-    )));
+    expect(
+      semantics,
+      isNot(includesNodeWith(
+        label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
+        actions: <SemanticsAction>[SemanticsAction.tap],
+      )),
+    );
 
     semantics.dispose();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
@@ -113,8 +119,7 @@ void main() {
           of: find.descendant(
             of: find.byType(DrawerController),
             matching: find.byWidgetPredicate((Widget widget) {
-              return widget is Semantics
-                  && widget.properties.label == 'Dismiss';
+              return widget is Semantics && widget.properties.label == 'Dismiss';
             }),
           ),
           matching: find.byType(Container),
@@ -123,7 +128,7 @@ void main() {
     }
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    Widget buildFrame({ Color? drawerScrimColor }) {
+    Widget buildFrame({Color? drawerScrimColor}) {
       return MaterialApp(
         home: Scaffold(
           key: scaffoldKey,
@@ -132,7 +137,9 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return GestureDetector(
-                  onTap: () { Navigator.pop(context); }, // close drawer
+                  onTap: () {
+                    Navigator.pop(context);
+                  }, // close drawer
                 );
               },
             ),
@@ -205,7 +212,7 @@ void main() {
     expect(state.isEndDrawerOpen, equals(true));
 
     // And a fling from the left closes it
-    await tester.flingFrom( Offset(0, size.height / 2), const Offset(80, 0), 500);
+    await tester.flingFrom(Offset(0, size.height / 2), const Offset(80, 0), 500);
     await tester.pumpAndSettle();
     expect(state.isDrawerOpen, equals(false));
     expect(state.isEndDrawerOpen, equals(false));

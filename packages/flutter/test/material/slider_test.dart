@@ -190,7 +190,6 @@ void main() {
     int startValueUpdates = 0;
     int endValueUpdates = 0;
 
-
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -620,10 +619,10 @@ void main() {
       bool enabled = true,
     }) {
       final ValueChanged<double>? onChanged = !enabled
-        ? null
-        : (double d) {
-            value = d;
-          };
+          ? null
+          : (double d) {
+              value = d;
+            };
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -738,11 +737,15 @@ void main() {
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
     expect(
-        material,
-        paints
-          ..rrect(color: sliderTheme.disabledActiveTrackColor)
-          ..rrect(color: sliderTheme.disabledInactiveTrackColor),);
-    expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
+      material,
+      paints..rrect(color: sliderTheme.disabledActiveTrackColor)..rrect(color: sliderTheme.disabledInactiveTrackColor),
+    );
+    expect(
+      material,
+      paints
+        ..shadow(color: Colors.black)
+        ..circle(color: sliderTheme.disabledThumbColor),
+    );
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
@@ -750,10 +753,9 @@ void main() {
     // Test setting the activeColor and inactiveColor for disabled widget.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
     expect(
-        material,
-        paints
-          ..rrect(color: sliderTheme.disabledActiveTrackColor)
-          ..rrect(color: sliderTheme.disabledInactiveTrackColor),);
+      material,
+      paints..rrect(color: sliderTheme.disabledActiveTrackColor)..rrect(color: sliderTheme.disabledInactiveTrackColor),
+    );
     expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
@@ -1079,7 +1081,8 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.renderObject(find.byType(Overlay)),
+    expect(
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1140,7 +1143,7 @@ void main() {
                   max: 100.0,
                   divisions: divisions,
                   value: 0.25,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                 ),
               ),
             ),
@@ -1307,166 +1310,181 @@ void main() {
     await testReparenting(true);
   });
 
+  testWidgets(
+    'Slider Semantics',
+    (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Slider(
-              value: 0.5,
-              onChanged: (double v) { },
+      await tester.pumpWidget(MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Slider(
+                value: 0.5,
+                onChanged: (double v) {},
+              ),
             ),
           ),
         ),
-      ),
-    ));
+      ));
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.isSlider,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+      );
 
-    // Disable slider
-    await tester.pumpWidget(MaterialApp(
-      home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: const Material(
-            child: Slider(
-              value: 0.5,
-              onChanged: null,
+      // Disable slider
+      await tester.pumpWidget(MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: const Material(
+              child: Slider(
+                value: 0.5,
+                onChanged: null,
+              ),
             ),
           ),
         ),
-      ),
-    ));
+      ));
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            // isFocusable is delayed by 1 frame.
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              // isFocusable is delayed by 1 frame.
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.isSlider,
+                            ],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+      );
 
-    await tester.pump();
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isSlider,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      await tester.pump();
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isSlider,
+                            ],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+      );
 
-    semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+      semantics.dispose();
+    },
+    variant: const TargetPlatformVariant(
+      <TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      },
+    ),
+  );
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1484,7 +1502,7 @@ void main() {
                   value: 100.0,
                   min: 0.0,
                   max: 200.0,
-                  onChanged: (double v) { },
+                  onChanged: (double v) {},
                 ),
               ),
             ),
@@ -1511,7 +1529,12 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '60%',
@@ -1584,7 +1607,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1601,7 +1624,7 @@ void main() {
               max: 200.0,
               divisions: 10,
               semanticFormatterCallback: (double value) => value.round().toString(),
-              onChanged: (double v) { },
+              onChanged: (double v) {},
             ),
           ),
         ),
@@ -1626,7 +1649,12 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
                           actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
@@ -1663,11 +1691,13 @@ void main() {
                 ),
                 child: Slider(
                   value: value,
-                  onChanged: enabled ? (double newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  } : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 ),
@@ -1677,6 +1707,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
 
     // Check that the overlay shows when focused.
@@ -1711,11 +1742,13 @@ void main() {
                 ),
                 child: Slider(
                   value: value,
-                  onChanged: enabled ? (double newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  } : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 ),
               );
             }),
@@ -1723,6 +1756,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildApp());
 
     // Slider does not have overlay when enabled and not hovered.
@@ -1755,99 +1789,17 @@ void main() {
     );
   });
 
-  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    double value = 0.5;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Slider(
-                value: value,
-                onChanged: (double newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                },
-                autofocus: true,
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pumpAndSettle();
-    expect(value, 0.55);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
-    expect(value, 0.55);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
-
-  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    double value = 0.5;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Slider(
-                value: value,
-                onChanged: (double newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                },
-                autofocus: true,
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pumpAndSettle();
-    expect(value, 0.6);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
-    expect(value, 0.6);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
-
-  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    double value = 0.5;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Directionality(
-                textDirection: TextDirection.rtl,
-                child: Slider(
+  testWidgets(
+    'Slider can be incremented and decremented by keyboard shortcuts - LTR',
+    (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      double value = 0.5;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Slider(
                   value: value,
                   onChanged: (double newValue) {
                     setState(() {
@@ -1855,7 +1807,56 @@ void main() {
                     });
                   },
                   autofocus: true,
-                ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(value, 0.55);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(value, 0.5);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(value, 0.55);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(value, 0.5);
+    },
+    variant: const TargetPlatformVariant(
+      <TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      },
+    ),
+  );
+
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double value = 0.5;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+                autofocus: true,
               );
             }),
           ),
@@ -1866,7 +1867,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-    expect(value, 0.45);
+    expect(value, 0.6);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
@@ -1874,12 +1875,67 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
-    expect(value, 0.55);
+    expect(value, 0.6);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+
+  testWidgets(
+    'Slider can be incremented and decremented by keyboard shortcuts - RTL',
+    (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      double value = 0.5;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Slider(
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    autofocus: true,
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(value, 0.45);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(value, 0.5);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(value, 0.55);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(value, 0.5);
+    },
+    variant: const TargetPlatformVariant(
+      <TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      },
+    ),
+  );
 
   testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -1923,7 +1979,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
     final ThemeData baseTheme = ThemeData(
@@ -1932,7 +1988,7 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({ required SliderThemeData sliderTheme, int? divisions, bool enabled = true }) {
+    Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
       final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
       return MaterialApp(
         home: Directionality(
@@ -1973,13 +2029,18 @@ void main() {
       // Wait for value indicator animation to finish.
       await tester.pumpAndSettle();
 
-
       final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
       expect(
         valueIndicatorBox,
         isVisible
-            ? (paints..path(color: theme.valueIndicatorColor)..paragraph())
-            : isNot(paints..path(color: theme.valueIndicatorColor)..paragraph()),
+            ? (paints
+              ..path(color: theme.valueIndicatorColor)
+              ..paragraph())
+            : isNot(
+                paints
+                  ..path(color: theme.valueIndicatorColor)
+                  ..paragraph(),
+              ),
       );
       await gesture.up();
     }
@@ -2055,102 +2116,107 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
-    final Key sliderKey = UniqueKey();
-    const Color fillColor = Color(0xf55f5f5f);
-    double value = 0.0;
+  testWidgets(
+    'Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.',
+    (WidgetTester tester) async {
+      final Key sliderKey = UniqueKey();
+      const Color fillColor = Color(0xf55f5f5f);
+      double value = 0.0;
 
-    Widget buildApp({
-      int? divisions,
-      bool enabled = true,
-    }) {
-      return MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            // The builder is used to pass the context from the MaterialApp widget
-            // to the [Navigator]. This context is required in order for the
-            // Navigator to work.
-            builder: (BuildContext context) {
-              return Column(
-                children: <Widget>[
-                  Slider(
-                    key: sliderKey,
-                    min: 0.0,
-                    max: 100.0,
-                    divisions: divisions,
-                    label: '${value.round()}',
-                    value: value,
-                    onChanged: (double newValue) {
-                      value = newValue;
-                    },
-                  ),
-                  ElevatedButton(
-                    child: const Text('Next'),
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return ElevatedButton(
-                              child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context).pop(); },
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              );
-            },
+      Widget buildApp({
+        int? divisions,
+        bool enabled = true,
+      }) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              // The builder is used to pass the context from the MaterialApp widget
+              // to the [Navigator]. This context is required in order for the
+              // Navigator to work.
+              builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Slider(
+                      key: sliderKey,
+                      min: 0.0,
+                      max: 100.0,
+                      divisions: divisions,
+                      label: '${value.round()}',
+                      value: value,
+                      onChanged: (double newValue) {
+                        value = newValue;
+                      },
+                    ),
+                    ElevatedButton(
+                      child: const Text('Next'),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return ElevatedButton(
+                                child: const Text('Inner page'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    await tester.pumpWidget(buildApp(divisions: 3));
+      await tester.pumpWidget(buildApp(divisions: 3));
 
-    final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
-    final Offset topRight = tester.getTopRight(find.byType(Slider)).translate(-24, 0);
-    final TestGesture gesture = await tester.startGesture(topRight);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
+      final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+      final Offset topRight = tester.getTopRight(find.byType(Slider)).translate(-24, 0);
+      final TestGesture gesture = await tester.startGesture(topRight);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
 
-    expect(find.byType(Slider), isNotNull);
-    expect(
-      valueIndicatorBox,
-      paints
-        // Represents the raised button with text, next.
-        ..path(color: Colors.black)
-        ..paragraph()
-        // Represents the Slider.
-        ..path(color: fillColor)
-        ..paragraph(),
-    );
-
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 2));
-
-    await tester.tap(find.text('Next'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(Slider), findsNothing);
-    expect(
-      valueIndicatorBox,
-      isNot(
+      expect(find.byType(Slider), isNotNull);
+      expect(
+        valueIndicatorBox,
         paints
+          // Represents the raised button with text, next.
+          ..path(color: Colors.black)
+          ..paragraph()
+          // Represents the Slider.
           ..path(color: fillColor)
           ..paragraph(),
-      ),
-    );
+      );
 
-    // Represents the ElevatedButton with inner Text, inner page.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 2));
 
-    // Don't stop holding the value indicator.
-    await gesture.up();
-    await tester.pumpAndSettle();
-  });
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Slider), findsNothing);
+      expect(
+        valueIndicatorBox,
+        isNot(
+          paints
+            ..path(color: fillColor)
+            ..paragraph(),
+        ),
+      );
+
+      // Represents the ElevatedButton with inner Text, inner page.
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
+
+      // Don't stop holding the value indicator.
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+  );
 
   testWidgets('Slider.adaptive', (WidgetTester tester) async {
     double value = 0.5;
@@ -2191,7 +2257,12 @@ void main() {
       await gesture.up();
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
       value = 0.5;
       await tester.pumpWidget(buildFrame(platform));
       await tester.pumpAndSettle(); // Finish the theme change animation.
@@ -2216,7 +2287,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
+              final SliderThemeData sliderTheme =
+                  SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
               return MediaQuery(
                 data: MediaQueryData.fromWindow(window),
                 child: Material(
@@ -2262,7 +2334,7 @@ void main() {
                 child: Slider(
                   mouseCursor: SystemMouseCursors.text,
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                 ),
               ),
             ),
@@ -2291,7 +2363,7 @@ void main() {
                 child: Slider.adaptive(
                   mouseCursor: SystemMouseCursors.text,
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                 ),
               ),
             ),
@@ -2313,7 +2385,7 @@ void main() {
                 cursor: SystemMouseCursors.forbidden,
                 child: Slider(
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (double newValue) {},
                 ),
               ),
             ),
@@ -2343,8 +2415,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'value: 50.0',
@@ -2424,11 +2497,33 @@ void main() {
       renderObject,
       paints
         // active track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            -14.0,
+            2.0,
+            5.0,
+            8.0,
+            topLeft: const Radius.circular(3.0),
+            bottomLeft: const Radius.circular(3.0),
+          ),
+        )
         // inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            5.0,
+            3.0,
+            24.0,
+            7.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
         // thumb
-        ..circle(x: 5.0, y: 5.0, radius: 10.0, ),
+        ..circle(
+          x: 5.0,
+          y: 5.0,
+          radius: 10.0,
+        ),
     );
   });
 
@@ -2459,12 +2554,15 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late RRect activeTrackRRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRRect)
-        return false;
-      activeTrackRRect = arguments[0] as RRect;
-      return true;
-    }));
+    expect(
+      renderObject,
+      paints
+        ..something((Symbol method, List<dynamic> arguments) {
+          if (method != #drawRRect) return false;
+          activeTrackRRect = arguments[0] as RRect;
+          return true;
+        }),
+    );
 
     // The thumb should at one-third(5 / 15) of the Slider.
     // The right of the active track shape is the position of the thumb.

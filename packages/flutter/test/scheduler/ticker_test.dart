@@ -94,7 +94,7 @@ void main() {
     late Ticker ticker;
 
     void testFunction() {
-      ticker = Ticker((Duration _) { });
+      ticker = Ticker((Duration _) {});
     }
 
     testFunction();
@@ -149,7 +149,7 @@ void main() {
     expect(tickCount, equals(0));
 
     final ByteData? message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isTrue);
 
@@ -158,7 +158,8 @@ void main() {
 
   testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
     final ByteData? pausedMessage = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', pausedMessage, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', pausedMessage, (_) {});
 
     int tickCount = 0;
     void handleTick(Duration duration) {
@@ -177,7 +178,8 @@ void main() {
     expect(ticker.isTicking, isFalse);
 
     final ByteData? resumedMessage = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', resumedMessage, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', resumedMessage, (_) {});
 
     await tester.pump(const Duration(milliseconds: 10));
 

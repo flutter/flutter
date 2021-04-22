@@ -35,8 +35,7 @@ class FadeInImageParts {
   Element? get semanticsElement {
     Element? result;
     fadeInImageElement.visitChildren((Element child) {
-      if (child.widget is Semantics)
-        result = child;
+      if (child.widget is Semantics) result = child;
     });
     return result;
   }
@@ -272,42 +271,44 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
     });
 
-    testWidgets("doesn't interrupt in-progress animation when animation values are updated", (WidgetTester tester) async {
-      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
-      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+    testWidgets(
+      "doesn't interrupt in-progress animation when animation values are updated",
+      (WidgetTester tester) async {
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
-      await tester.pumpWidget(FadeInImage(
-        placeholder: placeholderProvider,
-        image: imageProvider,
-        fadeOutDuration: animationDuration,
-        fadeInDuration: animationDuration,
-        excludeFromSemantics: true,
-      ));
+        await tester.pumpWidget(FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          fadeOutDuration: animationDuration,
+          fadeInDuration: animationDuration,
+          excludeFromSemantics: true,
+        ));
 
-      final State? state = findFadeInImage(tester).state;
-      placeholderProvider.complete();
-      imageProvider.complete();
-      await tester.pump();
-      await tester.pump(animationDuration);
+        final State? state = findFadeInImage(tester).state;
+        placeholderProvider.complete();
+        imageProvider.complete();
+        await tester.pump();
+        await tester.pump(animationDuration);
 
-      await tester.pumpWidget(FadeInImage(
-        placeholder: placeholderProvider,
-        image: imageProvider,
-        fadeOutDuration: animationDuration * 2,
-        fadeInDuration: animationDuration * 2,
-        excludeFromSemantics: true,
-      ));
+        await tester.pumpWidget(FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          fadeOutDuration: animationDuration * 2,
+          fadeInDuration: animationDuration * 2,
+          excludeFromSemantics: true,
+        ));
 
-      expect(findFadeInImage(tester).state, same(state));
-      expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
-      expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(0));
-      await tester.pump(animationDuration);
-      expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
-      expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
-    });
+        expect(findFadeInImage(tester).state, same(state));
+        expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
+        expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(0));
+        await tester.pump(animationDuration);
+        expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
+        expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
+      },
+    );
 
     group('ImageProvider', () {
-
       testWidgets('memory placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
         final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
         final FadeInImage image = FadeInImage.memoryNetwork(
@@ -325,8 +326,14 @@ Future<void> main() async {
           expect(cacheHeight, 30);
           expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+          return PaintingBinding.instance!.instantiateImageCodec(
+            bytes,
+            cacheWidth: cacheWidth,
+            cacheHeight: cacheHeight,
+            allowUpscaling: allowUpscaling,
+          );
         }
+
         final ImageProvider resizeImage = image.placeholder;
         expect(image.placeholder, isA<ResizeImage>());
         expect(called, false);
@@ -348,8 +355,10 @@ Future<void> main() async {
           expect(cacheHeight, null);
           expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+          return PaintingBinding.instance!
+              .instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
         }
+
         // image.placeholder should be an instance of MemoryImage instead of ResizeImage
         final ImageProvider memoryImage = image.placeholder;
         expect(image.placeholder, isA<MemoryImage>());
@@ -423,10 +432,10 @@ Future<void> main() async {
           final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
           await tester.pumpWidget(FadeInImage(
-              placeholder: placeholderProvider,
-              image: imageProvider,
-              fadeOutDuration: animationDuration,
-              fadeInDuration: animationDuration,
+            placeholder: placeholderProvider,
+            image: imageProvider,
+            fadeOutDuration: animationDuration,
+            fadeInDuration: animationDuration,
           ));
 
           placeholderProvider.complete();

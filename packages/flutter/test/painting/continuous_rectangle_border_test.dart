@@ -26,9 +26,12 @@ void main() {
   });
 
   test('ContinuousRectangleBorder scale and lerp', () {
-    final ContinuousRectangleBorder c10 = ContinuousRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
-    final ContinuousRectangleBorder c15 = ContinuousRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
-    final ContinuousRectangleBorder c20 = ContinuousRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: BorderRadius.circular(200.0));
+    final ContinuousRectangleBorder c10 =
+        ContinuousRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
+    final ContinuousRectangleBorder c15 =
+        ContinuousRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
+    final ContinuousRectangleBorder c20 =
+        ContinuousRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: BorderRadius.circular(200.0));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
@@ -40,8 +43,8 @@ void main() {
   test('ContinuousRectangleBorder BorderRadius.zero', () {
     const Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect1 = isPathThat(
-      includes: const <Offset>[ Offset(10.0, 20.0), Offset(20.0, 30.0) ],
-      excludes: const <Offset>[ Offset(9.0, 19.0), Offset(31.0, 41.0) ],
+      includes: const <Offset>[Offset(10.0, 20.0), Offset(20.0, 30.0)],
+      excludes: const <Offset>[Offset(9.0, 19.0), Offset(31.0, 41.0)],
     );
 
     // Default border radius and border side are zero, i.e. just a rectangle.
@@ -51,8 +54,8 @@ void main() {
     // Represents the inner path when borderSide.width = 4, which is just rect1
     // inset by 4 on all sides.
     final Matcher looksLikeInnerPath = isPathThat(
-      includes: const <Offset>[ Offset(14.0, 24.0), Offset(16.0, 26.0) ],
-      excludes: const <Offset>[ Offset(9.0, 23.0), Offset(27.0, 37.0) ],
+      includes: const <Offset>[Offset(14.0, 24.0), Offset(16.0, 26.0)],
+      excludes: const <Offset>[Offset(9.0, 23.0), Offset(27.0, 37.0)],
     );
 
     const BorderSide side = BorderSide(width: 4.0);
@@ -63,8 +66,8 @@ void main() {
   test('ContinuousRectangleBorder non-zero BorderRadius', () {
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
-      includes: const <Offset>[ Offset(15.0, 25.0), Offset(20.0, 30.0) ],
-      excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],
+      includes: const <Offset>[Offset(15.0, 25.0), Offset(20.0, 30.0)],
+      excludes: const <Offset>[Offset(10.0, 20.0), Offset(30.0, 40.0)],
     );
     const ContinuousRectangleBorder border = ContinuousRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5.0)),
@@ -211,5 +214,4 @@ void main() {
       matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
     );
   });
-
 }

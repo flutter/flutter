@@ -115,15 +115,18 @@ void main() {
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgets('should return false when there is text and partial uncollapsed selection', (WidgetTester tester) async {
-      final GlobalKey<EditableTextState> key = GlobalKey();
-      await tester.pumpWidget(createEditableText(
-        key: key,
-        text: '123',
-        selection: const TextSelection(baseOffset: 1, extentOffset: 2),
-      ));
-      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
-    });
+    testWidgets(
+      'should return false when there is text and partial uncollapsed selection',
+      (WidgetTester tester) async {
+        final GlobalKey<EditableTextState> key = GlobalKey();
+        await tester.pumpWidget(createEditableText(
+          key: key,
+          text: '123',
+          selection: const TextSelection(baseOffset: 1, extentOffset: 2),
+        ));
+        expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
+      },
+    );
 
     testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
@@ -173,80 +176,90 @@ void main() {
   });
 
   // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
-  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Column(
-          children: <Widget>[
-            CupertinoTextField(
-              controller: controller,
-            ),
-          ],
+  testWidgets(
+    'Paste always appears regardless of clipboard content on iOS',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Column(
+            children: <Widget>[
+              CupertinoTextField(
+                controller: controller,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 
-    // Make sure the clipboard is empty to start.
-    await Clipboard.setData(const ClipboardData(text: ''));
+      // Make sure the clipboard is empty to start.
+      await Clipboard.setData(const ClipboardData(text: ''));
 
-    // Double tap to select the first word.
-    const int index = 4;
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-    expect(controller.selection.isCollapsed, isFalse);
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 7);
+      // Double tap to select the first word.
+      const int index = 4;
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+      expect(controller.selection.isCollapsed, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 7);
 
-    // Paste is showing even though clipboard is empty.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.descendant(
-      of: find.byType(Overlay),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
-    ), findsNWidgets(2));
+      // Paste is showing even though clipboard is empty.
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(Overlay),
+          matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+        ),
+        findsNWidgets(2),
+      );
 
-    // Tap copy to add something to the clipboard and close the menu.
-    await tester.tapAt(tester.getCenter(find.text('Copy')));
-    await tester.pumpAndSettle();
+      // Tap copy to add something to the clipboard and close the menu.
+      await tester.tapAt(tester.getCenter(find.text('Copy')));
+      await tester.pumpAndSettle();
 
-    // The menu is gone, but the handles are visible on the existing selection.
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Paste'), findsNothing);
-    expect(controller.selection.isCollapsed, isFalse);
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 7);
-    expect(find.descendant(
-      of: find.byType(Overlay),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
-    ), findsNWidgets(2));
+      // The menu is gone, but the handles are visible on the existing selection.
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(controller.selection.isCollapsed, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 7);
+      expect(
+        find.descendant(
+          of: find.byType(Overlay),
+          matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+        ),
+        findsNWidgets(2),
+      );
 
-    // Double tap to show the menu again.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
+      // Double tap to show the menu again.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
 
-    // Paste still shows.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-  },
+      // Paste still shows.
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsOneWidget);
+    },
     skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
   group('Text selection menu overflow (iOS)', () {
-    testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
-      await tester.pumpWidget(CupertinoApp(
-        home: Directionality(
+    testWidgets(
+      'All menu items show when they fit.',
+      (WidgetTester tester) async {
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        await tester.pumpWidget(CupertinoApp(
+          home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
               data: const MediaQueryData(size: Size(800.0, 600.0)),
@@ -257,53 +270,55 @@ void main() {
               ),
             ),
           ),
-      ));
+        ));
 
-      // Initially, the menu isn't shown at all.
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsNothing);
+        // Initially, the menu isn't shown at all.
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
-      // Long press on an empty space to show the selection menu.
-      await tester.longPressAt(textOffsetToPosition(tester, 4));
-      await tester.pumpAndSettle();
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsOneWidget);
-      expect(find.text('Select All'), findsOneWidget);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsNothing);
+        // Long press on an empty space to show the selection menu.
+        await tester.longPressAt(textOffsetToPosition(tester, 4));
+        await tester.pumpAndSettle();
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsOneWidget);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
-      // Double tap to select a word and show the full selection menu.
-      final Offset textOffset = textOffsetToPosition(tester, 1);
-      await tester.tapAt(textOffset);
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.tapAt(textOffset);
-      await tester.pumpAndSettle();
+        // Double tap to select a word and show the full selection menu.
+        final Offset textOffset = textOffsetToPosition(tester, 1);
+        await tester.tapAt(textOffset);
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.tapAt(textOffset);
+        await tester.pumpAndSettle();
 
-      // The full menu is shown without the navigation buttons.
-      expect(find.text('Cut'), findsOneWidget);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Paste'), findsOneWidget);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsNothing);
-    },
+        // The full menu is shown without the navigation buttons.
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
+      },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
     );
 
-    testWidgets('When a menu item doesn\'t fit, a second page is used.', (WidgetTester tester) async {
-      // Set the screen size to more narrow, so that Paste can't fit.
-      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    testWidgets(
+      'When a menu item doesn\'t fit, a second page is used.',
+      (WidgetTester tester) async {
+        // Set the screen size to more narrow, so that Paste can't fit.
+        tester.binding.window.physicalSizeTestValue = const Size(800, 800);
+        addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
-      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
-      await tester.pumpWidget(CupertinoApp(
-        home: Directionality(
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        await tester.pumpWidget(CupertinoApp(
+          home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
               data: const MediaQueryData(size: Size(800.0, 600.0)),
@@ -314,68 +329,70 @@ void main() {
               ),
             ),
           ),
-      ));
+        ));
 
-      // Initially, the menu isn't shown at all.
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsNothing);
+        // Initially, the menu isn't shown at all.
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
-      // Double tap to select a word and show the selection menu.
-      final Offset textOffset = textOffsetToPosition(tester, 1);
-      await tester.tapAt(textOffset);
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.tapAt(textOffset);
-      await tester.pumpAndSettle();
+        // Double tap to select a word and show the selection menu.
+        final Offset textOffset = textOffsetToPosition(tester, 1);
+        await tester.tapAt(textOffset);
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.tapAt(textOffset);
+        await tester.pumpAndSettle();
 
-      // The last button is missing, and a next button is shown.
-      expect(find.text('Cut'), findsOneWidget);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
+        // The last button is missing, and a next button is shown.
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tapping the next button shows the overflowing button.
-      await tester.tap(find.text('▶'));
-      await tester.pumpAndSettle();
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsOneWidget);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), false);
+        // Tapping the next button shows the overflowing button.
+        await tester.tap(find.text('▶'));
+        await tester.pumpAndSettle();
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), false);
 
-      // Tapping the back button shows the first page again.
-      await tester.tap(find.text('◀'));
-      await tester.pumpAndSettle();
-      expect(find.text('Cut'), findsOneWidget);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
-    },
+        // Tapping the back button shows the first page again.
+        await tester.tap(find.text('◀'));
+        await tester.pumpAndSettle();
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
+      },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
     );
 
-    testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
-      // Set the screen size to more narrow, so that two buttons can't fit on
-      // the same page.
-      tester.binding.window.physicalSizeTestValue = const Size(640, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    testWidgets(
+      'A smaller menu puts each button on its own page.',
+      (WidgetTester tester) async {
+        // Set the screen size to more narrow, so that two buttons can't fit on
+        // the same page.
+        tester.binding.window.physicalSizeTestValue = const Size(640, 800);
+        addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
-      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
-      await tester.pumpWidget(CupertinoApp(
-        home: Directionality(
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        await tester.pumpWidget(CupertinoApp(
+          home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
               data: const MediaQueryData(size: Size(800.0, 600.0)),
@@ -386,99 +403,101 @@ void main() {
               ),
             ),
           ),
-      ));
+        ));
 
-      // Initially, the menu isn't shown at all.
-      expect(find.byType(CupertinoButton), findsNothing);
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsNothing);
+        // Initially, the menu isn't shown at all.
+        expect(find.byType(CupertinoButton), findsNothing);
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
-      // Double tap to select a word and show the selection menu.
-      final Offset textOffset = textOffsetToPosition(tester, 1);
-      await tester.tapAt(textOffset);
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.tapAt(textOffset);
-      await tester.pumpAndSettle();
+        // Double tap to select a word and show the selection menu.
+        final Offset textOffset = textOffsetToPosition(tester, 1);
+        await tester.tapAt(textOffset);
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.tapAt(textOffset);
+        await tester.pumpAndSettle();
 
-      // Only the first button fits, and a next button is shown.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
-      expect(find.text('Cut'), findsOneWidget);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
+        // Only the first button fits, and a next button is shown.
+        expect(find.byType(CupertinoButton), findsNWidgets(2));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tapping the next button shows Copy.
-      await tester.tap(find.text('▶'));
-      await tester.pumpAndSettle();
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
+        // Tapping the next button shows Copy.
+        await tester.tap(find.text('▶'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CupertinoButton), findsNWidgets(3));
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tapping the next button again shows Paste.
-      await tester.tap(find.text('▶'));
-      await tester.pumpAndSettle();
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsOneWidget);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), false);
+        // Tapping the next button again shows Paste.
+        await tester.tap(find.text('▶'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CupertinoButton), findsNWidgets(3));
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), false);
 
-      // Tapping the back button shows the second page again.
-      await tester.tap(find.text('◀'));
-      await tester.pumpAndSettle();
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
+        // Tapping the back button shows the second page again.
+        await tester.tap(find.text('◀'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CupertinoButton), findsNWidgets(3));
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tapping the back button again shows the first page again.
-      await tester.tap(find.text('◀'));
-      await tester.pumpAndSettle();
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
-      expect(find.text('Cut'), findsOneWidget);
-      expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
-    },
+        // Tapping the back button again shows the first page again.
+        await tester.tap(find.text('◀'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CupertinoButton), findsNWidgets(2));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
+      },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
     );
 
-    testWidgets('Handles very long locale strings', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
-      await tester.pumpWidget(CupertinoApp(
-        locale: const Locale('en', 'us'),
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          _LongCupertinoLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-        ],
-        home: Directionality(
+    testWidgets(
+      'Handles very long locale strings',
+      (WidgetTester tester) async {
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        await tester.pumpWidget(CupertinoApp(
+          locale: const Locale('en', 'us'),
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            _LongCupertinoLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
               data: const MediaQueryData(size: Size(800.0, 600.0)),
@@ -489,102 +508,102 @@ void main() {
               ),
             ),
           ),
-      ));
+        ));
 
-      // Initially, the menu isn't shown at all.
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsNothing);
+        // Initially, the menu isn't shown at all.
+        expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
-      // Long press on an empty space to show the selection menu, with only the
-      // paste button visible.
-      await tester.longPressAt(textOffsetToPosition(tester, 4));
-      await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
+        // Long press on an empty space to show the selection menu, with only the
+        // paste button visible.
+        await tester.longPressAt(textOffsetToPosition(tester, 4));
+        await tester.pumpAndSettle();
+        expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tap next to go to the second and final page.
-      await tester.tap(find.text('▶'));
-      await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsOneWidget);
-      expect(find.text('◀'), findsOneWidget);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(appearsEnabled(tester, '▶'), false);
+        // Tap next to go to the second and final page.
+        await tester.tap(find.text('▶'));
+        await tester.pumpAndSettle();
+        expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsOneWidget);
+        expect(find.text('◀'), findsOneWidget);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(appearsEnabled(tester, '▶'), false);
 
-      // Tap select all to show the full selection menu.
-      await tester.tap(find.text(longLocalizations.selectAllButtonLabel));
-      await tester.pumpAndSettle();
+        // Tap select all to show the full selection menu.
+        await tester.tap(find.text(longLocalizations.selectAllButtonLabel));
+        await tester.pumpAndSettle();
 
-      // Only one button fits on each page.
-      expect(find.text(longLocalizations.cutButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
+        // Only one button fits on each page.
+        expect(find.text(longLocalizations.cutButtonLabel), findsOneWidget);
+        expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tap next to go to the second page.
-      await tester.tap(find.text('▶'));
-      await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.text('◀'), findsOneWidget);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(appearsEnabled(tester, '▶'), true);
+        // Tap next to go to the second page.
+        await tester.tap(find.text('▶'));
+        await tester.pumpAndSettle();
+        expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.copyButtonLabel), findsOneWidget);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+        expect(find.text('◀'), findsOneWidget);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tap next to go to the third and final page.
-      await tester.tap(find.text('▶'));
-      await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.text('◀'), findsOneWidget);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(appearsEnabled(tester, '▶'), false);
+        // Tap next to go to the third and final page.
+        await tester.tap(find.text('▶'));
+        await tester.pumpAndSettle();
+        expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+        expect(find.text('◀'), findsOneWidget);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(appearsEnabled(tester, '▶'), false);
 
-      // Tap back to go to the second page again.
-      await tester.tap(find.text('◀'));
-      await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.text('◀'), findsOneWidget);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '◀'), true);
-      expect(appearsEnabled(tester, '▶'), true);
+        // Tap back to go to the second page again.
+        await tester.tap(find.text('◀'));
+        await tester.pumpAndSettle();
+        expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.copyButtonLabel), findsOneWidget);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+        expect(find.text('◀'), findsOneWidget);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '◀'), true);
+        expect(appearsEnabled(tester, '▶'), true);
 
-      // Tap back to go to the first page again.
-      await tester.tap(find.text('◀'));
-      await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.text('◀'), findsNothing);
-      expect(find.text('▶'), findsOneWidget);
-      expect(appearsEnabled(tester, '▶'), true);
-    },
+        // Tap back to go to the first page again.
+        await tester.tap(find.text('◀'));
+        await tester.pumpAndSettle();
+        expect(find.text(longLocalizations.cutButtonLabel), findsOneWidget);
+        expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
+        expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsOneWidget);
+        expect(appearsEnabled(tester, '▶'), true);
+      },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
     );
   });
 }

@@ -103,7 +103,7 @@ void main() {
       ),
     );
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(AnimatedAlign));
-    expect(box.size.height, equals( 50.0));
+    expect(box.size.height, equals(50.0));
   });
 
   testWidgets('AnimatedAlign null height factor', (WidgetTester tester) async {
@@ -139,7 +139,7 @@ void main() {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: const <Widget>[
-               AnimatedAlign(
+              AnimatedAlign(
                 alignment: Alignment.center,
                 curve: Curves.ease,
                 duration: Duration(milliseconds: 200),

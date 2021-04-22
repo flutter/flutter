@@ -22,7 +22,6 @@ class OrderSwitcher extends StatefulWidget {
 }
 
 class OrderSwitcherState extends State<OrderSwitcher> {
-
   bool _aFirst = true;
 
   void switchChildren() {
@@ -36,14 +35,14 @@ class OrderSwitcherState extends State<OrderSwitcher> {
     return Stack(
       textDirection: TextDirection.ltr,
       children: _aFirst
-        ? <Widget>[
-            KeyedSubtree(child: widget.a),
-            widget.b,
-          ]
-        : <Widget>[
-            KeyedSubtree(child: widget.b),
-            widget.a,
-          ],
+          ? <Widget>[
+              KeyedSubtree(child: widget.a),
+              widget.b,
+            ]
+          : <Widget>[
+              KeyedSubtree(child: widget.b),
+              widget.a,
+            ],
     );
   }
 }
@@ -95,7 +94,6 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
 
 void main() {
   testWidgets('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
-
     // This is a bit of a weird test so let's try to explain it a bit.
     //
     // Basically what's happening here is that we have a complicated tree, and

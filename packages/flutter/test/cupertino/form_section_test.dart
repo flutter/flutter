@@ -36,23 +36,25 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
   });
 
-  testWidgets('Shows long dividers in edge-to-edge section part 1',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoFormSection(
-            children: <Widget>[CupertinoTextFormFieldRow()],
+  testWidgets(
+    'Shows long dividers in edge-to-edge section part 1',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoFormSection(
+              children: <Widget>[CupertinoTextFormFieldRow()],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Since the children list is reconstructed with dividers in it, the column
-    // retrieved should have 3 items for an input [children] param with 1 child.
-    final Column childrenColumn = tester.widget(find.byType(Column).at(1));
-    expect(childrenColumn.children.length, 3);
-  },);
+      // Since the children list is reconstructed with dividers in it, the column
+      // retrieved should have 3 items for an input [children] param with 1 child.
+      final Column childrenColumn = tester.widget(find.byType(Column).at(1));
+      expect(childrenColumn.children.length, 3);
+    },
+  );
 
   testWidgets('Shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -131,10 +133,8 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
-        tester.widget(find.byType(DecoratedBox).first);
-    final BoxDecoration boxDecoration =
-        decoratedBox.decoration as BoxDecoration;
+    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).first);
+    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.color, backgroundColor);
   });
 

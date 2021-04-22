@@ -71,10 +71,11 @@ void main() {
         throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
-        caughtError.complete(true);
-      }));
+      result.addListener(
+        ImageStreamListener((ImageInfo info, bool syncCall) {}, onError: (dynamic error, StackTrace? stackTrace) {
+          caughtError.complete(true);
+        }),
+      );
       expect(await caughtError.future, true);
     });
     expect(uncaught, false);
@@ -94,10 +95,11 @@ void main() {
         throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
-        caughtError.complete(true);
-      }));
+      result.addListener(
+        ImageStreamListener((ImageInfo info, bool syncCall) {}, onError: (dynamic error, StackTrace? stackTrace) {
+          caughtError.complete(true);
+        }),
+      );
       expect(await caughtError.future, true);
     });
     expect(uncaught, false);
@@ -134,9 +136,12 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.load(provider, (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-      return Future<Codec>.value(FakeCodec());
-    }), isA<MultiFrameImageStreamCompleter>());
+    expect(
+      provider.load(provider, (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+        return Future<Codec>.value(FakeCodec());
+      }),
+      isA<MultiFrameImageStreamCompleter>(),
+    );
 
     expect(await error.future, isStateError);
   });
@@ -147,10 +152,13 @@ void main() {
 
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
-    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
+    final File file = fs.file('/blue.png')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer =
+        provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
@@ -159,7 +167,8 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer =
+        provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });

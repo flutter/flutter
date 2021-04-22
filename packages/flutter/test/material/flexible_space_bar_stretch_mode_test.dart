@@ -63,7 +63,7 @@ void main() {
                     background: Row(
                       children: <Widget>[
                         Expanded(child: Container(color: Colors.red)),
-                        Expanded(child:Container(color: Colors.blue)),
+                        Expanded(child: Container(color: Colors.blue)),
                       ],
                     ),
                   ),
@@ -112,18 +112,22 @@ void main() {
     );
     await slowDrag(tester, blockKey, const Offset(0.0, 10.0));
     Opacity opacityWidget = tester.widget<Opacity>(
-      find.ancestor(
-        of: find.text('Title'),
-        matching: find.byType(Opacity),
-      ).first,
+      find
+          .ancestor(
+            of: find.text('Title'),
+            matching: find.byType(Opacity),
+          )
+          .first,
     );
     expect(opacityWidget.opacity.round(), equals(1));
     await slowDrag(tester, blockKey, const Offset(0.0, 100.0));
     opacityWidget = tester.widget<Opacity>(
-      find.ancestor(
-        of: find.text('Title'),
-        matching: find.byType(Opacity),
-      ).first,
+      find
+          .ancestor(
+            of: find.text('Title'),
+            matching: find.byType(Opacity),
+          )
+          .first,
     );
     expect(opacityWidget.opacity, equals(0.0));
   });

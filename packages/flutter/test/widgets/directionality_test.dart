@@ -95,11 +95,14 @@ void main() {
         ),
       ),
     );
-    expect(() => Directionality.of(noDirectionality.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No Directionality widget found.'),
-    )));
+    expect(
+      () => Directionality.of(noDirectionality.currentContext!),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        contains('No Directionality widget found.'),
+      )),
+    );
     expect(Directionality.of(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 }

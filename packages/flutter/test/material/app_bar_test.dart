@@ -36,7 +36,7 @@ Widget buildSliverAppBarApp({
               toolbarHeight: toolbarHeight,
               snap: snap,
               bottom: TabBar(
-                tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
+                tabs: <String>['A', 'B', 'C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
               ),
             ),
             SliverToBoxAdapter(
@@ -331,9 +331,12 @@ void main() {
       tester.getSize(title).width,
       equals(
         800.0 // Screen width.
-        - 56.0 // Leading button width.
-        - 16.0 // Leading button to title padding.
-        - 16.0, // Title right side padding.
+            -
+            56.0 // Leading button width.
+            -
+            16.0 // Leading button to title padding.
+            -
+            16.0, // Title right side padding.
       ),
     );
 
@@ -345,12 +348,20 @@ void main() {
 
     expect(tester.getTopLeft(title).dx, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
-    expect(tester.getSize(title).width, equals(
+    expect(
+      tester.getSize(title).width,
+      equals(
         800.0 // Screen width.
-        - 56.0 // Leading button width.
-        - 16.0 // Leading button to title padding.
-        - 16.0 // Title to actions padding
-        - 200.0,),); // Actions' width.
+            -
+            56.0 // Leading button width.
+            -
+            16.0 // Leading button to title padding.
+            -
+            16.0 // Title to actions padding
+            -
+            200.0,
+      ),
+    ); // Actions' width.
 
     leading = Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
@@ -643,7 +654,7 @@ void main() {
           appBar: AppBar(
             backwardsCompatibility: false,
             title: const Text('X'),
-            actions: const <Widget> [
+            actions: const <Widget>[
               IconButton(
                 icon: Icon(Icons.share),
                 onPressed: null,
@@ -709,7 +720,6 @@ void main() {
   });
 
   testWidgets('SliverAppBar expandedHeight, pinned', (WidgetTester tester) async {
-
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: false,
       pinned: true,
@@ -742,7 +752,6 @@ void main() {
   });
 
   testWidgets('SliverAppBar expandedHeight, pinned and floating', (WidgetTester tester) async {
-
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
       pinned: true,
@@ -991,9 +1000,9 @@ void main() {
     }
 
     Material getMaterial() => tester.widget<Material>(find.descendant(
-      of: find.byType(AppBar),
-      matching: find.byType(Material),
-    ));
+          of: find.byType(AppBar),
+          matching: find.byType(Material),
+        ));
 
     // Default elevation should be _AppBarState._defaultElevation = 4.0
     await tester.pumpWidget(buildAppBar());
@@ -1239,20 +1248,23 @@ void main() {
     expect(find.byIcon(Icons.menu), findsOneWidget);
   });
 
-  testWidgets('AppBar does not draw menu for drawer if automaticallyImplyLeading is false', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          drawer: const Drawer(),
-          appBar: AppBar(
-            backwardsCompatibility: false,
-            automaticallyImplyLeading: false,
+  testWidgets(
+    'AppBar does not draw menu for drawer if automaticallyImplyLeading is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(),
+            appBar: AppBar(
+              backwardsCompatibility: false,
+              automaticallyImplyLeading: false,
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byIcon(Icons.menu), findsNothing);
-  });
+      );
+      expect(find.byIcon(Icons.menu), findsNothing);
+    },
+  );
 
   testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
     final Page<void> page1 = MaterialPage<void>(
@@ -1263,13 +1275,13 @@ void main() {
       ),
     );
     final Page<void> page2 = MaterialPage<void>(
+      key: const ValueKey<String>('2'),
+      child: Scaffold(
         key: const ValueKey<String>('2'),
-        child: Scaffold(
-          key: const ValueKey<String>('2'),
-          appBar: AppBar(),
-        ),
+        appBar: AppBar(),
+      ),
     );
-    List<Page<void>> pages = <Page<void>>[ page1 ];
+    List<Page<void>> pages = <Page<void>>[page1];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -1280,7 +1292,7 @@ void main() {
     );
     expect(find.byType(BackButton), findsNothing);
     // Update pages
-    pages = <Page<void>>[ page2 ];
+    pages = <Page<void>>[page2];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -1307,7 +1319,7 @@ void main() {
         appBar: AppBar(),
       ),
     );
-    List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    List<Page<void>> pages = <Page<void>>[page1, page2];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -1325,7 +1337,7 @@ void main() {
       findsOneWidget,
     );
     // Update pages
-    pages = <Page<void>>[ page1 ];
+    pages = <Page<void>>[page1];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -1385,7 +1397,15 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(key));
-    expect(painter, paints..save()..translate()..save()..translate()..circle(x: 24.0, y: 28.0));
+    expect(
+      painter,
+      paints
+        ..save()
+        ..translate()
+        ..save()
+        ..translate()
+        ..circle(x: 24.0, y: 28.0),
+    );
   });
 
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
@@ -1540,7 +1560,7 @@ void main() {
                 backwardsCompatibility: false,
                 leading: Placeholder(key: leadingKey), // Forced to 56x56, see _kLeadingWidth in app_bar.dart.
                 title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
-                actions: <Widget>[ Placeholder(key: trailingKey, fallbackWidth: 10) ],
+                actions: <Widget>[Placeholder(key: trailingKey, fallbackWidth: 10)],
               ),
             ),
           ),
@@ -1586,7 +1606,7 @@ void main() {
                   backwardsCompatibility: false,
                   leading: Placeholder(key: leadingKey),
                   title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
-                  actions: <Widget>[ Placeholder(key: trailingKey) ],
+                  actions: <Widget>[Placeholder(key: trailingKey)],
                 ),
               ],
             ),
@@ -1600,43 +1620,46 @@ void main() {
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
   });
 
-  testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
+  testWidgets(
+    'SliverAppBar positioning of leading and trailing widgets with bottom padding',
+    (WidgetTester tester) async {
+      const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
 
-    final Key leadingKey = UniqueKey();
-    final Key titleKey = UniqueKey();
-    final Key trailingKey = UniqueKey();
+      final Key leadingKey = UniqueKey();
+      final Key titleKey = UniqueKey();
+      final Key trailingKey = UniqueKey();
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: MediaQuery(
-            data: topPadding100,
-            child: CustomScrollView(
-              primary: true,
-              slivers: <Widget>[
-                SliverAppBar(
-                  backwardsCompatibility: false,
-                  leading: Placeholder(key: leadingKey),
-                  title: Placeholder(key: titleKey),
-                  actions: <Widget>[ Placeholder(key: trailingKey) ],
-                ),
-              ],
+      await tester.pumpWidget(
+        Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: MediaQuery(
+              data: topPadding100,
+              child: CustomScrollView(
+                primary: true,
+                slivers: <Widget>[
+                  SliverAppBar(
+                    backwardsCompatibility: false,
+                    leading: Placeholder(key: leadingKey),
+                    title: Placeholder(key: titleKey),
+                    actions: <Widget>[Placeholder(key: trailingKey)],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-    expect(tester.getRect(find.byType(AppBar)), const Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(leadingKey)), const Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(trailingKey)), const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
-  });
+      );
+      expect(tester.getRect(find.byType(AppBar)), const Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
+      expect(tester.getRect(find.byKey(leadingKey)), const Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
+      expect(tester.getRect(find.byKey(trailingKey)), const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
+    },
+  );
 
   testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1662,60 +1685,63 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            children: <TestSemantics>[
-              TestSemantics(
-                children: <TestSemantics> [
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            label: 'Leading',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'Title',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Action 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Action 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Action 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Bottom',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'Leading',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.namesRoute,
+                                SemanticsFlag.isHeader,
+                              ],
+                              label: 'Title',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: 'Action 1',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: 'Action 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: 'Action 3',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: 'Bottom',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-      ignoreId: true,
-    ));
+    );
 
     semantics.dispose();
   });
@@ -1750,65 +1776,68 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            children: <TestSemantics>[
-              TestSemantics(
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        textDirection: TextDirection.rtl,
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                label: 'Leading',
-                                textDirection: TextDirection.rtl,
-                              ),
-                              TestSemantics(
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.namesRoute,
-                                  SemanticsFlag.isHeader,
-                                ],
-                                label: 'Title',
-                                textDirection: TextDirection.rtl,
-                              ),
-                              TestSemantics(
-                                label: 'Action 1',
-                                textDirection: TextDirection.rtl,
-                              ),
-                              TestSemantics(
-                                label: 'Action 2',
-                                textDirection: TextDirection.rtl,
-                              ),
-                              TestSemantics(
-                                label: 'Action 3',
-                                textDirection: TextDirection.rtl,
-                              ),
-                              TestSemantics(
-                                label: 'Bottom',
-                                textDirection: TextDirection.rtl,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          textDirection: TextDirection.rtl,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'Leading',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.namesRoute,
+                                    SemanticsFlag.isHeader,
+                                  ],
+                                  label: 'Title',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                                TestSemantics(
+                                  label: 'Action 1',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                                TestSemantics(
+                                  label: 'Action 2',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                                TestSemantics(
+                                  label: 'Action 3',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                                TestSemantics(
+                                  label: 'Bottom',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-      ignoreId: true,
-    ));
+    );
 
     semantics.dispose();
   });
@@ -1832,40 +1861,43 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            children: <TestSemantics>[
-              TestSemantics(
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            label: 'Leading',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Action 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'Leading',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: 'Action 1',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-      ignoreId: true,
-    ));
+    );
 
     semantics.dispose();
   });
@@ -1889,53 +1921,56 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            textDirection: TextDirection.ltr,
-            children: <TestSemantics>[
-              TestSemantics(
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                children: <TestSemantics>[
-                                  TestSemantics(
-                                    label: 'Leading',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                  TestSemantics(
-                                    label: 'Action 1',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                ],
-                              ),
-                              TestSemantics(),
-                            ],
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      label: 'Leading',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    TestSemantics(
+                                      label: 'Action 1',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ),
+                                TestSemantics(),
+                              ],
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-      ignoreId: true,
-    ));
+    );
 
     semantics.dispose();
   });
@@ -1959,61 +1994,64 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            textDirection: TextDirection.ltr,
-            children: <TestSemantics>[
-              TestSemantics(
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                children: <TestSemantics>[
-                                  TestSemantics(
-                                    label: 'Leading',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                  TestSemantics(
-                                    label: 'Action 1',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                ],
-                              ),
-                              TestSemantics(
-                                children: <TestSemantics>[
-                                  TestSemantics(
-                                    flags: <SemanticsFlag>[SemanticsFlag.isHeader],
-                                    label: 'Flexible space',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      label: 'Leading',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    TestSemantics(
+                                      label: 'Action 1',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ),
+                                TestSemantics(
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      flags: <SemanticsFlag>[SemanticsFlag.isHeader],
+                                      label: 'Flexible space',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-      ignoreId: true,
-    ));
+    );
 
     semantics.dispose();
   });
@@ -2032,10 +2070,13 @@ void main() {
 
     expect(darkTheme.primaryColorBrightness, Brightness.dark);
     expect(darkTheme.colorScheme.brightness, Brightness.dark);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.light,
-    ));
+    expect(
+      SystemChrome.latestStyle,
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
   });
 
   testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
@@ -2054,10 +2095,13 @@ void main() {
 
     expect(lightTheme.primaryColorBrightness, Brightness.light);
     expect(lightTheme.colorScheme.brightness, Brightness.light);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    expect(
+      SystemChrome.latestStyle,
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   });
 
   testWidgets('AppBar draws a light system bar for a light theme with a dark background', (WidgetTester tester) async {
@@ -2074,10 +2118,13 @@ void main() {
 
     expect(lightTheme.primaryColorBrightness, Brightness.dark);
     expect(lightTheme.colorScheme.brightness, Brightness.light);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.light,
-    ));
+    expect(
+      SystemChrome.latestStyle,
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
   });
 
   testWidgets('AppBar draws a dark system bar for a dark theme with a light background', (WidgetTester tester) async {
@@ -2096,10 +2143,13 @@ void main() {
 
     expect(darkTheme.primaryColorBrightness, Brightness.dark);
     expect(darkTheme.colorScheme.brightness, Brightness.dark);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    expect(
+      SystemChrome.latestStyle,
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   });
 
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
@@ -2265,42 +2315,45 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
-  testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
-    late double textScaleFactor;
+  testWidgets(
+    'AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2',
+    (WidgetTester tester) async {
+      late double textScaleFactor;
 
-    Widget buildFrame() {
-      return MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-              child: Scaffold(
-                appBar: AppBar(
-                  backwardsCompatibility: false,
-                  centerTitle: false,
-                  title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
+      Widget buildFrame() {
+        return MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                child: Scaffold(
+                  appBar: AppBar(
+                    backwardsCompatibility: false,
+                    centerTitle: false,
+                    title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      );
-    }
+              );
+            },
+          ),
+        );
+      }
 
-    final Finder appBarTitle = find.text('Jumbo');
+      final Finder appBarTitle = find.text('Jumbo');
 
-    textScaleFactor = 1;
-    await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle).height, 18);
+      textScaleFactor = 1;
+      await tester.pumpWidget(buildFrame());
+      expect(tester.getRect(appBarTitle).height, 18);
 
-    textScaleFactor = 1.34;
-    await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle).height, 24);
+      textScaleFactor = 1.34;
+      await tester.pumpWidget(buildFrame());
+      expect(tester.getRect(appBarTitle).height, 24);
 
-    textScaleFactor = 2;
-    await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle).height, 24);
-  });
+      textScaleFactor = 2;
+      await tester.pumpWidget(buildFrame());
+      expect(tester.getRect(appBarTitle).height, 24);
+    },
+  );
 
   testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
     double textScaleFactor = 1.0;
@@ -2372,7 +2425,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
-    Future<void> buildAndVerifyDelegate({ required bool pinned, required bool floating, required bool snap }) async {
+    Future<void> buildAndVerifyDelegate({required bool pinned, required bool floating, required bool snap}) async {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -2389,9 +2442,8 @@ void main() {
         ),
       );
 
-      final SliverPersistentHeaderDelegate delegate = tester
-        .widget<SliverPersistentHeader>(find.byType(SliverPersistentHeader))
-        .delegate;
+      final SliverPersistentHeaderDelegate delegate =
+          tester.widget<SliverPersistentHeader>(find.byType(SliverPersistentHeader)).delegate;
 
       // Ensure we have a non-null vsync when it's needed.
       if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
@@ -2590,22 +2642,27 @@ void main() {
     );
     expect(appBarMaterial.color, backgroundColor);
 
-    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
-      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
-    ).style;
+    final TextStyle titleTextStyle = tester
+        .widget<DefaultTextStyle>(
+          find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+        )
+        .style;
     expect(titleTextStyle.color, foregroundColor);
 
-    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
+    final IconThemeData leadingIconTheme = tester
+        .widget<IconTheme>(
+          find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+        )
+        .data;
     expect(leadingIconTheme.color, foregroundColor);
 
-    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
+    final IconThemeData actionIconTheme = tester
+        .widget<IconTheme>(
+          find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+        )
+        .data;
     expect(actionIconTheme.color, foregroundColor);
   });
-
 
   testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xff00ff00);
@@ -2630,19 +2687,25 @@ void main() {
       ),
     );
 
-    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
-      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
-    ).style;
+    final TextStyle titleTextStyle = tester
+        .widget<DefaultTextStyle>(
+          find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+        )
+        .style;
     expect(titleTextStyle.color, foregroundColor);
 
-    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
+    final IconThemeData leadingIconTheme = tester
+        .widget<IconTheme>(
+          find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+        )
+        .data;
     expect(leadingIconTheme.color, foregroundColor);
 
-    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
+    final IconThemeData actionIconTheme = tester
+        .widget<IconTheme>(
+          find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+        )
+        .data;
     expect(actionIconTheme.color, foregroundColor);
   });
 
@@ -2668,9 +2731,9 @@ void main() {
               ),
               SliverList(
                 delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(height: 1200.0, color: Colors.teal),
-                    ],
+                  <Widget>[
+                    Container(height: 1200.0, color: Colors.teal),
+                  ],
                 ),
               ),
             ],
@@ -2707,71 +2770,74 @@ void main() {
     expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
   });
 
-  testWidgets('SliverAppBar.backgroundColor with FlexibleSpace MaterialStateColor scrolledUnder', (WidgetTester tester) async {
-    const double collapsedHeight = kToolbarHeight;
-    const double expandedHeight = 200.0;
-    const Color scrolledColor = Color(0xff00ff00);
-    const Color defaultColor = Color(0xff0000ff);
+  testWidgets(
+    'SliverAppBar.backgroundColor with FlexibleSpace MaterialStateColor scrolledUnder',
+    (WidgetTester tester) async {
+      const double collapsedHeight = kToolbarHeight;
+      const double expandedHeight = 200.0;
+      const Color scrolledColor = Color(0xff00ff00);
+      const Color defaultColor = Color(0xff0000ff);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                backwardsCompatibility: false,
-                elevation: 0,
-                backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
-                }),
-                expandedHeight: expandedHeight,
-                pinned: true,
-                flexibleSpace: const FlexibleSpaceBar(
-                  title: Text('SliverAppBar'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverAppBar(
+                  backwardsCompatibility: false,
+                  elevation: 0,
+                  backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                    return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+                  }),
+                  expandedHeight: expandedHeight,
+                  pinned: true,
+                  flexibleSpace: const FlexibleSpaceBar(
+                    title: Text('SliverAppBar'),
+                  ),
                 ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
+                SliverList(
+                  delegate: SliverChildListDelegate(
                     <Widget>[
                       Container(height: 1200.0, color: Colors.teal),
                     ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    Finder findAppBarMaterial() {
-      // There are 2 Material widgets below AppBar. The second is only added if
-      // flexibleSpace is non-null.
-      return find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first;
-    }
+      Finder findAppBarMaterial() {
+        // There are 2 Material widgets below AppBar. The second is only added if
+        // flexibleSpace is non-null.
+        return find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first;
+      }
 
-    Color? getAppBarBackgroundColor() {
-      return tester.widget<Material>(findAppBarMaterial()).color;
-    }
+      Color? getAppBarBackgroundColor() {
+        return tester.widget<Material>(findAppBarMaterial()).color;
+      }
 
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+      expect(getAppBarBackgroundColor(), defaultColor);
+      expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
 
-    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(0.0, -expandedHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
+      TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+      await gesture.moveBy(const Offset(0.0, -expandedHeight));
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    expect(getAppBarBackgroundColor(), scrolledColor);
-    expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
+      expect(getAppBarBackgroundColor(), scrolledColor);
+      expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
 
-    gesture = await tester.startGesture(const Offset(50.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, expandedHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
+      gesture = await tester.startGesture(const Offset(50.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, expandedHeight));
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
-  });
+      expect(getAppBarBackgroundColor(), defaultColor);
+      expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+    },
+  );
 
   testWidgets('AppBar.backgroundColor MaterialStateColor scrolledUnder', (WidgetTester tester) async {
     const Color scrolledColor = Color(0xff00ff00);
@@ -2825,62 +2891,65 @@ void main() {
     expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
   });
 
-  testWidgets('AppBar.backgroundColor with FlexibleSpace MaterialStateColor scrolledUnder', (WidgetTester tester) async {
-    const Color scrolledColor = Color(0xff00ff00);
-    const Color defaultColor = Color(0xff0000ff);
+  testWidgets(
+    'AppBar.backgroundColor with FlexibleSpace MaterialStateColor scrolledUnder',
+    (WidgetTester tester) async {
+      const Color scrolledColor = Color(0xff00ff00);
+      const Color defaultColor = Color(0xff0000ff);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            backwardsCompatibility: false,
-            elevation: 0,
-            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
-            }),
-            title: const Text('AppBar'),
-            flexibleSpace: const FlexibleSpaceBar(
-              title: Text('FlexibleSpace'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              backwardsCompatibility: false,
+              elevation: 0,
+              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+              }),
+              title: const Text('AppBar'),
+              flexibleSpace: const FlexibleSpaceBar(
+                title: Text('FlexibleSpace'),
+              ),
+            ),
+            body: ListView(
+              children: <Widget>[
+                Container(height: 1200.0, color: Colors.teal),
+              ],
             ),
           ),
-          body: ListView(
-            children: <Widget>[
-              Container(height: 1200.0, color: Colors.teal),
-            ],
-          ),
         ),
-      ),
-    );
+      );
 
-    Finder findAppBarMaterial() {
-      // There are 2 Material widgets below AppBar. The second is only added if
-      // flexibleSpace is non-null.
-      return find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first;
-    }
+      Finder findAppBarMaterial() {
+        // There are 2 Material widgets below AppBar. The second is only added if
+        // flexibleSpace is non-null.
+        return find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first;
+      }
 
-    Color? getAppBarBackgroundColor() {
-      return tester.widget<Material>(findAppBarMaterial()).color;
-    }
+      Color? getAppBarBackgroundColor() {
+        return tester.widget<Material>(findAppBarMaterial()).color;
+      }
 
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(getAppBarBackgroundColor(), defaultColor);
+      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
 
-    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
+      TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    expect(getAppBarBackgroundColor(), scrolledColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(getAppBarBackgroundColor(), scrolledColor);
+      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
 
-    gesture = await tester.startGesture(const Offset(50.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, kToolbarHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
+      gesture = await tester.startGesture(const Offset(50.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
-  });
+      expect(getAppBarBackgroundColor(), defaultColor);
+      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+    },
+  );
 
   testWidgets('AppBar._handleScrollNotification safely calls setState()', (WidgetTester tester) async {
     // Regression test for failures found in Google internal issue b/185192049.
@@ -2913,7 +2982,7 @@ void main() {
     late double preferredHeight;
     late Size preferredSize;
 
-    Widget buildFrame({ double? themeToolbarHeight, double? appBarToolbarHeight }) {
+    Widget buildFrame({double? themeToolbarHeight, double? appBarToolbarHeight}) {
       final AppBar appBar = AppBar(
         toolbarHeight: appBarToolbarHeight,
       );

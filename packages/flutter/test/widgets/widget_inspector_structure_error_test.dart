@@ -40,7 +40,7 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
 
   Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(String extensionName) {
     return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-      .where((Map<Object, Object?> event) => event['extension'] == extensionName);
+        .where((Map<Object, Object?> event) => event['extension'] == extensionName);
   }
 
   Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
@@ -49,7 +49,6 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
     // extension where only JSON is allowed.
     return json.decode(json.encode(await extensions[name]!(arguments)))['enabled'] as String;
   }
-
 
   static void runTests() {
     final StructureErrorTestWidgetInspectorService service = StructureErrorTestWidgetInspectorService();

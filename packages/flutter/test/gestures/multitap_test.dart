@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {
-}
+class TestDrag extends Drag {}
 
 void main() {
   setUp(ensureGestureBinding);
@@ -18,12 +17,21 @@ void main() {
 
     final List<String> log = <String>[];
 
-    tap.onTapDown = (int pointer, TapDownDetails details) { log.add('tap-down $pointer'); };
-    tap.onTapUp = (int pointer, TapUpDetails details) { log.add('tap-up $pointer'); };
-    tap.onTap = (int pointer) { log.add('tap $pointer'); };
-    tap.onLongTapDown = (int pointer, TapDownDetails details) { log.add('long-tap-down $pointer'); };
-    tap.onTapCancel = (int pointer) { log.add('tap-cancel $pointer'); };
-
+    tap.onTapDown = (int pointer, TapDownDetails details) {
+      log.add('tap-down $pointer');
+    };
+    tap.onTapUp = (int pointer, TapUpDetails details) {
+      log.add('tap-up $pointer');
+    };
+    tap.onTap = (int pointer) {
+      log.add('tap $pointer');
+    };
+    tap.onLongTapDown = (int pointer, TapDownDetails details) {
+      log.add('long-tap-down $pointer');
+    };
+    tap.onTapCancel = (int pointer) {
+      log.add('tap-cancel $pointer');
+    };
 
     final TestPointer pointer5 = TestPointer(5);
     final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
@@ -71,20 +79,28 @@ void main() {
   });
 
   testGesture('Can filter based on device kind', (GestureTester tester) {
-    final MultiTapGestureRecognizer tap =
-        MultiTapGestureRecognizer(
-          longTapDelay: kLongPressTimeout,
-          kind: PointerDeviceKind.touch,
-        );
+    final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(
+      longTapDelay: kLongPressTimeout,
+      kind: PointerDeviceKind.touch,
+    );
 
     final List<String> log = <String>[];
 
-    tap.onTapDown = (int pointer, TapDownDetails details) { log.add('tap-down $pointer'); };
-    tap.onTapUp = (int pointer, TapUpDetails details) { log.add('tap-up $pointer'); };
-    tap.onTap = (int pointer) { log.add('tap $pointer'); };
-    tap.onLongTapDown = (int pointer, TapDownDetails details) { log.add('long-tap-down $pointer'); };
-    tap.onTapCancel = (int pointer) { log.add('tap-cancel $pointer'); };
-
+    tap.onTapDown = (int pointer, TapDownDetails details) {
+      log.add('tap-down $pointer');
+    };
+    tap.onTapUp = (int pointer, TapUpDetails details) {
+      log.add('tap-up $pointer');
+    };
+    tap.onTap = (int pointer) {
+      log.add('tap $pointer');
+    };
+    tap.onLongTapDown = (int pointer, TapDownDetails details) {
+      log.add('long-tap-down $pointer');
+    };
+    tap.onTapCancel = (int pointer) {
+      log.add('tap-cancel $pointer');
+    };
 
     final TestPointer touchPointer5 = TestPointer(5, PointerDeviceKind.touch);
     final PointerDownEvent down5 = touchPointer5.down(const Offset(10.0, 10.0));

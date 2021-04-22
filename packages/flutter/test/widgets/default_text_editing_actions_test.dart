@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestLeftIntent extends Intent {}
+
 class TestRightIntent extends Intent {}
 
 void main() {

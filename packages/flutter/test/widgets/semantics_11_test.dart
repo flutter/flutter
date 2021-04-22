@@ -10,88 +10,105 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+  testWidgets(
+    'markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent',
+    (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(
-      Semantics(
-        container: true,
-        onTap: dummyTapHandler,
-        child: Semantics(
+      await tester.pumpWidget(
+        Semantics(
+          container: true,
           onTap: dummyTapHandler,
           child: Semantics(
             onTap: dummyTapHandler,
-            textDirection: TextDirection.ltr,
-            label: 'foo',
+            child: Semantics(
+              onTap: dummyTapHandler,
+              textDirection: TextDirection.ltr,
+              label: 'foo',
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          actions: SemanticsAction.tap.index,
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 2,
-              actions: SemanticsAction.tap.index,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 3,
-                  actions: SemanticsAction.tap.index,
-                  label: 'foo',
-                ),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                id: 1,
+                actions: SemanticsAction.tap.index,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    actions: SemanticsAction.tap.index,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        actions: SemanticsAction.tap.index,
+                        label: 'foo',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
+      );
 
-    // make a change causing call to markNeedsSemanticsUpdate()
+      // make a change causing call to markNeedsSemanticsUpdate()
 
-    // This should not throw an assert.
-    await tester.pumpWidget(
-      Semantics(
-        container: true,
-        onTap: dummyTapHandler,
-        child: Semantics(
+      // This should not throw an assert.
+      await tester.pumpWidget(
+        Semantics(
+          container: true,
           onTap: dummyTapHandler,
           child: Semantics(
             onTap: dummyTapHandler,
-            textDirection: TextDirection.ltr,
-            label: 'bar', // <-- only change
+            child: Semantics(
+              onTap: dummyTapHandler,
+              textDirection: TextDirection.ltr,
+              label: 'bar', // <-- only change
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          actions: SemanticsAction.tap.index,
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 2,
-              actions: SemanticsAction.tap.index,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 3,
-                  actions: SemanticsAction.tap.index,
-                  label: 'bar',
-                ),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                id: 1,
+                actions: SemanticsAction.tap.index,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    actions: SemanticsAction.tap.index,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        actions: SemanticsAction.tap.index,
+                        label: 'bar',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
+      );
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+    },
+  );
 }
 
-void dummyTapHandler() { }
+void dummyTapHandler() {}

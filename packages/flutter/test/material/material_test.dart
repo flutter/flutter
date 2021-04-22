@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
-  const NotifyMaterial({ Key? key }) : super(key: key);
+  const NotifyMaterial({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     LayoutChangedNotification().dispatch(context);
@@ -69,9 +69,9 @@ void main() {
     const Material().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>['type: canvas']);
   });
@@ -87,9 +87,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'type: canvas',
@@ -156,10 +156,13 @@ void main() {
 
     // We paint twice because we have two CustomPaint widgets in the tree above
     // to test repainting both inside and outside the Material widget.
-    expect(log, equals(<Size>[
-      const Size(150.0, 150.0),
-      const Size(100.0, 100.0),
-    ]));
+    expect(
+      log,
+      equals(<Size>[
+        const Size(150.0, 150.0),
+        const Size(100.0, 100.0),
+      ]),
+    );
     log.clear();
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -300.0));
@@ -249,41 +252,42 @@ void main() {
   });
 
   group('Elevation Overlay', () {
-
     testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       await tester.pumpWidget(Theme(
-          data: ThemeData(
-            applyElevationOverlayColor: false,
-            colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
-          ),
-          child: buildMaterial(color: surfaceColor, elevation: 8.0),
+        data: ThemeData(
+          applyElevationOverlayColor: false,
+          colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
+        ),
+        child: buildMaterial(color: surfaceColor, elevation: 8.0),
       ));
       final RenderPhysicalShape model = getModel(tester);
       expect(model.color, equals(surfaceColor));
     });
 
-    testWidgets('applyElevationOverlayColor set to true applies a semi-transparent onSurface color to the surface color', (WidgetTester tester) async {
-      const Color surfaceColor = Color(0xFF121212);
-      const Color onSurfaceColor = Colors.greenAccent;
+    testWidgets(
+      'applyElevationOverlayColor set to true applies a semi-transparent onSurface color to the surface color',
+      (WidgetTester tester) async {
+        const Color surfaceColor = Color(0xFF121212);
+        const Color onSurfaceColor = Colors.greenAccent;
 
-      // The colors we should get with a base surface color of 0xFF121212 for
-      // and a given elevation
-      const List<ElevationColor> elevationColors = <ElevationColor>[
-        ElevationColor(0.0, Color(0xFF121212)),
-        ElevationColor(1.0, Color(0xFF161D19)),
-        ElevationColor(2.0, Color(0xFF18211D)),
-        ElevationColor(3.0, Color(0xFF19241E)),
-        ElevationColor(4.0, Color(0xFF1A2620)),
-        ElevationColor(6.0, Color(0xFF1B2922)),
-        ElevationColor(8.0, Color(0xFF1C2C24)),
-        ElevationColor(12.0, Color(0xFF1D3027)),
-        ElevationColor(16.0, Color(0xFF1E3329)),
-        ElevationColor(24.0, Color(0xFF20362B)),
-      ];
+        // The colors we should get with a base surface color of 0xFF121212 for
+        // and a given elevation
+        const List<ElevationColor> elevationColors = <ElevationColor>[
+          ElevationColor(0.0, Color(0xFF121212)),
+          ElevationColor(1.0, Color(0xFF161D19)),
+          ElevationColor(2.0, Color(0xFF18211D)),
+          ElevationColor(3.0, Color(0xFF19241E)),
+          ElevationColor(4.0, Color(0xFF1A2620)),
+          ElevationColor(6.0, Color(0xFF1B2922)),
+          ElevationColor(8.0, Color(0xFF1C2C24)),
+          ElevationColor(12.0, Color(0xFF1D3027)),
+          ElevationColor(16.0, Color(0xFF1E3329)),
+          ElevationColor(24.0, Color(0xFF20362B)),
+        ];
 
-      for (final ElevationColor test in elevationColors) {
-        await tester.pumpWidget(
+        for (final ElevationColor test in elevationColors) {
+          await tester.pumpWidget(
             Theme(
               data: ThemeData(
                 applyElevationOverlayColor: true,
@@ -297,12 +301,13 @@ void main() {
                 elevation: test.elevation,
               ),
             ),
-        );
-        await tester.pumpAndSettle(); // wait for the elevation animation to finish
-        final RenderPhysicalShape model = getModel(tester);
-        expect(model.color, equals(test.color));
-      }
-    });
+          );
+          await tester.pumpAndSettle(); // wait for the elevation animation to finish
+          final RenderPhysicalShape model = getModel(tester);
+          expect(model.color, equals(test.color));
+        }
+      },
+    );
 
     testWidgets('overlay will not apply to materials using a non-surface color', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -324,16 +329,16 @@ void main() {
 
     testWidgets('overlay will not apply to materials using a light theme', (WidgetTester tester) async {
       await tester.pumpWidget(
-          Theme(
-            data: ThemeData(
-              applyElevationOverlayColor: true,
-              colorScheme: const ColorScheme.light(),
-            ),
-            child: buildMaterial(
-              color: Colors.cyan,
-              elevation: 8.0,
-            ),
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.light(),
           ),
+          child: buildMaterial(
+            color: Colors.cyan,
+            elevation: 8.0,
+          ),
+        ),
       );
       final RenderPhysicalShape model = getModel(tester);
       // Shouldn't change, as it was under a light color scheme.
@@ -367,8 +372,7 @@ void main() {
       const Color onSurfaceColor = Color(0xFF654321);
       const double elevation = 8.0;
 
-      final Color surfaceColorWithOverlay =
-        ElevationOverlay.colorWithOverlay(surfaceColor, onSurfaceColor, elevation);
+      final Color surfaceColorWithOverlay = ElevationOverlay.colorWithOverlay(surfaceColor, onSurfaceColor, elevation);
 
       await tester.pumpWidget(
         Theme(
@@ -396,11 +400,11 @@ void main() {
     testWidgets('No clip by default', (WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-          Material(
-            key: materialKey,
-            type: MaterialType.transparency,
-            child: const SizedBox(width: 100.0, height: 100.0),
-          ),
+        Material(
+          key: materialKey,
+          type: MaterialType.transparency,
+          child: const SizedBox(width: 100.0, height: 100.0),
+        ),
       );
 
       expect(find.byKey(materialKey), hasNoImmediateClip);
@@ -462,7 +466,9 @@ void main() {
 
     testWidgets('supports directional clips', (WidgetTester tester) async {
       final List<String> logs = <String>[];
-      final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+      final ShapeBorder shape = TestBorder((String message) {
+        logs.add(message);
+      });
       Widget buildMaterial() {
         return Material(
           type: MaterialType.transparency,
@@ -471,6 +477,7 @@ void main() {
           clipBehavior: Clip.antiAlias,
         );
       }
+
       final Widget material = buildMaterial();
       // verify that a regular clip works as one would expect
       logs.add('--0');
@@ -535,11 +542,14 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
           borderRadius: BorderRadius.zero,
           elevation: 0.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('canvas with borderRadius and elevation', (WidgetTester tester) async {
@@ -554,11 +564,14 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 1.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('canvas with shape and elevation', (WidgetTester tester) async {
@@ -573,10 +586,13 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalShape(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalShape(
           shape: const StadiumBorder(),
           elevation: 1.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('card', (WidgetTester tester) async {
@@ -589,11 +605,14 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
           borderRadius: const BorderRadius.all(Radius.circular(2.0)),
           elevation: 0.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('card with borderRadius and elevation', (WidgetTester tester) async {
@@ -608,11 +627,14 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 5.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('card with shape and elevation', (WidgetTester tester) async {
@@ -627,10 +649,13 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalShape(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalShape(
           shape: const StadiumBorder(),
           elevation: 5.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('circle', (WidgetTester tester) async {
@@ -644,10 +669,13 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalModel(
           shape: BoxShape.circle,
           elevation: 0.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('button', (WidgetTester tester) async {
@@ -661,11 +689,14 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
           borderRadius: const BorderRadius.all(Radius.circular(2.0)),
           elevation: 0.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('button with elevation and borderRadius', (WidgetTester tester) async {
@@ -681,11 +712,14 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
-      ));
+        ),
+      );
     });
 
     testWidgets('button with elevation and shape', (WidgetTester tester) async {
@@ -701,10 +735,13 @@ void main() {
         ),
       );
 
-      expect(find.byKey(materialKey), rendersOnPhysicalShape(
+      expect(
+        find.byKey(materialKey),
+        rendersOnPhysicalShape(
           shape: const StadiumBorder(),
           elevation: 4.0,
-      ));
+        ),
+      );
     });
   });
 

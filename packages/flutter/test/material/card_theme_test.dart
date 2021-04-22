@@ -25,9 +25,12 @@ void main() {
     expect(material.color, Colors.white);
     expect(material.elevation, 1.0);
     expect(container.margin, const EdgeInsets.all(4.0));
-    expect(material.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-    ));
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+      ),
+    );
   });
 
   testWidgets('Card uses values from CardTheme', (WidgetTester tester) async {

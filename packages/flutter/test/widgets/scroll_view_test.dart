@@ -31,7 +31,7 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget textFieldBoilerplate({ required Widget child }) {
+Widget textFieldBoilerplate({required Widget child}) {
   return MaterialApp(
     home: Localizations(
       locale: const Locale('en', 'US'),
@@ -138,7 +138,7 @@ void main() {
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -172,7 +172,7 @@ void main() {
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -209,7 +209,7 @@ void main() {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
         separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -241,7 +241,7 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
@@ -275,10 +275,10 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -378,10 +378,10 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -450,7 +450,7 @@ void main() {
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -484,7 +484,7 @@ void main() {
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -521,7 +521,7 @@ void main() {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
         separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -553,7 +553,7 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
@@ -587,10 +587,10 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -690,10 +690,10 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -868,11 +868,14 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await gesture.moveBy(const Offset(0.0, -100.0));
 
-    expect(log, equals(<Type>[
-      ScrollStartNotification,
-      UserScrollNotification,
-      ScrollUpdateNotification,
-    ]));
+    expect(
+      log,
+      equals(<Type>[
+        ScrollStartNotification,
+        UserScrollNotification,
+        ScrollUpdateNotification,
+      ]),
+    );
     log.clear();
 
     await tester.pump();
@@ -880,13 +883,16 @@ void main() {
     controller.jumpTo(550.0);
 
     expect(controller.offset, equals(550.0));
-    expect(log, equals(<Type>[
-      ScrollEndNotification,
-      UserScrollNotification,
-      ScrollStartNotification,
-      ScrollUpdateNotification,
-      ScrollEndNotification,
-    ]));
+    expect(
+      log,
+      equals(<Type>[
+        ScrollEndNotification,
+        UserScrollNotification,
+        ScrollStartNotification,
+        ScrollUpdateNotification,
+        ScrollEndNotification,
+      ]),
+    );
     log.clear();
 
     await tester.pump();
@@ -1094,27 +1100,30 @@ void main() {
     expect(scrolled, isFalse);
   });
 
-  testWidgets('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior', (WidgetTester tester) async {
-    bool scrolled = false;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) {
-            scrolled = true;
-            return false;
-          },
-          child: ListView(
-            primary: false,
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: const <Widget>[],
+  testWidgets(
+    'physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior',
+    (WidgetTester tester) async {
+      bool scrolled = false;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<OverscrollNotification>(
+            onNotification: (OverscrollNotification message) {
+              scrolled = true;
+              return false;
+            },
+            child: ListView(
+              primary: false,
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[],
+            ),
           ),
         ),
-      ),
-    );
-    await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
-    expect(scrolled, isTrue);
-  });
+      );
+      await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+      expect(scrolled, isTrue);
+    },
+  );
 
   testWidgets('physics:ScrollPhysics actually overrides primary:true default behavior', (WidgetTester tester) async {
     bool scrolled = false;
@@ -1233,65 +1242,83 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
-    testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
-    expect(() => ListView(
-      itemExtent: 100,
-      prototypeItem: const SizedBox(),
-    ), throwsAssertionError);
+  testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(
+      () => ListView(
+        itemExtent: 100,
+        prototypeItem: const SizedBox(),
+      ),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemCount: -1,
-    ), throwsAssertionError);
+    expect(
+      () => ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return const SizedBox();
+        },
+        itemCount: -1,
+      ),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('ListView.builder asserts on negative semanticChildCount', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemCount: 1,
-      semanticChildCount: -1,
-    ), throwsAssertionError);
+    expect(
+      () => ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return const SizedBox();
+        },
+        itemCount: 1,
+        semanticChildCount: -1,
+      ),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('ListView.builder asserts on nonsensical childCount/semanticChildCount', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemCount: 1,
-      semanticChildCount: 4,
-    ), throwsAssertionError);
+    expect(
+      () => ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return const SizedBox();
+        },
+        itemCount: 1,
+        semanticChildCount: 4,
+      ),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('ListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemExtent: 100,
-      prototypeItem: const SizedBox(),
-    ), throwsAssertionError);
+    expect(
+      () => ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return const SizedBox();
+        },
+        itemExtent: 100,
+        prototypeItem: const SizedBox(),
+      ),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('ListView.custom asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
-    expect(() => ListView.custom(
-      childrenDelegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return const SizedBox();
-        },
+    expect(
+      () => ListView.custom(
+        childrenDelegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return const SizedBox();
+          },
+        ),
+        itemExtent: 100,
+        prototypeItem: const SizedBox(),
       ),
-      itemExtent: 100,
-      prototypeItem: const SizedBox(),
-    ), throwsAssertionError);
+      throwsAssertionError,
+    );
   });
 
-  testWidgets('PrimaryScrollController provides fallback ScrollActions', (WidgetTester tester)  async {
+  testWidgets('PrimaryScrollController provides fallback ScrollActions', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(

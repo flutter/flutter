@@ -45,14 +45,27 @@ void main() {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
           .setSize(const Size(100.0, 100.0));
-      await PlatformViewsService.initAndroidView( id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl)
+      await PlatformViewsService.initAndroidView(id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl)
           .setSize(const Size(200.0, 300.0));
-      await PlatformViewsService.initSurfaceAndroidView(id: 2, viewType: 'webview', layoutDirection: TextDirection.rtl).create();
+      await PlatformViewsService.initSurfaceAndroidView(id: 2, viewType: 'webview', layoutDirection: TextDirection.rtl)
+          .create();
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
-          const FakeAndroidPlatformView(1, 'webview', Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl, null),
+          const FakeAndroidPlatformView(
+            0,
+            'webview',
+            Size(100.0, 100.0),
+            AndroidViewController.kAndroidLayoutDirectionLtr,
+            null,
+          ),
+          const FakeAndroidPlatformView(
+            1,
+            'webview',
+            Size(200.0, 300.0),
+            AndroidViewController.kAndroidLayoutDirectionRtl,
+            null,
+          ),
           const FakeAndroidPlatformView(2, 'webview', null, AndroidViewController.kAndroidLayoutDirectionRtl, true),
         ]),
       );
@@ -101,14 +114,21 @@ void main() {
       await viewController.setSize(const Size(200.0, 300.0));
       await viewController.dispose();
 
-      final AndroidViewController surfaceViewController = PlatformViewsService.initSurfaceAndroidView(id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final AndroidViewController surfaceViewController =
+          PlatformViewsService.initSurfaceAndroidView(id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
       await surfaceViewController.create();
       await surfaceViewController.dispose();
 
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
+          const FakeAndroidPlatformView(
+            0,
+            'webview',
+            Size(100.0, 100.0),
+            AndroidViewController.kAndroidLayoutDirectionLtr,
+            null,
+          ),
         ]),
       );
     });
@@ -134,13 +154,15 @@ void main() {
         id: 0,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-        onFocus: () { didFocus = true; },
+        onFocus: () {
+          didFocus = true;
+        },
       );
       await viewController.setSize(const Size(100.0, 100.0));
       await viewController.dispose();
-      final ByteData message =
-          SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
-      await SystemChannels.platform_views.binaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      final ByteData message = SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
+      await SystemChannels.platform_views.binaryMessenger
+          .handlePlatformMessage(SystemChannels.platform_views.name, message, (_) {});
       expect(didFocus, isFalse);
     });
 
@@ -158,8 +180,20 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
-          const FakeAndroidPlatformView(1, 'webview', Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
+          const FakeAndroidPlatformView(
+            0,
+            'webview',
+            Size(100.0, 100.0),
+            AndroidViewController.kAndroidLayoutDirectionLtr,
+            null,
+          ),
+          const FakeAndroidPlatformView(
+            1,
+            'webview',
+            Size(500.0, 500.0),
+            AndroidViewController.kAndroidLayoutDirectionLtr,
+            null,
+          ),
         ]),
       );
     });
@@ -167,7 +201,9 @@ void main() {
     test('OnPlatformViewCreated callback', () async {
       viewsController.registerViewType('webview');
       final List<int> createdViews = <int>[];
-      void callback(int id) { createdViews.add(id); }
+      void callback(int id) {
+        createdViews.add(id);
+      }
 
       final AndroidViewController controller1 = PlatformViewsService.initAndroidView(
         id: 0,
@@ -188,19 +224,24 @@ void main() {
 
       await controller2.setSize(const Size(100.0, 200.0));
       expect(createdViews, orderedEquals(<int>[0, 5]));
-
     });
 
     test("change Android view's directionality before creation", () async {
       viewsController.registerViewType('webview');
       final AndroidViewController viewController =
-      PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+          PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
       await viewController.setLayoutDirection(TextDirection.ltr);
       await viewController.setSize(const Size(100.0, 100.0));
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
+          const FakeAndroidPlatformView(
+            0,
+            'webview',
+            Size(100.0, 100.0),
+            AndroidViewController.kAndroidLayoutDirectionLtr,
+            null,
+          ),
         ]),
       );
     });
@@ -208,13 +249,19 @@ void main() {
     test("change Android view's directionality after creation", () async {
       viewsController.registerViewType('webview');
       final AndroidViewController viewController =
-      PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+          PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
       await viewController.setSize(const Size(100.0, 100.0));
       await viewController.setLayoutDirection(TextDirection.rtl);
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl, null),
+          const FakeAndroidPlatformView(
+            0,
+            'webview',
+            Size(100.0, 100.0),
+            AndroidViewController.kAndroidLayoutDirectionRtl,
+            null,
+          ),
         ]),
       );
     });

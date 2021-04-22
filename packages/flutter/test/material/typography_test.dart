@@ -20,12 +20,18 @@ void main() {
     expect(Typography.material2018(platform: TargetPlatform.android).black.headline6!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.headline6!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.linux).black.headline6!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).black.headline6!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).black.headline6!.fontFamilyFallback,
+      <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+    );
     expect(Typography.material2018(platform: TargetPlatform.windows).black.headline6!.fontFamily, 'Segoe UI');
     expect(Typography.material2018(platform: TargetPlatform.android).white.headline6!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).white.headline6!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.linux).white.headline6!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).white.headline6!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).white.headline6!.fontFamilyFallback,
+      <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+    );
     expect(Typography.material2018(platform: TargetPlatform.windows).white.headline6!.fontFamily, 'Segoe UI');
   });
 
@@ -92,8 +98,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> nonDefaultPropertyNames = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.name!).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.name!)
+        .toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });

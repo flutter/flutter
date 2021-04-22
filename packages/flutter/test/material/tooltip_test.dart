@@ -74,7 +74,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -96,48 +97,51 @@ void main() {
     expect(tipInGlobal.dy, 20.0);
   });
 
-  testWidgets('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              OverlayEntry(
-                builder: (BuildContext context) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 300.0,
-                        top: 0.0,
-                        child: Tooltip(
-                          key: key,
-                          message: tooltipText,
-                          height: 20.0,
-                          padding: const EdgeInsets.all(5.0),
-                          verticalOffset: 20.0,
-                          preferBelow: false,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
+  testWidgets(
+    'Does tooltip end up in the right place - center with padding outside overlay',
+    (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(
+                  builder: (BuildContext context) {
+                    return Stack(
+                      children: <Widget>[
+                        Positioned(
+                          left: 300.0,
+                          top: 0.0,
+                          child: Tooltip(
+                            key: key,
+                            message: tooltipText,
+                            height: 20.0,
+                            padding: const EdgeInsets.all(5.0),
+                            verticalOffset: 20.0,
+                            preferBelow: false,
+                            child: const SizedBox(
+                              width: 0.0,
+                              height: 0.0,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
-    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+      );
+      (key.currentState as dynamic)
+          .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    /************************ 800x600 screen
+      /************************ 800x600 screen
      *   ________________   * }- 20.0 padding outside overlay
      *  |    o           |  * y=0
      *  |    |           |  * }- 20.0 vertical offset, of which 10.0 is in the screen edge margin
@@ -148,15 +152,16 @@ void main() {
      *                      * } - 20.0 padding outside overlay
      ************************/
 
-    final RenderBox tip = tester.renderObject(
-      _findTooltipContainer(tooltipText),
-    );
-    final Offset tipInGlobal = tip.localToGlobal(tip.size.topCenter(Offset.zero));
-    // The exact position of the left side depends on the font the test framework
-    // happens to pick, so we don't test that.
-    expect(tipInGlobal.dx, 320.0);
-    expect(tipInGlobal.dy, 40.0);
-  });
+      final RenderBox tip = tester.renderObject(
+        _findTooltipContainer(tooltipText),
+      );
+      final Offset tipInGlobal = tip.localToGlobal(tip.size.topCenter(Offset.zero));
+      // The exact position of the left side depends on the font the test framework
+      // happens to pick, so we don't test that.
+      expect(tipInGlobal.dx, 320.0);
+      expect(tipInGlobal.dy, 40.0);
+    },
+  );
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -193,7 +198,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -247,7 +253,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -303,7 +310,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -370,7 +378,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -425,7 +434,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -482,7 +492,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -530,7 +541,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final Offset topLeftTipInGlobal = tester.getTopLeft(
@@ -575,7 +587,8 @@ void main() {
         ),
       ),
     ));
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -601,7 +614,8 @@ void main() {
         ),
       ),
     ));
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -628,7 +642,8 @@ void main() {
         ),
       ),
     ));
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -686,15 +701,20 @@ void main() {
         ),
       ),
     ));
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<DefaultTextStyle>(
-      find.ancestor(
-        of: find.text(tooltipText),
-        matching: find.byType(DefaultTextStyle),
-      ).first,
-    ).style;
+    final TextStyle textStyle = tester
+        .widget<DefaultTextStyle>(
+          find
+              .ancestor(
+                of: find.text(tooltipText),
+                matching: find.byType(DefaultTextStyle),
+              )
+              .first,
+        )
+        .style;
 
     // The default fallback text style results in a text with a
     // double underline of Color(0xffffff00).
@@ -726,7 +746,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(
@@ -734,43 +755,57 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(tip, paints..rrect(
-      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
-      color: const Color(0xe6616161),
-    ));
+    expect(
+      tip,
+      paints
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+          color: const Color(0xe6616161),
+        ),
+    );
   });
 
-  testWidgets('Tooltip default size, shape, and color test for Desktop', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/68601
-    final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Tooltip(
-          key: key,
-          message: tooltipText,
-          child: const SizedBox(
-            width: 0.0,
-            height: 0.0,
+  testWidgets(
+    'Tooltip default size, shape, and color test for Desktop',
+    (WidgetTester tester) async {
+      // Regressing test for https://github.com/flutter/flutter/issues/68601
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Tooltip(
+            key: key,
+            message: tooltipText,
+            child: const SizedBox(
+              width: 0.0,
+              height: 0.0,
+            ),
           ),
         ),
-      ),
-    );
-    (key.currentState as dynamic).ensureTooltipVisible();
-    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+      );
+      (key.currentState as dynamic).ensureTooltipVisible();
+      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
-    expect(tooltipRenderParagraph.textSize.height, equals(10.0));
+      final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+      expect(tooltipRenderParagraph.textSize.height, equals(10.0));
 
-    final RenderBox tip = tester.renderObject(
-      _findTooltipContainer(tooltipText),
-    );
-    expect(tip.size.height, equals(24.0));
-    expect(tip.size.width, equals(46.0));
-    expect(tip, paints..rrect(
-      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
-      color: const Color(0xe6616161),
-    ));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
+      final RenderBox tip = tester.renderObject(
+        _findTooltipContainer(tooltipText),
+      );
+      expect(tip.size.height, equals(24.0));
+      expect(tip.size.width, equals(46.0));
+      expect(
+        tip,
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+            color: const Color(0xe6616161),
+          ),
+      );
+    },
+    variant: const TargetPlatformVariant(
+      <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows},
+    ),
+  );
 
   testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -800,7 +835,8 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(
@@ -808,9 +844,13 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(tip, paints..path(
-      color: const Color(0x80800000),
-    ));
+    expect(
+      tip,
+      paints
+        ..path(
+          color: const Color(0x80800000),
+        ),
+    );
   });
 
   testWidgets('Tooltip stays after long press', (WidgetTester tester) async {
@@ -864,8 +904,7 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
-        return gesture.removePointer();
+      if (gesture != null) return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -917,8 +956,7 @@ void main() {
     const Duration waitDuration = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
-        return gesture.removePointer();
+      if (gesture != null) return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -948,9 +986,9 @@ void main() {
 
     // Pump another random widget to unmount the Tooltip widget.
     await tester.pumpWidget(
-        const MaterialApp(
-          home: Center(
-            child: SizedBox(),
+      const MaterialApp(
+        home: Center(
+          child: SizedBox(),
         ),
       ),
     );
@@ -1003,7 +1041,8 @@ void main() {
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
 
     // Before using "as dynamic" in your code, see note at the top of the file.
-    (key.currentState as dynamic).ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
+    (key.currentState as dynamic)
+        .ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
@@ -1042,7 +1081,7 @@ void main() {
   });
 
   testWidgets('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { required double textScaleFactor }) {
+    Widget buildApp(String text, {required double textScaleFactor}) {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Directionality(
@@ -1126,18 +1165,23 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
+            TestSemantics.rootChild(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Foo\nBar',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'Foo\nBar',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -1145,8 +1189,11 @@ void main() {
             ),
           ],
         ),
-      ],
-    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+        ignoreRect: true,
+        ignoreId: true,
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1166,18 +1213,23 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
+            TestSemantics.rootChild(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Bar',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'Bar',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -1185,8 +1237,11 @@ void main() {
             ),
           ],
         ),
-      ],
-    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+        ignoreRect: true,
+        ignoreId: true,
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -1216,19 +1271,22 @@ void main() {
     await tester.longPress(find.byType(Tooltip));
     final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
 
-    expect(semanticEvents, unorderedEquals(<dynamic>[
-      <String, dynamic>{
-        'type': 'longPress',
-        'nodeId': findDebugSemantics(object).id,
-        'data': <String, dynamic>{},
-      },
-      <String, dynamic>{
-        'type': 'tooltip',
-        'data': <String, dynamic>{
-          'message': 'Foo',
+    expect(
+      semanticEvents,
+      unorderedEquals(<dynamic>[
+        <String, dynamic>{
+          'type': 'longPress',
+          'nodeId': findDebugSemantics(object).id,
+          'data': <String, dynamic>{},
         },
-      },
-    ]));
+        <String, dynamic>{
+          'type': 'tooltip',
+          'data': <String, dynamic>{
+            'message': 'Foo',
+          },
+        },
+      ]),
+    );
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
   });
@@ -1238,8 +1296,9 @@ void main() {
     const Tooltip(message: 'message').debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       '"message"',
@@ -1264,8 +1323,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       '"message"',
@@ -1282,7 +1342,6 @@ void main() {
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null)
-    return object.debugSemantics!;
+  if (object.debugSemantics != null) return object.debugSemantics!;
   return findDebugSemantics(object.parent! as RenderObject);
 }

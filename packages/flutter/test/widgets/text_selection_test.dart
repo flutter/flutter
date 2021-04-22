@@ -45,16 +45,45 @@ void main() {
   late int dragEndCount;
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  void _handleTapDown(TapDownDetails details) { tapCount++; }
-  void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
-  void _handleSingleTapCancel() { singleTapCancelCount++; }
-  void _handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
-  void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
-  void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
-  void _handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void _handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
-  void _handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
-  void _handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
+  void _handleTapDown(TapDownDetails details) {
+    tapCount++;
+  }
+
+  void _handleSingleTapUp(TapUpDetails details) {
+    singleTapUpCount++;
+  }
+
+  void _handleSingleTapCancel() {
+    singleTapCancelCount++;
+  }
+
+  void _handleSingleLongTapStart(LongPressStartDetails details) {
+    singleLongTapStartCount++;
+  }
+
+  void _handleDoubleTapDown(TapDownDetails details) {
+    doubleTapDownCount++;
+  }
+
+  void _handleForcePressStart(ForcePressDetails details) {
+    forcePressStartCount++;
+  }
+
+  void _handleForcePressEnd(ForcePressDetails details) {
+    forcePressEndCount++;
+  }
+
+  void _handleDragSelectionStart(DragStartDetails details) {
+    dragStartCount++;
+  }
+
+  void _handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) {
+    dragUpdateCount++;
+  }
+
+  void _handleDragSelectionEnd(DragEndDetails details) {
+    dragEndCount++;
+  }
 
   setUp(() {
     tapCount = 0;
@@ -99,8 +128,7 @@ void main() {
       forcePressEnabled: forcePressEnabled,
       selectionEnabled: selectionEnabled,
     );
-    final TextSelectionGestureDetectorBuilder provider =
-    TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -315,13 +343,12 @@ void main() {
     await gesture.downWithCustomEvent(
       forcePressOffset,
       PointerDownEvent(
-          pointer: pointerValue,
-          position: forcePressOffset,
-          pressure: 0.0,
-          pressureMax: 6.0,
-          pressureMin: 0.0,
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
       ),
-
     );
     // Initiate a quick tap.
     await gesture.updateWithCustomEvent(
@@ -503,8 +530,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     // Get the location of the 10th character
-    final Offset charLocation = renderEditable
-        .getLocalRectForCaret(const TextPosition(offset: 10)).center;
+    final Offset charLocation = renderEditable.getLocalRectForCaret(const TextPosition(offset: 10)).center;
     final Offset globalCharLocation = charLocation + tester.getTopLeft(find.byType(FakeEditable));
 
     // Right clicking on a word should select it
@@ -624,43 +650,46 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
   });
 
-  testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
-    await pumpTextSelectionGestureDetectorBuilder(tester);
-    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+  testWidgets(
+    'test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change',
+    (WidgetTester tester) async {
+      await pumpTextSelectionGestureDetectorBuilder(tester);
+      final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
 
-    // Reconfigure the RenderEditable for multi-line.
-    renderEditable.maxLines = null;
-    renderEditable.offset = ViewportOffset.fixed(20.0);
-    renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
-    await tester.pumpAndSettle();
+      // Reconfigure the RenderEditable for multi-line.
+      renderEditable.maxLines = null;
+      renderEditable.offset = ViewportOffset.fixed(20.0);
+      renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
+      await tester.pumpAndSettle();
 
-    final TestGesture gesture = await tester.startGesture(
-      const Offset(200.0, 200.0),
-      kind: PointerDeviceKind.mouse,
-    );
-    addTearDown(gesture.removePointer);
-    await tester.pumpAndSettle();
-    expect(renderEditable.selectPositionAtCalled, isFalse);
+      final TestGesture gesture = await tester.startGesture(
+        const Offset(200.0, 200.0),
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pumpAndSettle();
+      expect(renderEditable.selectPositionAtCalled, isFalse);
 
-    await gesture.moveTo(const Offset(300.0, 200.0));
-    await tester.pumpAndSettle();
-    expect(renderEditable.selectPositionAtCalled, isTrue);
-    expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 200.0));
-    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
+      await gesture.moveTo(const Offset(300.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(renderEditable.selectPositionAtCalled, isTrue);
+      expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 200.0));
+      expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
 
-    // Move the viewport offset (scroll).
-    renderEditable.offset = ViewportOffset.fixed(150.0);
-    renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
-    await tester.pumpAndSettle();
+      // Move the viewport offset (scroll).
+      renderEditable.offset = ViewportOffset.fixed(150.0);
+      renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
+      await tester.pumpAndSettle();
 
-    await gesture.moveTo(const Offset(300.0, 400.0));
-    await tester.pumpAndSettle();
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(renderEditable.selectPositionAtCalled, isTrue);
-    expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 70.0));
-    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 400.0));
-  });
+      await gesture.moveTo(const Offset(300.0, 400.0));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(renderEditable.selectPositionAtCalled, isTrue);
+      expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 70.0));
+      expect(renderEditable.selectPositionAtTo, const Offset(300.0, 400.0));
+    },
+  );
 
   testWidgets('test TextSelectionGestureDetectorBuilder selection disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
@@ -752,7 +781,7 @@ void main() {
 
     expect(hitRect.size.width, lessThan(textFieldRect.size.width));
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
   group('ClipboardStatusNotifier', () {
     group('when Clipboard fails', () {
@@ -823,14 +852,15 @@ class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGe
 }
 
 class FakeEditableText extends EditableText {
-  FakeEditableText({Key? key}): super(
-    key: key,
-    controller: TextEditingController(),
-    focusNode: FocusNode(),
-    backgroundCursorColor: Colors.white,
-    cursorColor: Colors.white,
-    style: const TextStyle(),
-  );
+  FakeEditableText({Key? key})
+      : super(
+          key: key,
+          controller: TextEditingController(),
+          focusNode: FocusNode(),
+          backgroundCursorColor: Colors.white,
+          cursorColor: Colors.white,
+          style: const TextStyle(),
+        );
 
   @override
   FakeEditableTextState createState() => FakeEditableTextState();
@@ -870,33 +900,34 @@ class FakeEditable extends LeafRenderObjectWidget {
 }
 
 class FakeRenderEditable extends RenderEditable {
-  FakeRenderEditable(EditableTextState delegate) : super(
-    text: const TextSpan(
-      style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
-      text: 'placeholder',
-    ),
-    startHandleLayerLink: LayerLink(),
-    endHandleLayerLink: LayerLink(),
-    ignorePointer: true,
-    textAlign: TextAlign.start,
-    textDirection: TextDirection.ltr,
-    locale: const Locale('en', 'US'),
-    offset: ViewportOffset.fixed(10.0),
-    textSelectionDelegate: delegate,
-    selection: const TextSelection.collapsed(
-      offset: 0,
-    ),
-  );
+  FakeRenderEditable(EditableTextState delegate)
+      : super(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            text: 'placeholder',
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          ignorePointer: true,
+          textAlign: TextAlign.start,
+          textDirection: TextDirection.ltr,
+          locale: const Locale('en', 'US'),
+          offset: ViewportOffset.fixed(10.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
 
   bool selectWordsInRangeCalled = false;
   @override
-  void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+  void selectWordsInRange({required Offset from, Offset? to, required SelectionChangedCause cause}) {
     selectWordsInRangeCalled = true;
   }
 
   bool selectWordEdgeCalled = false;
   @override
-  void selectWordEdge({ required SelectionChangedCause cause }) {
+  void selectWordEdge({required SelectionChangedCause cause}) {
     selectWordEdgeCalled = true;
   }
 
@@ -904,7 +935,7 @@ class FakeRenderEditable extends RenderEditable {
   Offset? selectPositionAtFrom;
   Offset? selectPositionAtTo;
   @override
-  void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+  void selectPositionAt({required Offset from, Offset? to, required SelectionChangedCause cause}) {
     selectPositionAtCalled = true;
     selectPositionAtFrom = from;
     selectPositionAtTo = to;
@@ -912,7 +943,7 @@ class FakeRenderEditable extends RenderEditable {
 
   bool selectWordCalled = false;
   @override
-  void selectWord({ required SelectionChangedCause cause }) {
+  void selectWord({required SelectionChangedCause cause}) {
     selectWordCalled = true;
   }
 }

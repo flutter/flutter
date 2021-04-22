@@ -53,6 +53,7 @@ class TestAction extends CallbackAction<TestIntent> {
     super.removeActionListener(listener);
     listeners.remove(listener);
   }
+
   List<ActionListenerCallback> listeners = <ActionListenerCallback>[];
 
   void _testInvoke(TestIntent intent) => invoke(intent);
@@ -149,32 +150,35 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
-    testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke', (WidgetTester tester) async {
-      final GlobalKey containerKey = GlobalKey();
-      bool invoked = false;
+    testWidgets(
+      'Actions widget can invoke actions with default dispatcher and maybeInvoke',
+      (WidgetTester tester) async {
+        final GlobalKey containerKey = GlobalKey();
+        bool invoked = false;
 
-      await tester.pumpWidget(
-        Actions(
-          actions: <Type, Action<Intent>>{
-            TestIntent: TestAction(
-              onInvoke: (Intent intent) {
-                invoked = true;
-                return invoked;
-              },
-            ),
-          },
-          child: Container(key: containerKey),
-        ),
-      );
+        await tester.pumpWidget(
+          Actions(
+            actions: <Type, Action<Intent>>{
+              TestIntent: TestAction(
+                onInvoke: (Intent intent) {
+                  invoked = true;
+                  return invoked;
+                },
+              ),
+            },
+            child: Container(key: containerKey),
+          ),
+        );
 
-      await tester.pump();
-      final Object? result = Actions.maybeInvoke(
-        containerKey.currentContext!,
-        const TestIntent(),
-      );
-      expect(result, isTrue);
-      expect(invoked, isTrue);
-    });
+        await tester.pump();
+        final Object? result = Actions.maybeInvoke(
+          containerKey.currentContext!,
+          const TestIntent(),
+        );
+        expect(result, isTrue);
+        expect(invoked, isTrue);
+      },
+    );
     testWidgets('maybeInvoke returns null when no action is found', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -293,41 +297,44 @@ void main() {
       expect(invokedAction, equals(testAction));
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
-    testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
-      final GlobalKey containerKey = GlobalKey();
-      bool invoked = false;
-      const TestIntent intent = TestIntent();
-      final Action<Intent> testAction = TestAction(
-        onInvoke: (Intent intent) {
-          invoked = true;
-          return invoked;
-        },
-      );
-
-      await tester.pumpWidget(
-        Actions(
-          dispatcher: TestDispatcher1(postInvoke: collect),
-          actions: <Type, Action<Intent>>{
-            TestIntent: testAction,
+    testWidgets(
+      "Actions can invoke actions in ancestor dispatcher if a lower one isn't specified",
+      (WidgetTester tester) async {
+        final GlobalKey containerKey = GlobalKey();
+        bool invoked = false;
+        const TestIntent intent = TestIntent();
+        final Action<Intent> testAction = TestAction(
+          onInvoke: (Intent intent) {
+            invoked = true;
+            return invoked;
           },
-          child: Actions(
-            actions: const <Type, Action<Intent>>{},
-            child: Container(key: containerKey),
-          ),
-        ),
-      );
+        );
 
-      await tester.pump();
-      final Object? result = Actions.invoke<TestIntent>(
-        containerKey.currentContext!,
-        intent,
-      );
-      expect(result, isTrue);
-      expect(invoked, isTrue);
-      expect(invokedIntent, equals(intent));
-      expect(invokedAction, equals(testAction));
-      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
-    });
+        await tester.pumpWidget(
+          Actions(
+            dispatcher: TestDispatcher1(postInvoke: collect),
+            actions: <Type, Action<Intent>>{
+              TestIntent: testAction,
+            },
+            child: Actions(
+              actions: const <Type, Action<Intent>>{},
+              child: Container(key: containerKey),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        final Object? result = Actions.invoke<TestIntent>(
+          containerKey.currentContext!,
+          intent,
+        );
+        expect(result, isTrue);
+        expect(invoked, isTrue);
+        expect(invokedIntent, equals(intent));
+        expect(invokedAction, equals(testAction));
+        expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
+      },
+    );
     testWidgets('Actions widget can be found with of', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
@@ -390,76 +397,79 @@ void main() {
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext!), throwsAssertionError);
       expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
-      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final GlobalKey containerKey = GlobalKey();
-      bool invoked = false;
-      const Intent intent = TestIntent();
-      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-      final Action<Intent> testAction = TestAction(
-        onInvoke: (Intent intent) {
-          invoked = true;
-          return invoked;
-        },
-      );
-      bool hovering = false;
-      bool focusing = false;
+    testWidgets(
+      'FocusableActionDetector keeps track of focus and hover even when disabled.',
+      (WidgetTester tester) async {
+        FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+        final GlobalKey containerKey = GlobalKey();
+        bool invoked = false;
+        const Intent intent = TestIntent();
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+        final Action<Intent> testAction = TestAction(
+          onInvoke: (Intent intent) {
+            invoked = true;
+            return invoked;
+          },
+        );
+        bool hovering = false;
+        bool focusing = false;
 
-      Future<void> buildTest(bool enabled) async {
-        await tester.pumpWidget(
-          Center(
-            child: Actions(
-              dispatcher: TestDispatcher1(postInvoke: collect),
-              actions: const <Type, Action<Intent>>{},
-              child: FocusableActionDetector(
-                enabled: enabled,
-                focusNode: focusNode,
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
-                },
-                actions: <Type, Action<Intent>>{
-                  TestIntent: testAction,
-                },
-                onShowHoverHighlight: (bool value) => hovering = value,
-                onShowFocusHighlight: (bool value) => focusing = value,
-                child: SizedBox(width: 100, height: 100, key: containerKey),
+        Future<void> buildTest(bool enabled) async {
+          await tester.pumpWidget(
+            Center(
+              child: Actions(
+                dispatcher: TestDispatcher1(postInvoke: collect),
+                actions: const <Type, Action<Intent>>{},
+                child: FocusableActionDetector(
+                  enabled: enabled,
+                  focusNode: focusNode,
+                  shortcuts: <LogicalKeySet, Intent>{
+                    LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                  },
+                  actions: <Type, Action<Intent>>{
+                    TestIntent: testAction,
+                  },
+                  onShowHoverHighlight: (bool value) => hovering = value,
+                  onShowFocusHighlight: (bool value) => focusing = value,
+                  child: SizedBox(width: 100, height: 100, key: containerKey),
+                ),
               ),
             ),
-          ),
-        );
-        return tester.pump();
-      }
+          );
+          return tester.pump();
+        }
 
-      await buildTest(true);
-      focusNode.requestFocus();
-      await tester.pump();
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
-      await tester.pump();
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      expect(hovering, isTrue);
-      expect(focusing, isTrue);
-      expect(invoked, isTrue);
+        await buildTest(true);
+        focusNode.requestFocus();
+        await tester.pump();
+        final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+        await tester.pump();
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        expect(hovering, isTrue);
+        expect(focusing, isTrue);
+        expect(invoked, isTrue);
 
-      invoked = false;
-      await buildTest(false);
-      expect(hovering, isFalse);
-      expect(focusing, isFalse);
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pump();
-      expect(invoked, isFalse);
-      await buildTest(true);
-      expect(focusing, isFalse);
-      expect(hovering, isTrue);
-      await buildTest(false);
-      expect(focusing, isFalse);
-      expect(hovering, isFalse);
-      await gesture.moveTo(Offset.zero);
-      await buildTest(true);
-      expect(hovering, isFalse);
-      expect(focusing, isFalse);
-    });
+        invoked = false;
+        await buildTest(false);
+        expect(hovering, isFalse);
+        expect(focusing, isFalse);
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump();
+        expect(invoked, isFalse);
+        await buildTest(true);
+        expect(focusing, isFalse);
+        expect(hovering, isTrue);
+        await buildTest(false);
+        expect(focusing, isFalse);
+        expect(hovering, isFalse);
+        await gesture.moveTo(Offset.zero);
+        await buildTest(true);
+        expect(hovering, isFalse);
+        expect(focusing, isFalse);
+      },
+    );
     testWidgets('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
       await tester.pumpWidget(
         MouseRegion(
@@ -771,12 +781,12 @@ void main() {
     late Action<Intent> testAction;
 
     Future<void> pumpTest(
-        WidgetTester tester, {
-          bool enabled = true,
-          bool directional = false,
-          bool supplyCallbacks = true,
-          required Key key,
-        }) async {
+      WidgetTester tester, {
+      bool enabled = true,
+      bool directional = false,
+      bool supplyCallbacks = true,
+      required Key key,
+    }) async {
       await tester.pumpWidget(
         MediaQuery(
           data: MediaQueryData(
@@ -820,70 +830,76 @@ void main() {
       );
     });
 
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
-      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final GlobalKey containerKey = GlobalKey();
+    testWidgets(
+      'FocusableActionDetector keeps track of focus and hover even when disabled.',
+      (WidgetTester tester) async {
+        FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+        final GlobalKey containerKey = GlobalKey();
 
-      await pumpTest(tester, enabled: true, key: containerKey);
-      focusNode.requestFocus();
-      await tester.pump();
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
-      await tester.pump();
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      expect(hovering, isTrue);
-      expect(focusing, isTrue);
-      expect(invoked, isTrue);
+        await pumpTest(tester, enabled: true, key: containerKey);
+        focusNode.requestFocus();
+        await tester.pump();
+        final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+        await tester.pump();
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        expect(hovering, isTrue);
+        expect(focusing, isTrue);
+        expect(invoked, isTrue);
 
-      invoked = false;
-      await pumpTest(tester, enabled: false, key: containerKey);
-      expect(hovering, isFalse);
-      expect(focusing, isFalse);
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pump();
-      expect(invoked, isFalse);
-      await pumpTest(tester, enabled: true, key: containerKey);
-      expect(focusing, isFalse);
-      expect(hovering, isTrue);
-      await pumpTest(tester, enabled: false, key: containerKey);
-      expect(focusing, isFalse);
-      expect(hovering, isFalse);
-      await gesture.moveTo(Offset.zero);
-      await pumpTest(tester, enabled: true, key: containerKey);
-      expect(hovering, isFalse);
-      expect(focusing, isFalse);
-    });
-    testWidgets('FocusableActionDetector shows focus highlight appropriately when focused and disabled', (WidgetTester tester) async {
-      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final GlobalKey containerKey = GlobalKey();
+        invoked = false;
+        await pumpTest(tester, enabled: false, key: containerKey);
+        expect(hovering, isFalse);
+        expect(focusing, isFalse);
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump();
+        expect(invoked, isFalse);
+        await pumpTest(tester, enabled: true, key: containerKey);
+        expect(focusing, isFalse);
+        expect(hovering, isTrue);
+        await pumpTest(tester, enabled: false, key: containerKey);
+        expect(focusing, isFalse);
+        expect(hovering, isFalse);
+        await gesture.moveTo(Offset.zero);
+        await pumpTest(tester, enabled: true, key: containerKey);
+        expect(hovering, isFalse);
+        expect(focusing, isFalse);
+      },
+    );
+    testWidgets(
+      'FocusableActionDetector shows focus highlight appropriately when focused and disabled',
+      (WidgetTester tester) async {
+        FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+        final GlobalKey containerKey = GlobalKey();
 
-      await pumpTest(tester, enabled: true, key: containerKey);
-      await tester.pump();
-      expect(focusing, isFalse);
+        await pumpTest(tester, enabled: true, key: containerKey);
+        await tester.pump();
+        expect(focusing, isFalse);
 
-      await pumpTest(tester, enabled: true, key: containerKey);
-      focusNode.requestFocus();
-      await tester.pump();
-      expect(focusing, isTrue);
+        await pumpTest(tester, enabled: true, key: containerKey);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusing, isTrue);
 
-      focusing = false;
-      await pumpTest(tester, enabled: false, key: containerKey);
-      focusNode.requestFocus();
-      await tester.pump();
-      expect(focusing, isFalse);
+        focusing = false;
+        await pumpTest(tester, enabled: false, key: containerKey);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusing, isFalse);
 
-      await pumpTest(tester, enabled: false, key: containerKey);
-      focusNode.requestFocus();
-      await tester.pump();
-      expect(focusing, isFalse);
+        await pumpTest(tester, enabled: false, key: containerKey);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusing, isFalse);
 
-      // In directional navigation, focus should show, even if disabled.
-      await pumpTest(tester, enabled: false, key: containerKey, directional: true);
-      focusNode.requestFocus();
-      await tester.pump();
-      expect(focusing, isTrue);
-    });
+        // In directional navigation, focus should show, even if disabled.
+        await pumpTest(tester, enabled: false, key: containerKey, directional: true);
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusing, isTrue);
+      },
+    );
     testWidgets('FocusableActionDetector can be used without callbacks', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
@@ -973,11 +989,11 @@ void main() {
       const TestIntent().debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        })
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description, isEmpty);
     });
@@ -991,11 +1007,11 @@ void main() {
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        })
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(2));
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));

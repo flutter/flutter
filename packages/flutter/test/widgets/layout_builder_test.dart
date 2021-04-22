@@ -294,36 +294,39 @@ void main() {
     expect(built, 2);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
-    int built = 0;
-    final Widget target = Directionality(
-      textDirection: TextDirection.ltr,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          SliverLayoutBuilder(
-            builder: (BuildContext context, SliverConstraints constraint) {
-              built++;
-              return SliverToBoxAdapter(child: Container());
-            },
-          ),
-        ],
-      ),
-    );
+  testWidgets(
+    'SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited',
+    (WidgetTester tester) async {
+      int built = 0;
+      final Widget target = Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverLayoutBuilder(
+              builder: (BuildContext context, SliverConstraints constraint) {
+                built++;
+                return SliverToBoxAdapter(child: Container());
+              },
+            ),
+          ],
+        ),
+      );
 
-    expect(built, 0);
+      expect(built, 0);
 
-    await tester.pumpWidget(MediaQuery(
+      await tester.pumpWidget(MediaQuery(
         data: const MediaQueryData(size: Size(400.0, 300.0)),
         child: target,
-    ));
-    expect(built, 1);
+      ));
+      expect(built, 1);
 
-    await tester.pumpWidget(MediaQuery(
+      await tester.pumpWidget(MediaQuery(
         data: const MediaQueryData(size: Size(300.0, 400.0)),
         child: target,
-    ));
-    expect(built, 1);
-  });
+      ));
+      expect(built, 1);
+    },
+  );
 
   testWidgets(
     'SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
@@ -347,14 +350,14 @@ void main() {
       expect(built, 0);
 
       await tester.pumpWidget(MediaQuery(
-          data: const MediaQueryData(size: Size(400.0, 300.0)),
-          child: target,
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
       ));
       expect(built, 1);
 
       await tester.pumpWidget(MediaQuery(
-          data: const MediaQueryData(size: Size(300.0, 400.0)),
-          child: target,
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
       ));
       expect(built, 2);
     },
@@ -463,7 +466,7 @@ void main() {
 
   testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    List<int> hitCounts = <int> [0, 0, 0];
+    List<int> hitCounts = <int>[0, 0, 0];
 
     await tester.pumpWidget(
       Directionality(
@@ -502,57 +505,57 @@ void main() {
     // Tap item 1.
     await tester.tapAt(const Offset(300, 50.0 + 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 0, 0]);
+    expect(hitCounts, const <int>[1, 0, 0]);
 
     // Tap item 2.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 0]);
+    expect(hitCounts, const <int>[1, 1, 0]);
 
     // Tap item 3. Shift the touch point up to ensure the touch lands within the viewport.
     await tester.tapAt(const Offset(300, 50.0 + 200 + 200 + 10));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     // Scrolling doesn't break it.
-    hitCounts = <int> [0, 0, 0];
+    hitCounts = <int>[0, 0, 0];
     scrollController.jumpTo(100);
     await tester.pump();
 
     // Tap item 1.
     await tester.tapAt(const Offset(300, 50.0 + 100 - 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 0, 0]);
+    expect(hitCounts, const <int>[1, 0, 0]);
 
     // Tap item 2.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200 - 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 0]);
+    expect(hitCounts, const <int>[1, 1, 0]);
 
     // Tap item 3.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200 + 200 - 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     // Tapping outside of the viewport shouldn't do anything.
     await tester.tapAt(const Offset(300, 1));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     await tester.tapAt(const Offset(300, 599));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     await tester.tapAt(const Offset(1, 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     await tester.tapAt(const Offset(799, 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     // Tap the no-content area in the viewport shouldn't do anything
-    hitCounts = <int> [0, 0, 0];
+    hitCounts = <int>[0, 0, 0];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -586,116 +589,122 @@ void main() {
 
     await tester.tapAt(const Offset(300, 301));
     await tester.pump();
-    expect(hitCounts, const <int> [0, 0, 0]);
+    expect(hitCounts, const <int>[0, 0, 0]);
   });
 
-  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
-    int builderInvocationCount = 0;
+  testWidgets(
+    'LayoutBuilder does not call builder when layout happens but layout constraints do not change',
+    (WidgetTester tester) async {
+      int builderInvocationCount = 0;
 
-    Future<void> pumpTestWidget(Size size) async {
-      await tester.pumpWidget(
-        // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
-        Center(
-          child: SizedBox.fromSize(
-            size: size,
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-              builderInvocationCount += 1;
-              return _LayoutSpy();
-            }),
+      Future<void> pumpTestWidget(Size size) async {
+        await tester.pumpWidget(
+          // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
+          Center(
+            child: SizedBox.fromSize(
+              size: size,
+              child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                builderInvocationCount += 1;
+                return _LayoutSpy();
+              }),
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    await pumpTestWidget(const Size(10, 10));
+      await pumpTestWidget(const Size(10, 10));
 
-    final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
+      final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
 
-    // The child is laid out once the first time.
-    expect(spy.performLayoutCount, 1);
-    expect(spy.performResizeCount, 1);
+      // The child is laid out once the first time.
+      expect(spy.performLayoutCount, 1);
+      expect(spy.performResizeCount, 1);
 
-    // The initial `pumpWidget` will trigger `performRebuild`, asking for
-    // builder invocation.
-    expect(builderInvocationCount, 1);
+      // The initial `pumpWidget` will trigger `performRebuild`, asking for
+      // builder invocation.
+      expect(builderInvocationCount, 1);
 
-    // Invalidate the layout without changing the constraints.
-    tester.renderObject(find.byType(LayoutBuilder)).markNeedsLayout();
+      // Invalidate the layout without changing the constraints.
+      tester.renderObject(find.byType(LayoutBuilder)).markNeedsLayout();
 
-    // The second pump will not go through the `performRebuild` or `update`, and
-    // only judge the need for builder invocation based on constraints, which
-    // didn't change, so we don't expect any counters to go up.
-    await tester.pump();
-    expect(builderInvocationCount, 1);
-    expect(spy.performLayoutCount, 1);
-    expect(spy.performResizeCount, 1);
+      // The second pump will not go through the `performRebuild` or `update`, and
+      // only judge the need for builder invocation based on constraints, which
+      // didn't change, so we don't expect any counters to go up.
+      await tester.pump();
+      expect(builderInvocationCount, 1);
+      expect(spy.performLayoutCount, 1);
+      expect(spy.performResizeCount, 1);
 
-    // Cause the `update` to be called (but not `performRebuild`), triggering
-    // builder invocation.
-    await pumpTestWidget(const Size(10, 10));
-    expect(builderInvocationCount, 2);
+      // Cause the `update` to be called (but not `performRebuild`), triggering
+      // builder invocation.
+      await pumpTestWidget(const Size(10, 10));
+      expect(builderInvocationCount, 2);
 
-    // The spy does not invalidate its layout on widget update, so no
-    // layout-related methods should be called.
-    expect(spy.performLayoutCount, 1);
-    expect(spy.performResizeCount, 1);
+      // The spy does not invalidate its layout on widget update, so no
+      // layout-related methods should be called.
+      expect(spy.performLayoutCount, 1);
+      expect(spy.performResizeCount, 1);
 
-    // Have the child request layout and verify that the child gets laid out
-    // despite layout constraints remaining constant.
-    spy.markNeedsLayout();
-    await tester.pump();
+      // Have the child request layout and verify that the child gets laid out
+      // despite layout constraints remaining constant.
+      spy.markNeedsLayout();
+      await tester.pump();
 
-    // Builder is not invoked. This was a layout-only pump with the same parent
-    // constraints.
-    expect(builderInvocationCount, 2);
+      // Builder is not invoked. This was a layout-only pump with the same parent
+      // constraints.
+      expect(builderInvocationCount, 2);
 
-    // Expect performLayout to be called.
-    expect(spy.performLayoutCount, 2);
+      // Expect performLayout to be called.
+      expect(spy.performLayoutCount, 2);
 
-    // performResize should not be called because the spy sets sizedByParent,
-    // and the constraints did not change.
-    expect(spy.performResizeCount, 1);
+      // performResize should not be called because the spy sets sizedByParent,
+      // and the constraints did not change.
+      expect(spy.performResizeCount, 1);
 
-    // Change the parent size, triggering constraint change.
-    await pumpTestWidget(const Size(20, 20));
+      // Change the parent size, triggering constraint change.
+      await pumpTestWidget(const Size(20, 20));
 
-    // We should see everything invoked once.
-    expect(builderInvocationCount, 3);
-    expect(spy.performLayoutCount, 3);
-    expect(spy.performResizeCount, 2);
-  });
+      // We should see everything invoked once.
+      expect(builderInvocationCount, 3);
+      expect(spy.performLayoutCount, 3);
+      expect(spy.performResizeCount, 2);
+    },
+  );
 
-  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
-    Size? childSize;
-    int buildCount = 0;
+  testWidgets(
+    'LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout',
+    (WidgetTester tester) async {
+      Size? childSize;
+      int buildCount = 0;
 
-    Future<void> pumpTestWidget(Size size) async {
-      await tester.pumpWidget(
-        // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
-        Center(
-          child: SizedBox.fromSize(
-            size: size,
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-              buildCount++;
-              if (buildCount > 1) {
-                final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
-                childSize = spy.size;
-              }
-              return ColoredBox(
-                color: const Color(0xffffffff),
-                child: _LayoutSpy(),
-              );
-            }),
+      Future<void> pumpTestWidget(Size size) async {
+        await tester.pumpWidget(
+          // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
+          Center(
+            child: SizedBox.fromSize(
+              size: size,
+              child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                buildCount++;
+                if (buildCount > 1) {
+                  final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
+                  childSize = spy.size;
+                }
+                return ColoredBox(
+                  color: const Color(0xffffffff),
+                  child: _LayoutSpy(),
+                );
+              }),
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    await pumpTestWidget(const Size(10.0, 10.0));
-    expect(childSize, isNull);
-    await pumpTestWidget(const Size(10.0, 10.0));
-    expect(childSize, const Size(10.0, 10.0));
-  });
+      await pumpTestWidget(const Size(10.0, 10.0));
+      expect(childSize, isNull);
+      await pumpTestWidget(const Size(10.0, 10.0));
+      expect(childSize, const Size(10.0, 10.0));
+    },
+  );
 }
 
 class _LayoutSpy extends LeafRenderObjectWidget {

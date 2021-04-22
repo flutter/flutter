@@ -12,165 +12,174 @@ void main() {
     expect(const NavigationRailThemeData().hashCode, const NavigationRailThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NavigationRail(
-            selectedIndex: 0,
-            destinations: _destinations(),
-          ),
-        ),
-      ),
-    );
-
-    expect(_railMaterial(tester).color, ThemeData().colorScheme.surface);
-    expect(_railMaterial(tester).elevation, 0);
-    expect(_selectedIconTheme(tester).size, 24.0);
-    expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.primary);
-    expect(_selectedIconTheme(tester).opacity, 1.0);
-    expect(_unselectedIconTheme(tester).size, 24.0);
-    expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
-    expect(_unselectedIconTheme(tester).opacity, 0.64);
-    expect(_selectedLabelStyle(tester).fontSize, 14.0);
-    expect(_unselectedLabelStyle(tester).fontSize, 14.0);
-    expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
-    expect(_labelType(tester), NavigationRailLabelType.none);
-  });
-
-  testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
-    const Color backgroundColor = Color(0x00000001);
-    const double elevation = 7.0;
-    const double selectedIconSize = 25.0;
-    const double unselectedIconSize = 23.0;
-    const Color selectedIconColor = Color(0x00000002);
-    const Color unselectedIconColor = Color(0x00000003);
-    const double selectedIconOpacity = 0.99;
-    const double unselectedIconOpacity = 0.98;
-    const double selectedLabelFontSize = 13.0;
-    const double unselectedLabelFontSize = 11.0;
-    const double groupAlignment = 0.0;
-    const NavigationRailLabelType labelType = NavigationRailLabelType.all;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NavigationRailTheme(
-            data: const NavigationRailThemeData(
-              backgroundColor: backgroundColor,
-              elevation: elevation,
-              selectedIconTheme: IconThemeData(
-                size: selectedIconSize,
-                color: selectedIconColor,
-                opacity: selectedIconOpacity,
-              ),
-              unselectedIconTheme: IconThemeData(
-                size: unselectedIconSize,
-                color: unselectedIconColor,
-                opacity: unselectedIconOpacity,
-              ),
-              selectedLabelTextStyle: TextStyle(fontSize: selectedLabelFontSize),
-              unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
-              groupAlignment: groupAlignment,
-              labelType: labelType,
-            ),
-            child: NavigationRail(
+  testWidgets(
+    'Default values are used when no NavigationRail or NavigationRailThemeData properties are specified',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NavigationRail(
               selectedIndex: 0,
               destinations: _destinations(),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(_railMaterial(tester).color, backgroundColor);
-    expect(_railMaterial(tester).elevation, elevation);
-    expect(_selectedIconTheme(tester).size, selectedIconSize);
-    expect(_selectedIconTheme(tester).color, selectedIconColor);
-    expect(_selectedIconTheme(tester).opacity, selectedIconOpacity);
-    expect(_unselectedIconTheme(tester).size, unselectedIconSize);
-    expect(_unselectedIconTheme(tester).color, unselectedIconColor);
-    expect(_unselectedIconTheme(tester).opacity, unselectedIconOpacity);
-    expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
-    expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
-    expect(_destinationsAlign(tester).alignment, Alignment.center);
-    expect(_labelType(tester), labelType);
-  });
+      expect(_railMaterial(tester).color, ThemeData().colorScheme.surface);
+      expect(_railMaterial(tester).elevation, 0);
+      expect(_selectedIconTheme(tester).size, 24.0);
+      expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.primary);
+      expect(_selectedIconTheme(tester).opacity, 1.0);
+      expect(_unselectedIconTheme(tester).size, 24.0);
+      expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
+      expect(_unselectedIconTheme(tester).opacity, 0.64);
+      expect(_selectedLabelStyle(tester).fontSize, 14.0);
+      expect(_unselectedLabelStyle(tester).fontSize, 14.0);
+      expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
+      expect(_labelType(tester), NavigationRailLabelType.none);
+    },
+  );
 
-  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
-    const Color backgroundColor = Color(0x00000001);
-    const double elevation = 7.0;
-    const double selectedIconSize = 25.0;
-    const double unselectedIconSize = 23.0;
-    const Color selectedIconColor = Color(0x00000002);
-    const Color unselectedIconColor = Color(0x00000003);
-    const double selectedIconOpacity = 0.99;
-    const double unselectedIconOpacity = 0.98;
-    const double selectedLabelFontSize = 13.0;
-    const double unselectedLabelFontSize = 11.0;
-    const double groupAlignment = 0.0;
-    const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+  testWidgets(
+    'NavigationRailThemeData values are used when no NavigationRail properties are specified',
+    (WidgetTester tester) async {
+      const Color backgroundColor = Color(0x00000001);
+      const double elevation = 7.0;
+      const double selectedIconSize = 25.0;
+      const double unselectedIconSize = 23.0;
+      const Color selectedIconColor = Color(0x00000002);
+      const Color unselectedIconColor = Color(0x00000003);
+      const double selectedIconOpacity = 0.99;
+      const double unselectedIconOpacity = 0.98;
+      const double selectedLabelFontSize = 13.0;
+      const double unselectedLabelFontSize = 11.0;
+      const double groupAlignment = 0.0;
+      const NavigationRailLabelType labelType = NavigationRailLabelType.all;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NavigationRailTheme(
-            data: const NavigationRailThemeData(
-              backgroundColor: Color(0x00000099),
-              elevation: 5,
-              selectedIconTheme: IconThemeData(
-                size: 31.0,
-                color: Color(0x00000098),
-                opacity: 0.81,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NavigationRailTheme(
+              data: const NavigationRailThemeData(
+                backgroundColor: backgroundColor,
+                elevation: elevation,
+                selectedIconTheme: IconThemeData(
+                  size: selectedIconSize,
+                  color: selectedIconColor,
+                  opacity: selectedIconOpacity,
+                ),
+                unselectedIconTheme: IconThemeData(
+                  size: unselectedIconSize,
+                  color: unselectedIconColor,
+                  opacity: unselectedIconOpacity,
+                ),
+                selectedLabelTextStyle: TextStyle(fontSize: selectedLabelFontSize),
+                unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
+                groupAlignment: groupAlignment,
+                labelType: labelType,
               ),
-              unselectedIconTheme: IconThemeData(
-                size: 37.0,
-                color: Color(0x00000097),
-                opacity: 0.82,
+              child: NavigationRail(
+                selectedIndex: 0,
+                destinations: _destinations(),
               ),
-              selectedLabelTextStyle: TextStyle(fontSize: 9.0),
-              unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
-              groupAlignment: 1.0,
-              labelType: NavigationRailLabelType.selected,
-            ),
-            child: NavigationRail(
-              selectedIndex: 0,
-              destinations: _destinations(),
-              backgroundColor: backgroundColor,
-              elevation: elevation,
-              selectedIconTheme: const IconThemeData(
-                size: selectedIconSize,
-                color: selectedIconColor,
-                opacity: selectedIconOpacity,
-              ),
-              unselectedIconTheme: const IconThemeData(
-                size: unselectedIconSize,
-                color: unselectedIconColor,
-                opacity: unselectedIconOpacity,
-              ),
-              selectedLabelTextStyle: const TextStyle(fontSize: selectedLabelFontSize),
-              unselectedLabelTextStyle: const TextStyle(fontSize: unselectedLabelFontSize),
-              groupAlignment: groupAlignment,
-              labelType: labelType,
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(_railMaterial(tester).color, backgroundColor);
-    expect(_railMaterial(tester).elevation, elevation);
-    expect(_selectedIconTheme(tester).size, selectedIconSize);
-    expect(_selectedIconTheme(tester).color, selectedIconColor);
-    expect(_selectedIconTheme(tester).opacity, selectedIconOpacity);
-    expect(_unselectedIconTheme(tester).size, unselectedIconSize);
-    expect(_unselectedIconTheme(tester).color, unselectedIconColor);
-    expect(_unselectedIconTheme(tester).opacity, unselectedIconOpacity);
-    expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
-    expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
-    expect(_destinationsAlign(tester).alignment, Alignment.center);
-    expect(_labelType(tester), labelType);
-  });
+      expect(_railMaterial(tester).color, backgroundColor);
+      expect(_railMaterial(tester).elevation, elevation);
+      expect(_selectedIconTheme(tester).size, selectedIconSize);
+      expect(_selectedIconTheme(tester).color, selectedIconColor);
+      expect(_selectedIconTheme(tester).opacity, selectedIconOpacity);
+      expect(_unselectedIconTheme(tester).size, unselectedIconSize);
+      expect(_unselectedIconTheme(tester).color, unselectedIconColor);
+      expect(_unselectedIconTheme(tester).opacity, unselectedIconOpacity);
+      expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
+      expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
+      expect(_destinationsAlign(tester).alignment, Alignment.center);
+      expect(_labelType(tester), labelType);
+    },
+  );
+
+  testWidgets(
+    'NavigationRail values take priority over NavigationRailThemeData values when both properties are specified',
+    (WidgetTester tester) async {
+      const Color backgroundColor = Color(0x00000001);
+      const double elevation = 7.0;
+      const double selectedIconSize = 25.0;
+      const double unselectedIconSize = 23.0;
+      const Color selectedIconColor = Color(0x00000002);
+      const Color unselectedIconColor = Color(0x00000003);
+      const double selectedIconOpacity = 0.99;
+      const double unselectedIconOpacity = 0.98;
+      const double selectedLabelFontSize = 13.0;
+      const double unselectedLabelFontSize = 11.0;
+      const double groupAlignment = 0.0;
+      const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NavigationRailTheme(
+              data: const NavigationRailThemeData(
+                backgroundColor: Color(0x00000099),
+                elevation: 5,
+                selectedIconTheme: IconThemeData(
+                  size: 31.0,
+                  color: Color(0x00000098),
+                  opacity: 0.81,
+                ),
+                unselectedIconTheme: IconThemeData(
+                  size: 37.0,
+                  color: Color(0x00000097),
+                  opacity: 0.82,
+                ),
+                selectedLabelTextStyle: TextStyle(fontSize: 9.0),
+                unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
+                groupAlignment: 1.0,
+                labelType: NavigationRailLabelType.selected,
+              ),
+              child: NavigationRail(
+                selectedIndex: 0,
+                destinations: _destinations(),
+                backgroundColor: backgroundColor,
+                elevation: elevation,
+                selectedIconTheme: const IconThemeData(
+                  size: selectedIconSize,
+                  color: selectedIconColor,
+                  opacity: selectedIconOpacity,
+                ),
+                unselectedIconTheme: const IconThemeData(
+                  size: unselectedIconSize,
+                  color: unselectedIconColor,
+                  opacity: unselectedIconOpacity,
+                ),
+                selectedLabelTextStyle: const TextStyle(fontSize: selectedLabelFontSize),
+                unselectedLabelTextStyle: const TextStyle(fontSize: unselectedLabelFontSize),
+                groupAlignment: groupAlignment,
+                labelType: labelType,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(_railMaterial(tester).color, backgroundColor);
+      expect(_railMaterial(tester).elevation, elevation);
+      expect(_selectedIconTheme(tester).size, selectedIconSize);
+      expect(_selectedIconTheme(tester).color, selectedIconColor);
+      expect(_selectedIconTheme(tester).opacity, selectedIconOpacity);
+      expect(_unselectedIconTheme(tester).size, unselectedIconSize);
+      expect(_unselectedIconTheme(tester).color, unselectedIconColor);
+      expect(_unselectedIconTheme(tester).opacity, unselectedIconOpacity);
+      expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
+      expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
+      expect(_destinationsAlign(tester).alignment, Alignment.center);
+      expect(_labelType(tester), labelType);
+    },
+  );
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -215,7 +224,6 @@ void main() {
 
     expect(description[6], 'groupAlignment: 1.0');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
-
   });
 }
 
@@ -254,30 +262,38 @@ IconThemeData _unselectedIconTheme(WidgetTester tester) {
 
 IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
   // The first IconTheme is the one added by the navigation rail.
-  return tester.firstWidget<IconTheme>(
-    find.ancestor(
-      of: find.byIcon(icon),
-      matching: find.byType(IconTheme),
-    ),
-  ).data;
+  return tester
+      .firstWidget<IconTheme>(
+        find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byType(IconTheme),
+        ),
+      )
+      .data;
 }
 
 TextStyle _selectedLabelStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(
-      of: find.text('Abc'),
-      matching: find.byType(RichText),
-    ),
-  ).text.style!;
+  return tester
+      .widget<RichText>(
+        find.descendant(
+          of: find.text('Abc'),
+          matching: find.byType(RichText),
+        ),
+      )
+      .text
+      .style!;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(
-      of: find.text('Def'),
-      matching: find.byType(RichText),
-    ),
-  ).text.style!;
+  return tester
+      .widget<RichText>(
+        find.descendant(
+          of: find.text('Def'),
+          matching: find.byType(RichText),
+        ),
+      )
+      .text
+      .style!;
 }
 
 Align _destinationsAlign(WidgetTester tester) {

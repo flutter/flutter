@@ -6,8 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding =
-    TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   const double _kOpenScale = 1.1;
 
   Widget _getChild() {
@@ -67,25 +66,28 @@ void main() {
   }
 
   group('CupertinoContextMenu before and during opening', () {
-    testWidgets('An unopened CupertinoContextMenu renders child in the same place as without', (WidgetTester tester) async {
-      // Measure the child in the scene with no CupertinoContextMenu.
-      final Widget child = _getChild();
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: CupertinoPageScaffold(
-            child: Center(
-              child: child,
+    testWidgets(
+      'An unopened CupertinoContextMenu renders child in the same place as without',
+      (WidgetTester tester) async {
+        // Measure the child in the scene with no CupertinoContextMenu.
+        final Widget child = _getChild();
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: CupertinoPageScaffold(
+              child: Center(
+                child: child,
+              ),
             ),
           ),
-        ),
-      );
-      final Rect childRect = tester.getRect(find.byWidget(child));
+        );
+        final Rect childRect = tester.getRect(find.byWidget(child));
 
-      // When wrapped in a CupertinoContextMenu, the child is rendered in the same Rect.
-      await tester.pumpWidget(_getContextMenu(child: child));
-      expect(find.byWidget(child), findsOneWidget);
-      expect(tester.getRect(find.byWidget(child)), childRect);
-    });
+        // When wrapped in a CupertinoContextMenu, the child is rendered in the same Rect.
+        await tester.pumpWidget(_getContextMenu(child: child));
+        expect(find.byWidget(child), findsOneWidget);
+        expect(tester.getRect(find.byWidget(child)), childRect);
+      },
+    );
 
     testWidgets('Can open CupertinoContextMenu by tap and hold', (WidgetTester tester) async {
       final Widget child = _getChild();

@@ -22,32 +22,35 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
-  testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    int buildCount = 0;
+  testWidgets(
+    'Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()',
+    (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      int buildCount = 0;
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        key: scaffoldKey,
-        body: const Center(child: Text('body')),
-      ),
-    ));
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
-      return Builder(
-        builder: (BuildContext context) {
-          buildCount += 1;
-          return Container(height: 200.0);
-        },
-      );
-    });
+      final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+        return Builder(
+          builder: (BuildContext context) {
+            buildCount += 1;
+            return Container(height: 200.0);
+          },
+        );
+      });
 
-    await tester.pump();
-    expect(buildCount, equals(1));
-    bottomSheet.setState!(() { });
-    await tester.pump();
-    expect(buildCount, equals(2));
-  });
+      await tester.pump();
+      expect(buildCount, equals(1));
+      bottomSheet.setState!(() {});
+      await tester.pump();
+      expect(buildCount, equals(2));
+    },
+  );
 
   testWidgets('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(

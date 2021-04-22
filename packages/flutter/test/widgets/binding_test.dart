@@ -54,7 +54,7 @@ void main() {
     final MemoryPressureObserver observer = MemoryPressureObserver();
     WidgetsBinding.instance!.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) {});
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance!.removeObserver(observer);
   });
@@ -65,19 +65,19 @@ void main() {
     WidgetsBinding.instance!.addObserver(observer);
 
     ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(observer.lifecycleState, AppLifecycleState.paused);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(observer.lifecycleState, AppLifecycleState.resumed);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(observer.lifecycleState, AppLifecycleState.inactive);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.detached')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(observer.lifecycleState, AppLifecycleState.detached);
   });
 
@@ -87,7 +87,7 @@ void main() {
 
     const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('pushRoute', testRouteName));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRoute, testRouteName);
 
     WidgetsBinding.instance!.removeObserver(observer);
@@ -105,7 +105,7 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRoute, 'testRouteName');
     WidgetsBinding.instance!.removeObserver(observer);
   });
@@ -121,12 +121,11 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance!.removeObserver(observer);
   });
-
 
   testWidgets('didPushRouteInformation callback with null state', (WidgetTester tester) async {
     final PushRouteInformationObserver observer = PushRouteInformationObserver();
@@ -139,7 +138,7 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, null);
     WidgetsBinding.instance!.removeObserver(observer);
@@ -151,31 +150,31 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.paused')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.detached')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.paused')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     tester.binding.scheduleFrame();
@@ -187,7 +186,9 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     int frameCount = 0;
-    tester.binding.addPostFrameCallback((Duration duration) { frameCount += 1; });
+    tester.binding.addPostFrameCallback((Duration duration) {
+      frameCount += 1;
+    });
     expect(tester.binding.hasScheduledFrame, isFalse);
     await tester.pump(const Duration(milliseconds: 1));
     expect(tester.binding.hasScheduledFrame, isFalse);
@@ -199,7 +200,7 @@ void main() {
 
     // Get the tester back to a resumed state for subsequent tests.
     message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
   });
@@ -207,7 +208,7 @@ void main() {
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
     late FlutterError error;
     try {
-      tester.binding.scheduleFrameCallback((Duration _) { }, rescheduling: true);
+      tester.binding.scheduleFrameCallback((Duration _) {}, rescheduling: true);
     } on FlutterError catch (e) {
       error = e;
     }
