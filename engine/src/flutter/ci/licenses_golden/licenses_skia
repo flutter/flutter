@@ -1,4 +1,4 @@
-Signature: bc8045bd37284317360bc07ff7f84380
+Signature: e462e91ca0e54b22d3806e522ea56144
 
 UNUSED LICENSES:
 
@@ -5442,6 +5442,8 @@ FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.h
