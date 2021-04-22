@@ -398,14 +398,15 @@ void main() {
 
     // Monotonically increasing in X.
     expect(
-        CatmullRomCurve.validateControlPoints(
-          const <Offset>[
-            Offset(0.2, 0.25),
-            Offset(0.01, 0.25),
-          ],
-          tension: 0.0,
-        ),
-        isFalse);
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(0.01, 0.25),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
     expect(() {
       CatmullRomCurve(
         const <Offset>[
@@ -418,14 +419,15 @@ void main() {
 
     // X within range (0.0, 1.0).
     expect(
-        CatmullRomCurve.validateControlPoints(
-          const <Offset>[
-            Offset(0.2, 0.25),
-            Offset(1.01, 0.25),
-          ],
-          tension: 0.0,
-        ),
-        isFalse);
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(1.01, 0.25),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
     expect(() {
       CatmullRomCurve(
         const <Offset>[
