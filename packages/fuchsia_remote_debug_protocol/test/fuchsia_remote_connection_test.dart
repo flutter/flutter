@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vm_service/vm_service.dart' as vms;
-import 'package:test/fake.dart';
-
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
+import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vms;
 
 import 'common.dart';
 
