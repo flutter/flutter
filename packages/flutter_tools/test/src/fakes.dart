@@ -513,9 +513,6 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   List<File> whichAll(String execName) => <File>[];
 
-  // @override
-  // File makePipe(String path) => null;
-
   @override
   void unzip(File file, Directory targetDirectory) { }
 
