@@ -1,4 +1,4 @@
-Signature: 6b4f6a03ad4544090297cb597246e437
+Signature: bc8045bd37284317360bc07ff7f84380
 
 UNUSED LICENSES:
 
@@ -5122,6 +5122,8 @@ FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
+FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.cpp
+FILE: ../../../third_party/skia/src/gpu/GrSubRunAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
@@ -5923,9 +5925,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDDLThreading.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/fuzz/FuzzTriangulation.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDDLThreading.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionOp.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkParagraph.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTriangulation.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google, LLC
 
