@@ -329,7 +329,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       try {
         final File fakePackage = _pubspecFor(tempDir);
         fakePackage.createSync();
-        fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
+        fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values, isPrintTransitiveClosure));
         // Create a synthetic flutter SDK so that transitive flutter SDK
         // constraints are not affected by this upgrade.
         Directory temporaryFlutterSdk;
@@ -1269,12 +1269,12 @@ File _pubspecFor(Directory directory) {
 
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
-String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
+String _generateFakePubspec(Iterable<PubspecDependency> dependencies, bool transitiveClosure) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  result.writeln("  sdk: '>=2.12.0 <3.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (_kManuallyPinnedDependencies.isNotEmpty) {
@@ -1285,7 +1285,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     };
     for (final String package in _kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
-      if (!allTransitive.contains(package)) {
+      if (!allTransitive.contains(package) && !transitiveClosure) {
         globals.printStatus('Skipping $package because it was not transitive');
         continue;
       }
