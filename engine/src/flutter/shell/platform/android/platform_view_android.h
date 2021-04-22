@@ -41,17 +41,11 @@ class PlatformViewAndroid final : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
 
-  // Creates a PlatformViewAndroid with no rendering surface for use with
-  // background execution.
-  PlatformViewAndroid(PlatformView::Delegate& delegate,
-                      flutter::TaskRunners task_runners,
-                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
-
-  // Creates a PlatformViewAndroid with a rendering surface.
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       flutter::TaskRunners task_runners,
                       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-                      bool use_software_rendering);
+                      bool use_software_rendering,
+                      bool create_onscreen_surface);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a new PlatformViewAndroid but using an existing
@@ -169,13 +163,6 @@ class PlatformViewAndroid final : public PlatformView {
 
   // |PlatformView|
   void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
-
-  std::shared_ptr<AndroidSurfaceFactoryImpl> MakeSurfaceFactory(
-      const std::shared_ptr<AndroidContext>& android_context,
-      const PlatformViewAndroidJNI& jni_facade);
-
-  std::unique_ptr<AndroidSurface> MakeSurface(
-      const std::shared_ptr<AndroidSurfaceFactoryImpl>& surface_factory);
 
   void InstallFirstFrameCallback();
 
