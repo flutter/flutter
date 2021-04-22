@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
 
