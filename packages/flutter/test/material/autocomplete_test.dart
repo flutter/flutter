@@ -20,21 +20,6 @@ class User {
   }
 }
 
-/// Returns a Future with the height of the default [Autocomplete] options widget
-/// after the provided text had been entered into the [Autocomplete] field.
-Future<double> _getOptionsHeight(WidgetTester tester, String enteredText) async {
-  final Finder listFinder = find.byType(ListView);
-  final Finder inputFinder = find.byType(TextFormField);
-  final TextFormField field =
-      inputFinder.evaluate().first.widget as TextFormField;
-  field.controller!.clear();
-  await tester.tap(inputFinder);
-  await tester.enterText(inputFinder, enteredText);
-  await tester.pump();
-  final Size baseSize = tester.getSize(listFinder);
-  return baseSize.height;
-}
-
 void main() {
   const List<String> kOptions = <String>[
     'aardvark',
@@ -297,7 +282,13 @@ void main() {
       ),
     )));
 
-    final double resultingHeight = await _getOptionsHeight(tester, '');
+    final Finder listFinder = find.byType(ListView);
+    final Finder inputFinder = find.byType(TextFormField);
+    await tester.tap(inputFinder);
+    await tester.enterText(inputFinder, '');
+    await tester.pump();
+    final Size baseSize = tester.getSize(listFinder);
+    final double resultingHeight = baseSize.height;
     expect(resultingHeight, equals(200));
   });
 
@@ -319,7 +310,13 @@ void main() {
     /// entering "a" returns 9 items from kOptions so basically the
     /// height of 9 options would be beyond `desiredHeight=150`,
     /// so height gets restricted to desiredHeight.
-    final double resultingHeight = await _getOptionsHeight(tester, 'a');
+    final Finder listFinder = find.byType(ListView);
+    final Finder inputFinder = find.byType(TextFormField);
+    await tester.tap(inputFinder);
+    await tester.enterText(inputFinder, 'a');
+    await tester.pump();
+    final Size baseSize = tester.getSize(listFinder);
+    final double resultingHeight = baseSize.height;
 
     /// expected desired Height =150.0
     expect(resultingHeight, equals(desiredHeight));
@@ -328,6 +325,22 @@ void main() {
   testWidgets(
       'The height of options shrinks to height of resulting items, if less than maxHeight',
       (WidgetTester tester) async {
+
+    /// Returns a Future with the height of the default [Autocomplete] options widget
+    /// after the provided text had been entered into the [Autocomplete] field.
+    Future<double> _getOptionsHeight(WidgetTester tester, String enteredText) async {
+      final Finder listFinder = find.byType(ListView);
+      final Finder inputFinder = find.byType(TextFormField);
+      final TextFormField field =
+      inputFinder.evaluate().first.widget as TextFormField;
+      field.controller!.clear();
+      await tester.tap(inputFinder);
+      await tester.enterText(inputFinder, enteredText);
+      await tester.pump();
+      final Size baseSize = tester.getSize(listFinder);
+      return baseSize.height;
+    }    
+
     const double maxOptionsHeight = 250.0;
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
