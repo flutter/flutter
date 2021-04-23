@@ -328,7 +328,7 @@ void main() {
 
     /// Returns a Future with the height of the default [Autocomplete] options widget
     /// after the provided text had been entered into the [Autocomplete] field.
-    Future<double> _getOptionsHeight(WidgetTester tester, String enteredText) async {
+    Future<double> _getDefaultOptionsHeight(WidgetTester tester, String enteredText) async {
       final Finder listFinder = find.byType(ListView);
       final Finder inputFinder = find.byType(TextFormField);
       final TextFormField field =
@@ -359,17 +359,17 @@ void main() {
 
     /// entering `a` returns 9 items(height > `maxOptionsheight`) from the kOptions
     /// so height gets restricted to `maxOptionsheight =250`
-    final double nineItemsHeight = await _getOptionsHeight(tester, 'a');
+    final double nineItemsHeight = await _getDefaultOptionsHeight(tester, 'a');
     expect(nineItemsHeight, equals(maxOptionsHeight));
 
     /// returns 2 Items (height < `maxOptionsHeight`)
     /// so options height shrinks to 2 Items combined height
-    final double twoItemsHeight = await _getOptionsHeight(tester, 'el');
+    final double twoItemsHeight = await _getDefaultOptionsHeight(tester, 'el');
     expect(twoItemsHeight, lessThan(maxOptionsHeight));
 
     /// returns 1 item (height < `maxOptionsHeight`) from `kOptions`
     /// so options height shrinks to 1 items height
-    final double oneItemsHeight = await _getOptionsHeight(tester, 'elep');
+    final double oneItemsHeight = await _getDefaultOptionsHeight(tester, 'elep');
     expect(oneItemsHeight, lessThan(twoItemsHeight));
   });
 
