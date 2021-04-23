@@ -195,6 +195,8 @@ WindowsUWPDevice setUpWindowsUwpDevice({
   return WindowsUWPDevice(
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
+    operatingSystemUtils: FakeOperatingSystemUtils(),
+    nativeApi: FakeNativeApi(),
   );
 }
 

@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
@@ -81,19 +82,22 @@ class WindowsUWPDevice extends Device {
     @required ProcessManager processManager,
     @required Logger logger,
     @required NativeApi nativeApi,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
        _processManager = processManager,
        _nativeApi = nativeApi,
-       super(
-      'winuwp',
-      platformType: PlatformType.windows,
-      ephemeral: false,
-      category: Category.desktop,
-     );
+       _operatingSystemUtils = operatingSystemUtils,
+      super(
+       'winuwp',
+        platformType: PlatformType.windows,
+        ephemeral: false,
+        category: Category.desktop,
+      );
 
   final ProcessManager _processManager;
   final Logger _logger;
   final NativeApi _nativeApi;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   int _processId;
 
@@ -128,7 +132,13 @@ class WindowsUWPDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(covariant ApplicationPackage app, {String userIdentifier}) async => true;
+  Future<bool> installApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+    await _processManager.run(<String>[
+      'powershell.exe',
+      r'build\winuwp\AppPackages\helloreloaded\helloreloaded_1.1.0.0_Debug_Test\Add-AppDevPackage.ps1'
+    ]);
+    return true;
+  }
 
   @override
   Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async => false;
@@ -163,19 +173,20 @@ class WindowsUWPDevice extends Device {
         target: mainPath,
       );
     }
+    if (!await isAppInstalled(package)) {
+      await installApp(package);
+    }
+
     final String guid = project.windowsUwp.packageGuid;
     if (guid == null) {
       _logger.printError('Could not find PACKAGE_GUID in ${project.windowsUwp.runnerCmakeFile.path}');
       return LaunchResult.failed();
     }
-    print(guid);
     final ProcessResult result = await _processManager.run(<String>[
       'powershell.exe',
-      r'C:\Users\Jonah\flutter\packages\flutter_tools\bin\getaumidfromname.ps1',
+      '${Cache.flutterRoot}\\packages\\flutter_tools\\bin\\getaumidfromname.ps1',
       '-Name', guid,
     ]);
-    print(result.stdout);
-    print(result.stderr);
     if (result.exitCode != 0) {
       _logger.printError('Failed to retrieve AUMID for project: ${result.stderr}');
       return LaunchResult.failed();
@@ -184,21 +195,45 @@ class WindowsUWPDevice extends Device {
     final String aumidstring = result.stdout.toString().trim();
     final String pfn = aumidstring.split('!').first;
 
-    /// If the terminal is attached, prompt the user to open the firewall port.
-    if (_logger.terminal.stdinHasTerminal && !debuggingOptions.buildInfo.mode.isRelease) {
-      _logger.printStatus(
-        'To continue start an admin cmd prompt and run the following command:\n'
-        '   checknetisolation loopbackexempt -is -n=$pfn\n'
-        'Press Y once this is complete.'
-      );
-      await _logger.terminal.promptForCharInput(<String>['y', 'n'], logger: _logger);
+    if (debuggingOptions.buildInfo.mode.isRelease) {
+      _processId = _nativeApi.launchApp(aumidstring, <String>[]);
+      return LaunchResult.succeeded();
     }
+
+    /// If the terminal is attached, prompt the user to open the firewall port.
+    if (_logger.terminal.stdinHasTerminal) {
+      await _logger.terminal.promptForCharInput(<String>['Y', 'y'], logger: _logger,
+        prompt: 'To continue start an admin cmd prompt and run the following command:\n'
+        '   checknetisolation loopbackexempt -is -n=$pfn\n'
+        'Press "y" once this is complete.'
+      );
+    }
+
     /// Currently we do not have a way to discover the VM Service URI.
+    final int port = debuggingOptions.deviceVmServicePort
+        ?? await _operatingSystemUtils.findFreePort();
     _processId = _nativeApi.launchApp(aumidstring, <String>[
-      '--observatory-port=12345',
+      '--observatory-port=$port',
       '--disable-service-auth-codes',
+      '--enable-dart-profiling',
+      if (debuggingOptions.startPaused) '--start-paused',
+      if (debuggingOptions.useTestFonts) '--use-test-fonts',
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
+      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
+      if (debuggingOptions.traceSkia) '--trace-skia',
+      if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
+      if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
+      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
+      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+      if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
+      if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ]);
-    return LaunchResult.succeeded(observatoryUri: Uri.parse('locahost://12345'));
+    return LaunchResult.succeeded(observatoryUri: Uri.parse('http://localhost:$port'));
   }
 
   @override
@@ -264,6 +299,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
           logger: _logger,
           processManager: _processManager,
           nativeApi: _nativeApi,
+          operatingSystemUtils: _operatingSystemUtils,
         )
     ];
   }
