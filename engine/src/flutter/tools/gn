@@ -438,6 +438,9 @@ def parse_args(args):
   parser.add_argument('--tsan', default=False, action='store_true')
   parser.add_argument('--ubsan', default=False, action='store_true')
 
+  parser.add_argument('--trace-gn', default=False, action='store_true',
+                       help='Write a GN trace log (gn_trace.json) in the Chromium tracing format in the build directory.')
+
   return parser.parse_args(args)
 
 def main(argv):
@@ -466,6 +469,10 @@ def main(argv):
   out_dir = get_out_dir(args)
   command.append(out_dir)
   command.append('--args=%s' % ' '.join(gn_args))
+
+  if args.trace_gn:
+    command.append('--tracelog=%s/gn_trace.json' % out_dir)
+
   print("Generating GN files in: %s" % out_dir)
   try:
     gn_call_result = subprocess.call(command, cwd=SRC_ROOT)
