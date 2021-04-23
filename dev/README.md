@@ -40,8 +40,11 @@ It follows format:
     ]
 }
 ```
-* name: builder name
-* task_name: task name that will appear in the dashboard
+* name: (str), builder name
+* repo: (str), name of the repository that this task runs against
+* task_name: (str), task name that will appear in the flutter build dashboard
+* flaky: (bool), if true, failure of this task will not close the tree
+
 `try_builders.json` will be mainly used in
 [`flutter/cocoon`](https://github.com/flutter/cocoon) to trigger/update pre-submit
 flutter luci tasks, whereas `prod_builders.json` will be mainly used in `flutter/cocoon`
