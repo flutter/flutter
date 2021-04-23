@@ -270,7 +270,7 @@ class ResidentWebRunner extends ResidentRunner {
           useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
-          enableDds: !debuggingOptions.disableDds,
+          enableDds: debuggingOptions.enableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,

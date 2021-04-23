@@ -87,7 +87,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
       await runner.run(<String>['deprecated']);
 
-      expect(testLogger.statusText,
+      expect(testLogger.errorText,
         contains('The "deprecated" command is deprecated and will be removed in '
             'a future version of Flutter.'));
       expect(flutterCommand.usage,
@@ -546,6 +546,49 @@ void main() {
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
       expect(buildInfo.packagesPath, 'foo');
     });
+
+    testUsingContext('dds options', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds-port=1']);
+      expect(ddsCommand.enableDds, isTrue);
+      expect(ddsCommand.ddsPort, 1);
+    });
+
+    testUsingContext('dds options --dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds']);
+      expect(ddsCommand.enableDds, isTrue);
+    });
+
+    testUsingContext('dds options --no-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--no-dds']);
+      expect(ddsCommand.enableDds, isFalse);
+    });
+
+    testUsingContext('dds options --disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--disable-dds']);
+      expect(ddsCommand.enableDds, isFalse);
+    });
+
+    testUsingContext('dds options --no-disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--no-disable-dds']);
+      expect(ddsCommand.enableDds, isTrue);
+    });
+
+    testUsingContext('dds options --dds --disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds', '--disable-dds']);
+      expect(() => ddsCommand.enableDds, throwsToolExit());
+    });
   });
 }
 
@@ -604,6 +647,23 @@ class FakeReportingNullSafetyCommand extends FlutterCommand {
 
   @override
   bool get reportNullSafety => true;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
+class FakeDdsCommand extends FlutterCommand {
+  FakeDdsCommand() {
+    addDdsOptions(verboseHelp: false);
+  }
+
+  @override
+  String get description => 'test';
+
+  @override
+  String get name => 'test';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

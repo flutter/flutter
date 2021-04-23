@@ -2517,7 +2517,7 @@ class FakeFlutterDevice extends FlutterDevice {
   Future<void> connect({
     ReloadSources reloadSources,
     Restart restart,
-    bool disableDds = false,
+    bool enableDds = true,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,

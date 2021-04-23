@@ -191,7 +191,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-        disableDds: boolArg('disable-dds'),
+        enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
