@@ -94,6 +94,7 @@ void main() {
       FlutterError.onError = (FlutterErrorDetails details) {
         onErrorCompleter.complete(true);
         throw Error();
+      }
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
       }, onError: (dynamic error, StackTrace? stackTrace) {
