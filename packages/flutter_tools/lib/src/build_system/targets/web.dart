@@ -178,9 +178,9 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.artifact(Artifact.flutterWebSdk),
-    Source.artifact(Artifact.dart2jsSnapshot),
-    Source.artifact(Artifact.engineDartBinary),
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+    Source.hostArtifact(HostArtifact.dart2jsSnapshot),
+    Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
@@ -198,12 +198,12 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
-
+    final String librariesSpec = (globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
     final List<String> sharedCommandOptions = <String>[
-      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
-      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
-      '--libraries-spec=${globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json')}',
+      globals.artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
+      '--libraries-spec=$librariesSpec',
       ...?decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',

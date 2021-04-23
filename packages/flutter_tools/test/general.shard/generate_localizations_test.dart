@@ -5,14 +5,13 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
-import 'package:yaml/yaml.dart';
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
+import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -98,75 +97,12 @@ void main() {
       );
     });
 
-    testWithoutContext('setInputDirectory fails if input string is null', () {
+    testWithoutContext('setting className fails if input string is empty', () {
       _standardFlutterDirectoryL10nSetup(fs);
       try {
-        LocalizationsGenerator.inputDirectoryFromPath(fs, null, fs.directory('bogus'));
+        LocalizationsGenerator.classNameFromString('');
       } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
-
-      fail(
-        'LocalizationsGenerator.setInputDirectory should fail if the '
-        'input string is null.'
-      );
-    });
-
-    testWithoutContext(
-      'setOutputDirectory fails if output string is null while not using the '
-      'synthetic package option',
-      () {
-        _standardFlutterDirectoryL10nSetup(fs);
-        try {
-          LocalizationsGenerator.outputDirectoryFromPath(fs, null, false, null);
-        } on L10nException catch (e) {
-          expect(e.message, contains('cannot be null'));
-          return;
-        }
-
-        fail(
-          'LocalizationsGenerator.setOutputDirectory should fail if the '
-          'input string is null.'
-        );
-      },
-    );
-
-    testWithoutContext('setTemplateArbFile fails if inputDirectory is null', () {
-      try {
-        LocalizationsGenerator.templateArbFileFromFileName(defaultTemplateArbFileName, null);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
-
-      fail(
-        'LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'inputDirectory is not specified.'
-      );
-    });
-
-    testWithoutContext('setTemplateArbFile fails if templateArbFileName is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      try {
-        LocalizationsGenerator.templateArbFileFromFileName(null, fs.directory('bogus'));
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
-
-      fail(
-        'LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'templateArbFileName passed in is null.'
-      );
-    });
-
-    testWithoutContext('setting className fails if input string is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      try {
-        LocalizationsGenerator.classNameFromString(null);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
+        expect(e.message, contains('cannot be empty'));
         return;
       }
 
