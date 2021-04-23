@@ -14,8 +14,6 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:html/dom.dart';
-import 'package:html/parser.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -110,14 +108,13 @@ void main() {
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('index.html')
         .createSync(recursive: true);
-    webResources.childFile('index.html').writeAsStringSync('''
-    <!DOCTYPE html><html><head></head></html>
+    webResources.childFile('index.html').writeAsStringSync(r'''
+    <!DOCTYPE html><html><base href="$FLUTTER_BASE_HREF"><head></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
     await const WebReleaseBundle().build(environment);
-    final Document parsedIndexFileContent = parse(await environment.outputDir.childFile('index.html').readAsString());
-    expect(parsedIndexFileContent.head.getElementsByTagName('base').isNotEmpty, true);
-    expect(parsedIndexFileContent.head.getElementsByTagName('base').first.attributes['href'], '/basehreftest/');
+
+    expect(environment.outputDir.childFile('index.html').readAsStringSync().contains('/basehreftest/'), true);
   }));
 
   test('null base href does not override existing base href in index.html', () => testbed.run(() async {
@@ -130,9 +127,8 @@ void main() {
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
     await const WebReleaseBundle().build(environment);
-    final Document parsedIndexFileContent = parse(await environment.outputDir.childFile('index.html').readAsString());
-    expect(parsedIndexFileContent.head.getElementsByTagName('base').isNotEmpty, true);
-    expect(parsedIndexFileContent.head.getElementsByTagName('base').first.attributes['href'], '/basehreftest/');
+
+    expect(environment.outputDir.childFile('index.html').readAsStringSync().contains('/basehreftest/'), true);
   }));
 
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {

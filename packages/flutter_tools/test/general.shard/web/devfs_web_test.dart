@@ -209,6 +209,20 @@ void main() {
     expect(await response.readAsString(), htmlContent);
   }));
 
+  test(r'serves index.html at / if href attribute is $FLUTTER_BASE_HREF', () => testbed.run(() async {
+    const String htmlContent = r'<html><head><base href ="$FLUTTER_BASE_HREF"></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory
+        .childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    final Response response = await webAssetServer
+        .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect(await response.readAsString(), htmlContent.replaceAll(r'$FLUTTER_BASE_HREF', '/'));
+  }));
+
   test('does not serve outside the base path', () => testbed.run(() async {
     webAssetServer.basePath = 'base/path';
 
