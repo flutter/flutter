@@ -1449,7 +1449,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
-      commandHelp.b.print();
       commandHelp.w.print();
       commandHelp.t.print();
       if (isRunningDebug) {
@@ -1457,21 +1456,24 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.S.print();
         commandHelp.U.print();
         commandHelp.i.print();
-        commandHelp.I.print();
         commandHelp.p.print();
+        commandHelp.I.print();
         commandHelp.o.print();
+        commandHelp.b.print();
         commandHelp.z.print();
-        commandHelp.g.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
       }
+      // Performance related features: `P` should precede `a`, which should precede `M`.
+      commandHelp.P.print();
+      commandHelp.a.print();
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      // `P` should precede `a`
-      commandHelp.P.print();
-      commandHelp.a.print();
+      if (isRunningDebug) {
+        commandHelp.g.print();
+      }
     }
   }
 

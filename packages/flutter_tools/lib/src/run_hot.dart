@@ -1081,7 +1081,6 @@ class HotRunner extends ResidentRunner {
     return message.toString();
   }
 
-
   @override
   void printHelp({ @required bool details }) {
     globals.printStatus('Flutter run key commands.');
@@ -1089,15 +1088,17 @@ class HotRunner extends ResidentRunner {
     if (supportsRestart) {
       commandHelp.R.print();
     }
-    commandHelp.h.print(); // TODO(ianh): print different message if "details" is false
+    if (details) {
+      printHelpDetails();
+      commandHelp.hWithDetails.print();
+    } else {
+      commandHelp.hWithoutDetails.print();
+    }
     if (_didAttach) {
       commandHelp.d.print();
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    if (details) {
-      printHelpDetails();
-    }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
       globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
