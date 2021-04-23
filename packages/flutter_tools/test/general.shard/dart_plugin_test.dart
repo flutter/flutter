@@ -17,7 +17,7 @@ import 'package:package_config/package_config.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
-import '../src/context.dart' hide FakeOperatingSystemUtils;
+import '../src/context.dart';
 
 void main() {
   group('Dart plugin registrant', () {
