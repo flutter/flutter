@@ -339,7 +339,7 @@ void main() {
       await tester.pump();
       final Size baseSize = tester.getSize(listFinder);
       return baseSize.height;
-    }    
+    }
 
     const double maxOptionsHeight = 250.0;
     await tester.pumpWidget(MaterialApp(
