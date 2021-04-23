@@ -1313,6 +1313,48 @@
       "repo": "flutter",
       "task_name": "win_web_tool_tests",
       "flaky": false
+    },
+    {
+      "name": "Windows_android complex_layout_win__compile",
+      "repo": "flutter",
+      "task_name": "complex_layout_win__compile",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android basic_material_app_win__compile",
+      "repo": "flutter",
+      "task_name": "basic_material_app_win__compile",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android flutter_gallery_win__compile",
+      "repo": "flutter",
+      "task_name": "flutter_gallery_win__compile",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android windows_chrome_dev_mode",
+      "repo": "flutter",
+      "task_name": "windows_chrome_dev_mode",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android flavors_test_win",
+      "repo": "flutter",
+      "task_name": "flavors_test_win",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android channels_integration_test_win",
+      "repo": "flutter",
+      "task_name": "channels_integration_test_win",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android hot_mode_dev_cycle_win__benchmark",
+      "repo": "flutter",
+      "task_name": "hot_mode_dev_cycle_win__benchmark",
+      "flaky": false
     }
   ]
 }
