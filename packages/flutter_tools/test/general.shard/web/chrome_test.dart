@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -14,7 +12,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const List<String> kChromeArgs = <String>[
   '--disable-background-timer-throttling',
@@ -30,12 +29,12 @@ const List<String> kChromeArgs = <String>[
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
-  FileExceptionHandler exceptionHandler;
-  ChromiumLauncher chromeLauncher;
-  FileSystem fileSystem;
-  Platform platform;
-  FakeProcessManager processManager;
-  OperatingSystemUtils operatingSystemUtils;
+  late FileExceptionHandler exceptionHandler;
+  late ChromiumLauncher chromeLauncher;
+  late FileSystem fileSystem;
+  late Platform platform;
+  late FakeProcessManager processManager;
+  late OperatingSystemUtils operatingSystemUtils;
 
   setUp(() {
     exceptionHandler = FileExceptionHandler();

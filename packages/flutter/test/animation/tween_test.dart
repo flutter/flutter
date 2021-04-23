@@ -28,7 +28,7 @@ void main() {
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
       'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
       'The type Object might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
-      'There may be a dedicated "ObjectTween" for this type, or you may need to create one.'
+      'There may be a dedicated "ObjectTween" for this type, or you may need to create one.',
     ]);
   });
 
@@ -59,7 +59,7 @@ void main() {
   test('throws flutter error when tweening types that do not fully satisfy tween requirements - Rect', () {
     final Tween<Rect> rectTween = Tween<Rect>(
       begin: const Rect.fromLTWH(0, 0, 10, 10),
-      end: const Rect.fromLTWH(2, 2, 2, 2)
+      end: const Rect.fromLTWH(2, 2, 2, 2),
     );
 
     FlutterError? error;
@@ -185,9 +185,7 @@ void main() {
     expect(rotationTween.lerp(0.0), equals(a));
     expect(rotationTween.lerp(1.0), equals(c));
     expect(
-      rotationTween.lerp(0.5).absoluteError(
-        a.clone()..rotateZ(0.5)
-      ),
+      rotationTween.lerp(0.5).absoluteError(a.clone()..rotateZ(0.5)),
       moreOrLessEquals(0.0),
     );
   }, skip: isWindows); // floating point math not quite deterministic on Windows?
@@ -210,7 +208,7 @@ void main() {
   test('ColorTween', () {
     final ColorTween tween = ColorTween(
       begin: const Color(0xff000000),
-      end: const Color(0xffffffff)
+      end: const Color(0xffffffff),
     );
     expect(tween.lerp(0.0), const Color(0xff000000));
     expect(tween.lerp(0.5), const Color(0xff7f7f7f));
