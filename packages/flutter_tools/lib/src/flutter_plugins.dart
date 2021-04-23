@@ -646,6 +646,7 @@ const String _dartPluginRegisterWith = r'''
 const String _dartPluginRegistryForDesktopTemplate = '''
 //
 // Generated file. Do not edit.
+// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.
 //
 
 // @dart = {{dartLanguageVersion}}

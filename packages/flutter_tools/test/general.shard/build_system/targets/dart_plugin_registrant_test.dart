@@ -71,6 +71,7 @@ dependencies:
 const String _kLinuxRegistrant =
 '//\n'
 '// Generated file. Do not edit.\n'
+'// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.\n'
 '//\n'
 '\n'
 '// @dart = 2.12\n'
