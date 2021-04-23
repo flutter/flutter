@@ -456,6 +456,7 @@ action("robolectric_tests") {
     "test/io/flutter/FlutterInjectorTest.java",
     "test/io/flutter/FlutterTestSuite.java",
     "test/io/flutter/SmokeTest.java",
+    "test/io/flutter/TestUtils.java",
     "test/io/flutter/embedding/android/AndroidKeyProcessorTest.java",
     "test/io/flutter/embedding/android/FlutterActivityAndFragmentDelegateTest.java",
     "test/io/flutter/embedding/android/FlutterActivityTest.java",
