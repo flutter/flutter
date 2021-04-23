@@ -94,12 +94,18 @@ void main() {
     expect(AlignmentDirectional.bottomEnd.resolve(TextDirection.rtl), Alignment.bottomLeft);
     expect(AlignmentDirectional(nonconst(1.0), 2.0), AlignmentDirectional(nonconst(1.0), 2.0));
     expect(const AlignmentDirectional(1.0, 2.0), isNot(const AlignmentDirectional(2.0, 1.0)));
-    expect(AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
-           AlignmentDirectional.centerEnd.resolve(TextDirection.rtl));
-    expect(AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
-     isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.ltr)));
-    expect(AlignmentDirectional.centerEnd.resolve(TextDirection.ltr),
-     isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.rtl)));
+    expect(
+      AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
+      AlignmentDirectional.centerEnd.resolve(TextDirection.rtl),
+    );
+    expect(
+      AlignmentDirectional.centerStart.resolve(TextDirection.ltr),
+      isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.ltr)),
+    );
+    expect(
+      AlignmentDirectional.centerEnd.resolve(TextDirection.ltr),
+      isNot(AlignmentDirectional.centerEnd.resolve(TextDirection.rtl)),
+    );
   });
 
   test('AlignmentGeometry.lerp ad hoc tests', () {
