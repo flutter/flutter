@@ -219,7 +219,8 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// that match the filter are disallowed.
   final bool allow;
 
-  /// String used to replace banned patterns.
+  /// String used to replace banned patterns in the default
+  /// [formattingStrategy].
   ///
   /// For deny lists ([allow] is false), each match of the
   /// [filterPattern] is replaced with this string. If [filterPattern]
@@ -251,6 +252,22 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// two "o"s replaced by a single occurrence of the replacement
   /// string) because both of the "o"s would be matched simultaneously
   /// by the pattern.
+  ///
+  /// The default [formattingStrategy] also attempts to preserve the original
+  /// selection and composing region.
+  ///
+  /// In the case of the "Into the Woods" example above, if [allow] is false,
+  /// and the pattern is "the", and the selection is placed around "the":
+  /// "Into |the| Woods", the format result would be "Into |*| Woods", the
+  /// range of the selection would be the same as the pre-format text. Composing
+  /// regions are handled exactly the same way.
+  ///
+  /// However, if an endpoint of the selection (or an endpoint of the composing
+  /// range) is strictly within a banned pattern, that endpoint will be place at
+  /// the end of the [replacementString] after formatting: if [allow] is false,
+  /// and the pattern is still "the", the result of formatting
+  /// "Into t|he |Woods" would be "Into *| |Woods". See [formattingStrategy] for
+  /// how this behavior can be overridden.
   final String replacementString;
 
   /// Determines how to perform formatting, update the selection and the
