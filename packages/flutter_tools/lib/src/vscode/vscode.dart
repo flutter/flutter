@@ -13,9 +13,6 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
 
-// Include VS Code insiders (useful for debugging).
-const bool _includeInsiders = false;
-
 const String extensionIdentifier = 'Dart-Code.flutter';
 const String extensionMarketplaceUrl =
   'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
@@ -155,7 +152,6 @@ class VsCode {
       VsCodeInstallLocation(
         fileSystem.path.join('/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
-        isInsiders: true,
       ),
       if (homeDirPath != null)
         VsCodeInstallLocation(
@@ -166,7 +162,6 @@ class VsCode {
             'Contents',
           ),
           '.vscode-insiders',
-          isInsiders: true,
         ),
       for (final String vsCodePath in LineSplitter.split(vsCodeSpotlightResult))
         VsCodeInstallLocation(
@@ -177,7 +172,6 @@ class VsCode {
         VsCodeInstallLocation(
           fileSystem.path.join(vsCodeInsidersPath, 'Contents'),
           '.vscode-insiders',
-          isInsiders: true,
         ),
     }, fileSystem, platform);
   }
@@ -219,7 +213,6 @@ class VsCode {
             fileSystem.path.join(progFiles86, 'Microsoft VS Code Insiders'),
             '.vscode-insiders',
             edition: '32-bit edition',
-            isInsiders: true,
           ),
         ],
       if (progFiles != null)
@@ -233,14 +226,12 @@ class VsCode {
             fileSystem.path.join(progFiles, 'Microsoft VS Code Insiders'),
             '.vscode-insiders',
             edition: '64-bit edition',
-            isInsiders: true,
           ),
         ],
       if (localAppData != null)
         VsCodeInstallLocation(
           fileSystem.path.join(localAppData, r'Programs\Microsoft VS Code Insiders'),
           '.vscode-insiders',
-          isInsiders: true,
         ),
     ];
     return _findInstalled(searchLocations, fileSystem, platform);
@@ -258,7 +249,6 @@ class VsCode {
       const VsCodeInstallLocation(
         '/usr/share/code-insiders',
         '.vscode-insiders',
-        isInsiders: true,
       ),
     ], fileSystem, platform);
   }
@@ -268,14 +258,9 @@ class VsCode {
     FileSystem fileSystem,
     Platform platform,
   ) {
-    final Iterable<VsCodeInstallLocation> searchLocations =
-      _includeInsiders
-        ? allLocations
-        : allLocations.where((VsCodeInstallLocation p) => p.isInsiders != true);
-
     final List<VsCode> results = <VsCode>[];
 
-    for (final VsCodeInstallLocation searchLocation in searchLocations) {
+    for (final VsCodeInstallLocation searchLocation in allLocations) {
       final String? homeDirPath = FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
       if (homeDirPath != null && fileSystem.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory = fileSystem.path.join(
@@ -323,24 +308,21 @@ class VsCodeInstallLocation {
     this.installPath,
     this.extensionsFolder, {
     this.edition,
-    bool? isInsiders
-  }) : isInsiders = isInsiders ?? false;
+  });
 
   final String installPath;
   final String extensionsFolder;
   final String? edition;
-  final bool isInsiders;
 
   @override
   bool operator ==(Object other) {
     return other is VsCodeInstallLocation &&
         other.installPath == installPath &&
         other.extensionsFolder == extensionsFolder &&
-        other.edition == edition &&
-        other.isInsiders == isInsiders;
+        other.edition == edition;
   }
 
   @override
   // Lowest bit is for isInsiders boolean.
-  int get hashCode => (installPath.hashCode ^ extensionsFolder.hashCode ^ edition.hashCode) << 1 | (isInsiders ? 1 : 0);
+  int get hashCode => installPath.hashCode ^ extensionsFolder.hashCode ^ edition.hashCode;
 }

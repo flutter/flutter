@@ -10,10 +10,10 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
@@ -639,13 +639,13 @@ void main() {
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     final String webPrecompiledSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
@@ -762,13 +762,13 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');

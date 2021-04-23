@@ -1173,7 +1173,7 @@ Future<void> _checkConsumerDependencies() async {
 
   // Do not change this signature without following the directions in
   // dev/bots/allowlist.dart
-  const String kExpected = '3S20q38QbN+dDAp+jApXiTRaDgVGGBZ0t4bMJgD3AUY=';
+  const String kExpected = 'nkO7DCjvSMB6VKyw+V9MU46m3xFEk/oYSbmgAWqvbXE=';
 
   if (disallowed.isNotEmpty) {
     exitWithError(<String>[
@@ -1197,7 +1197,7 @@ Future<void> _runFlutterAnalyze(String workingDirectory, {
 }) async {
   return runCommand(
     flutter,
-    <String>['analyze', '--dartdocs', ...options],
+    <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
 }

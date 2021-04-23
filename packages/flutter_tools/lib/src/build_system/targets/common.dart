@@ -194,7 +194,7 @@ class KernelSnapshot extends Target {
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
-    Source.artifact(Artifact.engineDartBinary),
+    Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ];
 
@@ -362,7 +362,7 @@ class AotElfProfile extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.engineDartBinary),
+    const Source.hostArtifact(HostArtifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: targetPlatform,
@@ -394,7 +394,7 @@ class AotElfRelease extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.engineDartBinary),
+    const Source.hostArtifact(HostArtifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: targetPlatform,

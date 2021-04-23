@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
@@ -258,6 +258,54 @@ void main() {
 
     expect(callbackTracker, equals(<int>[5]));
     check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5]);
+    callbackTracker.clear();
+  });
+
+  testWidgets('ListView.builder 30 items with big jump, using prototypeItem', (WidgetTester tester) async {
+    final List<int> callbackTracker = <int>[];
+
+    // The root view is 800x600 in the test environment and our list
+    // items are 300 tall. Scrolling should cause two or three items
+    // to be built.
+
+    Widget itemBuilder(BuildContext context, int index) {
+      callbackTracker.add(index);
+      return Text('$index', key: ValueKey<int>(index), textDirection: TextDirection.ltr);
+    }
+
+    final Widget testWidget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        itemBuilder: itemBuilder,
+        prototypeItem: const SizedBox(
+          width: 800,
+          height: 300,
+        ),
+        itemCount: 30,
+      ),
+    );
+
+    void jumpTo(double newScrollOffset) {
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(newScrollOffset);
+    }
+
+    await tester.pumpWidget(testWidget);
+
+    // 2 is in the cache area, but not visible.
+    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    final List<int> initialExpectedHidden = List<int>.generate(28, (int i) => i + 2);
+    check(visible: <int>[0, 1], hidden: initialExpectedHidden);
+    callbackTracker.clear();
+
+    // Jump to the end of the ListView.
+    jumpTo(8400);
+    await tester.pump();
+
+    // 27 is in the cache area, but not visible.
+    expect(callbackTracker, equals(<int>[27, 28, 29]));
+    final List<int> finalExpectedHidden = List<int>.generate(28, (int i) => i);
+    check(visible: <int>[28, 29], hidden: finalExpectedHidden);
     callbackTracker.clear();
   });
 

@@ -61,8 +61,8 @@ class FormatCommand extends FlutterCommand {
       );
     }
 
-    final String dartSdk = globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-    final String dartBinary = globals.artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String dartSdk = globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+    final String dartBinary = globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[
       dartBinary,
       globals.fs.path.join(dartSdk, 'bin', 'snapshots', 'dartfmt.dart.snapshot'),

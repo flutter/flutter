@@ -18,7 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -39,8 +39,8 @@ class IMobileDevice {
     @required Cache cache,
     @required ProcessManager processManager,
     @required Logger logger,
-  }) : _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-      _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios),
+  }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
+      _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
       _dyLdLibEntry = cache.dyLdLibEntry,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _processManager = processManager;
@@ -425,9 +425,10 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
         targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
       }
+      final String appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(
         targetBuildDir,
-        buildSettings['WRAPPER_NAME'],
+        appBundle,
       );
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
@@ -447,6 +448,10 @@ Future<XcodeBuildResult> buildXcodeProject({
             outputDir,
           ],
           throwOnError: true,
+        );
+        outputDir = globals.fs.path.join(
+          outputDir,
+          appBundle,
         );
       } else {
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');

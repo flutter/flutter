@@ -179,7 +179,9 @@ class SnippetGenerator {
         description.add(line);
       } else {
         assert(language != null);
-        components.last.contents.add(line);
+        if (components.isNotEmpty) {
+          components.last.contents.add(line);
+        }
       }
     }
     return <_ComponentTuple>[

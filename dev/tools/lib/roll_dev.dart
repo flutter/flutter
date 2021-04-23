@@ -8,10 +8,17 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import './globals.dart';
 import './repository.dart';
 import './stdio.dart';
 import './version.dart';
+
+const String kIncrement = 'increment';
+const String kCommit = 'commit';
+const String kRemoteName = 'remote';
+const String kJustPrint = 'just-print';
+const String kYes = 'yes';
+const String kForce = 'force';
+const String kSkipTagging = 'skip-tagging';
 
 /// Create a new dev release without cherry picks.
 class RollDevCommand extends Command<void> {
@@ -57,7 +64,17 @@ class RollDevCommand extends Command<void> {
       help: 'Do not create tag and push to remote, only update release branch. '
       'For recovering when the script fails trying to git push to the release branch.'
     );
-    argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
+    argParser.addFlag(
+      kYes,
+      negatable: false,
+      abbr: 'y',
+      help: 'Skip the confirmation prompt.',
+    );
+    argParser.addOption(
+      kRemoteName,
+      help: 'Specifies which git remote to fetch from.',
+      defaultsTo: 'upstream',
+    );
   }
 
   final Checkouts checkouts;
@@ -92,8 +109,8 @@ bool rollDev({
   @required ArgResults argResults,
   @required Stdio stdio,
   @required FrameworkRepository repository,
-  String remoteName = 'origin',
 }) {
+  final String remoteName = argResults[kRemoteName] as String;
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
   final bool justPrint = argResults[kJustPrint] as bool;

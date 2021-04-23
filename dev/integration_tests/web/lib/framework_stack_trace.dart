@@ -17,7 +17,7 @@ import 'package:flutter/widgets.dart';
 // framework's ability to parse stack traces in all build modes.
 void main() async {
   final StringBuffer errorMessage = StringBuffer();
-  debugPrint = (String message, { int wrapWidth }) {
+  debugPrint = (String? message, { int? wrapWidth }) {
     errorMessage.writeln(message);
   };
 
