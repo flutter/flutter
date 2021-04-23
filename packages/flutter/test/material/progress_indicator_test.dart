@@ -256,8 +256,8 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(
-          progressIndicatorTheme: ProgressIndicatorThemeData(
-            color: const Color(0xff0000ff),
+          progressIndicatorTheme: const ProgressIndicatorThemeData(
+            color: Color(0xff0000ff),
             backgroundColor: Colors.black,
           ),
         ),
@@ -402,7 +402,7 @@ void main() {
 
     // With ProgressIndicatorTheme
     await tester.pumpWidget(Theme(
-      data: ThemeData(progressIndicatorTheme: ProgressIndicatorThemeData(
+      data: ThemeData(progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: green,
         backgroundColor: blue,
       )),
