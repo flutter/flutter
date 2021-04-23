@@ -333,10 +333,6 @@ abstract class ImageProvider<T extends Object> {
       },
       (T? key, Object exception, StackTrace? stack) async {
         await null; // wait an event turn in case a listener has been added to the image stream.
-        final ImageStreamCompleter imageCompleter = stream.completer ?? _ErrorImageCompleter();
-        if (stream.completer == null) {
-          stream.setCompleter(imageCompleter);
-        }
         InformationCollector? collector;
         assert(() {
           collector = () sync* {
@@ -346,7 +342,10 @@ abstract class ImageProvider<T extends Object> {
           };
           return true;
         }());
-        imageCompleter.reportError(
+        if (stream.completer == null) {
+          stream.setCompleter(_ErrorImageCompleter());
+        }
+        stream.completer!.reportError(
           exception: exception,
           stack: stack,
           context: ErrorDescription('while resolving an image'),
