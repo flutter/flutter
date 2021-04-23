@@ -28,12 +28,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import io.flutter.TestUtils;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Test;
@@ -743,6 +746,50 @@ public class FlutterViewTest {
     surfaceView.setAlpha(1.0f);
     assertTrue(surfaceView.gatherTransparentRegion(mockRegion));
     verify(mockRegion, times(1)).op(0, 0, 0, 0, Region.Op.DIFFERENCE);
+  }
+
+  @Test
+  @SuppressLint("PrivateApi")
+  public void findViewByAccessibilityIdTraversal_returnsRootViewOnAndroid28() throws Exception {
+    TestUtils.setApiVersion(28);
+
+    FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
+
+    Method getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");
+    Integer accessibilityViewId = (Integer) getAccessibilityViewIdMethod.invoke(flutterView);
+
+    assertEquals(flutterView, flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
+  }
+
+  @Test
+  @SuppressLint("PrivateApi")
+  public void findViewByAccessibilityIdTraversal_returnsChildViewOnAndroid28() throws Exception {
+    TestUtils.setApiVersion(28);
+
+    FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
+    FrameLayout childView1 = new FrameLayout(RuntimeEnvironment.application);
+    flutterView.addView(childView1);
+
+    FrameLayout childView2 = new FrameLayout(RuntimeEnvironment.application);
+    childView1.addView(childView2);
+
+    Method getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");
+    Integer accessibilityViewId = (Integer) getAccessibilityViewIdMethod.invoke(childView2);
+
+    assertEquals(childView2, flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
+  }
+
+  @Test
+  @SuppressLint("PrivateApi")
+  public void findViewByAccessibilityIdTraversal_returnsRootViewOnAndroid29() throws Exception {
+    TestUtils.setApiVersion(29);
+
+    FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
+
+    Method getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");
+    Integer accessibilityViewId = (Integer) getAccessibilityViewIdMethod.invoke(flutterView);
+
+    assertEquals(null, flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
   }
 
   /*

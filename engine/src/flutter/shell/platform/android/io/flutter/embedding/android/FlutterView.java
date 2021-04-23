@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -44,6 +45,8 @@ import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.view.AccessibilityBridge;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -824,6 +827,84 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
       // tree.
       return null;
     }
+  }
+
+  /**
+   * Prior to Android Q, it's impossible to add real views as descendants of virtual nodes. This
+   * breaks accessibility when an Android view is embedded in a Flutter app.
+   *
+   * <p>This method overrides a @hide method in {@code ViewGroup} to workaround this limitation.
+   * This solution is derivated from Jetpack Compose, and can be found in the Android source code as
+   * well.
+   *
+   * <p>This workaround finds the descendant {@code View} that matches the provided accessibility
+   * id.
+   *
+   * @param accessibilityId The view accessibility id.
+   * @return The view matching the accessibility id if any.
+   */
+  @SuppressLint("PrivateApi")
+  public View findViewByAccessibilityIdTraversal(int accessibilityId) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+      return findViewByAccessibilityIdRootedAtCurrentView(accessibilityId, this);
+    }
+    // Android Q or later doesn't call this method.
+    //
+    // However, since this is implementation detail, a future version of Android might call
+    // this method again, fallback to calling the @hide method as expected by ViewGroup.
+    Method findViewByAccessibilityIdTraversalMethod;
+    try {
+      findViewByAccessibilityIdTraversalMethod =
+          View.class.getDeclaredMethod("findViewByAccessibilityIdTraversal", int.class);
+    } catch (NoSuchMethodException exception) {
+      return null;
+    }
+    findViewByAccessibilityIdTraversalMethod.setAccessible(true);
+    try {
+      return (View) findViewByAccessibilityIdTraversalMethod.invoke(this, accessibilityId);
+    } catch (IllegalAccessException exception) {
+      return null;
+    } catch (InvocationTargetException exception) {
+      return null;
+    }
+  }
+
+  /**
+   * Finds the descendant view that matches the provided accessibility id.
+   *
+   * @param accessibilityId The view accessibility id.
+   * @param currentView The root view.
+   * @return A descendant of currentView or currentView itself.
+   */
+  @SuppressLint("PrivateApi")
+  private View findViewByAccessibilityIdRootedAtCurrentView(int accessibilityId, View currentView) {
+    Method getAccessibilityViewIdMethod;
+    try {
+      getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");
+    } catch (NoSuchMethodException exception) {
+      return null;
+    }
+    getAccessibilityViewIdMethod.setAccessible(true);
+    try {
+      if (getAccessibilityViewIdMethod.invoke(currentView).equals(accessibilityId)) {
+        return currentView;
+      }
+    } catch (IllegalAccessException exception) {
+      return null;
+    } catch (InvocationTargetException exception) {
+      return null;
+    }
+    if (currentView instanceof ViewGroup) {
+      for (int i = 0; i < ((ViewGroup) currentView).getChildCount(); i++) {
+        View view =
+            findViewByAccessibilityIdRootedAtCurrentView(
+                accessibilityId, ((ViewGroup) currentView).getChildAt(i));
+        if (view != null) {
+          return view;
+        }
+      }
+    }
+    return null;
   }
 
   // TODO(mattcarroll): Confer with Ian as to why we need this method. Delete if possible, otherwise
