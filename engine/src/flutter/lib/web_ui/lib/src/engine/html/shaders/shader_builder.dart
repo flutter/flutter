@@ -229,6 +229,8 @@ class ShaderBuilder {
   String _precisionToString(int precision) => precision == ShaderPrecision.kLow
       ? 'lowp'
       : precision == ShaderPrecision.kMedium ? 'mediump' : 'highp';
+
+  String get texture2DFunction => isWebGl2 ? 'texture' : 'texture2D';
 }
 
 class ShaderMethod {
@@ -253,6 +255,36 @@ class ShaderMethod {
       _statements.add('  ' * _indentLevel + statement);
     } else {
       _statements.add(statement);
+    }
+  }
+
+  /// Adds statements to compute tiling in 0..1 coordinate space.
+  ///
+  /// For clamp we simply assign source value to destination.
+  ///
+  /// For repeat, we use fractional part of source value.
+  ///   float destination = fract(source);
+  ///
+  /// For mirror, we repeat every 2 units, by scaling and measuring distance
+  /// from floor.
+  ///   float destination = 1.0 - source;
+  ///   destination = abs((destination - 2.0 * floor(destination * 0.5)) - 1.0);
+  void addTileStatements(String source, String destination,
+      ui.TileMode tileMode) {
+    switch(tileMode) {
+      case ui.TileMode.repeated:
+        addStatement('float $destination = fract($source);');
+        break;
+      case ui.TileMode.mirror:
+        addStatement('float $destination = ($source - 1.0);');
+        addStatement(
+            '$destination = '
+            'abs(($destination - 2.0 * floor($destination * 0.5)) - 1.0);');
+        break;
+      case ui.TileMode.clamp:
+      case ui.TileMode.decal:
+        addStatement('float $destination = $source;');
+        break;
     }
   }
 

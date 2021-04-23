@@ -693,12 +693,9 @@ class Shadow {
 class ImageShader extends Shader {
   factory ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4, {
     FilterQuality? filterQuality,
-  }) {
-    if (engine.useCanvasKit) {
-      return engine.CkImageShader(image, tmx, tmy, matrix4, filterQuality);
-    }
-    throw UnsupportedError('ImageShader not implemented for web platform.');
-  }
+  }) => engine.useCanvasKit
+      ? engine.CkImageShader(image, tmx, tmy, matrix4, filterQuality)
+      : engine.ImageShader(image, tmx, tmy, matrix4, filterQuality);
 }
 
 class ImmutableBuffer {

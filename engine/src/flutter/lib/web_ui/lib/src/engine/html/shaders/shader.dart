@@ -51,9 +51,10 @@ class GradientSweep extends EngineGradient {
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    _GlProgram glProgram = gl.useAndCacheProgram(
+    _GlProgram glProgram = gl.cacheProgram(
         _WebGlRenderer.writeBaseVertexShader(),
         _createSweepFragmentShader(normalizedGradient, tileMode));
+    gl.useProgram(glProgram);
 
     Object tileOffset =
         gl.getUniformLocation(glProgram.program, 'u_tile_offset');
@@ -133,6 +134,18 @@ class GradientSweep extends EngineGradient {
   final double endAngle;
   final Float32List? matrix4;
 }
+
+class ImageShader implements ui.ImageShader {
+  ImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
+      : _image = image as HtmlImage;
+
+  final ui.TileMode tileModeX;
+  final ui.TileMode tileModeY;
+  final Float64List matrix4;
+  final ui.FilterQuality? filterQuality;
+  final HtmlImage _image;
+}
+
 
 class GradientLinear extends EngineGradient {
   GradientLinear(
@@ -221,9 +234,10 @@ class GradientLinear extends EngineGradient {
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    _GlProgram glProgram = gl.useAndCacheProgram(
+    _GlProgram glProgram = gl.cacheProgram(
         _WebGlRenderer.writeBaseVertexShader(),
         _createLinearFragmentShader(normalizedGradient, tileMode));
+    gl.useProgram(glProgram);
 
     // Setup from/to uniforms.
     //
@@ -491,10 +505,11 @@ class GradientRadial extends EngineGradient {
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    _GlProgram glProgram = gl.useAndCacheProgram(
+    _GlProgram glProgram = gl.cacheProgram(
         _WebGlRenderer.writeBaseVertexShader(),
         _createRadialFragmentShader(
             normalizedGradient, shaderBounds, tileMode));
+    gl.useProgram(glProgram);
 
     Object tileOffset =
         gl.getUniformLocation(glProgram.program, 'u_tile_offset');
