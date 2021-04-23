@@ -844,7 +844,7 @@
          "name": "Windows web_tool_tests",
          "repo": "flutter",
          "task_name": "win_web_tool_tests",
-         "flaky": false
+         "flaky": true
       },
       {
         "name": "Windows_android complex_layout_win__compile",
