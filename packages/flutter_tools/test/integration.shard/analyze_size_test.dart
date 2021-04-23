@@ -122,7 +122,7 @@ void main() {
 
   testWithoutContext('--analyze-size allows overriding the directory for code size files', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('size_test');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
