@@ -194,10 +194,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
-  /// Defines the maximum height the options can take
-  /// if optionsViewBuilder is null
+  /// The maximum height used for the default Material options list widget.
   ///
-  /// Defaults to 200.
+  /// When [optionsViewBuilder] is `null`, this property sets the maximum height
+  /// that the options widget can occupy.
+  ///  
+  /// The default value is set to 200.
   final double optionsMaxHeight;
 
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
