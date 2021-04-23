@@ -58,7 +58,7 @@ Future<TestStepResult> basicStringHandshake(String? message) async {
   return _basicMessageHandshake<String?>('String >$message<', channel, message);
 }
 
-Future<TestStepResult> basicJsonHandshake(dynamic message) async {
+Future<TestStepResult> basicJsonHandshake(Object? message) async {
   const BasicMessageChannel<dynamic> channel =
       BasicMessageChannel<dynamic>(
     'json-msg',
