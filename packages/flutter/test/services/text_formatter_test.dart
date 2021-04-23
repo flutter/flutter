@@ -956,7 +956,7 @@ void main() {
         .deny(
           'bad',
           replacementString: '***',
-          replacingStrategy: FilteringTextInputFormatter.preserveSelectionAndSkipComposingRegion,
+          formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion,
         )
         .formatEditUpdate(
           oldValue,

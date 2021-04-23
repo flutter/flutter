@@ -10,15 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'text_editing.dart';
 import 'text_input.dart';
 
-/// Signature for a callback function that will be applied on each banned
-/// pattern processed by a [FilteringTextInputFormatter].
-typedef FilteringFormatterReplacingStrategy = void Function(
-  TextEditingValueAccumulator accumulator,
-  int regionStart,
-  int regionEnd,
-  String replacement,
-);
-
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus
 /// [MaxLengthEnforcement.truncateAfterCompositionEnds]
@@ -133,7 +124,7 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 /// (or not matching) a particular pattern.
 ///
 /// The [allow] parameter and the [filterPattern] parameter determine the
-/// regions of banned patterns in the input string, while [replacingStrategy]
+/// regions of banned patterns in the input string, while [formattingStrategy]
 /// and [replacementString] determine how these regions should be updated.
 ///
 /// By default, instances of filtered characters found in the new
@@ -141,7 +132,7 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 /// defaults to the empty string, and attempts to preserve the existing
 /// [TextEditingValue.selection] as well as [TextEditingValue.composing] to
 /// values it would now fall at with the removed characters. See
-/// [replacingStrategy] for more details and how this behavior can be
+/// [formattingStrategy] for more details and how this behavior can be
 /// overridden.
 class FilteringTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that prevents the insertion of characters
@@ -156,37 +147,37 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// and characters that match the pattern are rejected. See also
   /// the [FilteringTextInputFormatter.deny] constructor.
   ///
-  /// The [filterPattern], [allow], [replacementString], and [replacingStrategy]
+  /// The [filterPattern], [allow], [replacementString], and [formattingStrategy]
   /// arguments must not be null.
   FilteringTextInputFormatter(
     this.filterPattern, {
     required this.allow,
     this.replacementString = '',
-    this.replacingStrategy = preserveSelectionAndComposingRegion,
+    this.formattingStrategy = FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion,
   })  : assert(filterPattern != null),
         assert(allow != null),
         assert(replacementString != null);
 
   /// Creates a formatter that only allows characters matching a pattern.
   ///
-  /// The [filterPattern], [replacementString] and [replacingStrategy] arguments
+  /// The [filterPattern], [replacementString] and [formattingStrategy] arguments
   /// must not be null.
   FilteringTextInputFormatter.allow(
     this.filterPattern, {
     this.replacementString = '',
-    this.replacingStrategy = preserveSelectionAndComposingRegion,
+    this.formattingStrategy = FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion,
   })  : assert(filterPattern != null),
         assert(replacementString != null),
         allow = true;
 
   /// Creates a formatter that blocks characters matching a pattern.
   ///
-  /// The [filterPattern], [replacementString] and [replacingStrategy] arguments
+  /// The [filterPattern], [replacementString] and [formattingStrategy] arguments
   /// must not be null.
   FilteringTextInputFormatter.deny(
     this.filterPattern, {
     this.replacementString = '',
-    this.replacingStrategy = preserveSelectionAndComposingRegion,
+    this.formattingStrategy = FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion,
   })  : assert(filterPattern != null),
         assert(replacementString != null),
         allow = false;
@@ -263,87 +254,61 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   final String replacementString;
 
   /// Determines how to perform formatting, update the selection and the
-  /// composing region, on each banned pattern in the input string.
+  /// composing region, on each matched [filterPattern] in the input string, and
+  /// the text regions that are between these matches.
   ///
-  /// Once the [allow] parameter and the [filterPattern] parameter has determind
-  /// the regions of the banned patterns, [replacingStrategy] will be called on
-  /// each of these regions. The default [FilteringFormatterReplacingStrategy]
-  /// is [preserveSelectionAndComposingRegion], which replaces the text within
-  /// every banned region with [replacementString], and updates the composing
-  /// region and the selection accordingly so they do not fall within the
-  /// removed regions.
+  /// Once the formatter has split the input text into interleaving regions
+  /// according to the [filterPattern] parameter, the [formattingStrategy] will
+  /// be applied on each of these regions, in their logical order,  producing a
+  /// final [TextEditingValue] output when all text regions are visited.
   ///
-  /// The framework also provides a [preserveSelectionAndSkipComposingRegion]
+  /// The default [FilteringFormatterFormattingStrategy] is
+  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion],
+  /// which replaces the text within every banned region with
+  /// [replacementString], and updates the composing region and the selection
+  /// accordingly so they do not fall within the removed regions.
+  ///
+  /// The framework also provides a
+  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion]
   /// strategy, which keeps the content within the current composing region
-  /// intact, and otherwise has same behavior as
-  /// [preserveSelectionAndComposingRegion]. With this strategy, a banned word
-  /// will not be immediately replaced if it's currently being composed. In
-  /// general this is more robust than [preserveSelectionAndComposingRegion], as
-  /// most IMEs only expect composing region changes from the user, not the text
-  /// editor. This replacing strategy should be used if CJK IME users experience
-  /// duplicated input in the text field. See
-  /// https://github.com/flutter/flutter/issues/79844 for a video footage of
-  /// this bug.
-  final FilteringFormatterReplacingStrategy replacingStrategy;
+  /// intact, and otherwise has the same behavior as the default
+  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
+  /// strategy. With this strategy, a banned word will not be immediately
+  /// replaced if it's currently being composed. Consider switching to this
+  /// strategy if you're having duplicate input problems in a text field with a
+  /// [FilteringTextInputFormatter].
+  ///
+  /// See the [FilteringFormatterFormattingStrategy] class documentation for
+  /// how to implement a custom [FilteringFormatterFormattingStrategy].
+  final FilteringFormatterFormattingStrategy formattingStrategy;
 
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    final TextEditingValueAccumulator accumulator = TextEditingValueAccumulator._(newValue);
+    final Object formatState = formattingStrategy.prepareForNewInput(oldValue, newValue);
 
     final Iterable<Match> matches = filterPattern.allMatches(newValue.text);
     Match? previousMatch;
     for (final Match match in matches) {
-      final int allowStart;
-      final int allowEnd;
-      final int replaceStart;
-      final int replaceEnd;
-
       assert(match.end > match.start);
-
       // Compute the non-match region between this `Match` and the previous
       // `Match`. Depending on the value of `allow`, either the match region or
       // the non-match region is the banned pattern.
-      if (allow) {
-        // The non-match region is the banned pattern.
-        allowStart = match.start;
-        allowEnd = match.end;
-        replaceStart = previousMatch?.end ?? 0;
-        replaceEnd = match.start;
-
-        // Apply the replacingStrategy first since the non-match region is
-        // banned.
-        replacingStrategy(accumulator, replaceStart, replaceEnd, replacementString);
-        accumulator.stringBuffer.write(newValue.text.substring(allowStart, allowEnd));
-      } else {
-        // When `allow` is false the match region is the banned pattern.
-        allowStart = previousMatch?.end ?? 0;
-        allowEnd = match.start;
-        replaceStart = match.start;
-        replaceEnd = match.end;
-
-        // Write the allowed word to the buffer first.
-        accumulator.stringBuffer.write(newValue.text.substring(allowStart, allowEnd));
-        replacingStrategy(accumulator, replaceStart, replaceEnd, replacementString);
-      }
+      //
+      // The non-match region.
+      formattingStrategy.processPattern(false, previousMatch?.end ?? 0, match.start, this, formatState);
+      // The match region.
+      formattingStrategy.processPattern(true, match.start, match.end, this, formatState);
 
       previousMatch = match;
     }
 
     // Handle the last non-match region betwee the last match region and the end
     // of the text.
-    final int replaceStart = previousMatch?.end ?? 0;
-    final int replaceEnd = newValue.text.length;
-
-    if (allow) {
-      replacingStrategy(accumulator, replaceStart, replaceEnd, replacementString);
-    } else {
-      accumulator.stringBuffer.write(newValue.text.substring(replaceStart));
-    }
-
-    return accumulator._finalize();
+    formattingStrategy.processPattern(false, previousMatch?.end ?? 0, newValue.text.length, this, formatState);
+    return formattingStrategy.finalize(formatState);
   }
 
   /// A [TextInputFormatter] that forces input to be a single line.
@@ -351,32 +316,138 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
   /// A [TextInputFormatter] that takes in digits `[0-9]` only.
   static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
+}
 
-  /// A [FilteringFormatterReplacingStrategy] that attempts to preserve the
-  /// pre-format selection and composing region as much as possible.
+/// An interface for performing formatting operations on matched patterns, and
+/// text between each matched patterns, in the input text of a
+/// [FilteringTextInputFormatter].
+///
+/// Every [FilteringTextInputFormatter] has a
+/// [FilteringFormatterFormattingStrategy]. Upon user input, the
+/// [FilteringTextInputFormatter] calls [prepareForNewInput] to produce a
+/// formatting state object for the current input, and splits the new content of
+/// the text field into interleaving text regions that match and does not match
+/// [FilteringTextInputFormatter.filterPattern]. Each of these regions will be
+/// processed by the [processPattern] method in their logical order, to update
+/// the formatting state object. After the last region has been processed, the
+/// [FilteringTextInputFormatter] calls [finalize] to produce the final
+/// [TextEditingValue] that the [FilteringTextInputFormatter] will use as its
+/// output.
+///
+/// ### Tips for Implementing a Custom `FilteringFormatterFormattingStrategy`
+///
+/// A [FilteringFormatterFormattingStrategy] is typically stateless itself, and
+/// stores the states needed for performing the formatting action in a state
+/// object, which should be created by the [prepareForNewInput] method.
+///
+/// In each [processPattern] call, there're typically 3 things in the state
+/// object that may need updating: the text, the selection, and the composing
+/// region. That is to say, each state object should typically contain at least
+/// as much information as a [TextEditingValue], and is usually mutable so it
+/// can be updated in-place.
+///
+/// For concatenating strings efficiently in the state object, a [StringBuffer]
+/// should be used to append each formatted text regions, in favor of the
+/// [String.+] operator.
+abstract class FilteringFormatterFormattingStrategy {
+  /// A [FilteringFormatterFormattingStrategy] that removes all banned patterns,
+  /// and attempts to preserve the pre-format selection and composing region as
+  /// much as possible.
   ///
-  /// If the start or the end of the selection (or the composing region) is
-  /// strictly inside the banned pattern described by `regionStart` and
-  /// `regionEnd` (meaning, `regionStart` < index < `regionEnd`), the index will
+  /// If the start index or the end index of the selection (or the composing
+  /// region) is strictly inside a banned pattern described by `regionStart` and
+  /// `regionEnd` (meaning, `regionStart` < index < `regionEndj), the index will
   /// be placed at the end of the replacement string.
-  static void preserveSelectionAndComposingRegion(
-    TextEditingValueAccumulator accumulator,
-    int regionStart,
-    int regionEnd,
-    String replacement,
-  ) {
+  static const FilteringFormatterFormattingStrategy preserveSelectionAndComposingRegion = _PreserveSelectionAndComposingRegion();
+
+  /// A [FilteringFormatterFormattingStrategy] that does not remove a banned
+  /// word immediately if part of word is still being composed, and has the same
+  /// behavior as [preserveSelectionAndComposingRegion] otherwise.
+  ///
+  /// This strategy guaratees the [FilteringTextInputFormatter] will never
+  /// change the content of the current non-empty composing text region, and
+  /// also preserves the pre-format selection as much as possible.
+  ///
+  /// This is generally more robust than the default strategy for most input
+  /// methods. Many input methods only expect composing region changes from the
+  /// user, but not from the text editor. Removing or replacing text from within
+  /// the composing region may result in duplicated input. The default CJK input
+  /// method on iOS 14.2 and many Android IMEs are known to have this problem.
+  static const FilteringFormatterFormattingStrategy preserveSelectionAndSkipComposingRegion = _PreserveSelectionAndSkipComposingRegion();
+
+  /// Creates a formatting state object necessary for performing the
+  /// formatting logic described by this [FilteringFormatterFormattingStrategy].
+  ///
+  /// This method should typically return a new state object every time. The
+  /// returned state object will later be passed to the [processPattern],
+  /// and [finalize].
+  Object prepareForNewInput(TextEditingValue oldValue, TextEditingValue newValue);
+
+  /// Processes the given text region and updates the given formatting state
+  /// object accordingly.
+  ///
+  /// The `isMatch` parameter indicates whether the given text region matches
+  /// the `formatter`'s `filterPattern`.
+  ///
+  /// `regionStart` (inclusive) and `regionEnd` (excluse) represent the
+  /// half-open range of the text region being processed. The value of the
+  /// `regionStart` parameter is always less than or equal to that of
+  /// `regionEnd`.
+  ///
+  /// The `formatter` parameter is the [FilteringTextInputFormatter] that's
+  /// currently performing the formatting action and the caller of this method.
+  ///
+  /// The `formattingState` is the formatting state object created by a previous
+  /// [prepareForNewInput] call. Typically the state object is mutable, and is
+  /// updated in-place in each [processPattern] call.
+  void processPattern(bool isMatch, int regionStart, int regionEnd, FilteringTextInputFormatter formatter, covariant Object formattingState);
+
+  /// Finishes the current formatting operation, and converts the formatting state
+  /// object created by [prepareForNewInput] to a [TextEditingValue] as the
+  /// formatter output.
+  TextEditingValue finalize(covariant Object formattingState);
+}
+
+/// A `FilteringFormatterFormattingStrategy` class for creating
+/// `FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion`
+class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormattingStrategy {
+  const _PreserveSelectionAndComposingRegion();
+
+  @override
+  _TextEditingValueAccumulator prepareForNewInput(TextEditingValue oldValue, TextEditingValue newValue) => _TextEditingValueAccumulator._(newValue);
+
+  @override
+  void processPattern(bool isMatch, int regionStart, int regionEnd, FilteringTextInputFormatter formatter, _TextEditingValueAccumulator formattingState) {
+    assert(!formattingState.debugFinalized);
+    if (formatter.allow == isMatch) {
+      _processAllowedPattern(regionStart, regionEnd, formatter, formattingState);
+    } else {
+      _processBannedPattern(regionStart, regionEnd, formatter, formattingState);
+    }
+    assert(!formattingState.debugFinalized);
+  }
+
+  void _processAllowedPattern(int regionStart, int regionEnd, FilteringTextInputFormatter formatter, _TextEditingValueAccumulator formattingState) {
+    formattingState.stringBuffer.write(formattingState.originalText.substring(regionStart, regionEnd));
+  }
+
+  void _processBannedPattern(int regionStart, int regionEnd, FilteringTextInputFormatter formatter, _TextEditingValueAccumulator formattingState) {
     assert(regionEnd >= regionStart);
+
+    // Nothing to do if the region is empty.
     if (regionEnd == regionStart) {
       return;
     }
 
-    final MutableTextRange<TextSelection>? selection = accumulator.selection;
-    final MutableTextRange<TextRange>? composingRegion = accumulator.composingRegion;
+    // Replace the text with replacementString.
+    formattingState.stringBuffer.write(formatter.replacementString);
 
-    // Always replace the text.
-    accumulator.stringBuffer.write(replacement);
+    // Now adjust the selection and the composing region.
 
-    final int replacementLength = replacement.length;
+    final _MutableTextRange<TextSelection>? selection = formattingState.selection;
+    final _MutableTextRange<TextRange>? composingRegion = formattingState.composingRegion;
+
+    final int replacementLength = formatter.replacementString.length;
     // Don't modify the text ranges if the region is replaced with a string of
     // the same length.
     if (regionEnd - regionStart == replacementLength) {
@@ -388,7 +459,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       //
       // - If the index precedes the replace region (i.e., before
       //   [regionStart, regionEnd)), the index does not require adjustment.
-      // - Otherwise, add `replacementLenght` to the index to account for the
+      // - Otherwise, add jreplacementLenght` to the index to account for the
       //   replacement text (we're placing the index **after** the replacement
       //   text), and subtract the length of substring within
       //   [regionStart, regionEnd), that's also before the index.
@@ -411,35 +482,33 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     }
   }
 
-  /// A [FilteringFormatterReplacingStrategy] that does not remove a banned word
-  /// immediately if part of word is still being composed, and has the same
-  /// behavior as [preserveSelectionAndComposingRegion] otherwise.
-  ///
-  /// This strategy guaratees the [FilteringTextInputFormatter] will never
-  /// change the content of the current non-empty composing region of the text,
-  /// and also preserves the pre-format selection as much as possible. This is
-  /// generally more robust than the default strategy for most input methods,
-  /// See https://github.com/flutter/flutter/issues/79844 for more details.
-  static void preserveSelectionAndSkipComposingRegion(
-    TextEditingValueAccumulator accumulator,
-    int regionStart,
-    int regionEnd,
-    String replacement,
-  ) {
-    assert(regionEnd >= regionStart);
-    if (regionEnd == regionStart) {
-      return;
-    }
-    final TextRange? composingRegion = accumulator.composingRegion?.originalRange;
+  @override
+  TextEditingValue finalize(_TextEditingValueAccumulator formattingState) {
+    assert(!formattingState.debugFinalized);
+    final TextEditingValue result = formattingState.finalize();
+    assert(formattingState.debugFinalized);
+    return result;
+  }
+}
+
+/// A [FilteringFormatterFormattingStrategy] class for creating
+/// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion].
+///
+/// This is generally more robust than [_PreserveSelectionAndComposingRegion],
+/// See https://github.com/flutter/flutter/issues/79844 for more details.
+class _PreserveSelectionAndSkipComposingRegion extends _PreserveSelectionAndComposingRegion {
+  const _PreserveSelectionAndSkipComposingRegion();
+  @override
+  void _processBannedPattern(int regionStart, int regionEnd, FilteringTextInputFormatter formatter, _TextEditingValueAccumulator formattingState) {
+    final TextRange? composingRegion = formattingState.composingRegion?.originalRange;
     assert(
       composingRegion == null || composingRegion.isNormalized,
       'The composing region $composingRegion should be normalized',
     );
     if (composingRegion == null || regionEnd <= composingRegion.start || regionStart >= composingRegion.end) {
-      preserveSelectionAndComposingRegion(accumulator, regionStart, regionEnd, replacement);
+      super._processBannedPattern(regionStart, regionEnd, formatter, formattingState);
     } else {
-      // Skip the region if it overlaps the composing region.
-      accumulator.stringBuffer.write(accumulator.originalText.substring(regionStart, regionEnd));
+      _processAllowedPattern(regionStart, regionEnd, formatter, formattingState);
     }
   }
 }
@@ -447,28 +516,24 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 /// A mutable, half-open range [`base`, `extent`) within a string.
 ///
 /// This class can be used to update the composing region or the selection in a
-/// [FilteringFormatterReplacingStrategy] implementation. It has no public
+/// [FilteringFormatterFormattingStrategy] implementation. It has no public
 /// constructors, the [FilteringTextInputFormatter] that employs the
-/// [FilteringFormatterReplacingStrategy] is responsible for providing a
+/// [FilteringFormatterFormattingStrategy] is responsible for providing a
 /// [MutableTextRange] that has its [base] and [extent] initialized to the
 /// composing region or the selection's base offset and extent offset.
-///
-/// See [FilteringTextInputFormatter.preserveSelectionAndComposingRegion] for an
-/// example of how [MutableTextRange]s are updated in a
-/// [FilteringFormatterReplacingStrategy].
-class MutableTextRange<T extends TextRange> {
-  MutableTextRange._(this.base, this.extent, this.originalRange);
+class _MutableTextRange<T extends TextRange> {
+  _MutableTextRange._(this.base, this.extent, this.originalRange);
 
-  static MutableTextRange<TextRange>? _fromComposingRange(TextRange range) {
+  static _MutableTextRange<TextRange>? _fromComposingRange(TextRange range) {
     return range.isValid && !range.isCollapsed
-        ? MutableTextRange<TextRange>._(range.start, range.end, range)
+        ? _MutableTextRange<TextRange>._(range.start, range.end, range)
         : null;
   }
 
-  static MutableTextRange<TextSelection>? _fromTextSelection(
+  static _MutableTextRange<TextSelection>? _fromTextSelection(
       TextSelection selection) {
     return selection.isValid
-        ? MutableTextRange<TextSelection>._(selection.baseOffset, selection.extentOffset, selection)
+        ? _MutableTextRange<TextSelection>._(selection.baseOffset, selection.extentOffset, selection)
         : null;
   }
 
@@ -492,19 +557,15 @@ class MutableTextRange<T extends TextRange> {
 /// The transient state of a [FilteringTextInputFormatter] when it's formatting
 /// a new user input.
 ///
-/// This class can be used to perform text replacement and update the composing
-/// region or the selected region in a [FilteringFormatterReplacingStrategy]. It
+/// This class is used to perform text replacement and update the composing
+/// region or the selected region in a [FilteringFormatterFormattingStrategy]. It
 /// has no public constructors, the [FilteringTextInputFormatter] that employs
-/// the [FilteringFormatterReplacingStrategy] is responsible for providing a
-/// [TextEditingValueAccumulator] to the [FilteringFormatterReplacingStrategy].
-///
-/// See [FilteringTextInputFormatter.preserveSelectionAndComposingRegion] for an
-/// example of how a [TextEditingValueAccumulator] is updated in a typical
-/// [FilteringFormatterReplacingStrategy] implementation.
-class TextEditingValueAccumulator {
-  TextEditingValueAccumulator._(TextEditingValue textEditingValue)
-    : selection = MutableTextRange._fromTextSelection(textEditingValue.selection),
-      composingRegion = MutableTextRange._fromComposingRange(textEditingValue.composing),
+/// the [FilteringFormatterFormattingStrategy] is responsible for providing a
+/// [_TextEditingValueAccumulator] to the [FilteringFormatterFormattingStrategy].
+class _TextEditingValueAccumulator {
+  _TextEditingValueAccumulator._(TextEditingValue textEditingValue)
+    : selection = _MutableTextRange._fromTextSelection(textEditingValue.selection),
+      composingRegion = _MutableTextRange._fromComposingRange(textEditingValue.composing),
       originalText = textEditingValue.text;
 
   /// The pre-format string that was sent to the [FilteringTextInputFormatter]
@@ -514,7 +575,7 @@ class TextEditingValueAccumulator {
   /// The [StringBuffer] that contains the string which has already been
   /// formatted.
   ///
-  /// In a [FilteringFormatterReplacingStrategy], typically the replacement
+  /// In a [FilteringFormatterFormattingStrategy], typically the replacement
   /// string, instead of the original string within the given range, is written
   /// to this [StringBuffer].
   final StringBuffer stringBuffer = StringBuffer();
@@ -524,18 +585,21 @@ class TextEditingValueAccumulator {
   ///
   /// This parameter will be null if the input [TextEditingValue.selection] is
   /// invalid.
-  final MutableTextRange<TextSelection>? selection;
+  final _MutableTextRange<TextSelection>? selection;
 
   /// The updated composing region, as well as the original composing region
   /// from the input [TextEditingValue] of the [FilteringTextInputFormatter].
   ///
   /// This parameter will be null if the input [TextEditingValue.composing] is
   /// invalid or collapsed.
-  final MutableTextRange<TextRange>? composingRegion;
+  final _MutableTextRange<TextRange>? composingRegion;
 
-  TextEditingValue _finalize() {
-    final MutableTextRange<TextSelection>? selection = this.selection;
-    final MutableTextRange<TextRange>? composingRegion = this.composingRegion;
+  bool debugFinalized = false;
+
+  TextEditingValue finalize() {
+    debugFinalized = true;
+    final _MutableTextRange<TextSelection>? selection = this.selection;
+    final _MutableTextRange<TextRange>? composingRegion = this.composingRegion;
     return TextEditingValue(
       text: stringBuffer.toString(),
       composing: composingRegion == null || composingRegion.base == composingRegion.extent
