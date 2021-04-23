@@ -119,12 +119,6 @@ class BuildBundleCommand extends BuildSubCommand {
       manifestPath: defaultManifestPath,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
-      trackWidgetCreation: boolArg('track-widget-creation'),
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-      extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
-      treeShakeIcons: buildInfo.treeShakeIcons,
     );
     return FlutterCommandResult.success();
   }

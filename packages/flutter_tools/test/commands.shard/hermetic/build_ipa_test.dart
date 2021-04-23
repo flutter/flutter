@@ -218,6 +218,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'ipa', '--no-pub']
     );
+    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

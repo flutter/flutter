@@ -6,8 +6,8 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
 import 'binding.dart';
@@ -165,6 +165,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// callback that returns a string describing useful debugging information,
   /// e.g. the arguments passed to the callback.
   @protected
+  @pragma('vm:notify-debugger-on-exception')
   T? invokeCallback<T>(String name, RecognizerCallback<T> callback, { String Function()? debugReport }) {
     assert(callback != null);
     T? result;
