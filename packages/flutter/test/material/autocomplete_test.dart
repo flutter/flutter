@@ -20,9 +20,9 @@ class User {
   }
 }
 
-/// Given a string input this method enters the string in the autocomplete field
-/// and it returns the height of the resulting options
-Future<double> getOptionsHeight(WidgetTester tester, String text) async {
+/// Returns a Future with the height of the default [Autocomplete] options widget
+/// after the provided text had been entered into the [Autocomplete] field.
+Future<double> _getOptionsHeight(WidgetTester tester, String text) async {
   final Finder listFinder = find.byType(ListView);
   final Finder inputFinder = find.byType(TextFormField);
   final TextFormField field =
@@ -297,7 +297,7 @@ void main() {
       ),
     )));
 
-    final double resultingHeight = await getOptionsHeight(tester, '');
+    final double resultingHeight = await _getOptionsHeight(tester, '');
     expect(resultingHeight, equals(200));
   });
 
@@ -319,7 +319,7 @@ void main() {
     /// entering "a" returns 9 items from kOptions so basically the
     /// height of 9 options would be beyond `desiredHeight=150`,
     /// so height gets restricted to desiredHeight.
-    final double resultingHeight = await getOptionsHeight(tester, 'a');
+    final double resultingHeight = await _getOptionsHeight(tester, 'a');
 
     /// expected desired Height =150.0
     expect(resultingHeight, equals(desiredHeight));
@@ -346,17 +346,17 @@ void main() {
 
     /// entering `a` returns 9 items(height > `maxOptionsheight`) from the kOptions
     /// so height gets restricted to `maxOptionsheight =250`
-    final double nineItemsHeight = await getOptionsHeight(tester, 'a');
+    final double nineItemsHeight = await _getOptionsHeight(tester, 'a');
     expect(nineItemsHeight, equals(maxOptionsHeight));
 
     /// returns 2 Items (height < `maxOptionsHeight`)
     /// so options height shrinks to 2 Items combined height
-    final double twoItemsHeight = await getOptionsHeight(tester, 'el');
+    final double twoItemsHeight = await _getOptionsHeight(tester, 'el');
     expect(twoItemsHeight, lessThan(maxOptionsHeight));
 
     /// returns 1 item (height < `maxOptionsHeight`) from `kOptions`
     /// so options height shrinks to 1 items height
-    final double oneItemsHeight = await getOptionsHeight(tester, 'elep');
+    final double oneItemsHeight = await _getOptionsHeight(tester, 'elep');
     expect(oneItemsHeight, lessThan(twoItemsHeight));
   });
 
