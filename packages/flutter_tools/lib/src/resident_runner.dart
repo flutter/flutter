@@ -100,15 +100,15 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(jonahwilliams): consistently provide these flags across platforms.
-      Artifact platformDillArtifact;
+      HostArtifact platformDillArtifact;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillArtifact = Artifact.webPlatformKernelDill;
+        platformDillArtifact = HostArtifact.webPlatformKernelDill;
         if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
           extraFrontEndOptions.add('--no-sound-null-safety');
         }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+        platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
         if (!extraFrontEndOptions.contains('--sound-null-safety')) {
           extraFrontEndOptions.add('--sound-null-safety');
         }
@@ -117,7 +117,7 @@ class FlutterDevice {
       }
 
       generator = ResidentCompiler(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
+        globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         fileSystemRoots: fileSystemRoots ?? <String>[],
@@ -132,11 +132,11 @@ class FlutterDevice {
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
-          .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
+          .getHostArtifact(platformDillArtifact))
           .absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
+          .getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
         processManager: globals.processManager,
@@ -869,7 +869,7 @@ abstract class ResidentHandlers {
     return true;
   }
 
-  /// Toggle the operating system brightness (light or dart).
+  /// Toggle the operating system brightness (light or dark).
   Future<bool> debugToggleBrightness() async {
     if (!supportsServiceProtocol) {
       return false;
