@@ -6,9 +6,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/material/progress_indicator_theme.dart';
 
 import 'material.dart';
+import 'progress_indicator_theme.dart';
 import 'theme.dart';
 
 const double _kMinCircularProgressIndicatorSize = 36.0;
