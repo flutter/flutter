@@ -58,7 +58,7 @@ const String _needHelp = 'Every option must have help explaining what it does, e
 const String _header = ' Comment: ';
 
 void verifyOptions(String command, Iterable<Option> options) {
-  /*late*/ String target;
+  String target;
   if (command == null) {
     target = 'the global argument "';
   } else {
