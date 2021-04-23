@@ -42,25 +42,25 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   }
 }
 
-Future<TestStepResult> basicBinaryHandshake(ByteData? message) async {
+Future<TestStepResult> basicBinaryHandshake(ByteData message) async {
   const BasicMessageChannel<ByteData> channel =
       BasicMessageChannel<ByteData>(
     'binary-msg',
     BinaryCodec(),
   );
-  return _basicMessageHandshake<ByteData?>(
+  return _basicMessageHandshake<ByteData>(
       'Binary >${toString(message)}<', channel, message);
 }
 
-Future<TestStepResult> basicStringHandshake(String? message) async {
+Future<TestStepResult> basicStringHandshake(String message) async {
   const BasicMessageChannel<String> channel = BasicMessageChannel<String>(
     'string-msg',
     StringCodec(),
   );
-  return _basicMessageHandshake<String?>('String >$message<', channel, message);
+  return _basicMessageHandshake<String>('String >$message<', channel, message);
 }
 
-Future<TestStepResult> basicJsonHandshake(Object? message) async {
+Future<TestStepResult> basicJsonHandshake(dynamic message) async {
   const BasicMessageChannel<dynamic> channel =
       BasicMessageChannel<dynamic>(
     'json-msg',
@@ -126,9 +126,9 @@ Future<TestStepResult> _basicMessageHandshake<T>(
   T message,
 ) async {
   final List<dynamic> received = <dynamic>[];
-  channel.setMessageHandler((T? message) async {
+  channel.setMessageHandler((T message) async {
     received.add(message);
-    return message!;
+    return message;
   });
   dynamic messageEcho = nothing;
   dynamic error = nothing;
@@ -150,7 +150,7 @@ Future<TestStepResult> _basicMessageHandshake<T>(
 /// Sends a message on a channel that no one listens on.
 Future<TestStepResult> _basicMessageToUnknownChannel<T>(
   String description,
-  BasicMessageChannel<T?> channel,
+  BasicMessageChannel<T> channel,
 ) async {
   dynamic messageEcho = nothing;
   dynamic error = nothing;
