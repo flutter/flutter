@@ -241,9 +241,9 @@ void main() {
 
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
-      SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
-      addTearDown(() => SystemChannels.platform.setMockMethodCallHandler(null));
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
 
       await tester.pumpWidget(_inputDatePickerField(autofocus: true));
       await tester.pumpAndSettle();

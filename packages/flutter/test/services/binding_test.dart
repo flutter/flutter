@@ -30,7 +30,7 @@ L2Paragraph2
 
 L2Paragraph3''';
 
-const String licenses = '''
+const String combinedLicenses = '''
 $license1
 --------------------------------------------------------------------------------
 $license2
@@ -38,20 +38,22 @@ $license2
 
 class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   @override
-  BinaryMessenger createBinaryMessenger() {
-    return super.createBinaryMessenger()
-      ..setMockMessageHandler('flutter/assets', (ByteData? message) async {
-        if (const StringCodec().decodeMessage(message) == 'NOTICES') {
-          return const StringCodec().encodeMessage(licenses);
-        }
-        return null;
-      });
+  TestDefaultBinaryMessenger get defaultBinaryMessenger => super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+
+  @override
+  TestDefaultBinaryMessenger createBinaryMessenger() {
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 }
 
 void main() {
   test('Adds rootBundle LICENSES to LicenseRegistry', () async {
-    TestBinding(); // The test binding registers a mock handler that returns licenses for the LICENSE key
+    TestBinding().defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+      if (const StringCodec().decodeMessage(message) == 'NOTICES') {
+        return const StringCodec().encodeMessage(combinedLicenses);
+      }
+      return null;
+    });
 
     final List<LicenseEntry> licenses = await LicenseRegistry.licenses.toList();
 
