@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/material/progress_indicator_theme.dart';
 
 import 'material.dart';
 import 'theme.dart';
@@ -63,7 +64,24 @@ abstract class ProgressIndicator extends StatefulWidget {
 
   /// The progress indicator's background color.
   ///
-  /// The current theme's [ColorScheme.background] by default.
+  /// This color is interpreted differently depending on the type of
+  /// indicator:
+  ///
+  /// For a [LinearProgressIndicator] it is the background color of the
+  /// track that the indicator is filling up. If this is null, than it
+  /// will use the value of the ambient [ProgressIndicatorThemeData.backgroundColor].
+  /// If that is null, then it will use [ColorScheme.background]
+  /// of the ambient [ThemeData.colorScheme].
+  ///
+  /// For a [CircularProgressIndicator] it is the color of the circular
+  /// track that the indicator is filling up. If this is null, than it
+  /// will use the value of the ambient [ProgressIndicatorThemeData.backgroundColor].
+  /// If that is null, then no track will be painted by default.
+  ///
+  /// For a [RefreshIndicator] it is the color of the background circle
+  /// behind the indicator. If this is null, than it
+  /// will use the value of the ambient [ProgressIndicatorThemeData.backgroundColor].
+  /// If this is null, then the ambient [ThemeData.canvasColor] will be used.
   ///
   /// This property is ignored if used in an adaptive constructor inside an iOS
   /// environment.
@@ -72,7 +90,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// The progress indicator's color.
   ///
   /// This is only used if [valueColor] is null. If [color] is also null,
-  /// then it defaults to the current theme's [ColorScheme.primary] by default.
+  /// then it will use the ambient [ProgressIndicatorThemeData.color]. If that
+  /// is null then it defaults to the current theme's [ColorScheme.primary]
+  /// by default.
   ///
   /// This property is ignored if used in an adaptive constructor inside an iOS
   /// environment.
@@ -80,8 +100,9 @@ abstract class ProgressIndicator extends StatefulWidget {
 
   /// The progress indicator's color as an animated value.
   ///
-  /// If null, the progress indicator is rendered with [color], or if that is
-  /// also null then with the current theme's [ColorScheme.primary].
+  /// If null, the progress indicator is rendered with [color]. If that is null,
+  /// then it will use the ambient [ProgressIndicatorThemeData.color]. If that
+  /// is also null then it defaults to the current theme's [ColorScheme.primary].
   ///
   /// This property is ignored if used in an adaptive constructor inside an iOS
   /// environment.
@@ -116,8 +137,20 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticsValue;
 
-  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).colorScheme.background;
-  Color _getValueColor(BuildContext context) => valueColor?.value ?? color ?? Theme.of(context).colorScheme.primary;
+  Color _getBackgroundColor(BuildContext context) {
+    return
+      backgroundColor ??
+      ProgressIndicatorTheme.of(context).backgroundColor ??
+      Theme.of(context).colorScheme.background;
+  }
+
+  Color _getValueColor(BuildContext context) {
+    return
+      valueColor?.value ??
+      color ??
+      ProgressIndicatorTheme.of(context).color ??
+      Theme.of(context).colorScheme.primary;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -667,7 +700,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
         ),
         child: CustomPaint(
           painter: _CircularProgressIndicatorPainter(
-            backgroundColor: widget.backgroundColor,
+            backgroundColor: widget.backgroundColor ?? ProgressIndicatorTheme.of(context).backgroundColor,
             valueColor: widget._getValueColor(context),
             value: widget.value, // may be null
             headValue: headValue, // remaining arguments are ignored if widget.value is not null
@@ -803,6 +836,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     Key? key,
     double? value,
     Color? backgroundColor,
+    Color? color,
     Animation<Color?>? valueColor,
     double strokeWidth = 2.0, // Different default than CircularProgressIndicator.
     String? semanticsLabel,
@@ -811,6 +845,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     key: key,
     value: value,
     backgroundColor: backgroundColor,
+    color: color,
     valueColor: valueColor,
     strokeWidth: strokeWidth,
     semanticsLabel: semanticsLabel,
@@ -848,7 +883,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
         margin: const EdgeInsets.all(4.0), // accommodate the shadow
         child: Material(
           type: MaterialType.circle,
-          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+          color: widget.backgroundColor ?? ProgressIndicatorTheme.of(context).backgroundColor ?? Theme.of(context).canvasColor,
           elevation: 2.0,
           child: Padding(
             padding: const EdgeInsets.all(12.0),

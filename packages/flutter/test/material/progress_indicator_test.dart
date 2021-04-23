@@ -251,6 +251,38 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: primaryColor),
     );
+
+    // With ProgressIndicatorTheme colors
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(
+          progressIndicatorTheme: ProgressIndicatorThemeData(
+            color: const Color(0xff0000ff),
+            backgroundColor: Colors.black,
+          ),
+        ),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(
+                value: 0.25,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Should use the progress indicator theme colors
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: const Color(0xff0000ff)),
+    );
+
   });
 
   testWidgets('LinearProgressIndicator with animation with null colors', (WidgetTester tester) async {
@@ -367,6 +399,17 @@ void main() {
     ));
     expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: green)..arc(color: blue));
+
+    // With ProgressIndicatorTheme
+    await tester.pumpWidget(Theme(
+      data: ThemeData(progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: green,
+        backgroundColor: blue,
+      )),
+      child: const CircularProgressIndicator(),
+    ));
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: blue)..arc(color: green));
   });
 
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
