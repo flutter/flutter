@@ -158,18 +158,15 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
 
   @override
   TimeOfDay fromPrimitives(Object? data) {
-    final Map<String, int> timeData = Map<String, int>.from(data! as Map<Object?, Object?>);
+    final List<Object?> timeData = data! as List<Object?>;
     return TimeOfDay(
-      minute: timeData['minute']!,
-      hour: timeData['hour']!,
+      minute: timeData[0]! as int,
+      hour: timeData[1]! as int,
     );
   }
 
   @override
-  Object? toPrimitives() => <String, int>{
-    'minute': value.minute,
-    'hour': value.hour,
-  };
+  Object? toPrimitives() => <int>[value.minute, value.hour];
 }
 
 /// Determines how the time picker invoked using [showTimePicker] formats and

@@ -1649,15 +1649,6 @@ class _HourMinuteTextField extends StatefulWidget {
 }
 
 class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with RestorationMixin {
-  @override
-  String? get restorationId => widget.restorationId;
-
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(controller, 'text_editing_controller');
-    registerForRestoration(controllerHasBeenSet, 'has_controller_been_set');
-  }
-
   final RestorableTextEditingController controller = RestorableTextEditingController();
   final RestorableBool controllerHasBeenSet = RestorableBool(false);
   late FocusNode focusNode;
@@ -1679,6 +1670,15 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       controllerHasBeenSet.value = true;
       controller.value.text = _formattedValue;
     }
+  }
+
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(controller, 'text_editing_controller');
+    registerForRestoration(controllerHasBeenSet, 'has_controller_been_set');
   }
 
   String get _formattedValue {
