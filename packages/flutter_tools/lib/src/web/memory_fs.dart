@@ -59,11 +59,11 @@ class WebMemoryFS {
       if (codeStart < 0 || codeEnd > codeBytes.lengthInBytes) {
         continue;
       }
-      final Uint8List byteView = Uint8List.view(
-        codeBytes.buffer,
-        codeStart,
-        codeEnd - codeStart,
-      );
+      final int bytesLength = codeEnd - codeStart;
+      final Uint8List byteView = Uint8List(bytesLength);
+      for (int i = 0; i < bytesLength; i++) {
+        byteView[i] = codeBytes[codeStart + i];
+      }
       final String fileName =
           filePath.startsWith('/') ? filePath.substring(1) : filePath;
       files[fileName] = byteView;
@@ -73,11 +73,12 @@ class WebMemoryFS {
       if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
         continue;
       }
-      final Uint8List sourcemapView = Uint8List.view(
-        sourcemapBytes.buffer,
-        sourcemapStart,
-        sourcemapEnd - sourcemapStart,
-      );
+      final int sourceMapLength = sourcemapEnd - sourcemapStart;
+      final Uint8List sourcemapView = Uint8List(sourceMapLength);
+      for (int i = 0; i < sourceMapLength; i++) {
+        sourcemapView[i] = sourcemapBytes[sourcemapStart + i];
+      }
+
       final String sourcemapName = '$fileName.map';
       sourcemaps[sourcemapName] = sourcemapView;
 
@@ -86,11 +87,7 @@ class WebMemoryFS {
       if (metadataStart < 0 || metadataEnd > metadataBytes.lengthInBytes) {
         continue;
       }
-      final Uint8List metadataView = Uint8List.view(
-        metadataBytes.buffer,
-        metadataStart,
-        metadataEnd - metadataStart,
-      );
+      final Uint8List metadataView = metadataBytes.buffer.asUint8List(metadataStart, metadataEnd - metadataStart);
       final String metadataName = '$fileName.metadata';
       metadataFiles[metadataName] = metadataView;
 

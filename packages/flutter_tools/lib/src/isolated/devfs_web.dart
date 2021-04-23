@@ -361,7 +361,7 @@ class WebAssetServer implements AssetReader {
     final String webServerPath =
         requestPath.replaceFirst('.dart.js', '.dart.lib.js');
     if (_webMemoryFS.files.containsKey(requestPath) || _webMemoryFS.files.containsKey(webServerPath)) {
-      final List<int> bytes = getFile(requestPath) ?? getFile(webServerPath);
+      final Uint8List bytes = getFile(requestPath) ?? getFile(webServerPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
       // will also change the hashCode.
@@ -377,7 +377,7 @@ class WebAssetServer implements AssetReader {
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
     if (_webMemoryFS.sourcemaps.containsKey(requestPath)) {
-      final List<int> bytes = getSourceMap(requestPath);
+      final Uint8List bytes = getSourceMap(requestPath);
       final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
@@ -391,7 +391,7 @@ class WebAssetServer implements AssetReader {
     // If this is a metadata file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
     if (_webMemoryFS.metadataFiles.containsKey(requestPath)) {
-      final List<int> bytes = getMetadata(requestPath);
+      final Uint8List bytes = getMetadata(requestPath);
       final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
@@ -1056,3 +1056,15 @@ To serve from a subpath "foo" (i.e. http://localhost:8080/foo/ instead of http:/
 
 For more information, see: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
 ''';
+
+// class ByteResponse extends shelf.Response {
+//   ByteResponse(this.body, {Map<String, String> headers}) : super(HttpStatus.ok, headers: headers);
+
+//   final Uint8List body;
+
+//   @override
+//   int get contentLength => body.lengthInBytes;
+
+//   @override
+//   Stream<List<int>> read() => Stream<List<int>>.value(body);
+// }
