@@ -23,7 +23,6 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
-    //addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesInteractiveGetCommand('upgrade', 'Upgrade the current package\'s dependencies to latest versions.'));
     addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
     addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
@@ -271,9 +270,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 }
 
 class PackagesInteractiveGetCommand extends FlutterCommand {
-  PackagesInteractiveGetCommand(this._commandName, this._description) {
-    requiresPubspecYaml();
-  }
+  PackagesInteractiveGetCommand(this._commandName, this._description);
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
@@ -298,10 +295,9 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     List<String> rest = argResults.rest;
+    final bool isHelp = rest.contains('-h') || rest.contains('--help');
     String target;
-    if (rest.length == 1 &&
-        (rest[0].contains('/') ||
-            rest[0].contains(r'\'))) {
+    if (rest.length == 1 && (rest[0].contains('/') || rest[0].contains(r'\'))) {
       // HACK: Supporting flutter specific behavior where you can pass a
       //       folder to the command.
       target = findProjectRoot(globals.fs, rest[0]);
@@ -309,43 +305,45 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
     } else {
       target = findProjectRoot(globals.fs);
     }
-    if (target == null) {
-      throwToolExit('Expected to find project root in '
-          'current working directory.');
+
+    FlutterProject flutterProject;
+    if (!isHelp) {
+      if (target == null) {
+        throwToolExit('Expected to find project root in current working directory.');
+      }
+      flutterProject = FlutterProject.fromDirectory(globals.fs.directory(target));
+
+      if (flutterProject.manifest.generateSyntheticPackage) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          platform: globals.platform,
+          projectDir: flutterProject.directory,
+        );
+
+        await generateLocalizationsSyntheticPackage(
+          environment: environment,
+          buildSystem: globals.buildSystem,
+        );
+      }
     }
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
-    if (flutterProject.manifest.generateSyntheticPackage) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        projectDir: flutterProject.directory,
-      );
-
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-      );
-    }
-
-    final List<String> subArgs = rest.toList()
-      ..removeWhere((String arg) => arg == '--');
+    final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
     await pub.interactively(
       <String>[name, ...subArgs],
       directory: target,
       stdio: globals.stdio,
-      touchesPackageConfig: true,
-      generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
+      touchesPackageConfig: !isHelp,
+      generateSyntheticPackage: flutterProject?.manifest?.generateSyntheticPackage ?? false,
     );
 
-    await flutterProject.regeneratePlatformSpecificTooling();
+    await flutterProject?.regeneratePlatformSpecificTooling();
     return FlutterCommandResult.success();
   }
 }
