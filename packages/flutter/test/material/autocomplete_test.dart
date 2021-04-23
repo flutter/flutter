@@ -22,14 +22,14 @@ class User {
 
 /// Returns a Future with the height of the default [Autocomplete] options widget
 /// after the provided text had been entered into the [Autocomplete] field.
-Future<double> _getOptionsHeight(WidgetTester tester, String text) async {
+Future<double> _getOptionsHeight(WidgetTester tester, String enteredText) async {
   final Finder listFinder = find.byType(ListView);
   final Finder inputFinder = find.byType(TextFormField);
   final TextFormField field =
       inputFinder.evaluate().first.widget as TextFormField;
   field.controller!.clear();
   await tester.tap(inputFinder);
-  await tester.enterText(inputFinder, text);
+  await tester.enterText(inputFinder, enteredText);
   await tester.pump();
   final Size baseSize = tester.getSize(listFinder);
   return baseSize.height;
