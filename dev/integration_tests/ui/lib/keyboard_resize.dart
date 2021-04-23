@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key(keys.kUnfocusButton),
-        onPressed: () { textField.focusNode?.unfocus(); },
+        onPressed: () { textField.focusNode!.unfocus(); },
         tooltip: 'Unfocus',
         child: const Icon(Icons.done),
       ),

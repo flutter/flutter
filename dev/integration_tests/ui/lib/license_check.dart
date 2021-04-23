@@ -20,12 +20,12 @@ class ShowLicenses extends StatelessWidget {
     BuildContext context,
     AsyncSnapshot<List<LicenseEntry>> snapshot,
   ) {
-    final List<LicenseEntry>? entries = snapshot.data;
+    final List<LicenseEntry> entries = snapshot.data  ?? <LicenseEntry>[];
     String flutterPackage = '';
     final List<String> flutterParagraphs = <String>[];
     String enginePackage = '';
     final List<String> engineParagraphs = <String>[];
-    for (final LicenseEntry entry in entries!) {
+    for (final LicenseEntry entry in entries) {
       if (entry.packages.contains('flutter')) {
         flutterPackage = 'flutter';
         flutterParagraphs.addAll(
@@ -41,17 +41,15 @@ class ShowLicenses extends StatelessWidget {
     }
 
     final List<Widget> result = <Widget>[];
-    if (entries.isNotEmpty == true) {
-      result.addAll(<Widget>[
-        const Text('License Check Test', key: ValueKey<String>('Header')),
-        Text(flutterPackage, key: const ValueKey<String>('FlutterPackage')),
-        Text(flutterParagraphs.join(' '), key: const ValueKey<String>('FlutterLicense')),
-        Text('${flutterParagraphs.length}', key: const ValueKey<String>('FlutterCount')),
-        Text(enginePackage, key: const ValueKey<String>('EnginePackage')),
-        Text(engineParagraphs.join(' '), key: const ValueKey<String>('EngineLicense')),
-        Text('${engineParagraphs.length}', key: const ValueKey<String>('EngineCount')),
-      ]);
-    }
+    result.addAll(<Widget>[
+      const Text('License Check Test', key: ValueKey<String>('Header')),
+      Text(flutterPackage, key: const ValueKey<String>('FlutterPackage')),
+      Text(flutterParagraphs.join(' '), key: const ValueKey<String>('FlutterLicense')),
+      Text('${flutterParagraphs.length}', key: const ValueKey<String>('FlutterCount')),
+      Text(enginePackage, key: const ValueKey<String>('EnginePackage')),
+      Text(engineParagraphs.join(' '), key: const ValueKey<String>('EngineLicense')),
+      Text('${engineParagraphs.length}', key: const ValueKey<String>('EngineCount')),
+    ]);
 
     return ListView(
       children: result,
