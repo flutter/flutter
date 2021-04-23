@@ -285,7 +285,7 @@ void main() {
     expect(find.byKey(optionsKey), findsOneWidget);
   });
 
-  testWidgets('the options take maxSize as 200.0 if not specified',
+  testWidgets('the default Autocomplete options widget has a maximum height of 200',
       (WidgetTester tester) async {
     const double defaultHeight = 200.0;
     await tester.pumpWidget(MaterialApp(home: Scaffold(
