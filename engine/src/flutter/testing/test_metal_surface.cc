@@ -48,4 +48,8 @@ sk_sp<SkImage> TestMetalSurface::GetRasterSurfaceSnapshot() {
   return impl_ ? impl_->GetRasterSurfaceSnapshot() : nullptr;
 }
 
+TestMetalContext::TextureInfo TestMetalSurface::GetTextureInfo() {
+  return impl_ ? impl_->GetTextureInfo() : TestMetalContext::TextureInfo();
+}
+
 }  // namespace flutter

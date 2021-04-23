@@ -5,7 +5,11 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 
 #include "flutter/fml/logging.h"
+#include "include/core/SkImageInfo.h"
+#include "include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+
+#include <memory>
 
 namespace flutter {
 namespace testing {
@@ -13,7 +17,14 @@ namespace testing {
 EmbedderTestBackingStoreProducer::EmbedderTestBackingStoreProducer(
     sk_sp<GrDirectContext> context,
     RenderTargetType type)
-    : context_(context), type_(type) {}
+    : context_(context),
+      type_(type)
+#ifdef SHELL_ENABLE_METAL
+      ,
+      test_metal_context_(std::make_unique<TestMetalContext>())
+#endif
+{
+}
 
 EmbedderTestBackingStoreProducer::~EmbedderTestBackingStoreProducer() = default;
 
@@ -28,6 +39,10 @@ bool EmbedderTestBackingStoreProducer::Create(
       return CreateTexture(config, renderer_out);
     case RenderTargetType::kOpenGLFramebuffer:
       return CreateFramebuffer(config, renderer_out);
+#endif
+#ifdef SHELL_ENABLE_METAL
+    case RenderTargetType::kMetalTexture:
+      return CreateMTLTexture(config, renderer_out);
 #endif
     default:
       return false;
@@ -172,6 +187,53 @@ bool EmbedderTestBackingStoreProducer::CreateSoftware(
   };
 
   return true;
+}
+
+bool EmbedderTestBackingStoreProducer::CreateMTLTexture(
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store_out) {
+#ifdef SHELL_ENABLE_METAL
+  // TODO(gw280): Use SkSurface::MakeRenderTarget instead of generating our
+  // own MTLTexture and wrapping it.
+  auto surface_size = SkISize::Make(config->size.width, config->size.height);
+  auto texture_info = test_metal_context_->CreateMetalTexture(surface_size);
+  sk_cf_obj<FlutterMetalTextureHandle> texture;
+  texture.retain(texture_info.texture);
+
+  GrMtlTextureInfo skia_texture_info;
+  skia_texture_info.fTexture = texture;
+  GrBackendTexture backend_texture(surface_size.width(), surface_size.height(),
+                                   GrMipmapped::kNo, skia_texture_info);
+
+  SkSurface::TextureReleaseProc release_mtltexture = [](void* user_data) {
+    SkCFSafeRelease(user_data);
+  };
+
+  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendTexture(
+      context_.get(), backend_texture, kTopLeft_GrSurfaceOrigin, 1,
+      kBGRA_8888_SkColorType, nullptr, nullptr, release_mtltexture,
+      texture_info.texture);
+
+  if (!surface) {
+    FML_LOG(ERROR) << "Could not create Skia surface from a Metal texture.";
+    return false;
+  }
+
+  backing_store_out->type = kFlutterBackingStoreTypeMetal;
+  backing_store_out->user_data = surface.get();
+  backing_store_out->metal.texture.texture = texture_info.texture;
+  // The balancing unref is in the destruction callback.
+  surface->ref();
+  backing_store_out->metal.struct_size = sizeof(FlutterMetalBackingStore);
+  backing_store_out->metal.texture.user_data = surface.get();
+  backing_store_out->metal.texture.destruction_callback = [](void* user_data) {
+    reinterpret_cast<SkSurface*>(user_data)->unref();
+  };
+
+  return true;
+#else
+  return false;
+#endif
 }
 
 }  // namespace testing

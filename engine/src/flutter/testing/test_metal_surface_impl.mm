@@ -9,6 +9,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/testing/test_metal_context.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -48,6 +49,7 @@ void TestMetalSurfaceImpl::Init(const TestMetalContext::TextureInfo& texture_inf
   }
 
   surface_ = std::move(surface);
+  texture_info_ = std::move(texture_info);
   is_valid_ = true;
 }
 
@@ -118,6 +120,11 @@ sk_sp<GrDirectContext> TestMetalSurfaceImpl::GetGrContext() const {
 // |TestMetalSurface|
 sk_sp<SkSurface> TestMetalSurfaceImpl::GetSurface() const {
   return IsValid() ? surface_ : nullptr;
+}
+
+// |TestMetalSurface|
+TestMetalContext::TextureInfo TestMetalSurfaceImpl::GetTextureInfo() {
+  return IsValid() ? texture_info_ : TestMetalContext::TextureInfo();
 }
 
 }  // namespace flutter

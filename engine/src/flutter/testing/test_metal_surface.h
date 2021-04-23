@@ -40,6 +40,8 @@ class TestMetalSurface {
 
   virtual sk_sp<SkImage> GetRasterSurfaceSnapshot();
 
+  virtual TestMetalContext::TextureInfo GetTextureInfo();
+
  protected:
   TestMetalSurface();
 

@@ -19,10 +19,13 @@ static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
 
 namespace flutter {
 
-GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceMetalDelegate* delegate, sk_sp<GrDirectContext> context)
+GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceMetalDelegate* delegate,
+                                 sk_sp<GrDirectContext> context,
+                                 bool render_to_surface)
     : delegate_(delegate),
       render_target_type_(delegate->GetRenderTargetType()),
-      context_(std::move(context)) {}
+      context_(std::move(context)),
+      render_to_surface_(render_to_surface) {}
 
 GPUSurfaceMetal::~GPUSurfaceMetal() {
   ReleaseUnusedDrawableIfNecessary();
@@ -53,6 +56,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& frame
   if (frame_size.isEmpty()) {
     FML_LOG(ERROR) << "Metal surface was asked for an empty frame.";
     return nullptr;
+  }
+
+  if (!render_to_surface_) {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, true, [](const SurfaceFrame& surface_frame, SkCanvas* canvas) { return true; });
   }
 
   PrecompileKnownSkSLsIfNecessary();

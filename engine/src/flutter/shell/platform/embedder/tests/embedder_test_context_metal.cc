@@ -8,6 +8,7 @@
 
 #include "embedder.h"
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor_metal.h"
 
 namespace flutter {
 namespace testing {
@@ -22,6 +23,7 @@ EmbedderTestContextMetal::~EmbedderTestContextMetal() {}
 void EmbedderTestContextMetal::SetupSurface(SkISize surface_size) {
   FML_CHECK(surface_size_.isEmpty());
   surface_size_ = surface_size;
+  metal_surface_ = TestMetalSurface::Create(*metal_context_, surface_size_);
 }
 
 size_t EmbedderTestContextMetal::GetSurfacePresentCount() const {
@@ -33,7 +35,11 @@ EmbedderTestContextType EmbedderTestContextMetal::GetContextType() const {
 }
 
 void EmbedderTestContextMetal::SetupCompositor() {
-  FML_CHECK(false) << "Compositor rendering not supported in metal.";
+  FML_CHECK(!compositor_) << "Already set up a compositor in this context.";
+  FML_CHECK(metal_surface_)
+      << "Set up the Metal surface before setting up a compositor.";
+  compositor_ = std::make_unique<EmbedderTestCompositorMetal>(
+      surface_size_, metal_surface_->GetGrContext());
 }
 
 TestMetalContext* EmbedderTestContextMetal::GetTestMetalContext() {
@@ -41,11 +47,8 @@ TestMetalContext* EmbedderTestContextMetal::GetTestMetalContext() {
 }
 
 bool EmbedderTestContextMetal::Present(int64_t texture_id) {
-  FireRootSurfacePresentCallbackIfPresent([&]() {
-    auto metal_surface_ =
-        TestMetalSurface::Create(*metal_context_, texture_id, surface_size_);
-    return metal_surface_->GetRasterSurfaceSnapshot();
-  });
+  FireRootSurfacePresentCallbackIfPresent(
+      [&]() { return metal_surface_->GetRasterSurfaceSnapshot(); });
   present_count_++;
   return metal_context_->Present(texture_id);
 }
@@ -65,6 +68,18 @@ bool EmbedderTestContextMetal::PopulateExternalTexture(
   } else {
     return false;
   }
+}
+
+FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(
+    const FlutterFrameInfo* frame_info) {
+  auto texture_info = metal_surface_->GetTextureInfo();
+
+  FlutterMetalTexture texture;
+  texture.struct_size = sizeof(FlutterMetalTexture);
+  texture.texture_id = texture_info.texture_id;
+  texture.texture =
+      reinterpret_cast<FlutterMetalTextureHandle>(texture_info.texture);
+  return texture;
 }
 
 }  // namespace testing

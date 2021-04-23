@@ -16,7 +16,8 @@ namespace flutter {
 class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
  public:
   GPUSurfaceMetal(GPUSurfaceMetalDelegate* delegate,
-                  sk_sp<GrDirectContext> context);
+                  sk_sp<GrDirectContext> context,
+                  bool render_to_surface = true);
 
   // |Surface|
   ~GPUSurfaceMetal();
@@ -30,6 +31,11 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
   GrMTLHandle next_drawable_ = nullptr;
   sk_sp<GrDirectContext> context_;
   GrDirectContext* precompiled_sksl_context_ = nullptr;
+  // TODO(38466): Refactor GPU surface APIs take into account the fact that an
+  // external view embedder may want to render to the root surface. This is a
+  // hack to make avoid allocating resources for the root surface when an
+  // external view embedder is present.
+  bool render_to_surface_;
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;

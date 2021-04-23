@@ -400,19 +400,8 @@ void EmbedderConfigBuilder::InitializeMetalRendererConfig() {
       metal_context.GetTestMetalContext()->GetMetalCommandQueue();
   metal_renderer_config_.get_next_drawable_callback =
       [](void* user_data, const FlutterFrameInfo* frame_info) {
-        EmbedderTestContextMetal* metal_context =
-            reinterpret_cast<EmbedderTestContextMetal*>(user_data);
-        SkISize surface_size =
-            SkISize::Make(frame_info->size.width, frame_info->size.height);
-        TestMetalContext::TextureInfo texture_info =
-            metal_context->GetTestMetalContext()->CreateMetalTexture(
-                surface_size);
-        FlutterMetalTexture texture;
-        texture.struct_size = sizeof(FlutterMetalTexture);
-        texture.texture_id = texture_info.texture_id;
-        texture.texture =
-            reinterpret_cast<FlutterMetalTextureHandle>(texture_info.texture);
-        return texture;
+        return reinterpret_cast<EmbedderTestContextMetal*>(user_data)
+            ->GetNextDrawable(frame_info);
       };
   metal_renderer_config_.present_drawable_callback =
       [](void* user_data, const FlutterMetalTexture* texture) -> bool {
