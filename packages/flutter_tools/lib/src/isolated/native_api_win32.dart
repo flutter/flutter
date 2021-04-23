@@ -20,7 +20,7 @@ class Win32NativeApi extends NativeApi {
   const Win32NativeApi();
 
   @override
-  int launchApp(String amuid) {
+  int launchApp(String amuid, List<String> args) {
     int hResult = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
     if (FAILED(hResult)) {
       throw WindowsException(hResult);
@@ -28,9 +28,10 @@ class Win32NativeApi extends NativeApi {
 
     final Pointer<Utf16> aumid = amuid.toNativeUtf16();
     final Pointer<Uint32> processId = calloc<Uint32>();
+    final Pointer<Utf16> arguments = args.join(',').toNativeUtf16();
 
     final ApplicationActivationManager aam = ApplicationActivationManager.createInstance();
-    hResult = aam.ActivateApplication(aumid, nullptr, 0, processId);
+    hResult = aam.ActivateApplication(aumid, arguments, 0, processId);
     if (FAILED(hResult)) {
       throw WindowsException(hResult);
     }
@@ -38,6 +39,7 @@ class Win32NativeApi extends NativeApi {
     free(aumid);
     free(processId);
     free(aam.ptr);
+    free(arguments);
     CoUninitialize();
     return id;
   }

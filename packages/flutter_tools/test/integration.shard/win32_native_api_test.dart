@@ -26,7 +26,7 @@ void main() {
 
       final String aumidstring = result.stdout.toString().trim();
       const NativeApi nativeApi = Win32NativeApi();
-      calculatorPid = nativeApi.launchApp(aumidstring);
+      calculatorPid = nativeApi.launchApp(aumidstring, <String>[]);
 
       // Verify that the app started.
       final ProcessResult psCheck = await processManager.run(<String>['powershell.exe', 'ps', '-id', '$calculatorPid']);

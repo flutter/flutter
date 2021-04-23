@@ -9,5 +9,5 @@ abstract class NativeApi {
 
   /// Launch the native windows application with the given [amuid], returning the PID
   /// if successful.
-  int launchApp(String amuid);
+  int launchApp(String amuid, List<String> args);
 }

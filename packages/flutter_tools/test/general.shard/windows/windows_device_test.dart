@@ -193,10 +193,8 @@ WindowsUWPDevice setUpWindowsUwpDevice({
   ProcessManager processManager,
 }) {
   return WindowsUWPDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: FakeOperatingSystemUtils(),
   );
 }
 
