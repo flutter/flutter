@@ -326,8 +326,8 @@ void main() {
       'The height of options shrinks to height of resulting items, if less than maxHeight',
       (WidgetTester tester) async {
 
-    /// Returns a Future with the height of the default [Autocomplete] options widget
-    /// after the provided text had been entered into the [Autocomplete] field.
+    // Returns a Future with the height of the default [Autocomplete] options widget
+    // after the provided text had been entered into the [Autocomplete] field.
     Future<double> _getDefaultOptionsHeight(WidgetTester tester, String enteredText) async {
       final Finder listFinder = find.byType(ListView);
       final Finder inputFinder = find.byType(TextFormField);
