@@ -1026,7 +1026,6 @@ String _stripTrailingSlashes(String path) {
 String _parseBasePathFromIndexHtml(File indexHtml) {
   final String htmlContent =
       indexHtml.existsSync() ? indexHtml.readAsStringSync() : _kDefaultIndex;
-  
   final Document document = parse(htmlContent);
   final Element baseElement = document.querySelector('base');
   String baseHref =
