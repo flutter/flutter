@@ -7,8 +7,7 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:html/dom.dart';
-import 'package:html/parser.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -321,13 +320,9 @@ class WebReleaseBundle extends Target {
     }
 
     final String versionInfo = FlutterProject.current().getVersionInfo();
-
     environment.outputDir
         .childFile('version.json')
         .writeAsStringSync(versionInfo);
-    if (environment.defines[kBaseHref] != null) {
-      addBaseHrefToIndexPage(environment);
-    }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -366,7 +361,7 @@ class WebReleaseBundle extends Target {
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
         final String randomHash = Random().nextInt(4294967296).toString();
-        final String resultString = inputFile.readAsStringSync()
+        String resultString = inputFile.readAsStringSync()
           .replaceFirst(
             'var serviceWorkerVersion = null',
             "var serviceWorkerVersion = '$randomHash'",
@@ -377,6 +372,14 @@ class WebReleaseBundle extends Target {
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
+        if (resultString.contains(r'$FLUTTER_BASE_HREF') &&
+            environment.defines[kBaseHref] == null) {
+          resultString = resultString.replaceAll(r'$FLUTTER_BASE_HREF', '/');
+        } else if (resultString.contains(r'$FLUTTER_BASE_HREF') &&
+            environment.defines[kBaseHref] != null) {
+          resultString = resultString.replaceAll(
+              r'$FLUTTER_BASE_HREF', environment.defines[kBaseHref]);
+        }
         outputFile.writeAsStringSync(resultString);
         continue;
       }
@@ -665,28 +668,4 @@ function onlineFirst(event) {
   );
 }
 ''';
-}
-
-///Adds base tag to index.html
-void addBaseHrefToIndexPage(Environment environment) {
-  final File indexFile = environment.projectDir.childFile('web/index.html');
-  final String indexFileContent = indexFile.readAsStringSync();
-  final Document parsedContent = parse(indexFileContent);
-
-  if (!indexFileContent.contains('<head>')) {
-    return;
-  }
-
-  if (parsedContent.head.getElementsByTagName('base').isEmpty) {
-    parsedContent.head.append(
-      Element.tag('base')..attributes['href'] = environment.defines[kBaseHref],
-    );
-  } else {
-    parsedContent.head.getElementsByTagName('base').first.attributes['href'] =
-        environment.defines[kBaseHref];
-  }
-  environment.projectDir
-      .childDirectory('web')
-      .childFile('index.html')
-      .writeAsStringSync(parsedContent.outerHtml);
 }

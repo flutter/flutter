@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -97,6 +98,16 @@ class BuildWebCommand extends BuildSubCommand {
     }
     if (stringArg('base-href') != null && !(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
+    }
+    if (!globals.fs.currentDirectory
+        .childDirectory('web')
+        .childFile('index.html')
+        .readAsStringSync()
+        .contains(r'$FLUTTER_BASE_HREF') &&
+        stringArg('base-href') != null) {
+      throwToolExit(
+          r'Placeholder $FLUTTER_BASE_HREF not found in base tag of index.html.'
+          r' Please set href attribute of base tag as $FLUTTER_BASE_HREF to use this flag.');
     }
     displayNullSafetyMode(buildInfo);
     await buildWeb(
