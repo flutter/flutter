@@ -313,7 +313,7 @@ void main() {
             return option.contains(textEditingValue.text.toLowerCase());
           });
         },
-        maxOptionsHeight: desiredHeight,
+        optionsMaxHeight: desiredHeight,
       ),
     )));
 
@@ -338,7 +338,7 @@ void main() {
             return option.contains(textEditingValue.text.toLowerCase());
           });
         },
-        maxOptionsHeight: maxOptionsHeight,
+        optionsMaxHeight: maxOptionsHeight,
       ),
     )));
 
