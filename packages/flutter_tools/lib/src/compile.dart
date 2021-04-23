@@ -244,7 +244,7 @@ class KernelCompiler {
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String engineDartPath = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     if (!_processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -695,7 +695,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     final List<String> command = <String>[
-      _artifacts.getArtifactPath(Artifact.engineDartBinary),
+      _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',

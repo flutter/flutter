@@ -101,15 +101,15 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(jonahwilliams): consistently provide these flags across platforms.
-      Artifact platformDillArtifact;
+      HostArtifact platformDillArtifact;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillArtifact = Artifact.webPlatformKernelDill;
+        platformDillArtifact = HostArtifact.webPlatformKernelDill;
         if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
           extraFrontEndOptions.add('--no-sound-null-safety');
         }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+        platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
         if (!extraFrontEndOptions.contains('--sound-null-safety')) {
           extraFrontEndOptions.add('--sound-null-safety');
         }
@@ -118,7 +118,7 @@ class FlutterDevice {
       }
 
       generator = ResidentCompiler(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
+        globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         fileSystemRoots: fileSystemRoots ?? <String>[],
@@ -133,11 +133,11 @@ class FlutterDevice {
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
-          .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
+          .getHostArtifact(platformDillArtifact))
           .absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
+          .getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
         processManager: globals.processManager,
@@ -365,10 +365,16 @@ class FlutterDevice {
     }
     for (final FlutterView view in views) {
       if (view != null && view.uiIsolate != null) {
-        // If successful, there will be no response from flutterExit.
+        // If successful, there will be no response from flutterExit. If the exit
+        // method is not registered, this will complete with `false`.
         unawaited(vmService.flutterExit(
           isolateId: view.uiIsolate.id,
-        ));
+        ).then((bool exited) async {
+          // If exiting the app failed, fall back to stopApp
+          if (!exited) {
+            await device.stopApp(package, userIdentifier: userIdentifier);
+          }
+        }));
       }
     }
     return vmService.service.onDone
@@ -379,10 +385,6 @@ class FlutterDevice {
          );
       })
       .timeout(timeoutDelay, onTimeout: () {
-        // TODO(jonahwilliams): this only seems to fail on CI in the
-        // flutter_attach_android_test. This log should help verify this
-        // is where the tool is getting stuck.
-        globals.logger.printTrace('error: vm service shutdown failed');
         return device.stopApp(package, userIdentifier: userIdentifier);
       });
   }
@@ -868,7 +870,7 @@ abstract class ResidentHandlers {
     return true;
   }
 
-  /// Toggle the operating system brightness (light or dart).
+  /// Toggle the operating system brightness (light or dark).
   Future<bool> debugToggleBrightness() async {
     if (!supportsServiceProtocol) {
       return false;
@@ -1455,7 +1457,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
-      commandHelp.b.print();
       commandHelp.w.print();
       commandHelp.t.print();
       if (isRunningDebug) {
@@ -1463,21 +1464,24 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.S.print();
         commandHelp.U.print();
         commandHelp.i.print();
-        commandHelp.I.print();
         commandHelp.p.print();
+        commandHelp.I.print();
         commandHelp.o.print();
+        commandHelp.b.print();
         commandHelp.z.print();
-        commandHelp.g.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
       }
+      // Performance related features: `P` should precede `a`, which should precede `M`.
+      commandHelp.P.print();
+      commandHelp.a.print();
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      // `P` should precede `a`
-      commandHelp.P.print();
-      commandHelp.a.print();
+      if (isRunningDebug) {
+        commandHelp.g.print();
+      }
     }
   }
 
