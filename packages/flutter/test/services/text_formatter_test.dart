@@ -704,8 +704,9 @@ void main() {
         const TextSelection(baseOffset: 10, extentOffset: 7),
       );
 
-      // AAAB | B | BCCC | => AAA* | * | *CCC
-      // Same length replacement, don't move the selection.
+      // AAAB | B | BCCC => AAA***|CCC
+      // Same length replacement, still move the selection to the end of the
+      // replacement if the entire selection is replaced.
       expect(
         FilteringTextInputFormatter.deny('BBB', replacementString: '***').formatEditUpdate(
           oldValue,
@@ -713,7 +714,7 @@ void main() {
             selection: const TextSelection(baseOffset: 5, extentOffset: 4),
           ),
         ).selection,
-        const TextSelection(baseOffset: 5, extentOffset: 4),
+        const TextSelection(baseOffset: 6, extentOffset: 6),
       );
 
       // AAA | BBB | CCC => AAA | CCC
@@ -836,8 +837,9 @@ void main() {
         const TextRange(start: 7, end: 10),
       );
 
-      // AAAB | B | BCCC | => AAA* | * | *CCC
-      // Same length replacement, don't move the composing region.
+      // AAAB | B | BCCC => AAA*** | CCC
+      // Same length replacement, still move the selection to the end of the
+      // replacement if the entire selection is replaced.
       expect(
         FilteringTextInputFormatter.deny('BBB', replacementString: '***').formatEditUpdate(
           oldValue,
@@ -845,7 +847,7 @@ void main() {
             composing: const TextRange(start: 4, end: 5),
           ),
         ).composing,
-        const TextRange(start: 4, end: 5),
+        TextRange.empty,
       );
 
       // AAA | BBB | CCC => | AAA CCC
@@ -900,8 +902,9 @@ void main() {
         const TextSelection(baseOffset: 10, extentOffset: 7),
       );
 
-      // AAAB | B | BCCC | => AAA* | * | *CCC
-      // Same length replacement, don't move the selection.
+      // AAAB | B | BCCC => AAA*** | CCC
+      // Same length replacement, still move the selection to the end of the
+      // replacement if the entire selection is replaced.
       expect(
         FilteringTextInputFormatter.deny('BBB', replacementString: '***').formatEditUpdate(
           oldValue,
@@ -909,7 +912,7 @@ void main() {
             selection: const TextSelection(baseOffset: 5, extentOffset: 4),
           ),
         ).selection,
-        const TextSelection(baseOffset: 5, extentOffset: 4),
+        const TextSelection(baseOffset: 6, extentOffset: 6),
       );
 
       // AAA | BBB | CCC => AAA | CCC
@@ -949,8 +952,8 @@ void main() {
 
     test('Skips the composing region', () {
       const TextEditingValue newValue = TextEditingValue(text: 'good badgood bad');
-
-      // good b|<a>dgood b|ad => good b|<a>dgood *|**
+      // <>: characters inside a composing region.
+      // good b|<a>dgood b|ad => good b|<a>dgood ***|
       expect(
         FilteringTextInputFormatter
         .deny(
@@ -967,8 +970,30 @@ void main() {
         ),
         const TextEditingValue(
           text: 'good badgood ***',
-          selection: TextSelection(baseOffset: 5, extentOffset: 14),
+          selection: TextSelection(baseOffset: 5, extentOffset: 16),
           composing: TextRange(start: 6, end: 7),
+        ),
+      );
+
+      // good <b|adgood|> bad => good <b|adgood|> ***
+      expect(
+        FilteringTextInputFormatter
+        .deny(
+          'bad',
+          replacementString: '***',
+          formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion,
+        )
+        .formatEditUpdate(
+          oldValue,
+          newValue.copyWith(
+            selection: const TextSelection(baseOffset: 5, extentOffset: 11),
+            composing: const TextRange(start: 6, end: 11),
+          ),
+        ),
+        const TextEditingValue(
+          text: 'good badgood ***',
+          selection: TextSelection(baseOffset: 5, extentOffset: 11),
+          composing: TextRange(start: 6, end: 11),
         ),
       );
     });

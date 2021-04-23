@@ -389,10 +389,10 @@ abstract class FilteringFormatterFormattingStrategy {
   /// The `isMatch` parameter indicates whether the given text region matches
   /// the `formatter`'s `filterPattern`.
   ///
-  /// `regionStart` (inclusive) and `regionEnd` (excluse) represent the
-  /// half-open range of the text region being processed. The value of the
-  /// `regionStart` parameter is always less than or equal to that of
-  /// `regionEnd`.
+  /// `regionStart` (inclusive) and `regionEnd` (exclusive) represent the
+  /// half-open range of the text region being processed, within the original
+  /// input text. The value of the `regionStart` parameter is always less than
+  /// or equal to that of `regionEnd`.
   ///
   /// The `formatter` parameter is the [FilteringTextInputFormatter] that's
   /// currently performing the formatting action and the caller of this method.
@@ -402,9 +402,9 @@ abstract class FilteringFormatterFormattingStrategy {
   /// updated in-place in each [processPattern] call.
   void processPattern(bool isMatch, int regionStart, int regionEnd, FilteringTextInputFormatter formatter, covariant Object formattingState);
 
-  /// Finishes the current formatting operation, and converts the formatting state
-  /// object created by [prepareForNewInput] to a [TextEditingValue] as the
-  /// formatter output.
+  /// Finishes the current formatting operation, and converts the formatting
+  /// state object created by [prepareForNewInput] to a [TextEditingValue] as
+  /// the formatter output.
   TextEditingValue finalize(covariant Object formattingState);
 }
 
@@ -414,7 +414,7 @@ class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormatti
   const _PreserveSelectionAndComposingRegion();
 
   @override
-  _TextEditingValueAccumulator prepareForNewInput(TextEditingValue oldValue, TextEditingValue newValue) => _TextEditingValueAccumulator._(newValue);
+  _TextEditingValueAccumulator prepareForNewInput(TextEditingValue oldValue, TextEditingValue newValue) => _TextEditingValueAccumulator(newValue);
 
   @override
   void processPattern(bool isMatch, int regionStart, int regionEnd, FilteringTextInputFormatter formatter, _TextEditingValueAccumulator formattingState) {
@@ -448,11 +448,6 @@ class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormatti
     final _MutableTextRange<TextRange>? composingRegion = formattingState.composingRegion;
 
     final int replacementLength = formatter.replacementString.length;
-    // Don't modify the text ranges if the region is replaced with a string of
-    // the same length.
-    if (regionEnd - regionStart == replacementLength) {
-      return;
-    }
     if (composingRegion != null) {
       // All 4 indices are adjusted to account for the string replacement,
       // following the same logic below:
@@ -491,11 +486,11 @@ class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormatti
   }
 }
 
-/// A [FilteringFormatterFormattingStrategy] class for creating
-/// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion].
-///
-/// This is generally more robust than [_PreserveSelectionAndComposingRegion],
-/// See https://github.com/flutter/flutter/issues/79844 for more details.
+// A [FilteringFormatterFormattingStrategy] class for creating
+// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion].
+//
+// This is generally more robust than [_PreserveSelectionAndComposingRegion],
+// See https://github.com/flutter/flutter/issues/79844 for more details.
 class _PreserveSelectionAndSkipComposingRegion extends _PreserveSelectionAndComposingRegion {
   const _PreserveSelectionAndSkipComposingRegion();
   @override
@@ -513,27 +508,24 @@ class _PreserveSelectionAndSkipComposingRegion extends _PreserveSelectionAndComp
   }
 }
 
-/// A mutable, half-open range [`base`, `extent`) within a string.
-///
-/// This class can be used to update the composing region or the selection in a
-/// [FilteringFormatterFormattingStrategy] implementation. It has no public
-/// constructors, the [FilteringTextInputFormatter] that employs the
-/// [FilteringFormatterFormattingStrategy] is responsible for providing a
-/// [MutableTextRange] that has its [base] and [extent] initialized to the
-/// composing region or the selection's base offset and extent offset.
+// A mutable, half-open range [`base`, `extent`) within a string.
+//
+// The [FilteringFormatterFormattingStrategy] is responsible for providing a
+// [MutableTextRange] that has its [base] and [extent] initialized to the
+// composing region or the selection's base offset and extent offset.
 class _MutableTextRange<T extends TextRange> {
-  _MutableTextRange._(this.base, this.extent, this.originalRange);
+  _MutableTextRange(this.base, this.extent, this.originalRange);
 
-  static _MutableTextRange<TextRange>? _fromComposingRange(TextRange range) {
+  static _MutableTextRange<TextRange>? fromComposingRange(TextRange range) {
     return range.isValid && !range.isCollapsed
-        ? _MutableTextRange<TextRange>._(range.start, range.end, range)
+        ? _MutableTextRange<TextRange>(range.start, range.end, range)
         : null;
   }
 
-  static _MutableTextRange<TextSelection>? _fromTextSelection(
+  static _MutableTextRange<TextSelection>? fromTextSelection(
       TextSelection selection) {
     return selection.isValid
-        ? _MutableTextRange<TextSelection>._(selection.baseOffset, selection.extentOffset, selection)
+        ? _MutableTextRange<TextSelection>(selection.baseOffset, selection.extentOffset, selection)
         : null;
   }
 
@@ -554,18 +546,15 @@ class _MutableTextRange<T extends TextRange> {
   final T originalRange;
 }
 
-/// The transient state of a [FilteringTextInputFormatter] when it's formatting
-/// a new user input.
-///
-/// This class is used to perform text replacement and update the composing
-/// region or the selected region in a [FilteringFormatterFormattingStrategy]. It
-/// has no public constructors, the [FilteringTextInputFormatter] that employs
-/// the [FilteringFormatterFormattingStrategy] is responsible for providing a
-/// [_TextEditingValueAccumulator] to the [FilteringFormatterFormattingStrategy].
+// The intermediate state of a [FilteringFormatterFormattingStrategy] when it's
+// formatting a new user input.
+//
+// This class is used to perform text replacement and update the composing
+// region or the selected region in a [FilteringFormatterFormattingStrategy].
 class _TextEditingValueAccumulator {
-  _TextEditingValueAccumulator._(TextEditingValue textEditingValue)
-    : selection = _MutableTextRange._fromTextSelection(textEditingValue.selection),
-      composingRegion = _MutableTextRange._fromComposingRange(textEditingValue.composing),
+  _TextEditingValueAccumulator(TextEditingValue textEditingValue)
+    : selection = _MutableTextRange.fromTextSelection(textEditingValue.selection),
+      composingRegion = _MutableTextRange.fromComposingRange(textEditingValue.composing),
       originalText = textEditingValue.text;
 
   /// The pre-format string that was sent to the [FilteringTextInputFormatter]
@@ -594,6 +583,7 @@ class _TextEditingValueAccumulator {
   /// invalid or collapsed.
   final _MutableTextRange<TextRange>? composingRegion;
 
+  // Whether this state object has reached its end-of-life.
   bool debugFinalized = false;
 
   TextEditingValue finalize() {
