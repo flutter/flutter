@@ -125,62 +125,72 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 ///
 /// The [allow] parameter and the [filterPattern] parameter determine the
 /// regions of banned patterns in the input string, while [formattingStrategy]
-/// and [replacementString] determine how these regions should be updated.
+/// and determine how these regions should be updated.
 ///
 /// By default, instances of filtered characters found in the new
-/// [TextEditingValue]s will be replaced with the [replacementString] which
+/// [TextEditingValue]s will be replaced with the `replacementString` which
 /// defaults to the empty string, and attempts to preserve the existing
 /// [TextEditingValue.selection] as well as [TextEditingValue.composing] to
-/// values it would now fall at with the removed characters. See
-/// [formattingStrategy] for more details and how this behavior can be
-/// overridden.
+/// values it would now fall at with the removed characters.
+///
+/// Further customization can be achieved by using the
+/// `FilteringTextInputFormatter.withFormattingStrategy` constructor.
+/// See [formattingStrategy] and [FilteringFormatterFormattingStrategy] for more
+/// details on how this behavior can be overridden.
 class FilteringTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that prevents the insertion of characters
   /// based on a filter pattern.
   ///
-  /// If [allow] is true, then the filter pattern is an allow list,
+  /// If `allow` is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also
   /// the `FilteringTextInputFormatter.allow` constructor.
   // TODO(goderbauer): Cannot link to the constructor because of https://github.com/dart-lang/dartdoc/issues/2276.
   ///
-  /// If [allow] is false, then the filter pattern is a deny list,
+  /// If `allow` is false, then the filter pattern is a deny list,
   /// and characters that match the pattern are rejected. See also
   /// the [FilteringTextInputFormatter.deny] constructor.
   ///
-  /// The [filterPattern], [allow], [replacementString], and [formattingStrategy]
-  /// arguments must not be null.
+  /// The [filterPattern], [allow], and `replacementString` arguments must not
+  /// be null.
   FilteringTextInputFormatter(
-    this.filterPattern, {
-    required this.allow,
-    this.replacementString = '',
-    this.formattingStrategy = FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion,
-  })  : assert(filterPattern != null),
-        assert(allow != null),
-        assert(replacementString != null);
+    Pattern filterPattern, {
+    required bool allow,
+    String replacementString = '',
+  })  : this.withFormattingStrategy(
+          filterPattern,
+          allow: allow,
+          formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion(
+            replacementString: replacementString,
+          ),
+        );
 
   /// Creates a formatter that only allows characters matching a pattern.
   ///
-  /// The [filterPattern], [replacementString] and [formattingStrategy] arguments
-  /// must not be null.
+  /// The [filterPattern] and `replacementString` arguments must not be null.
   FilteringTextInputFormatter.allow(
-    this.filterPattern, {
-    this.replacementString = '',
-    this.formattingStrategy = FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion,
-  })  : assert(filterPattern != null),
-        assert(replacementString != null),
-        allow = true;
+    Pattern filterPattern, {
+    String replacementString = '',
+  })  : this(filterPattern, allow: true, replacementString: replacementString);
 
   /// Creates a formatter that blocks characters matching a pattern.
   ///
-  /// The [filterPattern], [replacementString] and [formattingStrategy] arguments
-  /// must not be null.
+  /// The [filterPattern], `replacementString` arguments must not be null.
   FilteringTextInputFormatter.deny(
+    Pattern filterPattern, {
+    String replacementString = '',
+  })  : this(filterPattern, allow: false, replacementString: replacementString);
+
+  /// Creates a formatter that applies a custom
+  /// [FilteringFormatterFormattingStrategy] on each matched [filterPattern] in
+  /// the input string, and the text regions that are between these matches.
+  ///
+  /// The [filterPattern], [allow] and [formattingStrategy] arguments must not
+  /// be null.
+  FilteringTextInputFormatter.withFormattingStrategy(
     this.filterPattern, {
-    this.replacementString = '',
-    this.formattingStrategy = FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion,
-  })  : assert(filterPattern != null),
-        assert(replacementString != null),
-        allow = false;
+    required this.allow,
+    required this.formattingStrategy,
+  });
 
   /// A [Pattern] to match and replace in incoming [TextEditingValue]s.
   ///
@@ -190,7 +200,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// specifying a pattern that characters must not match to be accepted.
   ///
   /// In general, the pattern should only match one character at a
-  /// time. See the discussion at [replacementString].
+  /// time. See the discussion at `replacementString`.
   ///
   /// {@tool snippet}
   /// Typically the pattern is a regular expression, as in:
@@ -219,57 +229,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// that match the filter are disallowed.
   final bool allow;
 
-  /// String used to replace banned patterns in the default
-  /// [formattingStrategy].
-  ///
-  /// For deny lists ([allow] is false), each match of the
-  /// [filterPattern] is replaced with this string. If [filterPattern]
-  /// can match more than one character at a time, then this can
-  /// result in multiple characters being replaced by a single
-  /// instance of this [replacementString].
-  ///
-  /// For allow lists ([allow] is true), sequences between matches of
-  /// [filterPattern] are replaced as one, regardless of the number of
-  /// characters.
-  ///
-  /// For example, consider a [filterPattern] consisting of just the
-  /// letter "o", applied to text field whose initial value is the
-  /// string "Into The Woods", with the [replacementString] set to
-  /// `*`.
-  ///
-  /// If [allow] is true, then the result will be "*o*oo*". Each
-  /// sequence of characters not matching the pattern is replaced by
-  /// its own single copy of the replacement string, regardless of how
-  /// many characters are in that sequence.
-  ///
-  /// If [allow] is false, then the result will be "Int* the W**ds".
-  /// Every matching sequence is replaced, and each "o" matches the
-  /// pattern separately.
-  ///
-  /// If the pattern was the [RegExp] `o+`, the result would be the
-  /// same in the case where [allow] is true, but in the case where
-  /// [allow] is false, the result would be "Int* the W*ds" (with the
-  /// two "o"s replaced by a single occurrence of the replacement
-  /// string) because both of the "o"s would be matched simultaneously
-  /// by the pattern.
-  ///
-  /// The default [formattingStrategy] also attempts to preserve the original
-  /// selection and composing region.
-  ///
-  /// In the case of the "Into the Woods" example above, if [allow] is false,
-  /// and the pattern is "the", and the selection is placed around "the":
-  /// "Into |the| Woods", the format result would be "Into |*| Woods", the
-  /// range of the selection would be the same as the pre-format text. Composing
-  /// regions are handled exactly the same way.
-  ///
-  /// However, if an endpoint of the selection (or an endpoint of the composing
-  /// range) is strictly within a banned pattern, that endpoint will be place at
-  /// the end of the [replacementString] after formatting: if [allow] is false,
-  /// and the pattern is still "the", the result of formatting
-  /// "Into t|he |Woods" would be "Into *| |Woods". See [formattingStrategy] for
-  /// how this behavior can be overridden.
-  final String replacementString;
-
   /// Determines how to perform formatting, update the selection and the
   /// composing region, on each matched [filterPattern] in the input string, and
   /// the text regions that are between these matches.
@@ -282,8 +241,10 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// The default [FilteringFormatterFormattingStrategy] is
   /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion],
   /// which replaces the text within every banned region with
-  /// [replacementString], and updates the composing region and the selection
+  /// `replacementString`, and updates the composing region and the selection
   /// accordingly so they do not fall within the removed regions.
+  ///
+  /// {@macro flutter.services.FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion}
   ///
   /// The framework also provides a
   /// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion]
@@ -298,6 +259,12 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// See the [FilteringFormatterFormattingStrategy] class documentation for
   /// how to implement a custom [FilteringFormatterFormattingStrategy].
   final FilteringFormatterFormattingStrategy formattingStrategy;
+
+  /// A [TextInputFormatter] that forces input to be a single line.
+  static final TextInputFormatter singleLineFormatter = FilteringTextInputFormatter.deny('\n');
+
+  /// A [TextInputFormatter] that takes in digits `[0-9]` only.
+  static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
 
   @override
   TextEditingValue formatEditUpdate(
@@ -327,12 +294,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     formattingStrategy.processPattern(false, previousMatch?.end ?? 0, newValue.text.length, this, formatState);
     return formattingStrategy.finalize(formatState);
   }
-
-  /// A [TextInputFormatter] that forces input to be a single line.
-  static final TextInputFormatter singleLineFormatter = FilteringTextInputFormatter.deny('\n');
-
-  /// A [TextInputFormatter] that takes in digits `[0-9]` only.
-  static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
 }
 
 /// An interface for performing formatting operations on matched patterns, and
@@ -368,14 +329,64 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 /// [String.+] operator.
 abstract class FilteringFormatterFormattingStrategy {
   /// A [FilteringFormatterFormattingStrategy] that removes all banned patterns,
-  /// and attempts to preserve the pre-format selection and composing region as
-  /// much as possible.
+  /// replacing them with a constant `replacementString`, and attempts to
+  /// preserve the pre-format selection and composing region as much as
+  /// possible.
   ///
   /// If the start index or the end index of the selection (or the composing
   /// region) is strictly inside a banned pattern described by `regionStart` and
   /// `regionEnd` (meaning, `regionStart` < index < `regionEndj), the index will
   /// be placed at the end of the replacement string.
-  static const FilteringFormatterFormattingStrategy preserveSelectionAndComposingRegion = _PreserveSelectionAndComposingRegion();
+  ///
+  /// {@template flutter.services.FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion}
+  /// For deny lists (`allow` is false), each match of the `filterPattern` is
+  /// replaced with this string. If `filterPattern` can match more than one
+  /// character at a time, then this can result in multiple characters being
+  /// replaced by a single instance of this `replacementString`.
+  ///
+  /// For allow lists (`allow` is true), sequences between matches of
+  /// `filterPattern` are replaced as one, regardless of the number of
+  /// characters.
+  ///
+  /// For example, consider a `filterPattern` consisting of just the
+  /// letter "o", applied to text field whose initial value is the
+  /// string "Into The Woods", with the `replacementString` set to
+  /// `*`.
+  ///
+  /// If `allow` is true, then the result will be "*o*oo*". Each
+  /// sequence of characters not matching the pattern is replaced by
+  /// its own single copy of the replacement string, regardless of how
+  /// many characters are in that sequence.
+  ///
+  /// If `allow` is false, then the result will be "Int* the W**ds".
+  /// Every matching sequence is replaced, and each "o" matches the
+  /// pattern separately.
+  ///
+  /// If the pattern was the [RegExp] `o+`, the result would be the
+  /// same in the case where `allow` is true, but in the case where
+  /// `allow` is false, the result would be "Int* the W*ds" (with the
+  /// two "o"s replaced by a single occurrence of the replacement
+  /// string) because both of the "o"s would be matched simultaneously
+  /// by the pattern.
+  ///
+  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
+  /// attempts to preserve the original selection and composing region as much
+  /// as possible. In the case of the "Into the Woods" example above, if `allow`
+  /// is false, and the pattern is "the", and the selection is placed around
+  /// "the": "Into |the| Woods", the format result would be "Into |*| Woods",
+  /// the range of the selection would be the same as the pre-format text.
+  /// Composing regions are handled exactly the same.
+  ///
+  /// However, if an endpoint of the selection (or an endpoint of the composing
+  /// range) is strictly within a banned pattern, that endpoint will be place at
+  /// the end of the `replacementString` after formatting: if `allow` is false,
+  /// and the pattern is still "the", the result of formatting
+  /// "Into t|he |Woods" would be "Into *| |Woods". See [formattingStrategy] for
+  /// how this behavior can be overridden.
+  /// {@endtemplate}
+  factory FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion({
+    required String replacementString,
+  }) = _PreserveSelectionAndComposingRegion;
 
   /// A [FilteringFormatterFormattingStrategy] that does not remove a banned
   /// word immediately if part of word is still being composed, and has the same
@@ -390,7 +401,9 @@ abstract class FilteringFormatterFormattingStrategy {
   /// user, but not from the text editor. Removing or replacing text from within
   /// the composing region may result in duplicated input. The default CJK input
   /// method on iOS 14.2 and many Android IMEs are known to have this problem.
-  static const FilteringFormatterFormattingStrategy preserveSelectionAndSkipComposingRegion = _PreserveSelectionAndSkipComposingRegion();
+  factory FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion({
+    required String replacementString,
+  }) = _PreserveSelectionAndSkipComposingRegion;
 
   /// Creates a formatting state object necessary for performing the
   /// formatting logic described by this [FilteringFormatterFormattingStrategy].
@@ -428,7 +441,9 @@ abstract class FilteringFormatterFormattingStrategy {
 /// A `FilteringFormatterFormattingStrategy` class for creating
 /// `FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion`
 class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormattingStrategy {
-  const _PreserveSelectionAndComposingRegion();
+  const _PreserveSelectionAndComposingRegion({ required this.replacementString });
+
+  final String replacementString;
 
   @override
   _TextEditingValueAccumulator prepareForNewInput(TextEditingValue oldValue, TextEditingValue newValue) => _TextEditingValueAccumulator(newValue);
@@ -457,14 +472,14 @@ class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormatti
     }
 
     // Replace the text with replacementString.
-    formattingState.stringBuffer.write(formatter.replacementString);
+    formattingState.stringBuffer.write(replacementString);
 
     // Now adjust the selection and the composing region.
 
     final _MutableTextRange<TextSelection>? selection = formattingState.selection;
     final _MutableTextRange<TextRange>? composingRegion = formattingState.composingRegion;
 
-    final int replacementLength = formatter.replacementString.length;
+    final int replacementLength = replacementString.length;
     if (composingRegion != null) {
       // All 4 indices are adjusted to account for the string replacement,
       // following the same logic below:
@@ -509,7 +524,10 @@ class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormatti
 // This is generally more robust than [_PreserveSelectionAndComposingRegion],
 // See https://github.com/flutter/flutter/issues/79844 for more details.
 class _PreserveSelectionAndSkipComposingRegion extends _PreserveSelectionAndComposingRegion {
-  const _PreserveSelectionAndSkipComposingRegion();
+  const _PreserveSelectionAndSkipComposingRegion({
+    required String replacementString,
+  }) : super(replacementString: replacementString);
+
   @override
   void _processBannedPattern(int regionStart, int regionEnd, FilteringTextInputFormatter formatter, _TextEditingValueAccumulator formattingState) {
     final TextRange? composingRegion = formattingState.composingRegion?.originalRange;
