@@ -2210,7 +2210,7 @@ void main() {
     expect(find.text('foo'), findsOneWidget);
   });
 
-  // Regressing test for https://github.com/flutter/flutter/issues/80869
+  // Regression test for https://github.com/flutter/flutter/issues/80869
   testWidgets('The menu position test in the scrollable widget', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
 
@@ -2220,7 +2220,7 @@ void main() {
           body: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                const SizedBox(height: 100,),
+                const SizedBox(height: 100),
                 PopupMenuButton<int>(
                   child: SizedBox(
                     key: buttonKey,
@@ -2235,7 +2235,7 @@ void main() {
                     const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
                   ],
                 ),
-                const SizedBox(height: 600,),
+                const SizedBox(height: 600),
               ],
             ),
           ),
@@ -2255,7 +2255,7 @@ void main() {
     // The 8.0 pixels is [_kMenuScreenPadding].
     expect(popupMenu, const Offset(8.0, 100.0));
 
-    // Close the popup.
+    // Close the menu.
     await tester.tap(find.byKey(buttonKey), warnIfMissed: false);
     await tester.pumpAndSettle();
 
@@ -2265,6 +2265,7 @@ void main() {
     button = tester.getTopLeft(find.byKey(buttonKey));
     expect(button, const Offset(0.0, 50.0));
 
+    // Open the menu again.
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
 
