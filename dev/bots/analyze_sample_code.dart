@@ -264,6 +264,7 @@ class SampleChecker {
   List<Line> get headers {
     return _headers ??= <String>[
       '// generated code',
+      '// ignore_for_file: directives_ordering',
       '// ignore_for_file: unused_import',
       '// ignore_for_file: unused_element',
       '// ignore_for_file: unused_local_variable',
