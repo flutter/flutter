@@ -938,6 +938,7 @@ class _SwitchPainter extends ToggleablePainter {
         _cachedThumbColor = thumbColor;
         _cachedThumbImage = thumbImage;
         _cachedThumbErrorListener = thumbErrorListener;
+        _cachedThumbPainter?.dispose();
         _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener).createBoxPainter(_handleDecorationChanged);
       }
       final BoxPainter thumbPainter = _cachedThumbPainter!;
@@ -953,5 +954,11 @@ class _SwitchPainter extends ToggleablePainter {
     } finally {
       _isPainting = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _cachedThumbPainter?.dispose();
+    super.dispose();
   }
 }
