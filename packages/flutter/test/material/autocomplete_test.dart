@@ -287,7 +287,6 @@ void main() {
 
   testWidgets('the default Autocomplete options widget has a maximum height of 200',
       (WidgetTester tester) async {
-    const double defaultHeight = 200.0;
     await tester.pumpWidget(MaterialApp(home: Scaffold(
       body: Autocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
@@ -299,7 +298,7 @@ void main() {
     )));
 
     final double resultingHeight = await getOptionsHeight(tester, '');
-    expect(resultingHeight, equals(defaultHeight));
+    expect(resultingHeight, equals(200));
   });
 
   testWidgets('the options height restricts to max desired height',
