@@ -1444,6 +1444,19 @@ flutter:
     expect(deferredComponents[0].assets[1].path, 'path/to/asset2.jpg');
     expect(deferredComponents[0].assets[2].path, 'path/to/asset3.jpg');
   });
+
+  testWithoutContext('FlutterManifest can parse empty dependencies', () async {
+    const String manifest = '''
+name: test
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.dependencies, isEmpty);
+  });
 }
 
 Matcher matchesManifest({

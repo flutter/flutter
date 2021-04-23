@@ -120,6 +120,7 @@ class PackagesGetCommand extends FlutterCommand {
         processManager: globals.processManager,
         platform: globals.platform,
         projectDir: flutterProject.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -325,6 +326,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           projectDir: flutterProject.directory,
+          generateDartPluginRegistry: true,
         );
 
         await generateLocalizationsSyntheticPackage(

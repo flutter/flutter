@@ -26,6 +26,7 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/targets/dart_plugin_registrant.dart';
 import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -1211,9 +1212,16 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
+      generateDartPluginRegistry: true,
     );
-    _lastBuild = await globals.buildSystem.buildIncremental(
+
+    final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       const GenerateLocalizationsTarget(),
+      const DartPluginRegistrantTarget(),
+    ]);
+
+    _lastBuild = await globals.buildSystem.buildIncremental(
+      compositeTarget,
       _environment,
       _lastBuild,
     );

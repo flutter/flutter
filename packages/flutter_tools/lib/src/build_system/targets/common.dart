@@ -17,6 +17,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
+import 'dart_plugin_registrant.dart';
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
 
@@ -209,6 +210,7 @@ class KernelSnapshot extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     GenerateLocalizationsTarget(),
+    DartPluginRegistrantTarget(),
   ];
 
   @override
@@ -286,6 +288,8 @@ class KernelSnapshot extends Target {
       fileSystemScheme: fileSystemScheme,
       dartDefines: decodeDartDefines(environment.defines, kDartDefines),
       packageConfig: packageConfig,
+      buildDir: environment.buildDir,
+      checkDartPluginRegistry: environment.generateDartPluginRegistry,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception();

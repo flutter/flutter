@@ -1176,6 +1176,7 @@ abstract class FlutterCommand extends Command<void> {
         processManager: globals.processManager,
         platform: globals.platform,
         projectDir: project.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
