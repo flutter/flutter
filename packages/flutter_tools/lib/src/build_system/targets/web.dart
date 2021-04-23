@@ -7,7 +7,6 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
