@@ -65,6 +65,16 @@ inline bool operator==(const FlutterOpenGLFramebuffer& a,
          a.destruction_callback == b.destruction_callback;
 }
 
+inline bool operator==(const FlutterMetalTexture& a,
+                       const FlutterMetalTexture& b) {
+  return a.texture_id == b.texture_id && a.texture == b.texture;
+}
+
+inline bool operator==(const FlutterMetalBackingStore& a,
+                       const FlutterMetalBackingStore& b) {
+  return a.texture == b.texture;
+}
+
 inline bool operator==(const FlutterOpenGLBackingStore& a,
                        const FlutterOpenGLBackingStore& b) {
   if (!(a.type == b.type)) {
@@ -100,6 +110,8 @@ inline bool operator==(const FlutterBackingStore& a,
       return a.open_gl == b.open_gl;
     case kFlutterBackingStoreTypeSoftware:
       return a.software == b.software;
+    case kFlutterBackingStoreTypeMetal:
+      return a.metal == b.metal;
   }
 
   return false;
@@ -216,6 +228,8 @@ inline std::string FlutterBackingStoreTypeToString(
       return "kFlutterBackingStoreTypeOpenGL";
     case kFlutterBackingStoreTypeSoftware:
       return "kFlutterBackingStoreTypeSoftware";
+    case kFlutterBackingStoreTypeMetal:
+      return "kFlutterBackingStoreTypeMetal";
   }
   return "Unknown";
 }
@@ -236,6 +250,12 @@ inline std::ostream& operator<<(std::ostream& out,
              << reinterpret_cast<void*>(item.destruction_callback);
 }
 
+inline std::ostream& operator<<(std::ostream& out,
+                                const FlutterMetalTexture& item) {
+  return out << "(FlutterMetalTexture) Texture ID: " << std::hex
+             << item.texture_id << std::dec << " Handle: 0x" << std::hex
+             << item.texture;
+}
 inline std::string FlutterPlatformViewMutationTypeToString(
     FlutterPlatformViewMutationType type) {
   switch (type) {
@@ -323,6 +343,11 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 
 inline std::ostream& operator<<(std::ostream& out,
+                                const FlutterMetalBackingStore& item) {
+  return out << "(FlutterMetalBackingStore) Texture: " << item.texture;
+}
+
+inline std::ostream& operator<<(std::ostream& out,
                                 const FlutterBackingStore& backing_store) {
   out << "(FlutterBackingStore) Struct size: " << backing_store.struct_size
       << " User Data: " << backing_store.user_data
@@ -336,6 +361,10 @@ inline std::ostream& operator<<(std::ostream& out,
 
     case kFlutterBackingStoreTypeSoftware:
       out << backing_store.software;
+      break;
+
+    case kFlutterBackingStoreTypeMetal:
+      out << backing_store.metal;
       break;
   }
 

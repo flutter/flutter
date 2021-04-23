@@ -565,6 +565,51 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
   return surface;
 }
 
+static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
+    GrDirectContext* context,
+    const FlutterBackingStoreConfig& config,
+    const FlutterMetalBackingStore* metal) {
+#ifdef SHELL_ENABLE_METAL
+  GrMtlTextureInfo texture_info;
+  if (!metal->texture.texture) {
+    FML_LOG(ERROR) << "Embedder supplied null Metal texture.";
+    return nullptr;
+  }
+  sk_cf_obj<FlutterMetalTextureHandle> mtl_texture;
+  mtl_texture.retain(metal->texture.texture);
+  texture_info.fTexture = mtl_texture;
+  GrBackendTexture backend_texture(config.size.width,   //
+                                   config.size.height,  //
+                                   GrMipMapped::kNo,    //
+                                   texture_info         //
+  );
+
+  SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
+
+  auto surface = SkSurface::MakeFromBackendTexture(
+      context,                   // context
+      backend_texture,           // back-end texture
+      kTopLeft_GrSurfaceOrigin,  // surface origin
+      1,                         // sample count
+      kBGRA_8888_SkColorType,    // color type
+      nullptr,                   // color space
+      &surface_properties,       // surface properties
+      static_cast<SkSurface::TextureReleaseProc>(
+          metal->texture.destruction_callback),  // release proc
+      metal->texture.user_data                   // release context
+  );
+
+  if (!surface) {
+    FML_LOG(ERROR) << "Could not wrap embedder supplied Metal render texture.";
+    return nullptr;
+  }
+
+  return surface;
+#else
+  return nullptr;
+#endif
+}
+
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 CreateEmbedderRenderTarget(const FlutterCompositor* compositor,
                            const FlutterBackingStoreConfig& config,
@@ -621,6 +666,10 @@ CreateEmbedderRenderTarget(const FlutterCompositor* compositor,
     case kFlutterBackingStoreTypeSoftware:
       render_surface = MakeSkSurfaceFromBackingStore(context, config,
                                                      &backing_store.software);
+      break;
+    case kFlutterBackingStoreTypeMetal:
+      render_surface =
+          MakeSkSurfaceFromBackingStore(context, config, &backing_store.metal);
       break;
   };
 

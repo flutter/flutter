@@ -495,6 +495,13 @@ typedef struct {
   /// Handle to the MTLTexture that is owned by the embedder. Engine will render
   /// the frame into this texture.
   FlutterMetalTextureHandle texture;
+  /// A baton that is not interpreted by the engine in any way. It will be given
+  /// back to the embedder in the destruction callback below. Embedder resources
+  /// may be associated with this baton.
+  void* user_data;
+  /// The callback invoked by the engine when it no longer needs this backing
+  /// store.
+  VoidCallback destruction_callback;
 } FlutterMetalTexture;
 
 /// Callback for when a metal texture is requested.
@@ -944,6 +951,17 @@ typedef struct {
   VoidCallback destruction_callback;
 } FlutterSoftwareBackingStore;
 
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterMetalBackingStore).
+  size_t struct_size;
+  union {
+    // A Metal texture for Flutter to render into. Ownership is not transferred
+    // to Flutter; the texture is CFRetained on successfully being passed in and
+    // CFReleased when no longer used.
+    FlutterMetalTexture texture;
+  };
+} FlutterMetalBackingStore;
+
 typedef enum {
   /// Indicates that the Flutter application requested that an opacity be
   /// applied to the platform view.
@@ -1001,6 +1019,8 @@ typedef enum {
   kFlutterBackingStoreTypeOpenGL,
   /// Specified an software allocation for Flutter to render into using the CPU.
   kFlutterBackingStoreTypeSoftware,
+  /// Specifies a Metal backing store. This is backed by a Metal texture.
+  kFlutterBackingStoreTypeMetal,
 } FlutterBackingStoreType;
 
 typedef struct {
@@ -1020,6 +1040,8 @@ typedef struct {
     FlutterOpenGLBackingStore open_gl;
     /// The description of the software backing store.
     FlutterSoftwareBackingStore software;
+    // The description of the Metal backing store.
+    FlutterMetalBackingStore metal;
   };
 } FlutterBackingStore;
 

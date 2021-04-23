@@ -10,6 +10,7 @@
 #import <Metal/Metal.h>
 
 #include "embedder.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -114,6 +115,268 @@ TEST_F(EmbedderTest, ExternalTextureMetal) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
 
   ASSERT_TRUE(ImageMatchesFixture("external_texture_metal.png", rendered_scene));
+}
+
+TEST_F(EmbedderTest, MetalCompositorMustBeAbleToRenderPlatformViews) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kMetalContext);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetMetalRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views");
+
+  builder.SetRenderTargetType(EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture);
+
+  fml::CountDownLatch latch(3);
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 3u);
+
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.struct_size = sizeof(backing_store);
+          backing_store.type = kFlutterBackingStoreTypeMetal;
+          backing_store.did_update = true;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0, 0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        {
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(123.0, 456.0);
+          layer.offset = FlutterPointMake(1.0, 2.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        {
+          FlutterBackingStore backing_store = *layers[2]->backing_store;
+          backing_store.struct_size = sizeof(backing_store);
+          backing_store.type = kFlutterBackingStoreTypeMetal;
+          backing_store.did_update = true;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[2], layer);
+        }
+
+        latch.CountDown();
+      });
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+}
+
+TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorMetal) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kMetalContext);
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
+  builder.SetMetalRendererConfig(SkISize::Make(800, 600));
+
+  auto rendered_scene = context.GetNextSceneImage();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
+
+  ASSERT_TRUE(ImageMatchesFixture("scene_without_custom_compositor.png", rendered_scene));
+}
+
+TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneMetal) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kMetalContext);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetMetalRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views_with_known_scene");
+
+  builder.SetRenderTargetType(EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture);
+
+  fml::CountDownLatch latch(5);
+
+  auto scene_image = context.GetNextSceneImage();
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 5u);
+
+        // Layer Root
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeMetal;
+          backing_store.did_update = true;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 1
+        {
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 1;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(50.0, 150.0);
+          layer.offset = FlutterPointMake(20.0, 20.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        // Layer 2
+        {
+          FlutterBackingStore backing_store = *layers[2]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeMetal;
+          backing_store.did_update = true;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[2], layer);
+        }
+
+        // Layer 3
+        {
+          FlutterPlatformView platform_view = *layers[3]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 2;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(50.0, 150.0);
+          layer.offset = FlutterPointMake(40.0, 40.0);
+
+          ASSERT_EQ(*layers[3], layer);
+        }
+
+        // Layer 4
+        {
+          FlutterBackingStore backing_store = *layers[4]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeMetal;
+          backing_store.did_update = true;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[4], layer);
+        }
+
+        latch.CountDown();
+      });
+
+  context.GetCompositor().SetPlatformViewRendererCallback(
+      [&](const FlutterLayer& layer, GrDirectContext* context) -> sk_sp<SkImage> {
+        auto surface = CreateRenderSurface(layer, context);
+        auto canvas = surface->getCanvas();
+        FML_CHECK(canvas != nullptr);
+
+        switch (layer.platform_view->identifier) {
+          case 1: {
+            SkPaint paint;
+            // See dart test for total order.
+            paint.setColor(SK_ColorGREEN);
+            paint.setAlpha(127);
+            const auto& rect = SkRect::MakeWH(layer.size.width, layer.size.height);
+            canvas->drawRect(rect, paint);
+            latch.CountDown();
+          } break;
+          case 2: {
+            SkPaint paint;
+            // See dart test for total order.
+            paint.setColor(SK_ColorMAGENTA);
+            paint.setAlpha(127);
+            const auto& rect = SkRect::MakeWH(layer.size.width, layer.size.height);
+            canvas->drawRect(rect, paint);
+            latch.CountDown();
+          } break;
+          default:
+            // Asked to render an unknown platform view.
+            FML_CHECK(false) << "Test was asked to composite an unknown platform view.";
+        }
+
+        return surface->makeImageSnapshot();
+      });
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  // Flutter still thinks it is 800 x 600. Only the root surface is rotated.
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+
+  ASSERT_TRUE(ImageMatchesFixture("compositor.png", scene_image));
 }
 
 }  // namespace testing
