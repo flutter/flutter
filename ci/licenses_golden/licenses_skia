@@ -1,4 +1,4 @@
-Signature: fbfc762f3c4ce10f8a8882dc20a3c4ce
+Signature: 10aad90468c834ee6de57df47baffe3d
 
 UNUSED LICENSES:
 
@@ -5696,6 +5696,8 @@ FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
 FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Paint.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/RuntimeShaderBuilder.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/Shader.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Surface.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
