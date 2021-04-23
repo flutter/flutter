@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -14,7 +12,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const List<String> kChromeArgs = <String>[
   '--disable-background-timer-throttling',
@@ -30,12 +29,12 @@ const List<String> kChromeArgs = <String>[
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
-  FileExceptionHandler exceptionHandler;
-  ChromiumLauncher chromeLauncher;
-  FileSystem fileSystem;
-  Platform platform;
-  FakeProcessManager processManager;
-  OperatingSystemUtils operatingSystemUtils;
+  late FileExceptionHandler exceptionHandler;
+  late ChromiumLauncher chromeLauncher;
+  late FileSystem fileSystem;
+  late Platform platform;
+  late FakeProcessManager processManager;
+  late OperatingSystemUtils operatingSystemUtils;
 
   setUp(() {
     exceptionHandler = FileExceptionHandler();
@@ -187,6 +186,121 @@ void main() {
 
     await chrome.close(); // does not exit with error.
     expect(logger.errorText, contains('Failed to restore Chrome preferences'));
+  });
+
+  testWithoutContext('can launch Chrome on x86_64 macOS', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      )
+    ]);
+
+    expect(
+          () async => chromiumLauncher.launch(
+        'example_url',
+        skipCheck: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  testWithoutContext('can launch x86_64 Chrome on ARM macOS', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'file',
+          'example_chrome',
+        ],
+        stdout: 'Mach-O 64-bit executable x86_64',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      )
+    ]);
+
+    expect(
+          () async => chromiumLauncher.launch(
+        'example_url',
+        skipCheck: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  testWithoutContext('can launch ARM Chrome natively on ARM macOS when installed', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'file',
+          'example_chrome',
+        ],
+        stdout: 'Mach-O 64-bit executable arm64',
+      ),
+      const FakeCommand(
+        command: <String>[
+          '/usr/bin/arch',
+          '-arm64',
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    ]);
+
+    expect(
+      () async => chromiumLauncher.launch(
+        'example_url',
+        skipCheck: true,
+      ),
+      returnsNormally,
+    );
   });
 
   testWithoutContext('can launch chrome with a custom debug port', () async {

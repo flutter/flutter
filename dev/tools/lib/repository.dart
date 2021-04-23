@@ -7,8 +7,8 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import './git.dart';
 import './globals.dart';

@@ -5,10 +5,10 @@
 import 'dart:ui' show window, SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -2210,85 +2210,69 @@ void main() {
     expect(find.text('foo'), findsOneWidget);
   });
 
-  testWidgets('The opened menu should follow if the button\'s position changed', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/80869
+  testWidgets('The menu position test in the scrollable widget', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
 
-    Widget buildFrame(double width, double height) {
-      return MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
-          body:  SizedBox(
-            height: height,
-            width: width,
-            child: Center(
-              child: PopupMenuButton<int>(
-                child: SizedBox(
-                  key: buttonKey,
-                  height: 10.0,
-                  width: 10.0,
-                  child: const ColoredBox(
-                    color: Colors.pink,
+          body: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const SizedBox(height: 100),
+                PopupMenuButton<int>(
+                  child: SizedBox(
+                    key: buttonKey,
+                    height: 10.0,
+                    width: 10.0,
+                    child: const ColoredBox(
+                      color: Colors.pink,
+                    ),
                   ),
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(child: Text('-1-'), value: 1,),
+                    const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
+                  ],
                 ),
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                  const PopupMenuItem<int>(child: Text('-1-'), value: 1),
-                  const PopupMenuItem<int>(child: Text('-2-'), value: 2),
-                ],
-              ),
+                const SizedBox(height: 600),
+              ],
             ),
           ),
         ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(100.0, 100.0));
+      ),
+    );
 
     // Open the menu.
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
 
-    //                 +--------+--------+ 100
-    //                 |        |        |
-    //                 |        | (50,50)|
-    //                 +--------+--------+
-    //                 |        |        |
-    //                 |        |        |
-    //             100 +--------+--------+
-    //
-    // The button is a rectangle of 10 * 10 size and is centered,
-    // so its top-left offset should be (45.0, 45.0).
-    Offset buttonOffset = tester.getTopLeft(find.byKey(buttonKey));
-    expect(buttonOffset, const Offset(45.0, 45.0));
+    Offset button = tester.getTopLeft(find.byKey(buttonKey));
+    expect(button, const Offset(0.0, 100.0));
 
-    // The top-left corner of the menu and button should be aligned.
-    Offset popupMenuOffset = tester.getTopLeft(find.byType(SingleChildScrollView));
-    expect(popupMenuOffset, buttonOffset);
+    Offset popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView).last);
+    // The menu should be positioned directly next to the top of the button.
+    // The 8.0 pixels is [_kMenuScreenPadding].
+    expect(popupMenu, const Offset(8.0, 100.0));
 
-    // Keep the menu opened and re-layout the screen.
-    await tester.pumpWidget(buildFrame(200.0, 300.0));
+    // Close the menu.
+    await tester.tap(find.byKey(buttonKey), warnIfMissed: false);
+    await tester.pumpAndSettle();
 
-    //                 +-----------+-----------+ 200
-    //                 |           |           |
-    //                 |           |           |
-    //                 |           |           |
-    //                 |           |           |
-    //                 |           | (100,150) |
-    //                 +-----------+-----------+
-    //                 |           |           |
-    //                 |           |           |
-    //                 |           |           |
-    //                 |           |           |
-    //                 |           |           |
-    //             300 +-----------+-----------+
-    //
-    // The button is a rectangle of 10 * 10 size and is centered,
-    // so its top-left offset should be (95.0, 145.0).
-    await tester.pump(); // Need a frame to update the menu.
-    buttonOffset = tester.getTopLeft(find.byKey(buttonKey));
-    expect(buttonOffset, const Offset(95.0, 145.0));
+    // Scroll a little bit.
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -50.0));
 
-    // The popup menu should follow the button.
-    popupMenuOffset = tester.getTopLeft(find.byType(SingleChildScrollView));
-    expect(popupMenuOffset, buttonOffset);
+    button = tester.getTopLeft(find.byKey(buttonKey));
+    expect(button, const Offset(0.0, 50.0));
+
+    // Open the menu again.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    popupMenu = tester.getTopLeft(find.byType(SingleChildScrollView).last);
+    // The menu should be positioned directly next to the top of the button.
+    // The 8.0 pixels is [_kMenuScreenPadding].
+    expect(popupMenu, const Offset(8.0, 50.0));
   });
 }
 

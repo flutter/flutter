@@ -27,7 +27,6 @@ import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
-import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
@@ -210,7 +209,7 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,
@@ -355,10 +354,9 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         xcode: globals.xcode,
         iproxy: IProxy(
-          iproxyPath: globals.artifacts.getArtifactPath(
-            Artifact.iproxy,
-            platform: TargetPlatform.ios,
-          ),
+          iproxyPath: globals.artifacts.getHostArtifact(
+            HostArtifact.iproxy,
+          ).path,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
