@@ -198,7 +198,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   ///
   /// When [optionsViewBuilder] is `null`, this property sets the maximum height
   /// that the options widget can occupy.
-  ///  
+  ///
   /// The default value is set to 200.
   final double optionsMaxHeight;
 
