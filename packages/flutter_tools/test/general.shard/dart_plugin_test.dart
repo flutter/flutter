@@ -43,7 +43,7 @@ void main() {
     });
 
     group('resolvePlatformImplementation', () {
-      test('selects implementation from direct dependency', () async {
+      testWithoutContext('selects implementation from direct dependency', () async {
         final Set<String> directDependencies = <String>{
           'url_launcher_linux',
           'url_launcher_macos',
@@ -131,7 +131,7 @@ void main() {
         );
       });
 
-      test('selects default implementation', () async {
+      testWithoutContext('selects default implementation', () async {
         final Set<String> directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
@@ -175,7 +175,7 @@ void main() {
         );
       });
 
-      test('selects default implementation if interface is direct dependency', () async {
+      testWithoutContext('selects default implementation if interface is direct dependency', () async {
         final Set<String> directDependencies = <String>{'url_launcher'};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
@@ -219,7 +219,7 @@ void main() {
         );
       });
 
-      test('selects user selected implementation despites default implementation', () async {
+      testWithoutContext('selects user selected implementation despites default implementation', () async {
         final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
@@ -281,7 +281,7 @@ void main() {
         );
       });
 
-      test('selects user selected implementation despites default implementation', () async {
+      testWithoutContext('selects user selected implementation despites default implementation', () async {
         final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
