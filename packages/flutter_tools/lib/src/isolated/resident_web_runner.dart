@@ -537,7 +537,7 @@ class ResidentWebRunner extends ResidentRunner {
             kNoneWorker,
             true,
             debuggingOptions.nativeNullAssertions,
-            null
+            null,
           );
         }
         await device.device.startApp(
