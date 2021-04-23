@@ -39,7 +39,8 @@ std::unique_ptr<Surface> EmbedderSurfaceMetal::CreateGPUSurface() {
     return nullptr;
   }
 
-  auto surface = std::make_unique<GPUSurfaceMetal>(this, main_context_);
+  const bool render_to_surface = !external_view_embedder_;
+  auto surface = std::make_unique<GPUSurfaceMetal>(this, main_context_, render_to_surface);
 
   if (!surface->IsValid()) {
     return nullptr;
