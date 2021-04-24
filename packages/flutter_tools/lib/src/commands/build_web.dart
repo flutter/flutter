@@ -103,11 +103,11 @@ class BuildWebCommand extends BuildSubCommand {
         .childDirectory('web')
         .childFile('index.html')
         .readAsStringSync()
-        .contains(r'$FLUTTER_BASE_HREF') &&
+        .contains(kBaseHrefPlaceholder) &&
         stringArg('base-href') != null) {
       throwToolExit(
-          r'Placeholder $FLUTTER_BASE_HREF not found in base tag of index.html.'
-          r' Please set href attribute of base tag as $FLUTTER_BASE_HREF to use this flag.');
+          "Couldn't find the placeholder for base href. "
+          r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html');
     }
     displayNullSafetyMode(buildInfo);
     await buildWeb(

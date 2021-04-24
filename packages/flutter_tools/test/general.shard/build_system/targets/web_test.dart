@@ -108,8 +108,8 @@ void main() {
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('index.html')
         .createSync(recursive: true);
-    webResources.childFile('index.html').writeAsStringSync(r'''
-    <!DOCTYPE html><html><base href="$FLUTTER_BASE_HREF"><head></head></html>
+    webResources.childFile('index.html').writeAsStringSync('''
+    <!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
     await const WebReleaseBundle().build(environment);

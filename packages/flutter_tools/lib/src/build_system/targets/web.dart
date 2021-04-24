@@ -39,6 +39,10 @@ const String kCspMode = 'cspMode';
 /// Base href to set in index.html in flutter build command
 const String kBaseHref = 'baseHref';
 
+/// Placeholder for base href
+const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+
+
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
@@ -371,13 +375,13 @@ class WebReleaseBundle extends Target {
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
-        if (resultString.contains(r'$FLUTTER_BASE_HREF') &&
+        if (resultString.contains(kBaseHrefPlaceholder) &&
             environment.defines[kBaseHref] == null) {
-          resultString = resultString.replaceAll(r'$FLUTTER_BASE_HREF', '/');
-        } else if (resultString.contains(r'$FLUTTER_BASE_HREF') &&
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
+        } else if (resultString.contains(kBaseHrefPlaceholder) &&
             environment.defines[kBaseHref] != null) {
           resultString = resultString.replaceAll(
-              r'$FLUTTER_BASE_HREF', environment.defines[kBaseHref]);
+              kBaseHrefPlaceholder, environment.defines[kBaseHref]);
         }
         outputFile.writeAsStringSync(resultString);
         continue;

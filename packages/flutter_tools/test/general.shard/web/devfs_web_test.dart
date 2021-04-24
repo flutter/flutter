@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -209,8 +210,8 @@ void main() {
     expect(await response.readAsString(), htmlContent);
   }));
 
-  test(r'serves index.html at / if href attribute is $FLUTTER_BASE_HREF', () => testbed.run(() async {
-    const String htmlContent = r'<html><head><base href ="$FLUTTER_BASE_HREF"></head><body id="test"></body></html>';
+  test('serves index.html at / if href attribute is $kBaseHrefPlaceholder', () => testbed.run(() async {
+    const String htmlContent = '<html><head><base href ="$kBaseHrefPlaceholder"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory
         .childDirectory('web')
       ..createSync();
@@ -220,7 +221,7 @@ void main() {
         .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
     expect(response.statusCode, HttpStatus.ok);
-    expect(await response.readAsString(), htmlContent.replaceAll(r'$FLUTTER_BASE_HREF', '/'));
+    expect(await response.readAsString(), htmlContent.replaceAll(kBaseHrefPlaceholder, '/'));
   }));
 
   test('does not serve outside the base path', () => testbed.run(() async {

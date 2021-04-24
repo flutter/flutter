@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:logging/logging.dart' as logging;
@@ -485,9 +486,9 @@ class WebAssetServer implements AssetReader {
 
     if (indexFile.existsSync()) {
       String indexFileContent =  indexFile.readAsStringSync();
-      if(indexFileContent.contains(r'$FLUTTER_BASE_HREF') )
+      if(indexFileContent.contains(kBaseHrefPlaceholder) )
         {
-          indexFileContent =  indexFileContent.replaceAll(r'$FLUTTER_BASE_HREF', '/');
+          indexFileContent =  indexFileContent.replaceAll(kBaseHrefPlaceholder, '/');
           headers[HttpHeaders.contentLengthHeader] = indexFileContent.length.toString();
           return shelf.Response.ok(indexFileContent,headers: headers);
         }
@@ -1031,7 +1032,7 @@ String _parseBasePathFromIndexHtml(File indexHtml) {
   String baseHref =
       baseElement?.attributes == null ? null : baseElement.attributes['href'];
 
-  if (baseHref == null || baseHref == r'$FLUTTER_BASE_HREF') {
+  if (baseHref == null || baseHref == kBaseHrefPlaceholder) {
     baseHref = '';
   } else if (!baseHref.startsWith('/')) {
     throw ToolExit(
