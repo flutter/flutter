@@ -23,7 +23,10 @@ import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
+import 'ios/xcodeproj.dart';
+import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
@@ -38,6 +41,9 @@ AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 Usage get flutterUsage => context.get<Usage>()!;
+XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
+Xcode? get xcode => context.get<Xcode>();
+IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 

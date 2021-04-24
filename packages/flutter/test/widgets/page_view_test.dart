@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
@@ -984,5 +984,30 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('PageView.padEnds tests', (WidgetTester tester) async {
+    Finder viewportFinder() => find.byType(SliverFillViewport, skipOffstage: false);
+
+    // PageView() defaults to true.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        children: const <Widget>[],
+      ),
+    ));
+
+    expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, true);
+
+    // PageView(padEnds: false) is propagated properly.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        padEnds: false,
+        children: const <Widget>[],
+      ),
+    ));
+
+    expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
   });
 }

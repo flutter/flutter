@@ -5,8 +5,8 @@
 import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'mouse_tracker_test_utils.dart';
@@ -39,7 +39,7 @@ void main() {
   // This annotation also contains a cursor with a value of `testCursor`.
   // The mouse tracker records the cursor requests it receives to `logCursors`.
   TestAnnotationTarget _setUpWithOneAnnotation({
-    required List<PointerEvent> logEvents
+    required List<PointerEvent> logEvents,
   }) {
     final TestAnnotationTarget oneAnnotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) {
@@ -233,15 +233,13 @@ void main() {
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.move, const Offset(0.0, 201.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-    ]));
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[]));
     events.clear();
 
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.up, const Offset(0.0, 301.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-    ]));
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[]));
     events.clear();
   });
 
@@ -266,8 +264,7 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
     addTearDown(() => dispatchRemoveDevice());
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-    ]));
+    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
@@ -445,10 +442,10 @@ void main() {
     bool isInHitRegionOne = true;
     bool isInHitRegionTwo = false;
     final TestAnnotationTarget annotation1 = TestAnnotationTarget(
-      onEnter: (PointerEnterEvent event) {}
+      onEnter: (PointerEnterEvent event) {},
     );
     final TestAnnotationTarget annotation2 = TestAnnotationTarget(
-      onExit: (PointerExitEvent event) {}
+      onExit: (PointerExitEvent event) {},
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegionOne)
@@ -602,8 +599,7 @@ class BaseEventMatcher extends Matcher {
 
   final PointerEvent expected;
 
-  bool _matchesField(Map<dynamic, dynamic> matchState, String field,
-      dynamic actual, dynamic expected) {
+  bool _matchesField(Map<dynamic, dynamic> matchState, String field, dynamic actual, dynamic expected) {
     if (actual != expected) {
       addStateInfo(matchState, <dynamic, dynamic>{
         'field': field,
@@ -746,8 +742,12 @@ class _EventListCriticalFieldsMatcher extends Matcher {
         .add('\nsince it ');
       final Description subDescription = StringDescription();
       final Matcher matcher = matchState['matcher'] as Matcher;
-      matcher.describeMismatch(matchState['actual'], subDescription,
-        matchState['state'] as Map<dynamic, dynamic>, verbose);
+      matcher.describeMismatch(
+        matchState['actual'],
+        subDescription,
+        matchState['state'] as Map<dynamic, dynamic>,
+        verbose,
+      );
       mismatchDescription.add(subDescription.toString());
       return mismatchDescription;
     }

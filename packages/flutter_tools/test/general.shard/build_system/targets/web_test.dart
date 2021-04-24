@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
 const List<String> kDart2jsLinuxArgs = <String>[

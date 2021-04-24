@@ -80,7 +80,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -116,7 +116,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -152,7 +152,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -189,7 +189,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -228,7 +228,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -265,7 +265,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -314,7 +314,7 @@ void main() {
     final String build = testEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',

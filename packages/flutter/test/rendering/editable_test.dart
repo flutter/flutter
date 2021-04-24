@@ -111,7 +111,7 @@ void main() {
         '   ║   size: 10.0\n'
         '   ║   height: 1.0x\n'
         '   ║   "12345"\n'
-        '   ╚═══════════\n'
+        '   ╚═══════════\n',
       ),
     );
   });
@@ -320,7 +320,7 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61024
+  });
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -2970,7 +2970,8 @@ void main() {
     );
     editable.layout(BoxConstraints.loose(const Size(100, 100)));
     final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
-      const TextSelection(baseOffset: 0, extentOffset: 1));
+      const TextSelection(baseOffset: 0, extentOffset: 1),
+    );
     expect(endpoints[0].point.dx, 0);
   });
 
@@ -3050,7 +3051,8 @@ void main() {
       expect(
         editable.getRectForComposingRange(const TextRange(start: 0, end: 1)),
         // On web this evaluates to a zero-width Rect.
-        anyOf(isNull, (Rect rect) => rect.width == 0));
+        anyOf(isNull, (Rect rect) => rect.width == 0),
+      );
     });
 
     test('more than 1 run on the same line', () {
@@ -3060,7 +3062,7 @@ void main() {
         children: <TextSpan>[
           const TextSpan(text: 'A', style: tinyText),
           TextSpan(text: 'A' * 20, style: normalText),
-          const TextSpan(text: 'A', style: tinyText)
+          const TextSpan(text: 'A', style: tinyText),
         ],
       );
       // Give it a width that forces the editable to wrap.
@@ -3325,7 +3327,7 @@ void main() {
         (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
-          ..paragraph()
+          ..paragraph(),
       );
     });
   });

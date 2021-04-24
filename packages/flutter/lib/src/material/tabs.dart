@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'colors.dart';
@@ -57,7 +58,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
-class Tab extends StatelessWidget {
+class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// Creates a material design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
@@ -140,6 +141,14 @@ class Tab extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('text', text, defaultValue: null));
     properties.add(DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
+  }
+
+  @override
+  Size get preferredSize {
+    if ((text != null || child != null) && icon != null)
+      return const Size.fromHeight(_kTextAndIconTabHeight);
+    else
+      return const Size.fromHeight(_kTabHeight);
   }
 }
 
@@ -891,14 +900,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [AppBar] uses this size to compute its own preferred size.
   @override
   Size get preferredSize {
+    double maxHeight = _kTabHeight;
     for (final Widget item in tabs) {
-      if (item is Tab) {
-        final Tab tab = item;
-        if ((tab.text != null || tab.child != null) && tab.icon != null)
-          return Size.fromHeight(_kTextAndIconTabHeight + indicatorWeight);
+      if (item is PreferredSizeWidget) {
+        final double itemHeight = item.preferredSize.height;
+        maxHeight = math.max(itemHeight, maxHeight);
       }
     }
-    return Size.fromHeight(_kTabHeight + indicatorWeight);
+    return Size.fromHeight(maxHeight + indicatorWeight);
   }
 
   @override

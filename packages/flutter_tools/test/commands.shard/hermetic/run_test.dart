@@ -507,6 +507,16 @@ void main() {
       '--no-pub',
     ]), throwsA(isA<RPCError>()));
   });
+
+  testUsingContext('Passes sksl bundle info the build options', () async {
+    final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '--no-pub',
+      '--bundle-sksl-path=foo.json',
+    ]), throwsA(isA<ToolExit>().having((ToolExit exit) => exit.message, 'message', contains('No SkSL shader bundle found at foo.json'))));
+  });
 }
 
 class MockCache extends Mock implements Cache {}
