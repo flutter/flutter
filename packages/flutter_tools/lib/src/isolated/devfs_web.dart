@@ -9,7 +9,6 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:logging/logging.dart' as logging;
@@ -29,6 +28,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/targets/web.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
