@@ -367,7 +367,7 @@ class ReplacementTextEditingController extends TextEditingController {
     this.composingRegionPrioritized = false
   }) : assert(replacements.isNotEmpty), super.fromValue(value);
 
-  /// The [TextEditingInlineSpanReplacment]s that are evaluated on the editing value.
+  /// The [TextEditingInlineSpanReplacement]s that are evaluated on the editing value.
   ///
   /// Each replacement is evaluated in order from first to last. If multiple replacement
   /// [Pattern]s match against the same range of text,
@@ -376,7 +376,7 @@ class ReplacementTextEditingController extends TextEditingController {
   ///
   /// For example, if given replacements with patterns of '{hello}' and
   /// 'hello', only the first replacement will be used as the second one is always
-  /// overlapping with the first.
+  /// overlapping with the first.git@github.com:flutter/packages.git
   final List<TextEditingInlineSpanReplacement> replacements;
 
   /// If composing regions should be matched against for replacements.
