@@ -57,7 +57,13 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// ```
 ///
 /// ```dart
+/// void main() {
+///   runApp(const AnimatedListSample());
+/// }
+///
 /// class AnimatedListSample extends StatefulWidget {
+///   const AnimatedListSample({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _AnimatedListSampleState createState() => _AnimatedListSampleState();
 /// }
@@ -156,6 +162,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }
 /// }
 ///
+/// typedef RemovedItemBuilder = Widget Function(int item, BuildContext context, Animation<double> animation);
+///
 /// /// Keeps a Dart [List] in sync with an [AnimatedList].
 /// ///
 /// /// The [insert] and [removeAt] methods apply to both the internal list and
@@ -173,7 +181,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   }) : _items = List<E>.from(initialItems ?? <E>[]);
 ///
 ///   final GlobalKey<AnimatedListState> listKey;
-///   final dynamic removedItemBuilder;
+///   final RemovedItemBuilder removedItemBuilder;
 ///   final List<E> _items;
 ///
 ///   AnimatedListState? get _animatedList => listKey.currentState;
@@ -189,7 +197,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///       _animatedList!.removeItem(
 ///         index,
 ///         (BuildContext context, Animation<double> animation) {
-///           return removedItemBuilder(removedItem, context, animation);
+///           return removedItemBuilder(index, context, animation);
 ///         },
 ///       );
 ///     }
@@ -250,10 +258,6 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///       ),
 ///     );
 ///   }
-/// }
-///
-/// void main() {
-///   runApp(AnimatedListSample());
 /// }
 /// ```
 /// {@end-tool}
@@ -398,17 +402,17 @@ class AnimatedList extends StatefulWidget {
     assert((){
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary(
-            'AnimatedList.of() called with a context that does not contain an AnimatedList.'),
+          ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
           ErrorDescription(
-            'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().'),
+            'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().',
+          ),
           ErrorHint(
             'This can happen when the context provided is from the same StatefulWidget that '
             'built the AnimatedList. Please see the AnimatedList documentation for examples '
-            'of how to refer to an AnimatedListState object:'
-            '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html'
+            'of how to refer to an AnimatedListState object:\n'
+            '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html',
           ),
-          context.describeElement('The context used was')
+          context.describeElement('The context used was'),
         ]);
       }
       return true;
@@ -531,9 +535,11 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// ```
 ///
 /// ```dart
-/// void main() => runApp(SliverAnimatedListSample());
+/// void main() => runApp(const SliverAnimatedListSample());
 ///
 /// class SliverAnimatedListSample extends StatefulWidget {
+///   const SliverAnimatedListSample({Key? key}) : super(key: key);
+///
 ///   @override
 ///   _SliverAnimatedListSampleState createState() => _SliverAnimatedListSampleState();
 /// }
@@ -599,7 +605,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///         _selectedItem = null;
 ///       });
 ///     } else {
-///       _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
+///       _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
 ///         content: Text(
 ///           'Select an item to remove from the list.',
 ///           style: TextStyle(fontSize: 20),
@@ -617,7 +623,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///         body: CustomScrollView(
 ///           slivers: <Widget>[
 ///             SliverAppBar(
-///               title: Text(
+///               title: const Text(
 ///                 'SliverAnimatedList',
 ///                 style: TextStyle(fontSize: 30),
 ///               ),
@@ -630,7 +636,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///                 tooltip: 'Insert a new item.',
 ///                 iconSize: 32,
 ///               ),
-///               actions: [
+///               actions: <Widget>[
 ///                 IconButton(
 ///                   icon: const Icon(Icons.remove_circle),
 ///                   onPressed: _remove,
@@ -651,6 +657,8 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   }
 /// }
 ///
+/// typedef RemovedItemBuilder = Widget Function(int item, BuildContext context, Animation<double> animation);
+///
 /// // Keeps a Dart [List] in sync with an [AnimatedList].
 /// //
 /// // The [insert] and [removeAt] methods apply to both the internal list and
@@ -668,7 +676,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   }) : _items = List<E>.from(initialItems ?? <E>[]);
 ///
 ///   final GlobalKey<SliverAnimatedListState> listKey;
-///   final dynamic removedItemBuilder;
+///   final RemovedItemBuilder removedItemBuilder;
 ///   final List<E> _items;
 ///
 ///   SliverAnimatedListState get _animatedList => listKey.currentState!;
@@ -683,7 +691,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///     if (removedItem != null) {
 ///       _animatedList.removeItem(
 ///         index,
-///         (BuildContext context, Animation<double> animation) => removedItemBuilder(removedItem, context, animation),
+///         (BuildContext context, Animation<double> animation) => removedItemBuilder(index, context, animation),
 ///       );
 ///     }
 ///     return removedItem;
@@ -818,7 +826,8 @@ class SliverAnimatedList extends StatefulWidget {
           'for examples of how to refer to an AnimatedListState object: '
           'https://api.flutter.dev/flutter/widgets/SliverAnimatedListState-class.html\n'
           'The context used was:\n'
-          '  $context');
+          '  $context',
+        );
       }
       return true;
     }());

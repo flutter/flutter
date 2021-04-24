@@ -7,8 +7,8 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -17,17 +17,17 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
@@ -41,6 +41,7 @@ void main() {
     FakeProcessManager fakeProcessManager;
     MemoryFileSystem fs;
     Cache cache;
+
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
       ProcessManager: () => fakeProcessManager,
@@ -50,14 +51,14 @@ void main() {
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       fs = MemoryFileSystem.test();
       cache = Cache.test(
         processManager: FakeProcessManager.any(),
       );
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       fs.file(project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       ).path).createSync(recursive: true);
@@ -96,11 +97,7 @@ void main() {
 
     testUsingContext('Licenses available, build tools not, apk exists', () async {
       when(sdk.latestVersion).thenReturn(null);
-      final FlutterProject project = FlutterProject.current();
-      final File gradle = project.android.hostAppGradleRoot.childFile(
-        globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
-      )..createSync(recursive: true);
-
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       project.android.hostAppGradleRoot
         .childFile('gradle.properties')
         .writeAsStringSync('irrelevant');
@@ -111,8 +108,6 @@ void main() {
           .createSync(recursive: true);
       gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
       gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
-
-      fakeProcessManager.addCommand(FakeCommand(command: <String>[gradle.path, 'dependencies']));
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,

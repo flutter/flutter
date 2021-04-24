@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final LayerLink link = LayerLink();
@@ -35,7 +35,7 @@ void main() {
                   link: linkToUse ?? link,
                   targetAnchor: Alignment.center,
                   followerAnchor: Alignment.center,
-                  child: Container(key: key, height: 20.0, width: 20.0),
+                  child: SizedBox(key: key, height: 20.0, width: 20.0),
                 ),
               ),
             ],
@@ -76,7 +76,7 @@ void main() {
                 link: link,
                 targetAnchor: targetAlignment,
                 followerAnchor: followerAlignment,
-                child: Container(key: key, height: 20.0, width: 20.0),
+                child: SizedBox(key: key, height: 20.0, width: 20.0),
               ),
             ),
           ],
@@ -119,7 +119,7 @@ void main() {
                 angle: 1.0, // radians
                 child: CompositedTransformTarget(
                   link: link,
-                  child: Container(key: key1, width: 80.0, height: 10.0),
+                  child: SizedBox(key: key1, width: 80.0, height: 10.0),
                 ),
               ),
             ),
@@ -132,7 +132,7 @@ void main() {
                   link: link,
                   targetAnchor: targetAlignment,
                   followerAnchor: followerAlignment,
-                  child: Container(key: key2, width: 40.0, height: 20.0),
+                  child: SizedBox(key: key2, width: 40.0, height: 20.0),
                 ),
               ),
             ),
@@ -184,7 +184,7 @@ void main() {
                 angle: 1.0, // radians
                 child: CompositedTransformTarget(
                   link: link,
-                  child: Container(key: key1, width: 80.0, height: 10.0),
+                  child: SizedBox(key: key1, width: 80.0, height: 10.0),
                 ),
               ),
             ),
@@ -205,7 +205,7 @@ void main() {
                           link: link,
                           targetAnchor: targetAlignment,
                           followerAnchor: followerAlignment,
-                          child: Container(key: key2, width: 40.0, height: 20.0),
+                          child: SizedBox(key: key2, width: 40.0, height: 20.0),
                         ),
                       ),
                     ),
@@ -262,7 +262,7 @@ void main() {
               top: 456.0,
               child: CompositedTransformTarget(
                 link: link,
-                child: Container(key: key1, height: 10.0, width: 10.0),
+                child: SizedBox(key: key1, height: 10.0, width: 10.0),
               ),
             ),
             CompositedTransformFollower(
@@ -271,7 +271,7 @@ void main() {
                 key: key2,
                 behavior: HitTestBehavior.opaque,
                 onTap: () { tapped = true; },
-                child: Container(key: key3, height: 2.0, width: 2.0),
+                child: SizedBox(key: key3, height: 2.0, width: 2.0),
               ),
             ),
           ],

@@ -977,26 +977,32 @@ class _RenderDecoration extends RenderBox {
     boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, boxConstraints);
     boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, boxConstraints);
 
-    final double inputWidth = math.max(0.0, constraints.maxWidth - (
-      _boxSize(icon).width
-      + contentPadding.left
-      + _boxSize(prefixIcon).width
-      + _boxSize(prefix).width
-      + _boxSize(suffix).width
-      + _boxSize(suffixIcon).width
-      + contentPadding.right));
+    final double inputWidth = math.max(
+      0.0,
+      constraints.maxWidth - (
+        _boxSize(icon).width
+        + contentPadding.left
+        + _boxSize(prefixIcon).width
+        + _boxSize(prefix).width
+        + _boxSize(suffix).width
+        + _boxSize(suffixIcon).width
+        + contentPadding.right),
+    );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
     double suffixIconWidth = _boxSize(suffixIcon).width;
     if (decoration.border!.isOutline) {
       suffixIconWidth = lerpDouble(suffixIconWidth, 0.0, decoration.floatingLabelProgress)!;
     }
-    final double labelWidth = math.max(0.0, constraints.maxWidth - (
-      _boxSize(icon).width
-      + contentPadding.left
-      + _boxSize(prefixIcon).width
-      + suffixIconWidth
-      + contentPadding.right));
+    final double labelWidth = math.max(
+      0.0,
+      constraints.maxWidth - (
+        _boxSize(icon).width
+        + contentPadding.left
+        + _boxSize(prefixIcon).width
+        + suffixIconWidth
+        + contentPadding.right),
+    );
     boxToBaseline[label] = _layoutLineBox(
       label,
       boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale),
@@ -1268,13 +1274,12 @@ class _RenderDecoration extends RenderBox {
     final double containerHeight = contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox?>[prefix, input, suffix])
-      + subtextHeight
       + contentPadding.bottom
       + densityOffset.dy;
     final double minContainerHeight = decoration.isDense! || expands
       ? 0.0
       : kMinInteractiveDimension;
-    return math.max(containerHeight, minContainerHeight);
+    return math.max(containerHeight, minContainerHeight) + subtextHeight;
   }
 
   @override
@@ -1497,8 +1502,13 @@ class _RenderDecoration extends RenderBox {
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
-      _transformLayer = context.pushTransform(needsCompositing, offset, _labelTransform!, _paintLabel,
-          oldLayer: _transformLayer);
+      _transformLayer = context.pushTransform(
+        needsCompositing,
+        offset,
+        _labelTransform!,
+        _paintLabel,
+        oldLayer: _transformLayer,
+      );
     } else {
       _transformLayer = null;
     }
@@ -1588,7 +1598,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.decoration.icon, _DecorationSlot.icon);
     _mountChild(widget.decoration.input, _DecorationSlot.input);
@@ -1685,7 +1695,7 @@ class _DecorationElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -1760,7 +1770,7 @@ class _AffixText extends StatelessWidget {
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? (text == null ? null : Text(text!, style: style,)),
+        child: child ?? (text == null ? null : Text(text!, style: style)),
       ),
     );
   }
@@ -1945,7 +1955,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
-      value: labelIsInitiallyFloating ? 1.0 : 0.0
+      value: labelIsInitiallyFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
@@ -2019,24 +2029,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getActiveColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+      return themeData.colorScheme.primary;
     }
     return themeData.hintColor;
   }
 
   Color _getDefaultBorderColor(ThemeData themeData) {
     if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
+        return themeData.colorScheme.primary;
     }
     if (decoration!.filled!) {
       return themeData.hintColor;
@@ -2363,7 +2363,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
-    return _Decorator(
+    final _Decorator decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
         isCollapsed: decoration!.isCollapsed,
@@ -2393,6 +2393,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isFocused: isFocused,
       expands: widget.expands,
     );
+
+    final BoxConstraints? constraints = decoration!.constraints ?? themeData.inputDecorationTheme.constraints;
+    if (constraints != null) {
+      return ConstrainedBox(
+        constraints: constraints,
+        child: decorator,
+      );
+    }
+    return decorator;
   }
 }
 
@@ -2415,7 +2424,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       icon: Icon(Icons.send),
 ///       hintText: 'Hint Text',
@@ -2438,7 +2447,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration.collapsed(
 ///       hintText: 'Hint Text',
 ///       border: OutlineInputBorder(),
@@ -2458,7 +2467,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return TextField(
+///   return const TextField(
 ///     decoration: InputDecoration(
 ///       hintText: 'Hint Text',
 ///       errorText: 'Error Text',
@@ -2530,7 +2539,7 @@ class InputDecoration {
     this.errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior,
@@ -2563,6 +2572,7 @@ class InputDecoration {
     this.enabled = true,
     this.semanticCounterText,
     this.alignLabelWithHint,
+    this.constraints,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
@@ -2576,7 +2586,7 @@ class InputDecoration {
     required this.hintText,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior,
@@ -2589,8 +2599,10 @@ class InputDecoration {
     this.border = InputBorder.none,
     this.enabled = true,
   }) : assert(enabled != null),
-       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
-              'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
+       assert(
+         !(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+         'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always',
+       ),
        icon = null,
        labelText = null,
        labelStyle = null,
@@ -2623,7 +2635,8 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
-       alignLabelWithHint = false;
+       alignLabelWithHint = false,
+       constraints = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2758,7 +2771,7 @@ class InputDecoration {
   ///
   @Deprecated(
     'Use floatingLabelBehavior instead. '
-    'This feature was deprecated after v1.13.2.'
+    'This feature was deprecated after v1.13.2.',
   )
   final bool hasFloatingPlaceholder;
 
@@ -2875,7 +2888,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3043,7 +3056,7 @@ class InputDecoration {
   ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
   ///     child: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
+  ///       children: const <Widget>[
   ///         TextField(
   ///           decoration: InputDecoration(
   ///             hintText: 'Normal Icon Constraints',
@@ -3318,6 +3331,20 @@ class InputDecoration {
   /// Defaults to false.
   final bool? alignLabelWithHint;
 
+  /// Defines minimum and maximum sizes for the [InputDecorator].
+  ///
+  /// Typically the decorator will fill the horizontal space it is given. For
+  /// larger screens, it may be useful to have the maximum width clamped to
+  /// a given value so it doesn't fill the whole screen. This property
+  /// allows you to control how big the decorator will be in its available
+  /// space.
+  ///
+  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
+  /// [InputDecorationTheme.constraints] will be used. If that
+  /// is null then the decorator will fill the available width with
+  /// a default height based on text size.
+  final BoxConstraints? constraints;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   InputDecoration copyWith({
@@ -3365,6 +3392,7 @@ class InputDecoration {
     bool? enabled,
     String? semanticCounterText,
     bool? alignLabelWithHint,
+    BoxConstraints? constraints,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3411,6 +3439,7 @@ class InputDecoration {
       enabled: enabled ?? this.enabled,
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
+      constraints: constraints ?? this.constraints,
     );
   }
 
@@ -3446,6 +3475,7 @@ class InputDecoration {
       enabledBorder: enabledBorder ?? theme.enabledBorder,
       border: border ?? theme.border,
       alignLabelWithHint: alignLabelWithHint ?? theme.alignLabelWithHint,
+      constraints: constraints ?? theme.constraints,
     );
   }
 
@@ -3499,7 +3529,8 @@ class InputDecoration {
         && other.border == border
         && other.enabled == enabled
         && other.semanticCounterText == semanticCounterText
-        && other.alignLabelWithHint == alignLabelWithHint;
+        && other.alignLabelWithHint == alignLabelWithHint
+        && other.constraints == constraints;
   }
 
   @override
@@ -3551,6 +3582,7 @@ class InputDecoration {
       enabled,
       semanticCounterText,
       alignLabelWithHint,
+      constraints,
     ];
     return hashList(values);
   }
@@ -3598,6 +3630,7 @@ class InputDecoration {
       if (!enabled) 'enabled: false',
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
+      if (constraints != null) 'constraints: $constraints',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
@@ -3628,7 +3661,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
@@ -3649,12 +3682,15 @@ class InputDecorationTheme with Diagnosticable {
     this.enabledBorder,
     this.border,
     this.alignLabelWithHint = false,
+    this.constraints,
   }) : assert(isDense != null),
        assert(isCollapsed != null),
        assert(filled != null),
        assert(alignLabelWithHint != null),
-       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
-        'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always');
+       assert(
+         !(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+         'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always',
+       );
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.
@@ -3722,7 +3758,7 @@ class InputDecorationTheme with Diagnosticable {
   /// Defaults to true.
   @Deprecated(
     'Use floatingLabelBehavior instead. '
-    'This feature was deprecated after v1.13.2.'
+    'This feature was deprecated after v1.13.2.',
   )
   final bool hasFloatingPlaceholder;
 
@@ -3968,6 +4004,23 @@ class InputDecorationTheme with Diagnosticable {
   /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;
 
+  /// Defines minimum and maximum sizes for the [InputDecorator].
+  ///
+  /// Typically the decorator will fill the horizontal space it is given. For
+  /// larger screens, it may be useful to have the maximum width clamped to
+  /// a given value so it doesn't fill the whole screen. This property
+  /// allows you to control how big the decorator will be in its available
+  /// space.
+  ///
+  /// If null, then the decorator will fill the available width with
+  /// a default height based on text size.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.constraints], which can override this setting for a
+  ///    given decorator.
+  final BoxConstraints? constraints;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationTheme copyWith({
@@ -3979,7 +4032,7 @@ class InputDecorationTheme with Diagnosticable {
     int? errorMaxLines,
     @Deprecated(
       'Use floatingLabelBehavior instead. '
-      'This feature was deprecated after v1.13.2.'
+      'This feature was deprecated after v1.13.2.',
     )
     bool? hasFloatingPlaceholder,
     FloatingLabelBehavior? floatingLabelBehavior,
@@ -4000,6 +4053,7 @@ class InputDecorationTheme with Diagnosticable {
     InputBorder? enabledBorder,
     InputBorder? border,
     bool? alignLabelWithHint,
+    BoxConstraints? constraints,
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -4027,6 +4081,7 @@ class InputDecorationTheme with Diagnosticable {
       enabledBorder: enabledBorder ?? this.enabledBorder,
       border: border ?? this.border,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
+      constraints: constraints ?? this.constraints,
     );
   }
 
@@ -4058,6 +4113,7 @@ class InputDecorationTheme with Diagnosticable {
       enabledBorder,
       border,
       alignLabelWithHint,
+      constraints,
     ]);
   }
 
@@ -4092,6 +4148,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.enabledBorder == enabledBorder
         && other.border == border
         && other.alignLabelWithHint == alignLabelWithHint
+        && other.constraints == constraints
         && other.disabledBorder == disabledBorder;
   }
 
@@ -4124,5 +4181,6 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
     properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: defaultTheme.constraints));
   }
 }

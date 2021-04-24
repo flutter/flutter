@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const int kLollipopVersionCode = 21;
 const String kLastLogcatTimestamp = '11-27 15:39:04.506';
@@ -43,7 +43,7 @@ void main() {
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion < 21', () async {
@@ -66,7 +66,7 @@ void main() {
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags null apiVersion', () async {
@@ -89,7 +89,7 @@ void main() {
       processManager,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags when requesting past logs', () async {
@@ -115,7 +115,7 @@ void main() {
       includePastLogs: true,
     );
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AdbLogReader handles process early exit', () async {

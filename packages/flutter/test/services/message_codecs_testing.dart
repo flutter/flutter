@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes) {
   final ByteData encoded = codec.encodeMessage(message)!;
@@ -46,8 +46,7 @@ bool deepEquals(dynamic valueA, dynamic valueB) {
 bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
   if (valueA is ByteData) {
     return valueB is ByteData
-        && deepEqualsList(
-            valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
+        && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
   }
   if (valueA is Uint8List)
     return valueB is Uint8List && deepEqualsList(valueA, valueB);

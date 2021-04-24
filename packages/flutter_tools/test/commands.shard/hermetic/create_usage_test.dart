@@ -10,11 +10,13 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -66,7 +68,7 @@ void main() {
       });
     });
 
-    test('set template type as usage value', () => testbed.run(() async {
+    testUsingContext('set template type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -83,7 +85,7 @@ void main() {
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'plugin'));
     }));
 
-    test('set iOS host language type as usage value', () => testbed.run(() async {
+    testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -104,7 +106,7 @@ void main() {
 
     }));
 
-    test('set Android host language type as usage value', () => testbed.run(() async {
+    testUsingContext('set Android host language type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 

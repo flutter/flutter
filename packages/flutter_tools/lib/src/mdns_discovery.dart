@@ -162,7 +162,7 @@ class MDnsObservatoryDiscovery {
     final String host = usesIpv6
       ? InternetAddress.loopbackIPv6.address
       : InternetAddress.loopbackIPv4.address;
-    return await buildObservatoryUri(
+    return buildObservatoryUri(
       device,
       host,
       result.port,

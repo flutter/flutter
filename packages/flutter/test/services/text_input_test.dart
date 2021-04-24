@@ -7,8 +7,7 @@ import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -62,16 +61,17 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
         // From requestExistingInputState
         const MethodCall(
-            'TextInput.setEditingState',
-            <String, dynamic>{
-              'text': '',
-              'selectionBase': -1,
-              'selectionExtent': -1,
-              'selectionAffinity': 'TextAffinity.downstream',
-              'selectionIsDirectional': false,
-              'composingBase': -1,
-              'composingExtent': -1,
-            }),
+          'TextInput.setEditingState',
+          <String, dynamic>{
+            'text': '',
+            'selectionBase': -1,
+            'selectionExtent': -1,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ),
       ]);
     });
   });
@@ -134,7 +134,7 @@ void main() {
     test('basic structure', () async {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
-      const TextInputType number2 = TextInputType.numberWithOptions(); // ignore: use_named_constants
+      const TextInputType number2 = TextInputType.numberWithOptions();
       const TextInputType signed = TextInputType.numberWithOptions(signed: true);
       const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
       const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
@@ -198,8 +198,7 @@ void main() {
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -212,8 +211,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test('TextInputClient performPrivateCommand method is called with float',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with float', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -225,8 +223,7 @@ void main() {
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : 0.5}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : 0.5}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -239,9 +236,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with CharSequence array',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with CharSequence array', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -253,8 +248,7 @@ void main() {
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : ["abc", "efg"]}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : ["abc", "efg"]}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -267,9 +261,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with CharSequence',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with CharSequence', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -282,8 +274,7 @@ void main() {
           const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : "abc"}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abc"}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -296,9 +287,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with float array',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with float array', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -311,8 +300,7 @@ void main() {
           const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -325,8 +313,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test('TextInputClient showAutocorrectionPromptRect method is called',
-        () async {
+    test('TextInputClient showAutocorrectionPromptRect method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -455,16 +442,6 @@ class FakeTextChannel implements MethodChannel {
   @override
   void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
 
-  @override
-  bool checkMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
-
-
-  @override
-  void setMockMethodCallHandler(Future<void>? Function(MethodCall call)? handler)  => throw UnimplementedError();
-
-  @override
-  bool checkMockMethodCallHandler(Future<void> Function(MethodCall call)? handler) => throw UnimplementedError();
-
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);
     bool hasError = false;
@@ -478,7 +455,8 @@ class FakeTextChannel implements MethodChannel {
         print(
           'Index $i did not match:\n'
           '  actual:   $outgoingString\n'
-          '  expected: $expectedString');
+          '  expected: $expectedString',
+        );
         hasError = true;
       }
     }

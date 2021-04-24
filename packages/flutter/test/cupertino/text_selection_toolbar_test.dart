@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
@@ -54,6 +54,13 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
   }
 }
 
+class TestBox extends SizedBox {
+  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
+
+  static const double itemHeight = 44.0;
+  static const double itemWidth = 100.0;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -75,18 +82,7 @@ void main() {
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = 44.0;
-    const double itemWidth = 100.0;
-    final List<Widget> children = <Widget>[
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
-    ];
-
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -105,25 +101,25 @@ void main() {
     );
 
     // All children fit on the screen, so they are all rendered.
-    expect(find.byType(Container), findsNWidgets(children.length));
+    expect(find.byType(TestBox), findsNWidgets(children.length));
     expect(_findOverflowNextButton(), findsNothing);
     expect(_findOverflowBackButton(), findsNothing);
 
     // Adding one more child makes the children overflow.
     setState(() {
       children.add(
-        Container(width: itemWidth, height: height),
+        const TestBox(),
       );
     });
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(children.length - 1));
+    expect(find.byType(TestBox), findsNWidgets(children.length - 1));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsNothing);
 
     // Tap the overflow next button to show the next page of children.
     await tester.tap(_findOverflowNextButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(1));
+    expect(find.byType(TestBox), findsNWidgets(1));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsOneWidget);
 
@@ -131,28 +127,28 @@ void main() {
     // disabled and there are no more children to display.
     await tester.tap(_findOverflowNextButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(1));
+    expect(find.byType(TestBox), findsNWidgets(1));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
     await tester.tap(_findOverflowBackButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(7));
+    expect(find.byType(TestBox), findsNWidgets(7));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsNothing);
 
     // Adding 7 more children overflows onto a third page.
     setState(() {
-      children.add(Container(width: itemWidth, height: height));
-      children.add(Container(width: itemWidth, height: height));
-      children.add(Container(width: itemWidth, height: height));
-      children.add(Container(width: itemWidth, height: height));
-      children.add(Container(width: itemWidth, height: height));
-      children.add(Container(width: itemWidth, height: height));
+      children.add(const TestBox());
+      children.add(const TestBox());
+      children.add(const TestBox());
+      children.add(const TestBox());
+      children.add(const TestBox());
+      children.add(const TestBox());
     });
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(7));
+    expect(find.byType(TestBox), findsNWidgets(7));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsNothing);
 
@@ -160,28 +156,28 @@ void main() {
     await tester.tap(_findOverflowNextButton());
     await tester.pumpAndSettle();
     // With the back button, only six children fit on this page.
-    expect(find.byType(Container), findsNWidgets(6));
+    expect(find.byType(TestBox), findsNWidgets(6));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow next button again to show the third page of children.
     await tester.tap(_findOverflowNextButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(1));
+    expect(find.byType(TestBox), findsNWidgets(1));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the second page.
     await tester.tap(_findOverflowBackButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(6));
+    expect(find.byType(TestBox), findsNWidgets(6));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
     await tester.tap(_findOverflowBackButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(7));
+    expect(find.byType(TestBox), findsNWidgets(7));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb);

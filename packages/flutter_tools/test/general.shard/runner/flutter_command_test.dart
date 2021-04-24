@@ -15,30 +15,30 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 void main() {
   group('Flutter Command', () {
-    MockitoCache cache;
-    MockitoUsage usage;
+    MockCache cache;
+    TestUsage usage;
     FakeClock clock;
     MockProcessInfo mockProcessInfo;
 
     setUp(() {
       Cache.disableLocking();
-      cache = MockitoCache();
-      usage = MockitoUsage();
+      cache = MockCache();
+      usage = TestUsage();
       clock = FakeClock();
       mockProcessInfo = MockProcessInfo();
 
@@ -87,7 +87,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
       await runner.run(<String>['deprecated']);
 
-      expect(testLogger.statusText,
+      expect(testLogger.errorText,
         contains('The "deprecated" command is deprecated and will be removed in '
             'a future version of Flutter.'));
       expect(flutterCommand.usage,
@@ -135,7 +135,7 @@ void main() {
       final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
       final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
 
-      expect(() async => await runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
+      expect(() async => runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -160,24 +160,19 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(
-        'dummy',
-        parameters: anyNamed('parameters'),
-      ));
-      verify(usage.sendEvent(
-        'tool-command-result',
-        'dummy',
-        label: 'success',
-        parameters: anyNamed('parameters'),
-      ));
-      expect(verify(usage.sendEvent(
+      expect(usage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'success',
+        ),
+        const TestUsageEvent(
           'tool-command-max-rss',
           'dummy',
           label: 'success',
-          value: captureAnyNamed('value'),
-        )).captured[0],
-        10,
-      );
+          value: 10,
+        ),
+      ]);
     });
 
     testUsingCommandContext('reports command that results in warning', () async {
@@ -191,24 +186,19 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(
-        'dummy',
-        parameters: anyNamed('parameters'),
-      ));
-      verify(usage.sendEvent(
-        'tool-command-result',
-        'dummy',
-        label: 'warning',
-        parameters: anyNamed('parameters'),
-      ));
-      expect(verify(usage.sendEvent(
+      expect(usage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'warning',
+        ),
+        const TestUsageEvent(
           'tool-command-max-rss',
           'dummy',
           label: 'warning',
-          value: captureAnyNamed('value'),
-        )).captured[0],
-        10,
-      );
+          value: 10,
+        ),
+      ]);
     });
 
     testUsingCommandContext('reports command that results in failure', () async {
@@ -252,32 +242,25 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-          return null; // unreachable
         }
       );
-
       try {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        verify(usage.sendCommand(
-          'dummy',
-          parameters: anyNamed('parameters'),
-        ));
-        verify(usage.sendEvent(
-          'tool-command-result',
-          'dummy',
-          label: 'fail',
-          parameters: anyNamed('parameters'),
-        ));
-        expect(verify(usage.sendEvent(
+        expect(usage.events, <TestUsageEvent>[
+          const TestUsageEvent(
+            'tool-command-result',
+            'dummy',
+            label: 'fail',
+          ),
+          const TestUsageEvent(
             'tool-command-max-rss',
             'dummy',
             label: 'fail',
-            value: captureAnyNamed('value'),
-          )).captured[0],
-          10,
-        );
+            value: 10,
+          ),
+        ]);
       }
     });
 
@@ -366,24 +349,19 @@ void main() {
         signalController.add(mockSignal);
         await completer.future;
 
-        verify(usage.sendCommand(
-          'dummy',
-          parameters: anyNamed('parameters'),
-        ));
-        verify(usage.sendEvent(
-          'tool-command-result',
-          'dummy',
-          label: 'killed',
-          parameters: anyNamed('parameters'),
-        ));
-        expect(verify(usage.sendEvent(
+        expect(usage.events, <TestUsageEvent>[
+          const TestUsageEvent(
+            'tool-command-result',
+            'dummy',
+            label: 'killed',
+          ),
+          const TestUsageEvent(
             'tool-command-max-rss',
             'dummy',
             label: 'killed',
-            value: captureAnyNamed('value'),
-          )).captured[0],
-          10,
-        );
+            value: 10,
+          ),
+        ]);
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
@@ -439,17 +417,13 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
-      expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
-        <dynamic>[
+      expect(usage.timings, contains(
+        const TestTimingEvent(
           'flutter',
           'dummy',
-          const Duration(milliseconds: 1000),
-          'fail',
-        ],
-      );
+          Duration(milliseconds: 1000),
+          label: 'fail',
+        )));
     });
 
     testUsingCommandContext('no timing report without usagePath', () async {
@@ -459,9 +433,8 @@ void main() {
       final DummyFlutterCommand flutterCommand =
           DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
-      verifyNever(usage.sendTiming(
-                   any, any, any,
-                   label: anyNamed('label')));
+
+      expect(usage.timings, isEmpty);
     });
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
@@ -479,17 +452,14 @@ void main() {
         commandFunction: () async => commandResult
       );
       await flutterCommand.run();
-      expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
-        <dynamic>[
+
+      expect(usage.timings, contains(
+        const TestTimingEvent(
           'flutter',
           'dummy',
-          const Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
-          'success-blah1-blah2-blah3',
-        ],
-      );
+          Duration(milliseconds: 500),
+          label: 'success-blah1-blah2-blah3',
+        )));
     });
 
     testUsingCommandContext('report failed execution timing too', () async {
@@ -499,7 +469,6 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-          return null; // unreachable
         },
       );
 
@@ -507,18 +476,13 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-
-        expect(
-          verify(usage.sendTiming(
-                  captureAny, captureAny, captureAny,
-                  label: captureAnyNamed('label'))).captured,
-          <dynamic>[
+        expect(usage.timings, contains(
+          const TestTimingEvent(
             'flutter',
             'dummy',
-            const Duration(milliseconds: 1000),
-            'fail',
-          ],
-        );
+            Duration(milliseconds: 1000),
+            label: 'fail',
+          )));
       }
     });
 
@@ -551,16 +515,79 @@ void main() {
 
       await runner.run(<String>['test']);
 
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
-        'cd49': '1', 'cd50': '1',
-      })).called(1);
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
+      expect(usage.events, containsAll(<TestUsageEvent>[
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'runtime-mode',
+          label: 'NullSafetyMode.sound',
+        ),
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'stats',
+          parameters: <String, String>{
+            'cd49': '1', 'cd50': '1',
+          },
+        ),
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'language-version',
+          label: '2.12',
+        ),
+      ]));
     }, overrides: <Type, Generator>{
       Pub: () => FakePub(),
-      Usage: () => MockitoUsage(),
+      Usage: () => usage,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('use packagesPath to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.packagesPath, 'foo');
+    });
+
+    testUsingContext('dds options', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds-port=1']);
+      expect(ddsCommand.enableDds, isTrue);
+      expect(ddsCommand.ddsPort, 1);
+    });
+
+    testUsingContext('dds options --dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds']);
+      expect(ddsCommand.enableDds, isTrue);
+    });
+
+    testUsingContext('dds options --no-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--no-dds']);
+      expect(ddsCommand.enableDds, isFalse);
+    });
+
+    testUsingContext('dds options --disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--disable-dds']);
+      expect(ddsCommand.enableDds, isFalse);
+    });
+
+    testUsingContext('dds options --no-disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--no-disable-dds']);
+      expect(ddsCommand.enableDds, isTrue);
+    });
+
+    testUsingContext('dds options --dds --disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds', '--disable-dds']);
+      expect(() => ddsCommand.enableDds, throwsToolExit());
     });
   });
 }
@@ -574,23 +601,6 @@ class FakeDeprecatedCommand extends FlutterCommand {
 
   @override
   bool get deprecated => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
-}
-
-class FakeNullSafeCommand extends FlutterCommand {
-  FakeNullSafeCommand() {
-    addEnableExperimentation(hide: false);
-  }
-
-  @override
-  String get description => 'test null safety';
-
-  @override
-  String get name => 'safety';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -644,7 +654,23 @@ class FakeReportingNullSafetyCommand extends FlutterCommand {
   }
 }
 
-class MockVersion extends Mock implements FlutterVersion {}
+class FakeDdsCommand extends FlutterCommand {
+  FakeDdsCommand() {
+    addDdsOptions(verboseHelp: false);
+  }
+
+  @override
+  String get description => 'test';
+
+  @override
+  String get name => 'test';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
 class MockProcessInfo extends Mock implements ProcessInfo {}
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
 
@@ -659,7 +685,7 @@ class FakeSignals implements Signals {
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    if (signal == ProcessSignal.SIGTERM) {
+    if (signal == ProcessSignal.sigterm) {
       return delegate.addHandler(subForSigTerm, handler);
     }
     return delegate.addHandler(signal, handler);
@@ -680,4 +706,20 @@ class FakeClock extends Fake implements SystemClock {
   DateTime now() {
     return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
   }
+}
+
+class MockCache extends Mock implements Cache {}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+  }) async { }
 }

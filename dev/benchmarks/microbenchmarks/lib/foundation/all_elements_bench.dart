@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-// ignore: implementation_imports
-import 'package:flutter_test/src/all_elements.dart';
+import 'package:flutter_test/flutter_test.dart' show collectAllElementsFrom;
 
 import '../common.dart';
 
@@ -43,7 +42,10 @@ Future<void> main() async {
     ),
   ));
 
-  await SchedulerBinding.instance.endOfFrame;
+  // Wait for frame rendering to stabilize.
+  for (int i = 0; i < 5; i++) {
+    await SchedulerBinding.instance.endOfFrame;
+  }
 
   final Stopwatch watch = Stopwatch();
 

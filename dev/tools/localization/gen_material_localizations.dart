@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'localizations_utils.dart';
 
-HeaderGenerator generateMaterialHeader = (String regenerateInstructions) {
+String generateMaterialHeader(String regenerateInstructions) {
   return '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -27,11 +29,11 @@ import '../material_localizations.dart';
 // These classes are constructed by the [getMaterialTranslation] method at the
 // bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
 // method defined in `flutter_localizations/lib/src/material_localizations.dart`.''';
-};
+}
 
 /// Returns the source of the constructor for a GlobalMaterialLocalizations
 /// subclass.
-ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
+String generateMaterialConstructor(LocaleInfo locale) {
   final String localeName = locale.originalString;
   return '''
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
@@ -60,7 +62,7 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );''';
-};
+}
 
 const String materialFactoryName = 'getMaterialTranslation';
 

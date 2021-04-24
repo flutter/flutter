@@ -6,18 +6,18 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:mockito/mockito.dart';
-import 'package:fake_async/fake_async.dart';
+
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart' show MockProcess,
-                                   MockProcessManager,
+import '../../src/mocks.dart' show MockProcessManager,
                                    flakyProcessFactory;
 
 void main() {
@@ -26,7 +26,7 @@ void main() {
     ProcessUtils processUtils;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       processUtils = ProcessUtils(
         processManager: fakeProcessManager,
         logger: BufferLogger.test(),
@@ -41,7 +41,7 @@ void main() {
         exitCode: 1,
       ));
 
-      expect(() async => await processUtils.run(<String>['false'], throwOnError: true),
+      expect(() async => processUtils.run(<String>['false'], throwOnError: true),
              throwsA(isA<ProcessException>()));
     });
   });
@@ -49,35 +49,17 @@ void main() {
   group('shutdownHooks', () {
     testWithoutContext('runInExpectedOrder', () async {
       int i = 1;
-      int serializeRecording1;
-      int serializeRecording2;
-      int postProcessRecording;
       int cleanup;
 
       final ShutdownHooks shutdownHooks = ShutdownHooks(logger: BufferLogger.test());
 
       shutdownHooks.addShutdownHook(() async {
-        serializeRecording1 = i++;
-      }, ShutdownStage.SERIALIZE_RECORDING);
-
-      shutdownHooks.addShutdownHook(() async {
         cleanup = i++;
-      }, ShutdownStage.CLEANUP);
-
-      shutdownHooks.addShutdownHook(() async {
-        postProcessRecording = i++;
-      }, ShutdownStage.POST_PROCESS_RECORDING);
-
-      shutdownHooks.addShutdownHook(() async {
-        serializeRecording2 = i++;
-      }, ShutdownStage.SERIALIZE_RECORDING);
+      });
 
       await shutdownHooks.runShutdownHooks();
 
-      expect(serializeRecording1, lessThanOrEqualTo(2));
-      expect(serializeRecording2, lessThanOrEqualTo(2));
-      expect(postProcessRecording, 3);
-      expect(cleanup, 4);
+      expect(cleanup, 1);
     });
   });
 
@@ -101,7 +83,7 @@ void main() {
       );
     });
 
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout, {
+    FakeProcess Function(List<String>) processMetaFactory(List<String> stdout, {
       List<String> stderr = const <String>[],
     }) {
       final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
@@ -110,7 +92,7 @@ void main() {
       final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(
         stderr.map<List<int>>((String s) => s.codeUnits,
       ));
-      return (List<String> command) => MockProcess(stdout: stdoutStream, stderr: stderrStream);
+      return (List<String> command) => FakeProcess(stdout: stdoutStream, stderr: stderrStream);
     }
 
     testWithoutContext('Command output is not wrapped.', () async {
@@ -133,7 +115,7 @@ void main() {
       // MockProcessManager has an implementation of start() that returns the
       // result of processFactory.
       flakyProcessManager = MockProcessManager();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       processUtils = ProcessUtils(
         processManager: fakeProcessManager,
         logger: BufferLogger.test(),
@@ -277,7 +259,7 @@ void main() {
     BufferLogger testLogger;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),
@@ -519,7 +501,7 @@ void main() {
         ArgumentError('Bad input'),
       );
       expect(
-        () async => await processUtils.exitsHappy(<String>['invalid']),
+        () async => processUtils.exitsHappy(<String>['invalid']),
         throwsArgumentError,
       );
     });

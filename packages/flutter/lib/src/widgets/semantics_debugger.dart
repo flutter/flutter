@@ -6,8 +6,8 @@ import 'dart:math' as math;
 import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -184,7 +184,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 class _SemanticsClient extends ChangeNotifier {
   _SemanticsClient(PipelineOwner pipelineOwner) {
     _semanticsHandle = pipelineOwner.ensureSemantics(
-      listener: _didUpdateSemantics
+      listener: _didUpdateSemantics,
     );
   }
 

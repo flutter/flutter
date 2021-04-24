@@ -14,9 +14,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
+import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -25,6 +24,7 @@ import 'platform.dart';
 import 'restoration.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
+import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
 
@@ -79,74 +79,29 @@ enum TestBindingEventSource {
 
 const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 
-/// A [BinaryMessenger] subclass that is used as the default binary messenger
-/// under testing environment.
+/// Overrides the [ServicesBinding]'s binary messenger logic to use
+/// [TestDefaultBinaryMessenger].
 ///
-/// It tracks status of data sent across the Flutter platform barrier, which is
-/// useful for testing frameworks to monitor and synchronize against the
-/// platform messages.
-class TestDefaultBinaryMessenger extends BinaryMessenger {
-  /// Creates a [TestDefaultBinaryMessenger] instance.
-  ///
-  /// The [delegate] instance must not be null.
-  TestDefaultBinaryMessenger(this.delegate): assert(delegate != null);
-
-  /// The delegate [BinaryMessenger].
-  final BinaryMessenger delegate;
-
-  final List<Future<ByteData?>> _pendingMessages = <Future<ByteData?>>[];
-
-  /// The number of incomplete/pending calls sent to the platform channels.
-  int get pendingMessageCount => _pendingMessages.length;
-
+/// Test bindings that are used by tests that mock message handlers for plugins
+/// should mix in this binding to enable the use of the
+/// [TestDefaultBinaryMessenger] APIs.
+mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   @override
-  Future<ByteData?>? send(String channel, ByteData? message) {
-    final Future<ByteData?>? resultFuture = delegate.send(channel, message);
-    if (resultFuture != null) {
-      _pendingMessages.add(resultFuture);
-      resultFuture
-        .catchError((Object error) { /* errors are the responsibility of the caller */ })
-        .whenComplete(() => _pendingMessages.remove(resultFuture));
-    }
-    return resultFuture;
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
   }
 
-  /// Returns a Future that completes after all the platform calls are finished.
-  ///
-  /// If a new platform message is sent after this method is called, this new
-  /// message is not tracked. Use with [pendingMessageCount] to guarantee no
-  /// pending message calls.
-  Future<void> get platformMessagesFinished {
-    return Future.wait<void>(_pendingMessages);
-  }
+  /// The current [TestDefaultBinaryMessengerBinding], if one has been created.
+  static TestDefaultBinaryMessengerBinding? get instance => _instance;
+  static TestDefaultBinaryMessengerBinding? _instance;
 
   @override
-  Future<void> handlePlatformMessage(
-      String channel,
-      ByteData? data,
-      ui.PlatformMessageResponseCallback? callback,
-  ) {
-    return delegate.handlePlatformMessage(channel, data, callback);
-  }
+  TestDefaultBinaryMessenger get defaultBinaryMessenger => super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
 
   @override
-  void setMessageHandler(String channel, MessageHandler? handler) {
-    delegate.setMessageHandler(channel, handler);
-  }
-
-  @override
-  bool checkMessageHandler(String channel, MessageHandler? handler) {
-    return delegate.checkMessageHandler(channel, handler);
-  }
-
-  @override
-  void setMockMessageHandler(String channel, MessageHandler? handler) {
-    delegate.setMockMessageHandler(channel, handler);
-  }
-
-  @override
-  bool checkMockMessageHandler(String channel, MessageHandler? handler) {
-    return delegate.checkMockMessageHandler(channel, handler);
+  TestDefaultBinaryMessenger createBinaryMessenger() {
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 }
 
@@ -171,7 +126,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
        SemanticsBinding,
        RendererBinding,
        PaintingBinding,
-       WidgetsBinding {
+       WidgetsBinding,
+       TestDefaultBinaryMessengerBinding {
 
   /// Constructor for [TestWidgetsFlutterBinding].
   ///
@@ -195,9 +151,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// Called by the test framework at the beginning of a widget test to
   /// prepare the binding for the next test.
+  ///
+  /// If [registerTestTextInput] returns true when this method is called,
+  /// the [testTextInput] is configured to simulate the keyboard.
   void reset() {
     _restorationManager = null;
     resetGestureBinding();
+    testTextInput.reset();
+    if (registerTestTextInput)
+      _testTextInput.register();
   }
 
   @override
@@ -227,17 +189,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get disableShadows => false;
 
-  /// Determines whether the Dart [HttpClient] class should be overriden to
+  /// Determines whether the Dart [HttpClient] class should be overridden to
   /// always return a failure response.
   ///
   /// By default, this value is true, so that unit tests will not become flaky
-  /// due to intermitten network errors. The value may be overriden by a binding
-  /// intended for use in integration tests that do end to end application
-  /// testing, including working with real network responses.
+  /// due to intermittent network errors. The value may be overridden by a
+  /// binding intended for use in integration tests that do end to end
+  /// application testing, including working with real network responses.
   @protected
   bool get overrideHttpClient => true;
 
-  /// Determines whether the binding automatically registers [testTextInput].
+  /// Determines whether the binding automatically registers [testTextInput] as
+  /// a fake keyboard implementation.
   ///
   /// Unit tests make use of this to mock out text input communication for
   /// widgets. An integration test would set this to false, to test real IME
@@ -245,6 +208,19 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// [TestTextInput.isRegistered] reports whether the text input mock is
   /// registered or not.
+  ///
+  /// Some of the properties and methods on [testTextInput] are only valid if
+  /// [registerTestTextInput] returns true when a test starts. If those
+  /// members are accessed when using a binding that sets this flag to false,
+  /// they will throw.
+  ///
+  /// If this property returns true when a test ends, the [testTextInput] is
+  /// unregistered.
+  ///
+  /// This property should not change the value it returns during the lifetime
+  /// of the binding. Changing the value of this property risks very confusing
+  /// behavior as the [TestTextInput] may be inconsistently registered or
+  /// unregistered.
   @protected
   bool get registerTestTextInput => true;
 
@@ -284,7 +260,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// typically used in `flutter test`), this advances the fake [clock] for the
   /// period and also increases timeout (see [addTime]).
   ///
-  /// In the live test environemnt ([LiveTestWidgetsFlutterBinding], typically
+  /// In the live test environment ([LiveTestWidgetsFlutterBinding], typically
   /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
   /// equivalent as [Future.delayed].
   Future<void> delayed(Duration duration);
@@ -319,9 +295,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
-    if (registerTestTextInput) {
-      _testTextInput.register();
-    }
   }
 
   @override
@@ -329,11 +302,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
-  }
-
-  @override
-  BinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 
   /// Whether there is currently a test executing.
@@ -402,7 +370,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// current timeout, if any. See [AutomatedTestWidgetsFlutterBinding.addTime]
   /// for details.
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
@@ -515,12 +483,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestTextInput get testTextInput => _testTextInput;
   late TestTextInput _testTextInput;
 
-  /// The current client of the onscreen keyboard. Callers must pump
-  /// an additional frame after setting this property to complete the
-  /// focus change.
+  /// The [State] of the current [EditableText] client of the onscreen keyboard.
+  ///
+  /// Setting this property to a new value causes the given [EditableTextState]
+  /// to focus itself and request the keyboard to establish a
+  /// [TextInputConnection].
+  ///
+  /// Callers must pump an additional frame after setting this property to
+  /// complete the focus change.
   ///
   /// Instead of setting this directly, consider using
   /// [WidgetTester.showKeyboard].
+  //
+  // TODO(ianh): We should just remove this property and move the call to
+  // requestKeyboard to the WidgetTester.showKeyboard method.
   EditableTextState? get focusedEditable => _focusedEditable;
   EditableTextState? _focusedEditable;
   set focusedEditable(EditableTextState? value) {
@@ -600,7 +576,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `timeout` argument sets the initial timeout, if any. It can
   /// be increased with [addTime]. By default there is no timeout.
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration? timeout });
+  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -641,7 +617,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<void> _runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester,
     String description, {
     Future<void>? timeout,
@@ -774,7 +750,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return testCompleter.future;
   }
 
-  Future<void> _runTestBody(Future<void> testBody(), VoidCallback invariantTester) async {
+  Future<void> _runTestBody(Future<void> Function() testBody, VoidCallback invariantTester) async {
     assert(inTest);
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
@@ -799,6 +775,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // alone so that we don't cause more spurious errors.
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
+      if (registerTestTextInput)
+        _testTextInput.unregister();
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
@@ -979,7 +957,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
@@ -996,13 +974,13 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     final Zone realAsyncZone = Zone.current.fork(
       specification: ZoneSpecification(
-        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void Function() f) {
           Zone.root.scheduleMicrotask(f);
         },
-        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
           return Zone.root.createTimer(duration, f);
         },
-        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void f(Timer timer)) {
+        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void Function(Timer timer) f) {
           return Zone.root.createPeriodicTimer(period, f);
         },
       ),
@@ -1166,7 +1144,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<void> runTest(
-    Future<void> testBody(),
+    Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
     Duration? timeout,
@@ -1293,7 +1271,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// Strictly show only frames that are explicitly pumped.
   ///
   /// This most closely matches the [AutomatedTestWidgetsFlutterBinding]
-  /// (the defualt binding for `flutter test`) behavior.
+  /// (the default binding for `flutter test`) behavior.
   onlyPumps,
 
   /// Show pumped frames, and additionally schedule and run frames to fade
@@ -1582,7 +1560,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T?> runAsync<T>(
-    Future<T> callback(), {
+    Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
@@ -1615,7 +1593,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
+  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;

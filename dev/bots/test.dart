@@ -106,39 +106,19 @@ Future<void> main(List<String> args) async {
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
-      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPluginsTests,
+      'skp_generator': _runSkpGeneratorTests,
       kSmokeTestShardName: () async {}, // No-op, the smoke tests already ran. Used for testing this script.
     });
   } on ExitException catch (error) {
     error.apply();
   }
   print('$clock ${bold}Test successful.$reset');
-}
-
-/// Returns whether or not Linux desktop tests should be run.
-///
-/// The branch restrictions here should stay in sync with features.dart.
-bool _shouldRunLinux() {
-  return Platform.isLinux && (branchName != 'beta' && branchName != 'stable');
-}
-
-/// Returns whether or not macOS desktop tests should be run.
-///
-/// The branch restrictions here should stay in sync with features.dart.
-bool _shouldRunMacOS() {
-  return Platform.isMacOS && (branchName != 'beta' && branchName != 'stable');
-}
-
-/// Returns whether or not Windows desktop tests should be run.
-///
-/// The branch restrictions here should stay in sync with features.dart.
-bool _shouldRunWindows() {
-  return Platform.isWindows && (branchName != 'beta' && branchName != 'stable');
 }
 
 /// Verify the Flutter Engine is the revision in
@@ -295,6 +275,16 @@ Future<void> _runCommandsToolTests() async {
   );
 }
 
+Future<void> _runWebToolTests() async {
+  await _pubRunTest(
+    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    forceSingleCore: true,
+    testPaths: <String>[path.join('test', 'web.shard')],
+    enableFlutterToolAsserts: true,
+    perTestTimeout: const Duration(minutes: 3),
+  );
+}
+
 Future<void> _runIntegrationToolTests() async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
   final List<String> allTests = Directory(path.join(toolsPath, 'test', 'integration.shard'))
@@ -313,28 +303,57 @@ Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
+    'web': _runWebToolTests,
   });
 }
 
-Future<void> _runWebToolTests() async {
-  const String kDotShard = '.shard';
-  const String kWeb = 'web';
-  const String kTest = 'test';
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+Future<void> runForbiddenFromReleaseTests() async {
+  // Build a release APK to get the snapshot json.
+  final Directory tempDirectory = Directory.systemTemp.createTempSync('flutter_forbidden_imports.');
+  final List<String> command = <String>[
+    'build',
+    'apk',
+    '--target-platform',
+    'android-arm64',
+    '--release',
+    '--analyze-size',
+    '--code-size-directory',
+    tempDirectory.path,
+    '-v',
+  ];
 
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{
-      kWeb:
-      () async {
-        await _pubRunTest(
-          toolsPath,
-          forceSingleCore: true,
-          testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
-          enableFlutterToolAsserts: true,
-        );
-      }
-  };
+  await runCommand(
+    flutter,
+    command,
+    workingDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
+  );
 
-  await selectSubshard(subshards);
+  // First, a smoke test.
+  final List<String> smokeTestArgs = <String>[
+    path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+    '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
+    '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    '--forbidden-type', 'package:flutter/src/widgets/framework.dart::Widget',
+  ];
+  await runCommand(
+    dart,
+    smokeTestArgs,
+    workingDirectory: flutterRoot,
+    expectNonZeroExit: true,
+  );
+
+  // Actual test.
+  final List<String> args = <String>[
+    path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+    '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
+    '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
+  ];
+  await runCommand(
+    dart,
+    args,
+    workingDirectory: flutterRoot,
+  );
 }
 
 /// Verifies that APK, and IPA (if on macOS) builds the examples apps
@@ -342,30 +361,38 @@ Future<void> _runWebToolTests() async {
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
 /// we can build when there are spaces in the path name for the Flutter SDK and
 /// target app.
+///
+/// Also does some checking about types included in hello_world.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'channels')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
-    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
-        () => _runExampleProjectBuildTests(exampleDirectory),
-    if (branchName != 'beta' && branchName != 'stable')
-      ...<ShardRunner>[
-        // Web compilation tests.
-          () =>  _flutterBuildDart2js(
-          path.join('dev', 'integration_tests', 'web'),
-          path.join('lib', 'main.dart'),
-        ),
-        // Should not fail to compile with dart:io.
-          () =>  _flutterBuildDart2js(
-          path.join('dev', 'integration_tests', 'web_compile_tests'),
-          path.join('lib', 'dart_io_import.dart'),
-        ),
-      ],
+      () => _runExampleProjectBuildTests(exampleDirectory),
+    ...<ShardRunner>[
+      // Web compilation tests.
+      () => _flutterBuildDart2js(
+            path.join('dev', 'integration_tests', 'web'),
+            path.join('lib', 'main.dart'),
+          ),
+      // Should not fail to compile with dart:io.
+      () => _flutterBuildDart2js(
+            path.join('dev', 'integration_tests', 'web_compile_tests'),
+            path.join('lib', 'dart_io_import.dart'),
+          ),
+    ],
+    runForbiddenFromReleaseTests,
   ]..shuffle(math.Random(0));
 
   await _runShardRunnerIndexOfTotalSubshard(tests);
@@ -396,7 +423,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
-  if (_shouldRunLinux()) {
+  if (Platform.isLinux) {
     if (Directory(path.join(examplePath, 'linux')).existsSync()) {
       await _flutterBuildLinux(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildLinux(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -404,7 +431,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no linux directory, skipping Linux');
     }
   }
-  if (_shouldRunMacOS()) {
+  if (Platform.isMacOS) {
     if (Directory(path.join(examplePath, 'macos')).existsSync()) {
       await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -412,7 +439,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no macos directory, skipping macOS');
     }
   }
-  if (_shouldRunWindows()) {
+  if (Platform.isWindows) {
     if (Directory(path.join(examplePath, 'windows')).existsSync()) {
       await _flutterBuildWin32(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildWin32(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -535,7 +562,7 @@ Future<void> _flutterBuild(
     final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
     if (!_allTargetsCached(file)) {
       print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync()}');
+      print('The target performance data was: ${file.readAsStringSync().replaceAll('},', '},\n')}');
       exit(1);
     }
   }
@@ -842,7 +869,7 @@ Future<String> getFlutterPluginsVersion({
 Future<void> _runFlutterPluginsTests() async {
   Future<void> runAnalyze() async {
     print('${green}Running analysis for flutter/plugins$reset');
-    final Directory checkout = Directory.systemTemp.createTempSync('plugins');
+    final Directory checkout = Directory.systemTemp.createTempSync('flutter_plugins.');
     await runCommand(
       'git',
       <String>[
@@ -866,28 +893,45 @@ Future<void> _runFlutterPluginsTests() async {
       workingDirectory: checkout.path,
     );
     await runCommand(
-      pub,
+      './script/incremental_build.sh',
       <String>[
-        'global',
-        'activate',
-        'flutter_plugin_tools',
-      ],
-      workingDirectory: checkout.path,
-    );
-    await runCommand(
-      pub,
-      <String>[
-        'global',
-        'run',
-        'flutter_plugin_tools',
         'analyze',
       ],
       workingDirectory: checkout.path,
+      environment: <String, String>{
+        'BRANCH_NAME': 'master',
+      },
     );
   }
   await selectSubshard(<String, ShardRunner>{
     'analyze': runAnalyze,
   });
+}
+
+/// Runs the skp_generator from the flutter/tests repo.
+///
+/// See also the customer_tests shard.
+///
+/// Generated SKPs are ditched, this just verifies that it can run without failure.
+Future<void> _runSkpGeneratorTests() async {
+  print('${green}Running skp_generator from flutter/tests$reset');
+  final Directory checkout = Directory.systemTemp.createTempSync('flutter_skp_generator.');
+  await runCommand(
+    'git',
+    <String>[
+      '-c',
+      'core.longPaths=true',
+      'clone',
+      'https://github.com/flutter/tests.git',
+      '.'
+    ],
+    workingDirectory: checkout.path,
+  );
+  await runCommand(
+    './build.sh',
+    <String>[ ],
+    workingDirectory: path.join(checkout.path, 'skp_generator'),
+  );
 }
 
 // The `chromedriver` process created by this test.

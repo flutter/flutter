@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // DOWN (default)
@@ -21,10 +21,10 @@ void main() {
     await tester.pumpWidget(Center(
       child: Column(
         key: columnKey,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -67,10 +67,10 @@ void main() {
     await tester.pumpWidget(Center(
       child: Column(
         key: columnKey,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -112,9 +112,9 @@ void main() {
       child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -151,10 +151,10 @@ void main() {
       child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -197,10 +197,10 @@ void main() {
       child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -244,11 +244,11 @@ void main() {
       child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
-          Container(key: child3Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
+          SizedBox(key: child3Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -297,10 +297,10 @@ void main() {
       child: Column(
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 20.0),
-          Container(key: child1Key, width: 100.0, height: 20.0),
-          Container(key: child2Key, width: 100.0, height: 20.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 20.0),
+          SizedBox(key: child1Key, width: 100.0, height: 20.0),
+          SizedBox(key: child2Key, width: 100.0, height: 20.0),
         ],
       ),
     ));
@@ -368,13 +368,13 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: Container(
+      child: SizedBox(
         width: 0.0,
         height: 0.0,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               key: childKey,
               width: 100.0,
               height: 100.0,
@@ -405,10 +405,10 @@ void main() {
       child: Column(
         key: columnKey,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0)),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -452,10 +452,10 @@ void main() {
       child: Column(
         key: columnKey,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -498,9 +498,9 @@ void main() {
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.center,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -538,10 +538,10 @@ void main() {
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.end,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -585,10 +585,10 @@ void main() {
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -633,11 +633,11 @@ void main() {
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 100.0),
-          Container(key: child1Key, width: 100.0, height: 100.0),
-          Container(key: child2Key, width: 100.0, height: 100.0),
-          Container(key: child3Key, width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 100.0),
+          SizedBox(key: child1Key, width: 100.0, height: 100.0),
+          SizedBox(key: child2Key, width: 100.0, height: 100.0),
+          SizedBox(key: child3Key, width: 100.0, height: 100.0),
         ],
       ),
     ));
@@ -687,10 +687,10 @@ void main() {
         key: columnKey,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(key: child0Key, width: 100.0, height: 20.0),
-          Container(key: child1Key, width: 100.0, height: 20.0),
-          Container(key: child2Key, width: 100.0, height: 20.0),
+        children: const <Widget>[
+          SizedBox(key: child0Key, width: 100.0, height: 20.0),
+          SizedBox(key: child1Key, width: 100.0, height: 20.0),
+          SizedBox(key: child2Key, width: 100.0, height: 20.0),
         ],
       ),
     ));
@@ -760,14 +760,14 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: Container(
+      child: SizedBox(
         width: 0.0,
         height: 0.0,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           verticalDirection: VerticalDirection.up,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               key: childKey,
               width: 100.0,
               height: 100.0,

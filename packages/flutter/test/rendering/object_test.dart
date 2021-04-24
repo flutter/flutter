@@ -65,7 +65,7 @@ void main() {
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞══════════════════════\n'
         'The following assertion was thrown during performLayout():\n'
-        'TestThrowingRenderObject does not support performLayout.\n'
+        'TestThrowingRenderObject does not support performLayout.\n',
       ),
     );
 
@@ -78,7 +78,7 @@ void main() {
         '  parentData: MISSING\n'
         '  constraints: BoxConstraints(unconstrained)\n'
         'This RenderObject has no descendants.\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
       ),
     );
   });

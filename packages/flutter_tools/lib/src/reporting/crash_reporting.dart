@@ -4,7 +4,20 @@
 
 // @dart = 2.8
 
-part of reporting;
+import 'dart:async';
+
+import 'package:file/file.dart';
+import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
+
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../project.dart';
+import 'github_template.dart';
+import 'reporting.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
 const String _kProductId = 'Flutter_Tools';
@@ -136,7 +149,7 @@ class CrashReportSender {
   Future<void> sendReport({
     @required dynamic error,
     @required StackTrace stackTrace,
-    @required String getFlutterVersion(),
+    @required String Function() getFlutterVersion,
     @required String command,
   }) async {
     // Only send one crash report per run.

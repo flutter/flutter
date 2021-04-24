@@ -21,6 +21,7 @@ import '../bundle.dart';
 import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -166,9 +167,7 @@ class FlutterTesterDevice extends Device {
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
-      treeShakeIcons: buildInfo.treeShakeIcons,
       assetDirPath: assetDirectory.path,
     );
 
@@ -205,6 +204,7 @@ class FlutterTesterDevice extends Device {
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
+        logger: _logger,
       );
       _logReader.initializeProcess(_process);
 

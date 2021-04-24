@@ -11,32 +11,32 @@ void main() {
   test('installDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
-    await DeferredComponent.installDeferredComponent(moduleName: 'testModuleName');
+    await DeferredComponent.installDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
       'installDeferredComponent',
-      arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
+      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
     ));
   });
 
   test('uninstallDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
-    await DeferredComponent.uninstallDeferredComponent(moduleName: 'testModuleName');
+    await DeferredComponent.uninstallDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
       'uninstallDeferredComponent',
-      arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
+      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
     ));
   });
 }

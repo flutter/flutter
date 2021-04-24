@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -93,7 +93,7 @@ void main() {
 
   testWidgets('Passes onEditingComplete to underlying CupertinoTextField',
       (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () {};
+    void onEditingComplete() {}
 
     await tester.pumpWidget(
       CupertinoApp(

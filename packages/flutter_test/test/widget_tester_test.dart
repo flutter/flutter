@@ -5,17 +5,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:test_api/src/frontend/async_matcher.dart' show AsyncMatcher;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
-import 'package:test_api/src/frontend/async_matcher.dart' show AsyncMatcher;
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -73,7 +72,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      final String message = failure.message;
+      final String? message = failure.message;
       expect(message, contains('Expected: exactly one matching node in the widget tree\n'));
       expect(message, contains('Actual: _TextFinder:<zero widgets with text "foo">\n'));
       expect(message, contains('Which: means none were found but one was expected\n'));
@@ -96,7 +95,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      final String message = failure.message;
+      final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr)>\n'));
@@ -114,7 +113,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      final String message = failure.message;
+      final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr)>\n'));
@@ -611,25 +610,42 @@ void main() {
     });
   });
 
-  testWidgets('showKeyboard can be called twice', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextFormField(),
+  group('showKeyboard', () {
+    testWidgets('can be called twice', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextFormField(),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pump();
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pump();
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.pump();
+      );
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.pump();
+    });
+
+    testWidgets(
+      'can focus on offstage text input field if finder says not to skip offstage nodes',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Offstage(
+                child: TextFormField(),
+              ),
+            ),
+          ),
+        );
+        await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
+      });
   });
 
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {

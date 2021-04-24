@@ -194,10 +194,10 @@ class Dialog extends StatelessWidget {
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
-///         title: Text('AlertDialog Title'),
+///         title: const Text('AlertDialog Title'),
 ///         content: SingleChildScrollView(
 ///           child: ListBody(
-///             children: <Widget>[
+///             children: const <Widget>[
 ///               Text('This is a demo alert dialog.'),
 ///               Text('Would you like to approve of this message?'),
 ///             ],
@@ -205,7 +205,7 @@ class Dialog extends StatelessWidget {
 ///         ),
 ///         actions: <Widget>[
 ///           TextButton(
-///             child: Text('Approve'),
+///             child: const Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
 ///             },
@@ -232,7 +232,7 @@ class Dialog extends StatelessWidget {
 ///       builder: (BuildContext context) => AlertDialog(
 ///         title: const Text('AlertDialog Tilte'),
 ///         content: const Text('AlertDialog description'),
-///         actions: [
+///         actions: <Widget>[
 ///           TextButton(
 ///             onPressed: () => Navigator.pop(context, 'Cancel'),
 ///             child: const Text('Cancel'),
@@ -244,7 +244,7 @@ class Dialog extends StatelessWidget {
 ///         ],
 ///       ),
 ///     ),
-///     child: Text('Show Dialog'),
+///     child: const Text('Show Dialog'),
 ///   );
 /// }
 ///
@@ -367,13 +367,13 @@ class AlertDialog extends StatelessWidget {
   /// This is an example of a set of actions aligned with the content widget.
   /// ```dart
   /// AlertDialog(
-  ///   title: Text('Title'),
+  ///   title: const Text('Title'),
   ///   content: Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
-  ///     ElevatedButton(onPressed: () {}, child: Text('Button 1')),
-  ///     ElevatedButton(onPressed: () {}, child: Text('Button 2')),
+  ///     ElevatedButton(onPressed: () {}, child: const Text('Button 1')),
+  ///     ElevatedButton(onPressed: () {}, child: const Text('Button 2')),
   ///   ],
-  ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
+  ///   actionsPadding: const EdgeInsets.symmetric(horizontal: 8.0),
   /// )
   /// ```
   /// {@end-tool}
@@ -526,7 +526,10 @@ class AlertDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1!,
-          child: content!,
+          child: Semantics(
+            container: true,
+            child: content!,
+          ),
         ),
       );
     }
@@ -877,7 +880,11 @@ class SimpleDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
-          child: Semantics(namesRoute: label == null, child: title),
+          child: Semantics(
+            namesRoute: label == null,
+            container: true,
+            child: title,
+          ),
         ),
       );
     }
@@ -994,7 +1001,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=stateless_widget_restoration_material}
 ///
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
@@ -1003,47 +1010,25 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
 /// ```dart
-/// void main() {
-///   runApp(MyApp());
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       restorationScopeId: 'app',
-///       title: 'Restorable Routes Demo',
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatelessWidget {
-///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///     return DialogRoute<void>(
-///       context: context,
-///       builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
-///     );
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       body: Center(
-///         child: OutlinedButton(
-///           onPressed: () {
-///             Navigator.of(context).restorablePush(_dialogBuilder);
-///           },
-///           child: const Text('Open Dialog'),
-///         ),
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: OutlinedButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_dialogBuilder);
+///         },
+///         child: const Text('Open Dialog'),
 ///       ),
-///     );
-///   }
+///     ),
+///   );
+/// }
+///
+/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///   return DialogRoute<void>(
+///     context: context,
+///     builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
+///   );
 /// }
 /// ```
 ///

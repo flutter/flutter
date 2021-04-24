@@ -47,7 +47,7 @@ void main() {
   testUsingContext('TestCompiler reports a dill file when compile is successful', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.current(),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
     when(residentCompiler.recompile(
@@ -55,6 +55,8 @@ void main() {
       <Uri>[Uri.parse('test/foo.dart')],
       outputPath: testCompiler.outputDill.path,
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('abc.dill').createSync();
       return const CompilerOutput('abc.dill', 0, <Uri>[]);
@@ -72,7 +74,7 @@ void main() {
   testUsingContext('TestCompiler reports null when a compile fails', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.current(),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
     when(residentCompiler.recompile(
@@ -80,6 +82,8 @@ void main() {
       <Uri>[Uri.parse('test/foo.dart')],
       outputPath: testCompiler.outputDill.path,
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('abc.dill').createSync();
       return const CompilerOutput('abc.dill', 1, <Uri>[]);
@@ -98,7 +102,7 @@ void main() {
   testUsingContext('TestCompiler disposing test compiler shuts down backing compiler', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.current(),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
     testCompiler.compiler = residentCompiler;

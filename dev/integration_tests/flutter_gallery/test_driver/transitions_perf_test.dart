@@ -9,10 +9,9 @@ import 'dart:convert' show JsonEncoder, json;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_gallery/demo_lists.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
-import 'package:flutter_gallery/demo_lists.dart';
 
 const FileSystem _fs = LocalFileSystem();
 
@@ -207,7 +206,6 @@ void main([List<String> args = const <String>[]]) {
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile('transitions', pretty: true);
       await summary.writeTimelineToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(

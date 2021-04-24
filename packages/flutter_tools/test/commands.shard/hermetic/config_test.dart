@@ -9,23 +9,23 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  MockAndroidStudio mockAndroidStudio;
-  MockAndroidSdk mockAndroidSdk;
-  MockFlutterVersion mockFlutterVersion;
+  FakeAndroidStudio fakeAndroidStudio;
+  FakeAndroidSdk fakeAndroidSdk;
+  FakeFlutterVersion fakeFlutterVersion;
   TestUsage testUsage;
 
   setUpAll(() {
@@ -33,9 +33,9 @@ void main() {
   });
 
   setUp(() {
-    mockAndroidStudio = MockAndroidStudio();
-    mockAndroidSdk = MockAndroidSdk();
-    mockFlutterVersion = MockFlutterVersion();
+    fakeAndroidStudio = FakeAndroidStudio();
+    fakeAndroidSdk = FakeAndroidSdk();
+    fakeFlutterVersion = FakeFlutterVersion();
     testUsage = TestUsage();
   });
 
@@ -61,8 +61,8 @@ void main() {
       expect(jsonObject['android-sdk'], isNotNull);
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      AndroidStudio: () => mockAndroidStudio,
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => fakeAndroidStudio,
+      AndroidSdk: () => fakeAndroidSdk,
       Usage: () => testUsage,
     });
 
@@ -100,12 +100,16 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--enable-android',
+        '--enable-ios',
         '--enable-web',
         '--enable-linux-desktop',
         '--enable-windows-desktop',
         '--enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), true);
+      expect(globals.config.getValue('enable-ios'), true);
       expect(globals.config.getValue('enable-web'), true);
       expect(globals.config.getValue('enable-linux-desktop'), true);
       expect(globals.config.getValue('enable-windows-desktop'), true);
@@ -115,6 +119,8 @@ void main() {
         'config', '--clear-features',
       ]);
 
+      expect(globals.config.getValue('enable-android'), null);
+      expect(globals.config.getValue('enable-ios'), null);
       expect(globals.config.getValue('enable-web'), null);
       expect(globals.config.getValue('enable-linux-desktop'), null);
       expect(globals.config.getValue('enable-windows-desktop'), null);
@@ -122,20 +128,24 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--no-enable-android',
+        '--no-enable-ios',
         '--no-enable-web',
         '--no-enable-linux-desktop',
         '--no-enable-windows-desktop',
         '--no-enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), false);
+      expect(globals.config.getValue('enable-ios'), false);
       expect(globals.config.getValue('enable-web'), false);
       expect(globals.config.getValue('enable-linux-desktop'), false);
       expect(globals.config.getValue('enable-windows-desktop'), false);
       expect(globals.config.getValue('enable-macos-desktop'), false);
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      AndroidStudio: () => mockAndroidStudio,
-      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => fakeAndroidStudio,
+      AndroidSdk: () => fakeAndroidSdk,
       Usage: () => testUsage,
     });
 
@@ -157,7 +167,7 @@ void main() {
     });
 
     testUsingContext('displays which config settings are available on stable', () async {
-      when(mockFlutterVersion.channel).thenReturn('stable');
+      fakeFlutterVersion.channel = 'stable';
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
@@ -191,9 +201,9 @@ void main() {
       );
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      AndroidStudio: () => mockAndroidStudio,
-      AndroidSdk: () => mockAndroidSdk,
-      FlutterVersion: () => mockFlutterVersion,
+      AndroidStudio: () => fakeAndroidStudio,
+      AndroidSdk: () => fakeAndroidSdk,
+      FlutterVersion: () => fakeFlutterVersion,
       Usage: () => testUsage,
     });
 
@@ -265,14 +275,23 @@ void main() {
   });
 }
 
-class MockAndroidStudio extends Mock implements AndroidStudio, Comparable<AndroidStudio> {
+class FakeAndroidStudio extends Fake implements AndroidStudio, Comparable<AndroidStudio> {
   @override
   String get directory => 'path/to/android/stdio';
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {
+class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   Directory get directory => globals.fs.directory('path/to/android/sdk');
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
+class FakeFlutterVersion extends Fake implements FlutterVersion {
+  @override
+  String channel;
+
+  @override
+  void ensureVersionFile() {}
+
+  @override
+  Future<void> checkFlutterVersionFreshness() async {}
+}

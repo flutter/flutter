@@ -27,14 +27,14 @@ void main () {
 
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
-      SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
         final Map<dynamic, dynamic> typedMessage = message as Map<dynamic, dynamic>;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });
     });
 
     tearDown(() {
-      SystemChannels.accessibility.setMockMessageHandler(null);
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
     });
 
     testWidgets('forTap', (WidgetTester tester) async {
@@ -70,9 +70,9 @@ void main () {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       int callbackCount = 0;
-      final VoidCallback callback = () {
+      void callback() {
         callbackCount++;
-      };
+      }
 
       await tester.pumpWidget(TestWidget(
         tapHandler: (BuildContext context) {
@@ -132,9 +132,9 @@ void main () {
     testWidgets('forLongPress Wrapper', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       int callbackCount = 0;
-      final VoidCallback callback = () {
+      void callback() {
         callbackCount++;
-      };
+      }
 
       await tester.pumpWidget(TestWidget(
         longPressHandler: (BuildContext context) {

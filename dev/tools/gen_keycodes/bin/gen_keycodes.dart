@@ -6,22 +6,21 @@ import 'dart:convert';
 import 'dart:io' hide Platform;
 
 import 'package:args/args.dart';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
-
 import 'package:gen_keycodes/android_code_gen.dart';
 import 'package:gen_keycodes/base_code_gen.dart';
-import 'package:gen_keycodes/ios_code_gen.dart';
-import 'package:gen_keycodes/macos_code_gen.dart';
 import 'package:gen_keycodes/fuchsia_code_gen.dart';
 import 'package:gen_keycodes/glfw_code_gen.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
-import 'package:gen_keycodes/windows_code_gen.dart';
-import 'package:gen_keycodes/web_code_gen.dart';
+import 'package:gen_keycodes/ios_code_gen.dart';
+import 'package:gen_keycodes/key_data.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
 import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
-import 'package:gen_keycodes/key_data.dart';
+import 'package:gen_keycodes/macos_code_gen.dart';
 import 'package:gen_keycodes/utils.dart';
+import 'package:gen_keycodes/web_code_gen.dart';
+import 'package:gen_keycodes/windows_code_gen.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 
 /// Get contents of the file that contains the key code mapping in Chromium
 /// source.
@@ -38,7 +37,7 @@ Future<String> getAndroidKeyCodes() async {
 
 Future<String> getWindowsKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.10240.0/um/WinUser.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 /// Get contents of the file that contains the scan codes in Android source.
@@ -54,12 +53,12 @@ Future<String> getAndroidScanCodes() async {
 
 Future<String> getGlfwKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/glfw/glfw/master/include/GLFW/glfw3.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 Future<String> getGtkKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
-  return await http.read(keyCodesUri);
+  return http.read(keyCodesUri);
 }
 
 Future<void> main(List<String> rawArguments) async {

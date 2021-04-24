@@ -55,6 +55,8 @@ class _GesturePainter extends CustomPainter {
 }
 
 class GestureDemo extends StatefulWidget {
+  const GestureDemo({Key? key}) : super(key: key);
+
   @override
   GestureDemoState createState() => GestureDemoState();
 }
@@ -223,7 +225,7 @@ void main() {
     theme: ThemeData.dark(),
     home: Scaffold(
       appBar: AppBar(title: const Text('Gestures Demo')),
-      body: GestureDemo(),
+      body: const GestureDemo(),
     ),
   ));
 }

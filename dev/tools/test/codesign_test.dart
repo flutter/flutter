@@ -8,7 +8,6 @@ import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
@@ -23,12 +22,12 @@ void main() {
     const String flutterBin =
         '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/flutter';
     const String revision = 'abcd1234';
-    CommandRunner<void> runner;
-    Checkouts checkouts;
-    MemoryFileSystem fileSystem;
-    FakePlatform platform;
-    TestStdio stdio;
-    FakeProcessManager processManager;
+    late CommandRunner<void> runner;
+    late Checkouts checkouts;
+    late MemoryFileSystem fileSystem;
+    late FakePlatform platform;
+    late TestStdio stdio;
+    late FakeProcessManager processManager;
     const List<String> binariesWithEntitlements = <String>[
       '$flutterCache/dart-sdk/bin/dart',
       '$flutterCache/dart-sdk/bin/dartaotruntime',
@@ -43,7 +42,7 @@ void main() {
 
     void createRunner({
       String operatingSystem = 'macos',
-      List<FakeCommand> commands,
+      List<FakeCommand>? commands,
     }) {
       stdio = TestStdio();
       fileSystem = MemoryFileSystem.test();
@@ -69,7 +68,7 @@ void main() {
     test('throws exception if not run from macos', () async {
       createRunner(operatingSystem: 'linux');
       expect(
-        () async => await runner.run(<String>['codesign']),
+        () async => runner.run(<String>['codesign']),
         throwsExceptionWith('Error! Expected operating system "macos"'),
       );
     });
@@ -77,7 +76,7 @@ void main() {
     test('throws exception if verify flag is not provided', () async {
       createRunner();
       expect(
-        () async => await runner.run(<String>['codesign']),
+        () async => runner.run(<String>['codesign']),
         throwsExceptionWith(
             'Sorry, but codesigning is not implemented yet. Please pass the --$kVerify flag to verify signatures'),
       );
@@ -109,6 +108,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -194,6 +195,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -240,7 +243,7 @@ void main() {
         ...codesignCheckCommands,
       ]);
       expect(
-        () async => await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because unsigned binaries detected.'),
       );
       expect(processManager.hasRemainingExpectations, false);
@@ -279,6 +282,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -325,7 +330,7 @@ void main() {
         ...codesignCheckCommands,
       ]);
       expect(
-        () async => await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because files found with the wrong entitlements'),
       );
       expect(processManager.hasRemainingExpectations, false);
@@ -336,6 +341,8 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--origin',
+          'upstream',
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
@@ -402,10 +409,10 @@ void main() {
 
 class FakeCodesignCommand extends CodesignCommand {
   FakeCodesignCommand({
-    @required Checkouts checkouts,
-    @required this.binariesWithEntitlements,
-    @required this.binariesWithoutEntitlements,
-    @required Directory flutterRoot,
+    required Checkouts checkouts,
+    required this.binariesWithEntitlements,
+    required this.binariesWithoutEntitlements,
+    required Directory flutterRoot,
   }) : super(checkouts: checkouts, flutterRoot: flutterRoot);
 
   @override

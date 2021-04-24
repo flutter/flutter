@@ -4,9 +4,9 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const Size _kTestViewSize = Size(800.0, 600.0);
 
@@ -86,8 +86,7 @@ class Counter {
 class Trigger {
   VoidCallback? callback;
   void fire() {
-    if (callback != null)
-      callback!();
+    callback?.call();
   }
 }
 
@@ -270,7 +269,7 @@ enum WidgetState {
 }
 
 class TestStates extends StatefulWidget {
-  const TestStates({required this.states});
+  const TestStates({Key? key, required this.states}) : super(key: key);
 
   final List<WidgetState> states;
 

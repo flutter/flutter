@@ -7,8 +7,8 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'thumb_painter.dart';
@@ -35,7 +35,7 @@ import 'thumb_painter.dart';
 /// ```dart
 /// MergeSemantics(
 ///   child: ListTile(
-///     title: Text('Lights'),
+///     title: const Text('Lights'),
 ///     trailing: CupertinoSwitch(
 ///       value: _lights,
 ///       onChanged: (bool value) { setState(() { _lights = value; }); },

@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Rolls the dev channel.
-// Only tested on Linux.
-//
+// @dart = 2.8
+
 // See: https://github.com/flutter/flutter/wiki/Release-process
 
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:dev_tools/clean.dart';
 import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/roll_dev.dart';
+import 'package:dev_tools/start.dart';
+import 'package:dev_tools/status.dart';
 import 'package:dev_tools/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -54,6 +56,16 @@ Future<void> main(List<String> args) async {
       checkouts: checkouts,
       flutterRoot: localFlutterRoot,
     ),
+    StatusCommand(
+      checkouts: checkouts,
+    ),
+    StartCommand(
+      checkouts: checkouts,
+      flutterRoot: localFlutterRoot,
+    ),
+    CleanCommand(
+      checkouts: checkouts,
+    ),
   ].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {
@@ -63,8 +75,8 @@ Future<void> main(List<String> args) async {
 
   try {
     await runner.run(args);
-  } on Exception catch (e) {
-    stdio.printError(e.toString());
+  } on Exception catch (e, stacktrace) {
+    stdio.printError('$e\n\n$stacktrace');
     io.exit(1);
   }
 }

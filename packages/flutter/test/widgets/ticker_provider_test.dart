@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
@@ -98,9 +98,7 @@ void main() {
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
-      final Widget widget = Container(
-        child: _SingleTickerTest(key: key),
-      );
+      final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
       FlutterError? error;
       key.currentState!.controller.repeat();
@@ -141,9 +139,7 @@ void main() {
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
-      final Widget widget = Container(
-        child: _SingleTickerTest(key: key),
-      );
+      final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
       FlutterError? error;
       key.currentState!.controller.repeat();
@@ -184,9 +180,7 @@ void main() {
 
     testWidgets('ProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
       final GlobalKey<_MultipleTickerTestState> key = GlobalKey<_MultipleTickerTestState>();
-      final Widget widget = Container(
-        child: _MultipleTickerTest(key: key),
-      );
+      final Widget widget = _MultipleTickerTest(key: key);
       await tester.pumpWidget(widget);
       FlutterError? error;
       key.currentState!.controllers.first.repeat();

@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
 import 'package:macrobenchmarks/common.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 const Duration kTimeout = Duration(seconds: 30);
 
@@ -40,8 +39,8 @@ void macroPerfTest(
     { Duration pageDelay,
       Duration duration = const Duration(seconds: 3),
       Duration timeout = kTimeout,
-      Future<void> driverOps(FlutterDriver driver),
-      Future<void> setupOps(FlutterDriver driver),
+      Future<void> Function(FlutterDriver driver) driverOps,
+      Future<void> Function(FlutterDriver driver) setupOps,
     }) {
   test(testName, () async {
     Timeline timeline;
@@ -67,7 +66,6 @@ void macroPerfTest(
     expect(timeline, isNotNull);
 
     final TimelineSummary summary = TimelineSummary.summarize(timeline);
-    await summary.writeSummaryToFile(testName, pretty: true);
     await summary.writeTimelineToFile(testName, pretty: true);
   }, timeout: Timeout(timeout));
 }

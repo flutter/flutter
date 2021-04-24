@@ -17,8 +17,8 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 final FakePlatform linux = FakePlatform(
   operatingSystem: 'linux',

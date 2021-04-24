@@ -10,8 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 import '../src/common.dart';
@@ -39,9 +38,9 @@ void main() {
         ),
         enableObservatory: false,
       );
-      flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
+      flutterPlatform.loadChannel('test1.dart', FakeSuitePlatform());
 
-      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', FakeSuitePlatform()), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -55,9 +54,9 @@ void main() {
         precompiledDillPath: 'example.dill',
         enableObservatory: false,
       );
-      flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
+      flutterPlatform.loadChannel('test1.dart', FakeSuitePlatform());
 
-      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', FakeSuitePlatform()), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -123,7 +122,7 @@ void main() {
   });
 }
 
-class MockSuitePlatform extends Mock implements SuitePlatform {}
+class FakeSuitePlatform extends Fake implements SuitePlatform {}
 
 // A FlutterPlatform with enough fields set to load and start a test.
 class TestFlutterPlatform extends FlutterPlatform {

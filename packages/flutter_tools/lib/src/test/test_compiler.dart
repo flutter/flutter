@@ -111,6 +111,7 @@ class TestCompiler {
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
+      fileSystem: globals.fs,
     );
     return residentCompiler;
   }
@@ -139,6 +140,8 @@ class TestCompiler {
         <Uri>[request.mainUri],
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
+        projectRootPath: flutterProject.directory.absolute.path,
+        fs: globals.fs,
       );
       final String outputPath = compilerOutput?.outputFilename;
 

@@ -19,7 +19,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// MB. The maximum size can be adjusted using [maximumSize] and
 /// [maximumSizeBytes].
 ///
-/// The cache also holds a list of "live" references. An image is considered
+/// The cache also holds a list of 'live' references. An image is considered
 /// live if its [ImageStreamCompleter]'s listener count has never dropped to
 /// zero after adding at least one listener. The cache uses
 /// [ImageStreamCompleter.addOnLastListenerRemovedCallback] to determine when
@@ -28,7 +28,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// The [putIfAbsent] method is the main entry-point to the cache API. It
 /// returns the previously cached [ImageStreamCompleter] for the given key, if
 /// available; if not, it calls the given callback to obtain it first. In either
-/// case, the key is moved to the "most recently used" position.
+/// case, the key is moved to the 'most recently used' position.
 ///
 /// A caller can determine whether an image is already in the cache by using
 /// [containsKey], which will return true if the image is tracked by the cache
@@ -52,7 +52,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// class MyImageCache extends ImageCache {
 ///   @override
 ///   void clear() {
-///     print("Clearing cache!");
+///     print('Clearing cache!');
 ///     super.clear();
 ///   }
 /// }
@@ -65,10 +65,12 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// void main() {
 ///   // The constructor sets global variables.
 ///   MyWidgetsBinding();
-///   runApp(MyApp());
+///   runApp(const MyApp());
 /// }
 ///
 /// class MyApp extends StatelessWidget {
+///   const MyApp({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Container();
@@ -188,6 +190,9 @@ class ImageCache {
         },
       );
     }
+    for (final _CachedImage image in _cache.values) {
+      image.dispose();
+    }
     _cache.clear();
     _pendingImages.clear();
     _currentSizeBytes = 0;
@@ -245,7 +250,7 @@ class ImageCache {
     if (pendingImage != null) {
       if (!kReleaseMode) {
         Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
-          'type': 'pending'
+          'type': 'pending',
         });
       }
       pendingImage.removeListener();
@@ -306,7 +311,7 @@ class ImageCache {
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
   /// if not, calls the given callback to obtain it first. In either case, the
-  /// key is moved to the "most recently used" position.
+  /// key is moved to the 'most recently used' position.
   ///
   /// The arguments must not be null. The `loader` cannot return null.
   ///
@@ -314,7 +319,7 @@ class ImageCache {
   /// `onError` is also provided. When an exception is caught resolving an image,
   /// no completers are cached and `null` is returned instead of a new
   /// completer.
-  ImageStreamCompleter? putIfAbsent(Object key, ImageStreamCompleter loader(), { ImageErrorListener? onError }) {
+  ImageStreamCompleter? putIfAbsent(Object key, ImageStreamCompleter Function() loader, { ImageErrorListener? onError }) {
     assert(key != null);
     assert(loader != null);
     TimelineTask? timelineTask;

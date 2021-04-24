@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
@@ -59,10 +59,10 @@ void main() {
             return ListView(
               controller: controller,
               shrinkWrap: true,
-              children: <Widget>[
-                Container(height: 100.0, child: const Text('One')),
-                Container(height: 100.0, child: const Text('Two')),
-                Container(height: 100.0, child: const Text('Three')),
+              children: const <Widget>[
+                SizedBox(height: 100.0, child: Text('One')),
+                SizedBox(height: 100.0, child: Text('Two')),
+                SizedBox(height: 100.0, child: Text('Three')),
               ],
             );
           },
@@ -94,10 +94,10 @@ void main() {
       return ListView(
         shrinkWrap: true,
         primary: false,
-        children: <Widget>[
-          Container(height: 100.0, child: const Text('One')),
-          Container(height: 100.0, child: const Text('Two')),
-          Container(height: 100.0, child: const Text('Three')),
+        children: const <Widget>[
+          SizedBox(height: 100.0, child: Text('One')),
+          SizedBox(height: 100.0, child: Text('Two')),
+          SizedBox(height: 100.0, child: Text('Three')),
         ],
       );
     });
@@ -126,10 +126,10 @@ void main() {
       return ListView(
         shrinkWrap: true,
         primary: false,
-        children: <Widget>[
-          Container(height: 100.0, child: const Text('One')),
-          Container(height: 100.0, child: const Text('Two')),
-          Container(height: 100.0, child: const Text('Three')),
+        children: const <Widget>[
+          SizedBox(height: 100.0, child: Text('One')),
+          SizedBox(height: 100.0, child: Text('Two')),
+          SizedBox(height: 100.0, child: Text('Three')),
         ],
       );
     });
@@ -165,10 +165,10 @@ void main() {
             return ListView(
               shrinkWrap: true,
               controller: controller,
-              children: <Widget>[
-                Container(height: 100.0, child: const Text('One')),
-                Container(height: 100.0, child: const Text('Two')),
-                Container(height: 100.0, child: const Text('Three')),
+              children: const <Widget>[
+                SizedBox(height: 100.0, child: Text('One')),
+                SizedBox(height: 100.0, child: Text('Two')),
+                SizedBox(height: 100.0, child: Text('Three')),
               ],
             );
           },
@@ -319,18 +319,18 @@ void main() {
             return ListView(
               controller: controller,
               shrinkWrap: true,
-              children: <Widget>[
-                Container(height: 100.0, child: const Text('One')),
-                Container(height: 100.0, child: const Text('Two')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
-                Container(height: 100.0, child: const Text('Three')),
+              children: const <Widget>[
+                SizedBox(height: 100.0, child: Text('One')),
+                SizedBox(height: 100.0, child: Text('Two')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
+                SizedBox(height: 100.0, child: Text('Three')),
               ],
             );
           },
@@ -516,10 +516,10 @@ void main() {
       return ListView(
         shrinkWrap: true,
         primary: false,
-        children: <Widget>[
-          Container(height: 100.0, child: const Text('One')),
-          Container(height: 100.0, child: const Text('Two')),
-          Container(height: 100.0, child: const Text('Three')),
+        children: const <Widget>[
+          SizedBox(height: 100.0, child: Text('One')),
+          SizedBox(height: 100.0, child: Text('Two')),
+          SizedBox(height: 100.0, child: Text('Three')),
         ],
       );
     }, backgroundColor: color, elevation: elevation, shape: shape, clipBehavior: clipBehavior);

@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 
 import '../src/common.dart';
 
@@ -28,25 +26,26 @@ baz=qux
     testWithoutContext('can parse and compare', () {
       expect(Version.unknown.toString(), equals('unknown'));
       expect(Version(null, null, null).toString(), equals('0'));
+      expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
-      final Version v1 = Version.parse('1');
+      final Version v1 = Version.parse('1')!;
       expect(v1.major, equals(1));
       expect(v1.minor, equals(0));
       expect(v1.patch, equals(0));
 
       expect(v1, greaterThan(Version.unknown));
 
-      final Version v2 = Version.parse('1.2');
+      final Version v2 = Version.parse('1.2')!;
       expect(v2.major, equals(1));
       expect(v2.minor, equals(2));
       expect(v2.patch, equals(0));
 
-      final Version v3 = Version.parse('1.2.3');
+      final Version v3 = Version.parse('1.2.3')!;
       expect(v3.major, equals(1));
       expect(v3.minor, equals(2));
       expect(v3.patch, equals(3));
 
-      final Version v4 = Version.parse('1.12');
+      final Version v4 = Version.parse('1.12')!;
       expect(v4, greaterThan(v2));
 
       expect(v3, greaterThan(v2));

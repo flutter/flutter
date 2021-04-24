@@ -15,11 +15,15 @@ void main() {
       // Check a modifier key
       expect(PhysicalKeyboardKey.findKeyByCode(0x000700e1), equals(PhysicalKeyboardKey.shiftLeft));
     });
-    test('Equality is only based on HID code.', () async {
-      const PhysicalKeyboardKey key1 = PhysicalKeyboardKey(0x01, debugName: 'key1');
-      const PhysicalKeyboardKey key2 = PhysicalKeyboardKey(0x01, debugName: 'key2');
-      expect(key1, equals(key1));
-      expect(key1, equals(key2));
+    test('Values are equal', () async {
+      expect(PhysicalKeyboardKey.keyA == PhysicalKeyboardKey(PhysicalKeyboardKey.keyA.usbHidUsage), true);
+      // ignore: prefer_const_constructors, intentionally test if a const key is equal to a non-const key
+      expect(const PhysicalKeyboardKey(0x12345) == PhysicalKeyboardKey(0x12345), true);
+    });
+    test('debugNames', () async {
+      expect(PhysicalKeyboardKey.keyA.debugName, 'Key A');
+      expect(PhysicalKeyboardKey.backslash.debugName, 'Backslash');
+      expect(const PhysicalKeyboardKey(0x12345).debugName, 'Key with ID 0x00012345');
     });
   });
   group(LogicalKeyboardKey, () {
@@ -44,12 +48,6 @@ void main() {
       expect(LogicalKeyboardKey.isControlCharacter('~'), isFalse);
       expect(LogicalKeyboardKey.isControlCharacter('\xa0'), isFalse); // NO-BREAK SPACE
     });
-    test('Equality is only based on ID.', () async {
-      const LogicalKeyboardKey key1 = LogicalKeyboardKey(0x01, keyLabel: 'label1', debugName: 'key1');
-      const LogicalKeyboardKey key2 = LogicalKeyboardKey(0x01, keyLabel: 'label2', debugName: 'key2');
-      expect(key1, equals(key1));
-      expect(key1, equals(key2));
-    });
     test('Basic synonyms can be looked up.', () async {
       expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));
       expect(LogicalKeyboardKey.controlLeft.synonyms.first, equals(LogicalKeyboardKey.control));
@@ -63,48 +61,76 @@ void main() {
     test('Synonyms get collapsed properly.', () async {
       expect(LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{}), isEmpty);
       expect(
-          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.altLeft,
-            LogicalKeyboardKey.metaLeft,
-          }),
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
-          }));
+        LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shiftLeft,
+          LogicalKeyboardKey.controlLeft,
+          LogicalKeyboardKey.altLeft,
+          LogicalKeyboardKey.metaLeft,
+        }),
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.alt,
+          LogicalKeyboardKey.meta,
+        }),
+      );
       expect(
-          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftRight,
-            LogicalKeyboardKey.controlRight,
-            LogicalKeyboardKey.altRight,
-            LogicalKeyboardKey.metaRight,
-          }),
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
-          }));
+        LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shiftRight,
+          LogicalKeyboardKey.controlRight,
+          LogicalKeyboardKey.altRight,
+          LogicalKeyboardKey.metaRight,
+        }),
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.alt,
+          LogicalKeyboardKey.meta,
+        }),
+      );
       expect(
-          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.altLeft,
-            LogicalKeyboardKey.metaLeft,
-            LogicalKeyboardKey.shiftRight,
-            LogicalKeyboardKey.controlRight,
-            LogicalKeyboardKey.altRight,
-            LogicalKeyboardKey.metaRight,
-          }),
-          equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
-          }));
+        LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shiftLeft,
+          LogicalKeyboardKey.controlLeft,
+          LogicalKeyboardKey.altLeft,
+          LogicalKeyboardKey.metaLeft,
+          LogicalKeyboardKey.shiftRight,
+          LogicalKeyboardKey.controlRight,
+          LogicalKeyboardKey.altRight,
+          LogicalKeyboardKey.metaRight,
+        }),
+        equals(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.alt,
+          LogicalKeyboardKey.meta,
+        }),
+      );
+    });
+    test('Values are equal', () async {
+      expect(LogicalKeyboardKey.keyA == LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId), true);
+      // ignore: prefer_const_constructors, intentionally test if a const key is equal to a non-const key
+      expect(const PhysicalKeyboardKey(0x12345) == PhysicalKeyboardKey(0x12345), true);
+    });
+    test('keyLabel', () async {
+      expect(LogicalKeyboardKey.keyA.keyLabel, 'A');
+      expect(LogicalKeyboardKey.backslash.keyLabel, r'\');
+      expect(const LogicalKeyboardKey(0xD9).keyLabel, 'Ù');
+      expect(const LogicalKeyboardKey(0xF9).keyLabel, 'Ù');
+      expect(LogicalKeyboardKey.shiftLeft.keyLabel, 'Shift Left');
+      expect(LogicalKeyboardKey.numpadDecimal.keyLabel, 'Numpad Decimal');
+      expect(LogicalKeyboardKey.numpad1.keyLabel, 'Numpad 1');
+      expect(LogicalKeyboardKey.delete.keyLabel, 'Delete');
+      expect(LogicalKeyboardKey.f12.keyLabel, 'F12');
+      expect(LogicalKeyboardKey.mediaPlay.keyLabel, 'Media Play');
+      expect(const LogicalKeyboardKey(0x100012345).keyLabel, '');
+    });
+    test('debugName', () async {
+      expect(LogicalKeyboardKey.keyA.debugName, 'Key A');
+      expect(LogicalKeyboardKey.backslash.debugName, 'Backslash');
+      expect(const LogicalKeyboardKey(0xD9).debugName, 'Key Ù');
+      expect(LogicalKeyboardKey.mediaPlay.debugName, 'Media Play');
+      expect(const LogicalKeyboardKey(0x100012345).debugName, 'Key with ID 0x00100012345');
     });
   });
 }

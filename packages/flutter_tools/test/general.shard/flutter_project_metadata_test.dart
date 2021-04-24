@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_tools/src/flutter_project_metadata.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:file/memory.dart';
+import 'package:flutter_tools/src/flutter_project_metadata.dart';
 
 import '../src/common.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  File metadataFile;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late File metadataFile;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();

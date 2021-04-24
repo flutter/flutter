@@ -19,11 +19,12 @@ import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   setUpAll(() {
@@ -39,7 +40,7 @@ void main() {
   Logger logger;
 
   setUp(() {
-    fileSystem = LocalFileSystem.instance;
+    fileSystem = globals.localFileSystem;
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
@@ -90,7 +91,7 @@ void main() {
       );
 
       server = AnalysisServer(
-        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -128,7 +129,7 @@ void main() {
     );
 
       server = AnalysisServer(
-        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -153,7 +154,7 @@ void main() {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     server = AnalysisServer(
-      globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+      globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
@@ -179,23 +180,20 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'custom-dart-sdk/bin/dart',
+            'HostArtifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'custom-dart-sdk',
+            'HostArtifact.engineDartSdkPath',
           ],
           completer: completer,
           stdin: IOSink(stdin.sink),
         ),
       ]);
 
-    final Artifacts artifacts = MockArtifacts();
-    when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
-      .thenReturn('custom-dart-sdk');
-
+    final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
@@ -210,7 +208,7 @@ void main() {
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
@@ -220,23 +218,20 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'custom-dart-sdk/bin/dart',
+            'HostArtifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'custom-dart-sdk',
+            'HostArtifact.engineDartSdkPath',
           ],
           completer: completer,
           stdin: IOSink(stdin.sink),
         ),
       ]);
 
-    final Artifacts artifacts = MockArtifacts();
-    when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
-      .thenReturn('custom-dart-sdk');
-
+    final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
@@ -251,8 +246,6 @@ void main() {
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
 
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
-
-class MockArtifacts extends Mock implements Artifacts {}

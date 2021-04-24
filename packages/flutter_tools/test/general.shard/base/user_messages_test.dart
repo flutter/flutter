@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 
@@ -20,7 +18,7 @@ void main() {
     expect(message(macPlatform), contains('https://flutter.dev/docs/get-started/install/macos#android-setup'));
     expect(message(linuxPlatform), contains('https://flutter.dev/docs/get-started/install/linux#android-setup'));
     expect(message(windowsPlatform), contains('https://flutter.dev/docs/get-started/install/windows#android-setup'));
-    expect(message(FakePlatform()), contains('https://flutter.dev/docs/get-started/install '));
+    expect(message(FakePlatform(operatingSystem: '')), contains('https://flutter.dev/docs/get-started/install '));
   }
 
   testWithoutContext('Android installation instructions', () {

@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -21,6 +21,7 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
+    usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     argParser
       ..addOption('depfile',
@@ -70,7 +71,7 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject flutterProject = FlutterProject.fromPath(projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
     if (flutterProject == null) {
       return const <CustomDimensions, String>{};
     }
@@ -118,12 +119,6 @@ class BuildBundleCommand extends BuildSubCommand {
       manifestPath: defaultManifestPath,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
-      trackWidgetCreation: boolArg('track-widget-creation'),
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-      extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
-      treeShakeIcons: buildInfo.treeShakeIcons,
     );
     return FlutterCommandResult.success();
   }

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
@@ -2397,14 +2397,12 @@ void main() {
       required List<String> tabs,
     }) {
       return boilerplate(
-        child: Container(
-          child: TabBar(
-            controller: controller,
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            onTap: (int index) {
-              tabIndex = index;
-            },
-          ),
+        child: TabBar(
+          controller: controller,
+          tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+          onTap: (int index) {
+            tabIndex = index;
+          },
         ),
       );
     }
@@ -2619,7 +2617,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
             )
           )
@@ -2643,7 +2641,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
               enableFeedback: false,
             ),
@@ -2671,7 +2669,7 @@ void main() {
             length: 1,
             child: TabBar(
               tabs: const <Tab>[
-                Tab(text: 'A',)
+                Tab(text: 'A')
               ],
               overlayColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
@@ -2704,7 +2702,7 @@ void main() {
           length: 1,
           child: TabBar(
             tabs: const <Tab>[
-              Tab(text: 'A',)
+              Tab(text: 'A')
             ],
             overlayColor: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
@@ -3167,8 +3165,8 @@ void main() {
       Tab(icon: Icon(Icons.notifications), child: Text('Test')),
     ];
 
-    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight,);
-    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight,);
+    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight);
+    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight);
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
    });
@@ -3308,7 +3306,7 @@ void main() {
   });
 
   testWidgets('Crash on dispose', (WidgetTester tester) async {
-    await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
+    await tester.pumpWidget(const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.byIcon(Icons.directions_bike));
     // There was a time where this would throw an exception
     // because we tried to send a notification on dispose.
@@ -3403,6 +3401,138 @@ void main() {
     // No other tab got instantiated during the animation.
     expect(log, <String>['init: 0', 'init: 3', 'dispose: 0']);
   });
+
+  testWidgets('TabController\'s animation value should be updated when TabController\'s index >= tabs\'s length', (WidgetTester tester) async {
+    // This is a regression test for the issue brought up here
+    // https://github.com/flutter/flutter/issues/79226
+
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  bottom: TabBar(
+                    tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Remove Last Tab'),
+                      onPressed: () {
+                        setState(() {
+                          tabs.removeLast();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                body: TabBarView(
+                  children: tabs.map<Widget>((String tab) => Tab(text: 'Tab child $tab')).toList(),
+                ),
+              )
+            );
+          },
+        ),
+      ),
+    );
+
+    TabController getController() => DefaultTabController.of(tester.element(find.text('B')))!;
+    TabController controller = getController();
+
+    controller.animateTo(2, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    controller = getController();
+    expect(controller.index, 2);
+    expect(controller.animation!.value, 2);
+
+    await tester.tap(find.text('Remove Last Tab'));
+    await tester.pumpAndSettle();
+
+    controller = getController();
+    expect(controller.index, 1);
+    expect(controller.animation!.value, 1);
+  });
+
+  testWidgets('Tab preferredSize gives correct value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Row(
+            children: const <Tab>[
+              Tab(icon: Icon(Icons.message)),
+              Tab(text: 'Two'),
+              Tab(text: 'Three', icon: Icon(Icons.chat)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.message));
+    final Tab secondTab = tester.widget(find.widgetWithText(Tab, 'Two'));
+    final Tab thirdTab = tester.widget(find.widgetWithText(Tab, 'Three'));
+
+    expect(firstTab.preferredSize, const Size.fromHeight(46.0));
+    expect(secondTab.preferredSize, const Size.fromHeight(46.0));
+    expect(thirdTab.preferredSize, const Size.fromHeight(72.0));
+  });
+
+  testWidgets('TabBar preferredSize gives correct value when there are both icon and text in tabs', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 5,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(text: 'car'),
+                Tab(text: 'transit'),
+                Tab(text: 'bike'),
+                Tab(text: 'boat', icon: Icon(Icons.message)),
+                Tab(text: 'bus'),
+              ],
+            ),
+            title: const Text('Tabs Test'),
+          ),
+        ),
+      ),
+    ));
+
+    final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
+
+    expect(tabBar.preferredSize, const Size.fromHeight(74.0));
+  });
+
+  testWidgets('TabBar preferredSize gives correct value when there is only icon or text in tabs', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 5,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(text: 'car'),
+                Tab(icon: Icon(Icons.message)),
+                Tab(text: 'bike'),
+                Tab(icon: Icon(Icons.chat)),
+                Tab(text: 'bus'),
+              ],
+            ),
+            title: const Text('Tabs Test'),
+          ),
+        ),
+      ),
+    ));
+
+    final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
+
+    expect(tabBar.preferredSize, const Size.fromHeight(48.0));
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
@@ -3428,6 +3558,8 @@ class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClie
 }
 
 class TabBarDemo extends StatelessWidget {
+  const TabBarDemo({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

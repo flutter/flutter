@@ -5,9 +5,9 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
@@ -30,7 +30,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -78,7 +78,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -127,7 +127,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -197,7 +197,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(

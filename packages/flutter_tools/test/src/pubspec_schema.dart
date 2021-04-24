@@ -5,9 +5,10 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
+
 import 'common.dart';
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.

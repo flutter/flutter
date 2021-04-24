@@ -225,9 +225,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
-      // TODO(dnfield): Remove ignore once internal repo is up to date
-      // https://github.com/flutter/flutter/issues/74518
-      // ignore: await_only_futures
       await client.dispose();
       await client.onDone;
       throw DriverError('Flutter application health check failed.');
@@ -351,7 +348,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }
 
   Future<vms.Timestamp> _getVMTimelineMicros() async {
-    return await _serviceClient.getVMTimelineMicros();
+    return _serviceClient.getVMTimelineMicros();
   }
 
   @override
@@ -440,7 +437,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   @override
   Future<Timeline> traceAction(
-      Future<dynamic> action(), {
+      Future<dynamic> Function() action, {
         List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
         bool retainPriorEvents = false,
       }) async {
@@ -493,7 +490,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<T> runUnsynchronized<T>(Future<T> action(), { Duration? timeout }) async {
+  Future<T> runUnsynchronized<T>(Future<T> Function() action, { Duration? timeout }) async {
     await sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
     try {
@@ -519,9 +516,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   @override
   Future<void> close() async {
-    // TODO(dnfield): Remove ignore once internal repo is up to date
-    // https://github.com/flutter/flutter/issues/74518
-    await _serviceClient.dispose(); // ignore: await_only_futures
+    await _serviceClient.dispose();
     await _serviceClient.onDone;
   }
 }

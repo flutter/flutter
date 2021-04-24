@@ -10,7 +10,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 abstract class LinuxApp extends ApplicationPackage {

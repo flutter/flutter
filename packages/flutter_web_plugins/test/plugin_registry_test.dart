@@ -4,7 +4,7 @@
 
 @TestOn('chrome') // Uses web-only Flutter SDK
 
-import 'dart:ui' as ui; // ignore: unused_import, it looks unused as web-only elements are the only elements used.
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,13 +70,6 @@ void main() {
 
       ServicesBinding.instance!.defaultBinaryMessenger
           .setMessageHandler('test_send', null);
-    });
-
-    test('throws when trying to set a mock handler', () {
-      expect(
-          () => pluginBinaryMessenger.setMockMessageHandler(
-              'test', (ByteData? data) async => ByteData(0)),
-          throwsFlutterError);
     });
   });
 }

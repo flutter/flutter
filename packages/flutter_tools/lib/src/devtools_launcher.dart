@@ -178,7 +178,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
             'devtools`:\n${_devToolsActivateProcess.stderr}');
         return false;
       }
-      _persistentToolState.lastDevToolsActivationTime = DateTime.now();
+      _persistentToolState.lastDevToolsActivation = DateTime.now();
       return true;
     } on Exception catch (e, _) {
       _logger.printError('Error running `pub global activate devtools`: $e');

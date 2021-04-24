@@ -65,12 +65,12 @@ class _DropdownMenuPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double selectedItemOffset = getSelectedItemOffset();
     final Tween<double> top = Tween<double>(
-      begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
+      begin: selectedItemOffset.clamp(0.0, math.max(size.height - _kMenuItemHeight, 0.0)),
       end: 0.0,
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: (top.begin! + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height),
+      begin: (top.begin! + _kMenuItemHeight).clamp(math.min(_kMenuItemHeight, size.height), size.height),
       end: size.height,
     );
 
@@ -88,21 +88,6 @@ class _DropdownMenuPainter extends CustomPainter {
   }
 }
 
-// Do not use the platform-specific default scroll configuration.
-// Dropdown menus should never overscroll or display an overscroll indicator.
-class _DropdownScrollBehavior extends ScrollBehavior {
-  const _DropdownScrollBehavior();
-
-  @override
-  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
-
-  @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
-
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
-}
-
 // The widget that is the button wrapping the menu items.
 class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
@@ -112,6 +97,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
     required this.buttonRect,
     required this.constraints,
     required this.itemIndex,
+    required this.enableFeedback,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -119,6 +105,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   final Rect buttonRect;
   final BoxConstraints constraints;
   final int itemIndex;
+  final bool enableFeedback;
 
   @override
   _DropdownMenuItemButtonState<T> createState() => _DropdownMenuItemButtonState<T>();
@@ -138,7 +125,10 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
     if (focused && inTraditionalMode) {
       final _MenuLimits menuLimits = widget.route.getMenuLimits(
-          widget.buttonRect, widget.constraints.maxHeight, widget.itemIndex);
+        widget.buttonRect,
+        widget.constraints.maxHeight,
+        widget.itemIndex,
+      );
       widget.route.scrollController!.animateTo(
         menuLimits.scrollOffset,
         curve: Curves.easeInOut,
@@ -150,9 +140,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   void _handleOnTap() {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
 
-    if (dropdownMenuItem.onTap != null) {
-      dropdownMenuItem.onTap!();
-    }
+    dropdownMenuItem.onTap?.call();
 
     Navigator.pop(
       context,
@@ -161,11 +149,15 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   }
 
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+    // On the web, up/down don't change focus, *except* in a <select>
+    // element, which is what a dropdown emulates.
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
   };
 
   @override
   Widget build(BuildContext context) {
+    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
     final CurvedAnimation opacity;
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
@@ -175,21 +167,22 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
     }
-    Widget child = FadeTransition(
-      opacity: opacity,
-      child: InkWell(
+    Widget child = Container(
+      padding: widget.padding,
+      child: widget.route.items[widget.itemIndex],
+    );
+    // An [InkWell] is added to the item only if it is enabled
+    if (dropdownMenuItem.enabled) {
+      child = InkWell(
         autofocus: widget.itemIndex == widget.route.selectedIndex,
-        child: Container(
-          padding: widget.padding,
-          child: widget.route.items[widget.itemIndex],
-        ),
+        enableFeedback: widget.enableFeedback,
+        child: child,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-      ),
-    );
-    if (kIsWeb) {
-      // On the web, enter doesn't select things, *except* in a <select>
-      // element, which is what a dropdown emulates.
+      );
+    }
+    child = FadeTransition(opacity: opacity, child: child);
+    if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(
         shortcuts: _webShortcuts,
         child: child,
@@ -207,6 +200,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     required this.buttonRect,
     required this.constraints,
     this.dropdownColor,
+    required this.enableFeedback,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -214,6 +208,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final Rect buttonRect;
   final BoxConstraints constraints;
   final Color? dropdownColor;
+  final bool enableFeedback;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -263,6 +258,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           buttonRect: widget.buttonRect,
           constraints: widget.constraints,
           itemIndex: itemIndex,
+          enableFeedback: widget.enableFeedback,
         ),
       ];
 
@@ -287,7 +283,14 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             type: MaterialType.transparency,
             textStyle: route.style,
             child: ScrollConfiguration(
-              behavior: const _DropdownScrollBehavior(),
+              // Dropdown menus should never overscroll or display an overscroll indicator.
+              // The default scrollbar platforms will apply.
+              // Platform must use Theme and ScrollPhysics must be Clamping.
+              behavior: ScrollConfiguration.of(context).copyWith(
+                overscroll: false,
+                physics: const ClampingScrollPhysics(),
+                platform: Theme.of(context).platform,
+              ),
               child: PrimaryScrollController(
                 controller: widget.route.scrollController!,
                 child: Scrollbar(
@@ -324,7 +327,10 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
     //   -- https://material.io/design/components/menus.html#usage
-    final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
+    double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
+    if (route.menuMaxHeight != null && route.menuMaxHeight! <= maxHeight) {
+      maxHeight = route.menuMaxHeight!;
+    }
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
     final double width = math.min(constraints.maxWidth, buttonRect.width);
@@ -410,6 +416,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.barrierLabel,
     this.itemHeight,
     this.dropdownColor,
+    this.menuMaxHeight,
+    required this.enableFeedback,
   }) : assert(style != null),
        itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
@@ -422,6 +430,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final TextStyle style;
   final double? itemHeight;
   final Color? dropdownColor;
+  final double? menuMaxHeight;
+  final bool enableFeedback;
 
   final List<double> itemHeights;
   ScrollController? scrollController;
@@ -453,8 +463,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           capturedThemes: capturedThemes,
           style: style,
           dropdownColor: dropdownColor,
+          enableFeedback: enableFeedback,
         );
-      }
+      },
     );
   }
 
@@ -548,6 +559,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     required this.capturedThemes,
     this.style,
     required this.dropdownColor,
+    required this.enableFeedback,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -560,6 +572,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final CapturedThemes capturedThemes;
   final TextStyle? style;
   final Color? dropdownColor;
+  final bool enableFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -583,6 +596,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       buttonRect: buttonRect,
       constraints: constraints,
       dropdownColor: dropdownColor,
+      enableFeedback: enableFeedback,
     );
 
     return MediaQuery.removePadding(
@@ -685,6 +699,7 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     Key? key,
     this.onTap,
     this.value,
+    this.enabled = true,
     required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
@@ -696,6 +711,11 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   ///
   /// Eventually returned in a call to [DropdownButton.onChanged].
   final T? value;
+
+  /// Whether or not a user can select this menu item.
+  ///
+  /// Defaults to `true`.
+  final bool enabled;
 }
 
 /// An inherited widget that causes any descendant [DropdownButton]
@@ -753,10 +773,10 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// Widget build(BuildContext context) {
 ///   return DropdownButton<String>(
 ///     value: dropdownValue,
-///     icon: Icon(Icons.arrow_downward),
+///     icon: const Icon(Icons.arrow_downward),
 ///     iconSize: 24,
 ///     elevation: 16,
-///     style: TextStyle(
+///     style: const TextStyle(
 ///       color: Colors.deepPurple
 ///     ),
 ///     underline: Container(
@@ -844,6 +864,8 @@ class DropdownButton<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.dropdownColor,
+    this.menuMaxHeight,
+    this.enableFeedback,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -994,12 +1016,12 @@ class DropdownButton<T> extends StatefulWidget {
   ///           dropdownValue = newValue!;
   ///         });
   ///       },
-  ///       style: TextStyle(color: Colors.blue),
+  ///       style: const TextStyle(color: Colors.blue),
   ///       selectedItemBuilder: (BuildContext context) {
   ///         return options.map((String value) {
   ///           return Text(
   ///             dropdownValue,
-  ///             style: TextStyle(color: Colors.white),
+  ///             style: const TextStyle(color: Colors.white),
   ///           );
   ///         }).toList();
   ///       },
@@ -1093,6 +1115,29 @@ class DropdownButton<T> extends StatefulWidget {
   /// instead.
   final Color? dropdownColor;
 
+  /// The maximum height of the menu.
+  ///
+  /// The maximum height of the menu must be at least one row shorter than
+  /// the height of the app's view. This ensures that a tappable area
+  /// outside of the simple menu is present so the user can dismiss the menu.
+  ///
+  /// If this property is set above the maximum allowable height threshold
+  /// mentioned above, then the menu defaults to being padded at the top
+  /// and bottom of the menu by at one menu item's height.
+  final double? menuMaxHeight;
+
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// By default, platform-specific feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 }
@@ -1181,7 +1226,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   void _updateSelectedIndex() {
-    if (widget.value == null || widget.items == null || widget.items!.isEmpty) {
+    if (widget.items == null
+        || widget.items!.isEmpty
+        || (widget.value == null &&
+            widget.items!
+                .where((DropdownMenuItem<T> item) => item.enabled && item.value == widget.value)
+                .isEmpty)) {
       _selectedIndex = null;
       return;
     }
@@ -1221,7 +1271,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
           _dropdownRoute!.itemHeights[index] = size.height;
         },
-      )
+      ),
     ];
 
     final NavigatorState navigator = Navigator.of(context);
@@ -1239,19 +1289,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
       dropdownColor: widget.dropdownColor,
+      menuMaxHeight: widget.menuMaxHeight,
+      enableFeedback: widget.enableFeedback ?? true,
     );
 
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null)
         return;
-      if (widget.onChanged != null)
-        widget.onChanged!(newValue.result);
+      widget.onChanged?.call(newValue.result);
     });
 
-    if (widget.onTap != null) {
-      widget.onTap!();
-    }
+    widget.onTap?.call();
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1483,10 +1532,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
     @Deprecated(
       'Use autovalidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     bool autovalidate = false,
     AutovalidateMode? autovalidateMode,
+    double? menuMaxHeight,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1506,7 +1556,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.'
+         'autovalidate and autovalidateMode should not be used together.',
        ),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(
@@ -1555,6 +1605,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      focusNode: focusNode,
                      autofocus: autofocus,
                      dropdownColor: dropdownColor,
+                     menuMaxHeight: menuMaxHeight,
                    ),
                  ),
                );
