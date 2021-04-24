@@ -228,7 +228,7 @@ class PlatformViewsService {
   ///
   /// The `id` and `viewType` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
-  static Future<LinuxViewController> initLinuxView({
+  static Future<GtkViewController> initGtkView({
     required int id,
     required String viewType,
     required TextDirection layoutDirection,
@@ -243,7 +243,7 @@ class PlatformViewsService {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
       'viewType': viewType,
-      'direction': LinuxViewController._getGtkTextDirection(layoutDirection),
+      'direction': GtkViewController._getGtkTextDirection(layoutDirection),
     };
 
     if (creationParams != null) {
@@ -254,7 +254,7 @@ class PlatformViewsService {
     }
 
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    return LinuxViewController._(id, layoutDirection);
+    return GtkViewController._(id, layoutDirection);
   }
 }
 
@@ -1155,11 +1155,11 @@ class UiKitViewController {
   }
 }
 
-/// Controls an Linux view.
+/// Controls an Linux GtkWidget.
 ///
-/// Typically created with [PlatformViewsService.initLinuxView].
-class LinuxViewController {
-  LinuxViewController._(
+/// Typically created with [PlatformViewsService.initGtkView].
+class GtkViewController {
+  GtkViewController._(
     this.id,
     TextDirection layoutDirection,
   ) : assert(id != null),
@@ -1175,7 +1175,7 @@ class LinuxViewController {
   /// Gtk's [GTK_TEXT_DIR_RTL](https://developer.gnome.org/gtk3/stable/GtkWidget.html#GtkTextDirection) value.
   static const int kGtkTextDirectionRtl = 2;
 
-  /// The unique identifier of the Linux view controlled by this controller.
+  /// The unique identifier of the Linux GtkWidget controlled by this controller.
   final int id;
 
   bool _debugDisposed = false;
@@ -1228,7 +1228,7 @@ class LinuxViewController {
 
   /// Disposes the view.
   ///
-  /// The [LinuxViewController] object is unusable after calling this.
+  /// The [GtkViewController] object is unusable after calling this.
   /// The `id` of the platform view cannot be reused after the view is
   /// disposed.
   Future<void> dispose() async {

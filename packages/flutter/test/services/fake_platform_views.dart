@@ -394,13 +394,13 @@ class FakeIosPlatformViewsController {
   }
 }
 
-class FakeLinuxPlatformViewsController {
-  FakeLinuxPlatformViewsController() {
+class FakeGtkPlatformViewsController {
+  FakeGtkPlatformViewsController() {
     SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
   }
 
-  Iterable<FakeLinuxView> get views => _views.values;
-  final Map<int, FakeLinuxView> _views = <int, FakeLinuxView>{};
+  Iterable<FakeGtkView> get views => _views.values;
+  final Map<int, FakeGtkView> _views = <int, FakeGtkView>{};
 
   final Set<String> _registeredViewTypes = <String>{};
 
@@ -467,7 +467,7 @@ class FakeLinuxPlatformViewsController {
       );
     }
 
-    _views[id] = FakeLinuxView(id, viewType, layoutDirection, creationParams);
+    _views[id] = FakeGtkView(id, viewType, layoutDirection, creationParams);
     gesturesAccepted[id] = 0;
     gesturesRejected[id] = 0;
     targetEntered[id] = 0;
@@ -697,15 +697,15 @@ class FakeUiKitView {
 }
 
 @immutable
-class FakeLinuxView {
-  const FakeLinuxView(this.id, this.type, this.layoutDirection, [this.creationParams]);
+class FakeGtkView {
+  const FakeGtkView(this.id, this.type, this.layoutDirection, [this.creationParams]);
 
   final int id;
   final String type;
   final Uint8List? creationParams;
   final int layoutDirection;
 
-  FakeLinuxView copyWith({int? layoutDirection}) => FakeLinuxView(
+  FakeGtkView copyWith({int? layoutDirection}) => FakeGtkView(
     id,
     type,
     layoutDirection ?? this.layoutDirection,
@@ -716,7 +716,7 @@ class FakeLinuxView {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    return other is FakeLinuxView
+    return other is FakeGtkView
         && other.id == id
         && other.type == type
         && other.creationParams == creationParams
@@ -728,7 +728,7 @@ class FakeLinuxView {
 
   @override
   String toString() {
-    return 'FakeLinuxView(id: $id, type: $type, layoutDirection: $layoutDirection, creationParams: $creationParams)';
+    return 'FakeGtkView(id: $id, type: $type, layoutDirection: $layoutDirection, creationParams: $creationParams)';
   }
 }
 

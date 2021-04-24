@@ -307,7 +307,7 @@ class UiKitView extends StatefulWidget {
 
 /// Embeds a Linux GtkWidget in the Widget hierarchy.
 ///
-/// {@macro flutter.rendering.RenderLinuxView}
+/// {@macro flutter.rendering.RenderGtkView}
 ///
 /// Embedding Linux GtkWidget is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
@@ -320,11 +320,11 @@ class UiKitView extends StatefulWidget {
 ///
 /// Construction of GtkWidget is done asynchronously, before the GtkWidget is ready this widget paints
 /// nothing while maintaining the same layout constraints.
-class LinuxView extends StatefulWidget {
+class GtkView extends StatefulWidget {
   /// Creates a widget that embeds an GtkWidget.
   ///
   /// {@macro flutter.widgets.AndroidView.constructorArgs}
-  const LinuxView({
+  const GtkView({
     Key? key,
     required this.viewType,
     this.onPlatformViewCreated,
@@ -338,7 +338,7 @@ class LinuxView extends StatefulWidget {
         assert(creationParams == null || creationParamsCodec != null),
         super(key: key);
 
-  /// The unique identifier for Linux view type to be embedded by this widget.
+  /// The unique identifier for Linux GtkWidget view type to be embedded by this widget.
   ///
   /// A PlatformViewFactory for this type must have been registered.
   final String viewType;
@@ -365,7 +365,7 @@ class LinuxView extends StatefulWidget {
   /// This must not be null if [creationParams] is not null.
   final MessageCodec<dynamic>? creationParamsCodec;
 
-  /// Which gestures should be forwarded to the Linux view.
+  /// Which gestures should be forwarded to the Linux GtkWidget view.
   ///
   /// {@macro flutter.widgets.AndroidView.gestureRecognizers.descHead}
   ///
@@ -375,13 +375,13 @@ class LinuxView extends StatefulWidget {
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
-  ///   child: LinuxView(
+  ///   child: GtkView(
   ///     viewType: 'webview',
   ///   ),
   /// )
   /// ```
   ///
-  /// To get the [LinuxView] to claim the vertical drag gestures we can pass a vertical drag
+  /// To get the [GtkView] to claim the vertical drag gestures we can pass a vertical drag
   /// gesture recognizer factory in [gestureRecognizers] e.g:
   ///
   /// ```dart
@@ -390,7 +390,7 @@ class LinuxView extends StatefulWidget {
   ///   child: SizedBox(
   ///     width: 200.0,
   ///     height: 100.0,
-  ///     child: LinuxView(
+  ///     child: GtkView(
   ///       viewType: 'webview',
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
   ///         new Factory<OneSequenceGestureRecognizer>(
@@ -409,7 +409,7 @@ class LinuxView extends StatefulWidget {
   final Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers;
 
   @override
-  State<LinuxView> createState() => _LinuxViewState();
+  State<GtkView> createState() => _GtkViewState();
 }
 
 /// Embeds an HTML element in the Widget hierarchy in Flutter Web.
@@ -752,8 +752,8 @@ class _UiKitViewState extends State<UiKitView> {
   }
 }
 
-class _LinuxViewState extends State<LinuxView> {
-  LinuxViewController? _controller;
+class _GtkViewState extends State<GtkView> {
+  GtkViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
 
@@ -792,7 +792,7 @@ class _LinuxViewState extends State<LinuxView> {
     if (_controller == null) {
       return const SizedBox.expand();
     }
-    Widget result = _LinuxPlatformView(
+    Widget result = _GtkPlatformView(
       controller: _controller!,
       hitTestBehavior: widget.hitTestBehavior,
       gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
@@ -822,7 +822,7 @@ class _LinuxViewState extends State<LinuxView> {
       return;
     }
     _initialized = true;
-    _createNewLinuxView();
+    _createNewGtkView();
   }
 
   @override
@@ -841,7 +841,7 @@ class _LinuxViewState extends State<LinuxView> {
   }
 
   @override
-  void didUpdateWidget(LinuxView oldWidget) {
+  void didUpdateWidget(GtkView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
@@ -850,7 +850,7 @@ class _LinuxViewState extends State<LinuxView> {
 
     if (widget.viewType != oldWidget.viewType) {
       _controller?.dispose();
-      _createNewLinuxView();
+      _createNewGtkView();
       return;
     }
 
@@ -872,9 +872,9 @@ class _LinuxViewState extends State<LinuxView> {
     super.dispose();
   }
 
-  Future<void> _createNewLinuxView() async {
+  Future<void> _createNewGtkView() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
-    final LinuxViewController controller = await PlatformViewsService.initLinuxView(
+    final GtkViewController controller = await PlatformViewsService.initGtkView(
       id: id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection!,
@@ -962,8 +962,8 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
   }
 }
 
-class _LinuxPlatformView extends LeafRenderObjectWidget {
-  const _LinuxPlatformView({
+class _GtkPlatformView extends LeafRenderObjectWidget {
+  const _GtkPlatformView({
     Key? key,
     this.id,
     required this.controller,
@@ -971,14 +971,14 @@ class _LinuxPlatformView extends LeafRenderObjectWidget {
     required this.gestureRecognizers,
   }) : super(key: key);
 
-  final LinuxViewController controller;
+  final GtkViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
   final int? id;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderLinuxView(
+    return RenderGtkView(
       viewController: controller,
       hitTestBehavior: hitTestBehavior,
       gestureRecognizers: gestureRecognizers,
@@ -986,7 +986,7 @@ class _LinuxPlatformView extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderLinuxView renderObject) {
+  void updateRenderObject(BuildContext context, RenderGtkView renderObject) {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);

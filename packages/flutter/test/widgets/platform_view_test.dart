@@ -1991,10 +1991,10 @@ void main() {
     });
   });
 
-  group('LinuxView', () {
+  group('GtkView', () {
     testWidgets('Create GtkWidget', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2002,22 +2002,22 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 1, 'webview', LinuxViewController.kGtkTextDirectionLtr),
+        unorderedEquals(<FakeGtkView>[
+          FakeGtkView(currentViewId + 1, 'webview', GtkViewController.kGtkTextDirectionLtr),
         ]),
       );
     });
 
     testWidgets('Change GtkWidget view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
@@ -2025,7 +2025,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
@@ -2035,28 +2035,28 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(viewType: 'maps', layoutDirection: TextDirection.ltr),
+            child: GtkView(viewType: 'maps', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 2, 'maps', LinuxViewController.kGtkTextDirectionLtr),
+        unorderedEquals(<FakeGtkView>[
+          FakeGtkView(currentViewId + 2, 'maps', GtkViewController.kGtkTextDirectionLtr),
         ]),
       );
     });
 
     testWidgets('Dispose GtkWidget ', (WidgetTester tester) async {
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
@@ -2077,7 +2077,7 @@ void main() {
     });
 
     testWidgets('Dispose GtkWidget before creation completed ', (WidgetTester tester) async {
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       viewsController.creationDelay = Completer<void>();
       await tester.pumpWidget(
@@ -2085,7 +2085,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
@@ -2109,7 +2109,7 @@ void main() {
 
     testWidgets('GtkWidget survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
@@ -2117,7 +2117,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
+            child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
           ),
         ),
       );
@@ -2128,7 +2128,7 @@ void main() {
             child: SizedBox(
               width: 200.0,
               height: 100.0,
-              child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
+              child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
             ),
           ),
         ),
@@ -2136,15 +2136,15 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 1, 'webview', LinuxViewController.kGtkTextDirectionLtr),
+        unorderedEquals(<FakeGtkView>[
+          FakeGtkView(currentViewId + 1, 'webview', GtkViewController.kGtkTextDirectionLtr),
         ]),
       );
     });
 
     testWidgets('Create GtkWidget with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2152,7 +2152,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(
+            child: GtkView(
               viewType: 'webview',
               layoutDirection: TextDirection.ltr,
               creationParams: 'creation parameters',
@@ -2162,7 +2162,7 @@ void main() {
         ),
       );
 
-      final FakeLinuxView fakeView = viewsController.views.first;
+      final FakeGtkView fakeView = viewsController.views.first;
       final Uint8List rawCreationParams = fakeView.creationParams!;
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
@@ -2174,15 +2174,15 @@ void main() {
       expect(actualParams, 'creation parameters');
       expect(
         viewsController.views,
-        unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 1, 'webview', LinuxViewController.kGtkTextDirectionLtr, fakeView.creationParams),
+        unorderedEquals(<FakeGtkView>[
+          FakeGtkView(currentViewId + 1, 'webview', GtkViewController.kGtkTextDirectionLtr, fakeView.creationParams),
         ]),
       );
     });
 
-    testWidgets('LinuxView accepts gestures', (WidgetTester tester) async {
+    testWidgets('GtkView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2191,7 +2191,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr,),
+            child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr,),
           ),
         ),
       );
@@ -2208,9 +2208,9 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
     });
 
-    testWidgets('LinuxView transparent hit test behavior', (WidgetTester tester) async {
+    testWidgets('GtkView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       int numPointerDownsOnParent = 0;
@@ -2229,7 +2229,7 @@ void main() {
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
-                  child: LinuxView(
+                  child: GtkView(
                     viewType: 'webview',
                     hitTestBehavior: PlatformViewHitTestBehavior.transparent,
                     layoutDirection: TextDirection.ltr,
@@ -2253,9 +2253,9 @@ void main() {
       expect(numPointerDownsOnParent, 1);
     });
 
-    testWidgets('LinuxView translucent hit test behavior', (WidgetTester tester) async {
+    testWidgets('GtkView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       int numPointerDownsOnParent = 0;
@@ -2274,7 +2274,7 @@ void main() {
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
-                  child: LinuxView(
+                  child: GtkView(
                     viewType: 'webview',
                     hitTestBehavior: PlatformViewHitTestBehavior.translucent,
                     layoutDirection: TextDirection.ltr,
@@ -2298,9 +2298,9 @@ void main() {
       expect(numPointerDownsOnParent, 1);
     });
 
-    testWidgets('LinuxView opaque hit test behavior', (WidgetTester tester) async {
+    testWidgets('GtkView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       int numPointerDownsOnParent = 0;
@@ -2319,7 +2319,7 @@ void main() {
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
-                  child: LinuxView(
+                  child: GtkView(
                     viewType: 'webview',
                     hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                     layoutDirection: TextDirection.ltr,
@@ -2342,9 +2342,9 @@ void main() {
       expect(numPointerDownsOnParent, 0);
     });
 
-    testWidgets('LinuxView can lose gesture arenas', (WidgetTester tester) async {
+    testWidgets('GtkView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       bool verticalDragAcceptedByParent = false;
@@ -2360,7 +2360,7 @@ void main() {
               child: const SizedBox(
                 width: 200.0,
                 height: 100.0,
-                child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+                child: GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr),
               ),
             ),
           ),
@@ -2380,9 +2380,9 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 1);
     });
 
-    testWidgets('LinuxView tap gesture recognizers', (WidgetTester tester) async {
+    testWidgets('GtkView tap gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       bool gestureAcceptedByParent = false;
       await tester.pumpWidget(
@@ -2395,7 +2395,7 @@ void main() {
             child: SizedBox(
               width: 200.0,
               height: 100.0,
-              child: LinuxView(
+              child: GtkView(
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
@@ -2424,9 +2424,9 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgets('LinuxView long press gesture recognizers', (WidgetTester tester) async {
+    testWidgets('GtkView long press gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       bool gestureAcceptedByParent = false;
       await tester.pumpWidget(
@@ -2439,7 +2439,7 @@ void main() {
             child: SizedBox(
               width: 200.0,
               height: 100.0,
-              child: LinuxView(
+              child: GtkView(
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
@@ -2466,9 +2466,9 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgets('LinuxView drag gesture recognizers', (WidgetTester tester) async {
+    testWidgets('GtkView drag gesture recognizers', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       bool verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
@@ -2481,7 +2481,7 @@ void main() {
             child: SizedBox(
               width: 200.0,
               height: 100.0,
-              child: LinuxView(
+              child: GtkView(
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
@@ -2508,9 +2508,9 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgets('LinuxView can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('GtkView can claim gesture after all pointers are up', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       bool verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the AndroidView gets the pointer up event.
@@ -2526,7 +2526,7 @@ void main() {
             child: const SizedBox(
               width: 200.0,
               height: 100.0,
-              child: LinuxView(
+              child: GtkView(
                 viewType: 'webview',
                 layoutDirection: TextDirection.ltr,
               ),
@@ -2548,9 +2548,9 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgets('LinuxView rebuilt during gesture', (WidgetTester tester) async {
+    testWidgets('GtkView rebuilt during gesture', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         const Align(
@@ -2558,7 +2558,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(
+            child: GtkView(
               viewType: 'webview',
               layoutDirection: TextDirection.ltr,
             ),
@@ -2579,7 +2579,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: LinuxView(
+            child: GtkView(
               viewType: 'webview',
               layoutDirection: TextDirection.ltr,
             ),
@@ -2593,9 +2593,9 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgets('LinuxView with eager gesture recognizer', (WidgetTester tester) async {
+    testWidgets('GtkView with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
         Align(
@@ -2605,7 +2605,7 @@ void main() {
             child: SizedBox(
               width: 200.0,
               height: 100.0,
-              child: LinuxView(
+              child: GtkView(
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
@@ -2633,16 +2633,16 @@ void main() {
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
-    testWidgets('LinuxView rejects gestures absorbed by siblings', (WidgetTester tester) async {
+    testWidgets('GtkView rejects gestures absorbed by siblings', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
         Stack(
           alignment: Alignment.topLeft,
           children: <Widget>[
-            const LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            const GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr),
             Container(
               color: const Color.fromARGB(255, 255, 255, 255),
               width: 100,
@@ -2663,12 +2663,12 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
     });
 
-    testWidgets('LinuxView rejects gestures absorbed by siblings if the touch is outside of the platform view bounds but inside platform view frame', (WidgetTester tester) async {
-      // LinuxView is positioned at (left=0, top=100, right=300, bottom=600).
-      // Opaque container is on top of the LinuxView positioned at (left=0, top=500, right=300, bottom=600).
+    testWidgets('GtkView rejects gestures absorbed by siblings if the touch is outside of the platform view bounds but inside platform view frame', (WidgetTester tester) async {
+      // GtkView is positioned at (left=0, top=100, right=300, bottom=600).
+      // Opaque container is on top of the GtkView positioned at (left=0, top=500, right=300, bottom=600).
       // Touch on (550, 150) is expected to be absorbed by the container.
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2681,7 +2681,7 @@ void main() {
                 child: Container(
                   width: 300,
                   height: 500,
-                  child: const LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
+                  child: const GtkView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
               Transform.translate(
                 offset: const Offset(0, 500),
                 child: Container(
@@ -2706,7 +2706,7 @@ void main() {
     });
 
     testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       int factoryInvocationCount = 0;
@@ -2716,7 +2716,7 @@ void main() {
       };
 
       await tester.pumpWidget(
-        LinuxView(
+        GtkView(
           viewType: 'webview',
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(constructRecognizer),
@@ -2726,7 +2726,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        LinuxView(
+        GtkView(
           viewType: 'webview',
           hitTestBehavior: PlatformViewHitTestBehavior.translucent,
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
@@ -2739,11 +2739,11 @@ void main() {
       expect(factoryInvocationCount, 1);
     });
 
-    testWidgets('LinuxView has correct semantics', (WidgetTester tester) async {
+    testWidgets('GtkView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      final FakeGtkPlatformViewsController viewsController = FakeGtkPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -2754,7 +2754,7 @@ void main() {
             child: SizedBox(
               width: 200.0,
               height: 100.0,
-              child: LinuxView(
+              child: GtkView(
                 viewType: 'webview',
                 layoutDirection: TextDirection.ltr,
               ),
@@ -2766,7 +2766,7 @@ void main() {
       // is not yet in the tree.
       await tester.pump();
 
-      final SemanticsNode semantics = tester.getSemantics(find.byType(LinuxView));
+      final SemanticsNode semantics = tester.getSemantics(find.byType(GtkView));
 
       expect(semantics.platformViewId, currentViewId + 1);
       expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));

@@ -277,16 +277,16 @@ void main() {
     });
   });
 
-  group('Linux', () {
-    late FakeLinuxPlatformViewsController viewsController;
+  group('Gtk', () {
+    late FakeGtkPlatformViewsController viewsController;
     setUp(() {
-      viewsController = FakeLinuxPlatformViewsController();
+      viewsController = FakeGtkPlatformViewsController();
     });
 
-    test('create Linux view of unregistered type', () async {
+    test('create Gtk view of unregistered type', () async {
       expect(
         () {
-          return PlatformViewsService.initLinuxView(
+          return PlatformViewsService.initGtkView(
             id: 0,
             viewType: 'unregistered_view_type',
             layoutDirection: TextDirection.ltr,
@@ -296,54 +296,54 @@ void main() {
       );
     });
 
-    test('create Linux views', () async {
+    test('create Gtk views', () async {
       viewsController.registerViewType('webview');
-      await PlatformViewsService.initLinuxView(
+      await PlatformViewsService.initGtkView(
           id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
-      await PlatformViewsService.initLinuxView(
+      await PlatformViewsService.initGtkView(
           id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl);
       expect(
         viewsController.views,
-        unorderedEquals(<FakeLinuxView>[
-          const FakeLinuxView(0, 'webview', LinuxViewController.kGtkTextDirectionLtr),
-          const FakeLinuxView(1, 'webview', LinuxViewController.kGtkTextDirectionRtl),
+        unorderedEquals(<FakeGtkView>[
+          const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionLtr),
+          const FakeGtkView(1, 'webview', GtkViewController.kGtkTextDirectionRtl),
         ]),
       );
     });
 
-    test('reuse Linux view id', () async {
+    test('reuse Gtk view id', () async {
       viewsController.registerViewType('webview');
-      await PlatformViewsService.initLinuxView(
+      await PlatformViewsService.initGtkView(
         id: 0,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
       );
       expect(
-            () => PlatformViewsService.initLinuxView(
+            () => PlatformViewsService.initGtkView(
             id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
         throwsA(isA<PlatformException>()),
       );
     });
 
-    test('dispose Linux view', () async {
+    test('dispose Gtk view', () async {
       viewsController.registerViewType('webview');
-      await PlatformViewsService.initLinuxView(
+      await PlatformViewsService.initGtkView(
           id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
-      final LinuxViewController viewController = await PlatformViewsService.initLinuxView(
+      final GtkViewController viewController = await PlatformViewsService.initGtkView(
           id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
 
       viewController.dispose();
       expect(
           viewsController.views,
-          unorderedEquals(<FakeLinuxView>[
-            const FakeLinuxView(0, 'webview', LinuxViewController.kGtkTextDirectionLtr),
+          unorderedEquals(<FakeGtkView>[
+            const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionLtr),
           ]));
     });
 
-    test('dispose inexisting Linux view', () async {
+    test('dispose inexisting Gtk view', () async {
       viewsController.registerViewType('webview');
-      await PlatformViewsService.initLinuxView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
-      final LinuxViewController viewController = await PlatformViewsService.initLinuxView(
+      await PlatformViewsService.initGtkView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final GtkViewController viewController = await PlatformViewsService.initGtkView(
           id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
       await viewController.dispose();
       expect(
@@ -354,15 +354,15 @@ void main() {
       );
     });
 
-    test("change Linux GtkWidget's directionality", () async {
+    test("change Gtk GtkWidget's directionality", () async {
       viewsController.registerViewType('webview');
-      final LinuxViewController viewController = await PlatformViewsService.initLinuxView(
+      final GtkViewController viewController = await PlatformViewsService.initGtkView(
           id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
       await viewController.setLayoutDirection(TextDirection.rtl);
       expect(
           viewsController.views,
-          unorderedEquals(<FakeLinuxView>[
-            const FakeLinuxView(0, 'webview', LinuxViewController.kGtkTextDirectionRtl, null),
+          unorderedEquals(<FakeGtkView>[
+            const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionRtl, null),
           ]));
     });
   });
