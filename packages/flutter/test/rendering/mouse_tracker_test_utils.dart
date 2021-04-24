@@ -5,10 +5,11 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart' show TestDefaultBinaryMessengerBinding;
 
 class _TestHitTester extends RenderBox {
   _TestHitTester(this.hitTestOverride);
@@ -24,7 +25,7 @@ class _TestHitTester extends RenderBox {
 // A binding used to test MouseTracker, allowing the test to override hit test
 // searching.
 class TestMouseTrackerFlutterBinding extends BindingBase
-    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {
+    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding, TestDefaultBinaryMessengerBinding {
   @override
   void initInstances() {
     super.initInstances();

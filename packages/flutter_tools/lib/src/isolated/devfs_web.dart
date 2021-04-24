@@ -545,7 +545,7 @@ class WebAssetServer implements AssetReader {
     // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
     final Directory dartSdkParent = globals.fs
         .directory(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath))
         .parent;
     final File dartSdkFile = globals.fs.file(dartSdkParent.uri.resolve(path));
     if (dartSdkFile.existsSync()) {
@@ -553,19 +553,19 @@ class WebAssetServer implements AssetReader {
     }
 
     final Directory flutterWebSdk = globals.fs
-        .directory(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk));
+        .directory(globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk));
     final File webSdkFile = globals.fs.file(flutterWebSdk.uri.resolve(path));
 
     return webSdkFile;
   }
 
   File get _resolveDartSdkJsFile =>
-      globals.fs.file(globals.artifacts.getArtifactPath(
+      globals.fs.file(globals.artifacts.getHostArtifact(
           kDartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
       ));
 
   File get _resolveDartSdkJsMapFile =>
-    globals.fs.file(globals.artifacts.getArtifactPath(
+    globals.fs.file(globals.artifacts.getHostArtifact(
         kDartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
     ));
 
@@ -843,6 +843,8 @@ class WebDevFS implements DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       packageConfig: packageConfig,
+      projectRootPath: projectRootPath,
+      fs: globals.fs,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
@@ -877,7 +879,7 @@ class WebDevFS implements DevFS {
 
   @visibleForTesting
   final File requireJS = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'kernel',
@@ -887,7 +889,7 @@ class WebDevFS implements DevFS {
 
   @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'web',

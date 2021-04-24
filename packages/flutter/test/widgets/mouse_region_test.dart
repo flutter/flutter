@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
@@ -1588,7 +1588,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
-    SystemChannels.mouseCursor.setMockMethodCallHandler((_) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (_) async {
       logCursors.add('cursor');
     });
 

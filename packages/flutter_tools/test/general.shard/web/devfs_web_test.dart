@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
@@ -620,6 +621,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -654,13 +657,13 @@ void main() {
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     final String webPrecompiledSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
@@ -738,6 +741,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -777,13 +782,13 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -853,6 +858,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -898,6 +905,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -951,6 +960,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -1071,6 +1082,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });

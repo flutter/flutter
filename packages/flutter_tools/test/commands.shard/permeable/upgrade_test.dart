@@ -39,7 +39,7 @@ void main() {
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
       realCommandRunner = UpgradeCommandRunner();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
         'ENV1': 'irrelevant',

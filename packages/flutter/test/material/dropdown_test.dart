@@ -5,13 +5,14 @@
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
@@ -3164,5 +3165,153 @@ void main() {
         // The height of menu is 47.0.
         ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 112.0, 47.0, 2.0, 2.0), color: Colors.grey[50], hasMaskFilter: false)
     );
+  });
+
+  testWidgets('Tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
+    String? value = 'first';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
+              value: value,
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  enabled: false,
+                  child: Text('disabled'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'first',
+                  child: Text('first'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'second',
+                  child: Text('second'),
+                ),
+              ],
+              onChanged: (String? newValue) {
+                setState(() {
+                  value = newValue;
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on a disabled item.
+    await tester.tap(find.text('disabled').hitTestable());
+    await tester.pumpAndSettle();
+
+    // The dropdown should still be open, i.e., there should be one widget with 'second' text.
+    expect(find.text('second').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('Disabled item should not be focusable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButton<String>(
+            value: 'enabled',
+            onChanged: onChanged,
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(
+                enabled: false,
+                child: Text('disabled'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'enabled',
+                child: Text('enabled'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('enabled').hitTestable());
+    await tester.pumpAndSettle();
+
+    // The `FocusNode` of [disabledItem] should be `null` as enabled is false.
+    final Element disabledItem = tester.element(find.text('disabled').hitTestable());
+    expect(Focus.maybeOf(disabledItem), null, reason: 'Disabled menu item should not be able to request focus');
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    Widget feedbackBoilerplate({bool? enableFeedback}) {
+      return MaterialApp(
+        home : Material(
+          child: DropdownButton<String>(
+            value: 'One',
+            enableFeedback: enableFeedback,
+            underline: Container(
+              height: 2,
+              color: Colors.deepPurpleAccent,
+            ),
+            onChanged: (String? value) {},
+            items: <String>['One', 'Two'].map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('Dropdown with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
+
+      await tester.tap(find.text('One'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(InkWell, 'One'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('Dropdown with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
+
+      await tester.tap(find.text('One'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(InkWell, 'One'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('Dropdown with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(feedbackBoilerplate());
+
+      await tester.tap(find.text('One'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(InkWell, 'Two'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }

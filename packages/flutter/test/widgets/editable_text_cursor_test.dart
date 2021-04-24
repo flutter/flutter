@@ -4,10 +4,10 @@
 
 @TestOn('!chrome')
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
@@ -75,7 +75,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -127,7 +127,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -820,7 +820,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;
@@ -878,7 +878,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
       return null;

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'arena.dart';
 import 'constants.dart';

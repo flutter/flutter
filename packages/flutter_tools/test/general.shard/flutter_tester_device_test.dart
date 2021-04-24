@@ -7,18 +7,18 @@
 import 'dart:async';
 
 import 'package:dds/dds.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/test/font_config_manager.dart';
 import 'package:flutter_tools/src/test/flutter_tester_device.dart';
+import 'package:flutter_tools/src/test/font_config_manager.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -54,7 +54,7 @@ void main() {
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
     setUp(() {
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       device = createDevice();
 
       fileSystem
@@ -221,7 +221,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
         packagesPath: '.dart_tool/package_config.json',
       ),
       startPaused: false,
-      disableDds: false,
+      enableDds: true,
       disableServiceAuthCodes: false,
       hostVmServicePort: 1234,
       nullAssertions: false,
