@@ -141,6 +141,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
     this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 4),
+    this.prefixIcon = const Icon(CupertinoIcons.search),
     this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),
     this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
     this.suffixMode = OverlayVisibilityMode.editing,
@@ -245,6 +246,11 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// `UISearchTextField` suffix look. The inset values were determined using
   /// the comparison tool in https://github.com/flutter/platform_tests/.
   final EdgeInsetsGeometry prefixInsets;
+
+  /// Sets a prefix widget.
+  ///
+  /// Cannot be null. Defaults to [CupertinoIcons.search].
+  final Widget prefixIcon;
 
   /// Sets the padding insets for the prefix.
   ///
@@ -387,7 +393,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final Widget prefix = Padding(
       child: IconTheme(
         data: iconThemeData,
-        child: const Icon(CupertinoIcons.search),
+        child: widget.prefixIcon,
       ),
       padding: widget.prefixInsets,
     );
