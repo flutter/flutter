@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../macos/xcode.dart';
@@ -30,9 +26,9 @@ class SnapshotType {
 /// Interface to the gen_snapshot command-line tool.
 class GenSnapshot {
   GenSnapshot({
-    @required Artifacts artifacts,
-    @required ProcessManager processManager,
-    @required Logger logger,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
+    required Logger logger,
   }) : _artifacts = artifacts,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -56,8 +52,8 @@ class GenSnapshot {
   };
 
   Future<int> run({
-    @required SnapshotType snapshotType,
-    DarwinArch darwinArch,
+    required SnapshotType snapshotType,
+    DarwinArch? darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
@@ -69,12 +65,12 @@ class GenSnapshot {
     // iOS has a separate gen_snapshot for armv7 and arm64 in the same,
     // directory. So we need to select the right one.
     if (snapshotType.platform == TargetPlatform.ios) {
-      snapshotterPath += '_' + getNameForDarwinArch(darwinArch);
+      snapshotterPath += '_' + getNameForDarwinArch(darwinArch!);
     }
 
     return _processUtils.stream(
       <String>[snapshotterPath, ...args],
-      mapFunction: (String line) =>  kIgnoredWarnings.contains(line) ? null : line,
+      mapFunction: (String? line) =>  (kIgnoredWarnings.contains(line) ? null : line)!,
     );
   }
 }
@@ -82,11 +78,11 @@ class GenSnapshot {
 class AOTSnapshotter {
   AOTSnapshotter({
     this.reportTimings = false,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Xcode xcode,
-    @required ProcessManager processManager,
-    @required Artifacts artifacts,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Xcode xcode,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
   }) : _logger = logger,
       _fileSystem = fileSystem,
       _xcode = xcode,
@@ -108,16 +104,16 @@ class AOTSnapshotter {
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
-    @required TargetPlatform platform,
-    @required BuildMode buildMode,
-    @required String mainPath,
-    @required String outputPath,
-    DarwinArch darwinArch,
-    String sdkRoot,
+    required TargetPlatform platform,
+    required BuildMode buildMode,
+    required String mainPath,
+    required String outputPath,
+    DarwinArch? darwinArch,
+    String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
-    @required bool bitcode,
-    @required String splitDebugInfo,
-    @required bool dartObfuscation,
+    required bool bitcode,
+    required String splitDebugInfo,
+    required bool dartObfuscation,
     bool quiet = false,
   }) async {
     assert(platform != TargetPlatform.ios || darwinArch != null);
@@ -186,7 +182,7 @@ class AOTSnapshotter {
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
-    final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
+    final bool shouldSplitDebugInfo = splitDebugInfo.isNotEmpty;
     if (shouldSplitDebugInfo) {
       _fileSystem.directory(splitDebugInfo)
         .createSync(recursive: true);
@@ -220,9 +216,9 @@ class AOTSnapshotter {
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
-        appleArch: darwinArch,
+        appleArch: darwinArch!,
         isIOS: platform == TargetPlatform.ios,
-        sdkRoot: sdkRoot,
+        sdkRoot: sdkRoot!,
         assemblyPath: assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
@@ -238,13 +234,13 @@ class AOTSnapshotter {
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
   Future<RunResult> _buildFramework({
-    @required DarwinArch appleArch,
-    @required bool isIOS,
-    @required String sdkRoot,
-    @required String assemblyPath,
-    @required String outputPath,
-    @required bool bitcode,
-    @required bool quiet
+    required DarwinArch appleArch,
+    required bool isIOS,
+    required String sdkRoot,
+    required String assemblyPath,
+    required String outputPath,
+    required bool bitcode,
+    required bool quiet
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     if (!quiet) {
@@ -262,7 +258,7 @@ class AOTSnapshotter {
 
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
-    List<String> isysrootArgs;
+    List<String>? isysrootArgs;
     if (sdkRoot != null) {
       isysrootArgs = <String>['-isysroot', sdkRoot];
     }
