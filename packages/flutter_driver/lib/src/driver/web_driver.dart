@@ -32,8 +32,8 @@ class WebFlutterDriver extends FlutterDriver {
         this._connection, {
           bool printCommunication = false,
           bool logCommunicationToFile = true,
-        }) : this._printCommunication = printCommunication,
-          this._logCommunicationToFile = logCommunicationToFile,
+        }) : _printCommunication = printCommunication,
+          _logCommunicationToFile = logCommunicationToFile,
           _startTime = DateTime.now(),
           _driverId = _nextDriverId++;
 
