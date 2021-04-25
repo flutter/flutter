@@ -3453,9 +3453,9 @@ void main() {
         pumpFrame(phase: EnginePhase.compositingBits);
 
         final BoxHitTestResult result = BoxHitTestResult();
-        // At x=5, we should hit "B" as we are scrolled to the left by 5
+        // At x=6, we should hit "B" as we are scrolled to the left by 6
         // pixels.
-        editable.hitTest(result, position: const Offset(5.0, 0));
+        editable.hitTest(result, position: const Offset(6.0, 0));
         expect(result.path, hasLength(2));
         final HitTestTarget target = result.path.first.target;
         expect(target, isA<TextSpan>());
