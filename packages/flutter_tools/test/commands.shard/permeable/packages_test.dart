@@ -525,5 +525,31 @@ void main() {
         platform: globals.platform,
       ),
     });
+
+    testUsingContext('upgrade does not check for pubspec.yaml if -h/--help is passed', () async {
+      Cache.flutterRoot = '';
+      processManager.addCommand(
+        FakeCommand(command: const <String>[
+          '/bin/cache/dart-sdk/bin/pub', 'upgrade', '-h'],
+          stdin:  IOSink(StreamController<List<int>>().sink),
+        ),
+      );
+      await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'upgrade', '-h']);
+
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      ProcessManager: () => processManager,
+      Stdio: () => mockStdio,
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
   });
 }

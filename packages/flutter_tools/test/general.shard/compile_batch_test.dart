@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -366,5 +367,61 @@ void main() {
     completer.complete();
 
     expect((await output).outputFilename, '');
+  });
+
+  testWithoutContext('KernelCompiler uses generated entrypoint', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final Completer<void> completer = Completer<void>();
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final KernelCompiler kernelCompiler = KernelCompiler(
+      artifacts: Artifacts.test(),
+      fileSystem: fs,
+      fileSystemRoots: <String>[
+        '/foo/bar/fizz',
+      ],
+      fileSystemScheme: 'scheme',
+      logger: logger,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: const <String>[
+          'HostArtifact.engineDartBinary',
+          '--disable-dart-dev',
+          'Artifact.frontendServerSnapshotForEngineDartSdk',
+          '--sdk-root',
+          '/path/to/sdkroot/',
+          '--target=flutter',
+          '--no-print-incremental-dependencies',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--no-link-platform',
+          '--packages',
+          '.packages',
+          '.dart_tools/flutter_build/generated_main.dart',
+        ], completer: completer),
+      ]),
+      stdoutHandler: stdoutHandler,
+    );
+
+    final Directory buildDir = fs.directory('.dart_tools')
+        .childDirectory('flutter_build')
+        .childDirectory('test');
+
+    buildDir.parent.childFile('generated_main.dart').createSync(recursive: true);
+
+    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+      mainPath: '/foo/bar/fizz/main.dart',
+      buildMode: BuildMode.debug,
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      packageConfig: PackageConfig.empty,
+      packagesPath: '.packages',
+      buildDir: buildDir,
+      checkDartPluginRegistry: true,
+    );
+
+    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    completer.complete();
+    await output;
   });
 }

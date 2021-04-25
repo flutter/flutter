@@ -11,7 +11,7 @@ void main() {
   test('Haptic feedback control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -25,7 +25,7 @@ void main() {
     Future<void> callAndVerifyHapticFunction(Function hapticFunction, String platformMethodArgument) async {
       final List<MethodCall> log = <MethodCall>[];
 
-      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         log.add(methodCall);
       });
 

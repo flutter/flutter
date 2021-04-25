@@ -22,7 +22,7 @@ void main() {
         calledOldValue = oldValue;
         calledNewValue = newValue;
         return TextEditingValue.empty;
-      }
+      },
     );
 
     formatterUnderTest.formatEditUpdate(testOldValue, testNewValue);
@@ -417,7 +417,7 @@ void main() {
             LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
-          newValue
+          newValue,
         );
         expect(formatted.text, newValue.text);
       });
@@ -437,7 +437,7 @@ void main() {
             LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
-          newValue
+          newValue,
         );
         expect(formatted.text, oldValue.text);
       });
@@ -457,7 +457,7 @@ void main() {
             LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
-          newValue
+          newValue,
         );
         expect(formatted.text, 'bbbbbbbbbb');
       });
@@ -576,8 +576,7 @@ void main() {
 
     final TextInputFormatter formatter =
         FilteringTextInputFormatter.digitsOnly;
-    TextEditingValue formatted = formatter.formatEditUpdate(oldValue,
-        newValue);
+    TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // assert that we are passing digits only at the first time
     expect(oldValue.text, equals('123'));
@@ -587,8 +586,7 @@ void main() {
     expect(formatted.selection.baseOffset, equals(6));
 
     // move cursor at the middle of the text and then add the number 9.
-    oldValue = newValue.copyWith(
-        selection: const TextSelection.collapsed(offset: 4));
+    oldValue = newValue.copyWith(selection: const TextSelection.collapsed(offset: 4));
     newValue = oldValue.copyWith(text: '1239456');
 
     formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -609,8 +607,7 @@ void main() {
 
     final TextInputFormatter formatter =
         FilteringTextInputFormatter.digitsOnly;
-    TextEditingValue formatted = formatter.formatEditUpdate(oldValue,
-        newValue);
+    TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // assert that we are passing digits only at the first time
     expect(oldValue.text, equals('123'));
@@ -620,8 +617,7 @@ void main() {
     expect(formatted.selection.baseOffset, equals(6));
 
     // move cursor at the middle of the text and then add the number 9.
-    oldValue = newValue.copyWith(
-        selection: const TextSelection.collapsed(offset: 4));
+    oldValue = newValue.copyWith(selection: const TextSelection.collapsed(offset: 4));
     newValue = oldValue.copyWith(text: '1239456');
 
     formatted = formatter.formatEditUpdate(oldValue, newValue);

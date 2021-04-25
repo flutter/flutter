@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // See: https://github.com/flutter/flutter/wiki/Release-process
 
 import 'dart:io' as io;
