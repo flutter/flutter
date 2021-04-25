@@ -33,7 +33,7 @@ class WebFlutterDriver extends FlutterDriver {
           bool printCommunication = false,
           bool logCommunicationToFile = true,
         }) : this._printCommunication = printCommunication,
-          this._logCommunicationToFile = logCommunicationToFile, 
+          this._logCommunicationToFile = logCommunicationToFile,
           _startTime = DateTime.now(),
           _driverId = _nextDriverId++;
 
@@ -70,11 +70,10 @@ class WebFlutterDriver extends FlutterDriver {
   /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC,
   /// DRIVER_SESSION_CAPABILITIES and ANDROID_CHROME_ON_EMULATOR for
   /// configurations.
-  /// 
+  ///
   /// See [FlutterDriver.connect] for more documentation.
   static Future<FlutterDriver> connectWeb(
-      {
-        String? hostUrl, 
+      {String? hostUrl, 
         bool printCommunication = false,
         bool logCommunicationToFile = true,
         Duration? timeout,
