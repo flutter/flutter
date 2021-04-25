@@ -12,8 +12,10 @@ import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/support/async.dart';
 import 'package:file/file.dart' as f;
 import 'package:path/path.dart' as p;
+
 import '../common/error.dart';
 import '../common/message.dart';
+
 import 'common.dart';
 import 'driver.dart';
 import 'timeline.dart';
