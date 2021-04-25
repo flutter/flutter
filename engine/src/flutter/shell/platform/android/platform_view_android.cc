@@ -94,11 +94,11 @@ PlatformViewAndroid::PlatformViewAndroid(
       platform_view_android_delegate_(jni_facade) {
   // TODO(dnfield): always create a pbuffer surface for background use to
   // resolve https://github.com/flutter/flutter/issues/73675
-  if (android_context) {
-    FML_CHECK(android_context->IsValid())
+  if (android_context_) {
+    FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context, jni_facade_);
+        android_context_, jni_facade_);
     android_surface_ = surface_factory_->CreateSurface();
 
     FML_CHECK(android_surface_ && android_surface_->IsValid())
