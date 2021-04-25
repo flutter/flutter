@@ -21,6 +21,7 @@
 .project
 .settings/
 .vscode/
+.dart/
 
 # Flutter repo-specific
 /bin/cache/
