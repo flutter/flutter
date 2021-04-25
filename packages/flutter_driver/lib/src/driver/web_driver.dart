@@ -73,7 +73,8 @@ class WebFlutterDriver extends FlutterDriver {
   ///
   /// See [FlutterDriver.connect] for more documentation.
   static Future<FlutterDriver> connectWeb(
-      {String? hostUrl, 
+      {
+        String? hostUrl,
         bool printCommunication = false,
         bool logCommunicationToFile = true,
         Duration? timeout,
