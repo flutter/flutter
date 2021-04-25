@@ -46,7 +46,18 @@ def RunCmd(cmd, forbidden_output=[], **kwargs):
 
   if process.returncode != 0:
     PrintDivider('!')
-    raise Exception('Command "%s" exited with code %d' % (command_string, process.returncode))
+
+    print('Failed Command:\n\n%s\n\nExit Code: %d\n' % (command_string, process.returncode))
+
+    if stdout:
+      print('STDOUT: \n%s' % stdout)
+
+    if stderr:
+      print('STDERR: \n%s' % stderr)
+
+    PrintDivider('!')
+
+    raise Exception('Command "%s" exited with code %d.' % (command_string, process.returncode))
 
   if stdout or stderr:
     print(stdout)
