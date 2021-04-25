@@ -116,7 +116,7 @@
             },
             "minItems": 1,
             "default": [
-              "ssh", "pi@raspberrypi", "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64"
+              "ssh", "pi@raspberrypi", "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
             ],
             "required": false
           }

@@ -604,22 +604,13 @@ class CustomDevice extends Device {
       throw UnsupportedError('Screenshotting is not supported for this device.');
     }
 
-    final List<String> interpolated = interpolateCommand(_config.screenshotCommand, <String, String>{});
+    final List<String> interpolated = interpolateCommand(
+      _config.screenshotCommand,
+      <String, String>{},
+    );
 
     final RunResult result = await _processUtils.run(interpolated, throwOnError: true);
-
-    // remove all non-base64 characters.
-    final String trimmedStdout = result.stdout.trim().replaceAll(RegExp(r'[^a-zA-Z0-9+/]+'), '');
-    if (trimmedStdout.isNotEmpty) {
-      _logger.printTrace('custom device screenshot command stdout: $trimmedStdout');
-    }
-
-    final String trimmedStderr = result.stderr.trim();
-    if (trimmedStderr.isNotEmpty) {
-      _logger.printTrace('custom device screenshot command stderr: $trimmedStderr');
-    }
-
-    await outputFile.writeAsBytes(base64Decode(trimmedStdout));
+    await outputFile.writeAsBytes(base64Decode(result.stdout));
   }
 
   @override

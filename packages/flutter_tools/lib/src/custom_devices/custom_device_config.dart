@@ -74,7 +74,7 @@ class CustomDeviceConfig {
     runDebugCommand: const <String>['ssh', 'pi@raspberrypi', r'flutter-pi "/tmp/${appName}"'],
     forwardPortCommand: const <String>['ssh', '-o', 'ExitOnForwardFailure=yes', '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}', 'pi@raspberrypi'],
     forwardPortSuccessRegex: RegExp('Linux'),
-    screenshotCommand: const <String>['ssh', 'pi@raspberrypi', 'fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64']
+    screenshotCommand: const <String>['ssh', 'pi@raspberrypi', r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'"]
   );
 
   final String id;

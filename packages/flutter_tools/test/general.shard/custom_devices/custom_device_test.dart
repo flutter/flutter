@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file/src/interface/directory.dart';
 import 'package:file/src/interface/file.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -545,7 +546,7 @@ void main() {
 
     await device.takeScreenshot(screenshotFile);
     expect(screenshotCommandWasExecuted, true);
-    expect(screenshotFile.existsSync(), true);
+    expect(screenshotFile, exists);
   });
 
   testWithoutContext('CustomDevice without screenshotting support', () async {
