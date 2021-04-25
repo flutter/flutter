@@ -324,7 +324,11 @@ class ChromiumLauncher {
     if (sourceChromeDefault.existsSync()) {
       targetChromeDefault.createSync(recursive: true);
       try {
-        copyDirectory(sourceChromeDefault, targetChromeDefault);
+        copyDirectory(
+          sourceChromeDefault,
+          targetChromeDefault,
+          shouldCopyDirectory: _isNotCacheDirectory
+        );
       } on FileSystemException catch (err) {
         // This is a best-effort update. Display the message in case the failure is relevant.
         // one possible example is a file lock due to multiple running chrome instances.
@@ -352,11 +356,22 @@ class ChromiumLauncher {
     try {
       if (sourceChromeDefault.existsSync()) {
         targetChromeDefault.createSync(recursive: true);
-        copyDirectory(sourceChromeDefault, targetChromeDefault);
+        copyDirectory(
+          sourceChromeDefault,
+          targetChromeDefault,
+          shouldCopyDirectory: _isNotCacheDirectory,
+        );
       }
     } on FileSystemException catch (err) {
       _logger.printError('Failed to restore Chrome preferences: $err');
     }
+  }
+
+  // Cache, Code Cache, and GPUCache are nearly 1GB of data
+  bool _isNotCacheDirectory(Directory directory) {
+    return !directory.path.endsWith('Cache') &&
+           !directory.path.endsWith('Code Cache') &&
+           !directory.path.endsWith('GPUCache');
   }
 
   Future<Chromium> _connect(Chromium chrome, bool skipCheck) async {
