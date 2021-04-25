@@ -72,12 +72,11 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// The [value] (as well as [text] and [selection]) of this controller can be
 /// updated from within a listener added to this controller. Be aware of
 /// infinite loops since the listener will also be notified of the changes made
-/// from within itself. Modifying the composing region from within a listener
-/// can also have a bad interaction with some input methods. Gboard, for
-/// example, will try to restore the composing region of the text if it was
-/// modified programmatically, creating an infinite loop of communications
-/// between the framework and the input method. Consider using
-/// [TextInputFormatter]s instead for as-you-type text modification.
+/// from within itself. Consider using [TextInputFormatter]s instead for
+/// as-you-type text modification.
+///
+/// **Modifying the composing region can also have a bad interaction with some
+/// input methods.** See [TextEditingValue.composing] for more details.
 ///
 /// If both the [text] or [selection] properties need to be changed, set the
 /// controller's [value] instead.

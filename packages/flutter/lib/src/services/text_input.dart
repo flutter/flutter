@@ -704,6 +704,26 @@ class TextEditingValue {
   final TextSelection selection;
 
   /// The range of text that is still being composed.
+  ///
+  /// If the range represented by this property is empty, then the text is not
+  /// currently being composed.
+  ///
+  /// ### Working with Input Methods
+  ///
+  /// Composing regions are created by input methods (IMEs) to indicate the text
+  /// within a certain range is provisional, and generally there can be at most
+  /// one such range. For instance, to enter CJK characters on a QWERTY
+  /// keyboard, one must enter a sequence of characters the CJK IME can
+  /// interpreted and turn into CJK characters. Many IMEs may choose to put the
+  /// provisional input sequence into the text field, enclosed in a composing
+  /// region.
+  ///
+  /// The composing region generally should only be changed by the IME, or the
+  /// user via interacting with the IME. Many IMEs do not expect the composing
+  /// text or the composing region to be changed by the text editor. **Removing
+  /// or replacing the composing text, or changing the composing region may
+  /// result in duplicated input and other undesired behaviors.** The default
+  /// CJK input method on iOS 14.2 is known to have this problem.
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.

@@ -64,6 +64,7 @@ void main() {
         const TextEditingValue(text: 'Int* the W*ds'),
       );
 
+      // "Into the Wo|ods|".
       const TextEditingValue selectedIntoTheWoods = TextEditingValue(text: 'Into the Woods', selection: TextSelection(baseOffset: 11, extentOffset: 14));
       expect(
         FilteringTextInputFormatter('o', allow: true, replacementString: '*').formatEditUpdate(testOldValue, selectedIntoTheWoods),
@@ -955,11 +956,12 @@ void main() {
       // <>: characters inside a composing region.
       // good b|<a>dgood b|ad => good b|<a>dgood ***|
       expect(
-        FilteringTextInputFormatter
-        .deny(
+        FilteringTextInputFormatter.withFormattingStrategy(
           'bad',
-          replacementString: '***',
-          formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion,
+          allow: false,
+          formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion(
+            replacementStringBuilder: (TextRange range) => range.isCollapsed ? '' : '***',
+          ),
         )
         .formatEditUpdate(
           oldValue,
@@ -977,11 +979,12 @@ void main() {
 
       // good <b|adgood|> bad => good <b|adgood|> ***
       expect(
-        FilteringTextInputFormatter
-        .deny(
+        FilteringTextInputFormatter.withFormattingStrategy(
           'bad',
-          replacementString: '***',
-          formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion,
+          allow: false,
+          formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion(
+            replacementStringBuilder: (TextRange range) => range.isCollapsed ? '' : '***',
+          ),
         )
         .formatEditUpdate(
           oldValue,
