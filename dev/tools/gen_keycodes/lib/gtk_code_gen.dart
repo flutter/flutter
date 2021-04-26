@@ -34,7 +34,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
-        lines.add(value, '  insert_record(table, ${toHex(value)}, ${toHex(entry.value, digits: 10)});  // $name');
+        lines.add(value, '  insert_record(table, ${toHex(value)}, ${toHex(entry.value, digits: 11)});  // $name');
       });
     }
     return lines.sortedJoin().trimRight();
@@ -70,12 +70,13 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
         print('Unrecognized secondary physical key $secondaryPhysicalName specified for $debugFunctionName.');
         return;
       }
+      final String pad = secondaryPhysical == null ? '' : ' ';
       result.writeln('''
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_${modifierBitName}_MASK), data);
-  data->primary_logical_key = ${toHex(primaryLogical.value, digits: 9)};  // ${primaryLogical.constantName}
-  data->primary_physical_key = ${toHex(primaryPhysical.usbHidCode, digits: 9)};  // ${primaryPhysical.constantName}''');
+  data->primary_logical_key = ${toHex(primaryLogical.value, digits: 11)};$pad  // ${primaryLogical.constantName}
+  data->primary_physical_key = ${toHex(primaryPhysical.usbHidCode, digits: 9)};$pad   // ${primaryPhysical.constantName}''');
       if (secondaryPhysical != null) {
         result.writeln('''
   data->secondary_physical_key = ${toHex(secondaryPhysical.usbHidCode, digits: 9)};  // ${secondaryPhysical.constantName}''');
