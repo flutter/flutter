@@ -221,7 +221,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
         packagesPath: '.dart_tool/package_config.json',
       ),
       startPaused: false,
-      disableDds: false,
+      enableDds: true,
       disableServiceAuthCodes: false,
       hostVmServicePort: 1234,
       nullAssertions: false,

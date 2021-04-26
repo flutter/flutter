@@ -430,7 +430,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
-      disableDds: boolArg('disable-dds'),
+      enableDds: enableDds,
       devToolsServerAddress: devToolsServerAddress,
     );
 

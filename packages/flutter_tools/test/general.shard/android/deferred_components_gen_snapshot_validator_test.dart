@@ -38,6 +38,7 @@ void main() {
       processManager: globals.processManager,
       platform: FakePlatform(),
       engineVersion: 'invalidEngineVersion',
+      generateDartPluginRegistry: false,
     );
     return result;
   }

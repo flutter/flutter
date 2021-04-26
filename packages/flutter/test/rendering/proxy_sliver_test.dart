@@ -14,7 +14,7 @@ void main() {
       opacity: 0.0,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -34,7 +34,7 @@ void main() {
       opacity: 1.0,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -53,7 +53,7 @@ void main() {
       opacity: 0.5,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -61,7 +61,7 @@ void main() {
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
-      children: <RenderSliver>[renderSliverOpacity]
+      children: <RenderSliver>[renderSliverOpacity],
     );
 
     expect(renderSliverOpacity.debugLayer, null);
@@ -87,7 +87,7 @@ void main() {
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -112,7 +112,7 @@ void main() {
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -136,7 +136,7 @@ void main() {
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-      )
+      ),
     );
 
     final RenderViewport root = RenderViewport(
@@ -144,7 +144,7 @@ void main() {
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
-      children: <RenderSliver>[renderSliverAnimatedOpacity]
+      children: <RenderSliver>[renderSliverAnimatedOpacity],
     );
 
     expect(renderSliverAnimatedOpacity.debugLayer, null);

@@ -568,7 +568,7 @@ void main() {
   testWidgets('switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -606,13 +606,13 @@ void main() {
     expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -656,7 +656,7 @@ void main() {
     expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semanticsTester.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('Switch.adaptive', (WidgetTester tester) async {

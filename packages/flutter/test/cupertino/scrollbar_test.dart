@@ -132,9 +132,9 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
-        hapticFeedbackCalls++;
+        hapticFeedbackCalls += 1;
       }
     });
 
@@ -680,9 +680,9 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
-        hapticFeedbackCalls++;
+        hapticFeedbackCalls += 1;
       }
     });
 

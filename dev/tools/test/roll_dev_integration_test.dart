@@ -14,16 +14,16 @@ import './common.dart';
 
 void main() {
   group('roll-dev', () {
-    TestStdio stdio;
-    Platform platform;
-    ProcessManager processManager;
-    FileSystem fileSystem;
+    late TestStdio stdio;
+    late Platform platform;
+    late ProcessManager processManager;
+    late FileSystem fileSystem;
     const String usageString = 'Usage: flutter conductor.';
 
-    Checkouts checkouts;
-    FrameworkRepository frameworkUpstream;
-    FrameworkRepository framework;
-    Directory tempDir;
+    late Checkouts checkouts;
+    late FrameworkRepository frameworkUpstream;
+    late FrameworkRepository framework;
+    late Directory tempDir;
 
     setUp(() {
       platform = const LocalPlatform();
