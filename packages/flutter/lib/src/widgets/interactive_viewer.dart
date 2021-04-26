@@ -14,7 +14,7 @@ import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
 
-/// A type for widget builders that take a [Quad] of the current viewport.
+/// A signature for widget builders that take a [Quad] of the current viewport.
 ///
 /// See also:
 ///
