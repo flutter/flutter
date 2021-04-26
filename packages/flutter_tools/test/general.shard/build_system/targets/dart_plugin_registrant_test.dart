@@ -331,7 +331,7 @@ void main() {
       config.writeAsStringSync('{"configVersion": 2, "packages": []}');
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
-      await expectLater(() async => await DartPluginRegistrantTarget.test(testProject).build(environment),
+      await expectLater(() => DartPluginRegistrantTarget.test(testProject).build(environment),
         throwsAssertionError,
       );
     });
