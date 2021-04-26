@@ -62,7 +62,32 @@ void main() {
         ),
       ),
     );
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 2.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 2.0)),
+    );
 
+    // Same test, but using the theme
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(
+          progressIndicatorTheme: const ProgressIndicatorThemeData(
+            linearMinHeight: 2.0,
+          ),
+        ),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(value: 0.25),
+            ),
+          ),
+        ),
+      ),
+    );
     expect(
       find.byType(LinearProgressIndicator),
       paints
@@ -251,6 +276,39 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: primaryColor),
     );
+
+    // With ProgressIndicatorTheme colors
+    const Color indicatorColor = Color(0xff0000ff);
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(
+          progressIndicatorTheme: const ProgressIndicatorThemeData(
+            color: indicatorColor,
+            linearTrackColor: Colors.black,
+          ),
+        ),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: LinearProgressIndicator(
+                value: 0.25,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Should use the progress indicator theme colors
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: indicatorColor),
+    );
+
   });
 
   testWidgets('LinearProgressIndicator with animation with null colors', (WidgetTester tester) async {
@@ -367,6 +425,77 @@ void main() {
     ));
     expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: green)..arc(color: blue));
+
+    // With ProgressIndicatorTheme
+    await tester.pumpWidget(Theme(
+      data: ThemeData(progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: green,
+        circularTrackColor: blue,
+      )),
+      child: const CircularProgressIndicator(),
+    ));
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: blue)..arc(color: green));
+  });
+
+  testWidgets('RefreshProgressIndicator paint colors', (WidgetTester tester) async {
+    const Color green = Color(0xFF00FF00);
+    const Color blue = Color(0xFF0000FF);
+    const Color red = Color(0xFFFF0000);
+
+    // With valueColor & color provided
+    await tester.pumpWidget(const RefreshProgressIndicator(
+      color: red,
+      valueColor: AlwaysStoppedAnimation<Color>(blue),
+    ));
+    expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(color: blue));
+
+    // With just color provided
+    await tester.pumpWidget(const RefreshProgressIndicator(
+      color: red,
+    ));
+    expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(color: red));
+
+    // With no color provided
+    await tester.pumpWidget(Theme(
+      data: ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(primary: green)),
+      child: const RefreshProgressIndicator(),
+    ));
+    expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(color: green));
+
+    // With background
+    await tester.pumpWidget(const RefreshProgressIndicator(
+      color: blue,
+      backgroundColor: green,
+    ));
+    expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(color: blue));
+    final Material backgroundMaterial = tester.widget(find.descendant(
+      of: find.byType(RefreshProgressIndicator),
+      matching: find.byType(Material)
+    ));
+    expect(backgroundMaterial.type, MaterialType.circle);
+    expect(backgroundMaterial.color, green);
+
+    // With ProgressIndicatorTheme
+    await tester.pumpWidget(Theme(
+      data: ThemeData(progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: green,
+        refreshBackgroundColor: blue,
+      )),
+      child: const RefreshProgressIndicator(),
+    ));
+    expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(color: green));
+    final Material themeBackgroundMaterial = tester.widget(find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material)
+    ));
+    expect(themeBackgroundMaterial.type, MaterialType.circle);
+    expect(themeBackgroundMaterial.color, blue);
   });
 
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
