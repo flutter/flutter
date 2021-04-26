@@ -56,5 +56,7 @@ abstract class PlatformCodeGenerator extends BaseCodeGenerator {
   /// Absolute path to the output file.
   ///
   /// How this value will be used is based on the callee.
-  String outputPath(String platform) => path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', platform, 'keycodes', 'keyboard_map_$platform.h'));
+  String outputPath(String platform);
+
+  static String engineRoot = '';
 }

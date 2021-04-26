@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
@@ -72,7 +69,8 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'windows_flutter_key_map_cc.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('shell', 'platform', 'windows', 'flutter_key_map.cc'));
+  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+      'shell', 'platform', 'windows', 'flutter_key_map.cc');
 
   @override
   Map<String, String> mappings() {

@@ -44,7 +44,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'android_keyboard_map_java.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', 'shell', 'platform',
+  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot, 'shell', 'platform',
       path.join('android', 'io', 'flutter', 'embedding', 'android', 'KeyboardMap.java'));
 
   @override
