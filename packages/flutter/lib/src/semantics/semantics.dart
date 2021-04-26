@@ -2353,7 +2353,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
 
   @override
   int compareTo(_BoxEdge other) {
-    return (offset - other.offset).sign.toInt();
+    return offset.compareTo(other.offset);
   }
 }
 
@@ -2381,7 +2381,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
 
   @override
   int compareTo(_SemanticsSortGroup other) {
-    return (startOffset - other.startOffset).sign.toInt();
+    return startOffset.compareTo(other.startOffset);
   }
 
   /// Sorts this group assuming that [nodes] belong to the same vertical group.

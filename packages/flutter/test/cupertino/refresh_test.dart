@@ -173,7 +173,7 @@ void main() {
     testWidgets('drag past threshold triggers refresh task', (WidgetTester tester) async {
       final List<MethodCall> platformCallLog = <MethodCall>[];
 
-      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         platformCallLog.add(methodCall);
       });
 

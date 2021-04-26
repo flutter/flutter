@@ -17,7 +17,9 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
 import 'base/version.dart';
+import 'cache.dart';
 import 'convert.dart';
+import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
@@ -32,15 +34,16 @@ void _renderTemplateToFile(String template, dynamic context, File file, Template
   file.writeAsStringSync(renderedTemplate);
 }
 
-Plugin _pluginFromPackage(String name, Uri packageRoot) {
-  final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!globals.fs.isFileSync(pubspecPath)) {
+Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies, {FileSystem fileSystem}) {
+  final FileSystem fs = fileSystem ?? globals.fs;
+  final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
+  if (!fs.isFileSync(pubspecPath)) {
     return null;
   }
   dynamic pubspec;
 
   try {
-    pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+    pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
   } on YamlException catch (err) {
     globals.printTrace('Failed to parse plugin manifest for $name: $err');
     // Do nothing, potentially not a plugin.
@@ -52,7 +55,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool)) {
     return null;
   }
-  final String packageRootPath = globals.fs.path.fromUri(packageRoot);
+  final String packageRootPath = fs.path.fromUri(packageRoot);
   final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
   globals.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
@@ -60,24 +63,31 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
-    fileSystem: globals.fs,
+    fileSystem: fs,
+    appDependencies: appDependencies,
   );
 }
 
 Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
-  final String packagesFile = globals.fs.path.join(
+  final FileSystem fs = project.directory.fileSystem;
+  final String packagesFile = fs.path.join(
     project.directory.path,
     '.packages',
   );
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    globals.fs.file(packagesFile),
+    fs.file(packagesFile),
     logger: globals.logger,
     throwOnError: throwOnError,
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
-    final Plugin plugin = _pluginFromPackage(package.name, packageRoot);
+    final Plugin plugin = _pluginFromPackage(
+      package.name,
+      packageRoot,
+      project.manifest.dependencies,
+      fileSystem: fs
+    );
     if (plugin != null) {
       plugins.add(plugin);
     }
@@ -619,6 +629,74 @@ foreach(plugin ${FLUTTER_PLUGIN_LIST})
 endforeach(plugin)
 ''';
 
+const String _dartPluginRegisterWith = r'''
+      try {
+        {{dartClass}}.registerWith();
+      } catch (err) {
+        print(
+          '`{{pluginName}}` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+''';
+
+// TODO(egarciad): Evaluate merging the web and desktop plugin registry templates.
+// https://github.com/flutter/flutter/issues/80406
+const String _dartPluginRegistryForDesktopTemplate = '''
+//
+// Generated file. Do not edit.
+// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.
+//
+
+// @dart = {{dartLanguageVersion}}
+
+import '{{mainEntrypoint}}' as entrypoint;
+import 'dart:io'; // flutter_ignore: dart_io_import.
+{{#linux}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/linux}}
+{{#macos}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/macos}}
+{{#windows}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/windows}}
+
+@pragma('vm:entry-point')
+class _PluginRegistrant {
+
+  @pragma('vm:entry-point')
+  static void register() {
+    if (Platform.isLinux) {
+      {{#linux}}
+$_dartPluginRegisterWith
+      {{/linux}}
+    } else if (Platform.isMacOS) {
+      {{#macos}}
+$_dartPluginRegisterWith
+      {{/macos}}
+    } else if (Platform.isWindows) {
+      {{#windows}}
+$_dartPluginRegisterWith
+      {{/windows}}
+    }
+  }
+
+}
+
+typedef _UnaryFunction = dynamic Function(List<String> args);
+typedef _NullaryFunction = dynamic Function();
+
+void main(List<String> args) {
+  if (entrypoint.main is _UnaryFunction) {
+    (entrypoint.main as _UnaryFunction)(args);
+  } else {
+    (entrypoint.main as _NullaryFunction)();
+  }
+}
+''';
+
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
@@ -978,4 +1056,181 @@ Future<void> injectPlugins(
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
   return _readFileContent(project.flutterPluginsFile) != null;
+}
+
+/// Resolves the platform implementation for Dart-only plugins.
+///
+///   * If there are multiple direct pub dependencies on packages that implement the
+///     frontend plugin for the current platform, fail.
+///   * If there is a single direct dependency on a package that implements the
+///     frontend plugin for the target platform, this package is the selected implementation.
+///   * If there is no direct dependency on a package that implements the frontend
+///     plugin for the target platform, and the frontend plugin has a default implementation
+///     for the target platform the default implementation is selected.
+///   * Else fail.
+///
+///  For more details, https://flutter.dev/go/federated-plugins.
+List<PluginInterfaceResolution> resolvePlatformImplementation(
+  List<Plugin> plugins, {
+  bool throwOnPluginPubspecError = true,
+}) {
+  final List<String> platforms = <String>[
+    LinuxPlugin.kConfigKey,
+    MacOSPlugin.kConfigKey,
+    WindowsPlugin.kConfigKey,
+  ];
+  final Map<String, PluginInterfaceResolution> directDependencyResolutions
+      = <String, PluginInterfaceResolution>{};
+  final Map<String, String> defaultImplementations = <String, String>{};
+  bool didFindError = false;
+
+  for (final Plugin plugin in plugins) {
+    for (final String platform in platforms) {
+      // The plugin doesn't implement this platform.
+      if (plugin.platforms[platform] == null &&
+          plugin.defaultPackagePlatforms[platform] == null) {
+        continue;
+      }
+      // The plugin doesn't implement an interface, verify that it has a default implementation.
+      if (plugin.implementsPackage == null || plugin.implementsPackage.isEmpty) {
+        final String defaultImplementation = plugin.defaultPackagePlatforms[platform];
+        if (defaultImplementation == null) {
+          if (throwOnPluginPubspecError) {
+            globals.printError(
+              'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
+              'a default implementation in pubspec.yaml.\n\n'
+              'To set a default implementation, use:\n'
+              'flutter:\n'
+              '  plugin:\n'
+              '    platforms:\n'
+              '      $platform:\n'
+              '        $kDefaultPackage: <plugin-implementation>\n'
+              '\n'
+              'To implement an interface, use:\n'
+              'flutter:\n'
+              '  plugin:\n'
+              '    implements: <plugin-interface>'
+              '\n'
+            );
+          }
+          didFindError = true;
+          continue;
+        }
+        defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
+        continue;
+      }
+      if (plugin.pluginDartClassPlatforms[platform] == null ||
+          plugin.pluginDartClassPlatforms[platform] == 'none') {
+        continue;
+      }
+      final String resolutionKey = '$platform/${plugin.implementsPackage}';
+      if (directDependencyResolutions.containsKey(resolutionKey)) {
+        final PluginInterfaceResolution currResolution = directDependencyResolutions[resolutionKey];
+        if (currResolution != null && currResolution.plugin.isDirectDependency) {
+          if (plugin.isDirectDependency) {
+            if (throwOnPluginPubspecError) {
+              globals.printError(
+                'Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
+                'implemented by plugin `${currResolution.plugin.name}`.\n'
+                'To fix this issue, remove either dependency from pubspec.yaml.'
+                '\n\n'
+              );
+            }
+            didFindError = true;
+          }
+          // Use the plugin implementation added by the user as a direct dependency.
+          continue;
+        }
+      }
+      directDependencyResolutions[resolutionKey] = PluginInterfaceResolution(
+        plugin: plugin,
+        platform: platform,
+      );
+    }
+  }
+  if (didFindError && throwOnPluginPubspecError) {
+    throwToolExit('Please resolve the errors');
+  }
+  final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
+  for (final MapEntry<String, PluginInterfaceResolution> resolution in directDependencyResolutions.entries) {
+    if (resolution.value.plugin.isDirectDependency) {
+      finalResolution.add(resolution.value);
+    } else if (defaultImplementations.containsKey(resolution.key)) {
+      // Pick the default implementation.
+      if (defaultImplementations[resolution.key] == resolution.value.plugin.name) {
+        finalResolution.add(resolution.value);
+      }
+    }
+  }
+  return finalResolution;
+}
+
+/// Generates the Dart plugin registrant, which allows to bind a platform
+/// implementation of a Dart only plugin to its interface.
+/// The new entrypoint wraps [currentMainUri], adds the [_PluginRegistrant] class,
+/// and writes the file to [newMainDart].
+///
+/// [mainFile] is the main entrypoint file. e.g. /<app>/lib/main.dart.
+///
+/// A successful run will create a new generate_main.dart file or update the existing file.
+/// Throws [ToolExit] if unable to generate the file.
+///
+/// This method also validates each plugin's pubspec.yaml, but errors are only
+/// reported if [throwOnPluginPubspecError] is [true].
+///
+/// For more details, see https://flutter.dev/go/federated-plugins.
+Future<void> generateMainDartWithPluginRegistrant(
+  FlutterProject rootProject,
+  PackageConfig packageConfig,
+  String currentMainUri,
+  File newMainDart,
+  File mainFile, {
+  bool throwOnPluginPubspecError,
+}) async {
+  final List<Plugin> plugins = await findPlugins(rootProject);
+  final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+    plugins,
+    throwOnPluginPubspecError: throwOnPluginPubspecError ?? false,
+  );
+  final LanguageVersion entrypointVersion = determineLanguageVersion(
+    mainFile,
+    packageConfig.packageOf(mainFile.absolute.uri),
+    Cache.flutterRoot,
+  );
+  final Map<String, dynamic> templateContext = <String, dynamic>{
+    'mainEntrypoint': currentMainUri,
+    'dartLanguageVersion': entrypointVersion.toString(),
+    LinuxPlugin.kConfigKey: <dynamic>[],
+    MacOSPlugin.kConfigKey: <dynamic>[],
+    WindowsPlugin.kConfigKey: <dynamic>[],
+  };
+  if (resolutions.isEmpty) {
+    try {
+      if (newMainDart.existsSync()) {
+        newMainDart.deleteSync();
+      }
+    } on FileSystemException catch (error) {
+      globals.printError(
+        'Unable to remove ${newMainDart.path}, received error: $error.\n'
+        'You might need to run flutter clean.'
+      );
+      rethrow;
+    }
+    return;
+  }
+  for (final PluginInterfaceResolution resolution in resolutions) {
+    assert(templateContext.containsKey(resolution.platform));
+    (templateContext[resolution.platform] as List<dynamic>).add(resolution.toMap());
+  }
+  try {
+    _renderTemplateToFile(
+      _dartPluginRegistryForDesktopTemplate,
+      templateContext,
+      newMainDart,
+      globals.templateRenderer,
+    );
+  } on FileSystemException catch (error) {
+    globals.printError('Unable to write ${newMainDart.path}, received error: $error');
+    rethrow;
+  }
 }

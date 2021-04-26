@@ -271,6 +271,8 @@ void main() {
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
       suppressErrors: true,
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('foo', 0 ,<Uri>[]);
     });
@@ -288,6 +290,8 @@ void main() {
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
       suppressErrors: true,
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }), overrides: <Type, Generator>{
@@ -316,6 +320,8 @@ void main() {
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
       suppressErrors: true,
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('foo', 1 ,<Uri>[]);
     });
@@ -408,6 +414,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
       suppressErrors: false,
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('foo', 0, <Uri>[]);
@@ -426,6 +434,8 @@ void main() {
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
       suppressErrors: false,
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }), overrides: <Type, Generator>{
@@ -1438,6 +1448,26 @@ void main() {
     globals.fs.file('l10n.yaml').createSync();
     globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
+    // Create necessary files for [DartPluginRegistrantTarget]
+    final File packageConfig = globals.fs.directory('.dart_tool')
+        .childFile('package_config.json');
+    packageConfig.createSync(recursive: true);
+    packageConfig.writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "../../../path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+    // Start from an empty generated_main.dart file.
+    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').createSync(recursive: true);
+
     await residentRunner.runSourceGenerators();
 
     expect(testLogger.errorText, isEmpty);
@@ -1465,7 +1495,7 @@ void main() {
     expect(testLogger.statusText, isEmpty);
   }));
 
-  testUsingContext('ResidentRunner printHelpDetails', () => testbed.run(() {
+  testUsingContext('ResidentRunner printHelpDetails hot runner', () => testbed.run(() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
     residentRunner.printHelp(details: true);
@@ -1484,25 +1514,56 @@ void main() {
           'Flutter run key commands.',
           commandHelp.r,
           commandHelp.R,
-          commandHelp.h,
-          commandHelp.c,
-          commandHelp.q,
           commandHelp.s,
-          commandHelp.b,
           commandHelp.w,
           commandHelp.t,
           commandHelp.L,
           commandHelp.S,
           commandHelp.U,
           commandHelp.i,
-          commandHelp.I,
           commandHelp.p,
+          commandHelp.I,
           commandHelp.o,
+          commandHelp.b,
           commandHelp.z,
-          commandHelp.g,
-          commandHelp.M,
           commandHelp.P,
           commandHelp.a,
+          commandHelp.M,
+          commandHelp.g,
+          commandHelp.hWithDetails,
+          commandHelp.c,
+          commandHelp.q,
+          '',
+          '💪 Running with sound null safety 💪',
+          '',
+          'An Observatory debugger and profiler on FakeDevice is available at: null',
+          '',
+        ].join('\n')
+    ));
+  }));
+
+  testUsingContext('ResidentRunner printHelp hot runner', () => testbed.run(() {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+
+    residentRunner.printHelp(details: false);
+
+    final CommandHelp commandHelp = residentRunner.commandHelp;
+
+    // supports service protocol
+    expect(residentRunner.supportsServiceProtocol, true);
+    // isRunningDebug
+    expect(residentRunner.isRunningDebug, true);
+    // does support SkSL
+    expect(residentRunner.supportsWriteSkSL, true);
+    // commands
+    expect(testLogger.statusText, equals(
+        <dynamic>[
+          'Flutter run key commands.',
+          commandHelp.r,
+          commandHelp.R,
+          commandHelp.hWithoutDetails,
+          commandHelp.c,
+          commandHelp.q,
           '',
           '💪 Running with sound null safety 💪',
           '',
@@ -1538,7 +1599,40 @@ void main() {
         <dynamic>[
           'Flutter run key commands.',
           commandHelp.s,
-          commandHelp.h,
+          commandHelp.hWithDetails,
+          commandHelp.c,
+          commandHelp.q,
+          ''
+        ].join('\n')
+    ));
+  }));
+
+  testUsingContext('ResidentRunner printHelp cold runner', () => testbed.run(() {
+    fakeVmServiceHost = null;
+    residentRunner = ColdRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+    residentRunner.printHelp(details: false);
+
+    final CommandHelp commandHelp = residentRunner.commandHelp;
+
+    // does not supports service protocol
+    expect(residentRunner.supportsServiceProtocol, false);
+    // isRunningDebug
+    expect(residentRunner.isRunningDebug, false);
+    // does support SkSL
+    expect(residentRunner.supportsWriteSkSL, false);
+    // commands
+    expect(testLogger.statusText, equals(
+        <dynamic>[
+          'Flutter run key commands.',
+          commandHelp.hWithoutDetails,
           commandHelp.c,
           commandHelp.q,
           ''
@@ -1669,6 +1763,42 @@ void main() {
     flutterDevice.vmService = fakeVmServiceHost.vmService;
 
     await flutterDevice.exitApps();
+
+    expect(mockDevice.appStopped, true);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
+  testUsingContext('FlutterDevice will exit an isolate that did not register the exit extension method', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      FakeVmServiceRequest(
+        method: '_flutter.listViews',
+        jsonResponse: <String, Object>{
+          'views': <Object>[
+            fakeFlutterView.toJson(),
+          ],
+        },
+      ),
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        errorCode: RPCErrorCodes.kMethodNotFound,
+      ),
+    ]);
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+    );
+    flutterDevice.vmService = fakeVmServiceHost.vmService;
+
+    await flutterDevice.exitApps(timeoutDelay: Duration.zero);
 
     expect(mockDevice.appStopped, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -2069,12 +2199,12 @@ void main() {
     expect(residentCompiler.initializeFromDill,
       globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
+      globals.fs.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
-    expect(residentCompiler.platformDill, 'file:///Artifact.webPlatformKernelDill.debug');
+      globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path + '/');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelDill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -2100,12 +2230,12 @@ void main() {
     expect(residentCompiler.initializeFromDill,
       globals.fs.path.join(getBuildDirectory(), '825b8f791aa86c5057fff6f064542c54.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
+      globals.fs.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
-    expect(residentCompiler.platformDill, 'file:///Artifact.webPlatformSoundKernelDill.debug');
+      globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path + '/');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformSoundKernelDill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -2387,7 +2517,7 @@ class FakeFlutterDevice extends FlutterDevice {
   Future<void> connect({
     ReloadSources reloadSources,
     Restart restart,
-    bool disableDds = false,
+    bool enableDds = true,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,
@@ -2415,6 +2545,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     List<Uri> invalidatedFiles, {
     @required String outputPath,
     @required PackageConfig packageConfig,
+    @required String projectRootPath,
+    @required FileSystem fs,
     bool suppressErrors = false,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
