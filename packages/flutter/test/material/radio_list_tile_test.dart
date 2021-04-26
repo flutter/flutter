@@ -539,7 +539,7 @@ void main() {
     final Key key = UniqueKey();
     dynamic semanticEvent;
     int? radioValue = 2;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
 
@@ -570,7 +570,7 @@ void main() {
     expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semantics.dispose();
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+    SystemChannels.accessibility.setMockMessageHandler(null);
   });
 
   testWidgets('RadioListTile can autofocus unless disabled.', (WidgetTester tester) async {

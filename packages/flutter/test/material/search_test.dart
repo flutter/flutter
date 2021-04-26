@@ -32,12 +32,12 @@ void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    SystemChannels.platform.setMockMethodCallHandler(null);
   });
 
   testWidgets('Can open and close search', (WidgetTester tester) async {

@@ -1042,7 +1042,7 @@ void main() {
       await tester.pump();
 
       late int lastPlatformViewTextClient;
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
+      SystemChannels.textInput.setMockMethodCallHandler((MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
           lastPlatformViewTextClient = call.arguments as int;
         }
