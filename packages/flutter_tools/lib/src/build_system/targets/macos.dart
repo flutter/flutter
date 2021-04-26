@@ -173,7 +173,7 @@ DarwinArch _darwinArchForEnvironment(Environment environment) {
     case TargetPlatform.darwin_x64:
       return DarwinArch.x86_64;
     default:
-      throw Exception('Invalid macos target platform: $targetPlatform');
+      throw Exception('Invalid macOS target platform: $targetPlatform');
   }
 }
 
