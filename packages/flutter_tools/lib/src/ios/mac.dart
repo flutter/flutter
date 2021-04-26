@@ -39,8 +39,8 @@ class IMobileDevice {
     @required Cache cache,
     @required ProcessManager processManager,
     @required Logger logger,
-  }) : _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-      _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios),
+  }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
+      _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
       _dyLdLibEntry = cache.dyLdLibEntry,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _processManager = processManager;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // Regenerates the material icons file.
 // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
 

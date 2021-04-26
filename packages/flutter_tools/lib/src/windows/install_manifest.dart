@@ -41,10 +41,10 @@ Future<void> createManifest({
   if (buildInfo.mode.isPrecompiled) {
     outputs.add(buildDirectory.childFile('app.so'));
   } else {
-    outputs.add(buildDirectory.childDirectory('flutter_assets').childFile('kernel_blob.bin'));
+    outputs.add(buildDirectory.parent.childDirectory('flutter_assets').childFile('kernel_blob.bin'));
   }
   for (final String key in assetBundle.entries.keys) {
-    outputs.add(buildDirectory.childDirectory('flutter_assets').childFile(key));
+    outputs.add(buildDirectory.parent.childDirectory('flutter_assets').childFile(key));
   }
   outputs.add(project.ephemeralDirectory.childFile('flutter_windows_winuwp.dll'));
   outputs.add(project.ephemeralDirectory.childFile('flutter_windows_winuwp.dll.pdb'));

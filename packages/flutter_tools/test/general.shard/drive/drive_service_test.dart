@@ -231,7 +231,7 @@ void main() {
       observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, disableDds: true), true);
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, enableDds: false), true);
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>[],

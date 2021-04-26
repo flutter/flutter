@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:dev_tools/roll_dev.dart';

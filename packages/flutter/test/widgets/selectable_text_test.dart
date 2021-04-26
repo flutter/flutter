@@ -124,7 +124,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   const String kThreeLines =
       'First line of text is\n'
@@ -1626,7 +1626,7 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     String clipboardContent = '';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
