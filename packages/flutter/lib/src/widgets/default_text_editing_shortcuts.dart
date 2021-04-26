@@ -156,7 +156,9 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   }) : super(
     key: key,
     debugLabel: '<Default Text Editing Shortcuts>',
-    shortcuts: _shortcuts,
+    shortcuts: kIsWeb
+        ? <LogicalKeySet, Intent>{ ..._shortcuts, ..._webAdditionalShortcuts }
+        : _shortcuts,
     child: child,
   );
 
@@ -430,57 +432,13 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + backspace
   };
 
-  // Web handles its text selection natively and doesn't use any of these
-  // shortcuts in Flutter.
-  static final Map<LogicalKeySet, Intent> _webShortcuts = <LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.backspace): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.delete): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.end): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.home): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end): const DoNothingAndStopPropagationTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home): const DoNothingAndStopPropagationTextIntent(),
+  // These shortcuts are specific to the web, in addition to the shortcuts of
+  // the OS.
+  static final Map<LogicalKeySet, Intent> _webAdditionalShortcuts = <LogicalKeySet, Intent>{
     LogicalKeySet(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
   };
 
   static Map<LogicalKeySet, Intent> get _shortcuts {
-    if (kIsWeb) {
-      return _webShortcuts;
-    }
-
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return _androidShortcuts;
