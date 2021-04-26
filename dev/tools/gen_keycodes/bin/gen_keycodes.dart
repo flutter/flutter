@@ -201,7 +201,10 @@ Future<void> main(List<String> rawArguments) async {
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
 
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
-    'android': AndroidCodeGenerator(physicalData, logicalData),
+    'android': AndroidCodeGenerator(
+      physicalData,
+      logicalData,
+    ),
     'macos': MacOsCodeGenerator(
       physicalData,
       logicalData,
