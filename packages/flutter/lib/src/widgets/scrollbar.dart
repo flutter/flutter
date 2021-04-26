@@ -1153,6 +1153,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void _handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
+    final Axis? direction = getScrollbarDirection();
+    if (direction == null)
+      return;
 
     double scrollIncrement;
     // Is an increment calculator available?
