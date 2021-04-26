@@ -318,6 +318,13 @@ class ChromiumLauncher {
   ///
   /// Note: more detailed docs of the Chrome user preferences store exists here:
   /// https://www.chromium.org/developers/design-documents/preferences.
+  ///
+  /// This intentionally skips the Cache, Code Cache, and GPUCache directories.
+  /// While we're not sure exactly what is in them, this constitutes nearly 1 GB
+  /// of data for a fresh flutter run and adds significant overhead to all startups.
+  /// For workflows that may require this data, using the start-paused flag and
+  /// dart debug extension with a user controlled browser profile will lead to a
+  /// better experience.
   void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
