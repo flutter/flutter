@@ -519,6 +519,29 @@ class FrameworkRepository extends Repository {
   }
 }
 
+class HostFrameworkRepository extends FrameworkRepository {
+  HostFrameworkRepository({
+    required Checkouts checkouts,
+    String name = 'host-framework',
+    bool useExistingCheckout = false,
+    required String upstreamPath,
+  }) : super(
+    checkouts,
+    name: name,
+    fetchRemote: Remote(
+      name: RemoteName.upstream,
+      url: 'file://$upstreamPath/',
+    ),
+    localUpstream: false,
+    useExistingCheckout: useExistingCheckout,
+  ) {
+    _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
+  }
+
+  @override
+  Directory get checkoutDirectory => _checkoutDirectory!;
+}
+
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
