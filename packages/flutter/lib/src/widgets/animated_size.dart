@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'ticker_provider.dart';
 
 /// Animated widget that automatically transitions its size over a given
 /// duration whenever the given child's size changes.
@@ -35,7 +36,6 @@ import 'framework.dart';
 ///         color: Colors.amberAccent,
 ///         child: AnimatedSize(
 ///           curve: Curves.easeIn,
-///           vsync: this,
 ///           duration: const Duration(seconds: 1),
 ///           child: FlutterLogo(size: _size),
 ///         ),
@@ -49,21 +49,27 @@ import 'framework.dart';
 /// See also:
 ///
 ///  * [SizeTransition], which changes its size based on an [Animation].
-class AnimatedSize extends SingleChildRenderObjectWidget {
+class AnimatedSize extends StatefulWidget {
   /// Creates a widget that animates its size to match that of its child.
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedSize({
     Key? key,
-    Widget? child,
+    this.child,
     this.alignment = Alignment.center,
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
-    required this.vsync,
+    // TODO(jsimmons): deprecate when customers tests are updated.
+    TickerProvider? vsync, // ignore: avoid_unused_constructor_parameters
     this.clipBehavior = Clip.hardEdge,
   }) : assert(clipBehavior != null),
-       super(key: key, child: child);
+       super(key: key);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
 
   /// The alignment of the child within the parent when the parent is not yet
   /// the same size as the child.
@@ -100,12 +106,52 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// If not specified, defaults to [duration].
   final Duration? reverseDuration;
 
-  /// The [TickerProvider] for this widget.
-  final TickerProvider vsync;
-
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
+  final Clip clipBehavior;
+
+  @override
+  _AnimatedSizeState createState() => _AnimatedSizeState();
+}
+
+class _AnimatedSizeState
+    extends State<AnimatedSize> with SingleTickerProviderStateMixin {
+  @override
+  Widget build(BuildContext context) {
+    return _AnimatedSize(
+      child: widget.child,
+      alignment: widget.alignment,
+      curve: widget.curve,
+      duration: widget.duration,
+      reverseDuration: widget.reverseDuration,
+      vsync: this,
+      clipBehavior: widget.clipBehavior,
+    );
+  }
+}
+
+class _AnimatedSize extends SingleChildRenderObjectWidget {
+  const _AnimatedSize({
+    Key? key,
+    Widget? child,
+    this.alignment = Alignment.center,
+    this.curve = Curves.linear,
+    required this.duration,
+    this.reverseDuration,
+    required this.vsync,
+    this.clipBehavior = Clip.hardEdge,
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
+
+  final AlignmentGeometry alignment;
+  final Curve curve;
+  final Duration duration;
+  final Duration? reverseDuration;
+
+  /// The [TickerProvider] for this widget.
+  final TickerProvider vsync;
+
   final Clip clipBehavior;
 
   @override
