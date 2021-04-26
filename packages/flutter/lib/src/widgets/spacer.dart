@@ -15,6 +15,8 @@ import 'framework.dart';
 /// [Spacer] has taken up all of the additional space, therefore there is none
 /// left to redistribute.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7FJgd7QN1zI}
+///
 /// {@tool snippet}
 ///
 /// ```dart
@@ -30,8 +32,6 @@ import 'framework.dart';
 /// )
 /// ```
 /// {@end-tool}
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=7FJgd7QN1zI}
 ///
 /// See also:
 ///
