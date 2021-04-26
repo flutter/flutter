@@ -180,6 +180,13 @@
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
+      "name": "Linux skp_generator",
+      "repo": "flutter",
+      "task_name": "linux_skp_generator",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter/", "bin/"]
+    },
+    {
       "name": "Linux tool_tests_general",
       "repo": "flutter",
       "task_name": "linux_tool_tests_general",
