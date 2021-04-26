@@ -105,7 +105,7 @@ void main() {
         'ts': 358849612473,
         'tts': 476761,
         'ph': 'B',
-        'args': {
+        'args': <String, dynamic>{
           'isolateGroupId': 'isolateGroups/10824099774666259225',
         },
       },
@@ -121,7 +121,7 @@ void main() {
         'ts': 358849612473,
         'tts': 476761,
         'ph': 'B',
-        'args': {
+        'args': <String, dynamic>{
           'isolateGroupId': 'isolateGroups/10824099774666259225',
         },
       },
