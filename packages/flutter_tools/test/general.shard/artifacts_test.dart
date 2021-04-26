@@ -181,6 +181,10 @@ void main() {
         artifacts.getEngineType(TargetPlatform.darwin_x64),
         'darwin-x64',
       );
+      expect(
+        artifacts.getEngineType(TargetPlatform.darwin_arm64),
+        'darwin-arm64',
+      );
     });
   });
 
