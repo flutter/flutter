@@ -16,7 +16,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 
 const String _kEmptyPubspecFile = '''
-name: app_without_plugins
+name: path_provider_example
 
 dependencies:
   flutter:
@@ -27,6 +27,12 @@ const String _kEmptyPackageJson = '''
 {
   "configVersion": 2,
   "packages": [
+     {
+      "name": "path_provider_example",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
   ]
 }
 ''';
@@ -161,33 +167,37 @@ void main() {
     });
 
     testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
+      final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
-          projectDir: fileSystem.directory('project')..createSync(),
+          projectDir: projectDir,
           artifacts: null,
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
+          defines: <String, String>{
+            kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
+          },
           generateDartPluginRegistry: true);
 
-      final File config = environment.projectDir
+      final File config = projectDir
           .childDirectory('.dart_tool')
           .childFile('package_config.json');
       config.createSync(recursive: true);
       config.writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = environment.projectDir.childFile('pubspec.yaml');
+      final File pubspec = projectDir.childFile('pubspec.yaml');
       pubspec.createSync();
 
-      final File packages = environment.projectDir.childFile('.packages');
+      final File packages = projectDir.childFile('.packages');
       packages.createSync();
 
-      final File generatedMain = environment.projectDir
+      final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('generated_main.dart');
 
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
 
       expect(generatedMain.existsSync(), isFalse);
@@ -234,7 +244,7 @@ void main() {
       pluginPubspec.createSync(recursive: true);
       pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
 
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
 
       final String mainContent = generatedMain.readAsStringSync();
@@ -242,29 +252,36 @@ void main() {
     });
 
     testUsingContext('removes generated_main.dart if plugins are removed from pubspec.yaml', () async {
+      final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
-          projectDir: fileSystem.directory('project')..createSync(),
+          projectDir: projectDir,
           artifacts: null,
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
+          defines: <String, String>{
+            kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
+          },
           generateDartPluginRegistry: true);
-      final File config = environment.projectDir
+      final File config = projectDir
           .childDirectory('.dart_tool')
           .childFile('package_config.json');
       config.createSync(recursive: true);
       config.writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = environment.projectDir.childFile('pubspec.yaml');
+      final File mainEntrypoint = projectDir.childDirectory('lib').childFile('main.dart');
+      mainEntrypoint.createSync(recursive: true);
+
+      final File pubspec = projectDir.childFile('pubspec.yaml');
       pubspec.createSync();
       pubspec.writeAsStringSync(_kSamplePubspecFile);
 
-      final File packages = environment.projectDir.childFile('.packages');
+      final File packages = projectDir.childFile('.packages');
       packages.createSync();
       packages.writeAsStringSync(_kSamplePackagesFile);
 
-      final File generatedMain = environment.projectDir
+      final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('generated_main.dart');
@@ -276,7 +293,7 @@ void main() {
       pluginPubspec.createSync(recursive: true);
       pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
 
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
       expect(generatedMain.existsSync(), isTrue);
 
@@ -287,6 +304,36 @@ void main() {
 
       await DartPluginRegistrantTarget.test(testProject).build(environment);
       expect(generatedMain.existsSync(), isFalse);
+    });
+
+    testUsingContext('assert that target file is resolved against the package config', () async {
+      final Directory projectDir = fileSystem.directory('project')..createSync();
+      final Environment environment = Environment.test(
+          fileSystem.currentDirectory,
+          projectDir: projectDir,
+          artifacts: null,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+          defines: <String, String>{
+            kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
+          },
+          generateDartPluginRegistry: true);
+
+      final File pubspec = projectDir.childFile('pubspec.yaml');
+      final File config = projectDir
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json');
+      final File packages = projectDir.childFile('.packages');
+
+      pubspec.writeAsStringSync(_kEmptyPubspecFile);
+      packages.writeAsStringSync('{"configVersion": 2, "packages": []}');
+      config.writeAsStringSync('{"configVersion": 2, "packages": []}');
+
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+      await expectLater(() async => await DartPluginRegistrantTarget.test(testProject).build(environment),
+        throwsAssertionError,
+      );
     });
   });
 }
