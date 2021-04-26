@@ -15,7 +15,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
+// ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package;
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -24,7 +25,6 @@ import 'platform.dart';
 import 'restoration.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
-import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
 
@@ -79,29 +79,74 @@ enum TestBindingEventSource {
 
 const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 
-/// Overrides the [ServicesBinding]'s binary messenger logic to use
-/// [TestDefaultBinaryMessenger].
+/// A [BinaryMessenger] subclass that is used as the default binary messenger
+/// under testing environment.
 ///
-/// Test bindings that are used by tests that mock message handlers for plugins
-/// should mix in this binding to enable the use of the
-/// [TestDefaultBinaryMessenger] APIs.
-mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
+/// It tracks status of data sent across the Flutter platform barrier, which is
+/// useful for testing frameworks to monitor and synchronize against the
+/// platform messages.
+class TestDefaultBinaryMessenger extends BinaryMessenger {
+  /// Creates a [TestDefaultBinaryMessenger] instance.
+  ///
+  /// The [delegate] instance must not be null.
+  TestDefaultBinaryMessenger(this.delegate): assert(delegate != null);
+
+  /// The delegate [BinaryMessenger].
+  final BinaryMessenger delegate;
+
+  final List<Future<ByteData?>> _pendingMessages = <Future<ByteData?>>[];
+
+  /// The number of incomplete/pending calls sent to the platform channels.
+  int get pendingMessageCount => _pendingMessages.length;
+
   @override
-  void initInstances() {
-    super.initInstances();
-    _instance = this;
+  Future<ByteData?>? send(String channel, ByteData? message) {
+    final Future<ByteData?>? resultFuture = delegate.send(channel, message);
+    if (resultFuture != null) {
+      _pendingMessages.add(resultFuture);
+      resultFuture
+        .catchError((Object error) { /* errors are the responsibility of the caller */ })
+        .whenComplete(() => _pendingMessages.remove(resultFuture));
+    }
+    return resultFuture;
   }
 
-  /// The current [TestDefaultBinaryMessengerBinding], if one has been created.
-  static TestDefaultBinaryMessengerBinding? get instance => _instance;
-  static TestDefaultBinaryMessengerBinding? _instance;
+  /// Returns a Future that completes after all the platform calls are finished.
+  ///
+  /// If a new platform message is sent after this method is called, this new
+  /// message is not tracked. Use with [pendingMessageCount] to guarantee no
+  /// pending message calls.
+  Future<void> get platformMessagesFinished {
+    return Future.wait<void>(_pendingMessages);
+  }
 
   @override
-  TestDefaultBinaryMessenger get defaultBinaryMessenger => super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+  Future<void> handlePlatformMessage(
+      String channel,
+      ByteData? data,
+      ui.PlatformMessageResponseCallback? callback,
+  ) {
+    return delegate.handlePlatformMessage(channel, data, callback);
+  }
 
   @override
-  TestDefaultBinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+  void setMessageHandler(String channel, MessageHandler? handler) {
+    delegate.setMessageHandler(channel, handler);
+  }
+
+  @override
+  bool checkMessageHandler(String channel, MessageHandler? handler) {
+    return delegate.checkMessageHandler(channel, handler);
+  }
+
+  @override
+  void setMockMessageHandler(String channel, MessageHandler? handler) {
+    delegate.setMockMessageHandler(channel, handler);
+  }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler? handler) {
+    return delegate.checkMockMessageHandler(channel, handler);
   }
 }
 
@@ -126,8 +171,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
        SemanticsBinding,
        RendererBinding,
        PaintingBinding,
-       WidgetsBinding,
-       TestDefaultBinaryMessengerBinding {
+       WidgetsBinding {
 
   /// Constructor for [TestWidgetsFlutterBinding].
   ///
@@ -302,6 +346,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
+  }
+
+  @override
+  BinaryMessenger createBinaryMessenger() {
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 
   /// Whether there is currently a test executing.

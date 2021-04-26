@@ -8,10 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'binding.dart' show TestDefaultBinaryMessengerBinding;
-import 'deprecated.dart';
-import 'test_async_utils.dart';
-
 export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
 /// A testing stub for the system's onscreen keyboard.
@@ -48,6 +44,9 @@ class TestTextInput {
   /// [updateEditingValue], [enterText], or [receiveAction]), the keyboard must
   /// first be requested, e.g. using [WidgetTester.showKeyboard].
   final VoidCallback? onCleared;
+
+  /// The messenger which sends the bytes for this channel, not null.
+  BinaryMessenger get _binaryMessenger => ServicesBinding.instance!.defaultBinaryMessenger;
 
   /// Log for method calls.
   ///
@@ -154,25 +153,16 @@ class TestTextInput {
     _isVisible = false;
   }
 
-  /// Simulates the user changing the text of the focused text field, and resets
-  /// the selection.
+  /// Simulates the user typing the given text.
   ///
   /// Calling this method replaces the content of the connected input field with
   /// `text`, and places the caret at the end of the text.
-  ///
-  /// To update the UI under test after this method is invoked, use
-  /// [WidgetTester.pump].
   ///
   /// This can be called even if the [TestTextInput] has not been [register]ed.
   ///
   /// If this is used to inject text when there is a real IME connection, for
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
-  ///
-  /// See also:
-  ///
-  ///  * [updateEditingValue], which takes a [TextEditingValue] so that one can
-  ///    also change the selection.
   void enterText(String text) {
     updateEditingValue(TextEditingValue(
       text: text,
@@ -182,21 +172,13 @@ class TestTextInput {
 
   /// Simulates the user changing the [TextEditingValue] to the given value.
   ///
-  /// To update the UI under test after this method is invoked, use
-  /// [WidgetTester.pump].
-  ///
   /// This can be called even if the [TestTextInput] has not been [register]ed.
   ///
   /// If this is used to inject text when there is a real IME connection, for
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
-  ///
-  /// See also:
-  ///
-  ///  * [enterText], which is similar but takes only a String and resets the
-  ///    selection.
   void updateEditingValue(TextEditingValue value) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -204,7 +186,7 @@ class TestTextInput {
           <dynamic>[_client ?? -1, value.toJSON()],
         ),
       ),
-      (ByteData? data) { /* ignored */ },
+      (ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
@@ -220,7 +202,7 @@ class TestTextInput {
   Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
       final Completer<void> completer = Completer<void>();
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      _binaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(
@@ -234,7 +216,8 @@ class TestTextInput {
             // Decoding throws a PlatformException if the data represents an
             // error, and that's all we care about here.
             SystemChannels.textInput.codec.decodeEnvelope(data!);
-            // If we reach here then no error was found. Complete without issue.
+
+            // No error was found. Complete without issue.
             completer.complete();
           } catch (error) {
             // An exception occurred as a result of receiveAction()'ing. Report
@@ -243,6 +226,7 @@ class TestTextInput {
           }
         },
       );
+
       return completer.future;
     });
   }
@@ -260,7 +244,7 @@ class TestTextInput {
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
   void closeConnection() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
