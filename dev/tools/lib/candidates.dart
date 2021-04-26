@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import './git.dart';
 import './globals.dart' show releaseCandidateBranchRegex;
 import './repository.dart';
+import './stdio.dart';
 import './version.dart';
 
 const String kRemote = 'remote';
@@ -18,7 +19,7 @@ class CandidatesCommand extends Command<void> {
   CandidatesCommand({
     required this.flutterRoot,
     required this.checkouts,
-  }) : git = Git(checkouts.processManager) {
+  }) : git = Git(checkouts.processManager), stdio = checkouts.stdio {
     argParser.addOption(
       kRemote,
       help: 'Which remote name to query for branches.',
@@ -29,6 +30,7 @@ class CandidatesCommand extends Command<void> {
   final Checkouts checkouts;
   final Directory flutterRoot;
   final Git git;
+  final Stdio stdio;
 
   @override
   String get name => 'candidates';
@@ -52,7 +54,7 @@ class CandidatesCommand extends Command<void> {
     );
 
     final Version currentVersion = framework.flutterVersion();
-    print('currentVersion = $currentVersion');
+    stdio.printStatus('currentVersion = $currentVersion');
 
     final List<String> branches = git.getOutput(
       <String>[
@@ -91,7 +93,7 @@ class CandidatesCommand extends Command<void> {
       if (x == currentX && y == currentY && currentZ == 0 && m < currentM) {
         continue;
       }
-      print(match.group(1)!);
+      stdio.printStatus(match.group(1)!);
     }
   }
 }
