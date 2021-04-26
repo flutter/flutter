@@ -154,7 +154,7 @@ void main() {
     expect(collapsedContainerDecoration.border!.bottom.color, _dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('ListTileTheme', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
     final Key collapsedTitleKey = UniqueKey();
     final Key expandedIconKey = UniqueKey();
@@ -163,7 +163,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch().copyWith(secondary: _foregroundColor),
+          colorScheme: ColorScheme.fromSwatch().copyWith(primary: _foregroundColor),
           unselectedWidgetColor: _unselectedWidgetColor,
           textTheme: const TextTheme(subtitle1: TextStyle(color: _headerColor)),
         ),
