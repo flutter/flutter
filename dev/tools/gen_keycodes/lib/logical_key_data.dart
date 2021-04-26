@@ -49,28 +49,17 @@ class LogicalKeyData {
     String windowsNameMap,
     String androidKeyCodeHeader,
     String androidNameMap,
+    String macosLogicalToPhysical,
+    String iosLogicalToPhysical,
     PhysicalKeyData physicalKeyData,
   ) {
     final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
-    final String supplementalChromiumKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'supplemental_key_data.inc',)).readAsStringSync();
-    _readKeyEntries(data, chromiumKeys + '\n' + supplementalChromiumKeys);
+    _readKeyEntries(data, chromiumKeys);
     _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
     _readGtkKeyCodes(data, gtkKeyCodeHeader, parseMapOfListOfString(gtkNameMap));
     _readAndroidKeyCodes(data, androidKeyCodeHeader, parseMapOfListOfString(androidNameMap));
-    _readMacOsKeyCodes(
-      data,
-      physicalKeyData,
-      parseMapOfListOfString(File(
-        path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'macos_logical_to_physical.json')
-      ).readAsStringSync()),
-    );
-    _readIosKeyCodes(
-      data,
-      physicalKeyData,
-      parseMapOfListOfString(File(
-        path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'ios_logical_to_physical.json')
-      ).readAsStringSync()),
-    );
+    _readMacOsKeyCodes(data, physicalKeyData, parseMapOfListOfString(macosLogicalToPhysical));
+    _readIosKeyCodes(data, physicalKeyData, parseMapOfListOfString(iosLogicalToPhysical));
     _readFuchsiaKeyCodes(data, physicalKeyData);
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(

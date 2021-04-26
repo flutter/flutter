@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
@@ -15,11 +13,17 @@ import 'utils.dart';
 /// Generates the key mapping of GTK, based on the information in the key
 /// data structure given to it.
 class GtkCodeGenerator extends PlatformCodeGenerator {
-  GtkCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+  GtkCodeGenerator(
+    PhysicalKeyData keyData,
+    LogicalKeyData logicalData,
+    String modifierBitMapping,
+    String lockBitMapping,
+  ) : _modifierBitMapping = parseMapOfListOfString(modifierBitMapping),
+      _lockBitMapping = parseMapOfListOfString(lockBitMapping),
+      super(keyData, logicalData);
 
   /// This generates the map of XKB scan codes to Flutter physical keys.
-  String get xkbScanCodeMap {
+  String get _xkbScanCodeMap {
     final OutputLines<int> lines = OutputLines<int>('GTK scancode map');
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.xKbScanCode != null) {
@@ -30,7 +34,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   }
 
   /// This generates the map of GTK keyval codes to Flutter logical keys.
-  String get gtkKeyvalCodeMap {
+  String get _gtkKeyvalCodeMap {
     final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
@@ -87,19 +91,15 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     return result.toString().trimRight();
   }
 
-  String get gtkModifierBitMap {
-    final Map<String, List<String>> source = parseMapOfListOfString(File(
-      path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'gtk_modifier_bit_mapping.json')
-    ).readAsStringSync());
-    return constructMapFromModToKeys(source, keyData, logicalData, 'gtkModifierBitMap');
+  String get _gtkModifierBitMap {
+    return constructMapFromModToKeys(_modifierBitMapping, keyData, logicalData, 'gtkModifierBitMap');
   }
+  final Map<String, List<String>> _modifierBitMapping;
 
-  String get gtkModeBitMap {
-    final Map<String, List<String>> source = parseMapOfListOfString(File(
-      path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'gtk_mode_bit_mapping.json')
-    ).readAsStringSync());
-    return constructMapFromModToKeys(source, keyData, logicalData, 'gtkModeBitMap');
+  String get _gtkModeBitMap {
+    return constructMapFromModToKeys(_lockBitMapping, keyData, logicalData, 'gtkModeBitMap');
   }
+  final Map<String, List<String>> _lockBitMapping;
 
   @override
   String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'gtk_key_mapping_cc.tmpl');
@@ -110,10 +110,10 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   @override
   Map<String, String> mappings() {
     return <String, String>{
-      'XKB_SCAN_CODE_MAP': xkbScanCodeMap,
-      'GTK_KEYVAL_CODE_MAP': gtkKeyvalCodeMap,
-      'GTK_MODIFIER_BIT_MAP': gtkModifierBitMap,
-      'GTK_MODE_BIT_MAP': gtkModeBitMap,
+      'XKB_SCAN_CODE_MAP': _xkbScanCodeMap,
+      'GTK_KEYVAL_CODE_MAP': _gtkKeyvalCodeMap,
+      'GTK_MODIFIER_BIT_MAP': _gtkModifierBitMap,
+      'GTK_MODE_BIT_MAP': _gtkModeBitMap,
     };
   }
 }

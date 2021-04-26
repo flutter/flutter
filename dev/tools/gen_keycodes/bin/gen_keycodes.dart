@@ -145,19 +145,24 @@ Future<void> main(List<String> rawArguments) async {
     // Logical
     final String gtkKeyCodes = await getGtkKeyCodes();
     final String webLogicalKeys = await getChromiumKeys();
+    final String supplementalKeyData = readDataFile('supplemental_key_data.inc');
     final String gtkToDomKey = readDataFile('gtk_logical_name_mapping.json');
     final String windowsKeyCodes = await getWindowsKeyCodes();
     final String windowsToDomKey = readDataFile('windows_logical_to_window_vk.json');
+    final String macosLogicalToPhysical = readDataFile('macos_logical_to_physical.json');
+    final String iosLogicalToPhysical = readDataFile('ios_logical_to_physical.json');
     final String androidKeyCodes = await getAndroidKeyCodes();
 
     logicalData = LogicalKeyData(
-      webLogicalKeys,
+      '$webLogicalKeys\n$supplementalKeyData',
       gtkKeyCodes,
       gtkToDomKey,
       windowsKeyCodes,
       windowsToDomKey,
       androidKeyCodes,
       androidToDomKey,
+      macosLogicalToPhysical,
+      iosLogicalToPhysical,
       physicalData,
     );
 
@@ -184,13 +189,25 @@ Future<void> main(List<String> rawArguments) async {
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
 
-  final String maskConstants = readDataFile('mask_constants.json');
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
     'android': AndroidCodeGenerator(physicalData, logicalData),
-    'macos': MacOsCodeGenerator(physicalData, logicalData, maskConstants),
+    'macos': MacOsCodeGenerator(
+      physicalData,
+      logicalData,
+      readDataFile('mask_constants.json'),
+    ),
     'windows': WindowsCodeGenerator(physicalData, logicalData),
-    'linux': GtkCodeGenerator(physicalData, logicalData),
-    'web': WebCodeGenerator(physicalData, logicalData),
+    'linux': GtkCodeGenerator(
+      physicalData,
+      logicalData,
+      readDataFile('gtk_modifier_bit_mapping.json'),
+      readDataFile('gtk_lock_bit_mapping.json'),
+    ),
+    'web': WebCodeGenerator(
+      physicalData,
+      logicalData,
+      readDataFile('web_logical_location_mapping.json'),
+    ),
   };
   await Future.wait(platforms.entries.map((MapEntry<String, PlatformCodeGenerator> entry) {
     final String platform = entry.key;

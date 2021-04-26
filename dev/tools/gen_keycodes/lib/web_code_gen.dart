@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
@@ -15,8 +12,12 @@ import 'utils.dart';
 /// Generates the key mapping of Web, based on the information in the key
 /// data structure given to it.
 class WebCodeGenerator extends PlatformCodeGenerator {
-  WebCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+  WebCodeGenerator(
+    PhysicalKeyData keyData,
+    LogicalKeyData logicalData,
+    String logicalLocationMap,
+  ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap),
+      super(keyData, logicalData);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
@@ -42,12 +43,9 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Web number pad codes to logical key ids.
   String get _webLogicalLocationMap {
-    final Map<String, dynamic> source = json.decode(File(
-      path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_logical_location_mapping.json')
-    ).readAsStringSync()) as Map<String, dynamic>;
     final StringBuffer result = StringBuffer();
-    source.forEach((String webKey, dynamic dynamicValue) {
-      final String valuesString = (dynamicValue as List<dynamic>).map((dynamic value) {
+    _logicalLocationMap.forEach((String webKey, List<String?> locations) {
+      final String valuesString = locations.map((dynamic value) {
         if (value != null && logicalData.data[value] == null) {
           print('Error during web location map: $value is not a valid logical key.');
           return null;
@@ -58,6 +56,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
     });
     return result.toString().trimRight();
   }
+  final Map<String, List<String?>> _logicalLocationMap;
 
   @override
   String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_key_map_dart.tmpl');
