@@ -28,4 +28,3 @@ class AnimatedImagePage extends StatelessWidget {
     );
   }
 }
-
