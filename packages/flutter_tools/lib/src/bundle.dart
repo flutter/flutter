@@ -137,6 +137,7 @@ class BundleBuilder {
       logger: globals.logger,
       processManager: globals.processManager,
       platform: globals.platform,
+      generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug
         ? const CopyFlutterBundle()

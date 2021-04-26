@@ -40,10 +40,10 @@ abstract class Stdio {
 /// A logger that will print out trace messages.
 class VerboseStdio extends Stdio {
   VerboseStdio({
-    @required this.stdout,
-    @required this.stderr,
-    @required this.stdin,
-  }) : assert(stdout != null), assert(stderr != null), assert(stdin != null);
+    required this.stdout,
+    required this.stderr,
+    required this.stdin,
+  });
 
   factory VerboseStdio.local() => VerboseStdio(
     stdout: io.stdout,
@@ -81,6 +81,6 @@ class VerboseStdio extends Stdio {
 
   @override
   String readLineSync() {
-    return stdin.readLineSync();
+    return stdin.readLineSync()!;
   }
 }

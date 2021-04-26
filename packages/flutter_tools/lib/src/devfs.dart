@@ -524,6 +524,8 @@ class DevFS {
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath,
+      fs: _fileSystem,
+      projectRootPath: projectRootPath,
       packageConfig: packageConfig,
     );
     if (bundle != null) {

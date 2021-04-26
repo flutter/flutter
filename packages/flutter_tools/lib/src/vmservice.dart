@@ -865,8 +865,8 @@ class FlutterVmService {
     try {
       final List<vm_service.IsolateRef> refs = await _getIsolateRefs(webIsolate);
       for (final vm_service.IsolateRef ref in refs) {
-        final vm_service.Isolate isolate = await service.getIsolate(ref.id);
-        if (isolate.extensionRPCs.contains(extensionName)) {
+        final vm_service.Isolate isolate = await getIsolateOrNull(ref.id);
+        if (isolate != null && isolate.extensionRPCs.contains(extensionName)) {
           return ref;
         }
       }

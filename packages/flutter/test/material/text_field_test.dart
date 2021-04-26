@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 
@@ -164,14 +165,20 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      mockClipboard.handleMethodCall,
+    );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    SystemChannels.platform.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
   });
 
   final Key textFieldKey = UniqueKey();
@@ -337,7 +344,7 @@ void main() {
 
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
-    late String textFieldValue;
+    String? textFieldValue;
 
     await tester.pumpWidget(
       overlay(
@@ -360,15 +367,16 @@ void main() {
 
     Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
+        expect(textFieldValue, isNull);
         await tester.enterText(find.byType(TextField), testValue);
         // Check that the onChanged event handler fired.
         expect(textFieldValue, equals(testValue));
+        textFieldValue = null;
         await skipPastScrollingAnimation(tester);
       });
     }
 
     await checkText(' ');
-
     expect(findTextFieldBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
@@ -414,6 +422,8 @@ void main() {
       text: 'X',
       selection: TextSelection.collapsed(offset: 1),
     ));
+    await tester.idle();
+    expect(tester.state(find.byType(EditableText)), editableText);
     await checkCursorToggle();
   });
 
@@ -4687,8 +4697,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4760,8 +4770,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4833,8 +4843,8 @@ void main() {
     );
 
     const String clipboardContent = 'I love Flutter!';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -4883,8 +4893,8 @@ void main() {
         maxLines: 3,
       );
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4957,8 +4967,8 @@ void main() {
       obscureText: true,
     );
     String clipboardContent = '';
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -9318,8 +9328,8 @@ void main() {
     );
 
     bool triedToReadClipboard = false;
-    SystemChannels.platform
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData') {
           triedToReadClipboard = true;
         }
