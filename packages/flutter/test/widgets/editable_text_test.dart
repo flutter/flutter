@@ -7074,8 +7074,8 @@ void main() {
         child: SizedBox(
           width: 400,
           child: Shortcuts(
-            shortcuts: <LogicalKeySet, Intent>{
-              LogicalKeySet(LogicalKeyboardKey.arrowLeft): const MoveSelectionRightTextIntent(),
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.arrowLeft): MoveSelectionRightTextIntent(),
             },
             child: EditableText(
               maxLines: 10,
