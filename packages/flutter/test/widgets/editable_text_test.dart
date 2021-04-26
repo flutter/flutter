@@ -5898,7 +5898,7 @@ void main() {
     await tester.pump();
 
     // Nothing called when only the remote changes.
-    expect(log.length, 0);
+    expect(log, isEmpty);
 
     // Hide the keyboard.
     focusNode.unfocus();
@@ -5923,7 +5923,7 @@ void main() {
     await tester.pump();
 
     // Nothing called when only the remote changes.
-    expect(log.length, 0);
+    expect(log, isEmpty);
     // The keyboard is not be requested after a repeat value from the engine.
     expect(focusNode.hasFocus, false);
   });

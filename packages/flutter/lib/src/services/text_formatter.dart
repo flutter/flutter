@@ -399,7 +399,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       state.stringBuffer.write(state.inputValue.text.substring(regionStart, regionEnd));
     }
   }
-
 }
 
 /// An immutable data structure that specifies what adjustments to make to a
@@ -734,10 +733,16 @@ class _TextEditingValueAccumulator {
       composing: composingRegion == null || composingRegion.base == composingRegion.extent
           ? TextRange.empty
           : TextRange(start: composingRegion.base, end: composingRegion.extent),
-      // The selection affinity is downstream.
       selection: selection == null
           ? const TextSelection.collapsed(offset: -1)
-          : TextSelection(baseOffset: selection.base, extentOffset: selection.extent),
+          : TextSelection(
+            baseOffset: selection.base,
+            extentOffset: selection.extent,
+            // Try to preserve the selection affinity and isDirectional. This
+            // may not make sense if the selection has changed.
+            affinity: inputValue.selection.affinity,
+            isDirectional: inputValue.selection.isDirectional,
+          ),
     );
   }
 }
