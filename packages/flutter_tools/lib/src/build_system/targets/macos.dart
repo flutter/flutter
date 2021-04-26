@@ -177,21 +177,19 @@ class CompileMacOSFramework extends Target {
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
+    final String buildOutputPath = environment.buildDir.path;
     final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-
-    if (codeSizeDirectory != null) {
-      final File codeSizeFile = environment.fileSystem
-        .directory(codeSizeDirectory)
-        .childFile('snapshot.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
-      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
-      final File precompilerTraceFile = environment.fileSystem
-        .directory(codeSizeDirectory)
-        .childFile('trace.${getNameForDarwinArch(DarwinArch.x86_64)}.json');
-      extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
-      extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
+    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    final List<DarwinArch> darwinArchs = environment.defines[kDarwinArchs]
+      ?.split(' ')
+      ?.map(getDarwinArchForName)
+      ?.toList()
+      ?? <DarwinArch>[DarwinArch.x86_64];
+    if (targetPlatform != TargetPlatform.darwin) {
+      throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
 
     final AOTSnapshotter snapshotter = AOTSnapshotter(
@@ -202,19 +200,51 @@ class CompileMacOSFramework extends Target {
       artifacts: environment.artifacts,
       processManager: environment.processManager
     );
-    final int result = await snapshotter.build(
-      bitcode: false,
-      buildMode: buildMode,
-      mainPath: environment.buildDir.childFile('app.dill').path,
-      outputPath: environment.buildDir.path,
-      platform: TargetPlatform.darwin_x64,
-      darwinArch: DarwinArch.x86_64,
-      splitDebugInfo: splitDebugInfo,
-      dartObfuscation: dartObfuscation,
-      extraGenSnapshotOptions: extraGenSnapshotOptions,
-    );
-    if (result != 0) {
-      throw Exception('gen shapshot failed.');
+
+    final List<Future<int>> pending = <Future<int>>[];
+    for (final DarwinArch darwinArch in darwinArchs) {
+      if (codeSizeDirectory != null) {
+        final File codeSizeFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+        extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+        final File precompilerTraceFile = environment.fileSystem
+          .directory(codeSizeDirectory)
+          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
+        extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+        extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
+      }
+
+      pending.add(snapshotter.build(
+        bitcode: false,
+        buildMode: buildMode,
+        mainPath: environment.buildDir.childFile('app.dill').path,
+        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        platform: TargetPlatform.darwin,
+        darwinArch: darwinArch,
+        splitDebugInfo: splitDebugInfo,
+        dartObfuscation: dartObfuscation,
+        extraGenSnapshotOptions: extraGenSnapshotOptions,
+      ));
+    }
+
+    final List<int> results = await Future.wait(pending);
+    if (results.any((int result) => result != 0)) {
+      throw Exception('AOT snapshotter exited with code ${results.join()}');
+    }
+
+    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App');
+    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
+    final ProcessResult result = await environment.processManager.run(<String>[
+      'lipo',
+      ...darwinArchs.map((DarwinArch iosArch) =>
+          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
+      '-create',
+      '-output',
+      resultPath,
+    ]);
+    if (result.exitCode != 0) {
+      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
     }
   }
 
@@ -227,7 +257,7 @@ class CompileMacOSFramework extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin_x64),
+    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin),
   ];
 
   @override
@@ -291,7 +321,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
-      targetPlatform: TargetPlatform.darwin_x64,
+      targetPlatform: TargetPlatform.darwin,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -341,9 +371,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
       // Copy precompiled runtimes.
       try {
         final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData,
-            platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
+            platform: TargetPlatform.darwin, mode: BuildMode.debug);
         final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData,
-            platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
+            platform: TargetPlatform.darwin, mode: BuildMode.debug);
         environment.fileSystem.file(vmSnapshotData).copySync(
             assetDirectory.childFile('vm_snapshot_data').path);
         environment.fileSystem.file(isolateSnapshotData).copySync(
@@ -404,8 +434,8 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
-    const Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
+    const Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin, mode: BuildMode.debug),
   ];
 
   @override

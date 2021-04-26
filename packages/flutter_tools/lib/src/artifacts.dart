@@ -383,7 +383,7 @@ class CachedArtifacts implements Artifacts {
         return _getAndroidArtifactPath(artifact, platform, mode);
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode, environmentType);
-      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
@@ -547,7 +547,7 @@ class CachedArtifacts implements Artifacts {
     switch (platform) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
-      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
@@ -586,7 +586,7 @@ class CachedArtifacts implements Artifacts {
 
 TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils operatingSystemUtils) {
   if (platform.isMacOS) {
-    return TargetPlatform.darwin_x64;
+    return TargetPlatform.darwin;
   }
   if (platform.isLinux) {
     return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?

@@ -139,7 +139,7 @@ void main() {
     expect(() => runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=darwin-x64',
+      '--target-platform=darwin',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
@@ -193,7 +193,7 @@ void main() {
     await runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=darwin-x64',
+      '--target-platform=darwin',
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),

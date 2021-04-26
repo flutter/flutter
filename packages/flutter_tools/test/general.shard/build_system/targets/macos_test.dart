@@ -34,7 +34,8 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'debug',
-        kTargetPlatform: 'darwin-x64',
+        kTargetPlatform: 'darwin',
+        kDarwinArchs: 'x64',
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -113,13 +114,13 @@ void main() {
     fileSystem.file(
       artifacts.getArtifactPath(
         Artifact.vmSnapshotData,
-        platform: TargetPlatform.darwin_x64,
+        platform: TargetPlatform.darwin,
         mode: BuildMode.debug,
       )).createSync(recursive: true);
     fileSystem.file(
       artifacts.getArtifactPath(
         Artifact.isolateSnapshotData,
-        platform: TargetPlatform.darwin_x64,
+        platform: TargetPlatform.darwin,
         mode: BuildMode.debug,
       )).createSync(recursive: true);
     fileSystem.file('${environment.buildDir.path}/App.framework/App')
