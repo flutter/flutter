@@ -427,7 +427,8 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
   latch.Wait();
 }
 
-TEST_F(ImageDecoderFixtureTest, CanResizeWithoutDecode) {
+// TODO(https://github.com/flutter/flutter/issues/81232) - disabled due to flakiness
+TEST_F(ImageDecoderFixtureTest, DISABLED_CanResizeWithoutDecode) {
   SkImageInfo info = {};
   size_t row_bytes;
   sk_sp<SkData> decompressed_data;
