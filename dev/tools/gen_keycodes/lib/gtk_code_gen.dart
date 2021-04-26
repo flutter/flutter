@@ -20,24 +20,24 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of XKB scan codes to Flutter physical keys.
   String get xkbScanCodeMap {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('GTK scancode map');
     for (final PhysicalKeyEntry entry in keyData.data.values) {
       if (entry.xKbScanCode != null) {
-        result.writeln('  insert_record(table, ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)});  // ${entry.constantName}');
+        lines.add(entry.xKbScanCode!, '  insert_record(table, ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)});  // ${entry.constantName}');
       }
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of GTK keyval codes to Flutter logical keys.
   String get gtkKeyvalCodeMap {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
-        result.writeln('  insert_record(table, ${toHex(value)}, ${toHex(entry.value, digits: 9)});  // $name');
+        lines.add(value, '  insert_record(table, ${toHex(value)}, ${toHex(entry.value, digits: 10)});  // $name');
       });
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   static String constructMapFromModToKeys(
@@ -48,31 +48,40 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   ) {
     final StringBuffer result = StringBuffer();
     source.forEach((String modifierBitName, List<String> keyNames) {
-      final String firstLogicalName = keyNames[0];
-      final List<String> physicalNames = keyNames.sublist(1);
-      final int length = physicalNames.length;
-      final LogicalKeyEntry? firstLogical = logicalData.data[firstLogicalName];
-      if (firstLogical == null) {
-        print('Unrecognized first logical key $firstLogicalName specified for $debugFunctionName.');
+      if (keyNames.length != 2 && keyNames.length != 3) {
+        print('Unexpected keyName length ${keyNames.length}.');
+        return;
+      }
+      final String primaryLogicalName = keyNames[0];
+      final String primaryPhysicalName = keyNames[1];
+      final String? secondaryPhysicalName = keyNames.length == 3 ? keyNames[2] : null;
+      final LogicalKeyEntry? primaryLogical = logicalData.data[primaryLogicalName];
+      if (primaryLogical == null) {
+        print('Unrecognized primary logical key $primaryLogicalName specified for $debugFunctionName.');
+        return;
+      }
+      final PhysicalKeyEntry? primaryPhysical = physicalData.data[primaryPhysicalName];
+      if (primaryPhysical == null) {
+        print('Unrecognized primary physical key $primaryPhysicalName specified for $debugFunctionName.');
+        return;
+      }
+      final PhysicalKeyEntry? secondaryPhysical = secondaryPhysicalName == null ? null : physicalData.data[secondaryPhysicalName];
+      if (secondaryPhysical == null && secondaryPhysicalName != null) {
+        print('Unrecognized secondary physical key $secondaryPhysicalName specified for $debugFunctionName.');
         return;
       }
       result.writeln('''
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_${modifierBitName}_MASK), data);
-  data->length = $length;
-  data->first_logical_key = ${toHex(firstLogical.value, digits: 9)};  // ${firstLogical.constantName}
-  physical_keys = g_new(uint64_t, $length);
-  data->physical_keys = physical_keys;
-  data->is_caps_lock = ${physicalNames.first == 'CapsLock' ? 'true' : 'false'};''');
-      for (final String physicalName in physicalNames) {
-        final PhysicalKeyEntry? entry = physicalData.data[physicalName];
-        if (entry == null) {
-          print('Unrecognized physical key $physicalName specified for $debugFunctionName.');
-          return;
-        }
-        result.writeln('  *(physical_keys++) = ${toHex(entry.usbHidCode)};  // ${entry.name}');
+  data->primary_logical_key = ${toHex(primaryLogical.value, digits: 9)};  // ${primaryLogical.constantName}
+  data->primary_physical_key = ${toHex(primaryPhysical.usbHidCode, digits: 9)};  // ${primaryPhysical.constantName}''');
+      if (secondaryPhysical != null) {
+        result.writeln('''
+  data->secondary_physical_key = ${toHex(secondaryPhysical.usbHidCode, digits: 9)};  // ${secondaryPhysical.constantName}''');
       }
+      result.writeln('''
+  data->is_caps_lock = ${primaryPhysicalName == 'CapsLock' ? 'true' : 'false'};''');
     });
     return result.toString().trimRight();
   }

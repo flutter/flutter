@@ -217,3 +217,33 @@ void addNameValue(List<String> names, List<int> values, String name, int value) 
     }
   }
 }
+
+/// A utility class to build join a number of lines in a sorted order.
+///
+/// Use [add] to add a line and associate it with an index. Use [sortedJoin] to
+/// get the joined string of these lines joined sorting them in the order of the
+/// index.
+class OutputLines<T extends Comparable<Object>> {
+  OutputLines(this.mapName);
+
+  /// The name for this map.
+  ///
+  /// Used in warning messages.
+  final String mapName;
+
+  final Map<T, String> lines = <T, String>{};
+
+  void add(T code, String line) {
+    if (lines.containsKey(code)) {
+      print('Warn: $mapName is requested to add line $code as:\n    $line\n  but it already exists as:\n    ${lines[code]}');
+    }
+    lines[code] = line;
+  }
+
+  String sortedJoin() {
+    return (lines.entries.toList()
+      ..sort((MapEntry<T, String> a, MapEntry<T, String> b) => a.key.compareTo(b.key)))
+      .map((MapEntry<T, String> entry) => entry.value)
+      .join('\n');
+  }
+}
