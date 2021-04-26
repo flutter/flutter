@@ -17,7 +17,6 @@ import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/physical_key_data.dart';
 import 'package:gen_keycodes/logical_key_data.dart';
 import 'package:gen_keycodes/utils.dart';
-import 'package:gen_keycodes/mask_constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
@@ -67,88 +66,12 @@ Future<String> getGtkKeyCodes() async {
   return http.read(keyCodesUri);
 }
 
+String readDataFile(String fileName) {
+  return File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', fileName)).readAsStringSync();
+}
+
 Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
-  argParser.addOption(
-    'chromium-hid-codes',
-    defaultsTo: null,
-    help: 'The path to where the Chromium HID code mapping file should be '
-        'read. If --chromium-hid-codes is not specified, the input will be read '
-        'from the correct file in the Chromium repository.',
-  );
-  argParser.addOption(
-    'chromium-keys',
-    defaultsTo: null,
-    help: 'The path to where the Chromium key list file should be '
-        'read. If --chromium-keys is not specified, the input will be read '
-        'from the correct file in the Chromium repository.',
-  );
-  argParser.addOption(
-    'supplemental-hid-codes',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'supplemental_hid_codes.inc'),
-    help: "The path to where the supplemental HID codes that don't appear in the "
-        'Chromium map should be read.',
-  );
-  argParser.addOption(
-    'android-keycodes',
-    defaultsTo: null,
-    help: 'The path to where the Android keycodes header file should be read. '
-        'If --android-keycodes is not specified, the input will be read from the '
-        'correct file in the Android repository.',
-  );
-  argParser.addOption(
-    'android-scancodes',
-    defaultsTo: null,
-    help: 'The path to where the Android scancodes header file should be read. '
-      'If --android-scancodes is not specified, the input will be read from the '
-      'correct file in the Android repository.',
-  );
-  argParser.addOption(
-    'android-domkey',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'android_key_name_to_name.json'),
-    help: 'The path to where the Android keycode to DomKey mapping is.',
-  );
-  argParser.addOption(
-    'glfw-keycodes',
-    defaultsTo: null,
-    help: 'The path to where the GLFW keycodes header file should be read. '
-        'If --glfw-keycodes is not specified, the input will be read from the '
-        'correct file in the GLFW github repository.',
-  );
-  argParser.addOption(
-    'gtk-keycodes',
-    defaultsTo: null,
-    help: 'The path to where the GTK keycodes header file should be read. '
-        'If --gtk-keycodes is not specified, the input will be read from the '
-        'correct file in the GTK repository.',
-  );
-  argParser.addOption(
-    'windows-keycodes',
-    defaultsTo: null,
-    help: 'The path to where the Windows keycodes header file should be read. '
-        'If --windows-keycodes is not specified, the input will be read from the '
-        'correct file in the Windows github repository.',
-  );
-  argParser.addOption(
-    'windows-domkey',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'windows_logical_to_window_vk.json'),
-    help: 'The path to where the Windows keycode to DomKey mapping is.',
-  );
-  argParser.addOption(
-    'glfw-domkey',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_glfw_name.json'),
-    help: 'The path to where the GLFW keycode to DomKey mapping is.',
-  );
-  argParser.addOption(
-    'gtk-domkey',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'gtk_logical_name_mapping.json'),
-    help: 'The path to where the mapping is from GTK keyval name to Flutter logical key name.',
-  );
-  argParser.addOption(
-    'mask-constants',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'mask_constants.json'),
-    help: 'The path to where the mask constants are.',
-  );
   argParser.addOption(
     'physical-data',
     defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'physical_key_data.json'),
@@ -210,46 +133,22 @@ Future<void> main(List<String> rawArguments) async {
   LogicalKeyData logicalData;
   if (parsedArguments['collect'] as bool) {
     // Physical
-    final String baseHidCodes = parsedArguments['chromium-hid-codes'] == null ?
-      await getChromiumCodes() :
-      File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
-    final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
+    final String baseHidCodes = await getChromiumCodes();
+    final String supplementalHidCodes = readDataFile('supplemental_hid_codes.inc');
     final String hidCodes = '$baseHidCodes\n$supplementalHidCodes';
-
-    final String androidScanCodes = parsedArguments['android-scancodes'] == null ?
-      await getAndroidScanCodes() :
-      File(parsedArguments['android-scancodes'] as String).readAsStringSync();
-
-    final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
-
-    final String glfwKeyCodes = parsedArguments['glfw-keycodes'] == null ?
-      await getGlfwKeyCodes() :
-      File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
-
-    final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
-
+    final String androidScanCodes = await getAndroidScanCodes();
+    final String androidToDomKey = readDataFile('android_key_name_to_name.json');
+    final String glfwKeyCodes = await getGlfwKeyCodes();
+    final String glfwToDomKey = readDataFile('key_name_to_glfw_name.json');
     physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
 
     // Logical
-    final String gtkKeyCodes = parsedArguments['gtk-keycodes'] == null ?
-      await getGtkKeyCodes() :
-      File(parsedArguments['gtk-keycodes'] as String).readAsStringSync();
-
-    final String webLogicalKeys = parsedArguments['chromium-keys'] == null ?
-      await getChromiumKeys() :
-      File(parsedArguments['chromium-keys'] as String).readAsStringSync();
-
-    final String gtkToDomKey = File(parsedArguments['gtk-domkey'] as String).readAsStringSync();
-
-    final String windowsKeyCodes = parsedArguments['windows-keycodes'] == null ?
-      await getWindowsKeyCodes() :
-      File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
-
-    final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
-
-    final String androidKeyCodes = parsedArguments['android-keycodes'] == null ?
-      await getAndroidKeyCodes() :
-      File(parsedArguments['android-keycodes'] as String).readAsStringSync();
+    final String gtkKeyCodes = await getGtkKeyCodes();
+    final String webLogicalKeys = await getChromiumKeys();
+    final String gtkToDomKey = readDataFile('gtk_logical_name_mapping.json');
+    final String windowsKeyCodes = await getWindowsKeyCodes();
+    final String windowsToDomKey = readDataFile('windows_logical_to_window_vk.json');
+    final String androidKeyCodes = await getAndroidKeyCodes();
 
     logicalData = LogicalKeyData(
       webLogicalKeys,
@@ -271,8 +170,6 @@ Future<void> main(List<String> rawArguments) async {
     logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
-  final List<MaskConstant> maskConstants = parseMaskConstants(json.decode(await File(parsedArguments['mask-constants'] as String).readAsString()));
-
   final File codeFile = File(parsedArguments['code'] as String);
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
@@ -287,6 +184,7 @@ Future<void> main(List<String> rawArguments) async {
   print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
   await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
 
+  final String maskConstants = readDataFile('mask_constants.json');
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
     'android': AndroidCodeGenerator(physicalData, logicalData),
     'macos': MacOsCodeGenerator(physicalData, logicalData, maskConstants),

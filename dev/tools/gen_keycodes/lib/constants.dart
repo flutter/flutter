@@ -94,6 +94,3 @@ const int kRightModifierPlane = 0x40000000000;
 
 /// The code prefix for a Numpad key, such as Numpad 1.
 const int kNumpadPlane =        0x50000000000;
-
-
-/* Bit 44 and beyond */

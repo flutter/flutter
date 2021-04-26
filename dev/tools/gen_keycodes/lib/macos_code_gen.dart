@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
@@ -32,8 +34,9 @@ String _toConstantVariableName(String variableName) {
 /// Generates the key mapping of macOS, based on the information in the key
 /// data structure given to it.
 class MacOsCodeGenerator extends PlatformCodeGenerator {
-  MacOsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData, this.maskConstants)
-    : super(keyData, logicalData);
+  MacOsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData, String maskConstants)
+    : maskConstants = parseMaskConstants(json.decode(maskConstants)),
+      super(keyData, logicalData);
 
   final List<MaskConstant> maskConstants;
 
