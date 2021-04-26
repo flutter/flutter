@@ -134,18 +134,24 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 /// kept and matched regions are banned.
 ///
 /// The [formattingStrategy] parameter will then be applied on each banned
-/// region, deciding whether and how the banned words should be replaced. See
-/// the [FilteringFormatterFormattingStrategy] class for a list of provided
-/// strategies, and how to make custom strategies.
+/// region, in their logical order, deciding whether and how the banned words
+/// should be replaced. See the [FilteringFormatterFormattingStrategy] class for
+/// a list of provided strategies, and how to make custom strategies.
 /// {@endtemplate}
 ///
-/// The default constructor, as well as the `FilteringTextInputFormatter.allow`
-/// and the `FilteringTextInputFormatter.allow` variants, replaces each of the
-/// non-empty banned patterns in the input text with its `replacementString`.
+/// The default constructor, as well as its `FilteringTextInputFormatter.allow`
+/// and the `FilteringTextInputFormatter.deny` variants, uses the
+/// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
+/// strategy with a user-supplied `replacementString`. This means they replace
+/// each of the non-empty banned patterns in the input text with the
+/// `replacementString`, and move any endpoint of the selection or the composing
+/// region to the end of the `replacementString` if it was inside a banned
+/// pattern.
 ///
-/// Consider switching to the
+/// Oftentimes input methods don't expect composing regions changes from text
+/// editors. Consider switching to the
 /// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion]
-/// strategy if the input method behaves strangely with this input filter, such
+/// strategy if some input methods behave strangely with this input filter, such
 /// as having duplicate input. See [TextEditingValue.composing] and
 /// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion]
 /// for more details.
@@ -252,32 +258,98 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// that match the filter are disallowed.
   final bool allow;
 
-  /// Determines how to perform formatting, update the selection and the
-  /// composing region, on each banned pattern within the input text.
+  /// Determines how to format, update the selection and the composing region,
+  /// on each banned pattern within the input text.
   ///
   /// {@macro flutter.services.FilteringTextInputFormatter.filtering}
   ///
-  /// The default [FilteringFormatterFormattingStrategy] is
-  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion],
-  /// which replaces the text within every banned region with a (potentially
-  /// empty) replacement string, and updates the composing region and the
-  /// selection accordingly so they do not fall within the removed regions.
+  /// ### The Default Behavior
   ///
-  /// {@macro flutter.services.FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion}
+  /// The default [FilteringFormatterFormattingStrategy] is a
+  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
+  /// strategy which replaces the text within every banned region with a
+  /// (potentially empty) replacement string, and updates the composing region
+  /// and the selection accordingly so they do not fall within the removed
+  /// regions.
   ///
-  /// a different
+  /// For deny lists ([allow] is false), the default strategy replaces each
+  /// match of the [filterPattern] with the `replacementString`. If
+  /// [filterPattern] can match more than one character at a time, then this can
+  /// result in multiple characters being replaced by a single instance of the
+  /// `replacementString`.
+  ///
+  /// For allow lists ([FilteringTextInputFormatter.allow] is true), sequences
+  /// between matches of `filterPattern` are replaced as one, regardless of the
+  /// number of characters.
+  ///
+  /// For example, consider a `filterPattern` consisting of just the
+  /// letter "o", applied to text field whose initial value is the
+  /// string "Into The Woods", with the `replacementString` set to
+  /// `*`.
+  ///
+  /// If [allow] is true, then the result will be "*o*oo*". Each
+  /// sequence of characters not matching the pattern is replaced by
+  /// its own single copy of the replacement string, regardless of how
+  /// many characters are in that sequence.
+  ///
+  /// If [allow] is false, then the result will be "Int* the W**ds".
+  /// Every matching sequence is replaced, and each "o" matches the
+  /// pattern separately.
+  ///
+  /// If the pattern was the [RegExp] `o+`, the result would be the
+  /// same in the case where `allow` is true, but in the case where
+  /// `allow` is false, the result would be "Int* the W*ds" (with the
+  /// two "o"s replaced by a single occurrence of the replacement
+  /// string) because both of the "o"s would be matched simultaneously
+  /// by the pattern.
+  ///
+  /// {@tool snippet}
+  /// You can also configure
+  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
+  /// to use different replacement strings for different banned regions. For
+  /// instance, to replace each character in banned patterns with an asterisk:
+  ///
+  /// ```dart
+  /// FilteringTextInputFormatter.withFormattingStrategy(
+  ///   'bad',
+  ///   allow: false,
+  ///   formattingStrategy: FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion(
+  ///     replacementStringBuilder: (TextRange bannedRange) => '*' * (bannedRange.end - bannedRange.start),
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
+  /// attempts to preserve the original selection and composing region as much
+  /// as possible. In the case of the "Into the Woods" example above, if [allow]
+  /// is false, and the pattern is "the", and the selection is placed around
+  /// "the": "Into |the| Woods", the format result would be "Into |*| Woods".
+  /// Composing regions are handled exactly the same way.
+  ///
+  /// However, if an endpoint of the selection (or an endpoint of the composing
+  /// range) is strictly within a banned pattern, that endpoint will be place at
+  /// the end of the `replacementString` after formatting: if [allow] is false,
+  /// and the pattern is still "the", the result of formatting
+  /// "Into t|he |Woods" would be "Into *| |Woods".
+  ///
+  /// ### Skip Formatting the Composing Region
+  ///
+  /// The
   /// [FilteringFormatterFormattingStrategy.preserveSelectionAndSkipComposingRegion]
-  /// strategy is also provided, which keeps the content within the current
-  /// composing region intact, and otherwise has the same behavior as the
-  /// default
+  /// strategy keeps the content within the current composing region untouched, and
+  /// otherwise has the same behavior as the default
   /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
   /// strategy. With this strategy, a banned word will not be immediately
-  /// replaced if it's currently being composed. Consider switching to this
+  /// replaced if it's currently being composed. **Consider switching to this
   /// strategy if you're having duplicate input problems, or seeing other
-  /// strange input method interactions in a text field.
+  /// strange input method interactions in a text field.**
   ///
-  /// See the [FilteringFormatterFormattingStrategy] class documentation for
-  /// how to implement a custom [FilteringFormatterFormattingStrategy].
+  /// See also:
+  ///  * [FilteringFormatterFormattingStrategy], an interface for implementing
+  ///    a custom [formattingStrategy].
+  ///  * [TextEditingValue.composing], for best practices regarding handling the
+  ///    composing region.
   final FilteringFormatterFormattingStrategy formattingStrategy;
 
   @override
@@ -296,18 +368,18 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       // `Match`. Depending on the value of `allow`, either the match region or
       // the non-match region is the banned pattern.
       //
-      // The non-match region.
+      // The non-matching region.
       _processRegion(allow, previousMatch?.end ?? 0, match.start, formatState, formattingStrategy);
       assert(!formatState.debugFinalized);
-      // The match region.
+      // The matched region.
       _processRegion(!allow, match.start, match.end, formatState, formattingStrategy);
       assert(!formatState.debugFinalized);
 
       previousMatch = match;
     }
 
-    // Handle the last non-match region betwee the last match region and the end
-    // of the text.
+    // Handle the last non-matching region betwee the last match region and the
+    // end of the text.
     _processRegion(allow, previousMatch?.end ?? 0, newValue.text.length, formatState, formattingStrategy);
     assert(!formatState.debugFinalized);
     return formatState.finalize();
@@ -316,10 +388,9 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   void _processRegion(bool isBannedRegion, int regionStart, int regionEnd, _TextEditingValueAccumulator state, FilteringFormatterFormattingStrategy strategy) {
     if (isBannedRegion) {
       final TextRange bannedRange = TextRange(start: regionStart, end: regionEnd);
-      final TextEditingValueSegment update = strategy.processBannedPattern(bannedRange, state.inputValue);
-      //print('bannedRange: $bannedRange, ${state.inputValue} => ${update.replacementString}, (${update.composingStartAdjustment}, ${update.composingEndAdjustment}), selection: (${update.selectionBaseOffsetAdjustment}, ${update.selectionExtentOffsetAdjustment})');
+      final TextEditingValueAdjustments update = strategy.processBannedPattern(bannedRange, state.inputValue);
       update._debugAssertOOB(bannedRange);
-      state.stringBuffer.write(update.replacementString);
+      state.stringBuffer.write(update.replacementString ?? bannedRange.textInside(state.inputValue.text));
       state.selection?.base += update.selectionBaseOffsetAdjustment;
       state.selection?.extent += update.selectionExtentOffsetAdjustment;
       state.composingRegion?.base += update.composingStartAdjustment;
@@ -331,40 +402,73 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
 }
 
-/// Immutable data returned by a
-/// [FilteringFormatterFormattingStrategy.processBannedPattern] implementation
-/// that describes the adjustments to make on a [TextEditingValue], to account
-/// for a given banned [TextRange] in the [TextEditingValue].
-class TextEditingValueSegment {
-  /// Creates a [TextEditingValueSegment].
-  const TextEditingValueSegment({
-    required this.replacementString,
+/// An immutable data structure that specifies what adjustments to make to a
+/// [TextEditingValue].
+///
+/// This class is used by
+/// [FilteringFormatterFormattingStrategy.processBannedPattern] implementations
+/// to describes the changes needed for a given banned [TextRange] in the
+/// [TextEditingValue].
+///
+/// To indicate no adjustments should to be applied to the given banned
+/// [TextRange] (despite it contains the banned pattern), use
+/// [TextEditingValueAdjustments.noAdjustments].
+class TextEditingValueAdjustments {
+  /// Creates a [TextEditingValueAdjustments].
+  const TextEditingValueAdjustments({
+    required String replacementString,
+    int composingStartAdjustment = 0,
+    int composingEndAdjustment = 0,
+    int selectionBaseOffsetAdjustment = 0,
+    int selectionExtentOffsetAdjustment = 0,
+  }) : this._(
+    replacementString: replacementString,
+    composingStartAdjustment: composingStartAdjustment,
+    composingEndAdjustment: composingEndAdjustment,
+    selectionBaseOffsetAdjustment: selectionBaseOffsetAdjustment,
+    selectionExtentOffsetAdjustment: selectionExtentOffsetAdjustment,
+  );
+
+  const TextEditingValueAdjustments._({
+    this.replacementString,
     this.composingStartAdjustment = 0,
     this.composingEndAdjustment = 0,
     this.selectionBaseOffsetAdjustment = 0,
     this.selectionExtentOffsetAdjustment = 0,
   });
 
+  /// A [TextEditingValueAdjustments] that represents no adjustments should to
+  /// be made to a banned [TextRange], despite it matches the banned pattern.
+  static const TextEditingValueAdjustments noAdjustments = TextEditingValueAdjustments._();
+
   /// The text to replace the banned pattern.
   ///
   /// When [replacementString] is the empty string, the banned pattern will be
   /// entirely removed.
-  final String replacementString;
+  ///
+  /// When [replacementString] is null, the original text within the
+  /// `bannedRange` will be used. See the [noAdjustments] constant.
+  final String? replacementString;
 
   /// The int value to add to the [TextEditingValue.composing]'s start offset.
   ///
-  /// {@template flutter.services.TextEditingValueSegment.adjustment}
-  /// The exactly value typically depends on the base offset's relative
-  /// position within the `bannedRange` argument of the
-  /// [FilteringFormatterFormattingStrategy.processBannedPattern] method:
-  ///  * If the base offset is before the given `bannedRange`, this should
-  ///    typically be 0.
-  ///  * If the base offset is after the given `bannedRange`, this should
+  /// {@template flutter.services.TextEditingValueSegment.offsetAdjustments}
+  /// When text is removed or replaced in a given [TextRange], adjustments must
+  /// be made to offsets that represent locations in the original text, for
+  /// these offsets to represent the same locations in the changed text. For
+  /// [FilteringFormatterFormattingStrategy.processBannedPattern], the exact
+  /// adjustment value typically depends on the original offset's relative
+  /// position within the `bannedRange` argument:
+  ///
+  ///  * If the original offset is before the given `bannedRange`, this should
+  ///    typically be 0, since adding or removing text after a location in the
+  ///    orignal text does not change the offset of that location.
+  ///  * If the original offset is after the given `bannedRange`, this should
   ///    typically be the length difference between the [replacementString] and
   ///    the banned pattern.
-  ///  * If the base offset is within the given `bannedRange`, the adjustment
-  ///    should be the length of the [replacementString] that comes before the
-  ///    new base offset (in this case it's up to you whether the endpoint
+  ///  * If the original offset is within the given `bannedRange`, the
+  ///    adjustment should be the length of the [replacementString] that comes
+  ///    before the new text location (it's up to you whether the endpoint
   ///    should be placed before the [replacementString], after the
   ///    [replacementString], or somewhere in between), and the length of the
   ///    part of the removed pattern before the original offset.
@@ -372,20 +476,24 @@ class TextEditingValueSegment {
   final int composingStartAdjustment;
   /// The int value to add to the [TextEditingValue.composing]'s end offset.
   ///
-  /// {@macro flutter.services.TextEditingValueSegment.adjustment}
+  /// {@macro flutter.services.TextEditingValueSegment.offsetAdjustments}
   final int composingEndAdjustment;
 
   /// The int value to add to the [TextEditingValue.selection]'s `baseOffset`.
   ///
-  /// {@macro flutter.services.TextEditingValueSegment.adjustment}
+  /// {@macro flutter.services.TextEditingValueSegment.offsetAdjustments}
   final int selectionBaseOffsetAdjustment;
   /// The int value to add to the [TextEditingValue.selection]'s `extentOffset`.
   ///
-  /// {@macro flutter.services.TextEditingValueSegment.adjustment}
+  /// {@macro flutter.services.TextEditingValueSegment.offsetAdjustments}
   final int selectionExtentOffsetAdjustment;
 
   void _debugAssertOOB(TextRange bannedRegion) {
     assert(() {
+      final String? replacementString = this.replacementString;
+      if (replacementString == null) {
+        return true;
+      }
       final int lowerBound = bannedRegion.start - bannedRegion.end;
       final int upperBound = replacementString.length;
 
@@ -406,94 +514,25 @@ class TextEditingValueSegment {
   }
 }
 
-/// An interface for performing formatting operations on matched patterns, and
-/// text between each matched patterns, in the input text of a
-/// [FilteringTextInputFormatter].
+/// An interface for performing formatting operations on banned patterns within
+/// the input text of a [FilteringTextInputFormatter].
 ///
-/// Every [FilteringTextInputFormatter] has a
-/// [FilteringFormatterFormattingStrategy]. Upon user input, the
-/// [FilteringTextInputFormatter] calls [prepareForNewInput] to produce a
-/// formatting state object for the current input, and splits the new content of
-/// the text field into interleaving text regions that match and does not match
-/// [FilteringTextInputFormatter.filterPattern]. Each of these regions will be
-/// processed by the [processPattern] method in their logical order, to update
-/// the formatting state object. After the last region has been processed, the
-/// [FilteringTextInputFormatter] calls [finalize] to produce the final
-/// [TextEditingValue] that the [FilteringTextInputFormatter] will use as its
-/// output.
-///
-/// ### Tips for Implementing a Custom `FilteringFormatterFormattingStrategy`
-///
-/// A [FilteringFormatterFormattingStrategy] is typically stateless itself, and
-/// stores the states needed for performing the formatting action in a state
-/// object, which should be created by the [prepareForNewInput] method.
-///
-/// In each [processPattern] call, there're typically 3 things in the state
-/// object that may need updating: the text, the selection, and the composing
-/// region. That is to say, each state object should typically contain at least
-/// as much information as a [TextEditingValue], and is usually mutable so it
-/// can be updated in-place.
-///
-/// For concatenating strings efficiently in the state object, a [StringBuffer]
-/// should be used to append each formatted text regions, in favor of the
-/// [String.+] operator.
+/// A [FilteringTextInputFormatter] splits the input text into interleaving
+/// allowed and banned regions, and applie its
+/// [FilteringTextInputFormatter.formattingStrategy] on each banned region, in
+/// their logical order, deciding whether and how each banned region should be
+/// replaced.
 abstract class FilteringFormatterFormattingStrategy {
   /// A [FilteringFormatterFormattingStrategy] that removes all banned patterns,
-  /// replacing them with a constant `replacementString`, and attempts to
+  /// replacing them with a replacement String built by the
+  /// `replacementStringBuilder`, and attempts to
   /// preserve the pre-format selection and composing region as much as
   /// possible.
   ///
-  /// If the start index or the end index of the selection (or the composing
-  /// region) is strictly inside a banned pattern described by `regionStart` and
-  /// `regionEnd` (meaning, `regionStart` < index < `regionEndj), the index will
-  /// be placed at the end of the replacement string.
-  ///
-  /// {@template flutter.services.FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion}
-  /// For deny lists (`allow` is false), each match of the `filterPattern` is
-  /// replaced with this string. If `filterPattern` can match more than one
-  /// character at a time, then this can result in multiple characters being
-  /// replaced by a single instance of this `replacementString`.
-  ///
-  /// For allow lists ([FilteringTextInputFormatter.allow] is true), sequences
-  /// between matches of `filterPattern` are replaced as one, regardless of the
-  /// number of characters.
-  ///
-  /// For example, consider a `filterPattern` consisting of just the
-  /// letter "o", applied to text field whose initial value is the
-  /// string "Into The Woods", with the `replacementString` set to
-  /// `*`.
-  ///
-  /// If `allow` is true, then the result will be "*o*oo*". Each
-  /// sequence of characters not matching the pattern is replaced by
-  /// its own single copy of the replacement string, regardless of how
-  /// many characters are in that sequence.
-  ///
-  /// If `allow` is false, then the result will be "Int* the W**ds".
-  /// Every matching sequence is replaced, and each "o" matches the
-  /// pattern separately.
-  ///
-  /// If the pattern was the [RegExp] `o+`, the result would be the
-  /// same in the case where `allow` is true, but in the case where
-  /// `allow` is false, the result would be "Int* the W*ds" (with the
-  /// two "o"s replaced by a single occurrence of the replacement
-  /// string) because both of the "o"s would be matched simultaneously
-  /// by the pattern.
-  ///
-  /// [FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion]
-  /// attempts to preserve the original selection and composing region as much
-  /// as possible. In the case of the "Into the Woods" example above, if `allow`
-  /// is false, and the pattern is "the", and the selection is placed around
-  /// "the": "Into |the| Woods", the format result would be "Into |*| Woods",
-  /// the range of the selection would be the same as the pre-format text.
-  /// Composing regions are handled exactly the same.
-  ///
-  /// However, if an endpoint of the selection (or an endpoint of the composing
-  /// range) is strictly within a banned pattern, that endpoint will be place at
-  /// the end of the `replacementString` after formatting: if `allow` is false,
-  /// and the pattern is still "the", the result of formatting
-  /// "Into t|he |Woods" would be "Into *| |Woods". See [formattingStrategy] for
-  /// how this behavior can be overridden.
-  /// {@endtemplate}
+  /// If the start offset or the end offset of the selection (or the composing
+  /// region) is strictly inside a banned pattern described by `bannedRegion`
+  /// (meaning, `bannedRegion.start` < index < `bannedRegion.end), the offset
+  /// will be placed at the end of the replacement string.
   factory FilteringFormatterFormattingStrategy.preserveSelectionAndComposingRegion({
     required String Function(TextRange) replacementStringBuilder,
   }) = _PreserveSelectionAndComposingRegion;
@@ -503,7 +542,7 @@ abstract class FilteringFormatterFormattingStrategy {
   /// behavior as [preserveSelectionAndComposingRegion] otherwise.
   ///
   /// This strategy guaratees the [FilteringTextInputFormatter] will never
-  /// change the content of the current non-empty composing text region, and
+  /// change the content within the current non-empty composing text region, and
   /// also preserves the pre-format selection as much as possible.
   ///
   /// This is generally more robust than the default strategy for most input
@@ -527,18 +566,18 @@ abstract class FilteringFormatterFormattingStrategy {
   /// The `inputValue` parameter is the original unformatted [TextEditingValue]
   /// processed by the [FilteringTextInputFormatter].
   ///
-  /// This method returns a [TextEditingValueSegment] that contains the
+  /// This method returns a [TextEditingValueAdjustments] that contains the
   /// replacement text, and the index adjustments needed for the composing range
   /// and the selection of [inputValue]. For instance, to keep the given region
   /// dispite it contains the banned pattern, return
   /// ```dart
-  /// TextEditingValueSegment(replacementString: bannedRange.textInside(inputValue.text))
+  /// TextEditingValueAdjustments.noAdjustments
   /// ```
   /// so the original text is preserved.
   ///
   /// To remove the banned pattern entirely, return
   /// ```dart
-  /// TextEditingValueSegment(
+  /// TextEditingValueAdjustments(
   ///   replacementString: '',
   ///   composingStartAdjustment: inputValue.composing.start.clamp(bannedRange.start, bannedRange.end) - bannedRange.start,
   ///   composingEndAdjustment: inputValue.composing.end.clamp(bannedRange.start, bannedRange.end) - bannedRange.start,
@@ -550,7 +589,7 @@ abstract class FilteringFormatterFormattingStrategy {
   /// string, and the indices of the composing region and the selection are
   /// shifted towards the start of the string if they were originally placed
   /// after the removed text.
-  TextEditingValueSegment processBannedPattern(TextRange bannedRange, TextEditingValue inputValue);
+  TextEditingValueAdjustments processBannedPattern(TextRange bannedRange, TextEditingValue inputValue);
 }
 
 /// A `FilteringFormatterFormattingStrategy` class for creating
@@ -563,7 +602,7 @@ class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormatti
   final String Function(TextRange) replacementStringBuilder;
 
   @override
-  TextEditingValueSegment processBannedPattern(TextRange bannedRange, TextEditingValue inputValue) {
+  TextEditingValueAdjustments processBannedPattern(TextRange bannedRange, TextEditingValue inputValue) {
     assert(bannedRange.isNormalized);
 
     final String replacementString = replacementStringBuilder(bannedRange);
@@ -587,7 +626,7 @@ class _PreserveSelectionAndComposingRegion implements FilteringFormatterFormatti
       return replacedLength - (originalIndex.clamp(bannedRange.start, bannedRange.end) - bannedRange.start);
     }
 
-    return TextEditingValueSegment(
+    return TextEditingValueAdjustments(
       replacementString: replacementString,
       composingStartAdjustment: adjustIndex(composingRegion?.start),
       composingEndAdjustment: adjustIndex(composingRegion?.end),
@@ -608,19 +647,17 @@ class _PreserveSelectionAndSkipComposingRegion extends _PreserveSelectionAndComp
   }) : super(replacementStringBuilder: replacementStringBuilder);
 
   @override
-  TextEditingValueSegment processBannedPattern(TextRange bannedRange, TextEditingValue inputValue) {
+  TextEditingValueAdjustments processBannedPattern(TextRange bannedRange, TextEditingValue inputValue) {
     final TextRange composingRegion = inputValue.composing;
-    return composingRegion.isCollapsed || bannedRange.end <= composingRegion.start || bannedRange.start >= composingRegion.end
+    return composingRegion.isCollapsed
+        || bannedRange.end <= composingRegion.start
+        || bannedRange.start >= composingRegion.end
       ? super.processBannedPattern(bannedRange, inputValue)
-      : TextEditingValueSegment(replacementString: bannedRange.textInside(inputValue.text));
+      : TextEditingValueAdjustments.noAdjustments;
   }
 }
 
 // A mutable, half-open range [`base`, `extent`) within a string.
-//
-// The [FilteringFormatterFormattingStrategy] is responsible for providing a
-// [MutableTextRange] that has its [base] and [extent] initialized to the
-// composing region or the selection's base offset and extent offset.
 class _MutableTextRange {
   _MutableTextRange(this.base, this.extent);
 
@@ -659,8 +696,8 @@ class _TextEditingValueAccumulator {
     : selection = _MutableTextRange.fromTextSelection(inputValue.selection),
       composingRegion = _MutableTextRange.fromComposingRange(inputValue.composing);
 
-  /// The pre-format string that was sent to the [FilteringTextInputFormatter]
-  /// as input.
+  // The original string that was sent to the [FilteringTextInputFormatter] as
+  // input.
   final TextEditingValue inputValue;
 
   /// The [StringBuffer] that contains the string which has already been
