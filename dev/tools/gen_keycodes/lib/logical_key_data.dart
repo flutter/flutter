@@ -343,7 +343,7 @@ class LogicalKeyData {
 
   // Map Web key to the pair of key names
   static late final Map<String, _ModifierPair> chromeModifiers = () {
-    final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'chromium_modifiers.json',)).readAsStringSync();
+    final String rawJson = File(path.join(dataRoot, 'chromium_modifiers.json',)).readAsStringSync();
     return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
       final List<dynamic> pair = value as List<dynamic>;
       return MapEntry<String, _ModifierPair>(key, _ModifierPair(pair[0] as String, pair[1] as String));
@@ -352,14 +352,14 @@ class LogicalKeyData {
 
   /// Returns the static map of printable representations.
   static late final Map<String, String> printable = ((){
-    final String printableKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable.json',)).readAsStringSync();
+    final String printableKeys = File(path.join(dataRoot, 'printable.json',)).readAsStringSync();
     return (json.decode(printableKeys) as Map<String, dynamic>)
       .cast<String, String>();
   })();
 
   // Map printable to corresponding numpad key name
   static late final Map<String, String> printableToNumpads = () {
-    final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable_to_numpads.json',)).readAsStringSync();
+    final String rawJson = File(path.join(dataRoot, 'printable_to_numpads.json',)).readAsStringSync();
     return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
       return MapEntry<String, String>(key, value as String);
     });
@@ -371,7 +371,7 @@ class LogicalKeyData {
   /// representations, and appear in more than one place on the keyboard (e.g.
   /// SHIFT, ALT, etc.).
   static late final Map<String, List<String>> synonyms = ((){
-    final String synonymKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'synonyms.json',)).readAsStringSync();
+    final String synonymKeys = File(path.join(dataRoot, 'synonyms.json',)).readAsStringSync();
     final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
     return dynamicSynonym.map((String name, dynamic values) {
       // The keygen and algorithm of macOS relies on synonyms being pairs.

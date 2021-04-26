@@ -15,8 +15,12 @@ import 'utils.dart';
 /// Generates the key mapping of Windows, based on the information in the key
 /// data structure given to it.
 class WindowsCodeGenerator extends PlatformCodeGenerator {
-  WindowsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+  WindowsCodeGenerator(
+    PhysicalKeyData keyData,
+    LogicalKeyData logicalData,
+    String scancodeToLogical,
+  ) : _scancodeToLogical = parseMapOfString(scancodeToLogical),
+      super(keyData, logicalData);
 
   /// This generates the map of Windows scan codes to physical keys.
   String get _windowsScanCodeMap {
@@ -46,11 +50,8 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// key codes are either 0 or ambiguous (multiple keys using the same key
   /// code), these keys are resolved by scan codes.
   String get _scanCodeToLogicalMap {
-    final Map<String, dynamic> source = json.decode(File(
-      path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'windows_scancode_logical_map.json')
-    ).readAsStringSync()) as Map<String, dynamic>;
     final StringBuffer result = StringBuffer();
-    source.forEach((String scanCodeName, dynamic logicalName) {
+    _scancodeToLogical.forEach((String scanCodeName, dynamic logicalName) {
       final PhysicalKeyEntry? physicalEntry = keyData.data[scanCodeName];
       final int? logicalValue = logicalData.data[logicalName]?.value;
       if (physicalEntry == null) {
@@ -65,9 +66,10 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
     });
     return result.toString().trimRight();
   }
+  final Map<String, String> _scancodeToLogical;
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'windows_flutter_key_map_cc.tmpl');
+  String get templatePath => path.join(dataRoot, 'windows_flutter_key_map_cc.tmpl');
 
   @override
   String outputPath(String platform) => path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('shell', 'platform', 'windows', 'flutter_key_map.cc'));

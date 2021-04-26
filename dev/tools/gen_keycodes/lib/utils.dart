@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 /// The location of the Flutter root directory, based on the known location of
 /// this script.
 final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
+final String dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data');
 
 /// Converts `FOO_BAR` to `FooBar`.
 String shoutingToUpperCamel(String shouting) {
@@ -156,6 +157,11 @@ void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1,
     it2.moveNext();
     fn(it1.current, it2.current);
   }
+}
+
+/// Read a Map<String, String> out of its string representation in JSON.
+Map<String, String> parseMapOfString(String jsonString) {
+  return (json.decode(jsonString) as Map<String, dynamic>).cast<String, String>();
 }
 
 /// Read a Map<String, List<String>> out of its string representation in JSON.

@@ -59,7 +59,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   final Map<String, List<String?>> _logicalLocationMap;
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_key_map_dart.tmpl');
+  String get templatePath => path.join(dataRoot, 'web_key_map_dart.tmpl');
 
   @override
   String outputPath(String platform) => path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('lib', 'web_ui', 'lib', 'src', 'engine', 'key_map.dart'));

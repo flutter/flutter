@@ -67,14 +67,14 @@ Future<String> getGtkKeyCodes() async {
 }
 
 String readDataFile(String fileName) {
-  return File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', fileName)).readAsStringSync();
+  return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
 Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'physical-data',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'physical_key_data.json'),
+    defaultsTo: path.join(dataRoot, 'physical_key_data.json'),
     help: 'The path to where the physical key data file should be written when '
         'collected, and read from when generating output code. If --physical-data is '
         'not specified, the output will be written to/read from the current '
@@ -83,7 +83,7 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'logical-data',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'logical_key_data.json'),
+    defaultsTo: path.join(dataRoot, 'logical_key_data.json'),
     help: 'The path to where the logical key data file should be written when '
         'collected, and read from when generating output code. If --logical-data is '
         'not specified, the output will be written to/read from the current '
@@ -196,7 +196,11 @@ Future<void> main(List<String> rawArguments) async {
       logicalData,
       readDataFile('mask_constants.json'),
     ),
-    'windows': WindowsCodeGenerator(physicalData, logicalData),
+    'windows': WindowsCodeGenerator(
+      physicalData,
+      logicalData,
+      readDataFile('windows_scancode_logical_map.json')
+    ),
     'linux': GtkCodeGenerator(
       physicalData,
       logicalData,
