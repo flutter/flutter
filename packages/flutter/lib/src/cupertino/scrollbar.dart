@@ -41,6 +41,9 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// {@tool dartpad --template=stateless_widget_scaffold}
 /// This sample shows a [CupertinoScrollbar] that executes a fade animation as scrolling occurs.
 /// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
+/// The thickness of the scrollbar will be 6 when it's ideal and 10 when it's being dragged by the user.
+/// The Radius of the scrollbar thumb's rounded rectangle corners will be 34 when it's ideal and 0
+/// when the scrollbar is being dragged by the user.
 ///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
@@ -71,6 +74,9 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// When isAlwaysShown is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a ScrollController is provided to controller,
 /// or that the PrimaryScrollController is available.
+/// The thickness of the scrollbar will be 6 when it's ideal and 10 when it's being dragged by the user.
+/// The Radius of the scrollbar thumb's rounded rectangle corners will be 34 when it's ideal and 0
+/// when the scrollbar is being dragged by the user.
 ///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
