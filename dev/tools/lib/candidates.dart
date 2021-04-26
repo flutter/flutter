@@ -5,7 +5,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-//import 'package:process/process.dart';
 
 import './git.dart';
 import './globals.dart' show releaseCandidateBranchRegex;
