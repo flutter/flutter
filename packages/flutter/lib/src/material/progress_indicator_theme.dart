@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -25,27 +27,12 @@ import 'theme.dart';
 class ProgressIndicatorThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [ProgressIndicator] widgets.
   const ProgressIndicatorThemeData({
-    this.backgroundColor,
     this.color,
+    this.linearTrackColor,
+    this.linearMinHeight,
+    this.circularTrackColor,
+    this.refreshBackgroundColor,
   });
-
-  /// The color of the [ProgressIndicator]'s track.
-  ///
-  /// This color is interpreted differently depending on the type of
-  /// indicator:
-  ///
-  /// For a [LinearProgressIndicator] it is the background color of the
-  /// track that the indicator is filling up. If this is null, then it
-  /// will use [ColorScheme.background] of the ambient [ThemeData.colorScheme].
-  ///
-  /// For a [CircularProgressIndicator] it is the color of the circular
-  /// track that the indicator is filling up. If this is null, then no
-  /// track will be painted by default.
-  ///
-  /// For a [RefreshIndicator] it is the color of the background circle
-  /// behind the indicator. If this is null, then the ambient
-  /// [ThemeData.canvasColor] will be used.
-  final Color? backgroundColor;
 
   /// The color of the [ProgressIndicator]'s indicator.
   ///
@@ -60,15 +47,33 @@ class ProgressIndicatorThemeData with Diagnosticable {
   ///    a an animated color.
   final Color? color;
 
+  /// {@macro flutter.material.LinearProgressIndicator.trackColor}
+  final Color? linearTrackColor;
+
+  /// {@macro flutter.material.LinearProgressIndicator.minHeight}
+  final double? linearMinHeight;
+
+  /// {@macro flutter.material.CircularProgressIndicator.trackColor}
+  final Color? circularTrackColor;
+
+  /// {@macro flutter.material.RefreshProgressIndicator.backgroundColor}
+  final Color? refreshBackgroundColor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
-    Color? backgroundColor,
     Color? color,
+    Color? linearTrackColor,
+    double? linearMinHeight,
+    Color? circularTrackColor,
+    Color? refreshBackgroundColor,
   }) {
     return ProgressIndicatorThemeData(
-      backgroundColor: backgroundColor ?? this.backgroundColor,
       color: color ?? this.color,
+      linearTrackColor : linearTrackColor ?? this.linearTrackColor,
+      linearMinHeight : linearMinHeight ?? this.linearMinHeight,
+      circularTrackColor : circularTrackColor ?? this.circularTrackColor,
+      refreshBackgroundColor : refreshBackgroundColor ?? this.refreshBackgroundColor,
     );
   }
 
@@ -80,16 +85,22 @@ class ProgressIndicatorThemeData with Diagnosticable {
       return null;
     assert(t != null);
     return ProgressIndicatorThemeData(
-      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       color: Color.lerp(a?.color, b?.color, t),
+      linearTrackColor : Color.lerp(a?.linearTrackColor, b?.linearTrackColor, t),
+      linearMinHeight : lerpDouble(a?.linearMinHeight, b?.linearMinHeight, t),
+      circularTrackColor : Color.lerp(a?.circularTrackColor, b?.circularTrackColor, t),
+      refreshBackgroundColor : Color.lerp(a?.refreshBackgroundColor, b?.refreshBackgroundColor, t),
     );
   }
 
   @override
   int get hashCode {
     return hashValues(
-      backgroundColor,
       color,
+      linearTrackColor,
+      linearMinHeight,
+      circularTrackColor,
+      refreshBackgroundColor,
     );
   }
 
@@ -100,15 +111,21 @@ class ProgressIndicatorThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ProgressIndicatorThemeData
-        && other.backgroundColor == backgroundColor
-        && other.color == color;
+      && other.color == color
+      && other.linearTrackColor == linearTrackColor
+      && other.linearMinHeight == linearMinHeight
+      && other.circularTrackColor == circularTrackColor
+      && other.refreshBackgroundColor == refreshBackgroundColor;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('linearTrackColor', linearTrackColor, defaultValue: null));
+    properties.add(DoubleProperty('linearMinHeight', linearMinHeight, defaultValue: null));
+    properties.add(ColorProperty('circularTrackColor', circularTrackColor, defaultValue: null));
+    properties.add(ColorProperty('refreshBackgroundColor', refreshBackgroundColor, defaultValue: null));
   }
 }
 
@@ -147,7 +164,6 @@ class ProgressIndicatorTheme extends InheritedTheme {
 
   /// Returns the [data] from the closest [ProgressIndicatorTheme] ancestor. If
   /// there is no ancestor, it returns [ThemeData.progressIndicatorTheme].
-  /// Applications can assume that the returned value will not be null.
   ///
   /// Typical usage is as follows:
   ///
