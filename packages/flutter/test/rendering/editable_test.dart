@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -3329,6 +3330,137 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
           ..paragraph(),
       );
+    });
+
+    group('hit testing', () {
+      test('hits correct TextSpan when not scrolled', () {
+        final TextSelectionDelegate delegate = FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          offset: ViewportOffset.fixed(0.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        BoxHitTestResult result = BoxHitTestResult();
+        editable.hitTest(result, position: Offset.zero);
+        // We expect two hit test entries in the path because the RenderEditable
+        // will add itself as well.
+        expect(result.path, hasLength(2));
+        HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'A');
+        // Only testing the RenderEditable entry here once, not anymore below.
+        expect(result.path.last.target, isA<RenderEditable>());
+
+        result = BoxHitTestResult();
+        editable.hitTest(result, position: const Offset(15.0, 0.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B');
+      });
+
+      test('hits correct TextSpan when scrolled vertically', () {
+        final TextSelectionDelegate delegate = FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B\n'),
+              TextSpan(text: 'C'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          // Given maxLines of null and an offset of 5, the editable will be
+          // scrolled vertically by 5 pixels.
+          maxLines: null,
+          offset: ViewportOffset.fixed(5.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        BoxHitTestResult result = BoxHitTestResult();
+        editable.hitTest(result, position: Offset.zero);
+        expect(result.path, hasLength(2));
+        HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'A');
+
+        result = BoxHitTestResult();
+        editable.hitTest(result, position: const Offset(15.0, 0.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B\n');
+
+        result = BoxHitTestResult();
+        // When we hit at y=6 and are scrolled by -5 vertically, we expect "C"
+        // to be hit because the font size is 10.
+        editable.hitTest(result, position: const Offset(0.0, 6.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'C');
+      });
+
+      test('hits correct TextSpan when scrolled horizontally', () {
+        final TextSelectionDelegate delegate = FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          // Given maxLines of 1 and an offset of 5, the editable will be
+          // scrolled by 5 pixels to the left.
+          maxLines: 1,
+          offset: ViewportOffset.fixed(5.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        final BoxHitTestResult result = BoxHitTestResult();
+        // At x=6, we should hit "B" as we are scrolled to the left by 6
+        // pixels.
+        editable.hitTest(result, position: const Offset(6.0, 0));
+        expect(result.path, hasLength(2));
+        final HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B');
+      });
     });
   });
 }
