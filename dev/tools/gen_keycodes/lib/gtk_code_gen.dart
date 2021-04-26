@@ -85,8 +85,6 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
         result.writeln('''
   data->secondary_physical_key = ${toHex(secondaryPhysical.usbHidCode, digits: 9)};  // ${secondaryPhysical.constantName}''');
       }
-      result.writeln('''
-  data->is_caps_lock = ${primaryPhysicalName == 'CapsLock' ? 'true' : 'false'};''');
     });
     return result.toString().trimRight();
   }
