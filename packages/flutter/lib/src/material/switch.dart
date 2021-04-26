@@ -959,6 +959,10 @@ class _SwitchPainter extends ToggleablePainter {
   @override
   void dispose() {
     _cachedThumbPainter?.dispose();
+    _cachedThumbPainter = null;
+    _cachedThumbColor = null;
+    _cachedThumbImage = null;
+    _cachedThumbErrorListener = null;
     super.dispose();
   }
 }
