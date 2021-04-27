@@ -63,8 +63,6 @@ class System : public fml::RefCountedThreadSafe<System>,
 
   static uint64_t ClockGetMonotonic();
 
-  static uint64_t ClockGet(uint32_t clock_id);
-
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
   static zx_status_t ConnectToService(std::string path,

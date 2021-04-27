@@ -190,7 +190,6 @@ class System extends NativeFieldWrapperClass2 {
 
   // Time operations.
   static int clockGetMonotonic() native 'System_ClockGetMonotonic';
-  static int clockGet(int clockId) native 'System_ClockGet';
 
   // TODO(edcoyne): Remove this, it is required to safely do an API transition across repos.
   static int reboot() { return -2; /*ZX_ERR_NOT_SUPPORTED*/ }
