@@ -41,7 +41,7 @@ fi
 
 if [[ ! -d "$DEVICE_TOOLS" ]]; then
   echo "Directory $DEVICE_TOOLS not found."
-  ehco "Second argument must specify the device out directory containing gen_snapshot (e.g. out/android_debug_unopt_x64/clang_x64)."
+  echo "Second argument must specify the device out directory containing gen_snapshot (e.g. out/android_debug_unopt_x64/clang_x64)."
   exit 1
 fi
 
@@ -61,16 +61,22 @@ mkdir -p "$OUTDIR"
 
 echo "Compiling kernel..."
 
+# --disable-dart-dev: No need for observatory/DDS.
+# --no-print-incremental-dependencies: Avoid printing out a lot of verbosity that doesn't help this test.
 "$HOST_TOOLS/dart" \
+  --disable-dart-dev \
   "$HOST_TOOLS/gen/frontend_server.dart.snapshot" \
   --sdk-root "$HOST_TOOLS/flutter_patched_sdk" \
-  --aot --tfa --target=flutter \
+  --target=flutter \
+  --no-print-incremental-dependencies \
+  --aot \
+  --tfa  \
   --output-dill "$OUTDIR/app.dill" \
   "$SCRIPT_DIR/lib/main.dart"
 
 echo "Compiling ELF Shared Library..."
 
-"$HOST_TOOLS/gen_snapshot" --deterministic --snapshot_kind=app-aot-elf --elf="$OUTDIR/libapp.so" --strip "$OUTDIR/app.dill"
+"$DEVICE_TOOLS/gen_snapshot" --deterministic --snapshot_kind=app-aot-elf --elf="$OUTDIR/libapp.so" --strip "$OUTDIR/app.dill"
 
 mkdir -p "$SCRIPT_DIR/android/app/src/main/jniLibs/arm64-v8a"
 mkdir -p "$SCRIPT_DIR/android/app/libs"

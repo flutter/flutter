@@ -28,7 +28,7 @@ SRC_DIR="$(cd "$SCRIPT_DIR/../../.."; pwd -P)"
 export ANDROID_HOME="$SRC_DIR/third_party/android_tools/sdk"
 
 "$SRC_DIR/flutter/tools/gn" --unopt
-autoninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine sky_services
+ninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine sky_services -j 400
 
 "$SCRIPT_DIR/compile_android_aot.sh" "$1" "$2"
 
@@ -36,3 +36,7 @@ autoninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine sky_services
   cd "$SCRIPT_DIR/android"
   ./gradlew assembleDebug --no-daemon
 )
+
+# LUCI expects to find the APK here
+mkdir -p "$SCRIPT_DIR/android/app/build/outputs/apk/debug"
+cp "$SCRIPT_DIR/build/app/outputs/apk/debug/app-debug.apk" "$SCRIPT_DIR/android/app/build/outputs/apk/debug"
