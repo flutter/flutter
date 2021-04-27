@@ -1635,6 +1635,23 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
+    final Localizations localizations = Localizations(
+      locale: appLocale,
+      delegates: _localizationsDelegates.toList(),
+      child: title,
+    );
+
+    final MediaQueryData? data = MediaQuery.maybeOf(context);
+
+    Widget mediaQuery;
+    if (data == null) {
+      mediaQuery = _MediaQueryFromWindow(
+        child: localizations,
+      );
+    } else {
+      mediaQuery = localizations;
+    }
+
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: Shortcuts(
@@ -1648,13 +1665,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             child: DefaultTextEditingActions(
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: _MediaQueryFromWindow(
-                  child: Localizations(
-                    locale: appLocale,
-                    delegates: _localizationsDelegates.toList(),
-                    child: title,
-                  ),
-                ),
+                child: mediaQuery,
               ),
             ),
           ),
