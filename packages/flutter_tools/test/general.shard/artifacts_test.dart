@@ -179,7 +179,7 @@ void main() {
       );
       expect(
         artifacts.getEngineType(TargetPlatform.darwin),
-        'darwin',
+        'darwin-x64',
       );
     });
   });
