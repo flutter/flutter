@@ -120,7 +120,7 @@ class PointerEventResampler {
   ) {
     return isDown
         ? _toMoveEvent(
-            event, position, delta, pointerIdentifier, timeStamp, hadButtons)
+            event, position, delta, pointerIdentifier, timeStamp, buttons)
         : _toHoverEvent(event, position, delta, timeStamp, hadButtons);
   }
 
