@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -42,6 +46,15 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
     return super.createBinaryMessenger()
       ..setMockMessageHandler('flutter/assets', (ByteData? message) async {
         if (const StringCodec().decodeMessage(message) == 'NOTICES') {
+          return const StringCodec().encodeMessage(licenses);
+        }
+        return null;
+      })
+      ..setMockMessageHandler('flutter/assets', (ByteData? message) async {
+        if (const StringCodec().decodeMessage(message) == 'NOTICES.Z' && !kIsWeb) {
+          return Uint8List.fromList(gzip.encode(utf8.encode(licenses))).buffer.asByteData();
+        }
+        if (const StringCodec().decodeMessage(message) == 'NOTICES' && kIsWeb) {
           return const StringCodec().encodeMessage(licenses);
         }
         return null;
