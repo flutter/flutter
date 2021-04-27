@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -18,10 +16,10 @@ import '../src/fakes.dart';
 
 void main() {
   group('CachedArtifacts', () {
-    CachedArtifacts artifacts;
-    Cache cache;
-    FileSystem fileSystem;
-    Platform platform;
+    late CachedArtifacts artifacts;
+    late Cache cache;
+    late FileSystem fileSystem;
+    late Platform platform;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -185,10 +183,10 @@ void main() {
   });
 
   group('LocalEngineArtifacts', () {
-    LocalEngineArtifacts artifacts;
-    Cache cache;
-    FileSystem fileSystem;
-    Platform platform;
+    late LocalEngineArtifacts artifacts;
+    late Cache cache;
+    late FileSystem fileSystem;
+    late Platform platform;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
