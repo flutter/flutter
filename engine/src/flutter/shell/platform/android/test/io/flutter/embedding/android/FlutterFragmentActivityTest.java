@@ -3,6 +3,7 @@ package io.flutter.embedding.android;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -170,7 +171,37 @@ public class FlutterFragmentActivityTest {
     assertTrue(foundCustomView);
   }
 
+  @Test
+  public void itCreatesAValidFlutterFragment() {
+    FlutterFragmentActivityWithProvidedEngine activity =
+        Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get();
+
+    // Creating the FlutterFragmentActivity will create and attach the FlutterFragment, causing
+    // a FlutterEngine to be created.
+    activity.onCreate(null);
+    assertNotNull(activity.getFlutterEngine());
+    assertEquals(1, activity.numberOfEnginesCreated);
+  }
+
+  @Test
+  public void itRetrievesExistingFlutterFragmentWhenRecreated() {
+    FlutterFragmentActivityWithProvidedEngine activity =
+        spy(Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get());
+
+    FlutterFragment fragment = mock(FlutterFragment.class);
+    when(activity.retrieveExistingFlutterFragmentIfPossible()).thenReturn(fragment);
+
+    FlutterEngine engine = mock(FlutterEngine.class);
+    when(fragment.getFlutterEngine()).thenReturn(engine);
+
+    activity.onCreate(null);
+    assertEquals(engine, activity.getFlutterEngine());
+    assertEquals(0, activity.numberOfEnginesCreated);
+  }
+
   static class FlutterFragmentActivityWithProvidedEngine extends FlutterFragmentActivity {
+    int numberOfEnginesCreated = 0;
+
     @Override
     protected FlutterFragment createFlutterFragment() {
       return FlutterFragment.createDefault();
@@ -184,6 +215,7 @@ public class FlutterFragmentActivityTest {
       when(flutterJNI.isAttached()).thenReturn(true);
       when(flutterLoader.automaticallyRegisterPlugins()).thenReturn(true);
 
+      numberOfEnginesCreated++;
       return new FlutterEngine(context, flutterLoader, flutterJNI, new String[] {}, true);
     }
   }

@@ -241,6 +241,10 @@ public class FlutterFragmentActivity extends FragmentActivity
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     switchLaunchThemeForNormalTheme();
+    // Get an existing fragment reference first before onCreate since onCreate would re-attach
+    // existing fragments. This would cause FlutterFragment to reference the host activity which
+    // should be aware of its child fragment.
+    flutterFragment = retrieveExistingFlutterFragmentIfPossible();
 
     super.onCreate(savedInstanceState);
 
@@ -367,20 +371,30 @@ public class FlutterFragmentActivity extends FragmentActivity
   }
 
   /**
+   * Retrieves the previously created {@link FlutterFragment} if possible.
+   *
+   * <p>If the activity is recreated, an existing {@link FlutterFragment} may already exist. Retain
+   * a reference to that {@link FlutterFragment} in the {@code #flutterFragment} field and avoid
+   * re-creating another {@link FlutterFragment}.
+   */
+  @VisibleForTesting
+  FlutterFragment retrieveExistingFlutterFragmentIfPossible() {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    return (FlutterFragment) fragmentManager.findFragmentByTag(TAG_FLUTTER_FRAGMENT);
+  }
+
+  /**
    * Ensure that a {@link FlutterFragment} is attached to this {@code FlutterFragmentActivity}.
    *
    * <p>If no {@link FlutterFragment} exists in this {@code FlutterFragmentActivity}, then a {@link
-   * FlutterFragment} is created and added. If a {@link FlutterFragment} does exist in this {@code
-   * FlutterFragmentActivity}, then a reference to that {@link FlutterFragment} is retained in
-   * {@code #flutterFragment}.
+   * FlutterFragment} is created and added.
    */
   private void ensureFlutterFragmentCreated() {
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    flutterFragment = (FlutterFragment) fragmentManager.findFragmentByTag(TAG_FLUTTER_FRAGMENT);
     if (flutterFragment == null) {
       // No FlutterFragment exists yet. This must be the initial Activity creation. We will create
       // and add a new FlutterFragment to this Activity.
       flutterFragment = createFlutterFragment();
+      FragmentManager fragmentManager = getSupportFragmentManager();
       fragmentManager
           .beginTransaction()
           .add(FRAGMENT_CONTAINER_ID, flutterFragment, TAG_FLUTTER_FRAGMENT)
