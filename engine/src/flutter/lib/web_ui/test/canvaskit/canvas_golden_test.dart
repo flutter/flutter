@@ -262,8 +262,6 @@ void testMain() {
       await testTextStyle('paragraph height', layoutWidth: 50, paragraphHeight: 1.5);
     });
 
-    // TODO(yjbanov): paragraphTextHeightBehavior seems to have no effect. Unsure how to use it.
-    //                https://github.com/flutter/flutter/issues/74337
     test('text styles - paragraph text height behavior', () async {
       await testTextStyle('paragraph text height behavior', layoutWidth: 50, paragraphHeight: 1.5, paragraphTextHeightBehavior: ui.TextHeightBehavior(
         applyHeightToFirstAscent: false,

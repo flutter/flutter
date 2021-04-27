@@ -139,8 +139,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
 
     if (textHeightBehavior != null) {
       properties.textHeightBehavior =
-          (textHeightBehavior.applyHeightToFirstAscent ? 0 : 1 << 0) |
-              (textHeightBehavior.applyHeightToLastDescent ? 0 : 1 << 1);
+          toSkTextHeightBehavior(textHeightBehavior);
     }
 
     if (ellipsis != null) {
@@ -151,8 +150,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       properties.strutStyle = toSkStrutStyleProperties(strutStyle);
     }
 
-    properties.textStyle =
-        toSkTextStyleProperties(fontFamily, fontSize, height, fontWeight, fontStyle);
+    properties.textStyle = toSkTextStyleProperties(
+        fontFamily, fontSize, height, fontWeight, fontStyle);
 
     return canvasKit.ParagraphStyle(properties);
   }
