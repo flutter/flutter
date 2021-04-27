@@ -23,13 +23,13 @@ import '../../src/context.dart';
 void main() {
   group('clean command', () {
     Xcode xcode;
-    MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+    FakeXcodeProjectInterpreter xcodeProjectInterpreter;
 
     setUp(() {
-      mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+      xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       xcode = Xcode.test(
         processManager: FakeProcessManager.any(),
-        xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
       );
     });
 
@@ -48,8 +48,8 @@ void main() {
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS', () async {
         final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
-        mockXcodeProjectInterpreter.isInstalled = true;
-        mockXcodeProjectInterpreter.version = Version(1000, 0, 0);
+        xcodeProjectInterpreter.isInstalled = true;
+        xcodeProjectInterpreter.version = Version(1000, 0, 0);
         await CleanCommand().runCommand();
 
         expect(buildDirectory, isNot(exists));
@@ -72,7 +72,7 @@ void main() {
         expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
         expect(projectUnderTest.packagesFile, isNot(exists));
 
-      expect(mockXcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+      expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
         ]);
@@ -86,12 +86,12 @@ void main() {
       testUsingContext('$CleanCommand cleans Xcode verbosely for iOS and macOS', () async {
         setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
-        mockXcodeProjectInterpreter.isInstalled = true;
-        mockXcodeProjectInterpreter.version = Version(1000, 0, 0);
+        xcodeProjectInterpreter.isInstalled = true;
+        xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
         await CleanCommand(verbose: true).runCommand();
 
-        expect(mockXcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+        expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', true),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', true),
         ]);
@@ -115,7 +115,7 @@ void main() {
       });
 
       testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
-        mockXcodeProjectInterpreter.isInstalled = false;
+        xcodeProjectInterpreter.isInstalled = false;
 
         final File file = fileSystem.file('file')..createSync();
         exceptionHandler.addError(
@@ -141,7 +141,7 @@ void main() {
           ..createSync();
         handler.addError(throwingFile, FileSystemOp.delete, const FileSystemException('OS error: Access Denied'));
 
-        mockXcodeProjectInterpreter.isInstalled = false;
+        xcodeProjectInterpreter.isInstalled = false;
 
         final CleanCommand command = CleanCommand();
         command.deleteFile(throwingFile);
@@ -183,7 +183,7 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory) {
   return projectUnderTest;
 }
 
-class MockXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
   bool isInstalled = true;
 
