@@ -580,7 +580,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           }
 
           child = AnimatedContainer(
-            key: _MergeableMaterialSliceKey(_children[i].key),
             decoration: BoxDecoration(border: border),
             duration: kThemeAnimationDuration,
             curve: Curves.fastOutSlowIn,
@@ -596,6 +595,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               shape: BoxShape.rectangle,
             ),
             child: Material(
+              key: _MergeableMaterialSliceKey(_children[i].key),
               type: MaterialType.transparency,
               child: child,
             ),

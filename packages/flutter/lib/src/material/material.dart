@@ -544,11 +544,19 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
-      for (final InkFeature inkFeature in _inkFeatures!)
-        inkFeature._paint(canvas);
+      for (final InkFeature inkFeature in _inkFeatures!) {
+        if (inkFeature.visible)
+          inkFeature._paint(canvas);
+      }
       canvas.restore();
     }
     super.paint(context, offset);
+  }
+
+  void dispose() {
+    // [InkFeature.dispose] will eventually call [_inkFeatures!.remove].
+    while (_inkFeatures?.isNotEmpty == true)
+      _inkFeatures!.first.dispose();
   }
 }
 
@@ -585,6 +593,11 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
                 ..absorbHitTest = absorbHitTest;
     assert(vsync == renderObject.vsync);
   }
+
+  @override
+  void didUnmountRenderObject(_RenderInkFeatures renderObject) {
+    renderObject.dispose();
+  }
 }
 
 /// A visual reaction on a piece of [Material].
@@ -616,6 +629,15 @@ abstract class InkFeature {
   final VoidCallback? onRemoved;
 
   bool _debugDisposed = false;
+
+  /// Whether or not visual reaction is activated.
+  ///
+  /// Change this field will affect whether this InkFeature is render in next
+  /// frame.
+  ///
+  /// For this InkFeature to render properly, it should usually be change in
+  /// [State.deactivate] and [State.reactivate].
+  bool visible = true;
 
   /// Free up the resources associated with this ink feature.
   @mustCallSuper
