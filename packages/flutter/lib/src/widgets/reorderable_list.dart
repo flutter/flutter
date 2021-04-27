@@ -220,6 +220,8 @@ class ReorderableList extends StatefulWidget {
   /// If no [ReorderableList] surrounds the given context, then this function
   /// will assert in debug mode and throw an exception in release mode.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
@@ -256,6 +258,8 @@ class ReorderableList extends StatefulWidget {
   ///
   /// If no [ReorderableList] surrounds the context given, then this function will
   /// return null.
+  ///
+  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
@@ -408,6 +412,8 @@ class SliverReorderableList extends StatefulWidget {
   /// If no [SliverReorderableList] surrounds the context given, this function
   /// will assert in debug mode and throw an exception in release mode.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
@@ -446,6 +452,8 @@ class SliverReorderableList extends StatefulWidget {
   ///
   /// If no [SliverReorderableList] surrounds the context given, this function
   /// will return null.
+  ///
+  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
