@@ -29,4 +29,5 @@
 // Private methods made visible for testing
 @interface FlutterTextInputPlugin (TestMethods)
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+- (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange;
 @end
