@@ -133,28 +133,23 @@ void main() {
           },
           generateDartPluginRegistry: true);
 
-      final File config = projectDir
+      projectDir
           .childDirectory('.dart_tool')
           .childFile('package_config.json')
           ..createSync(recursive: true)
           ..writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = projectDir
-          .childFile('pubspec.yaml')
-          ..createSync();
+      projectDir.childFile('pubspec.yaml').createSync();
 
-      final File packages = projectDir
-          .childFile('.packages')
-          ..createSync();
+      projectDir.childFile('.packages').createSync();
+
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+      await DartPluginRegistrantTarget.test(testProject).build(environment);
 
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('generated_main.dart');
-
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
-      await DartPluginRegistrantTarget.test(testProject).build(environment);
-
       expect(generatedMain.existsSync(), isFalse);
     });
 
@@ -172,32 +167,19 @@ void main() {
           },
           generateDartPluginRegistry: true);
 
-      final File config = projectDir
+      projectDir
           .childDirectory('.dart_tool')
           .childFile('package_config.json')
           ..createSync(recursive: true)
           ..writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = projectDir
-          .childFile('pubspec.yaml')
-          ..writeAsStringSync(_kSamplePubspecFile);
+      projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
 
-      final File packages = projectDir
-          .childFile('.packages')
-          ..writeAsStringSync(_kSamplePackagesFile);
+      projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
 
-      final File generatedMain = projectDir
-          .childDirectory('.dart_tool')
-          .childDirectory('flutter_build')
-          .childFile('generated_main.dart')
-          ..createSync(recursive: true);
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-      final File mainEntrypoint = projectDir
-          .childDirectory('lib')
-          .childFile('main.dart')
-          ..createSync(recursive: true);
-
-      final File pluginPubspec = environment.fileSystem.currentDirectory
+      environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
           .childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -206,6 +188,10 @@ void main() {
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
 
+      final File generatedMain = projectDir
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_build')
+          .childFile('generated_main.dart');
       final String mainContent = generatedMain.readAsStringSync();
       expect(
         mainContent,
@@ -278,30 +264,20 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync(_kSamplePackageJson);
 
-      final File mainEntrypoint = projectDir
-          .childDirectory('lib')
-          .childFile('main.dart')
-          ..createSync(recursive: true);
+      final File pubspec = projectDir.childFile('pubspec.yaml')..writeAsStringSync(_kSamplePubspecFile);
 
-      final File pubspec = projectDir
+      final File packages = projectDir.childFile('.packages')..writeAsStringSync(_kSamplePackagesFile);
+
+      environment.fileSystem.currentDirectory
+          .childDirectory('path_provider_linux')
           .childFile('pubspec.yaml')
-          ..writeAsStringSync(_kSamplePubspecFile);
-
-      final File packages = projectDir
-          .childFile('.packages')
-          ..writeAsStringSync(_kSamplePackagesFile);
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePluginPubspec);
 
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('generated_main.dart');
-
-      final File pluginPubspec = environment.fileSystem.currentDirectory
-          .childDirectory('path_provider_linux')
-          .childFile('pubspec.yaml');
-
-      pluginPubspec.createSync(recursive: true);
-      pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -330,37 +306,29 @@ void main() {
           },
           generateDartPluginRegistry: true);
 
-      final File config = projectDir
+      projectDir
           .childDirectory('.dart_tool')
           .childFile('package_config.json')
-          ..writeAsStringSync(_kSamplePackageJson);
+          .writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = projectDir
+      projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
+
+      projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
+
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+
+      environment.fileSystem.currentDirectory
+          .childDirectory('path_provider_linux')
           .childFile('pubspec.yaml')
-          ..writeAsStringSync(_kSamplePubspecFile);
+          .writeAsStringSync(_kSamplePluginPubspec);
 
-      final File packages = projectDir
-          .childFile('.packages')
-          ..writeAsStringSync(_kSamplePackagesFile);
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+      await DartPluginRegistrantTarget.test(testProject).build(environment);
 
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart')
-          ..createSync(recursive: true);
-
-      final File mainEntrypoint = projectDir
-          .childDirectory('lib')
-          .childFile('main.dart')
-          ..createSync(recursive: true);
-
-      final File pluginPubspec = environment.fileSystem.currentDirectory
-          .childDirectory('path_provider_linux')
-          .childFile('pubspec.yaml')
-          ..writeAsStringSync(_kSamplePluginPubspec);
-
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
-      await DartPluginRegistrantTarget.test(testProject).build(environment);
+          .childFile('generated_main.dart');
 
       final String mainContent = generatedMain.readAsStringSync();
       expect(
