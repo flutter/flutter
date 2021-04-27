@@ -9,6 +9,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/third_party/accessibility/ax/ax_action_data.h"
 
@@ -135,6 +136,22 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
 
 TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   FlutterEngine* engine = CreateTestEngine();
+
+  // Set up view controller.
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  [engine setViewController:viewController];
+
+  // Attach the view to a NSWindow.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+
   engine.semanticsEnabled = YES;
   auto bridge = engine.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -186,6 +203,8 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
 
   EXPECT_EQ(called_action, FlutterSemanticsAction::kFlutterSemanticsActionTap);
   EXPECT_EQ(called_id, 1u);
+
+  [engine setViewController:nil];
   [engine shutDownEngine];
 }
 
