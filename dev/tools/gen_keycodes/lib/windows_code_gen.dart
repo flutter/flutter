@@ -22,7 +22,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Windows scan codes to physical keys.
   String get _windowsScanCodeMap {
     final StringBuffer windowsScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data.values) {
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.windowsScanCode != null) {
         windowsScanCodeMap.writeln('        {${toHex(entry.windowsScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
@@ -33,7 +33,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Windows key codes to logical keys.
   String get _windowsLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data.values) {
+    for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.windowsValues, entry.windowsNames, (int windowsValue, String windowsName) {
         result.writeln('        {${toHex(windowsValue)}, ${toHex(entry.value, digits: 11)}},  // $windowsName');
       });
@@ -48,17 +48,9 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// code), these keys are resolved by scan codes.
   String get _scanCodeToLogicalMap {
     final StringBuffer result = StringBuffer();
-    _scancodeToLogical.forEach((String scanCodeName, dynamic logicalName) {
-      final PhysicalKeyEntry? physicalEntry = keyData.data[scanCodeName];
-      final int? logicalValue = logicalData.data[logicalName]?.value;
-      if (physicalEntry == null) {
-        print('Unexpected scan code $scanCodeName specified for scanCodeToLogicalMap.');
-        return;
-      }
-      if (logicalValue == null) {
-        print('Unexpected logical key $logicalName specified for scanCodeToLogicalMap.');
-        return;
-      }
+    _scancodeToLogical.forEach((String scanCodeName, String logicalName) {
+      final PhysicalKeyEntry physicalEntry = keyData.entryByName(scanCodeName);
+      final int logicalValue = logicalData.entryByName(logicalName).value;
       result.writeln('        {${toHex(physicalEntry.windowsScanCode)}, ${toHex(logicalValue, digits: 10)}},  // ${physicalEntry.name}');
     });
     return result.toString().trimRight();

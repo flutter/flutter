@@ -43,7 +43,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
     final StringBuffer scanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data.values) {
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.macOsScanCode != null) {
         scanCodeMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.usbHidCode)},  // ${entry.constantName}');
       }
@@ -53,7 +53,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
 
   String get _keyCodeToLogicalMap {
     final StringBuffer result = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data.values) {
+    for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.macOsKeyCodeValues, entry.macOsKeyCodeNames, (int macOsValue, String macOsName) {
         result.writeln('  @${toHex(macOsValue)} : @${toHex(entry.value, digits: 10)},  // $macOsName');
       });
@@ -80,7 +80,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  @${toHex(logicalData.data[name]!.macOsKeyCodeValues[0])} : @(kModifierFlag${lowerCamelToUpperCamel(name)}),');
+      modifierKeyMap.writeln('  @${toHex(logicalData.entryByName(name).macOsKeyCodeValues[0])} : @(kModifierFlag${lowerCamelToUpperCamel(name)}),');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -89,7 +89,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      modifierKeyMap.writeln('  @(kModifierFlag${lowerCamelToUpperCamel(name)}) : @${toHex(logicalData.data[name]!.macOsKeyCodeValues[0])},');
+      modifierKeyMap.writeln('  @(kModifierFlag${lowerCamelToUpperCamel(name)}) : @${toHex(logicalData.entryByName(name).macOsKeyCodeValues[0])},');
     }
     return modifierKeyMap.toString().trimRight();
   }
@@ -98,10 +98,10 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _specialKeyConstants {
     final StringBuffer specialKeyConstants = StringBuffer();
     for (final String keyName in kSpecialPhysicalKeys) {
-      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.data[keyName]!.usbHidCode)};');
+      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.entryByName(keyName).usbHidCode)};');
     }
     for (final String keyName in kSpecialLogicalKeys) {
-      specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.data[keyName]!.value)};');
+      specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.entryByName(keyName).value)};');
     }
     return specialKeyConstants.toString().trimRight();
   }

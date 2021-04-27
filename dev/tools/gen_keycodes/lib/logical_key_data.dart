@@ -86,20 +86,32 @@ class LogicalKeyData {
   /// populating the data structure.
   ///
   /// None of the parameters may be null.
-  LogicalKeyData._(this.data);
+  LogicalKeyData._(this._data);
 
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [LogicalKeyData.fromJson].
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> outputMap = <String, dynamic>{};
-    for (final LogicalKeyEntry entry in data.values) {
+    for (final LogicalKeyEntry entry in _data.values) {
       outputMap[entry.name] = entry.toJson();
     }
     return outputMap;
   }
 
-  /// Keys mapped from their constant names.
-  final Map<String, LogicalKeyEntry> data;
+  /// Find an entry from name.
+  ///
+  /// Asserts if the name is not found.
+  LogicalKeyEntry entryByName(String name) {
+    assert(_data.containsKey(name),
+        'Unable to find logical entry by name $name.');
+    return _data[name]!;
+  }
+
+  /// All entries.
+  Iterable<LogicalKeyEntry> get entries => _data.values;
+
+  // Keys mapped from their names.
+  final Map<String, LogicalKeyEntry> _data;
 
   /// Parses entries from Chromium's key mapping header file.
   ///
@@ -189,19 +201,14 @@ class LogicalKeyData {
         (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for macOS'); });
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
-      final PhysicalKeyEntry? physicalEntry = physicalKeyData.data[physicalKeyName];
+      final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
+      assert(physicalEntry.macOsScanCode != null,
+        'Physical entry $physicalKeyName does not have a macOsScanCode.');
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
-      if (physicalEntry == null || physicalEntry.macOsScanCode == null) {
-        print('Unexpected physical key $physicalKeyName specified for macOS keyCodeToLogicalMap.');
-        return;
-      }
-      if (logicalEntry == null) {
-        print('Unexpected logical key $logicalKeyName specified for macOS keyCodeToLogicalMap.');
-        return;
-      }
-      logicalEntry.macOsKeyCodeNames.add(physicalEntry.name);
-      if (physicalEntry.macOsScanCode != null)
-        logicalEntry.macOsKeyCodeValues.add(physicalEntry.macOsScanCode!);
+      assert(logicalEntry != null,
+        'Unable to find logical entry by name $logicalKeyName.');
+      logicalEntry!.macOsKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.macOsKeyCodeValues.add(physicalEntry.macOsScanCode!);
     });
   }
 
@@ -214,19 +221,14 @@ class LogicalKeyData {
         (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for iOS'); });
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
-      final PhysicalKeyEntry? physicalEntry = physicalKeyData.data[physicalKeyName];
+      final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
+      assert(physicalEntry.iosScanCode != null,
+        'Physical entry $physicalKeyName does not have an iosScanCode.');
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
-      if (physicalEntry == null || physicalEntry.iosScanCode == null) {
-        print('Unexpected physical key $physicalKeyName specified for iOS keyCodeToLogicalMap.');
-        return;
-      }
-      if (logicalEntry == null) {
-        print('Unexpected logical key $logicalKeyName specified for iOS keyCodeToLogicalMap.');
-        return;
-      }
-      logicalEntry.iosKeyCodeNames.add(physicalEntry.name);
-      if (physicalEntry.iosScanCode != null)
-        logicalEntry.iosKeyCodeValues.add(physicalEntry.iosScanCode!);
+      assert(logicalEntry != null,
+        'Unable to find logical entry by name $logicalKeyName.');
+      logicalEntry!.iosKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.iosKeyCodeValues.add(physicalEntry.iosScanCode!);
     });
   }
 
@@ -330,7 +332,7 @@ class LogicalKeyData {
         if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
           return kUnicodePlane | (keyLabel.codeUnitAt(0) & kValueMask);
         } else {
-          final PhysicalKeyEntry? physicalEntry = physicalData.data[entry.name];
+          final PhysicalKeyEntry? physicalEntry = physicalData.tryEntryByName(entry.name);
           if (physicalEntry != null) {
             return kHidPlane | (physicalEntry.usbHidCode & kValueMask);
           }

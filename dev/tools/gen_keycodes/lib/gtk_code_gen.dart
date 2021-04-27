@@ -25,7 +25,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of XKB scan codes to Flutter physical keys.
   String get _xkbScanCodeMap {
     final OutputLines<int> lines = OutputLines<int>('GTK scancode map');
-    for (final PhysicalKeyEntry entry in keyData.data.values) {
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.xKbScanCode != null) {
         lines.add(entry.xKbScanCode!, '  insert_record(table, ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)});  // ${entry.constantName}');
       }
@@ -36,7 +36,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of GTK keyval codes to Flutter logical keys.
   String get _gtkKeyvalCodeMap {
     final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
-    for (final LogicalKeyEntry entry in logicalData.data.values) {
+    for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
         lines.add(value, '  insert_record(table, ${toHex(value)}, ${toHex(entry.value, digits: 11)});  // $name');
       });
@@ -52,24 +52,13 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   ) {
     final StringBuffer result = StringBuffer();
     source.forEach((String modifierBitName, List<String> keyNames) {
-      if (keyNames.length != 2 && keyNames.length != 3) {
-        print('Unexpected keyName length ${keyNames.length}.');
-        return;
-      }
+      assert(keyNames.length == 2 || keyNames.length == 3);
       final String primaryLogicalName = keyNames[0];
       final String primaryPhysicalName = keyNames[1];
       final String? secondaryPhysicalName = keyNames.length == 3 ? keyNames[2] : null;
-      final LogicalKeyEntry? primaryLogical = logicalData.data[primaryLogicalName];
-      if (primaryLogical == null) {
-        print('Unrecognized primary logical key $primaryLogicalName specified for $debugFunctionName.');
-        return;
-      }
-      final PhysicalKeyEntry? primaryPhysical = physicalData.data[primaryPhysicalName];
-      if (primaryPhysical == null) {
-        print('Unrecognized primary physical key $primaryPhysicalName specified for $debugFunctionName.');
-        return;
-      }
-      final PhysicalKeyEntry? secondaryPhysical = secondaryPhysicalName == null ? null : physicalData.data[secondaryPhysicalName];
+      final LogicalKeyEntry primaryLogical = logicalData.entryByName(primaryLogicalName);
+      final PhysicalKeyEntry primaryPhysical = physicalData.entryByName(primaryPhysicalName);
+      final PhysicalKeyEntry? secondaryPhysical = secondaryPhysicalName == null ? null : physicalData.entryByName(secondaryPhysicalName);
       if (secondaryPhysical == null && secondaryPhysicalName != null) {
         print('Unrecognized secondary physical key $secondaryPhysicalName specified for $debugFunctionName.');
         return;

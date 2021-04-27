@@ -22,7 +22,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data.values) {
+    for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.webValues, entry.webNames, (int value, String name) {
         result.writeln("  '$name': ${toHex(value, digits: 10)},");
       });
@@ -33,7 +33,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
   String get _webPhysicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data.values) {
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
       }
@@ -45,12 +45,8 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get _webLogicalLocationMap {
     final StringBuffer result = StringBuffer();
     _logicalLocationMap.forEach((String webKey, List<String?> locations) {
-      final String valuesString = locations.map((dynamic value) {
-        if (value != null && logicalData.data[value] == null) {
-          print('Error during web location map: $value is not a valid logical key.');
-          return null;
-        }
-        return value == null ? 'null' : toHex(logicalData.data[value]?.value, digits: 10);
+      final String valuesString = locations.map((String? value) {
+        return value == null ? 'null' : toHex(logicalData.entryByName(value).value, digits: 10);
       }).join(', ');
       result.writeln("  '$webKey': <int?>[$valuesString],");
     });
