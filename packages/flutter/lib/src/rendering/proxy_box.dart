@@ -2266,6 +2266,9 @@ class RenderTransform extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  @override
+  bool get alwaysNeedsCompositing => child != null && _filterQuality != null;
+
   /// When set to true, hit tests are performed based on the position of the
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
@@ -2295,7 +2298,10 @@ class RenderTransform extends RenderProxyBox {
   set filterQuality(FilterQuality? value) {
     if (_filterQuality == value)
       return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
     _filterQuality = value;
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
