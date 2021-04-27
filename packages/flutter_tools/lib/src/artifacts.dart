@@ -103,7 +103,7 @@ enum HostArtifact {
   pubExecutable,
 }
 
-// TODO(knopp): Remove once darwin artifacts are moved out of darwin-x64
+// TODO(knopp): Remove once darwin artifacts are universal and moved out of darwin-x64
 String _enginePlatformDirectoryName(TargetPlatform platform) {
   if (platform == TargetPlatform.darwin) {
     return 'darwin-x64';
