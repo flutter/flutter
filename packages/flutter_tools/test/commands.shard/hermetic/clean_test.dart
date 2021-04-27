@@ -80,7 +80,7 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Xcode: () => xcode,
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
       testUsingContext('$CleanCommand cleans Xcode verbosely for iOS and macOS', () async {
@@ -99,7 +99,7 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Xcode: () => xcode,
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
     });
 
