@@ -33,7 +33,7 @@ void main() {
 
   setUp(() {
     artifacts = Artifacts.test();
-    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    iosDeployPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
   });
 
   testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with USB', () async {

@@ -18,7 +18,7 @@ void main() {
       const Placeholder(),
       // Stops right after the warm up frame.
       null,
-      EnginePhase.build
+      EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.

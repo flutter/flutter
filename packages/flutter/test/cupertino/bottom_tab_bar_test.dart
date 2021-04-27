@@ -388,6 +388,9 @@ Future<void> main() async {
 
     await tester.tap(find.text('Tab 1'));
     expect(callbackTab, 0);
+
+    await tester.tap(find.text('Tab 2'));
+    expect(callbackTab, 1);
   });
 
   testWidgets('tabs announce semantics', (WidgetTester tester) async {

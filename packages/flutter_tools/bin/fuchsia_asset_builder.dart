@@ -9,10 +9,11 @@ import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/bundle.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -61,6 +62,7 @@ Future<void> run(List<String> args) async {
     manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
     assetDirPath: assetDir,
     packagesPath: argResults[_kOptionPackages] as String,
+    targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
   );
 
   if (assets == null) {

@@ -30,7 +30,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   testWithoutContext('NoAndroidStudioValidator shows Android Studio as "not available" when not available.', () async {

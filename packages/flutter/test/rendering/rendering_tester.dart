@@ -105,8 +105,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
       pipelineOwner.flushSemantics();
       if (phase == EnginePhase.flushSemantics)
         return;
-      assert(phase == EnginePhase.flushSemantics ||
-            phase == EnginePhase.sendSemanticsUpdate);
+      assert(phase == EnginePhase.flushSemantics || phase == EnginePhase.sendSemanticsUpdate);
     } finally {
       FlutterError.onError = oldErrorHandler;
       if (_errors.isNotEmpty) {

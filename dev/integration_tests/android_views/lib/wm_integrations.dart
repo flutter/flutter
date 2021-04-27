@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'page.dart';
 
 class WindowManagerIntegrationsPage extends PageWidget {
-  const WindowManagerIntegrationsPage({Key key})
+  const WindowManagerIntegrationsPage({Key? key})
       : super('Window Manager Integrations Tests', const ValueKey<String>('WmIntegrationsListTile'), key: key);
 
   @override
@@ -18,7 +18,7 @@ class WindowManagerIntegrationsPage extends PageWidget {
 }
 
 class WindowManagerBody extends StatefulWidget {
-  const WindowManagerBody({Key key}) : super(key: key);
+  const WindowManagerBody({Key? key}) : super(key: key);
 
   @override
   State<WindowManagerBody> createState() => WindowManagerBodyState();
@@ -32,10 +32,10 @@ enum _LastTestStatus {
 
 class WindowManagerBodyState extends State<WindowManagerBody> {
 
-  MethodChannel viewChannel;
+  MethodChannel? viewChannel;
   _LastTestStatus lastTestStatus = _LastTestStatus.pending;
-  String lastError;
-  int id;
+  String? lastError;
+  int? id;
   int windowClickCount = 0;
 
   @override
@@ -87,11 +87,11 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
 
   Widget _statusWidget() {
     assert(lastTestStatus != _LastTestStatus.pending);
-    final String message = lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
+    final String? message = lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
     return Container(
       color: lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
       child: Text(
-        message,
+        message!,
         key: const ValueKey<String>('Status'),
         style: TextStyle(
           color: lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
@@ -107,7 +107,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       });
     }
     try {
-      await viewChannel.invokeMethod<void>('showAndHideAlertDialog');
+      await viewChannel?.invokeMethod<void>('showAndHideAlertDialog');
       setState(() {
         lastTestStatus = _LastTestStatus.success;
       });
@@ -121,7 +121,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
 
   Future<void> onAddWindowPressed() async {
     try {
-      await viewChannel.invokeMethod<void>('addWindowAndWaitForClick');
+      await viewChannel?.invokeMethod<void>('addWindowAndWaitForClick');
       setState(() {
         windowClickCount++;
       });

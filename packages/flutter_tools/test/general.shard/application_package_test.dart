@@ -51,7 +51,7 @@ void main() {
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       fs = MemoryFileSystem.test();
       cache = Cache.test(
         processManager: FakeProcessManager.any(),

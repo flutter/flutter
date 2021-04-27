@@ -191,7 +191,7 @@ void main() {
         'The following IDs were claimed multiple times from the parent RestorationBucket(restorationId: root, owner: MockManager):\n'
         ' * "child1" was claimed by:\n'
         '   * SecondClaim\n'
-        '   * FirstClaim (current owner)'
+        '   * FirstClaim (current owner)',
       );
     }
   });

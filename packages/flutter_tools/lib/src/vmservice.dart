@@ -545,7 +545,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpApp',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpRenderTree({
@@ -556,7 +556,7 @@ class FlutterVmService {
       isolateId: isolateId,
       args: <String, Object>{}
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpLayerTree({
@@ -566,7 +566,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpLayerTree',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInTraversalOrder({
@@ -576,7 +576,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInInverseHitTestOrder({
@@ -586,7 +586,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
       isolateId: isolateId,
     );
-    return response['data']?.toString();
+    return response != null ? response['data']?.toString() : '';
   }
 
   Future<Map<String, dynamic>> _flutterToggle(String name, {
@@ -701,15 +701,26 @@ class FlutterVmService {
   ///
   /// This method is only supported by certain embedders. This is
   /// described by [Device.supportsFlutterExit].
-  Future<void> flutterExit({
+  Future<bool> flutterExit({
     @required String isolateId,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
-      'ext.flutter.exit',
-      isolateId: isolateId,
-    ).catchError((dynamic error, StackTrace stackTrace) {
-      // Do nothing on sentinel or exception, the isolate already exited.
-    }, test: (dynamic error) => error is vm_service.SentinelException || error is vm_service.RPCError);
+  }) async {
+    try {
+      final Map<String, Object> result = await invokeFlutterExtensionRpcRaw(
+        'ext.flutter.exit',
+        isolateId: isolateId,
+      );
+      // A response of `null` indicates that `invokeFlutterExtensionRpcRaw` caught an RPCError
+      // with a missing method code. This can happen when attempting to quit a flutter app
+      // that never registered the methods in the bindings.
+      if (result == null) {
+        return false;
+      }
+    } on vm_service.SentinelException {
+      // Do nothing on sentinel, the isolate already exited.
+    } on vm_service.RPCError {
+      // Do nothing on RPCError, the isolate already exited.
+    }
+    return true;
   }
 
   /// Return the current platform override for the flutter view running with
@@ -829,9 +840,12 @@ class FlutterVmService {
   /// Looks at the list of loaded extensions for first Flutter view, as well as
   /// the stream of added extensions to avoid races.
   ///
+  /// If [webIsolate] is true, this uses the VM Service isolate list instead of
+  /// the `_flutter.listViews` method, which is not implemented by DWDS.
+  ///
   /// Throws a [VmServiceDisappearedException] should the VM Service disappear
   /// while making calls to it.
-  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
+  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName, {bool webIsolate = false}) async {
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
@@ -849,20 +863,11 @@ class FlutterVmService {
     });
 
     try {
-      final List<FlutterView> flutterViews = await getFlutterViews();
-      if (flutterViews.isEmpty) {
-        throw VmServiceDisappearedException();
-      }
-
-      for (final FlutterView flutterView in flutterViews) {
-        final vm_service.IsolateRef isolateRef = flutterView.uiIsolate;
-        if (isolateRef == null) {
-          continue;
-        }
-
-        final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
-        if (isolate.extensionRPCs.contains(extensionName)) {
-          return isolateRef;
+      final List<vm_service.IsolateRef> refs = await _getIsolateRefs(webIsolate);
+      for (final vm_service.IsolateRef ref in refs) {
+        final vm_service.Isolate isolate = await getIsolateOrNull(ref.id);
+        if (isolate != null && isolate.extensionRPCs.contains(extensionName)) {
+          return ref;
         }
       }
       return await extensionAdded.future;
@@ -874,6 +879,28 @@ class FlutterVmService {
         // It's ok for cleanup to fail, such as when the service disappears.
       }
     }
+  }
+
+  Future<List<vm_service.IsolateRef>> _getIsolateRefs(bool webIsolate) async {
+    if (webIsolate) {
+      final List<vm_service.IsolateRef> refs = (await service.getVM()).isolates;
+      if (refs.isEmpty) {
+        throw VmServiceDisappearedException();
+      }
+      return refs;
+    }
+    final List<FlutterView> flutterViews = await getFlutterViews();
+    if (flutterViews.isEmpty) {
+      throw VmServiceDisappearedException();
+    }
+
+    final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
+    for (final FlutterView flutterView in flutterViews) {
+      if (flutterView.uiIsolate != null) {
+        refs.add(flutterView.uiIsolate);
+      }
+    }
+    return refs;
   }
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has

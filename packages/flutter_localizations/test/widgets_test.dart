@@ -4,10 +4,10 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestLocalizations {
   TestLocalizations(this.locale, this.prefix);

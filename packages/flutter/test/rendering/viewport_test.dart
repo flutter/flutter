@@ -7,10 +7,10 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
@@ -1115,14 +1115,15 @@ void main() {
       controller.jumpTo(
         11 * 300.0  // Preceding headers
         + 200.0     // Shrinks the pinned header to minExtent
-        + 100.0     // Obstructs the leading 100 pixels of the 11th header
+        + 100.0,     // Obstructs the leading 100 pixels of the 11th header
       );
       await tester.pumpAndSettle();
 
       tester.renderObject(find.byWidget(children[11], skipOffstage: false)).showOnScreen();
       await tester.pumpAndSettle();
       expect(controller.offset, lessThan(11 * 300.0 + 200.0 + 100.0));
-  });
+    },
+  );
 
   void testFloatingHeaderShowOnScreen({ bool animated = true, Axis axis = Axis.vertical }) {
     final TickerProvider? vsync = animated ? const TestVSync() : null;
@@ -1185,7 +1186,7 @@ void main() {
                 floating: true,
                 delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
               ),
-            )
+            ),
           );
 
           final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
@@ -1217,7 +1218,8 @@ void main() {
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 15);
           expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
-      });
+        },
+      );
 
       testWidgets(
         'RenderViewportBase.showOnScreen but no child',
@@ -1230,7 +1232,7 @@ void main() {
                 floating: true,
                 delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, child: null, vsync: vsync),
               ),
-            )
+            ),
           );
 
           final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
@@ -1260,7 +1262,8 @@ void main() {
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 15);
           expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
-      });
+        },
+      );
 
       testWidgets(
         'RenderViewportBase.showOnScreen with maxShowOnScreenExtent ',
@@ -1278,7 +1281,7 @@ void main() {
                   showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(maxShowOnScreenExtent: 200),
                 ),
               ),
-            )
+            ),
           );
 
           final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
@@ -1320,7 +1323,8 @@ void main() {
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 10 + 50.0);
           expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
-      });
+        },
+      );
 
       testWidgets(
         'RenderViewportBase.showOnScreen with minShowOnScreenExtent ',
@@ -1338,7 +1342,7 @@ void main() {
                   showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: 200),
                 ),
               ),
-            )
+            ),
           );
 
           final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
@@ -1380,7 +1384,8 @@ void main() {
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 10 + 50.0);
           expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
-      });
+        },
+      );
 
       testWidgets(
         'RenderViewportBase.showOnScreen should not scroll if the rect is already visible, '
@@ -1394,7 +1399,7 @@ void main() {
                 delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
               ),
               reversed: true,
-            )
+            ),
           );
 
           controller.jumpTo(-300.0 * 15);
@@ -1414,14 +1419,15 @@ void main() {
             - 8 * 300.0 // Preceding headers 11 - 18, children[11]'s top edge is aligned to the leading edge.
             - 400.0     // Viewport height. children[10] (the pinned header) becomes pinned at the bottom of the screen.
             - 200.0     // Shrinks the pinned header to minExtent (100).
-            - 100.0     // Obstructs the leading 100 pixels of the 11th header
+            - 100.0,     // Obstructs the leading 100 pixels of the 11th header
           );
           await tester.pumpAndSettle();
 
           tester.renderObject(find.byWidget(children[9], skipOffstage: false)).showOnScreen();
           await tester.pumpAndSettle();
           expect(controller.offset, -8 * 300.0 - 400.0 - 200.0);
-      });
+        },
+      );
     });
   }
 
@@ -1653,7 +1659,7 @@ void main() {
           '   horizontal space for the children. In this case, consider using a\n'
           '   Row instead. Otherwise, consider using the "shrinkWrap" property\n'
           '   (or a ShrinkWrappingViewport) to size the width of the viewport\n'
-          '   to the sum of the widths of its children.\n'
+          '   to the sum of the widths of its children.\n',
       );
     });
 
@@ -1667,7 +1673,7 @@ void main() {
           '   Viewports expand in the cross axis to fill their container and\n'
           '   constrain their children to match their extent in the cross axis.\n'
           '   In this case, a vertical viewport was given an unlimited amount\n'
-          '   of horizontal space in which to expand.\n'
+          '   of horizontal space in which to expand.\n',
       );
     });
 
@@ -1688,14 +1694,14 @@ void main() {
           '   vertical space for the children. In this case, consider using a\n'
           '   Column instead. Otherwise, consider using the "shrinkWrap"\n'
           '   property (or a ShrinkWrappingViewport) to size the height of the\n'
-          '   viewport to the sum of the heights of its children.\n'
+          '   viewport to the sum of the heights of its children.\n',
       );
     });
   });
 
   test('Viewport debugThrowIfNotCheckingIntrinsics() control test', () {
     final RenderViewport renderViewport = RenderViewport(
-      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
+      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero(),
     );
     late FlutterError error;
     try {
@@ -1717,7 +1723,7 @@ void main() {
     );
 
     final RenderShrinkWrappingViewport renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
-      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
+      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero(),
     );
     try {
       renderShrinkWrappingViewport.computeMinIntrinsicHeight(0);
@@ -1757,8 +1763,10 @@ void main() {
       // Children should be painted in reverse order to the list given
       expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
       // childrenInPaintOrder should be reverse of childrenInHitTestOrder
-      expect(renderViewport.childrenInPaintOrder,
-          equals(renderViewport.childrenInHitTestOrder.toList().reversed));
+      expect(
+        renderViewport.childrenInPaintOrder,
+        equals(renderViewport.childrenInHitTestOrder.toList().reversed),
+      );
     });
 
     test('RenderShrinkWrappingViewport', () async {
@@ -1778,8 +1786,10 @@ void main() {
       // Children should be painted in reverse order to the list given
       expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
       // childrenInPaintOrder should be reverse of childrenInHitTestOrder
-      expect(renderViewport.childrenInPaintOrder,
-          equals(renderViewport.childrenInHitTestOrder.toList().reversed));
+      expect(
+        renderViewport.childrenInPaintOrder,
+        equals(renderViewport.childrenInHitTestOrder.toList().reversed),
+      );
     });
   });
 
@@ -1797,10 +1807,11 @@ void main() {
               GridView(
                 shrinkWrap: true,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 3,
-                    mainAxisSpacing: 3,
-                    crossAxisSpacing: 3),
+                  crossAxisCount: 3,
+                  childAspectRatio: 3,
+                  mainAxisSpacing: 3,
+                  crossAxisSpacing: 3,
+                ),
                 children: const <Widget>[
                   Text('a'),
                   Text('b'),

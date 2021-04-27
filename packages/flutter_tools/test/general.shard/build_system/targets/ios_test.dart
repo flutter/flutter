@@ -49,7 +49,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
     environment = Environment.test(

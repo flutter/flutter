@@ -102,7 +102,7 @@ void main() {
     expect(lastOptions.elementAt(0), 'chameleon');
     expect(lastOptions.elementAt(1), 'elephant');
 
-    // Select a option. The options hide and the field updates to show the
+    // Select an option. The options hide and the field updates to show the
     // selection.
     final String selection = lastOptions.elementAt(1);
     lastOnSelected(selection);
@@ -184,7 +184,7 @@ void main() {
     expect(lastOptions.elementAt(0), kOptionsUsers[0]);
     expect(lastOptions.elementAt(1), kOptionsUsers[1]);
 
-    // Select a option. The options hide and onSelected is called.
+    // Select an option. The options hide and onSelected is called.
     final User selection = lastOptions.elementAt(1);
     lastOnSelected(selection);
     await tester.pump();
@@ -266,7 +266,7 @@ void main() {
     expect(lastOptions.elementAt(0), kOptionsUsers[0]);
     expect(lastOptions.elementAt(1), kOptionsUsers[1]);
 
-    // Select a option. The options hide and onSelected is called. The field
+    // Select an option. The options hide and onSelected is called. The field
     // has its text set to the selection's display string.
     final User selection = lastOptions.elementAt(1);
     lastOnSelected(selection);
@@ -552,5 +552,97 @@ void main() {
     expect(find.byKey(fieldKey), findsOneWidget);
     expect(find.byKey(optionsKey), findsNothing);
     expect(textEditingController.text, lastOptions.elementAt(0));
+  });
+
+  testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late AutocompleteOnSelected<String> lastOnSelected;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            // Should initialize text field with 'lem'.
+            initialValue: const TextEditingValue(text: 'lem'),
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              lastOnSelected = onSelected;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The field is always rendered, but the options are not unless needed.
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    // The text editing controller value starts off with initialized value.
+    expect(textEditingController.text, 'lem');
+
+    // Focus the empty field. All the options are displayed.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.elementAt(0), 'lemur');
+
+    // Select an option. The options hide and the field updates to show the
+    // selection.
+    final String selection = lastOptions.elementAt(0);
+    lastOnSelected(selection);
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(textEditingController.text, selection);
+  });
+
+  testWidgets('initialValue cannot be defined if TextEditingController is defined', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController textEditingController = TextEditingController();
+
+    expect(
+      () {
+        RawAutocomplete<String>(
+          focusNode: focusNode,
+          // Both [initialValue] and [textEditingController] cannot be
+          // simultaneously defined.
+          initialValue: const TextEditingValue(text: 'lemur'),
+          textEditingController: textEditingController,
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            return Container();
+          },
+          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            return TextField(
+              focusNode: focusNode,
+              controller: textEditingController,
+            );
+          },
+        );
+      },
+      throwsAssertionError,
+    );
   });
 }

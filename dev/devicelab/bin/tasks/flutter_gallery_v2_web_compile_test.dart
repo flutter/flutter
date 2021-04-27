@@ -4,14 +4,12 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
-
 import 'package:flutter_devicelab/tasks/perf_tests.dart' show WebCompileTest;
+import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(const NewGalleryWebCompileTest().run);

@@ -744,6 +744,8 @@ class _TextStyleProxy implements TextStyle {
   List<Shadow>? get shadows => _delegate.shadows;
   @override
   List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
+  @override
+  TextOverflow? get overflow => _delegate.overflow;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
@@ -785,6 +787,7 @@ class _TextStyleProxy implements TextStyle {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }
@@ -819,6 +822,7 @@ class _TextStyleProxy implements TextStyle {
     TextDecorationStyle? decorationStyle,
     double? decorationThickness,
     String? debugLabel,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }

@@ -171,6 +171,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

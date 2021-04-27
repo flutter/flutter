@@ -100,5 +100,10 @@ void main() {
       expect(readDoubles[0], equals(3.14));
       expect(readDoubles[1], isNaN);
     });
+    test('done twice', () {
+      final WriteBuffer write = WriteBuffer();
+      write.done();
+      expect(() => write.done(), throwsStateError);
+    });
   });
 }

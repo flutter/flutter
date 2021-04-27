@@ -39,34 +39,36 @@ void main() {
   });
 
   test('test pumpBenchmark() only runs one frame', () async {
-    await benchmarkWidgets((WidgetTester tester) async {
-      const Key root = Key('root');
-      binding.attachRootWidget(Container(key: root));
-      await tester.pump();
+    await benchmarkWidgets(
+      (WidgetTester tester) async {
+        const Key root = Key('root');
+        binding.attachRootWidget(Container(key: root));
+        await tester.pump();
 
-      expect(binding.framesBegun, greaterThan(0));
-      expect(binding.framesDrawn, greaterThan(0));
+        expect(binding.framesBegun, greaterThan(0));
+        expect(binding.framesDrawn, greaterThan(0));
 
-      final Element appState = tester.element(find.byKey(root));
-      binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+        final Element appState = tester.element(find.byKey(root));
+        binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
-      final int startFramesBegun = binding.framesBegun;
-      final int startFramesDrawn = binding.framesDrawn;
-      expect(startFramesBegun, equals(startFramesDrawn));
+        final int startFramesBegun = binding.framesBegun;
+        final int startFramesDrawn = binding.framesDrawn;
+        expect(startFramesBegun, equals(startFramesDrawn));
 
-      appState.markNeedsBuild();
+        appState.markNeedsBuild();
 
-      await tester.pumpBenchmark(const Duration(milliseconds: 16));
+        await tester.pumpBenchmark(const Duration(milliseconds: 16));
 
-      final int endFramesBegun = binding.framesBegun;
-      final int endFramesDrawn = binding.framesDrawn;
-      expect(endFramesBegun, equals(endFramesDrawn));
+        final int endFramesBegun = binding.framesBegun;
+        final int endFramesDrawn = binding.framesDrawn;
+        expect(endFramesBegun, equals(endFramesDrawn));
 
-      expect(endFramesBegun, equals(startFramesBegun + 1));
-      expect(endFramesDrawn, equals(startFramesDrawn + 1));
-    },
-    // We are not interested in the performance of the "benchmark", we are just
-    // testing the behavior. So it's OK that asserts are enabled.
-    mayRunWithAsserts: true);
+        expect(endFramesBegun, equals(startFramesBegun + 1));
+        expect(endFramesDrawn, equals(startFramesDrawn + 1));
+      },
+      // We are not interested in the performance of the "benchmark", we are just
+      // testing the behavior. So it's OK that asserts are enabled.
+      mayRunWithAsserts: true,
+    );
   }, skip: isBrowser);
 }

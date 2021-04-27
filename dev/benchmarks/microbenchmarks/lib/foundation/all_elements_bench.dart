@@ -42,7 +42,10 @@ Future<void> main() async {
     ),
   ));
 
-  await SchedulerBinding.instance.endOfFrame;
+  // Wait for frame rendering to stabilize.
+  for (int i = 0; i < 5; i++) {
+    await SchedulerBinding.instance.endOfFrame;
+  }
 
   final Stopwatch watch = Stopwatch();
 

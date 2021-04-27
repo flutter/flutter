@@ -474,7 +474,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         if (!chrome)
           '--disable-service-auth-codes',
         '--machine',
-        if (!spawnDdsInstance) '--disable-dds',
+        if (!spawnDdsInstance) '--no-dds',
         ...getLocalEngineArguments(),
         '-d',
         if (chrome)
@@ -512,7 +512,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
          ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance)
-          '--disable-dds',
+          '--no-dds',
         '-d',
         'flutter-tester',
         '--debug-port',

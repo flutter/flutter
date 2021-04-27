@@ -22,12 +22,14 @@ void main() {
     int count = 0;
     const String channel = 'foo';
     ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-        channel, _makeByteData('bar'), (ByteData? message) async {
-      count += 1;
-    });
+      channel,
+      _makeByteData('bar'),
+      (ByteData? message) async {
+        count += 1;
+      },
+    );
     expect(count, equals(0));
-    await ui.channelBuffers.drain(channel,
-        (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+    await ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
       callback(null);
     });
     expect(count, equals(1));

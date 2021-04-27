@@ -30,7 +30,7 @@ import '../../src/fakes.dart';
 // The command used to actually launch the app with args in release/profile.
 const FakeCommand kLaunchReleaseCommand = FakeCommand(
   command: <String>[
-    'Artifact.iosDeploy.TargetPlatform.ios',
+    'HostArtifact.iosDeploy',
     '--id',
     '123',
     '--bundle',
@@ -49,7 +49,7 @@ const FakeCommand kLaunchReleaseCommand = FakeCommand(
 
 // The command used to just launch the app with args in debug.
 const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
-  'Artifact.iosDeploy.TargetPlatform.ios',
+  'HostArtifact.iosDeploy',
   '--id',
   '123',
   '--bundle',
@@ -69,7 +69,7 @@ const FakeCommand kAttachDebuggerCommand = FakeCommand(command: <String>[
   '-t',
   '0',
   '/dev/null',
-  'Artifact.iosDeploy.TargetPlatform.ios',
+  'HostArtifact.iosDeploy',
   '--id',
   '123',
   '--bundle',
@@ -214,7 +214,7 @@ void main() {
           '-t',
           '0',
           '/dev/null',
-          'Artifact.iosDeploy.TargetPlatform.ios',
+          'HostArtifact.iosDeploy',
           '--id',
           '123',
           '--bundle',

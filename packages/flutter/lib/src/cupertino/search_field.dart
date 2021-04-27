@@ -147,6 +147,9 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.onTap,
+    this.autocorrect = true,
+    this.enabled,
   })  : assert(padding != null),
         assert(itemColor != null),
         assert(itemSize != null),
@@ -275,6 +278,18 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.textfield.onTap}
+  final VoidCallback? onTap;
+
+  /// {@macro flutter.widgets.editableText.autocorrect}
+  final bool autocorrect;
+
+  /// Disables the text field when false.
+  ///
+  /// Text fields in disabled states have a light grey background and don't
+  /// respond to touch events including the [suffixIcon] and the search button.
+  final bool? enabled;
+
   @override
   State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
 }
@@ -393,6 +408,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       style: widget.style,
       prefix: prefix,
       suffix: suffix,
+      onTap: widget.onTap,
+      enabled: widget.enabled,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,
@@ -400,6 +417,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
+      autocorrect: widget.autocorrect,
     );
   }
 }

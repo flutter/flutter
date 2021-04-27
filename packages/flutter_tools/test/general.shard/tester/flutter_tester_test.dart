@@ -92,7 +92,7 @@ void main() {
 
     setUp(() {
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       device = FlutterTesterDevice('flutter-tester',
         fileSystem: fileSystem,
         processManager: fakeProcessManager,

@@ -20,9 +20,9 @@ void main() {
     );
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
-        listener: () {
-          ++semanticsUpdateCount;
-        }
+      listener: () {
+        ++semanticsUpdateCount;
+      },
     );
 
     layout(tree, phase: EnginePhase.flushSemantics);

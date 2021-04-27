@@ -187,7 +187,7 @@ void main() {
     setUp(() async {
       fileSystem = MemoryFileSystem.test();
       artifacts = Artifacts.test();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),

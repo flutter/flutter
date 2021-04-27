@@ -7,14 +7,13 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
-
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 /// Must match flutter_driver/lib/src/common.dart.
 ///
@@ -824,7 +823,7 @@ class PerfTestWithSkSL extends PerfTest {
       await _generateSkSL();
 
       // Build the app with SkSL artifacts and run that app
-      final String observatoryUri = await _buildAndRun();
+      final String observatoryUri = await _runApp(skslPath: _skslJsonFileName);
 
       // Attach to the running app and run the final driver test to get metrics.
       final TaskResult result = await internalRun(
@@ -860,7 +859,7 @@ class PerfTestWithSkSL extends PerfTest {
     );
   }
 
-  Future<String> _runApp({String appBinary, bool cacheSkSL = false}) async {
+  Future<String> _runApp({String appBinary, bool cacheSkSL = false, String skslPath}) async {
     if (File(_vmserviceFileName).existsSync()) {
       File(_vmserviceFileName).deleteSync();
     }
@@ -878,6 +877,7 @@ class PerfTestWithSkSL extends PerfTest {
         '--purge-persistent-cache',
         '--no-publish-port',
         '--profile',
+        if (skslPath != null) '--bundle-sksl-path=$skslPath',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,
         '-t', testTarget,
@@ -893,18 +893,6 @@ class PerfTestWithSkSL extends PerfTest {
 
     final File file = await waitForFile(_vmserviceFileName);
     return file.readAsStringSync();
-  }
-
-  // Return the VMService URI.
-  Future<String> _buildAndRun() async {
-    await flutter('build', options: <String>[
-      if (_isAndroid) 'apk' else 'ios',
-      '--profile',
-      '--bundle-sksl-path', _skslJsonFileName,
-      '-t', testTarget,
-    ]);
-
-    return _runApp(appBinary: _appBinary);
   }
 
   String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
@@ -1198,7 +1186,7 @@ class CompileTest {
 
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so'];
-    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES.Z'];
 
     return <String, dynamic>{
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,

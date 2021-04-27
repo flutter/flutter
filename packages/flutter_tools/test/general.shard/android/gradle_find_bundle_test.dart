@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -309,8 +308,7 @@ void main() {
     expect(bundle.path, fileSystem.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
   });
 
-  // Context is required due to build failure analytics event grabbing FlutterCommand.current.
-  testUsingContext('AAB not found', () {
+  testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final TestUsage testUsage = TestUsage();
     expect(
@@ -331,7 +329,7 @@ void main() {
     expect(testUsage.events, contains(
       const TestUsageEvent(
         'build',
-        'unspecified',
+        'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: <String, String> {
           'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',

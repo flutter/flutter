@@ -289,12 +289,66 @@ void main() {
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
-    await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+    await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64), uwp: false).build(environment);
     await const ProfileBundleWindowsAssets().build(environment);
 
     // Depfile is created and so is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ReleaseBundleWindowsAssets creates correct bundle structure with UWP', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+      }
+    );
+
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+
+    await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64), uwp: true).build(environment);
+    await const ReleaseBundleWindowsAssets().build(environment);
+
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\winuwp\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ProfileBundleWindowsAssets creates correct bundle structure with UWP', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'profile',
+      }
+    );
+
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+
+    await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64), uwp: true).build(environment);
+    await const ProfileBundleWindowsAssets().build(environment);
+
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\winuwp\app.so'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
   }, overrides: <Type, Generator>{
@@ -316,7 +370,7 @@ void main() {
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
-    await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+    await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64), uwp: false).build(environment);
     await const ReleaseBundleWindowsAssets().build(environment);
 
     // Depfile is created and so is copied.

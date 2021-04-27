@@ -18,22 +18,23 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -44,6 +45,7 @@ import 'fakes.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
+
 export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
@@ -294,44 +296,6 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class FakeOperatingSystemUtils implements OperatingSystemUtils {
-  @override
-  ProcessResult makeExecutable(File file) => null;
-
-  @override
-  HostPlatform hostPlatform = HostPlatform.linux_x64;
-
-  @override
-  void chmod(FileSystemEntity entity, String mode) { }
-
-  @override
-  File which(String execName) => null;
-
-  @override
-  List<File> whichAll(String execName) => <File>[];
-
-  @override
-  File makePipe(String path) => null;
-
-  @override
-  void unzip(File file, Directory targetDirectory) { }
-
-  @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) { }
-
-  @override
-  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
-
-  @override
-  String get name => 'fake OS name and version';
-
-  @override
-  String get pathVarSeparator => ';';
-
-  @override
-  Future<int> findFreePort({bool ipv6 = false}) async => 12345;
-}
-
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
@@ -342,13 +306,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   String get versionText => 'Xcode 12.0.1';
 
   @override
-  int get majorVersion => 12;
-
-  @override
-  int get minorVersion => 0;
-
-  @override
-  int get patchVersion => 1;
+  Version get version => Version(12, 0, 1);
 
   @override
   Future<Map<String, String>> getBuildSettings(

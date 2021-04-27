@@ -24,7 +24,7 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';

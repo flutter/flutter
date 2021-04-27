@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 
 import '../src/common.dart';
 
@@ -26,6 +26,7 @@ baz=qux
     testWithoutContext('can parse and compare', () {
       expect(Version.unknown.toString(), equals('unknown'));
       expect(Version(null, null, null).toString(), equals('0'));
+      expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
       final Version v1 = Version.parse('1')!;
       expect(v1.major, equals(1));

@@ -9,8 +9,8 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {

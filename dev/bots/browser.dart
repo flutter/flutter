@@ -5,12 +5,11 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:flutter_devicelab/framework/browser.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
-
-import 'package:flutter_devicelab/framework/browser.dart';
 
 /// Runs Chrome, opens the given `appUrl`, and returns the result reported by the
 /// app.

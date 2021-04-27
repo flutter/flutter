@@ -2,18 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/user_messages.dart';
 import '../doctor_validator.dart';
 import 'xcode.dart';
 
 class XcodeValidator extends DoctorValidator {
   XcodeValidator({
-    @required Xcode xcode,
-    @required UserMessages userMessages,
+    required Xcode xcode,
+    required UserMessages userMessages,
   }) : _xcode = xcode,
       _userMessages = userMessages,
       super('Xcode - develop for iOS and macOS');
@@ -25,13 +21,19 @@ class XcodeValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
-    String xcodeVersionInfo;
+    String? xcodeVersionInfo;
+
+    final String? xcodeSelectPath = _xcode.xcodeSelectPath;
 
     if (_xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
-
-      messages.add(ValidationMessage(_userMessages.xcodeLocation(_xcode.xcodeSelectPath)));
-      messages.add(ValidationMessage(_xcode.versionText));
+      if (xcodeSelectPath != null) {
+        messages.add(ValidationMessage(_userMessages.xcodeLocation(xcodeSelectPath)));
+      }
+      final String? versionText = _xcode.versionText;
+      if (versionText != null) {
+        messages.add(ValidationMessage(versionText));
+      }
 
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
@@ -58,7 +60,7 @@ class XcodeValidator extends DoctorValidator {
 
     } else {
       xcodeStatus = ValidationType.missing;
-      if (_xcode.xcodeSelectPath == null || _xcode.xcodeSelectPath.isEmpty) {
+      if (xcodeSelectPath == null || xcodeSelectPath.isEmpty) {
         messages.add(ValidationMessage.error(_userMessages.xcodeMissing));
       } else {
         messages.add(ValidationMessage.error(_userMessages.xcodeIncomplete));

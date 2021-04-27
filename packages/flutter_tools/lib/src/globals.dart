@@ -12,15 +12,12 @@ import 'device.dart';
 import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'globals_null_migrated.dart' as globals;
-import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
-import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
-import 'macos/xcode.dart';
+import 'macos/xcdevice.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
-import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 
 export 'globals_null_migrated.dart';
@@ -29,7 +26,6 @@ Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
-Usage get flutterUsage => context.get<Usage>();
 DeviceManager get deviceManager => context.get<DeviceManager>();
 
 FlutterProjectFactory get projectFactory {
@@ -46,9 +42,6 @@ LocalEngineLocator get localEngineLocator => context.get<LocalEngineLocator>();
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
-IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
-Xcode get xcode => context.get<Xcode>();
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 XCDevice get xcdevice => context.get<XCDevice>();
 

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:integration_ui/keys.dart' as keys;
 import 'package:flutter_driver/flutter_driver.dart';
-
+import 'package:integration_ui/keys.dart' as keys;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {

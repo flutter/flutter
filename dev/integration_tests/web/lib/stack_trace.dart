@@ -158,5 +158,5 @@ class StackFrameEquality implements Equality<StackFrame> {
   }
 
   @override
-  bool isValidKey(Object o) => o is StackFrame;
+  bool isValidKey(Object? o) => o is StackFrame;
 }

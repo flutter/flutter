@@ -21,7 +21,7 @@ void main() {
   late FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   OperatingSystemUtils createOSUtils(Platform platform) {

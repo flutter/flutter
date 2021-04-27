@@ -5,9 +5,9 @@
 import 'dart:developer';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'backdrop.dart';
 import 'demos.dart';

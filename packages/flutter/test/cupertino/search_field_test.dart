@@ -465,4 +465,69 @@ void main() {
       expect(find.text('Text'), findsOneWidget);
     },
   );
+
+  testWidgets('onTap is properly forwarded to the inner text field',
+          (WidgetTester tester) async {
+    int onTapCallCount = 0;
+
+    // onTap can be null.
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(),
+        ),
+      ),
+    );
+
+    // onTap callback is called if not null.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            onTap: () {
+              onTapCallCount++;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(onTapCallCount, 0);
+    await tester.tap(find.byType(CupertinoTextField));
+    expect(onTapCallCount, 1);
+  });
+
+  testWidgets('autocorrect is properly forwarded to the inner text field',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            autocorrect: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.autocorrect, false);
+  });
+
+  testWidgets('enabled is properly forwarded to the inner text field',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            enabled: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.enabled, false);
+  });
 }

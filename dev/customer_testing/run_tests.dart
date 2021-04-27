@@ -78,13 +78,13 @@ Future<bool> run(List<String> arguments) async {
     exit(1);
   }
 
-  final int repeat = int.tryParse(parsedArguments['repeat'] as String);
+  final int? repeat = int.tryParse(parsedArguments['repeat'] as String);
   final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'] as bool;
   final bool skipTemplate = parsedArguments['skip-template'] as bool;
   final bool verbose = parsedArguments['verbose'] as bool;
   final bool help = parsedArguments['help'] as bool;
-  final int numberShards = int.tryParse(parsedArguments['shards'] as String);
-  final int shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
+  final int? numberShards = int.tryParse(parsedArguments['shards'] as String);
+  final int? shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
   final List<File> files = parsedArguments
     .rest
     .expand((String path) => Glob(path).listFileSystemSync(const LocalFileSystem()))
@@ -106,10 +106,10 @@ Future<bool> run(List<String> arguments) async {
     return help;
   }
 
-  if (files.length < shardIndex)
+  if (files.length < shardIndex!)
     print('Warning: There are more shards than tests. Some shards will not run any tests.');
 
-  if (numberShards <= shardIndex) {
+  if (numberShards! <= shardIndex) {
     print('Error: There are more shard indexes than shards.');
     return help;
   }

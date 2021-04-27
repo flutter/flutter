@@ -51,7 +51,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     mockSdk = MockAndroidSdk();
     xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
 

@@ -19,9 +19,9 @@ import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -385,6 +385,7 @@ end
           engineVersion: globals.artifacts.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,
+          generateDartPluginRegistry: true,
         );
         Target target;
         // Always build debug for simulator.
@@ -525,7 +526,15 @@ end
       '-create-xcframework',
       for (Directory framework in frameworks) ...<String>[
         '-framework',
-        framework.path
+        framework.path,
+        ...framework.parent
+            .listSync()
+            .where((FileSystemEntity entity) =>
+                entity.basename.endsWith('bcsymbolmap') ||
+                entity.basename.endsWith('dSYM'))
+            .map((FileSystemEntity entity) =>
+                <String>['-debug-symbols', entity.path])
+            .expand<String>((List<String> parameter) => parameter)
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path

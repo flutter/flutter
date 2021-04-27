@@ -20,13 +20,11 @@ import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
-import '../../src/testbed.dart';
 
 const String _pubspecContents = '''
 dev_dependencies:

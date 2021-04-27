@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:test/fake.dart';
 
 /// Environment with DYLD_LIBRARY_PATH=/path/to/libraries
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -492,4 +493,41 @@ class FakeStatusLogger extends DelegatingLogger {
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) => status;
+}
+
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({this.hostPlatform = HostPlatform.linux_x64});
+
+  @override
+  void makeExecutable(File file) { }
+
+  @override
+  HostPlatform hostPlatform = HostPlatform.linux_x64;
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) { }
+
+  @override
+  File? which(String execName) => null;
+
+  @override
+  List<File> whichAll(String execName) => <File>[];
+
+  @override
+  void unzip(File file, Directory targetDirectory) { }
+
+  @override
+  void unpack(File gzippedTarFile, Directory targetDirectory) { }
+
+  @override
+  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
+
+  @override
+  String get name => 'fake OS name and version';
+
+  @override
+  String get pathVarSeparator => ';';
+
+  @override
+  Future<int> findFreePort({bool ipv6 = false}) async => 12345;
 }

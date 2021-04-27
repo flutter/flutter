@@ -112,6 +112,7 @@ Future<void> main(List<String> args) async {
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPluginsTests,
+      'skp_generator': _runSkpGeneratorTests,
       kSmokeTestShardName: () async {}, // No-op, the smoke tests already ran. Used for testing this script.
     });
   } on ExitException catch (error) {
@@ -306,11 +307,62 @@ Future<void> _runToolTests() async {
   });
 }
 
+Future<void> runForbiddenFromReleaseTests() async {
+  // Build a release APK to get the snapshot json.
+  final Directory tempDirectory = Directory.systemTemp.createTempSync('flutter_forbidden_imports.');
+  final List<String> command = <String>[
+    'build',
+    'apk',
+    '--target-platform',
+    'android-arm64',
+    '--release',
+    '--analyze-size',
+    '--code-size-directory',
+    tempDirectory.path,
+    '-v',
+  ];
+
+  await runCommand(
+    flutter,
+    command,
+    workingDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
+  );
+
+  // First, a smoke test.
+  final List<String> smokeTestArgs = <String>[
+    path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+    '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
+    '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    '--forbidden-type', 'package:flutter/src/widgets/framework.dart::Widget',
+  ];
+  await runCommand(
+    dart,
+    smokeTestArgs,
+    workingDirectory: flutterRoot,
+    expectNonZeroExit: true,
+  );
+
+  // Actual test.
+  final List<String> args = <String>[
+    path.join(flutterRoot, 'dev', 'forbidden_from_release_tests', 'bin', 'main.dart'),
+    '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
+    '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
+  ];
+  await runCommand(
+    dart,
+    args,
+    workingDirectory: flutterRoot,
+  );
+}
+
 /// Verifies that APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
 /// we can build when there are spaces in the path name for the Flutter SDK and
 /// target app.
+///
+/// Also does some checking about types included in hello_world.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
@@ -340,6 +392,7 @@ Future<void> _runBuildTests() async {
             path.join('lib', 'dart_io_import.dart'),
           ),
     ],
+    runForbiddenFromReleaseTests,
   ]..shuffle(math.Random(0));
 
   await _runShardRunnerIndexOfTotalSubshard(tests);
@@ -816,7 +869,7 @@ Future<String> getFlutterPluginsVersion({
 Future<void> _runFlutterPluginsTests() async {
   Future<void> runAnalyze() async {
     print('${green}Running analysis for flutter/plugins$reset');
-    final Directory checkout = Directory.systemTemp.createTempSync('plugins');
+    final Directory checkout = Directory.systemTemp.createTempSync('flutter_plugins.');
     await runCommand(
       'git',
       <String>[
@@ -853,6 +906,32 @@ Future<void> _runFlutterPluginsTests() async {
   await selectSubshard(<String, ShardRunner>{
     'analyze': runAnalyze,
   });
+}
+
+/// Runs the skp_generator from the flutter/tests repo.
+///
+/// See also the customer_tests shard.
+///
+/// Generated SKPs are ditched, this just verifies that it can run without failure.
+Future<void> _runSkpGeneratorTests() async {
+  print('${green}Running skp_generator from flutter/tests$reset');
+  final Directory checkout = Directory.systemTemp.createTempSync('flutter_skp_generator.');
+  await runCommand(
+    'git',
+    <String>[
+      '-c',
+      'core.longPaths=true',
+      'clone',
+      'https://github.com/flutter/tests.git',
+      '.'
+    ],
+    workingDirectory: checkout.path,
+  );
+  await runCommand(
+    './build.sh',
+    <String>[ ],
+    workingDirectory: path.join(checkout.path, 'skp_generator'),
+  );
 }
 
 // The `chromedriver` process created by this test.

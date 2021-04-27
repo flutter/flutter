@@ -199,6 +199,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       // the incompatibility is coming from.
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'app-not-using-plugins',
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -212,6 +213,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       );
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'app-not-using-androidx',
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -222,6 +224,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       // AARs, Jetifier translated Support libraries for AndroidX equivalents.
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'using-jetifier',
         flutterUsage: globals.flutterUsage,
       ).send();
@@ -233,6 +236,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       );
       BuildEvent(
         'gradle-android-x-failure',
+        type: 'gradle',
         eventError: 'not-using-jetifier',
         flutterUsage: globals.flutterUsage,
       ).send();

@@ -4,12 +4,12 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import '../rendering/mock_canvas.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget wrap({Widget? child}) {

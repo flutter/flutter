@@ -6,9 +6,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
+import 'package:flutter_gallery/gallery/demos.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // This title is visible on the home and demo category pages. It's
 // not visible when the demos are running.

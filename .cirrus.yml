@@ -15,11 +15,6 @@ environment:
   # We force BOT to true so that all our tools know we're in a CI environment. This avoids any
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
-  # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they might include non-ASCII
-  # characters which makes Gradle crash. See: https://github.com/flutter/flutter/issues/24935
-  # TODO(amirha): remove once we've migrated to newer Gradle
-  CIRRUS_CHANGE_MESSAGE: ""
-  CIRRUS_COMMIT_MESSAGE: ""
 
 
 gcp_credentials: ENCRYPTED[1917385f09764ac58515f6fee14ed58688afc808849b244969d41d0b082061eecd0a4c8ba801f00833877a12b51f8bb5]

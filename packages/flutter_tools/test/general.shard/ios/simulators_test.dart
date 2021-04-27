@@ -380,7 +380,7 @@ void main() {
     MockSimControl mockSimControl;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       mockSimControl = MockSimControl();
     });
 
@@ -486,7 +486,7 @@ void main() {
     Xcode xcode;
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       mockIosProject = FakeIosProject();
       mockSimControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
@@ -717,7 +717,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     const String appId = 'flutterApp';
 
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
       simControl = SimControl(
         logger: BufferLogger.test(),

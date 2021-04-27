@@ -115,6 +115,7 @@ class FlutterOptions {
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
+  static const String kCodeSizeDirectory = 'code-size-directory';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
@@ -369,18 +370,46 @@ abstract class FlutterCommand extends Command<void> {
             'Specifying port 0 (the default) will find a random free port.'
     );
     argParser.addFlag(
-      'disable-dds', // TODO(ianh): this should be called `dds` and default to true (see style guide about double negatives)
+      'dds',
       hide: !verboseHelp,
-      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided '
-            'when attaching to an application with an existing DDS instance (e.g., '
-            'attaching to an application currently connected to by "flutter run") or '
-            'when running certain tests.\n'
-            'Passing this flag may degrade IDE functionality if a DDS instance is not '
-            'already connected to the target application.'
+      defaultsTo: true,
+      help: 'Enable the Dart Developer Service (DDS).\n'
+            'It may be necessary to disable this when attaching to an application with '
+            'an existing DDS instance (e.g., attaching to an application currently '
+            'connected to by "flutter run"), or when running certain tests.\n'
+            'Disabling this feature may degrade IDE functionality if a DDS instance is '
+            'not already connected to the target application.'
+    );
+    argParser.addFlag(
+      'disable-dds',
+      hide: !verboseHelp,
+      help: '(deprecated; use "--no-dds" instead) '
+            'Disable the Dart Developer Service (DDS).'
     );
   }
 
-  bool get disableDds => boolArg('disable-dds');
+  bool _ddsEnabled;
+  bool get enableDds {
+    if (_ddsEnabled == null) {
+      if (argResults.wasParsed('disable-dds')) {
+        if (argResults.wasParsed('dds')) {
+          throwToolExit('The "--[no-]dds" and "--[no-]disable-dds" arguments are mutually exclusive. Only specify "--[no-]dds".');
+        }
+        _ddsEnabled = !boolArg('disable-dds');
+        // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
+        if (false) { // ignore: dead_code
+          if (_ddsEnabled) {
+            globals.printError('${globals.logger.terminal.warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.');
+          } else {
+            globals.printError('${globals.logger.terminal.warningMark} The "--disable-dds" argument is deprecated. Use "--no-dds" instead.');
+          }
+        }
+      } else {
+        _ddsEnabled = boolArg('dds');
+      }
+    }
+    return _ddsEnabled;
+  }
 
   bool get _hostVmServicePortProvided => argResults.wasParsed('observatory-port') ||
                                          argResults.wasParsed('host-vmservice-port');
@@ -434,7 +463,7 @@ abstract class FlutterCommand extends Command<void> {
     // If DDS is enabled and no explicit DDS port is provided, use the
     // host-vmservice-port for DDS instead and bind the VM service to a random
     // port.
-    if (!disableDds && !argResults.wasParsed('dds-port')) {
+    if (enableDds && !argResults.wasParsed('dds-port')) {
       return null;
     }
     return _tryParseHostVmservicePort();
@@ -456,11 +485,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
     argParser.addFlag('publish-port',
-        negatable: true,
-        hide: !verboseHelp,
-        help: 'Publish the VM service port over mDNS. Disable to prevent the '
-              'local network permission app dialog in debug and profile build modes (iOS devices only.)',
-        defaultsTo: enabledByDefault);
+      negatable: true,
+      hide: !verboseHelp,
+      help: 'Publish the VM service port over mDNS. Disable to prevent the '
+            'local network permission app dialog in debug and profile build modes (iOS devices only).',
+      defaultsTo: enabledByDefault,
+    );
   }
 
   bool get disablePortPublication => !boolArg('publish-port');
@@ -831,7 +861,15 @@ abstract class FlutterCommand extends Command<void> {
             'This flag is only supported on "--release" builds. When building for Android, a single '
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
+            'By default, the intermediate output files will be placed in a transient directory in the '
+            'build directory. This can be overriden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
+    );
+
+    argParser.addOption(
+      FlutterOptions.kCodeSizeDirectory,
+      help: 'The location to write code size analysis files. If this is not specified, files '
+            'are written to a temporary directory under the build directory.'
     );
   }
 
@@ -877,10 +915,13 @@ abstract class FlutterCommand extends Command<void> {
 
     String codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
-      final Directory directory = globals.fsUtils.getUniqueDirectory(
+      Directory directory = globals.fsUtils.getUniqueDirectory(
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
+      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
+        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
+      }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
@@ -1056,11 +1097,13 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printStatus('${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
-          'will be removed in a future version of Flutter. '
-          'See https://flutter.dev/docs/development/tools/sdk/releases '
-          'for previous releases of Flutter.');
-      globals.printStatus('');
+      globals.printError(
+        '${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
+        'will be removed in a future version of Flutter. '
+        'See https://flutter.dev/docs/development/tools/sdk/releases '
+        'for previous releases of Flutter.',
+      );
+      globals.printError('');
     }
   }
 
@@ -1105,7 +1148,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     assert(commandResult != null);
     // Send command result.
-    CommandResultEvent(commandPath, commandResult).send();
+    CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String> labels = <String>[
@@ -1164,6 +1207,7 @@ abstract class FlutterCommand extends Command<void> {
         processManager: globals.processManager,
         platform: globals.platform,
         projectDir: project.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(

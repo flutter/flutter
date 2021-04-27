@@ -229,6 +229,8 @@ class KernelCompiler {
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
+    Directory buildDir,
+    bool checkDartPluginRegistry = false,
     @required String packagesPath,
     @required BuildMode buildMode,
     @required bool trackWidgetCreation,
@@ -242,12 +244,13 @@ class KernelCompiler {
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String engineDartPath = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     if (!_processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
     String mainUri;
-    final Uri mainFileUri = _fileSystem.file(mainPath).uri;
+    final File mainFile = _fileSystem.file(mainPath);
+    final Uri mainFileUri = mainFile.uri;
     if (packagesPath != null) {
       mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
     }
@@ -255,6 +258,15 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
+    if (buildDir != null && checkDartPluginRegistry) {
+      // Check if there's a Dart plugin registrant.
+      // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
+      final File newMainDart = buildDir.parent.childFile('generated_main.dart');
+      if (newMainDart.existsSync()) {
+        mainUri = newMainDart.path;
+      }
+    }
+
     final List<String> command = <String>[
       engineDartPath,
       '--disable-dart-dev',
@@ -457,6 +469,8 @@ abstract class ResidentCompiler {
     List<Uri> invalidatedFiles, {
     @required String outputPath,
     @required PackageConfig packageConfig,
+    @required String projectRootPath,
+    @required FileSystem fs,
     bool suppressErrors = false,
   });
 
@@ -596,12 +610,27 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @required String outputPath,
     @required PackageConfig packageConfig,
     bool suppressErrors = false,
+    String projectRootPath,
+    FileSystem fs,
   }) async {
     assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
-
+    // `generated_main.dart` contains the Dart plugin registry.
+    if (projectRootPath != null && fs != null) {
+      final File generatedMainDart = fs.file(
+        fs.path.join(
+          projectRootPath,
+          '.dart_tool',
+          'flutter_build',
+          'generated_main.dart',
+        ),
+      );
+      if (generatedMainDart != null && generatedMainDart.existsSync()) {
+        mainUri = generatedMainDart.uri;
+      }
+    }
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
       _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)
@@ -666,7 +695,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     final List<String> command = <String>[
-      _artifacts.getArtifactPath(Artifact.engineDartBinary),
+      _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',

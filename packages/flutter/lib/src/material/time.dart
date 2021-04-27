@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -132,6 +133,40 @@ class TimeOfDay {
 
     return '$TimeOfDay($hourLabel:$minuteLabel)';
   }
+}
+
+/// A [RestorableValue] that knows how to save and restore [TimeOfDay].
+///
+/// {@macro flutter.widgets.RestorableNum}.
+class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
+  /// Creates a [RestorableTimeOfDay].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableTimeOfDay(TimeOfDay defaultValue) : _defaultValue = defaultValue;
+
+  final TimeOfDay _defaultValue;
+
+  @override
+  TimeOfDay createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(TimeOfDay? oldValue) {
+    assert(debugIsSerializableForRestoration(value.hour));
+    assert(debugIsSerializableForRestoration(value.minute));
+    notifyListeners();
+  }
+
+  @override
+  TimeOfDay fromPrimitives(Object? data) {
+    final List<Object?> timeData = data! as List<Object?>;
+    return TimeOfDay(
+      minute: timeData[0]! as int,
+      hour: timeData[1]! as int,
+    );
+  }
+
+  @override
+  Object? toPrimitives() => <int>[value.minute, value.hour];
 }
 
 /// Determines how the time picker invoked using [showTimePicker] formats and

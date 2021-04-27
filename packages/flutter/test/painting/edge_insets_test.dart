@@ -23,11 +23,15 @@ void main() {
     expect(insets.along(Axis.horizontal), equals(16.0));
     expect(insets.along(Axis.vertical), equals(20.0));
 
-    expect(insets.inflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           const Rect.fromLTRB(18.0, 25.0, 135.0, 156.0));
+    expect(
+      insets.inflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+      const Rect.fromLTRB(18.0, 25.0, 135.0, 156.0),
+    );
 
-    expect(insets.deflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0));
+    expect(
+      insets.deflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+      const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0),
+    );
 
     expect(insets.inflateSize(const Size(100.0, 125.0)), const Size(116.0, 145.0));
     expect(insets.deflateSize(const Size(100.0, 125.0)), const Size(84.0, 105.0));
@@ -66,12 +70,18 @@ void main() {
     expect(const EdgeInsetsDirectional.only(bottom: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 963.25));
     expect(EdgeInsetsDirectional.only(), EdgeInsetsDirectional.only()); // ignore: prefer_const_constructors
     expect(const EdgeInsetsDirectional.only(top: 1.0), isNot(const EdgeInsetsDirectional.only(bottom: 1.0)));
-    expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
-           const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.rtl));
-    expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
-     isNot(const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.ltr)));
-    expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
-     isNot(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.rtl)));
+    expect(
+      const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.rtl),
+    );
+    expect(
+      const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+      isNot(const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.ltr)),
+    );
+    expect(
+      const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+      isNot(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.rtl)),
+    );
   });
 
   test('EdgeInsets equality', () {

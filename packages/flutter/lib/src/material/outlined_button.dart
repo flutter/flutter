@@ -40,6 +40,14 @@ import 'theme_data.dart';
 /// outlined buttons in an app can be overridden with the [Theme]'s
 /// [ThemeData.outlinedButtonTheme] property.
 ///
+/// Unlike [TextButton] or [ElevatedButton], outline buttons have a
+/// default [ButtonStyle.side] which defines the appearance of the
+/// outline.  Because the default `side` is non-null, it
+/// unconditionally overrides the shape's [OutlinedBorder.side]. In
+/// other words, to specify an outlined button's shape _and_ the
+/// appearance of its outline, both the [ButtonStyle.shape] and
+/// [ButtonStyle.side] properties must be specified.
+///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// Here is an example of a basic [OutlinedButton].

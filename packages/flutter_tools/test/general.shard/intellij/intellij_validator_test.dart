@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -267,6 +268,55 @@ void main() {
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
     expect(ValidationType.installed, result.type);
+  });
+
+  testWithoutContext('can locate installations on macOS from Spotlight', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final String ceRandomLocation = fileSystem.path.join(
+      '/',
+      'random',
+      'IntelliJ CE (stable).app',
+    );
+    final String ultimateRandomLocation = fileSystem.path.join(
+      '/',
+      'random',
+      'IntelliJ UE (stable).app',
+    );
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+        ],
+        stdout: ceRandomLocation,
+      ),
+      FakeCommand(
+        command: const <String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+        ],
+        stdout: '$ultimateRandomLocation\n$ceRandomLocation',
+      ),
+    ]);
+    final Iterable<IntelliJValidatorOnMac> validators = IntelliJValidator.installedValidators(
+      fileSystem: fileSystem,
+      platform: macPlatform,
+      userMessages: UserMessages(),
+      processManager: processManager,
+      plistParser: FakePlistParser(<String, String>{
+        PlistParser.kCFBundleShortVersionStringKey: '2020.10',
+      }),
+    ).whereType<IntelliJValidatorOnMac>();
+    expect(validators.length, 2);
+
+    final IntelliJValidatorOnMac ce = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IdeaIC').single;
+    expect(ce.title, 'IntelliJ IDEA Community Edition');
+    expect(ce.installPath, ceRandomLocation);
+
+    final IntelliJValidatorOnMac utlimate = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea').single;
+    expect(utlimate.title, 'IntelliJ IDEA Ultimate Edition');
+    expect(utlimate.installPath, ultimateRandomLocation);
   });
 
   testWithoutContext('Intellij plugins path checking on mac', () async {

@@ -3188,7 +3188,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final Offset effectivePosition = position - _paintOffset;
+    final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));

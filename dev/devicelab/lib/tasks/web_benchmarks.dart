@@ -6,16 +6,15 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io' as io;
 
+import 'package:flutter_devicelab/framework/browser.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
-
-import 'package:flutter_devicelab/framework/browser.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
 
 /// The port number used by the local benchmark server.
 const int benchmarkServerPort = 9999;

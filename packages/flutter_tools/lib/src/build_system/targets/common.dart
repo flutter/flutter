@@ -17,6 +17,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
+import 'dart_plugin_registrant.dart';
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
 
@@ -194,7 +195,7 @@ class KernelSnapshot extends Target {
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
-    Source.artifact(Artifact.engineDartBinary),
+    Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ];
 
@@ -209,6 +210,7 @@ class KernelSnapshot extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     GenerateLocalizationsTarget(),
+    DartPluginRegistrantTarget(),
   ];
 
   @override
@@ -286,6 +288,8 @@ class KernelSnapshot extends Target {
       fileSystemScheme: fileSystemScheme,
       dartDefines: decodeDartDefines(environment.defines, kDartDefines),
       packageConfig: packageConfig,
+      buildDir: environment.buildDir,
+      checkDartPluginRegistry: environment.generateDartPluginRegistry,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception();
@@ -362,7 +366,7 @@ class AotElfProfile extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.engineDartBinary),
+    const Source.hostArtifact(HostArtifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: targetPlatform,
@@ -394,7 +398,7 @@ class AotElfRelease extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.engineDartBinary),
+    const Source.hostArtifact(HostArtifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: targetPlatform,

@@ -55,6 +55,8 @@ void main() {
       <Uri>[Uri.parse('test/foo.dart')],
       outputPath: testCompiler.outputDill.path,
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('abc.dill').createSync();
       return const CompilerOutput('abc.dill', 0, <Uri>[]);
@@ -80,6 +82,8 @@ void main() {
       <Uri>[Uri.parse('test/foo.dart')],
       outputPath: testCompiler.outputDill.path,
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('abc.dill').createSync();
       return const CompilerOutput('abc.dill', 1, <Uri>[]);

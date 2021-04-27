@@ -717,7 +717,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
-    this.disableDds = false,
+    this.enableDds = true,
     this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
@@ -768,7 +768,7 @@ class DebuggingOptions {
       startPaused = false,
       dartFlags = '',
       disableServiceAuthCodes = false,
-      disableDds = false,
+      enableDds = true,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
@@ -795,7 +795,7 @@ class DebuggingOptions {
   final String dartFlags;
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
-  final bool disableDds;
+  final bool enableDds;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;

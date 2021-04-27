@@ -6,9 +6,9 @@
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';

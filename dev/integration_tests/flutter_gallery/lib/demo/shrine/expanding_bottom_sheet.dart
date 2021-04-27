@@ -4,12 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:scoped_model/scoped_model.dart';
-
 import 'package:flutter_gallery/demo/shrine/colors.dart';
 import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/shopping_cart.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 // These curves define the emphasized easing curve.
 const Cubic _kAccelerateCurve = Cubic(0.548, 0.0, 0.757, 0.464);
@@ -378,7 +377,6 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
       key: _expandingBottomSheetKey,
       duration: const Duration(milliseconds: 225),
       curve: Curves.easeInOut,
-      vsync: this,
       alignment: FractionalOffset.topLeft,
       child: WillPopScope(
         onWillPop: _onWillPop,

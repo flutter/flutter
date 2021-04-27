@@ -33,7 +33,7 @@ void main() {
   setUp(() {
     logger = BufferLogger.test();
     fileSystem = MemoryFileSystem.test();
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     artifacts = Artifacts.test();
   });
 
@@ -173,7 +173,7 @@ void main() {
   });
 
   testUsingContext('AndroidAot can build provided target platform', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -212,7 +212,7 @@ void main() {
   });
 
   testUsingContext('AndroidAot provide code size information.', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -254,7 +254,7 @@ void main() {
   });
 
   testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -297,7 +297,7 @@ void main() {
   });
 
   testUsingContext('--no-strip in kExtraGenSnapshotOptions suppresses --strip gen_snapshot flag', () async {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),

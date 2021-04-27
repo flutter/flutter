@@ -23,7 +23,7 @@ void main() {
     stream.addListener(ImageStreamListener(
       (ImageInfo image, bool synchronousCall) {
         completer.complete();
-      }
+      },
     ));
     imageCache!.clearLiveImages();
     await completer.future;

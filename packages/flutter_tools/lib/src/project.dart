@@ -18,12 +18,12 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'features.dart';
 import 'flutter_manifest.dart';
+import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
-import 'ios/xcodeproj.dart' as xcode;
+import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
 import 'platform_plugins.dart';
-import 'plugins.dart';
 import 'template.dart';
 
 class FlutterProjectFactory {
@@ -544,7 +544,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (allBuildSettings != null) {
       if (fromPlist != null) {
         // Perform variable substitution using build settings.
-        return xcode.substituteXcodeVariables(fromPlist, allBuildSettings);
+        return substituteXcodeVariables(fromPlist, allBuildSettings);
       }
       return allBuildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     }

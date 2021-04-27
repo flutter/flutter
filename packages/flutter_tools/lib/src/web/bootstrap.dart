@@ -101,7 +101,7 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 String generateTestEntrypoint({
   required String relativeTestPath,
   required String absolutePath,
-  required String testConfigPath,
+  required String? testConfigPath,
   required LanguageVersion languageVersion,
 }) {
   return '''

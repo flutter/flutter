@@ -59,7 +59,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   bool get shouldCodesign => boolArg('codesign');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput);
+  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
 }
 
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for

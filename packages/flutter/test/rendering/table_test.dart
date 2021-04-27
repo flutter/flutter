@@ -10,7 +10,7 @@ import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {
   return RenderConstrainedBox(
-    additionalConstraints: BoxConstraints.tight(Size(width, height))
+    additionalConstraints: BoxConstraints.tight(Size(width, height)),
   );
 }
 

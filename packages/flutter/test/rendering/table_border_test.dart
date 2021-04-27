@@ -103,8 +103,10 @@ void main() {
     expect(TableBorder.lerp(tableA, tableB, 2.0), tableC);
     expect(TableBorder.lerp(tableB, tableC, -1.0), tableA);
     expect(TableBorder.lerp(tableA, tableC, 0.9195)!.isUniform, isFalse);
-    expect(TableBorder.lerp(tableA, tableC, 0.9195)!.dimensions,
-           EdgeInsets.lerp(tableA.dimensions, tableC.dimensions, 0.9195));
+    expect(
+      TableBorder.lerp(tableA, tableC, 0.9195)!.dimensions,
+      EdgeInsets.lerp(tableA.dimensions, tableC.dimensions, 0.9195),
+    );
   });
 
   test('TableBorder.lerp with nulls', () {

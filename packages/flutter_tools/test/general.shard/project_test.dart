@@ -14,10 +14,10 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -107,6 +107,17 @@ void main() {
         expect(
           FlutterProject.fromDirectory(directory).manifest.appName,
           'hello',
+        );
+      });
+
+      _testInMemory('reads dependencies from pubspec.yaml', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(validPubspecWithDependencies);
+        expect(
+          FlutterProject.fromDirectory(directory).manifest.dependencies,
+          <String>{'plugin_a', 'plugin_b'},
         );
       });
 
@@ -919,6 +930,16 @@ String get validPubspec => '''
 name: hello
 flutter:
 ''';
+
+String get validPubspecWithDependencies => '''
+name: hello
+flutter:
+
+dependencies:
+  plugin_a:
+  plugin_b:
+''';
+
 
 String get invalidPubspec => '''
 name: hello

@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:scoped_model/scoped_model.dart';
-
 import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:flutter_gallery/demo/shrine/model/products_repository.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 double _salesTaxRate = 0.06;
 double _shippingCostPerItem = 7.0;

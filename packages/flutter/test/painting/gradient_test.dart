@@ -801,7 +801,7 @@ void main() {
           child: RepaintBoundary(
             key: painterKey,
             child: CustomPaint(
-              painter: GradientPainter(shader, rect)
+              painter: GradientPainter(shader, rect),
             ),
           ),
         ),

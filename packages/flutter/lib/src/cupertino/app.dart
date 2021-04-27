@@ -346,9 +346,9 @@ class CupertinoApp extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WidgetsApp(
-  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///     shortcuts: <ShortcutActivator, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
+  ///       const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget? child) {
@@ -359,7 +359,7 @@ class CupertinoApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@macro flutter.widgets.widgetsApp.shortcuts.seeAlso}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
   /// {@tool snippet}

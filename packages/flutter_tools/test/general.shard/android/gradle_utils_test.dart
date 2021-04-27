@@ -12,7 +12,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
    group('injectGradleWrapperIfNeeded', () {

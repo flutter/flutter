@@ -96,7 +96,7 @@ void main() {
       outputPreferences: OutputPreferences.test(showColor: false),
     );
 
-    dartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    dartPath = artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     constFinderPath = artifacts.getArtifactPath(Artifact.constFinder);
     fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
 

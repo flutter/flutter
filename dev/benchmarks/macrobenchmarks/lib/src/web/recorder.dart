@@ -8,14 +8,13 @@ import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:meta/meta.dart';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 /// The number of samples from warm-up iterations.
 ///

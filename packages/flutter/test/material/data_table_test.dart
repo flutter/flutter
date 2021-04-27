@@ -1629,4 +1629,39 @@ void main() {
       _customHorizontalMargin,
     );
   });
+
+  testWidgets('DataRow is disabled when onSelectChanged is not set', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Col1')),
+              DataColumn(label: Text('Col2')),
+            ],
+            rows: <DataRow>[
+              DataRow(cells: const <DataCell>[
+                DataCell(Text('Hello')),
+                DataCell(Text('world')),
+              ],
+              onSelectChanged: (bool? value) {},
+              ),
+              const DataRow(cells: <DataCell>[
+                DataCell(Text('Bug')),
+                DataCell(Text('report')),
+              ]),
+              const DataRow(cells: <DataCell>[
+                DataCell(Text('GitHub')),
+                DataCell(Text('issue')),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.widgetWithText(TableRowInkWell, 'Hello'), findsOneWidget);
+    expect(find.widgetWithText(TableRowInkWell, 'Bug'), findsNothing);
+    expect(find.widgetWithText(TableRowInkWell, 'GitHub'), findsNothing);
+  });
 }

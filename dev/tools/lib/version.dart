@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 /// Possible string formats that `flutter --version` can return.
 enum VersionType {
   /// A stable flutter release.
   ///
   /// Example: '1.2.3'
   stable,
+
   /// A pre-stable flutter release.
   ///
   /// Example: '1.2.3-4.5.pre'
   development,
+
   /// A master channel flutter version.
   ///
   /// Example: '1.2.3-4.0.pre.10'
@@ -30,13 +30,13 @@ final Map<VersionType, RegExp> versionPatterns = <VersionType, RegExp>{
 
 class Version {
   Version({
-    @required this.x,
-    @required this.y,
-    @required this.z,
+    required this.x,
+    required this.y,
+    required this.z,
     this.m,
     this.n,
     this.commits,
-    @required this.type,
+    required this.type,
   }) {
     switch (type) {
       case VersionType.stable:
@@ -67,11 +67,13 @@ class Version {
 
     versionString = versionString.trim();
     // stable tag
-    Match match = versionPatterns[VersionType.stable].firstMatch(versionString);
+    Match? match = versionPatterns[VersionType.stable]!.firstMatch(versionString);
     if (match != null) {
       // parse stable
-      final List<int> parts =
-          match.groups(<int>[1, 2, 3]).map(int.parse).toList();
+      final List<int> parts = match
+          .groups(<int>[1, 2, 3])
+          .map((String? s) => int.parse(s!))
+          .toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -80,11 +82,11 @@ class Version {
       );
     }
     // development tag
-    match = versionPatterns[VersionType.development].firstMatch(versionString);
+    match = versionPatterns[VersionType.development]!.firstMatch(versionString);
     if (match != null) {
       // parse development
       final List<int> parts =
-          match.groups(<int>[1, 2, 3, 4, 5]).map(int.parse).toList();
+          match.groups(<int>[1, 2, 3, 4, 5]).map((String? s) => int.parse(s!)).toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -95,11 +97,14 @@ class Version {
       );
     }
     // latest tag
-    match = versionPatterns[VersionType.latest].firstMatch(versionString);
+    match = versionPatterns[VersionType.latest]!.firstMatch(versionString);
     if (match != null) {
       // parse latest
-      final List<int> parts =
-          match.groups(<int>[1, 2, 3, 4, 5, 6]).map(int.parse).toList();
+      final List<int> parts = match.groups(
+        <int>[1, 2, 3, 4, 5, 6],
+      ).map(
+        (String? s) => int.parse(s!),
+      ).toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -118,13 +123,13 @@ class Version {
   factory Version.increment(
     Version previousVersion,
     String increment, {
-    VersionType nextVersionType,
+    VersionType? nextVersionType,
   }) {
     final int nextX = previousVersion.x;
     int nextY = previousVersion.y;
     int nextZ = previousVersion.z;
-    int nextM = previousVersion.m;
-    int nextN = previousVersion.n;
+    int? nextM = previousVersion.m;
+    int? nextN = previousVersion.n;
     if (nextVersionType == null) {
       if (previousVersion.type == VersionType.latest) {
         nextVersionType = VersionType.development;
@@ -137,7 +142,6 @@ class Version {
       case 'x':
         // This was probably a mistake.
         throw Exception('Incrementing x is not supported by this tool.');
-        break;
       case 'y':
         // Dev release following a beta release.
         nextY += 1;
@@ -155,13 +159,12 @@ class Version {
       case 'm':
         // Regular dev release.
         assert(previousVersion.type == VersionType.development);
-        assert(nextM != null);
-        nextM += 1;
+        nextM = nextM! + 1;
         nextN = 0;
         break;
       case 'n':
         // Hotfix to internal roll.
-        nextN += 1;
+        nextN = nextN! + 1;
         break;
       default:
         throw Exception('Unknown increment level $increment.');
@@ -186,13 +189,13 @@ class Version {
   final int z;
 
   /// Zero-indexed count of dev releases after a beta release.
-  final int m;
+  final int? m;
 
   /// Number of hotfixes required to make a dev release.
-  final int n;
+  final int? n;
 
   /// Number of commits past last tagged dev release.
-  final int commits;
+  final int? commits;
 
   final VersionType type;
 
@@ -206,6 +209,5 @@ class Version {
       case VersionType.latest:
         return '$x.$y.$z-$m.$n.pre.$commits';
     }
-    return null; // For analyzer
   }
 }

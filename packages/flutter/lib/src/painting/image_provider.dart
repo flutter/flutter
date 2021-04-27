@@ -333,8 +333,6 @@ abstract class ImageProvider<T extends Object> {
       },
       (T? key, Object exception, StackTrace? stack) async {
         await null; // wait an event turn in case a listener has been added to the image stream.
-        final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
-        stream.setCompleter(imageCompleter);
         InformationCollector? collector;
         assert(() {
           collector = () sync* {
@@ -344,7 +342,10 @@ abstract class ImageProvider<T extends Object> {
           };
           return true;
         }());
-        imageCompleter.setError(
+        if (stream.completer == null) {
+          stream.setCompleter(_ErrorImageCompleter());
+        }
+        stream.completer!.reportError(
           exception: exception,
           stack: stack,
           context: ErrorDescription('while resolving an image'),
@@ -1006,9 +1007,11 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///
 /// Then, to fetch the image and associate it with scale `1.5`, use:
 ///
+/// {@tool snippet}
 /// ```dart
-/// AssetImage('icons/heart.png', scale: 1.5)
+/// const ExactAssetImage('icons/heart.png', scale: 1.5)
 /// ```
+/// {@end-tool}
 ///
 /// ## Assets in packages
 ///
@@ -1016,9 +1019,11 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// For instance, suppose the structure above is inside a package called
 /// `my_icons`. Then to fetch the image, use:
 ///
+/// {@tool snippet}
 /// ```dart
-/// AssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
+/// const ExactAssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
 /// ```
+/// {@end-tool}
 ///
 /// Assets used by the package itself should also be fetched using the [package]
 /// argument as above.
@@ -1123,25 +1128,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
 }
 
 // A completer used when resolving an image fails sync.
-class _ErrorImageCompleter extends ImageStreamCompleter {
-  _ErrorImageCompleter();
-
-  void setError({
-    DiagnosticsNode? context,
-    required Object exception,
-    StackTrace? stack,
-    InformationCollector? informationCollector,
-    bool silent = false,
-  }) {
-    reportError(
-      context: context,
-      exception: exception,
-      stack: stack,
-      informationCollector: informationCollector,
-      silent: silent,
-    );
-  }
-}
+class _ErrorImageCompleter extends ImageStreamCompleter {}
 
 /// The exception thrown when the HTTP request to load a network image fails.
 class NetworkImageLoadException implements Exception {

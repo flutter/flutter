@@ -280,6 +280,7 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
     final List<TimingsCallback> clonedCallbacks =
         List<TimingsCallback>.from(_timingsCallbacks);
@@ -450,6 +451,7 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Also returns false if there are no tasks remaining.
   @visibleForTesting
+  @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
     if (_taskQueue.isEmpty || locked)
       return false;
@@ -1133,6 +1135,7 @@ mixin SchedulerBinding on BindingBase {
   // Wraps the callback in a try/catch and forwards any error to
   // [debugSchedulerExceptionHandler], if set. If not set, then simply prints
   // the error.
+  @pragma('vm:notify-debugger-on-exception')
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace? callbackStack ]) {
     assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);

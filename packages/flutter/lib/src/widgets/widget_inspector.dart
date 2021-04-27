@@ -2892,7 +2892,12 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 ///
 /// This function will be registered to [FlutterErrorDetails.propertiesTransformers]
 /// in [WidgetsBinding.initInstances].
-Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
+///
+/// This is meant to be called only in debug mode. In other modes, it yields an empty list.
+Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
+  if (!kDebugMode) {
+    return;
+  }
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
   ErrorSummary? errorSummary;
   for (final DiagnosticsNode node in properties) {
@@ -2962,8 +2967,6 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (debugIsLocalCreationLocation(target)) {
-
-
       DiagnosticsNode? devToolsDiagnostic;
 
       // TODO(kenz): once the inspector is better at dealing with broken trees,

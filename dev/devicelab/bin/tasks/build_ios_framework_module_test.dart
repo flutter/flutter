@@ -310,6 +310,17 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'DeviceInfoPlugin.h',
     ));
 
+    if (mode != 'Debug') {
+      checkDirectoryExists(path.join(
+        outputPath,
+        mode,
+        'device_info.xcframework',
+        localXcodeArmDirectoryName,
+        'dSYMs',
+        'device_info.framework.dSYM',
+      ));
+    }
+
     final String simulatorFrameworkPath = path.join(
       outputPath,
       mode,
@@ -332,6 +343,14 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     checkFileExists(simulatorFrameworkPath);
     checkFileExists(simulatorFrameworkHeaderPath);
   }
+
+  checkDirectoryExists(path.join(
+    outputPath,
+    'Release',
+    'device_info.xcframework',
+    localXcodeArmDirectoryName,
+    'BCSymbolMaps',
+  ));
 
   section('Check all modes have generated plugin registrant');
 

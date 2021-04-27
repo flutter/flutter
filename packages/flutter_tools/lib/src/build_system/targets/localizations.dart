@@ -63,7 +63,7 @@ class GenerateLocalizationsTarget extends Target {
       options: options,
       projectDir: environment.projectDir,
       dependenciesDir: environment.buildDir,
-      localizationsGenerator: LocalizationsGenerator(environment.fileSystem),
+      fileSystem: environment.fileSystem,
     );
 
     final Map<String, Object> dependencies = json.decode(

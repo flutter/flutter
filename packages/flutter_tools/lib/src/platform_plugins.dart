@@ -13,6 +13,9 @@ const String kPluginClass = 'pluginClass';
 /// Constant for 'pluginClass' key in plugin maps.
 const String kDartPluginClass = 'dartPluginClass';
 
+// Constant for 'defaultPackage' key in plugin maps.
+const String kDefaultPackage = 'default_package';
+
 /// Marker interface for all platform specific plugin config implementations.
 abstract class PluginPlatform {
   const PluginPlatform();
@@ -204,19 +207,21 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
+    this.defaultPackage,
   });
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return MacOSPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
@@ -224,7 +229,9 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (yaml == null) {
       return false;
     }
-    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'macos';
@@ -232,6 +239,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
+  final String? defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -241,7 +249,8 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     return <String, dynamic>{
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
+      if (defaultPackage != null) kDefaultPackage : defaultPackage,
     };
   }
 }
@@ -255,19 +264,21 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-  }) : assert(pluginClass != null || dartPluginClass != null);
+    this.defaultPackage,
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return WindowsPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
@@ -275,7 +286,9 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     if (yaml == null) {
       return false;
     }
-    return yaml[kDartPluginClass] is String || yaml[kPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'windows';
@@ -283,6 +296,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
+  final String? defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -291,9 +305,10 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass,
+      if (pluginClass != null) 'class': pluginClass!,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
     };
   }
 }
@@ -307,19 +322,21 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-  }) : assert(pluginClass != null || dartPluginClass != null);
+    this.defaultPackage,
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String;
+    String? pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
     return LinuxPlugin(
       name: name,
       pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String?,
+      defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
 
@@ -327,7 +344,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (yaml == null) {
       return false;
     }
-    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'linux';
@@ -335,6 +354,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
+  final String? defaultPackage;
 
   @override
   bool isNative() => pluginClass != null;
@@ -343,9 +363,10 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass,
+      if (pluginClass != null) 'class': pluginClass!,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
     };
   }
 }

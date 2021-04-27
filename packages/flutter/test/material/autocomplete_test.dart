@@ -253,4 +253,51 @@ void main() {
     await tester.pump();
     expect(find.byKey(optionsKey), findsOneWidget);
   });
+
+  testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
+    late String lastSelection;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Autocomplete<String>(
+            initialValue: const TextEditingValue(text: 'lem'),
+            onSelected: (String selection) {
+              lastSelection = selection;
+            },
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The field is always rendered, but the options are not unless needed.
+    expect(find.byType(TextFormField), findsOneWidget);
+    expect(find.byType(ListView), findsNothing);
+    expect(
+      tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text,
+      'lem',
+    );
+
+    // Focus the empty field. All the options are displayed.
+    await tester.tap(find.byType(TextFormField));
+    await tester.pump();
+    expect(find.byType(ListView), findsOneWidget);
+    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    // Displays just one option ('lemur').
+    expect(list.semanticChildCount, 1);
+
+    // Select a option. The options hide and the field updates to show the
+    // selection.
+    await tester.tap(find.byType(InkWell).first);
+    await tester.pump();
+    expect(find.byType(TextFormField), findsOneWidget);
+    expect(find.byType(ListView), findsNothing);
+    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    expect(field.controller!.text, 'lemur');
+    expect(lastSelection, 'lemur');
+  });
 }

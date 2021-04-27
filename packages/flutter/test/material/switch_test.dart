@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1633,4 +1636,102 @@ void main() {
     // Release pointer after widget disappeared.
     await gesture.up();
   });
+
+  group('with image', () {
+    late ui.Image image;
+
+    setUp(() async {
+      image = await createTestImage(width: 100, height: 100);
+    });
+
+    testWidgets('do not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+      final DelayedImageProvider imageProvider = DelayedImageProvider(image);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Switch(
+                value: true,
+                onChanged: null,
+                inactiveThumbImage: imageProvider,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Switch), findsOneWidget);
+
+      // Dispose the switch by taking down the tree.
+      await tester.pumpWidget(Container());
+      expect(find.byType(Switch), findsNothing);
+
+      imageProvider.complete();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('do not crash when previous imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+      final DelayedImageProvider imageProvider1 = DelayedImageProvider(image);
+      final DelayedImageProvider imageProvider2 = DelayedImageProvider(image);
+
+      Future<void> buildSwitch(ImageProvider imageProvider) {
+        return tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Switch(
+                  value: true,
+                  onChanged: null,
+                  inactiveThumbImage: imageProvider,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await buildSwitch(imageProvider1);
+      expect(find.byType(Switch), findsOneWidget);
+      // Replace the ImageProvider.
+      await buildSwitch(imageProvider2);
+      expect(find.byType(Switch), findsOneWidget);
+
+      // Dispose the switch by taking down the tree.
+      await tester.pumpWidget(Container());
+      expect(find.byType(Switch), findsNothing);
+
+      // Completing the replaced ImageProvider shouldn't crash.
+      imageProvider1.complete();
+      expect(tester.takeException(), isNull);
+
+      imageProvider2.complete();
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
+  DelayedImageProvider(this.image);
+
+  final ui.Image image;
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+
+  @override
+  Future<DelayedImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<DelayedImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(_completer.future);
+  }
+
+  Future<void> complete() async {
+    _completer.complete(ImageInfo(image: image));
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
 }

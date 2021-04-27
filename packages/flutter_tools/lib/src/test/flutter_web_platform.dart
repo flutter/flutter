@@ -173,7 +173,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'kernel',
@@ -183,7 +183,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'web',
@@ -191,10 +191,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts.getArtifactPath(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(

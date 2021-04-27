@@ -1244,6 +1244,41 @@ void main() {
         i++;
       }
     });
+
+    // Accessing the intrinsic size of a LayoutBuilder throws an error, so
+    // InteractiveViewer only uses a LayoutBuilder when it's needed by
+    // InteractiveViewer.builder.
+    testWidgets('LayoutBuilder is only used for InteractiveViewer.builder', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(LayoutBuilder), findsNothing);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer.builder(
+                builder: (BuildContext context, Quad viewport) {
+                  return const SizedBox(width: 200.0, height: 200.0);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(LayoutBuilder), findsOneWidget);
+    });
   });
 
   group('getNearestPointOnLine', () {
@@ -1454,8 +1489,6 @@ void main() {
   });
 }
 
-// Returns the axis aligned bounding box for the given Quad, which might not
-// be axis aligned.
 Rect _axisAlignedBoundingBox(Quad quad) {
   double? xMin;
   double? xMax;

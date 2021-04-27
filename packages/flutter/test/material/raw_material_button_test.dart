@@ -46,9 +46,9 @@ void main() {
     const Color splashColor = Color(0xff00ff00);
     await tester.pumpWidget(
       Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
-          LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,

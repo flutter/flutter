@@ -220,6 +220,11 @@ abstract class FlutterDriver {
     await sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
+  /// Waits until [finder] is tappable.
+  Future<void> waitForTappable(SerializableFinder finder, { Duration? timeout }) async {
+    await sendCommand(WaitForTappable(finder, timeout: timeout));
+  }
+
   /// Waits until the given [waitCondition] is satisfied.
   Future<void> waitForCondition(SerializableWaitCondition waitCondition, {Duration? timeout}) async {
     await sendCommand(WaitForCondition(waitCondition, timeout: timeout));

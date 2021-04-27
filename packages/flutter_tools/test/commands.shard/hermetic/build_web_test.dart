@@ -13,9 +13,9 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';

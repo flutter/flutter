@@ -48,7 +48,7 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults['timeout'] != null) {
-      globals.printError('"--timeout" argument is deprecated, use "--${FlutterOptions.kDeviceTimeout}" instead');
+      globals.printError('${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.');
     }
     return super.validateCommand();
   }

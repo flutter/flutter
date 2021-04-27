@@ -95,6 +95,8 @@ void main() {
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
+      projectRootPath: '',
+      fs: fileSystem,
     ).then((CompilerOutput output) {
       expect(frontendServerStdIn.getAndClear(),
           'compile file:///path/to/main.dart\n');
@@ -137,6 +139,8 @@ void main() {
         null, /* invalidatedFiles */
         outputPath: '/build/',
         packageConfig: PackageConfig.empty,
+        projectRootPath: '',
+        fs: MemoryFileSystem(),
       ).then((CompilerOutput outputCompile) {
         expect(testLogger.errorText,
             equals('line1\nline2\n'));

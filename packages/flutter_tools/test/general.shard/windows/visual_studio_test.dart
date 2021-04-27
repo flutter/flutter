@@ -300,7 +300,7 @@ ERROR: The system was unable to find the specified registry key or value.
 
 // Create a visual studio instance with a FakeProcessManager.
 VisualStudioFixture setUpVisualStudio() {
-  final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+  final FakeProcessManager processManager = FakeProcessManager.empty();
   final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
   final BufferLogger logger = BufferLogger.test();
   final VisualStudio visualStudio = VisualStudio(
@@ -355,7 +355,7 @@ void main() {
     testWithoutContext('isInstalled and cmakePath correct when vswhere is missing', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       const Exception exception = ProcessException('vswhere', <String>[]);
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
 
       setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
       setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, null, exception);
@@ -377,7 +377,7 @@ void main() {
     testWithoutContext(
         'isInstalled returns false when vswhere returns non-zero', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
 
       setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
       setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);

@@ -639,7 +639,6 @@ class CustomDevice extends Device {
         mainPath: mainPath,
         depfilePath: defaultDepfilePath,
         assetDirPath: assetBundleDir,
-        treeShakeIcons: false,
       );
 
       // if we have a post build step (needed for some embedders), execute it
