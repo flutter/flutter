@@ -127,6 +127,15 @@ class DebugMacOSFramework extends Target {
   Future<void> build(Environment environment) async {
     final File outputFile = environment.fileSystem.file(environment.fileSystem.path.join(
         environment.buildDir.path, 'App.framework', 'App'));
+
+    final Iterable<DarwinArch> darwinArchs = environment.defines[kDarwinArchs]
+      ?.split(' ')
+      ?.map(getDarwinArchForName)
+      ?? <DarwinArch>[DarwinArch.x86_64];
+
+    final Iterable<String> darwinArchArguments =
+        darwinArchs.expand((DarwinArch arch) => <String>['-arch', getNameForDarwinArch(arch)]);
+
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
         ..writeAsStringSync(r'''
@@ -136,7 +145,7 @@ static const int Moo = 88;
       '-x',
       'c',
       debugApp.path,
-      '-arch', 'x86_64',
+      ...darwinArchArguments,
       '-dynamiclib',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
