@@ -375,6 +375,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+      case TargetPlatform.android:
         return _getAndroidArtifactPath(artifact, platform, mode);
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode, environmentType);
@@ -389,7 +390,6 @@ class CachedArtifacts implements Artifacts {
         return _getFuchsiaArtifactPath(artifact, platform, mode!);
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.android:
         throw StateError('');
     }
   }
