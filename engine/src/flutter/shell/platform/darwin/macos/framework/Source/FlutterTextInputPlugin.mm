@@ -21,6 +21,8 @@ static NSString* const kShowMethod = @"TextInput.show";
 static NSString* const kHideMethod = @"TextInput.hide";
 static NSString* const kClearClientMethod = @"TextInput.clearClient";
 static NSString* const kSetEditingStateMethod = @"TextInput.setEditingState";
+static NSString* const kSetEditableSizeAndTransform = @"TextInput.setEditableSizeAndTransform";
+static NSString* const kSetCaretRect = @"TextInput.setCaretRect";
 static NSString* const kUpdateEditStateResponseMethod = @"TextInputClient.updateEditingState";
 static NSString* const kPerformAction = @"TextInputClient.performAction";
 static NSString* const kMultilineInputType = @"TextInputType.multiline";
@@ -39,6 +41,7 @@ static NSString* const kSelectionIsDirectionalKey = @"selectionIsDirectional";
 static NSString* const kComposingBaseKey = @"composingBase";
 static NSString* const kComposingExtentKey = @"composingExtent";
 static NSString* const kTextKey = @"text";
+static NSString* const kTransformKey = @"transform";
 
 /**
  * The affinity of the current cursor position. If the cursor is at a position representing
@@ -163,6 +166,8 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     _textInputContext = [[NSTextInputContext alloc] initWithClient:self];
     _previouslyPressedFlags = 0;
 
+    _flutterViewController = viewController;
+
     // Initialize with the zero matrix which is not
     // an affine transform.
     _editableTransform = CATransform3D();
@@ -215,10 +220,10 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     // engine since it sent this update, and needs to now be made to match the
     // engine's version of the state.
     [self updateEditState];
-  } else if ([method isEqualToString:@"TextInput.setEditableSizeAndTransform"]) {
+  } else if ([method isEqualToString:kSetEditableSizeAndTransform]) {
     NSDictionary* state = call.arguments;
-    [self setEditableTransform:state[@"transform"]];
-  } else if ([method isEqualToString:@"TextInput.setCaretRect"]) {
+    [self setEditableTransform:state[kTransformKey]];
+  } else if ([method isEqualToString:kSetCaretRect]) {
     NSDictionary* rect = call.arguments;
     [self updateCaretRect:rect];
   } else {
@@ -462,9 +467,10 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     CGRect rect =
         CGRectApplyAffineTransform(_caretRect, CATransform3DGetAffineTransform(_editableTransform));
 
-    // flip and convert to screen coordinates
-    double viewHeight = self.flutterViewController.view.bounds.size.height;
-    rect.origin.y = viewHeight - rect.origin.y;
+    // convert to window coordinates
+    rect = [self.flutterViewController.view convertRect:rect toView:nil];
+
+    // convert to screen coordinates
     return [self.flutterViewController.view.window convertRectToScreen:rect];
   } else {
     return CGRectZero;
