@@ -922,6 +922,7 @@ void main() {
     // Move back to reset.
     await dragScrollbarGesture.moveBy(const Offset(0.0, -scrollAmount));
     await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(RawScrollbar),
