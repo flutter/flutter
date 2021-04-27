@@ -85,6 +85,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterKeyboardManager.mm",
     "framework/Source/FlutterMacOSExternalTexture.h",
     "framework/Source/FlutterMacOSExternalTexture.h",
+    "framework/Source/FlutterMetalCompositor.h",
+    "framework/Source/FlutterMetalCompositor.mm",
     "framework/Source/FlutterMetalRenderer.h",
     "framework/Source/FlutterMetalRenderer.mm",
     "framework/Source/FlutterMouseCursorPlugin.h",
