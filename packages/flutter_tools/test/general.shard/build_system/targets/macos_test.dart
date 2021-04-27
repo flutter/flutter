@@ -27,7 +27,7 @@ void main() {
   FakeProcessManager processManager;
 
   setUp(() {
-    processManager = FakeProcessManager.any();
+    processManager = FakeProcessManager.empty();
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     environment = Environment.test(
@@ -214,6 +214,68 @@ void main() {
     await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
 
     expect(outputFramework.readAsStringSync(), 'DEF');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('DebugMacOSFramework creates expected binary with arm64 only arch', () async {
+    environment.defines[kDarwinArchs] = 'arm64';
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        'xcrun',
+        'clang',
+        '-x',
+        'c',
+        environment.buildDir.childFile('debug_app.cc').path,
+        '-arch',
+        'arm64',
+        '-dynamiclib',
+        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+        '-install_name', '@rpath/App.framework/App',
+        '-o',
+        environment.buildDir
+            .childDirectory('App.framework')
+            .childFile('App')
+            .path,
+      ]),
+    );
+
+    await const DebugMacOSFramework().build(environment);
+    expect(processManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('DebugMacOSFramework creates universal binary', () async {
+    environment.defines[kDarwinArchs] = 'arm64 x86_64';
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        'xcrun',
+        'clang',
+        '-x',
+        'c',
+        environment.buildDir.childFile('debug_app.cc').path,
+        '-arch',
+        'arm64',
+        '-arch',
+        'x86_64',
+        '-dynamiclib',
+        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+        '-install_name', '@rpath/App.framework/App',
+        '-o',
+        environment.buildDir
+            .childDirectory('App.framework')
+            .childFile('App')
+            .path,
+      ]),
+    );
+
+    await const DebugMacOSFramework().build(environment);
+    expect(processManager.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
