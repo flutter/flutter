@@ -631,29 +631,11 @@ class BitmapCanvas extends EngineCanvas {
         paint.colorFilter as EngineColorFilter?;
     html.HtmlElement imgElement;
     if (colorFilter is _CkBlendModeColorFilter) {
-      switch (colorFilter.blendMode) {
-        case ui.BlendMode.colorBurn:
-        case ui.BlendMode.colorDodge:
-        case ui.BlendMode.hue:
-        case ui.BlendMode.modulate:
-        case ui.BlendMode.overlay:
-        case ui.BlendMode.plus:
-        case ui.BlendMode.srcIn:
-        case ui.BlendMode.srcATop:
-        case ui.BlendMode.srcOut:
-        case ui.BlendMode.saturation:
-        case ui.BlendMode.color:
-        case ui.BlendMode.luminosity:
-        case ui.BlendMode.xor:
-        case ui.BlendMode.dstATop:
-          imgElement = _createImageElementWithSvgFilter(
-              image, colorFilter.color, colorFilter.blendMode, paint);
-          break;
-        default:
-          imgElement = _createBackgroundImageWithBlend(
-              image, colorFilter.color, colorFilter.blendMode, paint);
-          break;
-      }
+      imgElement = _createImageElementWithBlend(image,
+          colorFilter.color, colorFilter.blendMode, paint);
+    } else if (colorFilter is _CkMatrixColorFilter) {
+      imgElement = _createImageElementWithSvgColorMatrixFilter(
+          image, colorFilter.matrix , paint);
     } else {
       // No Blending, create an image by cloning original loaded image.
       imgElement = _reuseOrCreateImage(htmlImage);
@@ -681,6 +663,31 @@ class BitmapCanvas extends EngineCanvas {
       _children.add(imgElement);
     }
     return imgElement;
+  }
+
+  html.HtmlElement _createImageElementWithBlend(HtmlImage image,
+      ui.Color color, ui.BlendMode blendMode, SurfacePaintData paint) {
+    switch (blendMode) {
+      case ui.BlendMode.colorBurn:
+      case ui.BlendMode.colorDodge:
+      case ui.BlendMode.hue:
+      case ui.BlendMode.modulate:
+      case ui.BlendMode.overlay:
+      case ui.BlendMode.plus:
+      case ui.BlendMode.srcIn:
+      case ui.BlendMode.srcATop:
+      case ui.BlendMode.srcOut:
+      case ui.BlendMode.saturation:
+      case ui.BlendMode.color:
+      case ui.BlendMode.luminosity:
+      case ui.BlendMode.xor:
+      case ui.BlendMode.dstATop:
+        return _createImageElementWithSvgBlendFilter(
+            image, color, blendMode, paint);
+      default:
+        return _createBackgroundImageWithBlend(
+            image, color, blendMode, paint);
+    }
   }
 
   @override
@@ -811,7 +818,7 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   // Creates an image element and an svg filter to apply on the element.
-  html.HtmlElement _createImageElementWithSvgFilter(
+  html.HtmlElement _createImageElementWithSvgBlendFilter(
       HtmlImage image,
       ui.Color? filterColor,
       ui.BlendMode colorFilterBlendMode,
@@ -828,6 +835,22 @@ class BitmapCanvas extends EngineCanvas {
     if (colorFilterBlendMode == ui.BlendMode.saturation) {
       imgElement.style.backgroundColor = colorToCssString(filterColor);
     }
+    return imgElement;
+  }
+
+  // Creates an image element and an svg color matrix filter to apply on the element.
+  html.HtmlElement _createImageElementWithSvgColorMatrixFilter(
+      HtmlImage image,
+      List<double> matrix,
+      SurfacePaintData paint) {
+    // For srcIn blendMode, we use an svg filter to apply to image element.
+    String? svgFilter = svgFilterFromColorMatrix(matrix);
+    final html.Element filterElement =
+    html.Element.html(svgFilter, treeSanitizer: _NullTreeSanitizer());
+    rootElement.append(filterElement);
+    _children.add(filterElement);
+    final html.HtmlElement imgElement = _reuseOrCreateImage(image);
+    imgElement.style.filter = 'url(#_fcf${_filterIdCounter})';
     return imgElement;
   }
 
