@@ -23,7 +23,7 @@ void main() {
   testWithoutContext('WebExpressionCompiler handles successful expression compilation', () async {
     fileSystem.file('compilerOutput').writeAsStringSync('a');
     final ResidentCompiler residentCompiler = FakeResidentCompiler(const CompilerOutput('compilerOutput', 0, <Uri>[]));
-    final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler);
+    final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
     final ExpressionCompilationResult result =
       await expressionCompiler.compileExpressionToJs(
@@ -35,7 +35,7 @@ void main() {
   testWithoutContext('WebExpressionCompiler handles compilation error', () async {
     fileSystem.file('compilerOutput').writeAsStringSync('Error: a');
     final ResidentCompiler residentCompiler = FakeResidentCompiler(const CompilerOutput('compilerOutput', 1, <Uri>[]));
-    final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler);
+    final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
     final ExpressionCompilationResult result =
       await expressionCompiler.compileExpressionToJs(
@@ -46,7 +46,7 @@ void main() {
 
   testWithoutContext('WebExpressionCompiler handles internal error', () async {
     final ResidentCompiler residentCompiler = FakeResidentCompiler(null);
-    final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler);
+    final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
     final ExpressionCompilationResult result =
       await expressionCompiler.compileExpressionToJs(
