@@ -108,7 +108,7 @@ const List<MaskConstant> maskConstants = <MaskConstant>[
     name: 'valueMask',
     value: kValueMask,
     description: <String>[
-      'Mask for the 32-bit value portion of the key code. ',
+      'Mask for the 32-bit value portion of the key code.',
       'This is used by platform-specific code to generate Flutter key codes.',
     ],
   ),

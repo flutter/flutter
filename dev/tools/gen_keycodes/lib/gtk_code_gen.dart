@@ -68,6 +68,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   data = g_new(FlKeyEmbedderCheckedKey, 1);
   g_hash_table_insert(table, GUINT_TO_POINTER(GDK_${modifierBitName}_MASK), data);
+  data->is_caps_lock = ${primaryPhysicalName == 'CapsLock' ? 'true' : 'false'};
   data->primary_logical_key = ${toHex(primaryLogical.value, digits: 11)};$pad  // ${primaryLogical.constantName}
   data->primary_physical_key = ${toHex(primaryPhysical.usbHidCode, digits: 9)};$pad   // ${primaryPhysical.constantName}''');
       if (secondaryPhysical != null) {
