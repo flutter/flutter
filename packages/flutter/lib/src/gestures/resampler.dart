@@ -116,7 +116,7 @@ class PointerEventResampler {
     int pointerIdentifier,
     Duration timeStamp,
     bool isDown,
-    int hadButtons,
+    int buttons,
   ) {
     return isDown
         ? _toMoveEvent(
