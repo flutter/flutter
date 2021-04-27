@@ -224,7 +224,15 @@ class ThemeData with Diagnosticable {
     Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
+    @Deprecated(
+      'Use colorScheme.secondary instead. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     Color? accentColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     Brightness? accentColorBrightness,
     Color? canvasColor,
     Color? shadowColor,
@@ -268,6 +276,10 @@ class ThemeData with Diagnosticable {
     String? fontFamily,
     TextTheme? textTheme,
     TextTheme? primaryTextTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     TextTheme? accentTextTheme,
     InputDecorationTheme? inputDecorationTheme,
     IconThemeData? iconTheme,
@@ -550,7 +562,15 @@ class ThemeData with Diagnosticable {
     required this.primaryColorDark,
     required this.canvasColor,
     required this.shadowColor,
+    @Deprecated(
+      'Use colorScheme.secondary instead. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     required this.accentColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     required this.accentColorBrightness,
     required this.scaffoldBackgroundColor,
     required this.bottomAppBarColor,
@@ -591,6 +611,10 @@ class ThemeData with Diagnosticable {
     required this.toggleableActiveColor,
     required this.textTheme,
     required this.primaryTextTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     required this.accentTextTheme,
     required this.inputDecorationTheme,
     required this.iconTheme,
@@ -877,11 +901,19 @@ class ThemeData with Diagnosticable {
   /// well as a color that contrasts well with the secondary color called
   /// [ColorScheme.onSecondary]. It might be simpler to just configure an app's
   /// visuals in terms of the theme's [colorScheme].
+  @Deprecated(
+    'Use colorScheme.secondary instead. '
+    'This feature was deprecated after v2.3.0-0.1.pre.',
+  )
   final Color accentColor;
 
   /// The brightness of the [accentColor]. Used to determine the color of text
   /// and icons placed on top of the accent color (e.g. the icons on a floating
   /// action button).
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.3.0-0.1.pre.',
+  )
   final Brightness accentColorBrightness;
 
   /// The default color of the [Material] that underlies the [Scaffold]. The
@@ -1005,6 +1037,10 @@ class ThemeData with Diagnosticable {
   final TextTheme primaryTextTheme;
 
   /// A text theme that contrasts with the accent color.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.3.0-0.1.pre.',
+  )
   final TextTheme accentTextTheme;
 
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
