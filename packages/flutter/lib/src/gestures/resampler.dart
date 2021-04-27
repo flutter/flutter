@@ -90,7 +90,7 @@ class PointerEventResampler {
       device: event.device,
       position: position,
       delta: delta,
-      buttons: hadButtons,
+      buttons: buttons,
       obscured: event.obscured,
       pressure: event.pressure,
       pressureMin: event.pressureMin,
