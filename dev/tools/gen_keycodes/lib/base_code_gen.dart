@@ -4,10 +4,8 @@
 
 import 'dart:io';
 import 'package:gen_keycodes/logical_key_data.dart';
-import 'package:path/path.dart' as path;
 
 import 'physical_key_data.dart';
-import 'utils.dart';
 
 String _injectDictionary(String template, Map<String, String> dictionary) {
   String result = template;

@@ -14,12 +14,6 @@ information into the pre-defined key values in the `LogicalKeyboardKey` and
 The `data` subdirectory contains both some local data files and the templates
 used to generate the source files.
 
-- `data/printable.json`: contains a mapping between Flutter key name and its
-  printable character. This character is used as the key label.
-- `data/synonyms.json`: contains a mapping between pseudo-keys that represent
-  other keys and the sets of keys they represent. For example, this contains
-  the "shift" key that represents either a "shiftLeft" or "shiftRight" key.
-
 ## Running the tool
 
 To run the `gen_keycodes` tool using the checked in `physical_key_data.json` file, run

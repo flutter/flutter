@@ -1,20 +1,24 @@
 ## Files
 
-### For This Tool
+### General
 
 | File name | Explanation |
 | ---- | ---- |
-| `chromium_modifiers.json` | Maps Web's `key` of modifier keys to the names of the logical keys for these keys' left and right variations. This is used supplement the list of logical keys based on Chromium's list of `key`s, whose indistinction of left and right modifier keys is undesired in Flutter's key model.|
-| `supplemental_hid_codes.inc` | A supplementary HID list on top of Chromium's list of HID codes for extra physical keys.|
 | `physical_key_data.json` | Contains the merged physical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
 | `logicall_key_data.json` | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
+| `supplemental_hid_codes.inc` | A supplementary HID list on top of Chromium's list of HID codes for extra physical keys. Certain entries may also overwrite Chromium's corresponding entries. |
+| `supplemental_key_data.inc` | A supplementary key list on top of Chromium's list of keys for extra logical keys.|
+| `chromium_modifiers.json` | Maps Web's `key` of modifier keys to the names of the logical keys for these keys' left and right variations.This is used when generating logical keys to provide independent values for sided logical keys. Web uses the same `key` for modifier keys of different sides, but Flutter's logical key model treats them as the different keys.|
+| `printable_to_numpads.json` | Maps character to the names of the logical keys for these keys' NumPad variations.This is used when generating logical keys to provide independent values for NumPad logical keys. Web uses the character as `key` for NumPad keys, but Flutter's logical key model treats them as independent keys.|
+| `printable.json` | Maps Flutter key name to its printable character. This character is used as the key label.|
+| `synonyms.json` | Maps pseudo-keys that represent other keys to the sets of keys they represent. For example, this contains the "shift" key that represents either a "shiftLeft" or "shiftRight" key.|
 
 ### Framework
 
 | File name | Explanation |
 | ---- | ---- |
-| `data/keyboard_key.tmpl` | The template for `keyboard_key.dart`. |
-| `data/keyboard_maps.tmpl` | The template for `keyboard_maps.dart`. |
+| `keyboard_key.tmpl` | The template for `keyboard_key.dart`. |
+| `keyboard_maps.tmpl` | The template for `keyboard_maps.dart`. |
 
 
 ### Android
@@ -27,6 +31,7 @@
 
 ### iOS
 | `ios_logical_to_physical.json` | Maps a logical key name to the names of its corresponding physical keys. This is used to derive logical keys (from `keyCode`) that can't or shouldn't be derived from `characterIgnoringModifiers`. |
+| `ios_keyboard_map_cc.tmpl` | The template for `keyboard_map.cc`. (Unused for now.) |
 
 ### Web
 
@@ -48,8 +53,16 @@
 | File name | Explanation |
 | ---- | ---- |
 | `gtk_key_mapping_cc.tmpl` | The template for `key_mapping.cc`. |
+| `gtk_lock_bit_mapping.json` | Maps a name for GTK's modifier bit macro to Flutter's logical name (element #0) and physical name (element #1). This is used to generate checked keys that GTK should keep lock state synchronous on.|
 | `gtk_logical_name_mapping.json` | Maps a logical key name to the macro names of its corresponding `keyval`s. This is used to convert logical keys.|
+| `gtk_modifier_bit_mapping.json` | Maps a name for GTK's modifier bit macro to Flutter's logical name (element #0), physical name (element #1), and the physical name for the paired key (element #2). This is used to generate checked keys that GTK should keep pressing state synchronous on.|
 | `gtk_numpad_shift.json` | Maps the name of a `keyval` macro of a numpad key to that of the corresponding key with NumLock on. GTK uses different `keyval` for numpad keys with and without NumLock on, but Flutter's logical key model treats them as the same key.|
+
+### Linux (GLFW)
+| File name | Explanation |
+| ---- | ---- |
+| `glfw_key_name_to_name.json` | Maps a logical key name to the names of its GLFW macro. (Unused for now.) |
+| `glfw_keyboard_map_cc.tmpl` | The template for `keyboard_map.cc`. (Unused for now.) |
 
 ### macOS
 
@@ -57,3 +70,9 @@
 | ---- | ---- |
 | `macos_key_code_map_cc.tmpl` | The template for `KeyCodeMap.cc`. |
 | `macos_logical_to_physical.json` | Maps a logical key name to the names of its corresponding physical keys. This is used to derive logical keys (from `keyCode`) that can't or shouldn't be derived from `characterIgnoringModifiers`. |
+
+### Fuchsia
+
+| File name | Explanation |
+| ---- | ---- |
+| `fuchsia_keyboard_map_cc.tmpl` | The template for `keyboard_map.cc`. (Unused for now.) |

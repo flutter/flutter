@@ -124,7 +124,7 @@ class LogicalKeyData {
   /// The UNI lines are ignored. Their entries have been included in the
   /// printable file.
   static void _readKeyEntries(Map<String, LogicalKeyEntry> data, String input) {
-    final Map<String, String> unusedNumpad = Map<String, String>.from(printableToNumpads);
+    final Map<String, String> unusedNumpad = Map<String, String>.from(_printableToNumpads);
 
     final RegExp domKeyRegExp = RegExp(
         r'DOM_KEY_(UNI|MAP)\s*\(\s*"([^\s]+?)",\s*'
@@ -143,8 +143,8 @@ class LogicalKeyData {
       final String? keyLabel = match.group(1)! == 'UNI' ? String.fromCharCode(value) : null;
       // If it's a modifier key, add left and right keys instead.
       // Don't add web names and values; they're solved with locations.
-      if (chromeModifiers.containsKey(name)) {
-        final _ModifierPair pair = chromeModifiers[name]!;
+      if (_chromeModifiers.containsKey(name)) {
+        final _ModifierPair pair = _chromeModifiers[name]!;
         data[pair.left] = LogicalKeyEntry.fromName(
           value: value + kLeftModifierPlane,
           name: pair.left,
@@ -162,8 +162,8 @@ class LogicalKeyData {
 
       // If it has a numpad counterpart, also add the numpad key.
       final String? char = value < 256 ? String.fromCharCode(value) : null;
-      if (char != null && printableToNumpads.containsKey(char)) {
-        final String numpadName = printableToNumpads[char]!;
+      if (char != null && _printableToNumpads.containsKey(char)) {
+        final String numpadName = _printableToNumpads[char]!;
         data[numpadName] = LogicalKeyEntry.fromName(
           value: char.codeUnitAt(0) + kNumpadPlane,
           name: numpadName,
@@ -344,7 +344,7 @@ class LogicalKeyData {
   }
 
   // Map Web key to the pair of key names
-  static late final Map<String, _ModifierPair> chromeModifiers = () {
+  static late final Map<String, _ModifierPair> _chromeModifiers = () {
     final String rawJson = File(path.join(dataRoot, 'chromium_modifiers.json',)).readAsStringSync();
     return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
       final List<dynamic> pair = value as List<dynamic>;
@@ -360,7 +360,7 @@ class LogicalKeyData {
   })();
 
   // Map printable to corresponding numpad key name
-  static late final Map<String, String> printableToNumpads = () {
+  static late final Map<String, String> _printableToNumpads = () {
     final String rawJson = File(path.join(dataRoot, 'printable_to_numpads.json',)).readAsStringSync();
     return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
       return MapEntry<String, String>(key, value as String);
