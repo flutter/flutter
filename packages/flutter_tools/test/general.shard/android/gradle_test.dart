@@ -1024,5 +1024,3 @@ class FakeGradleUtils extends GradleUtils {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {}
-// class MockAndroidProject extends Mock implements AndroidProject {}
-// class MockFlutterProject extends Mock implements FlutterProject {}
