@@ -1390,6 +1390,46 @@ void _paragraphTests() {
     paragraph.delete();
   });
 
+  test('RectHeightStyle', () {
+    SkParagraphStyleProperties props = SkParagraphStyleProperties();
+    props.heightMultiplier = 3;
+    props.textAlign = canvasKit.TextAlign.Start;
+    props.textDirection = canvasKit.TextDirection.LTR;
+    props.textStyle = SkTextStyleProperties()
+      ..fontSize = 25
+      ..fontFamilies = <String>['Roboto']
+      ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
+    props.strutStyle = SkStrutStyleProperties()
+      ..strutEnabled = true
+      ..forceStrutHeight = true
+      ..fontSize = 25
+      ..fontFamilies = <String>['Roboto']
+      ..heightMultiplier = 3
+      ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
+    final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
+    final SkParagraphBuilder builder =
+        canvasKit.ParagraphBuilder.MakeFromFontProvider(
+      paragraphStyle,
+      skiaFontCollection.fontProvider,
+    );
+    builder.addText('hello');
+
+    final SkParagraph paragraph = builder.build();
+    paragraph.layout(500);
+
+    expect(
+      paragraph.getRectsForRange(
+        0,
+        1,
+        canvasKit.RectHeightStyle.Strut,
+        canvasKit.RectWidthStyle.Tight,
+      ),
+      [
+        [0, 0, 13.770000457763672, 75],
+      ],
+    );
+  });
+
   test('TextHeightBehavior', () {
     expect(
       toSkTextHeightBehavior(ui.TextHeightBehavior(
