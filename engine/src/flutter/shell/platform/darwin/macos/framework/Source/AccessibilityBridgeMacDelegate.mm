@@ -6,6 +6,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
@@ -26,6 +27,10 @@ AccessibilityBridgeMacDelegate::AccessibilityBridgeMacDelegate(__weak FlutterEng
 
 void AccessibilityBridgeMacDelegate::OnAccessibilityEvent(
     ui::AXEventGenerator::TargetedEvent targeted_event) {
+  if (!flutter_engine_.viewController.viewLoaded || !flutter_engine_.viewController.view.window) {
+    // We don't need to send accessibility events if the there is no view or window.
+    return;
+  }
   ui::AXNode* ax_node = targeted_event.node;
   std::vector<AccessibilityBridgeMacDelegate::NSAccessibilityEvent> events =
       MacOSEventsFromAXEvent(targeted_event.event_params.event, *ax_node);
@@ -265,9 +270,10 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
     case ui::AXEventGenerator::Event::CHILDREN_CHANGED: {
       // NSAccessibilityCreatedNotification seems to be the only way to let
       // Voiceover pick up layout changes.
+      NSCAssert(flutter_engine_.viewController, @"The viewController must not be nil");
       events.push_back({
           .name = NSAccessibilityCreatedNotification,
-          .target = [NSApp mainWindow],
+          .target = flutter_engine_.viewController.view.window,
           .user_info = nil,
       });
       break;
@@ -335,6 +341,9 @@ void AccessibilityBridgeMacDelegate::DispatchAccessibilityAction(ui::AXNode::AXI
                                                                  FlutterSemanticsAction action,
                                                                  const std::vector<uint8_t>& data) {
   NSCAssert(flutter_engine_, @"Flutter engine should not be deallocated");
+  NSCAssert(flutter_engine_.viewController.viewLoaded && flutter_engine_.viewController.view.window,
+            @"The accessibility bridge should not receive accessibility actions if the flutter view"
+            @"is not loaded or attached to a NSWindow.");
   [flutter_engine_ dispatchSemanticsAction:action toTarget:target withData:data];
 }
 
