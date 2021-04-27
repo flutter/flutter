@@ -45,10 +45,27 @@ class ClipboardMessageHandler {
       final Map<String, dynamic> map = <String, dynamic>{'text': data};
       callback!(codec.encodeSuccessEnvelope(map));
     }).catchError((dynamic error) {
-      print('Could not get text from clipboard: $error');
-      callback!(codec.encodeErrorEnvelope(
-          code: 'paste_fail', message: 'Clipboard.getData failed'));
+      if (error is UnimplementedError) {
+        // Clipboard.getData not supported.
+        // Passing [null] to [callback] indicates that the platform message isn't
+        // implemented. Look at [MethodChannel.invokeMethod] to see how [null] is
+        // handled.
+        Future<void>.delayed(Duration.zero).then((_) {
+          if (callback != null) {
+            callback(null);
+          }
+        });
+        return;
+      }
+      _reportGetDataFailure(callback, codec, error);
     });
+  }
+
+  void _reportGetDataFailure(ui.PlatformMessageResponseCallback? callback,
+      MethodCodec codec, dynamic error) {
+    print('Could not get text from clipboard: $error');
+    callback!(codec.encodeErrorEnvelope(
+        code: 'paste_fail', message: 'Clipboard.getData failed'));
   }
 
   /// Methods used by tests.
@@ -185,6 +202,7 @@ class ExecCommandPasteStrategy implements PasteFromClipboardStrategy {
   @override
   Future<String> getData() {
     // TODO(nurhan): https://github.com/flutter/flutter/issues/48581
-    throw UnimplementedError('Paste is not implemented for this browser.');
+    return Future.error(
+        UnimplementedError('Paste is not implemented for this browser.'));
   }
 }
