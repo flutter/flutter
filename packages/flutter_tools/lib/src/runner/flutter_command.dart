@@ -18,7 +18,7 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for "useLegacyNames" only
+import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for deprecated option name aliases only
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
@@ -527,9 +527,10 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesDartDefineOption({ bool useLegacyNames = false }) {
+  void usesDartDefineOption() {
     argParser.addMultiOption(
-      useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption,
+      FlutterOptions.kDartDefinesOption,
+      aliases: <String>[ kDartDefines ], // supported for historical reasons
       help: 'Additional key-value pairs that will be available as constants '
             'from the String.fromEnvironment, bool.fromEnvironment, int.fromEnvironment, '
             'and double.fromEnvironment constructors.\n'
@@ -700,15 +701,17 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Enables support for the hidden options --extra-front-end-options and
   /// --extra-gen-snapshot-options.
-  void usesExtraDartFlagOptions({ @required bool verboseHelp, bool useLegacyNames = false }) {
-    argParser.addMultiOption(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions,
+  void usesExtraDartFlagOptions({ @required bool verboseHelp }) {
+    argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      aliases: <String>[ kExtraFrontEndOptions ], // supported for historical reasons
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart front end. '
             'For example, "--${FlutterOptions.kExtraFrontEndOptions}=--enable-experiment=nonfunction-type-aliases".',
       valueHelp: '--foo,--bar',
       splitCommas: true,
       hide: !verboseHelp,
     );
-    argParser.addMultiOption(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions,
+    argParser.addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
+      aliases: <String>[ kExtraGenSnapshotOptions ], // supported for historical reasons
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
             '(Only used in "--profile" or "--release" builds.) '
             'For example, "--${FlutterOptions.kExtraGenSnapshotOptions}=--no-strip".',
