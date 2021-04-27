@@ -50,9 +50,6 @@ class MacOSDevice extends DesktopDevice {
   @override
   String get name => 'macOS';
 
-  /// Returns [TargetPlatform.darwin] even on macOS ARM devices.
-  ///
-  /// Build system, artifacts rely on Rosetta to translate to x86_64 on ARM.
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
