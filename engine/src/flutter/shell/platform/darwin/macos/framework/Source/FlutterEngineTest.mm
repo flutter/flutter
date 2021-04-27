@@ -156,4 +156,87 @@ TEST(FlutterEngine, CanToggleAccessibility) {
   [engine shutDownEngine];
 }
 
+TEST(FlutterEngine, CanToggleAccessibilityWhenHeadless) {
+  FlutterEngine* engine = CreateTestEngine();
+  // Capture the update callbacks before the embedder API initializes.
+  auto original_init = engine.embedderAPI.Initialize;
+  std::function<void(const FlutterSemanticsNode*, void*)> update_node_callback;
+  std::function<void(const FlutterSemanticsCustomAction*, void*)> update_action_callback;
+  engine.embedderAPI.Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&update_action_callback, &update_node_callback, &original_init](
+                       size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data, auto engine_out) {
+        update_node_callback = args->update_semantics_node_callback;
+        update_action_callback = args->update_semantics_custom_action_callback;
+        return original_init(version, config, args, user_data, engine_out);
+      }));
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+
+  // Enable the semantics without attaching a view controller.
+  bool enabled_called = false;
+  engine.embedderAPI.UpdateSemanticsEnabled =
+      MOCK_ENGINE_PROC(UpdateSemanticsEnabled, ([&enabled_called](auto engine, bool enabled) {
+                         enabled_called = enabled;
+                         return kSuccess;
+                       }));
+  engine.semanticsEnabled = YES;
+  EXPECT_TRUE(enabled_called);
+  // Send flutter semantics updates.
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.text_selection_base = -1;
+  root.text_selection_extent = -1;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 1;
+  int32_t children[] = {1};
+  root.children_in_traversal_order = children;
+  root.custom_accessibility_actions_count = 0;
+  update_node_callback(&root, (void*)CFBridgingRetain(engine));
+
+  FlutterSemanticsNode child1;
+  child1.id = 1;
+  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  child1.actions = static_cast<FlutterSemanticsAction>(0);
+  child1.text_selection_base = -1;
+  child1.text_selection_extent = -1;
+  child1.label = "child 1";
+  child1.hint = "";
+  child1.value = "";
+  child1.increased_value = "";
+  child1.decreased_value = "";
+  child1.child_count = 0;
+  child1.custom_accessibility_actions_count = 0;
+  update_node_callback(&child1, (void*)CFBridgingRetain(engine));
+
+  FlutterSemanticsNode node_batch_end;
+  node_batch_end.id = kFlutterSemanticsNodeIdBatchEnd;
+  update_node_callback(&node_batch_end, (void*)CFBridgingRetain(engine));
+
+  FlutterSemanticsCustomAction action_batch_end;
+  action_batch_end.id = kFlutterSemanticsNodeIdBatchEnd;
+  update_action_callback(&action_batch_end, (void*)CFBridgingRetain(engine));
+
+  // No crashes.
+  EXPECT_EQ(engine.viewController, nil);
+
+  // Disable the semantics.
+  bool semanticsEnabled = true;
+  engine.embedderAPI.UpdateSemanticsEnabled =
+      MOCK_ENGINE_PROC(UpdateSemanticsEnabled, ([&semanticsEnabled](auto engine, bool enabled) {
+                         semanticsEnabled = enabled;
+                         return kSuccess;
+                       }));
+  engine.semanticsEnabled = NO;
+  EXPECT_FALSE(semanticsEnabled);
+  // Still no crashes
+  EXPECT_EQ(engine.viewController, nil);
+  [engine shutDownEngine];
+}
+
 }  // namespace flutter::testing

@@ -167,6 +167,7 @@ executable("flutter_desktop_darwin_unittests") {
   testonly = true
 
   sources = [
+    "framework/Source/AccessibilityBridgeMacDelegateTest.mm",
     "framework/Source/FlutterChannelKeyResponderUnittests.mm",
     "framework/Source/FlutterEmbedderExternalTextureUnittests.mm",
     "framework/Source/FlutterEmbedderKeyResponderUnittests.mm",
