@@ -12,6 +12,7 @@
 #include "loop.h"
 #include "platform/utils.h"
 #include "runner.h"
+#include "runtime/dart/utils/root_inspect_node.h"
 #include "runtime/dart/utils/tempfs.h"
 
 int main(int argc, char const* argv[]) {
@@ -19,13 +20,12 @@ int main(int argc, char const* argv[]) {
 
   // Create our component context which is served later.
   auto context = sys::ComponentContext::Create();
-  sys::ComponentInspector inspector(context.get());
-
-  inspect::Node& root = inspector.inspector()->GetRoot();
+  dart_utils::RootInspectNode::Initialize(context.get());
 
   // We inject the 'vm' node into the dart vm so that it can add any inspect
   // data that it needs to the inspect tree.
-  dart::SetDartVmNode(std::make_unique<inspect::Node>(root.CreateChild("vm")));
+  dart::SetDartVmNode(std::make_unique<inspect::Node>(
+      dart_utils::RootInspectNode::CreateRootChild("vm")));
 
   std::unique_ptr<trace::TraceProviderWithFdio> provider;
   {
