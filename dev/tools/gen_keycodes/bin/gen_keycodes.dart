@@ -208,7 +208,6 @@ Future<void> main(List<String> rawArguments) async {
     'macos': MacOsCodeGenerator(
       physicalData,
       logicalData,
-      readDataFile('mask_constants.json'),
     ),
     'windows': WindowsCodeGenerator(
       physicalData,

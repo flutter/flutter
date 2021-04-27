@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'constants.dart';
 import 'logical_key_data.dart';
-import 'mask_constants.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
@@ -34,11 +34,8 @@ String _toConstantVariableName(String variableName) {
 /// Generates the key mapping of macOS, based on the information in the key
 /// data structure given to it.
 class MacOsCodeGenerator extends PlatformCodeGenerator {
-  MacOsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData, String maskConstants)
-    : maskConstants = parseMaskConstants(json.decode(maskConstants)),
-      super(keyData, logicalData);
-
-  final List<MaskConstant> maskConstants;
+  MacOsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+    : super(keyData, logicalData);
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
@@ -70,7 +67,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
         .map((String line) => wrapString(line, prefix: ' * '))
         .join(' *\n'));
       buffer.writeln(' */');
-      buffer.writeln('const uint64_t ${_toConstantVariableName(constant.name)} = ${constant.value};');
+      buffer.writeln('const uint64_t ${_toConstantVariableName(constant.name)} = ${toHex(constant.value, digits: 11)};');
       buffer.writeln('');
     }
     return buffer.toString().trimRight();
