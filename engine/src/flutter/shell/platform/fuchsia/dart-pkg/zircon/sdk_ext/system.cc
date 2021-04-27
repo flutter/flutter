@@ -463,12 +463,6 @@ uint64_t System::ClockGetMonotonic() {
   return zx_clock_get_monotonic();
 }
 
-uint64_t System::ClockGet(uint32_t clock_id) {
-  zx_time_t result = 0;
-  zx_clock_get(clock_id, &result);
-  return result;
-}
-
 // clang-format: off
 
 #define FOR_EACH_STATIC_BINDING(V) \
@@ -488,8 +482,7 @@ uint64_t System::ClockGet(uint32_t clock_id) {
   V(System, VmoRead)               \
   V(System, VmoWrite)              \
   V(System, VmoMap)                \
-  V(System, ClockGetMonotonic)     \
-  V(System, ClockGet)
+  V(System, ClockGetMonotonic)
 
 // clang-format: on
 
