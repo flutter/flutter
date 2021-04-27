@@ -1,4 +1,4 @@
-Signature: 6f8f0bcaf2b9a1fa1ba1871ca95b8ede
+Signature: dc830621ab814e7eb616b5108d830514
 
 UNUSED LICENSES:
 
@@ -10560,7 +10560,6 @@ FILE: ../../../third_party/dart/runtime/observatory_2/lib/cli.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/debugger.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/sample_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/allocation_profile/allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/app/analytics.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/cli/command.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/debugger/debugger.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/debugger/debugger_location.dart
