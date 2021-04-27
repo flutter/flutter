@@ -207,9 +207,7 @@ void main() {
       }
       expect(err, isNotNull);
       expect(err.toString(), contains('Unable to upgrade Flutter: HEAD does not point to a branch'));
-      expect(err.toString(), contains('Use "flutter channel" to switch to an official channel ("stable", "beta", "dev", or "master") and retry'));
-      // FakeFlutterVersion.getBranchName is hardcoded to 'master'
-      expect(err.toString(), contains('flutter channel stable'));
+      expect(err.toString(), contains('Use "flutter channel" to switch to an official channel, and retry'));
       expect(err.toString(), contains('re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -242,10 +240,7 @@ void main() {
       }
       expect(err, isNotNull);
       expect(err.toString(), contains('Unable to upgrade Flutter: No upstream repository configured for branch.'));
-      expect(err.toString(), contains('Run "git remote add origin https://github.com/flutter/flutter.git"'));
-      // FakeFlutterVersion.getBranchName is hardcoded to 'master'
-      expect(err.toString(), contains('and "git branch --set-upstream-to=origin/master"'));
-      expect(err.toString(), contains('if remote "origin" exists in /src/flutter'));
+      expect(err.toString(), contains('Use "git remote" to set an upstream remote for the current branch, and retry'));
       expect(err.toString(), contains('re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -311,8 +306,7 @@ void main() {
         expect(err, isNotNull);
         expect(err.toString(), contains('The Flutter SDK is tracking a non-standard remote "$flutterNonStandardUrlDotGit"'));
         expect(err.toString(), contains('set the environment variable "FLUTTER_GIT_URL" to "$flutterNonStandardUrlDotGit", and retry.'));
-        expect(err.toString(), contains('change the url of the tracking remote to "https://github.com/flutter/flutter.git", and retry,'));
-        expect(err.toString(), contains('git remote set-url origin https://github.com/flutter/flutter.git'));
+        expect(err.toString(), contains('change the url of the tracking remote via "git remote" to "https://github.com/flutter/flutter.git", and retry'));
         expect(err.toString(), contains('re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
