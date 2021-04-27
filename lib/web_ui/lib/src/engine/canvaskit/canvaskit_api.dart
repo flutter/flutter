@@ -320,9 +320,12 @@ SkTextHeightBehavior toSkTextHeightBehavior(ui.TextHeightBehavior behavior) {
 
 @JS()
 class SkRectHeightStyleEnum {
-  // TODO(yjbanov): support all styles
   external SkRectHeightStyle get Tight;
   external SkRectHeightStyle get Max;
+  external SkRectHeightStyle get IncludeLineSpacingMiddle;
+  external SkRectHeightStyle get IncludeLineSpacingTop;
+  external SkRectHeightStyle get IncludeLineSpacingBottom;
+  external SkRectHeightStyle get Strut;
 }
 
 @JS()
@@ -333,11 +336,14 @@ class SkRectHeightStyle {
 final List<SkRectHeightStyle> _skRectHeightStyles = <SkRectHeightStyle>[
   canvasKit.RectHeightStyle.Tight,
   canvasKit.RectHeightStyle.Max,
+  canvasKit.RectHeightStyle.IncludeLineSpacingMiddle,
+  canvasKit.RectHeightStyle.IncludeLineSpacingTop,
+  canvasKit.RectHeightStyle.IncludeLineSpacingBottom,
+  canvasKit.RectHeightStyle.Strut,
 ];
 
 SkRectHeightStyle toSkRectHeightStyle(ui.BoxHeightStyle style) {
-  final int index = style.index;
-  return _skRectHeightStyles[index < 2 ? index : 0];
+  return _skRectHeightStyles[style.index];
 }
 
 @JS()
