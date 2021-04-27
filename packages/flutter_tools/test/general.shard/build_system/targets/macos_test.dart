@@ -25,56 +25,76 @@ void main() {
   FileSystem fileSystem;
   Artifacts artifacts;
   FakeProcessManager processManager;
+  File binary;
+  BufferLogger logger;
+  FakeCommand copyFrameworkCommand;
+  FakeCommand lipoInfoNonFatCommand;
+  FakeCommand lipoInfoFatCommand;
+  FakeCommand lipoVerifyX86_64Command;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: 'darwin',
-        kDarwinArchs: 'x64',
+        kDarwinArchs: 'x86_64',
       },
       inputs: <String, String>{},
       artifacts: artifacts,
       processManager: processManager,
-      logger: BufferLogger.test(),
+      logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2'
     );
+
+    binary = environment.outputDir
+        .childDirectory('FlutterMacOS.framework')
+        .childFile('FlutterMacOS');
+
+    copyFrameworkCommand = FakeCommand(
+      command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        'Artifact.flutterMacOSFramework.debug',
+        environment.outputDir.path,
+      ],
+    );
+
+    lipoInfoNonFatCommand = FakeCommand(command: <String>[
+      'lipo',
+      '-info',
+      binary.path,
+    ], stdout: 'Non-fat file:');
+
+    lipoInfoFatCommand = FakeCommand(command: <String>[
+      'lipo',
+      '-info',
+      binary.path,
+    ], stdout: 'Architectures in the fat file:');
+
+    lipoVerifyX86_64Command = FakeCommand(command: <String>[
+      'lipo',
+      binary.path,
+      '-verify_arch',
+      'x86_64',
+    ]);
   });
 
   testUsingContext('Copies files to correct cache directory', () async {
-    final Directory outputDir = fileSystem.directory('output');
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          'Artifact.flutterMacOSFramework.debug',
-          outputDir.path,
-        ],
-      ),
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      copyFrameworkCommand,
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
     ]);
-    environment = Environment.test(
-      fileSystem.currentDirectory,
-      defines: <String, String>{
-        kBuildMode: 'debug',
-        kTargetPlatform: 'darwin-x64',
-      },
-      inputs: <String, String>{},
-      artifacts: artifacts,
-      processManager: processManager,
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-      engineVersion: '2',
-      outputDir: outputDir,
-    );
 
     await const DebugUnpackMacOS().build(environment);
 
@@ -82,6 +102,81 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+  });
+
+  testUsingContext('thinning fails when framework missing', () async {
+    processManager.addCommand(copyFrameworkCommand);
+    await expectLater(
+        const DebugUnpackMacOS().build(environment),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('FlutterMacOS.framework/FlutterMacOS does not exist, cannot thin'),
+        )));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('lipo fails when arch missing from framework', () async {
+    environment.defines[kDarwinArchs] = 'arm64 x86_64';
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      copyFrameworkCommand,
+      lipoInfoFatCommand,
+      FakeCommand(command: <String>[
+        'lipo',
+        binary.path,
+        '-verify_arch',
+        'arm64',
+        'x86_64',
+      ], exitCode: 1),
+    ]);
+
+    await expectLater(
+        const DebugUnpackMacOS().build(environment),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('does not contain arm64 x86_64. Running lipo -info:\nArchitectures in the fat file:'),
+        )));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('skips thins framework', () async {
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      copyFrameworkCommand,
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
+    ]);
+
+    await const DebugUnpackMacOS().build(environment);
+
+    expect(logger.traceText, contains('Skipping lipo for non-fat file /FlutterMacOS.framework/FlutterMacOS'));
+  });
+
+  testUsingContext('thins fat framework', () async {
+    binary.createSync(recursive: true);
+    processManager.addCommands(<FakeCommand>[
+      copyFrameworkCommand,
+      lipoInfoFatCommand,
+      lipoVerifyX86_64Command,
+      FakeCommand(command: <String>[
+          'lipo',
+          '-output',
+          binary.path,
+          '-extract',
+          'x86_64',
+          binary.path,
+      ]),
+    ]);
+
+    await const DebugUnpackMacOS().build(environment);
+
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('debug macOS application fails if App.framework missing', () async {

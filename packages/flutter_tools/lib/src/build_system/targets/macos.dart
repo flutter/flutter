@@ -67,6 +67,58 @@ abstract class UnpackMacOS extends Target {
             '${result.stdout}\n---\n${result.stderr}',
       );
     }
+
+    final File frameworkBinary = environment.outputDir.childDirectory('FlutterMacOS.framework').childFile('FlutterMacOS');
+    final String frameworkBinaryPath = frameworkBinary.path;
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
+    }
+    _thinFramework(environment, frameworkBinaryPath);
+  }
+
+  void _thinFramework(Environment environment, String frameworkBinaryPath) {
+    final String archs = environment.defines[kDarwinArchs] ?? 'x86_64';
+    final List<String> archList = archs.split(' ').toList();
+    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-info',
+      frameworkBinaryPath,
+    ]);
+    final String lipoInfo = infoResult.stdout as String;
+
+    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+      'lipo',
+      frameworkBinaryPath,
+      '-verify_arch',
+      ...archList
+    ]);
+
+    if (verifyResult.exitCode != 0) {
+      throw Exception('Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+    }
+
+    // Skip thinning for non-fat executables.
+    if (lipoInfo.startsWith('Non-fat file:')) {
+      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
+      return;
+    }
+
+    // Thin in-place.
+    final ProcessResult extractResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-output',
+      frameworkBinaryPath,
+      for (final String arch in archList)
+        ...<String>[
+          '-extract',
+          arch,
+        ],
+      ...<String>[frameworkBinaryPath],
+    ]);
+
+    if (extractResult.exitCode != 0) {
+      throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+    }
   }
 }
 
