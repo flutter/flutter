@@ -75,7 +75,7 @@ TextStyle SkiaToTxt(const skt::TextStyle& skia) {
   for (const skt::TextShadow& skia_shadow : skia.getShadows()) {
     txt::TextShadow shadow;
     shadow.offset = skia_shadow.fOffset;
-    shadow.blur_radius = skia_shadow.fBlurRadius;
+    shadow.blur_radius = skia_shadow.fBlurSigma;
     shadow.color = skia_shadow.fColor;
     txt.text_shadows.emplace_back(shadow);
   }
