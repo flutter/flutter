@@ -1005,6 +1005,7 @@ class ReorderableDragStartListener extends StatelessWidget {
     Key? key,
     required this.child,
     required this.index,
+    this.draggable = true,
   }) : super(key: key);
 
   /// The widget for which the application would like to respond to a tap and
@@ -1014,10 +1015,13 @@ class ReorderableDragStartListener extends StatelessWidget {
   /// The index of the associated item that will be dragged in the list.
   final int index;
 
+  /// Whether the associated item can be dragged in the list
+  final bool draggable;
+
   @override
   Widget build(BuildContext context) {
     return Listener(
-      onPointerDown: (PointerDownEvent event) => _startDragging(context, event),
+      onPointerDown: draggable ? (PointerDownEvent event) => _startDragging(context, event) : null,
       child: child,
     );
   }
