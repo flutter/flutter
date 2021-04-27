@@ -107,9 +107,8 @@ enum HostArtifact {
 String _platformDirName(TargetPlatform platform) {
   if (platform == TargetPlatform.darwin) {
     return 'darwin-x64';
-  } else {
-    return getNameForTargetPlatform(platform);
   }
+  return getNameForTargetPlatform(platform);
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
