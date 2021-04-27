@@ -207,7 +207,6 @@ class CompileMacOSFramework extends Target {
         final File codeSizeFile = environment.fileSystem
           .directory(codeSizeDirectory)
           .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
-        extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         final File precompilerTraceFile = environment.fileSystem
           .directory(codeSizeDirectory)
           .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
