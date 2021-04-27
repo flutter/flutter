@@ -49,7 +49,7 @@ class PointerEventResampler {
     Offset position,
     Offset delta,
     Duration timeStamp,
-    int hadButtons,
+    int buttons,
   ) {
     return PointerHoverEvent(
       timeStamp: timeStamp,
