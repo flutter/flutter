@@ -553,6 +553,12 @@
       "flaky": false
     },
     {
+      "name": "Linux skp_generator",
+      "repo": "flutter",
+      "task_name": "linux_skp_generator",
+      "flaky": true
+    },
+    {
       "name": "Mac build_aar_module_test",
       "repo": "flutter",
       "task_name": "mac_build_aar_module_test",

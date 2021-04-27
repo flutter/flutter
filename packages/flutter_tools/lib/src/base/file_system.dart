@@ -107,10 +107,12 @@ String getDisplayPath(String fullPath, FileSystem fileSystem) {
 /// source/destination file pair.
 ///
 /// Skips files if [shouldCopyFile] returns `false`.
+/// Does not recurse over directories if [shouldCopyDirectory] returns `false`.
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
   bool Function(File srcFile, File destFile)? shouldCopyFile,
+  bool Function(Directory)? shouldCopyDirectory,
   void Function(File srcFile, File destFile)? onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
@@ -134,6 +136,9 @@ void copyDirectory(
       newFile.writeAsBytesSync(entity.readAsBytesSync());
       onFileCopied?.call(entity, newFile);
     } else if (entity is Directory) {
+      if (shouldCopyDirectory != null && !shouldCopyDirectory(entity)) {
+        continue;
+      }
       copyDirectory(
         entity,
         destDir.fileSystem.directory(newPath),

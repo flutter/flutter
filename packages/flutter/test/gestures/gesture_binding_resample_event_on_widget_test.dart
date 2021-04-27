@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Logically this file should be part of `gesture_binding_test.dart` but is here
+// due to conflict of `flutter_test` and `package:test`.
+// See https://github.com/dart-lang/matcher/issues/98
+// TODO(CareF): Consider combine this file back to `gesture_binding_test.dart`
+// after #98 is fixed.
+
 import 'dart:ui' as ui;
 
 import 'package:clock/clock.dart';

@@ -165,7 +165,7 @@ void main() {
   testWidgets('ModalBarrier plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
     final List<String> playedSystemSounds = <String>[];
     try {
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'SystemSound.play')
           playedSystemSounds.add(methodCall.arguments as String);
       });
@@ -182,7 +182,7 @@ void main() {
       await tester.tap(find.text('target'), warnIfMissed: false);
       await tester.pumpWidget(subject);
     } finally {
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+      SystemChannels.platform.setMockMethodCallHandler(null);
     }
     expect(playedSystemSounds, hasLength(1));
     expect(playedSystemSounds[0], SystemSoundType.alert.toString());

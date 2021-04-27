@@ -95,6 +95,7 @@ abstract class MethodCodec {
   ByteData encodeErrorEnvelope({ required String code, String? message, Object? details});
 }
 
+
 /// Thrown to indicate that a platform interaction failed in the platform
 /// plugin.
 ///

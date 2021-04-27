@@ -3101,7 +3101,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   bool onDragStartedCalled = false;
 
   int hapticFeedbackCalls = 0;
-  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+  SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
     if (methodCall.method == 'HapticFeedback.vibrate') {
       hapticFeedbackCalls++;
     }
