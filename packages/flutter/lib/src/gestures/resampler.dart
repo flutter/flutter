@@ -81,7 +81,7 @@ class PointerEventResampler {
     Offset delta,
     int pointerIdentifier,
     Duration timeStamp,
-    int hadButtons,
+    int buttons,
   ) {
     return PointerMoveEvent(
       timeStamp: timeStamp,
