@@ -2,5 +2,5 @@
   "SHIFT": ["ShiftLeft", "ShiftLeft", "ShiftRight"],
   "CONTROL": ["ControlLeft", "ControlLeft", "ControlRight"],
   "MOD1": ["AltLeft", "AltLeft", "AltRight"],
-  "MOD4": ["MetaLeft", "MetaLeft", "MetaRight"]
+  "META": ["MetaLeft", "MetaLeft", "MetaRight"]
 }
