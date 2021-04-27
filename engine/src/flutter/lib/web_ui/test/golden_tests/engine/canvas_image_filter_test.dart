@@ -24,11 +24,27 @@ void testMain() async {
   // Regression test for https://github.com/flutter/flutter/issues/76966
   test('Draws image with dstATop color filter', () async {
     final RecordingCanvas canvas = RecordingCanvas(region);
-    canvas.drawImage(createFlutterLogoTestImage(), Offset(10, 10),
-      makePaint()
-        ..colorFilter = EngineColorFilter.mode(Color(0x40000000),
-            BlendMode.dstATop));
-    await canvasScreenshot(canvas, 'image_color_fiter_dstatop',
-        region: region);
+    canvas.drawImage(
+        createFlutterLogoTestImage(),
+        Offset(10, 10),
+        makePaint()
+          ..colorFilter =
+              EngineColorFilter.mode(Color(0x40000000), BlendMode.dstATop));
+    await canvasScreenshot(canvas, 'image_color_fiter_dstatop', region: region);
+  });
+
+  test('Draws image with matrix color filter', () async {
+    final RecordingCanvas canvas = RecordingCanvas(region);
+    canvas.drawImage(
+        createFlutterLogoTestImage(),
+        Offset(10, 10),
+        makePaint()
+          ..colorFilter = EngineColorFilter.matrix(<double>[
+            0.2126, 0.7152, 0.0722, 0, 0, //
+            0.2126, 0.7152, 0.0722, 0, 0, //
+            0.2126, 0.7152, 0.0722, 0, 0, //
+            0, 0, 0, 1, 0, //
+          ]));
+    await canvasScreenshot(canvas, 'image_matrix_color_fiter', region: region);
   });
 }

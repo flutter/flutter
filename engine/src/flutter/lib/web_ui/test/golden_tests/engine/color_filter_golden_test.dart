@@ -48,6 +48,26 @@ void testMain() async {
         maxDiffRatePercent: 12.0);
   });
 
+  test('Should apply matrix color filter to image', () async {
+    final List<double> colorMatrix = <double>[
+      0.2126, 0.7152, 0.0722, 0, 0, //
+      0.2126, 0.7152, 0.0722, 0, 0, //
+      0.2126, 0.7152, 0.0722, 0, 0, //
+      0, 0, 0, 1, 0, //
+    ];
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    final Picture backgroundPicture = _drawBackground();
+    builder.addPicture(Offset.zero, backgroundPicture);
+    builder.pushColorFilter(
+        EngineColorFilter.matrix(colorMatrix));
+    final Picture circles1 = _drawTestPictureWithCircles(30, 30);
+    builder.addPicture(Offset.zero, circles1);
+    builder.pop();
+    html.document.body!.append(builder.build().webOnlyRootElement!);
+    await matchGoldenFile('color_filter_matrix.png', region: region,
+        maxDiffRatePercent: 12.0);
+  });
+
   /// Regression test for https://github.com/flutter/flutter/issues/59451.
   ///
   /// Picture with overlay blend inside a physical shape. Should show image

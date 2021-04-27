@@ -59,14 +59,18 @@ class PersistedColorFilter extends PersistedContainerSurface
       childContainer?.style.visibility = 'visible';
       return;
     }
-
-    if (engineValue is! _CkBlendModeColorFilter) {
+    if (engineValue is _CkBlendModeColorFilter) {
+      _applyBlendModeFilter(engineValue);
+    } else if (engineValue is _CkMatrixColorFilter) {
+      _applyMatrixColorFilter(engineValue);
+    } else {
       childContainer?.style.visibility = 'visible';
-      return;
     }
+  }
 
-    ui.Color filterColor = engineValue.color;
-    ui.BlendMode colorFilterBlendMode = engineValue.blendMode;
+  void _applyBlendModeFilter(_CkBlendModeColorFilter colorFilter) {
+    ui.Color filterColor = colorFilter.color;
+    ui.BlendMode colorFilterBlendMode = colorFilter.blendMode;
     html.CssStyleDeclaration style = rootElement!.style;
     switch (colorFilterBlendMode) {
       case ui.BlendMode.clear:
@@ -123,7 +127,16 @@ class PersistedColorFilter extends PersistedContainerSurface
           colorFilterBlendMode == ui.BlendMode.modulate) {
         style.backgroundColor = colorToCssString(filterColor);
       }
-      return;
+    }
+  }
+
+  void _applyMatrixColorFilter(_CkMatrixColorFilter colorFilter) {
+    String? svgFilter = svgFilterFromColorMatrix(colorFilter.matrix);
+    if (svgFilter != null) {
+      _filterElement =
+          html.Element.html(svgFilter, treeSanitizer: _NullTreeSanitizer());
+      rootElement!.append(_filterElement!);
+      rootElement!.style.filter = 'url(#_fcf${_filterIdCounter})';
     }
   }
 
@@ -213,6 +226,23 @@ String? svgFilterFromBlendMode(
       break;
   }
   return svgFilter;
+}
+
+String? svgFilterFromColorMatrix(List<double> matrix) {
+  _filterIdCounter += 1;
+  final StringBuffer sbMatrix = StringBuffer();
+  assert(matrix.length == 20);
+  for (int i = 0; i < 20; i++) {
+    if (i != 0) {
+      sbMatrix.write(' ');
+    }
+    sbMatrix.write(matrix[i]);
+  }
+  return '$kSvgResourceHeader'
+      '<filter id="_fcf$_filterIdCounter" '
+      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
+      '<feColorMatrix values="$sbMatrix" result="comp"/>'
+      '</filter></svg>';
 }
 
 int _filterIdCounter = 0;
