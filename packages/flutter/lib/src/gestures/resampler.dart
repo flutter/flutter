@@ -121,7 +121,7 @@ class PointerEventResampler {
     return isDown
         ? _toMoveEvent(
             event, position, delta, pointerIdentifier, timeStamp, buttons)
-        : _toHoverEvent(event, position, delta, timeStamp, hadButtons);
+        : _toHoverEvent(event, position, delta, timeStamp, buttons);
   }
 
   Offset _positionAt(Duration sampleTime) {
