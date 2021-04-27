@@ -104,7 +104,7 @@ enum HostArtifact {
 }
 
 // TODO(knopp): Remove once darwin artifacts are moved out of darwin-x64
-String _platformDirName(TargetPlatform platform) {
+String _enginePlatformDirectoryName(TargetPlatform platform) {
   if (platform == TargetPlatform.darwin) {
     return 'darwin-x64';
   }
@@ -506,7 +506,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        final String platformDirName = _platformDirName(platform);
+        final String platformDirName = _enginePlatformDirectoryName(platform);
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.platformKernelDill:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
@@ -522,7 +522,7 @@ class CachedArtifacts implements Artifacts {
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
-        String platformDirName = _platformDirName(platform);
+        String platformDirName = _enginePlatformDirectoryName(platform);
         if (mode == BuildMode.profile || mode == BuildMode.release) {
           platformDirName = '$platformDirName-${getNameForBuildMode(mode)}';
         }
@@ -540,7 +540,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fontSubset:
       case Artifact.constFinder:
         return _cache.getArtifactDirectory('engine')
-                     .childDirectory(_platformDirName(platform))
+                     .childDirectory(_enginePlatformDirectoryName(platform))
                      .childFile(_artifactToFileName(artifact, platform, mode))
                      .path;
       default:
@@ -551,7 +551,7 @@ class CachedArtifacts implements Artifacts {
 
   String _getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) {
     final String engineDir = _cache.getArtifactDirectory('engine').path;
-    final String platformName = _platformDirName(platform);
+    final String platformName = _enginePlatformDirectoryName(platform);
     switch (platform) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
