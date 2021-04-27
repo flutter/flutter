@@ -47,15 +47,34 @@ class PhysicalKeyData {
     return PhysicalKeyData._(data);
   }
 
-  PhysicalKeyData._(this.data);
+  PhysicalKeyData._(this._data);
 
-  final Map<String, PhysicalKeyEntry> data;
+  /// Find an entry from name, or null if not found.
+  PhysicalKeyEntry? tryEntryByName(String name) {
+    return _data[name];
+  }
+
+  /// Find an entry from name.
+  ///
+  /// Asserts if the name is not found.
+  PhysicalKeyEntry entryByName(String name) {
+    final PhysicalKeyEntry? entry = tryEntryByName(name);
+    assert(entry != null,
+        'Unable to find logical entry by name $name.');
+    return entry!;
+  }
+
+  /// All entries.
+  Iterable<PhysicalKeyEntry> get entries => _data.values;
+
+  // Keys mapped from their names.
+  final Map<String, PhysicalKeyEntry> _data;
 
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [PhysicalKeyData.fromJson].
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> outputMap = <String, dynamic>{};
-    for (final PhysicalKeyEntry entry in data.values) {
+    for (final PhysicalKeyEntry entry in _data.values) {
       outputMap[entry.name] = entry.toJson();
     }
     return outputMap;

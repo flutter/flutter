@@ -19,7 +19,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Android key codes to logical keys.
   String get _androidKeyCodeMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data.values) {
+    for (final LogicalKeyEntry entry in logicalData.entries) {
       for (final int code in entry.androidValues) {
         androidKeyCodeMap.writeln('          put(${toHex(code, digits: 10)}L, ${toHex(entry.value, digits: 10)}L); // ${entry.constantName}');
       }
@@ -30,7 +30,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Android scan codes to physical keys.
   String get _androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data.values) {
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.androidScanCodes != null) {
         for (final int code in entry.androidScanCodes.cast<int>()) {
           androidScanCodeMap.writeln('          put(${toHex(code, digits: 10)}L, ${toHex(entry.usbHidCode, digits: 10)}L); // ${entry.constantName}');

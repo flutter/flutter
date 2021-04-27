@@ -21,7 +21,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data.values) {
+    for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.webValues, entry.webNames, (int value, String name) {
         result.writeln("  '$name': ${toHex(value, digits: 10)},");
       });
@@ -32,7 +32,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
   String get _webPhysicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data.values) {
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.name != null) {
         result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
       }
@@ -42,17 +42,13 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Web number pad codes to logical key ids.
   String get _webLogicalLocationMap {
-    final Map<String, dynamic> source = json.decode(File(
+    final Map<String, List<String?>> source = (json.decode(File(
       path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_logical_location_mapping.json')
-    ).readAsStringSync()) as Map<String, dynamic>;
+    ).readAsStringSync()) as Map<String, dynamic>).cast<String, List<String?>>();
     final StringBuffer result = StringBuffer();
-    source.forEach((String webKey, dynamic dynamicValue) {
-      final String valuesString = (dynamicValue as List<dynamic>).map((dynamic value) {
-        if (value != null && logicalData.data[value] == null) {
-          print('Error during web location map: $value is not a valid logical key.');
-          return null;
-        }
-        return value == null ? 'null' : toHex(logicalData.data[value]?.value, digits: 10);
+    source.forEach((String webKey, List<String?> values) {
+      final String valuesString = values.map((String? value) {
+        return value == null ? 'null' : toHex(logicalData.entryByName(value).value, digits: 10);
       }).join(', ');
       result.writeln("  '$webKey': <int?>[$valuesString],");
     });
