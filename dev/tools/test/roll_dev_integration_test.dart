@@ -124,7 +124,7 @@ void main() {
       expect(finalVersion.m, 0);
       expect(finalVersion.n, 0);
       expect(finalVersion.commits, null);
-    });
+    }, skip: true);
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
