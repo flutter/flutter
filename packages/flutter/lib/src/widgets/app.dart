@@ -1645,7 +1645,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     Widget mediaQuery;
     if (data == null) {
-      mediaQuery = _MediaQueryFromWindow(
+      mediaQuery = MediaQueryFromWindow(
         child: localizations,
       );
     } else {
@@ -1679,16 +1679,21 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 ///
 /// It is performed in a standalone widget to rebuild **only** [MediaQuery] and
 /// its dependents when `window` changes, instead of rebuilding the entire widget tree.
-class _MediaQueryFromWindow extends StatefulWidget {
-  const _MediaQueryFromWindow({Key? key, required this.child}) : super(key: key);
+class MediaQueryFromWindow extends StatefulWidget {
+  /// Creates a [MediaQueryFromWindow] that provides a [MediaQuery] to its
+  /// descendants using the `window` to keep [MediaQueryData] up to date.
+  ///
+  /// The [child] must not be null.
+  const MediaQueryFromWindow({Key? key, required this.child}) : super(key: key);
 
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
   _MediaQueryFromWindowsState createState() => _MediaQueryFromWindowsState();
 }
 
-class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
+class _MediaQueryFromWindowsState extends State<MediaQueryFromWindow> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
