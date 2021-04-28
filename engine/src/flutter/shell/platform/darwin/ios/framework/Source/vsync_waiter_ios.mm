@@ -23,7 +23,8 @@ VsyncWaiterIOS::VsyncWaiterIOS(flutter::TaskRunners task_runners)
                                              callback:std::bind(&VsyncWaiterIOS::FireCallback,
                                                                 this,
                                                                 std::placeholders::_1,
-                                                                std::placeholders::_2)]) {}
+                                                                std::placeholders::_2,
+                                                                true)]) {}
 
 VsyncWaiterIOS::~VsyncWaiterIOS() {
   // This way, we will get no more callbacks from the display link that holds a weak (non-nilling)
