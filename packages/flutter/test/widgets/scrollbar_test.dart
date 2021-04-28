@@ -558,7 +558,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-        )
+        ),
     );
 
     // Tap on the track area below the thumb.
@@ -573,7 +573,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 240.0, 800.0, 600.0),
           color: const Color(0x66BCBCBC),
-      )
+      ),
     );
 
     // Tap on the track area above the thumb.
@@ -588,7 +588,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-      )
+      ),
     );
   });
 
@@ -600,7 +600,7 @@ void main() {
           data: MediaQueryData(),
           child: RawScrollbar(
             child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -658,7 +658,7 @@ void main() {
           data: MediaQueryData(),
           child: RawScrollbar(
             child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -710,7 +710,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -765,7 +765,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -880,7 +880,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -999,7 +999,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                  child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
