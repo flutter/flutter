@@ -134,7 +134,7 @@ void main() {
       };
 
       for (final MapEntry<String, String> entry in testCases.entries) {
-        final Directory sampleAppAndroid = fileSystem.systemTempDirectory.createTempSync('android');
+        final Directory sampleAppAndroid = fileSystem.systemTempDirectory.createTempSync('flutter_android.');
         sampleAppAndroid
           .childFile('build.gradle')
           .writeAsStringSync('''

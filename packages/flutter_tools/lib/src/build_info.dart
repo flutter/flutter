@@ -360,7 +360,7 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bu
     return null;
   }
   if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin_x64) {
+      targetPlatform == TargetPlatform.darwin) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
@@ -407,7 +407,7 @@ String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buil
     return null;
   }
   if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin_x64) {
+      targetPlatform == TargetPlatform.darwin) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
@@ -458,8 +458,7 @@ bool isEmulatorBuildMode(BuildMode mode) {
 enum TargetPlatform {
   android,
   ios,
-  // darwin_arm64 not yet supported, macOS desktop targets run in Rosetta as x86.
-  darwin_x64,
+  darwin,
   linux_x64,
   linux_arm64,
   windows_x64,
@@ -536,6 +535,16 @@ DarwinArch getIOSArchForName(String arch) {
   throw Exception('Unsupported iOS arch name "$arch"');
 }
 
+DarwinArch getDarwinArchForName(String arch) {
+  switch (arch) {
+    case 'arm64':
+      return DarwinArch.arm64;
+    case 'x86_64':
+      return DarwinArch.x86_64;
+  }
+  throw Exception('Unsupported MacOS arch name "$arch"');
+}
+
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   switch (platform) {
     case TargetPlatform.android_arm:
@@ -551,8 +560,11 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
         return 'ios-${getNameForDarwinArch(darwinArch)}';
       }
       return 'ios';
-    case TargetPlatform.darwin_x64:
-      return 'darwin-x64';
+    case TargetPlatform.darwin:
+      if (darwinArch != null) {
+        return 'darwin-${getNameForDarwinArch(darwinArch)}';
+      }
+      return 'darwin';
     case TargetPlatform.linux_x64:
       return 'linux-x64';
     case TargetPlatform.linux_arm64:
@@ -592,8 +604,12 @@ TargetPlatform? getTargetPlatformForName(String platform) {
       return TargetPlatform.fuchsia_x64;
     case 'ios':
       return TargetPlatform.ios;
+    case 'darwin':
+    // For backward-compatibility and also for Tester, where it must match
+    // host platform name (HostPlatform.darwin_x64)
     case 'darwin-x64':
-      return TargetPlatform.darwin_x64;
+    case 'darwin-arm':
+      return TargetPlatform.darwin;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
    case 'linux-arm64':
@@ -814,7 +830,7 @@ String _getCurrentHostPlatformArchName() {
 String getNameForTargetPlatformArch(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.linux_x64:
-    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin:
     case TargetPlatform.windows_x64:
       return 'x64';
     case TargetPlatform.linux_arm64:

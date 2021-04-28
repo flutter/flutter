@@ -1790,25 +1790,25 @@ void main() {
     final GlobalKey<PopupMenuButtonState<int>> globalKey = GlobalKey();
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                PopupMenuButton<int>(
-                  key: globalKey,
-                  itemBuilder: (BuildContext context) {
-                    return <PopupMenuEntry<int>>[
-                      const PopupMenuItem<int>(
-                        value: 1,
-                        child: Text('Tap me please!'),
-                      ),
-                    ];
-                  },
-                ),
-              ],
-            ),
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: globalKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+            ],
           ),
-        )
+        ),
+      ),
     );
 
     expect(find.text('Tap me please!'), findsNothing);
@@ -2033,8 +2033,8 @@ void main() {
                 ),
               ),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(child: Text('-1-'), value: 1,),
-                const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
+                const PopupMenuItem<int>(child: Text('-1-'), value: 1),
+                const PopupMenuItem<int>(child: Text('-2-'), value: 2),
               ],
             )],
           ),
@@ -2231,8 +2231,8 @@ void main() {
                     ),
                   ),
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                    const PopupMenuItem<int>(child: Text('-1-'), value: 1,),
-                    const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
+                    const PopupMenuItem<int>(child: Text('-1-'), value: 1),
+                    const PopupMenuItem<int>(child: Text('-2-'), value: 2),
                   ],
                 ),
                 const SizedBox(height: 600),

@@ -28,7 +28,7 @@ void main() {
     logger = BufferLogger.test();
     platform = FakePlatform(environment: <String, String>{});
 
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('devtools_launcher_test');
+    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_devtools_launcher_test.');
     persistentToolState = PersistentToolState.test(
       directory: tempDir,
       logger: logger,

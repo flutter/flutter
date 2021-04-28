@@ -19,15 +19,15 @@ class MockClipboard {
     'text': null,
   };
 
-  Future<Object?> handleMethodCall(MethodCall methodCall) async {
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
-        if (getDataThrows)
+        if (getDataThrows) {
           throw Exception();
+        }
         return _clipboardData;
       case 'Clipboard.setData':
         _clipboardData = methodCall.arguments;
-        break;
     }
   }
 }
@@ -758,11 +758,11 @@ void main() {
     group('when Clipboard fails', () {
       setUp(() {
         final MockClipboard mockClipboard = MockClipboard(getDataThrows: true);
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        SystemChannels.platform.setMockMethodCallHandler(null);
       });
 
       test('Clipboard API failure is gracefully recovered from', () async {
@@ -778,11 +778,11 @@ void main() {
       final MockClipboard mockClipboard = MockClipboard();
 
       setUp(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        SystemChannels.platform.setMockMethodCallHandler(null);
       });
 
       test('update sets value based on clipboard contents', () async {

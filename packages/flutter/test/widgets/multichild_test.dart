@@ -10,7 +10,7 @@ import 'test_widgets.dart';
 
 void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   final MultiChildRenderObjectElement element = tester.element(find.byElementPredicate(
-    (Element element) => element is MultiChildRenderObjectElement
+    (Element element) => element is MultiChildRenderObjectElement,
   ));
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
@@ -120,7 +120,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <BoxDecoration>[]);
@@ -247,7 +247,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <BoxDecoration>[]);

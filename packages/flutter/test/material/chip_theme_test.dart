@@ -89,30 +89,31 @@ void main() {
       return MaterialApp(
         locale: const Locale('en', 'us'),
         home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: RawChip(
-                  showCheckmark: true,
-                  onDeleted: () { },
-                  tapEnabled: true,
-                  avatar: const Placeholder(),
-                  deleteIcon: const Placeholder(),
-                  isEnabled: true,
-                  selected: false,
-                  label: const Text('Chip'),
-                  onSelected: (bool newValue) { },
-                  onPressed: null,
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Center(
+                child: Theme(
+                  data: theme,
+                  child: RawChip(
+                    showCheckmark: true,
+                    onDeleted: () { },
+                    tapEnabled: true,
+                    avatar: const Placeholder(),
+                    deleteIcon: const Placeholder(),
+                    isEnabled: true,
+                    selected: false,
+                    label: const Text('Chip'),
+                    onSelected: (bool newValue) { },
+                    onPressed: null,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ));
+      );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -139,33 +140,34 @@ void main() {
     Widget buildChip(ChipThemeData data) {
       return MaterialApp(
         home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
-          child: Material(
-            child: Center(
-              child: Theme(
-                data: theme,
-                child: ChipTheme(
-                  data: customTheme,
-                  child: RawChip(
-                    showCheckmark: true,
-                    onDeleted: () { },
-                    tapEnabled: true,
-                    avatar: const Placeholder(),
-                    deleteIcon: const Placeholder(),
-                    isEnabled: true,
-                    selected: value,
-                    label: const Text('$value'),
-                    onSelected: (bool newValue) { },
-                    onPressed: null,
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Center(
+                child: Theme(
+                  data: theme,
+                  child: ChipTheme(
+                    data: customTheme,
+                    child: RawChip(
+                      showCheckmark: true,
+                      onDeleted: () { },
+                      tapEnabled: true,
+                      avatar: const Placeholder(),
+                      deleteIcon: const Placeholder(),
+                      isEnabled: true,
+                      selected: value,
+                      label: const Text('$value'),
+                      onSelected: (bool newValue) { },
+                      onPressed: null,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ));
+      );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));

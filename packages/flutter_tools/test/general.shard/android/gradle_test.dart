@@ -19,10 +19,18 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+
+const String kModulePubspec = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+    androidX: true
+''';
 
 void main() {
   Cache.flutterRoot = getFlutterRoot();
@@ -35,54 +43,42 @@ void main() {
     });
 
     testWithoutContext('getApkDirectory in app projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(
-        getApkDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'app', 'outputs', 'flutter-apk')),
+        getApkDirectory(project).path, '/build/app/outputs/flutter-apk',
       );
     });
 
     testWithoutContext('getApkDirectory in module projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      fileSystem.currentDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(kModulePubspec);
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
+      expect(project.isModule, true);
       expect(
-        getApkDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'host', 'outputs', 'apk')),
+        getApkDirectory(project).path, '/build/host/outputs/apk',
       );
     });
 
     testWithoutContext('getBundleDirectory in app projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(
-        getBundleDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'app', 'outputs', 'bundle')),
+        getBundleDirectory(project).path, '/build/app/outputs/bundle',
       );
     });
 
     testWithoutContext('getBundleDirectory in module projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      fileSystem.currentDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(kModulePubspec);
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
+      expect(project.isModule, true);
       expect(
-        getBundleDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'host', 'outputs', 'bundle')),
+        getBundleDirectory(project).path, '/build/host/outputs/bundle',
       );
     });
 
@@ -1028,5 +1024,3 @@ class FakeGradleUtils extends GradleUtils {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {}
-class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFlutterProject extends Mock implements FlutterProject {}
