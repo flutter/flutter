@@ -275,7 +275,7 @@ void main() {
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
 
       void handleReorder(int fromIndex, int toIndex) {
-        onReorderCallCount++;
+        onReorderCallCount += 1;
         if (toIndex > fromIndex) {
           toIndex -= 1;
         }
@@ -322,7 +322,7 @@ void main() {
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
 
       void handleReorder(int fromIndex, int toIndex) {
-        onReorderCallCount++;
+        onReorderCallCount += 1;
         if (toIndex > fromIndex) {
           toIndex -= 1;
         }
