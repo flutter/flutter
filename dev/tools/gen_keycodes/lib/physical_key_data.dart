@@ -85,6 +85,7 @@ class PhysicalKeyData {
   /// Lines in this file look like this (without the ///):
   /// key 100   ALT_RIGHT
   /// # key 101 "KEY_LINEFEED"
+  /// key 477   F12               FUNCTION
   ///
   /// We parse the commented out lines as well as the non-commented lines, so so
   /// that we can get names for all of the available scan codes, not just ones
@@ -93,21 +94,26 @@ class PhysicalKeyData {
   /// Also, note that some keys (notably MEDIA_EJECT) can be mapped to more than
   /// one scan code, so the mapping can't just be 1:1, it has to be 1:many.
   static Map<String, List<int>> _readAndroidScanCodes(String keyboardLayout, String nameMap) {
-    final RegExp keyEntry = RegExp(r'#?\s*key\s+([0-9]+)\s*"?(?:KEY_)?([0-9A-Z_]+|\(undefined\))"?\s*(FUNCTION)?');
+    final RegExp keyEntry = RegExp(
+      r'#?\s*' // Optional comment mark
+      r'key\s+' // Literal "key"
+      r'(?<id>[0-9]+)\s*' // ID section
+      r'"?(?:KEY_)?(?<name>[0-9A-Z_]+|\(undefined\))"?\s*' // Name section
+      r'(?<function>FUNCTION)?' // Optional literal "FUNCTION"
+    );
     final Map<String, List<int>> androidNameToScanCodes = <String, List<int>>{};
-    for (final Match match in keyEntry.allMatches(keyboardLayout)) {
-      if (match.group(3) == 'FUNCTION') {
+    for (final RegExpMatch match in keyEntry.allMatches(keyboardLayout)) {
+      if (match.namedGroup('function') == 'FUNCTION') {
         // Skip odd duplicate Android FUNCTION keys (F1-F12 are already defined).
         continue;
       }
-      final String name = match.group(2)!;
+      final String name = match.namedGroup('name')!;
       if (name == '(undefined)') {
         // Skip undefined scan codes.
         continue;
       }
-      final String androidName = match.group(2)!;
-      androidNameToScanCodes.putIfAbsent(androidName, () => <int>[])
-        .add(int.parse(match.group(1)!));
+      androidNameToScanCodes.putIfAbsent(name, () => <int>[])
+        .add(int.parse(match.namedGroup('id')!));
     }
 
     // Cast Android dom map
@@ -180,20 +186,30 @@ class PhysicalKeyData {
   ) {
     final Map<int, PhysicalKeyEntry> entries = <int, PhysicalKeyEntry>{};
     final RegExp usbMapRegExp = RegExp(
-        r'DOM_CODE\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
-        r'\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*(?:"([^\s]+)")?[^")]*?,\s*([^\s]+?)\s*\)',
-        multiLine: true);
+      r'DOM_CODE\s*\(\s*'
+      r'0x(?<usb>[a-fA-F0-9]+),\s*'
+      r'0x(?<evdev>[a-fA-F0-9]+),\s*'
+      r'0x(?<xkb>[a-fA-F0-9]+),\s*'
+      r'0x(?<win>[a-fA-F0-9]+),\s*'
+      r'0x(?<mac>[a-fA-F0-9]+),\s*'
+      r'(?:"(?<code>[^\s]+)")?[^")]*?,'
+      r'\s*(?<enum>[^\s]+?)\s*'
+      r'\)',
+      // Multiline is necessary because some definition spreads across
+      // multiple lines.
+      multiLine: true,
+    );
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
-    for (final Match match in usbMapRegExp.allMatches(input)) {
-      final int usbHidCode = getHex(match.group(1)!);
-      final int linuxScanCode = getHex(match.group(2)!);
-      final int xKbScanCode = getHex(match.group(3)!);
-      final int windowsScanCode = getHex(match.group(4)!);
-      final int macScanCode = getHex(match.group(5)!);
-      final String? chromiumCode = match.group(6);
+    for (final RegExpMatch match in usbMapRegExp.allMatches(input)) {
+      final int usbHidCode = getHex(match.namedGroup('usb')!);
+      final int linuxScanCode = getHex(match.namedGroup('evdev')!);
+      final int xKbScanCode = getHex(match.namedGroup('xkb')!);
+      final int windowsScanCode = getHex(match.namedGroup('win')!);
+      final int macScanCode = getHex(match.namedGroup('mac')!);
+      final String? chromiumCode = match.namedGroup('code');
       // The input data has a typo...
-      final String enumName = match.group(7)!.replaceAll('MINIMIUM', 'MINIMUM');
+      final String enumName = match.namedGroup('enum')!.replaceAll('MINIMIUM', 'MINIMUM');
 
       final String name = chromiumCode ?? shoutingToUpperCamel(enumName);
       if (name == 'IntlHash') {

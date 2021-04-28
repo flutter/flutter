@@ -149,7 +149,7 @@ Future<void> main(List<String> rawArguments) async {
     final String androidScanCodes = await getAndroidScanCodes();
     final String androidToDomKey = readDataFile('android_key_name_to_name.json');
     final String glfwKeyCodes = await getGlfwKeyCodes();
-    final String glfwToDomKey = readDataFile('key_name_to_glfw_name.json');
+    final String glfwToDomKey = readDataFile('glfw_key_name_to_name.json');
     physicalData = PhysicalKeyData(
       <String>[baseHidCodes, supplementalHidCodes].join('\n'),
       androidScanCodes,

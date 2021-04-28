@@ -121,26 +121,36 @@ class LogicalKeyData {
   ///                Key        Enum       Value
   /// DOM_KEY_MAP("Accel",      ACCEL,    0x0101),
   ///
-  /// The UNI lines are ignored. Their entries have been included in the
-  /// printable file.
+  /// Flutter's supplemental_key_data.inc also has a new format
+  /// that uses a character as the 3rd argument.
+  ///                Key        Enum       Character
+  /// DOM_KEY_UNI("KeyB",      KEY_B,      'b'),
   static void _readKeyEntries(Map<String, LogicalKeyEntry> data, String input) {
     final Map<String, String> unusedNumpad = Map<String, String>.from(_printableToNumpads);
 
     final RegExp domKeyRegExp = RegExp(
-        r'DOM_KEY_(UNI|MAP)\s*\(\s*"([^\s]+?)",\s*'
-        r"([^\s]+?),\s*(?:0x([a-fA-F0-9]+)|'(.)')\s*\)",
-        multiLine: true);
+      r'DOM_KEY_(?<kind>UNI|MAP)\s*\(\s*'
+      r'"(?<name>[^\s]+?)",\s*'
+      r'(?<enum>[^\s]+?),\s*'
+      r"(?:0x(?<unicode>[a-fA-F0-9]+)|'(?<char>.)')\s*"
+      r'\)',
+      // Multiline is necessary because some definition spreads across
+      // multiple lines.
+      multiLine: true,
+    );
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
-    for (final Match match in domKeyRegExp.allMatches(input)) {
-      final String webName = match.group(2)!;
+    for (final RegExpMatch match in domKeyRegExp.allMatches(input)) {
+      final String webName = match.namedGroup('name')!;
       // ".AltGraphLatch"  is consumed internally and not expressed to the Web.
       if (webName.startsWith('.')) {
         continue;
       }
       final String name = LogicalKeyEntry.computeName(webName.replaceAll(RegExp('[^A-Za-z0-9]'), ''));
-      final int value = match.group(4) != null ? getHex(match.group(4)!) : match.group(5)!.codeUnitAt(0);
-      final String? keyLabel = match.group(1)! == 'UNI' ? String.fromCharCode(value) : null;
+      final int value = match.namedGroup('unicode') != null ?
+        getHex(match.namedGroup('unicode')!) :
+        match.namedGroup('char')!.codeUnitAt(0);
+      final String? keyLabel = match.namedGroup('kind')! == 'UNI' ? String.fromCharCode(value) : null;
       // If it's a modifier key, add left and right keys instead.
       // Don't add web names and values; they're solved with locations.
       if (_chromeModifiers.containsKey(name)) {
