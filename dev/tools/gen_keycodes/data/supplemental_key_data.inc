@@ -1,7 +1,5 @@
   // These are supplemental key data to be added to those that Chromium
-  // defines. Since the web doesn't have game controller buttons defined in the
-  // same way, these map USB HID codes for game controller buttons to
-  // Android/Linux button names.
+  // defines.
 
   // ============================================================
   // Printable keys
@@ -83,6 +81,9 @@
   // Game controller buttons
   // ============================================================
 
+  // Since the web doesn't have game controller buttons defined in the
+  // same way, these map USB HID codes for game controller buttons to
+  // Android/Linux button names.
   //          Key                       Enum                    Value
   DOM_KEY_MAP("GameButton1",            GAME_BUTTON_1,               0x05ff01),
   DOM_KEY_MAP("GameButton2",            GAME_BUTTON_2,               0x05ff02),

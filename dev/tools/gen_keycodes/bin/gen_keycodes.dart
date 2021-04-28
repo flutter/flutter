@@ -146,12 +146,17 @@ Future<void> main(List<String> rawArguments) async {
     // Physical
     final String baseHidCodes = await getChromiumCodes();
     final String supplementalHidCodes = readDataFile('supplemental_hid_codes.inc');
-    final String hidCodes = '$baseHidCodes\n$supplementalHidCodes';
     final String androidScanCodes = await getAndroidScanCodes();
     final String androidToDomKey = readDataFile('android_key_name_to_name.json');
     final String glfwKeyCodes = await getGlfwKeyCodes();
     final String glfwToDomKey = readDataFile('key_name_to_glfw_name.json');
-    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
+    physicalData = PhysicalKeyData(
+      <String>[baseHidCodes, supplementalHidCodes].join('\n'),
+      androidScanCodes,
+      androidToDomKey,
+      glfwKeyCodes,
+      glfwToDomKey,
+    );
 
     // Logical
     final String gtkKeyCodes = await getGtkKeyCodes();
@@ -165,7 +170,7 @@ Future<void> main(List<String> rawArguments) async {
     final String androidKeyCodes = await getAndroidKeyCodes();
 
     logicalData = LogicalKeyData(
-      '$webLogicalKeys\n$supplementalKeyData',
+      <String>[webLogicalKeys, supplementalKeyData].join('\n'),
       gtkKeyCodes,
       gtkToDomKey,
       windowsKeyCodes,
