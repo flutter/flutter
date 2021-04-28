@@ -2712,8 +2712,6 @@ class Navigator extends StatefulWidget {
   ///
   /// If there is no [Navigator] in the give `context`, this function will throw
   /// a [FlutterError] in debug mode, and an exception in release mode.
-  ///
-  /// This method can be expensive (it walks the element tree).
   static NavigatorState of(
     BuildContext context, {
     bool rootNavigator = false,
@@ -2762,8 +2760,6 @@ class Navigator extends StatefulWidget {
   /// subsequent instances of [Navigator].
   ///
   /// Will return null if there is no ancestor [Navigator] in the `context`.
-  ///
-  /// This method can be expensive (it walks the element tree).
   static NavigatorState? maybeOf(
       BuildContext context, {
         bool rootNavigator = false,
