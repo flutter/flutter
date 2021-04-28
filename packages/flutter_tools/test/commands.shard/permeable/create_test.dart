@@ -1691,7 +1691,7 @@ void main() {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
-            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')),
+            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
           )
         ]);
       };
