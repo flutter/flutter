@@ -345,7 +345,7 @@ void main() {
       '                         └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
-      '                             size: Size(800.0, 400.0)\n'
+      '                             size: Size(800.0, 400.0)\n',
     ));
     const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
@@ -530,7 +530,7 @@ void main() {
       '                         └─child: RenderCustomPaint#00000\n'
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
-      '                             size: Size(800.0, 400.0)\n'
+      '                             size: Size(800.0, 400.0)\n',
     ));
   }, skip: kIsWeb);
 

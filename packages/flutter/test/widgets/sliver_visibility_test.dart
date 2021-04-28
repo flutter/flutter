@@ -46,9 +46,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: const MediaQueryData(),
-            child: CustomScrollView(slivers: <Widget>[sliver])
-          )
-        )
+            child: CustomScrollView(slivers: <Widget>[sliver]),
+          ),
+        ),
       );
     }
 
@@ -67,7 +67,7 @@ void main() {
             );
           },
         ),
-      )
+      ),
     );
 
     // We now run a sequence of pumpWidget calls one after the other. In
@@ -378,8 +378,7 @@ void main() {
     expect(find.byType(Text), findsOneWidget);
     expect(find.text('a true', skipOffstage: false), findsOneWidget);
     expect(find.byType(SliverVisibility, skipOffstage: false), findsOneWidget);
-    expect(
-      find.byType(SliverVisibility, skipOffstage: false), paints..paragraph());
+    expect(find.byType(SliverVisibility, skipOffstage: false), paints..paragraph());
     renderViewport = tester.renderObject(find.byType(Viewport));
     renderSliver = renderViewport.lastChild!;
     expect(renderSliver.geometry!.scrollExtent, 14.0);

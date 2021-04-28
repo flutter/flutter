@@ -787,10 +787,11 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-          child: HoverFeedback(
-        onEnter: () { numEntrances += 1; },
-        onExit: () { numExits += 1; },
-      )),
+        child: HoverFeedback(
+          onEnter: () { numEntrances += 1; },
+          onExit: () { numExits += 1; },
+        ),
+      ),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
@@ -808,10 +809,11 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-          child: HoverFeedback(
-        onEnter: () { numEntrances += 1; },
-        onExit: () { numExits += 1; },
-      )),
+        child: HoverFeedback(
+          onEnter: () { numEntrances += 1; },
+          onExit: () { numExits += 1; },
+        ),
+      ),
     );
     await tester.pump();
     expect(numEntrances, equals(2));
@@ -829,11 +831,12 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-          child: HoverFeedback(
-        key: feedbackKey,
-        onEnter: () { numEntrances += 1; },
-        onExit: () { numExits += 1; },
-      )),
+        child: HoverFeedback(
+          key: feedbackKey,
+          onEnter: () { numEntrances += 1; },
+          onExit: () { numExits += 1; },
+        ),
+      ),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
@@ -1431,7 +1434,7 @@ void main() {
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
-      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
     ));
     expect(logs, <String>['paint']);
     logs.clear();
@@ -1449,7 +1452,7 @@ void main() {
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
-      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
     ));
 
     expect(logs, <String>['paint', 'hover-enter']);

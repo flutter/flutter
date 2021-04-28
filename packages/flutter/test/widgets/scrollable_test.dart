@@ -1039,13 +1039,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1126,13 +1126,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1189,7 +1189,7 @@ void main() {
                 children: <Widget>[
                   for (int i = 0; i < 100; i++)
                     Text('SingleChildScrollView $i'),
-                ]
+                ],
               ),
               SizedBox(
                 height: 3000,
@@ -1201,11 +1201,11 @@ void main() {
                   itemBuilder: (BuildContext context, int index) {
                     return Text('Nested NeverScrollable ListView $index');
                   },
-                )
+                ),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       ),
     ));
     expect(outerController.position.pixels, 0.0);
@@ -1235,17 +1235,17 @@ void main() {
     Widget build(double height) {
       return MaterialApp(
         home: Scaffold(
-            body: SizedBox(
-              width: double.infinity,
-              height: height,
-              child: SingleChildScrollView(
-                controller: controller,
-                child: const SizedBox(
-                  width: double.infinity,
-                  height: 300.0,
-                ),
+          body: SizedBox(
+            width: double.infinity,
+            height: height,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(
+                width: double.infinity,
+                height: 300.0,
               ),
-            )
+            ),
+          ),
         ),
       );
     }

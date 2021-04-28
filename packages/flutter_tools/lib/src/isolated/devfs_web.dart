@@ -43,7 +43,7 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
- @required AssetReader assetReader,
+  @required AssetReader assetReader,
   @required Stream<BuildResult> buildResults,
   @required ConnectionProvider chromeConnection,
   @required LoadStrategy loadStrategy,
