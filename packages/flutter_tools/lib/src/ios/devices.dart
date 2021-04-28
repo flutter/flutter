@@ -312,6 +312,7 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
+    @visibleForTesting Duration discoveryTimeout,
   }) async {
     String packageId;
 
@@ -427,10 +428,10 @@ class IOSDevice extends Device {
       }
 
       _logger.printTrace('Application launched on the device. Waiting for observatory port.');
-      final Timer timer = Timer(const Duration(seconds: 30), () {
-        _logger.printError('iOS observatory port not discovered after 30 seconds. This is taking much longer than expected...');
+      final Timer timer = Timer(discoveryTimeout ?? const Duration(seconds: 30), () {
+        _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
       });
-      final Uri localUri = await observatoryDiscovery.uri.timeout(const Duration(minutes: 5));
+      final Uri localUri = await observatoryDiscovery.uri;
       timer.cancel();
       if (localUri == null) {
         iosDeployDebugger?.detach();
