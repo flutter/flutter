@@ -15,10 +15,8 @@ class PlatformChannel extends StatefulWidget {
 }
 
 class _PlatformChannelState extends State<PlatformChannel> {
-  static const MethodChannel methodChannel =
-      MethodChannel('samples.flutter.io/battery');
-  static const EventChannel eventChannel =
-      EventChannel('samples.flutter.io/charging');
+  static const MethodChannel methodChannel = MethodChannel('samples.flutter.io/battery');
+  static const EventChannel eventChannel = EventChannel('samples.flutter.io/charging');
 
   String _batteryLevel = 'Battery level: unknown.';
   String _chargingStatus = 'Battery status: unknown.';
@@ -44,8 +42,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
 
   void _onEvent(Object? event) {
     setState(() {
-      _chargingStatus =
-          "Battery status: ${event == 'charging' ? '' : 'dis'}charging.";
+      _chargingStatus = "Battery status: ${event == 'charging' ? '' : 'dis'}charging.";
     });
   }
 
