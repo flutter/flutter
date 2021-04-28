@@ -49,12 +49,16 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   virtual void AwaitVSync() = 0;
 
   void FireCallback(fml::TimePoint frame_start_time,
-                    fml::TimePoint frame_target_time);
+                    fml::TimePoint frame_target_time,
+                    bool pause_secondary_tasks = true);
 
  private:
   std::mutex callback_mutex_;
   Callback callback_;
   std::unordered_map<uintptr_t, fml::closure> secondary_callbacks_;
+
+  void PauseDartMicroTasks();
+  void ResumeDartMicroTasks();
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiter);
 };
