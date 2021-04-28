@@ -5,11 +5,11 @@
 | File name | Explanation |
 | ---- | ---- |
 | `physical_key_data.json` | Contains the merged physical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
-| `logicall_key_data.json` | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
+| `logical_key_data.json` | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
 | `supplemental_hid_codes.inc` | A supplementary HID list on top of Chromium's list of HID codes for extra physical keys. Certain entries may also overwrite Chromium's corresponding entries. |
 | `supplemental_key_data.inc` | A supplementary key list on top of Chromium's list of keys for extra logical keys.|
-| `chromium_modifiers.json` | Maps Web's `key` of modifier keys to the names of the logical keys for these keys' left and right variations.This is used when generating logical keys to provide independent values for sided logical keys. Web uses the same `key` for modifier keys of different sides, but Flutter's logical key model treats them as the different keys.|
-| `printable_to_numpads.json` | Maps character to the names of the logical keys for these keys' NumPad variations.This is used when generating logical keys to provide independent values for NumPad logical keys. Web uses the character as `key` for NumPad keys, but Flutter's logical key model treats them as independent keys.|
+| `chromium_modifiers.json` | Maps the web's `key` for modifier keys to the names of the logical keys for these keys' left and right variations.This is used when generating logical keys to provide independent values for sided logical keys. Web uses the same `key` for modifier keys of different sides, but Flutter's logical key model treats them as different keys.|
+| `printable_to_numpads.json` | Maps a character to the names of the logical keys for these keys' number pad variations. This is used when generating logical keys to provide independent values for number pad logical keys. The web uses the character as the `key` for number pad keys, but Flutter's logical key model treats them as independent keys.|
 | `printable.json` | Maps Flutter key name to its printable character. This character is used as the key label.|
 | `synonyms.json` | Maps pseudo-keys that represent other keys to the sets of keys they represent. For example, this contains the "shift" key that represents either a "shiftLeft" or "shiftRight" key.|
 
@@ -38,7 +38,7 @@
 | File name | Explanation |
 | ---- | ---- |
 | `web_key_map_dart.tmpl` | The template for `key_map.dart`. |
-| `web_logical_location_mapping.json` | Maps a pair of Web's `key` and `locaion` to the name for its corresponding logical key. This is used to distinguish between logical keys with the same `key` but different `locations`. |
+| `web_logical_location_mapping.json` | Maps a pair of the web's `key` and `location` to the name for its corresponding logical key. This is used to distinguish between logical keys with the same `key` but different `locations`. |
 
 ### Windows
 

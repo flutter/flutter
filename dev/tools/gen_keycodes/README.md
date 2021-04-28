@@ -11,7 +11,7 @@ For engine, it generates one key mapping file for each platform.
 
 It draws information from various source bases, including online
 repositories, and manual mapping in the `data` subdirectory.  It incorporates
-these information into a giant list of physical keys, and another for logical
+this information into a giant list of physical keys, and another for logical
 keys.
 
 ## Running the tool
