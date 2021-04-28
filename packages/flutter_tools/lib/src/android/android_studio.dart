@@ -297,12 +297,18 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     // Query Spotlight for unexpected installation locations.
-    final ProcessResult spotlightQueryResult = globals.processManager.runSync(<String>[
-      'mdfind',
-      // com.google.android.studio, com.google.android.studio-EAP
-      'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-    ]);
-    for (final String studioPath in LineSplitter.split(spotlightQueryResult.stdout as String)) {
+    String spotlightQueryResult = '';
+    try {
+      final ProcessResult spotlightResult = globals.processManager.runSync(<String>[
+        'mdfind',
+        // com.google.android.studio, com.google.android.studio-EAP
+        'kMDItemCFBundleIdentifier="com.google.android.studio*"',
+      ]);
+      spotlightQueryResult = spotlightResult.stdout as String;
+    } on ProcessException {
+      // The Spotlight query is a nice-to-have, continue checking known installation locations.
+    }
+    for (final String studioPath in LineSplitter.split(spotlightQueryResult)) {
       final Directory appBundle = globals.fs.directory(studioPath);
       if (!candidatePaths.any((FileSystemEntity e) => e.path == studioPath)) {
         candidatePaths.add(appBundle);
