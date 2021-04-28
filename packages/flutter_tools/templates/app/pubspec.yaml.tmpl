@@ -2,7 +2,7 @@ name: {{projectName}}
 description: {{description}}
 
 # The following line prevents the package from being accidentally published to
-# pub.dev using `pub publish`. This is preferred for private packages.
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 {{^withPluginHook}}
 
@@ -22,6 +22,10 @@ version: 1.0.0+1
 environment:
   sdk: {{dartSdkVersionBounds}}
 
+# Dependencies specify other packages that your package needs in order to work.
+# To upgrade your package dependencies to the latest versions consider running
+# `flutter pub upgrade --major-versions` or update the package version numbers
+# below to the latest version available on pub.dev.
 dependencies:
   flutter:
     sdk: flutter
@@ -43,6 +47,12 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # The following imports a recommended set of lints designed to encourage good
+  # coding practises. Lints are configured and activated in the
+  # analysis_options.yaml file located at the root of the package.
+  lints:
+    path: /Users/goderbauer/dev/lints # TODO(goderbauer): Update this before submitting.
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
