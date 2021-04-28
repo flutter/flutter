@@ -71,6 +71,9 @@ Future<void> buildWeb(
         ? null
         : globals.flutterVersion.engineRevision,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      // Web uses a different Dart plugin registry.
+      // https://github.com/flutter/flutter/issues/80406
+      generateDartPluginRegistry: false,
     ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {

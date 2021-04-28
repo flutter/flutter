@@ -138,6 +138,8 @@ class WebTestCompiler {
       <Uri>[],
       outputPath: outputDirectory.childFile('out').path,
       packageConfig: buildInfo.packageConfig,
+      fs: _fileSystem,
+      projectRootPath: projectDirectory.absolute.path,
     );
     if (output.errorCount > 0) {
       throwToolExit('Failed to compile');

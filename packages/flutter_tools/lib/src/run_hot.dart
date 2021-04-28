@@ -26,6 +26,7 @@ import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
 import 'globals_null_migrated.dart' as globals;
+import 'project.dart';
 import 'reporting/reporting.dart';
 import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
@@ -314,6 +315,7 @@ class HotRunner extends ResidentRunner {
     bool enableDevTools = false,
     String route,
   }) async {
+    final File mainFile = globals.fs.file(mainPath);
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
@@ -326,7 +328,7 @@ class HotRunner extends ResidentRunner {
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
-            globals.fs.file(mainPath).uri,
+            mainFile.uri,
             <Uri>[],
             // When running without a provided applicationBinary, the tool will
             // simultaneously run the initial frontend_server compilation and
@@ -338,6 +340,8 @@ class HotRunner extends ResidentRunner {
                 trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
               ),
             packageConfig: debuggingOptions.buildInfo.packageConfig,
+            projectRootPath: FlutterProject.current().directory.absolute.path,
+            fs: globals.fs,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
       }

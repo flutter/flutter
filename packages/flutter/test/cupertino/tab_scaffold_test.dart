@@ -60,7 +60,7 @@ void main() {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
+                onPaint: () { tabsPainted.add(index); },
               ),
             );
           },
@@ -250,7 +250,7 @@ void main() {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
+                onPaint: () { tabsPainted.add(index); },
               ),
             );
           },
@@ -286,7 +286,7 @@ void main() {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
+                onPaint: () { tabsPainted.add(index); },
               ),
             );
           },
@@ -305,7 +305,7 @@ void main() {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
+                onPaint: () { tabsPainted.add(index); },
               ),
             );
           },
@@ -504,7 +504,7 @@ void main() {
                 tabBuilder: (BuildContext context, int index) {
                   contentPadding = MediaQuery.of(context).padding;
                   return const Placeholder();
-                }
+                },
               ),
             ),
           ),
@@ -514,7 +514,8 @@ void main() {
 
       expect(await getContentPaddingWithTabBarColor(const Color(0xAAFFFFFF)), isNot(EdgeInsets.zero));
       expect(await getContentPaddingWithTabBarColor(const Color(0xFFFFFFFF)), EdgeInsets.zero);
-  });
+    },
+  );
 
   testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
     late BuildContext innerContext;
@@ -631,7 +632,7 @@ void main() {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
+                onPaint: () { tabsPainted.add(index); },
               ),
             );
           },
@@ -653,7 +654,7 @@ void main() {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
-                onPaint: () { tabsPainted.add(index); }
+                onPaint: () { tabsPainted.add(index); },
               ),
             );
           },
@@ -670,9 +671,10 @@ void main() {
     expect(tabsPainted, const <int>[0, 0, 18]);
   });
 
-  testWidgets('If a controller is initially provided then the parent stops doing so for rebuilds, '
-              'a new instance of CupertinoTabController should be created and used by the widget, '
-              "while preserving the previous controller's tab index",
+  testWidgets(
+    'If a controller is initially provided then the parent stops doing so for rebuilds, '
+    'a new instance of CupertinoTabController should be created and used by the widget, '
+    "while preserving the previous controller's tab index",
     (WidgetTester tester) async {
       final List<int> tabsPainted = <int>[];
       final CupertinoTabController oldController = CupertinoTabController(initialIndex: 0);
@@ -688,7 +690,7 @@ void main() {
               return CustomPaint(
                 child: Text('Page ${index + 1}'),
                 painter: TestCallbackPainter(
-                  onPaint: () { tabsPainted.add(index); }
+                  onPaint: () { tabsPainted.add(index); },
                 ),
               );
             },
@@ -710,7 +712,7 @@ void main() {
               return CustomPaint(
                 child: Text('Page ${index + 1}'),
                 painter: TestCallbackPainter(
-                  onPaint: () { tabsPainted.add(index); }
+                  onPaint: () { tabsPainted.add(index); },
                 ),
               );
             },
@@ -731,10 +733,12 @@ void main() {
 
       // Changing [index] of the oldController should not work.
       expect(tabsPainted, const <int> [0, 0, 1]);
-  });
+    },
+  );
 
-  testWidgets('Do not call dispose on a controller that we do not own '
-              'but do remove from its listeners when done listening to it',
+  testWidgets(
+    'Do not call dispose on a controller that we do not own '
+    'but do remove from its listeners when done listening to it',
     (WidgetTester tester) async {
       final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
 
@@ -767,7 +771,8 @@ void main() {
 
       expect(mockController.numOfListeners, 0);
       expect(mockController.isDisposed, isFalse);
-  });
+    },
+  );
 
   testWidgets('The owner can dispose the old controller', (WidgetTester tester) async {
     CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
@@ -827,7 +832,7 @@ void main() {
                   tabBuilder: (BuildContext context, int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
-                        onPaint: () => tabsPainted0.add(index)
+                        onPaint: () => tabsPainted0.add(index),
                       ),
                     );
                   },
@@ -840,7 +845,7 @@ void main() {
                   tabBuilder: (BuildContext context, int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
-                        onPaint: () => tabsPainted1.add(index)
+                        onPaint: () => tabsPainted1.add(index),
                       ),
                     );
                   },
@@ -874,7 +879,7 @@ void main() {
                   tabBuilder: (BuildContext context, int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
-                        onPaint: () => tabsPainted0.add(index)
+                        onPaint: () => tabsPainted0.add(index),
                       ),
                     );
                   },
@@ -904,8 +909,8 @@ void main() {
                   tabBuilder: (BuildContext context, int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
-                        onPaint: () => tabsPainted0.add(index)
-                      )
+                        onPaint: () => tabsPainted0.add(index),
+                      ),
                     );
                   },
                 ),
@@ -917,7 +922,8 @@ void main() {
       expect(tabsPainted0, const <int>[2, 0, 1, 2]);
       expect(tabsPainted1, const <int>[2, 0]);
       expect(controller.numOfListeners, 1);
-    });
+    },
+  );
 
   testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);

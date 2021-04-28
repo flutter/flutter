@@ -26,6 +26,7 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/targets/dart_plugin_registrant.dart';
 import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -230,7 +231,7 @@ class FlutterDevice {
     int hostVmServicePort,
     int ddsPort,
     bool disableServiceAuthCodes = false,
-    bool disableDds = false,
+    bool enableDds = true,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) {
@@ -244,7 +245,7 @@ class FlutterDevice {
       isWaitingForVm = true;
       bool existingDds = false;
       FlutterVmService service;
-      if (!disableDds) {
+      if (enableDds) {
         void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
           if (!completer.isCompleted) {
@@ -299,7 +300,7 @@ class FlutterDevice {
         service = await Future.any<dynamic>(
           <Future<dynamic>>[
             connectToVmService(
-              disableDds ? observatoryUri : device.dds.uri,
+              enableDds ? device.dds.uri : observatoryUri,
               reloadSources: reloadSources,
               restart: restart,
               compileExpression: compileExpression,
@@ -1211,9 +1212,16 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
+      generateDartPluginRegistry: true,
     );
-    _lastBuild = await globals.buildSystem.buildIncremental(
+
+    final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       const GenerateLocalizationsTarget(),
+      const DartPluginRegistrantTarget(),
+    ]);
+
+    _lastBuild = await globals.buildSystem.buildIncremental(
+      compositeTarget,
       _environment,
       _lastBuild,
     );
@@ -1330,7 +1338,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
-        disableDds: debuggingOptions.disableDds,
+        enableDds: debuggingOptions.enableDds,
         ddsPort: debuggingOptions.ddsPort,
         allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,

@@ -325,6 +325,12 @@
       "flaky": false
     },
     {
+      "name": "Linux animated_image_gc_perf",
+      "repo": "flutter",
+      "task_name": "animated_image_gc_perf",
+      "flaky": true
+    },
+    {
       "name": "Linux linux_chrome_dev_mode",
       "repo": "flutter",
       "task_name": "linux_linux_chrome_dev_mode",
@@ -550,6 +556,12 @@
       "name": "Linux flutter_plugins",
       "repo": "flutter",
       "task_name": "flutter_plugins",
+      "flaky": false
+    },
+    {
+      "name": "Linux skp_generator",
+      "repo": "flutter",
+      "task_name": "linux_skp_generator",
       "flaky": false
     },
     {
@@ -910,7 +922,7 @@
       "name": "Mac dart_plugin_registry_test",
       "repo": "flutter",
       "task_name": "dart_plugin_registry_test",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Mac tool_tests_general",

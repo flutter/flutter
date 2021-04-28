@@ -254,7 +254,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
           throwsToolExit(
-            message: 'When the --debug-port or --debug-uri is unknown, this command determines '
+            message: 'When the --debug-port or --debug-url is unknown, this command determines '
                      'the value of --ipv6 on its own.',
           ),
         );
@@ -277,7 +277,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
-            message: 'When the --debug-port or --debug-uri is unknown, this command does not use '
+            message: 'When the --debug-port or --debug-url is unknown, this command does not use '
                      'the value of --observatory-port.',
           ),
         );

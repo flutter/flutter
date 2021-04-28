@@ -88,7 +88,8 @@ void main() {
         ));
 
         expect(client2.currentTextEditingValue, text2);
-    });
+      },
+    );
   });
 }
 
@@ -212,7 +213,8 @@ class FakeTextChannel implements MethodChannel {
         print(
           'Index $i did not match:\n'
           '  actual:   ${outgoingCalls[i]}\n'
-          '  expected: ${calls[i]}');
+          '  expected: ${calls[i]}',
+        );
         hasError = true;
       }
     }

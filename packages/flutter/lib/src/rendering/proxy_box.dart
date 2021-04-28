@@ -1141,9 +1141,13 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
-  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter })
+  /// The [blendMode] argument, if provided, must not be null
+  /// and will default to [BlendMode.srcOver].
+  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter, BlendMode blendMode = BlendMode.srcOver })
     : assert(filter != null),
+      assert(blendMode != null),
       _filter = filter,
+      _blendMode = blendMode,
       super(child);
 
   @override
@@ -1164,6 +1168,20 @@ class RenderBackdropFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
+  BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
+  set blendMode(BlendMode value) {
+    assert(value != null);
+    if (_blendMode == value)
+      return;
+    _blendMode = value;
+    markNeedsPaint();
+  }
+
   @override
   bool get alwaysNeedsCompositing => child != null;
 
@@ -1173,6 +1191,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
       layer!.filter = _filter;
+      layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
     } else {
       layer = null;

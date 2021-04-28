@@ -178,7 +178,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.always
+          floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
       ),
     );
@@ -193,7 +193,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.never
+          floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
       ),
     );
@@ -3137,7 +3137,7 @@ void main() {
     ]));
 
     final Set<Object> nodeValues = Set<Object>.from(
-      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!)
+      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
     );
     expect(nodeValues.length, 11);
   });

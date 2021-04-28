@@ -324,7 +324,7 @@ void main() {
                   backwardsCompatibility: false,
                   iconTheme: IconThemeData(color: appBarIconColor),
                   actions: <Widget>[
-                    IconButton(icon: const Icon(Icons.share), onPressed: () { })
+                    IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                   ],
                 ),
               );
@@ -385,7 +385,7 @@ void main() {
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(appBar: AppBar(
         backwardsCompatibility: false,
-        title: const Text('Title')
+        title: const Text('Title'),
       )),
     ));
 

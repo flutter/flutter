@@ -355,8 +355,15 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 /// The possible states of a [PrimaryPointerGestureRecognizer].
 ///
 /// The recognizer advances from [ready] to [possible] when it starts tracking a
-/// primary pointer. When the primary pointer is resolved in the gesture
-/// arena (either accepted or rejected), the recognizers advances to [defunct].
+/// primary pointer. Where it advances from there depends on how the gesture is
+/// resolved for that pointer:
+///
+///  * If the primary pointer is resolved by the gesture winning the arena, the
+///    recognizer stays in the [possible] state as long as it continues to track
+///    a pointer.
+///  * If the primary pointer is resolved by the gesture being rejected and
+///    losing the arena, the recognizer's state advances to [defunct].
+///
 /// Once the recognizer has stopped tracking any remaining pointers, the
 /// recognizer returns to [ready].
 enum GestureRecognizerState {
