@@ -359,7 +359,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 /// resolved for that pointer:
 ///
 ///  * If the primary pointer is resolved by the gesture winning the arena, the
-///    state remains as [possible] as long as the recognizer continues to track
+///    recognizer stays in the [possible] state as long as it continues to track
 ///    a pointer.
 ///  * If the primary pointer is resolved by the gesture being rejected and
 ///    losing the arena, the recognizer's state advances to [defunct].
