@@ -475,7 +475,7 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: blue));
     final Material backgroundMaterial = tester.widget(find.descendant(
       of: find.byType(RefreshProgressIndicator),
-      matching: find.byType(Material)
+      matching: find.byType(Material),
     ));
     expect(backgroundMaterial.type, MaterialType.circle);
     expect(backgroundMaterial.color, green);
@@ -491,8 +491,8 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: green));
     final Material themeBackgroundMaterial = tester.widget(find.descendant(
-        of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Material)
+      of: find.byType(RefreshProgressIndicator),
+      matching: find.byType(Material),
     ));
     expect(themeBackgroundMaterial.type, MaterialType.circle);
     expect(themeBackgroundMaterial.color, blue);
