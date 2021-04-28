@@ -105,6 +105,13 @@ void main() {
           ));
         }
       );
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext')))
+          .thenAnswer((_) async => <String, String>{
+                'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
+                'WRAPPER_NAME': 'My Super Awesome App.app',
+                'DEVELOPMENT_TEAM': '3333CCCC33',
+              });
+
       xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: mockXcodeProjectInterpreter);
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
@@ -125,11 +132,6 @@ void main() {
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
-      processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings'], stdout: r'''
-      TARGET_BUILD_DIR=build/ios/Release-iphoneos
-      WRAPPER_NAME=My Super Awesome App.app
-      '''
-      ));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
         '-av',
@@ -174,95 +176,6 @@ void main() {
       Xcode: () => xcode,
     });
 
-    testUsingContext('with flaky buildSettings call', () async {
-      LaunchResult launchResult;
-      FakeAsync().run((FakeAsync time) {
-        final IOSDevice iosDevice = setUpIOSDevice(
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: logger,
-          artifacts: artifacts,
-        );
-        setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
-        final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
-        fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
-
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-        processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
-        // The first showBuildSettings call should timeout.
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[...kRunReleaseArgs, '-showBuildSettings'],
-            duration: Duration(minutes: 5), // this is longer than the timeout of 1 minute.
-          ));
-        // The second call succeeds and is made after the first times out.
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>[...kRunReleaseArgs, '-showBuildSettings'],
-            exitCode: 0,
-            stdout: r'''
-      TARGET_BUILD_DIR=build/ios/Release-iphoneos
-      WRAPPER_NAME=My Super Awesome App.app
-      '''
-          ));
-        processManager.addCommand(const FakeCommand(command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          'build/ios/Release-iphoneos/My Super Awesome App.app',
-          'build/ios/iphoneos',
-        ]));
-        processManager.addCommand(FakeCommand(
-          command: <String>[
-            iosDeployPath,
-            '--id',
-            '123',
-            '--bundle',
-            'build/ios/iphoneos/My Super Awesome App.app',
-            '--app_deltas',
-            'build/ios/app-delta',
-            '--no-wifi',
-            '--justlaunch',
-            '--args',
-            const <String>[
-              '--enable-dart-profiling',
-              '--disable-service-auth-codes',
-            ].join(' ')
-          ])
-        );
-
-        iosDevice.startApp(
-          buildableIOSApp,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-          platformArgs: <String, Object>{},
-        ).then((LaunchResult result) {
-          launchResult = result;
-        });
-
-        // Elapse duration for process timeout.
-        time.flushMicrotasks();
-        time.elapse(const Duration(minutes: 1));
-
-        // Elapse duration for overall process timer.
-        time.flushMicrotasks();
-        time.elapse(const Duration(minutes: 5));
-
-        time.flushTimers();
-      });
-
-      expect(launchResult?.started, true);
-      expect(fileSystem.directory('build/ios/iphoneos'), exists);
-      expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-      FileSystem: () => fileSystem,
-      Logger: () => logger,
-      Platform: () => macPlatform,
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Xcode: () => xcode,
-    });
-
     testUsingContext('with concurrent build failures', () async {
       final IOSDevice iosDevice = setUpIOSDevice(
         fileSystem: fileSystem,
@@ -284,11 +197,6 @@ void main() {
           stdout: kConcurrentBuildErrorMessage,
         ));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[...kRunReleaseArgs, '-showBuildSettings'],
-          exitCode: 0,
-        ));
       processManager.addCommand(FakeCommand(
         command: <String>[
           iosDeployPath,

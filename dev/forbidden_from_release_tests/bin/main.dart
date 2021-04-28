@@ -2,17 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-// TODO(dnfield): migrate this once vm_snapshot_analysis is migrated.
-// https://github.com/dart-lang/sdk/issues/45683
-
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -79,7 +74,7 @@ Future<bool> validateType(String forbiddenType, File packageConfigFile) async {
     packageConfigFile.readAsStringSync(),
     packageConfigFile.uri,
   );
-  final Uri packageFileUri = packageConfig.resolve(packageUri);
+  final Uri? packageFileUri = packageConfig.resolve(packageUri);
   final File packageFile = fs.file(packageFileUri);
   if (!packageFile.existsSync()) {
     print('File $packageFile does not exist - forbidden type has moved or been removed.');
@@ -106,9 +101,9 @@ Future<bool> validateType(String forbiddenType, File packageConfigFile) async {
 
 class Options {
   const Options({
-    @required this.snapshot,
-    @required this.packageConfig,
-    @required this.forbiddenTypes,
+    required this.snapshot,
+    required this.packageConfig,
+    required this.forbiddenTypes,
   });
 
   factory Options.fromArgs(List<String> args) {

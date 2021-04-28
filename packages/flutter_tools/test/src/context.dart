@@ -87,9 +87,7 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync(
-      'flutter_config_dir_test.',
-    );
+    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return Config.test(
       name: Config.kFlutterSettings,
       directory: configDir,
@@ -97,9 +95,7 @@ void testUsingContext(
     );
   }
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync(
-      'flutter_config_dir_test.',
-    );
+    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return PersistentToolState.test(
       directory: configDir,
       logger: globals.logger,
@@ -311,7 +307,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    String scheme,
+    XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};

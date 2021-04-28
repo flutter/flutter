@@ -414,8 +414,8 @@ void main() {
               child: FocusableActionDetector(
                 enabled: enabled,
                 focusNode: focusNode,
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                shortcuts: const <ShortcutActivator, Intent>{
+                  SingleActivator(LogicalKeyboardKey.enter): intent,
                 },
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
@@ -789,8 +789,8 @@ void main() {
               child: FocusableActionDetector(
                 enabled: enabled,
                 focusNode: focusNode,
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                shortcuts: const <ShortcutActivator, Intent>{
+                  SingleActivator(LogicalKeyboardKey.enter): intent,
                 },
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,

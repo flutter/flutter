@@ -397,7 +397,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('from build settings, if no plist', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
                 'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -428,7 +428,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
                 'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -447,7 +447,7 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
         project.ios.defaultHostInfoPlist.createSync(recursive: true);
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext'))).thenAnswer(
           (_) {
             return Future<Map<String,String>>.value(<String, String>{
               'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -478,7 +478,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('handles case insensitive flavor', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
                 'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -550,7 +550,7 @@ apply plugin: 'kotlin-android'
       testUsingContext('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer((_) {
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext'))).thenAnswer((_) {
           return Future<Map<String,String>>.value(<String, String>{
             'FULL_PRODUCT_NAME': 'My App.app'
           });
@@ -667,7 +667,7 @@ apply plugin: 'kotlin-android'
 
     group('with bundle identifier', () {
       setUp(() {
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext'))).thenAnswer(
             (_) {
             return Future<Map<String,String>>.value(<String, String>{
               'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',

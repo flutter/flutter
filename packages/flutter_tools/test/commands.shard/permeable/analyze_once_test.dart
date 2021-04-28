@@ -139,9 +139,7 @@ void main() {
   });
 
   setUp(() {
-    tempDir = fileSystem.systemTempDirectory.createTempSync(
-      'flutter_analyze_once_test_1.',
-    ).absolute;
+    tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
     projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
     fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'))
         ..createSync(recursive: true)
@@ -387,8 +385,7 @@ StringBuffer bar = StringBuffer('baz');
   });
 
   testUsingContext('analyze once with default options has info issue finally exit code 1.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_default_options_info_issue_exit_code_1.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_default_options_info_issue_exit_code_1.');
     _createDotPackages(tempDir.path);
 
     const String infoSourceCode = '''
@@ -422,8 +419,7 @@ int analyze() {}
   });
 
   testUsingContext('analyze once with no-fatal-infos has info issue finally exit code 0.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_no_fatal_infos_info_issue_exit_code_0.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_no_fatal_infos_info_issue_exit_code_0.');
     _createDotPackages(tempDir.path);
 
     const String infoSourceCode = '''
@@ -457,8 +453,7 @@ int analyze() {}
   });
 
   testUsingContext('analyze once only fatal-warnings has info issue finally exit code 0.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_only_fatal_warnings_info_issue_exit_code_0.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_only_fatal_warnings_info_issue_exit_code_0.');
     _createDotPackages(tempDir.path);
 
     const String infoSourceCode = '''
@@ -492,8 +487,7 @@ int analyze() {}
   });
 
   testUsingContext('analyze once only fatal-infos has warning issue finally exit code 1.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_only_fatal_infos_warning_issue_exit_code_1.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_only_fatal_infos_warning_issue_exit_code_1.');
     _createDotPackages(tempDir.path);
 
     const String warningSourceCode = '''
