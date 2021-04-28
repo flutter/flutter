@@ -61,10 +61,6 @@ class AssetFontManager : public SkFontMgr {
                                           SkUnichar character) const override;
 
   // |SkFontMgr|
-  SkTypeface* onMatchFaceStyle(const SkTypeface*,
-                               const SkFontStyle&) const override;
-
-  // |SkFontMgr|
   sk_sp<SkTypeface> onMakeFromData(sk_sp<SkData>, int ttcIndex) const override;
 
   // |SkFontMgr|

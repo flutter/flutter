@@ -70,12 +70,6 @@ SkTypeface* AssetFontManager::onMatchFamilyStyleCharacter(
   return nullptr;
 }
 
-SkTypeface* AssetFontManager::onMatchFaceStyle(const SkTypeface*,
-                                               const SkFontStyle&) const {
-  FML_DCHECK(false);
-  return nullptr;
-}
-
 sk_sp<SkTypeface> AssetFontManager::onMakeFromData(sk_sp<SkData>,
                                                    int ttcIndex) const {
   FML_DCHECK(false);
