@@ -562,7 +562,7 @@
       "name": "Linux skp_generator",
       "repo": "flutter",
       "task_name": "linux_skp_generator",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Mac build_aar_module_test",
