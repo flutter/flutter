@@ -10,12 +10,6 @@ import 'package:win32/win32.dart';
 import '../windows/native_api.dart';
 
 /// An implementation of [NativeApi] which uses the win32 package.
-///
-// TODO(jonahwilliams): add support for looking up AMUID from application GUID
-// Powershell to get the AUMID for an installed app
-// $foo = get-appxpackage | where {$_.Name -like "Microsoft.WindowsCalculator"}
-// $aumid = $foo.packagefamilyname + "!" + (Get-AppxPackageManifest $foo).package.applications.application.id
-// write-host $aumid
 class Win32NativeApi extends NativeApi {
   const Win32NativeApi();
 
