@@ -542,7 +542,7 @@
       "name": "Mac dart_plugin_registry_test",
       "repo": "flutter",
       "task_name": "dart_plugin_registry_test",
-      "enabled": false,
+      "enabled": true,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
     {
