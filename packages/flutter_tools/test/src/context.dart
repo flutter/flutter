@@ -307,7 +307,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    String scheme,
+    XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};

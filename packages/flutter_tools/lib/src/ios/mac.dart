@@ -176,9 +176,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   Map<String, String> autoSigningConfigs;
+
+  final Map<String, String> buildSettings = await app.project.buildSettingsForBuildInfo(
+        buildInfo,
+        environmentType: buildForDevice ? EnvironmentType.physical : EnvironmentType.simulator,
+      ) ?? <String, String>{};
+
   if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
-      buildSettings: await app.project.buildSettingsForBuildInfo(buildInfo),
+      buildSettings: buildSettings,
       processManager: globals.processManager,
       logger: globals.logger,
       config: globals.config,
@@ -352,45 +358,6 @@ Future<XcodeBuildResult> buildXcodeProject({
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
   globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
-
-  // Run -showBuildSettings again but with the exact same parameters as the
-  // build. showBuildSettings is reported to occasionally timeout. Here, we give
-  // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
-  // When there is a timeout, we retry once. See issue #35988.
-  final List<String> showBuildSettingsCommand = (List<String>
-      .of(buildCommands)
-      ..add('-showBuildSettings'))
-      // Undocumented behavior: xcodebuild craps out if -showBuildSettings
-      // is used together with -allowProvisioningUpdates or
-      // -allowProvisioningDeviceRegistration and freezes forever.
-      .where((String buildCommand) {
-        return !const <String>[
-          '-allowProvisioningUpdates',
-          '-allowProvisioningDeviceRegistration',
-        ].contains(buildCommand);
-      }).toList();
-  const Duration showBuildSettingsTimeout = Duration(minutes: 1);
-  Map<String, String> buildSettings;
-  try {
-    final RunResult showBuildSettingsResult = await globals.processUtils.run(
-      showBuildSettingsCommand,
-      throwOnError: true,
-      workingDirectory: app.project.hostAppRoot.path,
-      timeout: showBuildSettingsTimeout,
-      timeoutRetries: 1,
-    );
-    final String showBuildSettings = showBuildSettingsResult.stdout.trim();
-    buildSettings = parseXcodeBuildSettings(showBuildSettings);
-  } on ProcessException catch (e) {
-    if (e.toString().contains('timed out')) {
-      BuildEvent('xcode-show-build-settings-timeout',
-        type: 'ios',
-        command: showBuildSettingsCommand.join(' '),
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    rethrow;
-  }
 
   if (buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');
