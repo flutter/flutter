@@ -398,6 +398,39 @@ void testMain() async {
     }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/78068
+  // Tests for correct behavior when using drawImageNine with a destination
+  // size that is too small to render the center portion of the original image.
+  test('Paints nine slice image', () async {
+    Rect region = const Rect.fromLTWH(0, 0, 100, 100);
+    EnginePictureRecorder recorder = EnginePictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    Image testImage = createNineSliceImage();
+    canvas.clipRect(Rect.fromLTWH(0, 0, 100, 100));
+    // The testImage is 60x60 and the center slice is 20x20 so the edges
+    // of the image are 40x40. Drawing into a destination that is smaller
+    // than that will not provide enough room to draw the center portion.
+    canvas.drawImageNine(testImage, Rect.fromLTWH(20, 20, 20, 20),
+        Rect.fromLTWH(20, 20, 36, 36), Paint());
+    Picture picture = recorder.endRecording();
+
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.addPicture(Offset(0, 0), picture);
+
+    // Wrap in <flt-scene> so that our CSS selectors kick in.
+    final html.Element sceneElement = html.Element.tag('flt-scene');
+    try {
+      sceneElement.append(builder.build().webOnlyRootElement);
+      html.document.body.append(sceneElement);
+      await matchGoldenFile('draw_nine_slice_empty_center.png',
+          region: region, maxDiffRatePercent: 0);
+    } finally {
+      // The page is reused across tests, so remove the element after taking the
+      // Scuba screenshot.
+      sceneElement.remove();
+    }
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/61691
   //
   // The bug in bitmap_canvas.dart was that when we transformed and clipped
