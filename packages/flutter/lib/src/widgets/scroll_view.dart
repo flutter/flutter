@@ -1522,7 +1522,7 @@ class ListView extends BoxScrollView {
 
   @override
   Widget buildChildLayout(BuildContext context) {
-    if (itemExtent != null) { // TODO(werainkhatri)
+    if (itemExtent != null) {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent!,

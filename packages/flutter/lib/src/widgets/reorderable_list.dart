@@ -843,7 +843,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         itemExtent: widget.itemExtent!,
         delegate: childrenDelegate,
       );
-    return SliverList( // TODO(werainkhatri)
+    return SliverList(
       // When dragging, the dragged item is still in the list but has been replaced
       // by a zero height SizedBox, so that the gap can move around. To make the
       // list extent stable we add a dummy entry to the end.
