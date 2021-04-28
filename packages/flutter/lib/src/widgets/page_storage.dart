@@ -267,8 +267,6 @@ class PageStorage extends StatelessWidget {
   /// ```dart
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
-  ///
-  /// This method can be expensive (it walks the element tree).
   static PageStorageBucket? of(BuildContext context) {
     final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;
