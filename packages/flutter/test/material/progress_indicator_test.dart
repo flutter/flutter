@@ -374,8 +374,8 @@ void main() {
     final List<Layer> layers1 = tester.layers;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
-    );
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)]),
+    ));
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
   });
@@ -535,7 +535,7 @@ void main() {
             builder: (BuildContext context, StateSetter setter) {
               setState = setter;
               return CircularProgressIndicator(value: progressValue);
-            }
+            },
           ),
         ),
       ),
@@ -756,7 +756,6 @@ void main() {
       value: value,
     ));
 
-
     handle.dispose();
   });
 
@@ -798,10 +797,11 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-    }, variant: const TargetPlatformVariant(<TargetPlatform> {
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
-    })
+    }),
   );
 
   testWidgets(
@@ -818,7 +818,8 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsNothing);
-    }, variant: const TargetPlatformVariant(<TargetPlatform> {
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.android,
       TargetPlatform.fuchsia,
       TargetPlatform.windows,
