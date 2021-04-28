@@ -8,11 +8,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -31,7 +33,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fake_vm_services.dart';
-import '../../src/mocks.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
@@ -929,3 +930,20 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 }
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
+
+class MockAndroidDevice extends Mock implements AndroidDevice {
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsFlutterExit => false;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
+}
