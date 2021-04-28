@@ -114,7 +114,7 @@ void main() {
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
           'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n'
+          'the ticker will leak.\n',
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(13).join('\n'), equalsIgnoringHashCodes(
@@ -130,7 +130,7 @@ void main() {
             '   the ticker will leak.\n'
             '   The offending ticker was:\n'
             '     Ticker(created by _SingleTickerTestState#00000)\n'
-            '     The stack trace when the Ticker was actually created was:'
+            '     The stack trace when the Ticker was actually created was:',
         ));
         key.currentState!.controller.stop();
       }
@@ -154,7 +154,7 @@ void main() {
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
           'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n'
+          'the ticker will leak.\n',
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(13).join('\n'), equalsIgnoringHashCodes(
@@ -170,7 +170,7 @@ void main() {
           '   the ticker will leak.\n'
           '   The offending ticker was:\n'
           '     Ticker(created by _SingleTickerTestState#00000)\n'
-          '     The stack trace when the Ticker was actually created was:'
+          '     The stack trace when the Ticker was actually created was:',
         ));
         key.currentState!.controller.stop();
       }
@@ -194,7 +194,7 @@ void main() {
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
           'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n'
+          'the ticker will leak.\n',
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(12).join('\n'), equalsIgnoringHashCodes(
@@ -209,7 +209,7 @@ void main() {
           '   calling dispose() on the AnimationController itself. Otherwise,\n'
           '   the ticker will leak.\n'
           '   The offending ticker was:\n'
-          '     _WidgetTicker(created by _MultipleTickerTestState#00000)'
+          '     _WidgetTicker(created by _MultipleTickerTestState#00000)',
         ));
         key.currentState!.controllers.first.stop();
       }

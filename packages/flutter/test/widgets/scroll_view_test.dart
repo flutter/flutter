@@ -113,7 +113,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -147,7 +147,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -181,7 +181,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -218,7 +218,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -252,7 +252,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -321,7 +321,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -355,7 +355,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -390,7 +390,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -413,22 +413,24 @@ void main() {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
-        child: ListView(
-      padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-      children: focusNodes.map((FocusNode focusNode) {
-        return Container(
-          height: 50,
-          color: Colors.green,
-          child: TextField(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+        children: focusNodes.map((FocusNode focusNode) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
               focusNode: focusNode,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )),
-        );
-      }).toList(),
-    )));
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    ));
 
     final Finder finder = find.byType(TextField).first;
     final TextField textField = tester.widget(finder);
@@ -457,7 +459,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -491,7 +493,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -528,7 +530,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -562,7 +564,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -631,7 +633,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -665,7 +667,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -700,7 +702,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -816,7 +818,7 @@ void main() {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                    )
+                    ),
                   ),
                 );
               }).toList(),
@@ -1309,7 +1311,7 @@ void main() {
       ),
     );
     final ScrollController controller = PrimaryScrollController.of(
-      tester.element(find.byType(CustomScrollView))
+      tester.element(find.byType(CustomScrollView)),
     )!;
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
