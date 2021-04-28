@@ -20,7 +20,7 @@ void main() {
   TestUsage testUsage;
   MemoryFileSystem memoryFileSystem;
   BufferLogger testLogger;
-  FakekMacOSProject macOSProject;
+  FakeMacOSProject macOSProject;
   File xcodeProjectInfoFile;
 
   setUp(() {
@@ -28,7 +28,7 @@ void main() {
     memoryFileSystem = MemoryFileSystem.test();
     xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
     testLogger = BufferLogger.test();
-    macOSProject = FakekMacOSProject();
+    macOSProject = FakeMacOSProject();
     macOSProject.xcodeProjectInfoFile = xcodeProjectInfoFile;
   });
 
@@ -158,7 +158,7 @@ keep this 2
   });
 }
 
-class FakekMacOSProject extends Fake implements MacOSProject {
+class FakeMacOSProject extends Fake implements MacOSProject {
   @override
   File xcodeProjectInfoFile;
 }
