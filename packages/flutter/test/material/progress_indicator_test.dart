@@ -826,4 +826,35 @@ void main() {
       TargetPlatform.linux,
     }),
   );
+
+  testWidgets('ProgressIndicatorTheme.wrap() always creates a new ProgressIndicatorTheme', (WidgetTester tester) async {
+
+    late BuildContext builderContext;
+
+    const ProgressIndicatorThemeData themeData = ProgressIndicatorThemeData(
+      color: Color(0xFFFF0000),
+      linearTrackColor: Color(0xFF00FF00),
+    );
+
+    final ProgressIndicatorTheme progressTheme = ProgressIndicatorTheme(
+      data: themeData,
+      child: Builder(
+        builder: (BuildContext context) {
+          builderContext = context;
+          return const LinearProgressIndicator(value: 0.5);
+        }
+      ),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: progressTheme,
+    ));
+    final Widget wrappedTheme = progressTheme.wrap(builderContext, Container());
+
+    // Make sure the returned widget is a new ProgressIndicatorTheme instance
+    // with the same theme data as the original.
+    expect(wrappedTheme, isNot(equals(progressTheme)));
+    expect(wrappedTheme, isInstanceOf<ProgressIndicatorTheme>());
+    expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
+  });
 }
