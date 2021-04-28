@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -43,14 +44,14 @@ void main() {
 
   testWithoutContext('WindowsUwpDevice defaults', () async {
     final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice();
-    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
     expect(windowsDevice.name, 'Windows (UWP)');
-    expect(await windowsDevice.installApp(windowsApp), true);
-    expect(await windowsDevice.uninstallApp(windowsApp), true);
-    expect(await windowsDevice.isLatestBuildInstalled(windowsApp), true);
-    expect(await windowsDevice.isAppInstalled(windowsApp), true);
+    expect(await windowsDevice.installApp(package), true);
+    expect(await windowsDevice.uninstallApp(package), true);
+    expect(await windowsDevice.isLatestBuildInstalled(package), false);
+    expect(await windowsDevice.isAppInstalled(package), false);
     expect(windowsDevice.category, Category.desktop);
 
     expect(windowsDevice.supportsRuntimeMode(BuildMode.debug), true);
@@ -164,6 +165,43 @@ void main() {
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.profile), 'profile/executable');
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.release), 'release/executable');
   });
+
+  testWithoutContext('WinUWPDevice can launch application', () async {
+    Cache.flutterRoot = '';
+    final FakeNativeApi nativeApi = FakeNativeApi();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'powershell.exe',
+        'build/winuwp/AppPackages/testapp/testapp_1.2.3.4_Debug_Test/Add-AppDevPackage.ps1',
+      ]),
+      const FakeCommand(command: <String>[
+        'powershell.exe',
+        'packages/flutter_tools/bin/getaumidfromname.ps1',
+        '-Name',
+        '1234'
+      ], stdout: 'ABCDEFG'),
+    ]);
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(fileSystem: fileSystem, processManager: processManager, nativeApi: nativeApi);
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+
+    final LaunchResult result = await windowsDevice.startApp(
+      package,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{},
+    );
+
+    expect(result.started, true);
+    expect(nativeApi.requests.single.amuid, 'ABCDEFG');
+    expect(nativeApi.requests.single.args, <String>[
+      '--observatory-port=12345',
+      '--disable-service-auth-codes',
+      '--enable-dart-profiling',
+      '--enable-checked-mode',
+      '--verify-entry-points',
+    ]);
+  });
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
@@ -191,12 +229,14 @@ WindowsUWPDevice setUpWindowsUwpDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
+  NativeApi nativeApi,
 }) {
   return WindowsUWPDevice(
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: FakeOperatingSystemUtils(),
-    nativeApi: FakeNativeApi(),
+    nativeApi: nativeApi ?? FakeNativeApi(),
+    fileSystem: fileSystem ?? MemoryFileSystem.test(),
   );
 }
 
@@ -205,4 +245,28 @@ class FakeWindowsApp extends Fake implements WindowsApp {
   String executable(BuildMode buildMode) => '${buildMode.name}/executable';
 }
 
-class FakeNativeApi extends Fake implements NativeApi {}
+class FakeBuildableUwpApp extends Fake implements BuildableUwpApp {
+  @override
+  String get id => '1234';
+  @override
+  String get name => 'testapp';
+  @override
+  String get projectVersion => '1.2.3.4';
+}
+
+class FakeNativeApi implements NativeApi {
+  final List<FakeLaunchRequest> requests = <FakeLaunchRequest>[];
+
+  @override
+  int launchApp(String amuid, List<String> args) {
+    requests.add(FakeLaunchRequest(amuid, args));
+    return 0;
+  }
+}
+
+class FakeLaunchRequest {
+  const FakeLaunchRequest(this.amuid, this.args);
+
+  final String amuid;
+  final List<String> args;
+}

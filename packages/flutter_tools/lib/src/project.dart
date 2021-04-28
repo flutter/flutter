@@ -1230,6 +1230,30 @@ class WindowsUwpProject extends WindowsProject {
   /// Retrieve the GUID of the UWP package.
   String get packageGuid => _packageGuid ??= getCmakePackageGuid(runnerCmakeFile);
   String _packageGuid;
+  
+  File get appManifest => _editableDirectory.childFile('appxmanifest.in');
+
+  String get packageVersion => _packageVersion ??= parseAppVersion(this);
+  String _packageVersion;
+}
+
+@visibleForTesting
+String parseAppVersion(WindowsUwpProject project) {
+  final File appManifestFile = project.appManifest;
+  if (!appManifestFile.existsSync()) {
+    return null;
+  }
+
+  XmlDocument document;
+  try {
+    document = XmlDocument.parse(appManifestFile.readAsStringSync());
+  } on XmlParserException {
+    throwToolExit('Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
+  }
+  for (final XmlElement metaData in document.findAllElements('Identity')) {
+    return metaData.getAttribute('Version');
+  }
+  return null;
 }
 
 /// The Linux sub project.

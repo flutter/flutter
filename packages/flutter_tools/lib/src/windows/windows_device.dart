@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../desktop_device.dart';
@@ -83,10 +84,12 @@ class WindowsUWPDevice extends Device {
     @required Logger logger,
     @required NativeApi nativeApi,
     @required OperatingSystemUtils operatingSystemUtils,
+    @required FileSystem fileSystem,
   }) : _logger = logger,
        _processManager = processManager,
        _nativeApi = nativeApi,
        _operatingSystemUtils = operatingSystemUtils,
+       _fileSystem = fileSystem,
       super(
        'winuwp',
         platformType: PlatformType.windows,
@@ -98,6 +101,8 @@ class WindowsUWPDevice extends Device {
   final Logger _logger;
   final NativeApi _nativeApi;
   final OperatingSystemUtils _operatingSystemUtils;
+  final FileSystem _fileSystem;
+  BuildMode _buildMode;
 
   int _processId;
 
@@ -112,9 +117,7 @@ class WindowsUWPDevice extends Device {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
-    // TODO(flutter): update with detection once FlutterProject knows
-    // about the UWP structure.
-    return true;
+    return flutterProject.windowsUwp.existsSync();
   }
 
   @override
@@ -127,15 +130,24 @@ class WindowsUWPDevice extends Device {
   Future<String> get emulatorId => null;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({covariant ApplicationPackage app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({covariant BuildableUwpApp app, bool includePastLogs = false}) {
     return NoOpDeviceLogReader('winuwp');
   }
 
   @override
-  Future<bool> installApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> installApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
+    /// The cmake build generates an install powershell script.
+    /// build\winuwp\AppPackages\<app-name>\<app-name>_<app-version>_<cmake-config>\Add-AppDevPackage.ps1
+    final String binaryName = app.name;
+    final String packageVersion = app.projectVersion;
+    if (packageVersion == null) {
+      return false;
+    }
+    final String config = toTitleCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
+    final String generated = '${binaryName}_${packageVersion}_${config}_Test';
     await _processManager.run(<String>[
       'powershell.exe',
-      r'build\winuwp\AppPackages\helloreloaded\helloreloaded_1.1.0.0_Debug_Test\Add-AppDevPackage.ps1'
+      _fileSystem.path.join('build', 'winuwp', 'AppPackages', binaryName, generated, 'Add-AppDevPackage.ps1'),
     ]);
     return true;
   }
@@ -156,7 +168,7 @@ class WindowsUWPDevice extends Device {
   Future<String> get sdkNameAndVersion async => '';
 
   @override
-  Future<LaunchResult> startApp(covariant ApplicationPackage package, {
+  Future<LaunchResult> startApp(covariant BuildableUwpApp package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -165,10 +177,10 @@ class WindowsUWPDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
-    final FlutterProject project = FlutterProject.current();
+    _buildMode = debuggingOptions.buildInfo.mode;
     if (!prebuiltApplication) {
       await buildWindowsUwp(
-        project.windowsUwp,
+        package.project,
         debuggingOptions.buildInfo,
         target: mainPath,
       );
@@ -177,15 +189,16 @@ class WindowsUWPDevice extends Device {
       await installApp(package);
     }
 
-    final String guid = project.windowsUwp.packageGuid;
+    final String guid = package.id;
     if (guid == null) {
-      _logger.printError('Could not find PACKAGE_GUID in ${project.windowsUwp.runnerCmakeFile.path}');
+      _logger.printError('Could not find PACKAGE_GUID in ${package.project.runnerCmakeFile.path}');
       return LaunchResult.failed();
     }
     final ProcessResult result = await _processManager.run(<String>[
       'powershell.exe',
-      '${Cache.flutterRoot}\\packages\\flutter_tools\\bin\\getaumidfromname.ps1',
-      '-Name', guid,
+      _fileSystem.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'bin', 'getaumidfromname.ps1'),
+      '-Name',
+      guid,
     ]);
     if (result.exitCode != 0) {
       _logger.printError('Failed to retrieve AUMID for project: ${result.stderr}');
@@ -237,7 +250,7 @@ class WindowsUWPDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> stopApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
     if (_processId != null) {
       return _processManager.killPid(_processId);
     }
@@ -245,9 +258,13 @@ class WindowsUWPDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> uninstallApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
+    // Not yet implemented, requires manual user uninstall.
     return true;
   }
+
+  @override
+  FutureOr<bool> supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {
@@ -300,6 +317,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
           processManager: _processManager,
           nativeApi: _nativeApi,
           operatingSystemUtils: _operatingSystemUtils,
+          fileSystem: _fileSystem,
         )
     ];
   }
