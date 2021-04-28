@@ -136,10 +136,10 @@ class _FakeProcess implements io.Process {
       stdin = stdin ?? IOSink(StreamController<List<int>>().sink),
       stderr = _stderr == null
         ? const Stream<List<int>>.empty()
-        : Stream<String>.value(_stderr).transform(const LineSplitter()).map((String line) => line + '\n').transform(utf8.encoder),
+        : Stream<List<int>>.value(utf8.encode(_stderr)),
       stdout = _stdout == null
         ? const Stream<List<int>>.empty()
-        : Stream<String>.value(_stdout).transform(const LineSplitter()).map((String line) => line + '\n').transform(utf8.encoder);
+        : Stream<List<int>>.value(utf8.encode(_stdout));
 
   final int _exitCode;
   final Completer<void>? _completer;
