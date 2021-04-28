@@ -287,6 +287,47 @@ class SurfaceCanvas implements ui.Canvas {
     _canvas.drawImageRect(image, src, dst, paint as SurfacePaint);
   }
 
+  // Return a list of slice coordinates based on the size of the nine-slice parameters in
+  // one dimension. Each set of slice coordinates contains a begin/end pair for each of the
+  // source (image) and dest (screen) in the order (src0, dst0, src1, dst1).
+  // The area from src0 => src1 of the image is painted on the screen from dst0 => dst1
+  // The slices for each dimension are generated independently.
+  List<double> _initSlices(double img0, double imgC0, double imgC1, double img1, double dst0, double dst1) {
+    final double imageDim = img1 - img0;
+    final double destDim = dst1 - dst0;
+
+    if (imageDim == destDim) {
+      // If the src and dest are the same size then we do not need scaling
+      // We return 4 values for a single slice
+      return <double>[ img0, dst0, img1, dst1 ];
+    }
+
+    final double edge0Dim = imgC0 - img0;
+    final double edge1Dim = img1 - imgC1;
+    final double edgesDim = edge0Dim + edge1Dim;
+
+    if (edgesDim >= destDim) {
+      // the center portion has disappeared, leaving only the edges to scale to a common
+      // center position in the destination
+      // this produces only 2 slices which is 8 values
+      double dstC = dst0 + destDim * edge0Dim / edgesDim;
+      return <double>[
+        img0,  dst0, imgC0, dstC,
+        imgC1, dstC, img1,  dst1,
+      ];
+    }
+
+    // center portion is nonEmpty and only that part is scaled
+    // we need 3 slices which is 12 values
+    final double dstC0 = dst0 + edge0Dim;
+    final double dstC1 = dst1 - edge1Dim;
+    return <double>[
+      img0,  dst0,  imgC0, dstC0,
+      imgC0, dstC0, imgC1, dstC1,
+      imgC1, dstC1, img1,  dst1
+    ];
+  }
+
   @override
   void drawImageNine(
       ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
@@ -296,147 +337,44 @@ class SurfaceCanvas implements ui.Canvas {
     assert(rectIsValid(dst));
     assert(paint != null); // ignore: unnecessary_null_comparison
 
-    // Assert you can fit the scaled part of the image (exluding the
-    // center source).
-    assert(image.width - center.width < dst.width);
-    assert(image.height - center.height < dst.height);
+    if (dst.isEmpty)
+      return;
 
-    // The four unscaled corner rectangles in the from the src.
-    final ui.Rect srcTopLeft = ui.Rect.fromLTWH(
-      0,
+    final List<double> hSlices = _initSlices(
       0,
       center.left,
-      center.top,
-    );
-    final ui.Rect srcTopRight = ui.Rect.fromLTWH(
       center.right,
-      0,
-      image.width - center.right,
-      center.top,
-    );
-    final ui.Rect srcBottomLeft = ui.Rect.fromLTWH(
-      0,
-      center.bottom,
-      center.left,
-      image.height - center.bottom,
-    );
-    final ui.Rect srcBottomRight = ui.Rect.fromLTWH(
-      center.right,
-      center.bottom,
-      image.width - center.right,
-      image.height - center.bottom,
-    );
-
-    final ui.Rect dstTopLeft = srcTopLeft.shift(dst.topLeft);
-
-    // The center rectangle in the dst region
-    final ui.Rect dstCenter = ui.Rect.fromLTWH(
-      dstTopLeft.right,
-      dstTopLeft.bottom,
-      dst.width - (srcTopLeft.width + srcTopRight.width),
-      dst.height - (srcTopLeft.height + srcBottomLeft.height),
-    );
-
-    drawImageRect(image, srcTopLeft, dstTopLeft, paint);
-
-    final ui.Rect dstTopRight = ui.Rect.fromLTWH(
-      dstCenter.right,
-      dst.top,
-      srcTopRight.width,
-      srcTopRight.height,
-    );
-    drawImageRect(image, srcTopRight, dstTopRight, paint);
-
-    final ui.Rect dstBottomLeft = ui.Rect.fromLTWH(
+      image.width.toDouble(),
       dst.left,
-      dstCenter.bottom,
-      srcBottomLeft.width,
-      srcBottomLeft.height,
+      dst.right,
     );
-    drawImageRect(image, srcBottomLeft, dstBottomLeft, paint);
-
-    final ui.Rect dstBottomRight = ui.Rect.fromLTWH(
-      dstCenter.right,
-      dstCenter.bottom,
-      srcBottomRight.width,
-      srcBottomRight.height,
-    );
-    drawImageRect(image, srcBottomRight, dstBottomRight, paint);
-
-    // Draw the top center rectangle.
-    drawImageRect(
-      image,
-      ui.Rect.fromLTRB(
-        srcTopLeft.right,
-        srcTopLeft.top,
-        srcTopRight.left,
-        srcTopRight.bottom,
-      ),
-      ui.Rect.fromLTRB(
-        dstTopLeft.right,
-        dstTopLeft.top,
-        dstTopRight.left,
-        dstTopRight.bottom,
-      ),
-      paint,
+    final List<double> vSlices = _initSlices(
+      0,
+      center.top,
+      center.bottom,
+      image.height.toDouble(),
+      dst.top,
+      dst.bottom,
     );
 
-    // Draw the middle left rectangle.
-    drawImageRect(
-      image,
-      ui.Rect.fromLTRB(
-        srcTopLeft.left,
-        srcTopLeft.bottom,
-        srcBottomLeft.right,
-        srcBottomLeft.top,
-      ),
-      ui.Rect.fromLTRB(
-        dstTopLeft.left,
-        dstTopLeft.bottom,
-        dstBottomLeft.right,
-        dstBottomLeft.top,
-      ),
-      paint,
-    );
-
-    // Draw the center rectangle.
-    drawImageRect(image, center, dstCenter, paint);
-
-    // Draw the middle right rectangle.
-    drawImageRect(
-      image,
-      ui.Rect.fromLTRB(
-        srcTopRight.left,
-        srcTopRight.bottom,
-        srcBottomRight.right,
-        srcBottomRight.top,
-      ),
-      ui.Rect.fromLTRB(
-        dstTopRight.left,
-        dstTopRight.bottom,
-        dstBottomRight.right,
-        dstBottomRight.top,
-      ),
-      paint,
-    );
-
-    // Draw the bottom center rectangle.
-    drawImageRect(
-      image,
-      ui.Rect.fromLTRB(
-        srcBottomLeft.right,
-        srcBottomLeft.top,
-        srcBottomRight.left,
-        srcBottomRight.bottom,
-      ),
-      ui.Rect.fromLTRB(
-        dstBottomLeft.right,
-        dstBottomLeft.top,
-        dstBottomRight.left,
-        dstBottomRight.bottom,
-      ),
-      paint,
-    );
+    for (int yi = 0; yi < vSlices.length; yi += 4) {
+      double srcY0 = vSlices[yi];
+      double dstY0 = vSlices[yi + 1];
+      double srcY1 = vSlices[yi + 2];
+      double dstY1 = vSlices[yi + 3];
+      for (int xi = 0; xi < hSlices.length; xi += 4) {
+        double srcX0 = hSlices[xi];
+        double dstX0 = hSlices[xi + 1];
+        double srcX1 = hSlices[xi + 2];
+        double dstX1 = hSlices[xi + 3];
+        drawImageRect(
+          image,
+          ui.Rect.fromLTRB(srcX0, srcY0, srcX1, srcY1),
+          ui.Rect.fromLTRB(dstX0, dstY0, dstX1, dstY1),
+          paint,
+        );
+      }
+    }
   }
 
   @override
