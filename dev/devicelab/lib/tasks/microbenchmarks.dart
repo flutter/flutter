@@ -34,13 +34,13 @@ TaskFunction createMicrobenchmarkTask() {
             device.deviceId,
           ];
           options.add(benchmarkPath);
-          return _startFlutter(
+          return startFlutter(
             options: options,
             canFail: false,
           );
         });
 
-        return _readJsonResults(flutterProcess);
+        return readJsonResults(flutterProcess);
       }
       return _run();
     }
@@ -63,7 +63,7 @@ TaskFunction createMicrobenchmarkTask() {
   };
 }
 
-Future<Process> _startFlutter({
+Future<Process> startFlutter({
   List<String> options = const <String>[],
   bool canFail = false,
   Map<String, String> environment,
@@ -72,7 +72,7 @@ Future<Process> _startFlutter({
   return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
 }
 
-Future<Map<String, double>> _readJsonResults(Process process) {
+Future<Map<String, double>> readJsonResults(Process process) {
   // IMPORTANT: keep these values in sync with dev/benchmarks/microbenchmarks/lib/common.dart
   const String jsonStart = '================ RESULTS ================';
   const String jsonEnd = '================ FORMATTED ==============';

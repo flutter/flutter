@@ -1,0 +1,46 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:io';
+import 'package:path/path.dart' as path;
+import 'package:flutter_devicelab/framework/utils.dart' as utils;
+
+import 'package:flutter_devicelab/tasks/microbenchmarks.dart'
+    as microbenchmarks;
+import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/adb.dart' as adb;
+
+TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
+  return () async {
+    adb.deviceOperatingSystem = operatingSystem;
+    final adb.Device device = await adb.devices.workingDevice;
+    await device.unlock();
+
+    final Directory appDir = utils.dir(path.join(
+        utils.flutterDirectory.path, 'dev/benchmarks/platform_channels_benchmarks'));
+    final Process flutterProcess = await utils.inDirectory(appDir, () async {
+      final List<String> options = <String>[
+        '-v',
+        // --release doesn't work on iOS due to code signing issues
+        '--profile',
+        '--no-publish-port',
+        '-d',
+        device.deviceId,
+      ];
+      return microbenchmarks.startFlutter(
+        options: options,
+        canFail: false,
+      );
+    });
+
+    final Map<String, double> results = await microbenchmarks.readJsonResults(flutterProcess);
+    return TaskResult.success(results,
+        benchmarkScoreKeys: results.keys.toList());
+  };
+}
+
+Future<void> main() async {
+  task(runTask(adb.DeviceOperatingSystem.android));
+}
