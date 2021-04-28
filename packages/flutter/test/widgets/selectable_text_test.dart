@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 @TestOn('!chrome')
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -4730,15 +4732,26 @@ void main() {
       const MaterialApp(
         home: Material(
           child: SelectableText(
-            'overflow',
+            '',
             maxLines: 1,
-            style: TextStyle(overflow: TextOverflow.ellipsis),
+            style: TextStyle(
+                overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
       ),
     );
 
+    // Testing this by comparing the resulting ParagraphStyle output.
     final EditableTextState editableTextState = tester.state(find.byType(EditableText));
-    expect(editableTextState.renderEditable.textPainter.ellipsis, kDefaultEllipsis);
+    final ui.ParagraphStyle actualStyle = editableTextState.renderEditable.textPainter.text!.style!.getParagraphStyle();
+
+    final ui.ParagraphStyle expectedParagraphStyle = const TextStyle(
+        fontWeight: FontWeight.w400,
+        fontFamily: 'Roboto',
+        overflow: TextOverflow.ellipsis,
+    ).getParagraphStyle();
+
+    expect(actualStyle, expectedParagraphStyle);
   });
 }

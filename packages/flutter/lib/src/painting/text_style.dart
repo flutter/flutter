@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, S
 
 import 'package:flutter/foundation.dart';
 
+import '../../rendering.dart' show kDefaultEllipsis;
 import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
@@ -1202,7 +1203,7 @@ class TextStyle with Diagnosticable {
         forceStrutHeight: strutStyle.forceStrutHeight,
       ),
       maxLines: maxLines,
-      ellipsis: ellipsis,
+      ellipsis: overflow == TextOverflow.ellipsis ? (ellipsis ?? kDefaultEllipsis) : null,
       locale: locale,
     );
   }

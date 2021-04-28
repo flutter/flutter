@@ -8,7 +8,6 @@ import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, P
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../../rendering.dart' show kDefaultEllipsis;
 import 'basic_types.dart';
 import 'inline_span.dart';
 import 'placeholder_span.dart';
@@ -180,9 +179,7 @@ class TextPainter {
        _textDirection = textDirection,
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
-       _ellipsis = text?.style?.overflow == TextOverflow.ellipsis
-         ? (ellipsis ?? kDefaultEllipsis)
-         : null,
+       _ellipsis = ellipsis,
         _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
