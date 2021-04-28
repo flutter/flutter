@@ -138,7 +138,14 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommand(
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
+        frameworkDirectoryBinary.path,
+      ]),
       FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -147,7 +154,7 @@ void main() {
         '--timestamp=none',
         frameworkDirectoryBinary.path,
       ]),
-    );
+    ]);
 
     await const DebugIosApplicationBundle().build(environment);
     expect(processManager.hasRemainingExpectations, isFalse);
@@ -184,7 +191,14 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommand(
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
+        frameworkDirectoryBinary.path,
+      ]),
       FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -192,7 +206,7 @@ void main() {
         'ABC123',
         frameworkDirectoryBinary.path,
       ]),
-    );
+    ]);
 
     await const ReleaseIosApplicationBundle().build(environment);
     expect(processManager.hasRemainingExpectations, isFalse);
