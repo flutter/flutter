@@ -10,7 +10,7 @@ void main() =>
       child:
         Text('Hello, world!',
           key: Key('title'),
-          textDirection: TextDirection.ltr
-        )
-      )
+          textDirection: TextDirection.ltr,
+        ),
+      ),
     );
