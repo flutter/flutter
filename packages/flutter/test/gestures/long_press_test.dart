@@ -288,6 +288,29 @@ void main() {
 
       longPress.dispose();
     });
+
+    testGesture('non-allowed pointer does not inadvertently reset the recognizer', (GestureTester tester) {
+      longPress = LongPressGestureRecognizer(kind: PointerDeviceKind.touch)..onLongPress = () {};
+
+      // Accept a long-press gesture
+      longPress.addPointer(down);
+      tester.closeArena(5);
+      tester.route(down);
+      tester.async.elapse(const Duration(milliseconds: 500));
+
+      // Add a non-allowed pointer (doesn't match the kind filter)
+      longPress.addPointer(const PointerDownEvent(
+        pointer: 101,
+        kind: PointerDeviceKind.mouse,
+        position: Offset(10, 10),
+      ));
+
+      // Moving the primary pointer should result in a normal event
+      tester.route(const PointerMoveEvent(
+        pointer: 5,
+        position: Offset(15, 15),
+      ));
+    });
   });
 
   group('long press drag', () {

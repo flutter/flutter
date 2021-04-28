@@ -464,6 +464,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
+  void handleNonAllowedPointer(PointerDownEvent event) {
+    if (!_gestureAccepted) {
+      super.handleNonAllowedPointer(event);
+    }
+  }
+
+  @override
   void handleEvent(PointerEvent event) {
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
