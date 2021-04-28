@@ -91,7 +91,7 @@ void main() {
       children: const <TableRow>[
         TableRow(
           decoration: BoxDecoration(
-              color: Colors.yellow
+              color: Colors.yellow,
           ),
           children: <Widget>[Placeholder()],
         ),
@@ -111,7 +111,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Center(
-            child: table
+            child: table,
           ),
         ),
       ),
@@ -897,7 +897,7 @@ void main() {
         '├Text("H")\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '└Text("III")\n'
-        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n',
       ),
     );
   });
@@ -961,7 +961,8 @@ void main() {
         expect(error, isNotNull);
         expect(error!.toStringDeep(), contains('The children property of TableRow must not be null.'));
       }
-  });
+    },
+  );
 
   testWidgets('Can replace child with a different RenderObject type', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/69395.

@@ -169,7 +169,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     // Result will be written during first build and need to clear it to remove
     // noise.
@@ -216,7 +216,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
     expect(rebuiltKeyOfFirstChildAfterLayout, key2);
@@ -265,7 +265,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     // Result will be written during first build and need to clear it to remove
     // noise.
@@ -319,7 +319,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
     expect(rebuiltKeyOfSecondChildAfterLayout, key3);
@@ -363,7 +363,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     // Result will be written during first build and need to clear it to remove
     // noise.
@@ -411,7 +411,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
     expect(rebuiltKeyOfThirdChildAfterLayout, key1);
@@ -441,7 +441,7 @@ void main() {
         'The key [GlobalKey#00000 problematic] was used by multiple widgets. The parents of those widgets were:\n'
         '- Container-[<1>]\n'
         '- Container-[<2>]\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -459,7 +459,7 @@ void main() {
           key: const ValueKey<int>(2),
         ),
         Container(
-          key: key
+          key: key,
         ),
       ],
     ));
@@ -487,7 +487,7 @@ void main() {
         'The key [GlobalKey#00000 problematic] was used by multiple widgets. The parents of those widgets were:\n'
         '- Container-[<1>]\n'
         '- Container-[<2>]\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -516,7 +516,7 @@ void main() {
         'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
         '  SizedBox-[GlobalKey#00000 problematic]\n'
         '  Placeholder-[GlobalKey#00000 problematic]\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -545,7 +545,7 @@ void main() {
         'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
         '  Container-[GlobalKey#00000 problematic]\n'
         '  Placeholder-[GlobalKey#00000 problematic]\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -721,7 +721,7 @@ void main() {
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
         'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
+        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].',
       ),
     );
   });
@@ -736,8 +736,8 @@ void main() {
         Container(key: key1),
         Container(key: key2),
         Container(key: key3),
-      ]),
-    );
+      ],
+    ));
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -892,7 +892,7 @@ void main() {
         'removed due to GlobalKey reparenting is:\n'
         '- Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose, '
         'renderObject: RenderStack#00000)\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -920,7 +920,7 @@ void main() {
         'The key [GlobalKey#95367 problematic] was used by 2 widgets:\n'
         '  SizedBox-[GlobalKey#00000 problematic]\n'
         '  Container-[GlobalKey#00000 problematic]\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -959,7 +959,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     // Result will be written during first build and need to clear it to remove
     // noise.
@@ -1006,7 +1006,7 @@ void main() {
             ],
           );
         },
-      )
+      ),
     );
     expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
     expect(rebuiltKeyOfFirstChildAfterLayout, key2);
@@ -1021,7 +1021,7 @@ void main() {
         'parents of those widgets were:\n'
         '- _Stateful(state: _StatefulState#00000)\n'
         '- _Stateful(state: _StatefulState#00000)\n'
-        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -1192,7 +1192,7 @@ void main() {
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]'
+        'debugCreator: _EmptyWidget ← Column ← [root]',
       ),
     );
   });
@@ -1225,7 +1225,7 @@ void main() {
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]'
+        'debugCreator: _EmptyWidget ← Column ← [root]',
       ),
     );
   });
@@ -1277,7 +1277,8 @@ void main() {
     late FlutterError error;
     try {
       tester.binding.buildOwner!.scheduleBuildFor(
-        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner!, Container()));
+        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner!, Container()),
+      );
     } on FlutterError catch (e) {
       error = e;
     } finally {
@@ -1361,7 +1362,7 @@ void main() {
       },
       build: (bool value) {
         isBuildDecorated = value;
-      }
+      },
     );
 
     await tester.pumpWidget(Inherited(0, child: child));
@@ -1539,8 +1540,8 @@ void main() {
         '  [root]\n'
         'The offending element (which does not appear to be a descendant of the root of '
         'the build scope) was:\n'
-        '  _StatefulLeaf-[GlobalKey#00000]'
-      )
+        '  _StatefulLeaf-[GlobalKey#00000]',
+      ),
     );
   });
 
@@ -1637,7 +1638,7 @@ class Decorate extends StatefulWidget {
   const Decorate({
     Key? key,
     required this.didChangeDependencies,
-    required this.build
+    required this.build,
   }) :
     assert(didChangeDependencies != null),
     assert(build != null),
