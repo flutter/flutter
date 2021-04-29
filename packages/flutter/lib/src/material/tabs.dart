@@ -97,8 +97,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   final EdgeInsetsGeometry iconMargin;
   
   /// The widget height when there is an icon and text
-  /// 
-  /// useful when the combination of both overflows the defaut height
+  ///
+  /// Useful when the combination of both overflows the default height
   final double kTextAndIconTabHeight;
 
   Widget _buildLabelText() {
