@@ -52,8 +52,8 @@ group("flutter") {
 
   # Flutter SDK artifacts should only be built when either doing host builds, or
   # for cross-compiled desktop targets.
-  build_engine_artifacts =
-      current_toolchain == host_toolchain || (is_linux && !is_chromeos)
+  build_engine_artifacts = current_toolchain == host_toolchain ||
+                           (is_linux && !is_chromeos) || is_mac
 
   # If enbaled, compile the SDK / snapshot.
   if (!is_fuchsia) {
