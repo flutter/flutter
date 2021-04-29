@@ -812,7 +812,8 @@ class _AppBarState extends State<AppBar> {
           states,
           widget.backgroundColor,
           appBarTheme.backgroundColor,
-          colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary);
+          colorScheme.brightness == Brightness.dark ? colorScheme.surface : colorScheme.primary,
+        );
 
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
@@ -865,6 +866,7 @@ class _AppBarState extends State<AppBar> {
       if (hasDrawer) {
         leading = IconButton(
           icon: const Icon(Icons.menu),
+          iconSize: overallIconTheme.size ?? 24,
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
@@ -938,6 +940,7 @@ class _AppBarState extends State<AppBar> {
     } else if (hasEndDrawer) {
       actions = IconButton(
         icon: const Icon(Icons.menu),
+        iconSize: overallIconTheme.size ?? 24,
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
@@ -20,7 +20,7 @@ class TestParentData {
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   final MultiChildRenderObjectElement element = tester.element(
-    find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement)
+    find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement),
   );
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
@@ -243,7 +243,7 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <TestParentData>[]);
@@ -283,7 +283,7 @@ void main() {
         'Usually, this indicates that at least one of the offending ParentDataWidgets listed '
         'above is not placed directly inside a compatible ancestor widget.\n'
         'The ownership chain for the RenderObject that received the parent data was:\n'
-        '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← [root]'
+        '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← [root]',
       ),
     );
 
@@ -320,12 +320,12 @@ void main() {
         'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
         'The offending Positioned is currently placed inside a Row widget.\n'
         'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← [root]'
+        '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← [root]',
       ),
     );
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <TestParentData>[]);
@@ -419,7 +419,7 @@ void main() {
         'Typically, Expanded widgets are placed directly inside Flex widgets.\n'
         'The offending Expanded is currently placed inside a Stack widget.\n'
         'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← [root]'
+        '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← [root]',
       ),
     );
   });

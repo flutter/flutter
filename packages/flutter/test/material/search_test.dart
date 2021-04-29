@@ -676,8 +676,12 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(buildExpected(routeName: 'Search'),
-          ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: 'Search'),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
 
       semantics.dispose();
     });
@@ -692,15 +696,18 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(buildExpected(routeName: ''),
-          ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: ''),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
 
       semantics.dispose();
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 
-  testWidgets('Custom searchFieldDecorationTheme value',
-      (WidgetTester tester) async {
+  testWidgets('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {
     const InputDecorationTheme searchFieldDecorationTheme = InputDecorationTheme(
       hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
     );
@@ -718,58 +725,58 @@ void main() {
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData.light();
-      final _TestSearchDelegate delegate = _TestSearchDelegate(
-        defaultAppBarTheme: true,
-      );
-      const String query = 'search query';
-      await tester.pumpWidget(TestHomePage(
-        delegate: delegate,
-        passInInitialQuery: true,
-        initialQuery: query,
-        themeData: themeData,
-      ));
+    final ThemeData themeData = ThemeData.light();
+    final _TestSearchDelegate delegate = _TestSearchDelegate(
+      defaultAppBarTheme: true,
+    );
+    const String query = 'search query';
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      passInInitialQuery: true,
+      initialQuery: query,
+      themeData: themeData,
+    ));
 
-      await tester.tap(find.byTooltip('Search'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
 
-      final Material appBarBackground = tester.widget<Material>(find.descendant(
-        of: find.byType(AppBar),
-        matching: find.byType(Material),
-      ));
-      expect(appBarBackground.color, Colors.white);
+    final Material appBarBackground = tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+    expect(appBarBackground.color, Colors.white);
 
-      final TextField textField = tester.widget<TextField>(find.byType(TextField));
-      expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
-      expect(textField.style!.color, isNot(equals(Colors.white)));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, isNot(equals(Colors.white)));
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (dark mode)', (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData.dark();
-      final _TestSearchDelegate delegate = _TestSearchDelegate(
-        defaultAppBarTheme: true,
-      );
-      const String query = 'search query';
-      await tester.pumpWidget(TestHomePage(
-        delegate: delegate,
-        passInInitialQuery: true,
-        initialQuery: query,
-        themeData: themeData,
-      ));
+    final ThemeData themeData = ThemeData.dark();
+    final _TestSearchDelegate delegate = _TestSearchDelegate(
+      defaultAppBarTheme: true,
+    );
+    const String query = 'search query';
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      passInInitialQuery: true,
+      initialQuery: query,
+      themeData: themeData,
+    ));
 
-      await tester.tap(find.byTooltip('Search'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
 
-      final Material appBarBackground = tester.widget<Material>(find.descendant(
-        of: find.byType(AppBar),
-        matching: find.byType(Material),
-      ));
-      expect(appBarBackground.color, themeData.primaryColor);
+    final Material appBarBackground = tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+    expect(appBarBackground.color, themeData.primaryColor);
 
-      final TextField textField = tester.widget<TextField>(find.byType(TextField));
-      expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
-      expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/78144

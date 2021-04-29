@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
@@ -251,7 +251,7 @@ void main() {
         return CustomPaint(
           child: Text('$i', textDirection: TextDirection.ltr),
           painter: TestCallbackPainter(
-            onPaint: () { itemsPainted.add(i); }
+            onPaint: () { itemsPainted.add(i); },
           ),
         );
       });
@@ -775,7 +775,7 @@ void main() {
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
       'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
       'Instead of providing a Directionality widget, another solution would be passing a non-directional '
-      '\'alignment\', or an explicit \'textDirection\', to the Stack.'
+      '\'alignment\', or an explicit \'textDirection\', to the Stack.',
     );
   });
 }

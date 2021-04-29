@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
@@ -38,7 +38,7 @@ void main() {
         builder: (BuildContext context) {
           buildCount += 1;
           return Container(height: 200.0);
-        }
+        },
       );
     });
 
@@ -390,7 +390,7 @@ void main() {
             builder: (BuildContext context) {
               scaffoldContext = context;
               return Container();
-            }
+            },
           ),
         ),
       ),
@@ -477,26 +477,29 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71435
-  testWidgets('Scaffold.bottomSheet should be updated without creating a new RO'
-      ' when the new widget has the same key and type.', (WidgetTester tester) async {
-    Widget buildFrame(String text) {
-      return MaterialApp(
-        home: Scaffold(
-          body: const Placeholder(),
-          bottomSheet: Text(text),
-        ),
-      );
-    }
+  testWidgets(
+    'Scaffold.bottomSheet should be updated without creating a new RO'
+    ' when the new widget has the same key and type.',
+    (WidgetTester tester) async {
+      Widget buildFrame(String text) {
+        return MaterialApp(
+          home: Scaffold(
+            body: const Placeholder(),
+            bottomSheet: Text(text),
+          ),
+        );
+      }
 
-    await tester.pumpWidget(buildFrame('I love Flutter!'));
-    final RenderParagraph renderBeforeUpdate = tester.renderObject(find.text('I love Flutter!'));
+      await tester.pumpWidget(buildFrame('I love Flutter!'));
+      final RenderParagraph renderBeforeUpdate = tester.renderObject(find.text('I love Flutter!'));
 
-    await tester.pumpWidget(buildFrame('Flutter is the best!'));
-    await tester.pumpAndSettle();
-    final RenderParagraph renderAfterUpdate = tester.renderObject(find.text('Flutter is the best!'));
+      await tester.pumpWidget(buildFrame('Flutter is the best!'));
+      await tester.pumpAndSettle();
+      final RenderParagraph renderAfterUpdate = tester.renderObject(find.text('Flutter is the best!'));
 
-    expect(renderBeforeUpdate, renderAfterUpdate);
-  });
+      expect(renderBeforeUpdate, renderAfterUpdate);
+    },
+  );
 
   testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -546,7 +549,7 @@ void main() {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);
-        }
+        },
       );
     });
 

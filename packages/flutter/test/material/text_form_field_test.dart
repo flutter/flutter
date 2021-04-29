@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/editable_text_utils.dart';
@@ -490,15 +490,15 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextFormField(
-                initialValue: 'initialValue',
-              ),
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              initialValue: 'initialValue',
             ),
           ),
-        )
+        ),
+      ),
     );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
@@ -513,15 +513,15 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/34847.
   testWidgets('didChange resets the text field\'s value to empty when passed null', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextFormField(
-                initialValue: null,
-              ),
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              initialValue: null,
             ),
           ),
-        )
+        ),
+      ),
     );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
@@ -538,15 +538,15 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/34847.
   testWidgets('reset resets the text field\'s value to empty when intialValue is null', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextFormField(
-                initialValue: null,
-              ),
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              initialValue: null,
             ),
           ),
-        )
+        ),
+      ),
     );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
@@ -571,7 +571,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(find.text('initialValue'), findsOneWidget);

@@ -322,7 +322,7 @@ Map<dynamic, dynamic> _createEncodedRestorationData1() {
       'child1' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'another value': 22,
-        }
+        },
       },
     },
   };
@@ -338,7 +338,7 @@ Map<dynamic, dynamic> _createEncodedRestorationData2() {
       'childFoo' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'bar': 'Hello',
-        }
+        },
       },
     },
   };

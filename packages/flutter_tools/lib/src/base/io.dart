@@ -45,8 +45,8 @@ import 'dart:io' as io
     StdoutException,
     stdout;
 
-import 'package:meta/meta.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
 import 'async_guard.dart';
 import 'platform.dart';
@@ -102,7 +102,8 @@ export 'dart:io'
         systemEncoding,
         WebSocket,
         WebSocketException,
-        WebSocketTransformer;
+        WebSocketTransformer,
+        ZLibEncoder;
 
 /// Exits the process with the given [exitCode].
 typedef ExitFunction = void Function(int exitCode);

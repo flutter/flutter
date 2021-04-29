@@ -84,7 +84,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory(globals.fs);
-      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);

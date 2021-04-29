@@ -2,38 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('negative itemCount should assert', (WidgetTester tester) async {
     final List<int> items = <int>[1, 2, 3];
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-          builder: (BuildContext outerContext, StateSetter setState) {
-            return CustomScrollView(
-              slivers: <Widget>[
-                SliverReorderableList(
-                  itemCount: -1,
-                  onReorder: (int fromIndex, int toIndex) {
-                    setState(() {
-                      if (toIndex > fromIndex) {
-                        toIndex -= 1;
-                      }
-                      items.insert(toIndex, items.removeAt(fromIndex));
-                    });
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                      height: 100,
-                      child: Text('item ${items[index]}'),
-                    );
-                  },
-                ),
-              ],
-            );
-          }
+        builder: (BuildContext outerContext, StateSetter setState) {
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: -1,
+                onReorder: (int fromIndex, int toIndex) {
+                  setState(() {
+                    if (toIndex > fromIndex) {
+                      toIndex -= 1;
+                    }
+                    items.insert(toIndex, items.removeAt(fromIndex));
+                  });
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    height: 100,
+                    child: Text('item ${items[index]}'),
+                  );
+                },
+              ),
+            ],
+          );
+        },
       ),
     ));
     expect(tester.takeException(), isA<AssertionError>());
@@ -43,41 +43,41 @@ void main() {
     final List<int> items = <int>[1, 2, 3];
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-          builder: (BuildContext outerContext, StateSetter setState) {
-            return CustomScrollView(
-              slivers: <Widget>[
-                SliverFixedExtentList(
-                  itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[
-                    const Text('before'),
-                  ]),
-                ),
-                SliverReorderableList(
-                  itemCount: 0,
-                  onReorder: (int fromIndex, int toIndex) {
-                    setState(() {
-                      if (toIndex > fromIndex) {
-                        toIndex -= 1;
-                      }
-                      items.insert(toIndex, items.removeAt(fromIndex));
-                    });
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                      height: 100,
-                      child: Text('item ${items[index]}'),
-                    );
-                  },
-                ),
-                SliverFixedExtentList(
-                  itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[
-                    const Text('after'),
-                  ]),
-                ),
-              ],
-            );
-          }
+        builder: (BuildContext outerContext, StateSetter setState) {
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverFixedExtentList(
+                itemExtent: 50.0,
+                delegate: SliverChildListDelegate(<Widget>[
+                  const Text('before'),
+                ]),
+              ),
+              SliverReorderableList(
+                itemCount: 0,
+                onReorder: (int fromIndex, int toIndex) {
+                  setState(() {
+                    if (toIndex > fromIndex) {
+                      toIndex -= 1;
+                    }
+                    items.insert(toIndex, items.removeAt(fromIndex));
+                  });
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    height: 100,
+                    child: Text('item ${items[index]}'),
+                  );
+                },
+              ),
+              SliverFixedExtentList(
+                itemExtent: 50.0,
+                delegate: SliverChildListDelegate(<Widget>[
+                  const Text('after'),
+                ]),
+              ),
+            ],
+          );
+        },
       ),
     ));
 
@@ -297,42 +297,42 @@ class _TestListState extends State<TestList> {
           child: IconTheme(
             data: IconThemeData(color: widget.iconColor),
             child: StatefulBuilder(
-                builder: (BuildContext outerContext, StateSetter setState) {
-                  final List<int> items = widget.items;
-                  return CustomScrollView(
-                    slivers: <Widget>[
-                      SliverReorderableList(
-                        itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            key: ValueKey<int>(items[index]),
-                            height: 100,
-                            color: items[index].isOdd ? Colors.red : Colors.green,
-                            child: ReorderableDragStartListener(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text('item ${items[index]}'),
-                                  const Icon(Icons.drag_handle),
-                                ],
-                              ),
-                              index: index,
+              builder: (BuildContext outerContext, StateSetter setState) {
+                final List<int> items = widget.items;
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          key: ValueKey<int>(items[index]),
+                          height: 100,
+                          color: items[index].isOdd ? Colors.red : Colors.green,
+                          child: ReorderableDragStartListener(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text('item ${items[index]}'),
+                                const Icon(Icons.drag_handle),
+                              ],
                             ),
-                          );
-                        },
-                        itemCount: items.length,
-                        onReorder: (int fromIndex, int toIndex) {
-                          setState(() {
-                            if (toIndex > fromIndex) {
-                              toIndex -= 1;
-                            }
-                            items.insert(toIndex, items.removeAt(fromIndex));
-                          });
-                        },
-                        proxyDecorator: widget.proxyDecorator,
-                      ),
-                    ],
-                  );
-                }
+                            index: index,
+                          ),
+                        );
+                      },
+                      itemCount: items.length,
+                      onReorder: (int fromIndex, int toIndex) {
+                        setState(() {
+                          if (toIndex > fromIndex) {
+                            toIndex -= 1;
+                          }
+                          items.insert(toIndex, items.removeAt(fromIndex));
+                        });
+                      },
+                      proxyDecorator: widget.proxyDecorator,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

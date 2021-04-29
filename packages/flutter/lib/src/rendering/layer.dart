@@ -1803,7 +1803,13 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The [filter] property must be non-null before the compositing phase of the
   /// pipeline.
-  BackdropFilterLayer({ ui.ImageFilter? filter }) : _filter = filter;
+  ///
+  /// The [blendMode] property defaults to [BlendMode.srcOver].
+  BackdropFilterLayer({
+    ui.ImageFilter? filter,
+    BlendMode blendMode = BlendMode.srcOver,
+  }) : _filter = filter,
+       _blendMode = blendMode;
 
   /// The filter to apply to the existing contents of the scene.
   ///
@@ -1818,11 +1824,29 @@ class BackdropFilterLayer extends ContainerLayer {
     }
   }
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// The default value of this property is [BlendMode.srcOver].
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
+  set blendMode(BlendMode value) {
+    if (value != _blendMode) {
+      _blendMode = value;
+      markNeedsAddToScene();
+    }
+  }
+
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(filter != null);
     engineLayer = builder.pushBackdropFilter(
       filter!,
+      blendMode: blendMode,
       oldLayer: _engineLayer as ui.BackdropFilterEngineLayer?,
     );
     addChildrenToScene(builder, layerOffset);

@@ -31,6 +31,7 @@ import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
+import 'progress_indicator_theme.dart';
 import 'radio_theme.dart';
 import 'scrollbar_theme.dart';
 import 'slider_theme.dart';
@@ -306,6 +307,7 @@ class ThemeData with Diagnosticable {
     CheckboxThemeData? checkboxTheme,
     RadioThemeData? radioTheme,
     SwitchThemeData? switchTheme,
+    ProgressIndicatorThemeData? progressIndicatorTheme,
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -443,6 +445,7 @@ class ThemeData with Diagnosticable {
     checkboxTheme ??= const CheckboxThemeData();
     radioTheme ??= const RadioThemeData();
     switchTheme ??= const SwitchThemeData();
+    progressIndicatorTheme ??= const ProgressIndicatorThemeData();
 
     fixTextFieldOutlineLabel ??= false;
     useTextSelectionTheme ??= true;
@@ -523,6 +526,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme: checkboxTheme,
       radioTheme: radioTheme,
       switchTheme: switchTheme,
+      progressIndicatorTheme: progressIndicatorTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
     );
@@ -626,6 +630,7 @@ class ThemeData with Diagnosticable {
     required this.checkboxTheme,
     required this.radioTheme,
     required this.switchTheme,
+    required this.progressIndicatorTheme,
     required this.fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -704,6 +709,7 @@ class ThemeData with Diagnosticable {
        assert(checkboxTheme != null),
        assert(radioTheme != null),
        assert(switchTheme != null),
+       assert(progressIndicatorTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -1208,6 +1214,9 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [Switch] widgets.
   final SwitchThemeData switchTheme;
 
+  /// A theme for customizing the appearance and layout of [ProgressIndicator] widgets.
+  final ProgressIndicatorThemeData progressIndicatorTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1322,6 +1331,7 @@ class ThemeData with Diagnosticable {
     CheckboxThemeData? checkboxTheme,
     RadioThemeData? radioTheme,
     SwitchThemeData? switchTheme,
+    ProgressIndicatorThemeData? progressIndicatorTheme,
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1406,6 +1416,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme: checkboxTheme ?? this.checkboxTheme,
       radioTheme: radioTheme ?? this.radioTheme,
       switchTheme: switchTheme ?? this.switchTheme,
+      progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
     );
@@ -1564,6 +1575,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
+      progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
     );
@@ -1650,6 +1662,7 @@ class ThemeData with Diagnosticable {
         && other.checkboxTheme == checkboxTheme
         && other.radioTheme == radioTheme
         && other.switchTheme == switchTheme
+        && other.progressIndicatorTheme == progressIndicatorTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
         && other.useTextSelectionTheme == useTextSelectionTheme;
   }
@@ -1735,6 +1748,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme,
       radioTheme,
       switchTheme,
+      progressIndicatorTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
     ];
@@ -1818,6 +1832,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
   }
 }
 

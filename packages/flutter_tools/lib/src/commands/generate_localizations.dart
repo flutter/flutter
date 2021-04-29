@@ -212,7 +212,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         options: options,
         projectDir: _fileSystem.currentDirectory,
         dependenciesDir: null,
-        localizationsGenerator: LocalizationsGenerator(_fileSystem),
+        fileSystem: _fileSystem,
       );
       return FlutterCommandResult.success();
     }
@@ -233,29 +233,27 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final bool areResourceAttributesRequired = boolArg('required-resource-attributes');
     final bool usesNullableGetter = boolArg('nullable-getter');
 
-    final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(_fileSystem);
-
     precacheLanguageAndRegionTags();
 
     try {
-      localizationsGenerator
-        ..initialize(
-          inputPathString: inputPathString,
-          outputPathString: outputPathString,
-          templateArbFileName: templateArbFileName,
-          outputFileString: outputFileString,
-          classNameString: classNameString,
-          preferredSupportedLocales: preferredSupportedLocales,
-          headerString: headerString,
-          headerFile: headerFile,
-          useDeferredLoading: useDeferredLoading,
-          inputsAndOutputsListPath: inputsAndOutputsListPath,
-          useSyntheticPackage: useSyntheticPackage,
-          projectPathString: projectPathString,
-          areResourceAttributesRequired: areResourceAttributesRequired,
-          untranslatedMessagesFile: untranslatedMessagesFile,
-          usesNullableGetter: usesNullableGetter,
-        )
+      LocalizationsGenerator(
+        fileSystem: _fileSystem,
+        inputPathString: inputPathString,
+        outputPathString: outputPathString,
+        templateArbFileName: templateArbFileName,
+        outputFileString: outputFileString,
+        classNameString: classNameString,
+        preferredSupportedLocales: preferredSupportedLocales,
+        headerString: headerString,
+        headerFile: headerFile,
+        useDeferredLoading: useDeferredLoading,
+        inputsAndOutputsListPath: inputsAndOutputsListPath,
+        useSyntheticPackage: useSyntheticPackage,
+        projectPathString: projectPathString,
+        areResourceAttributesRequired: areResourceAttributesRequired,
+        untranslatedMessagesFile: untranslatedMessagesFile,
+        usesNullableGetter: usesNullableGetter,
+      )
         ..loadResources()
         ..writeOutputFiles(_logger);
     } on L10nException catch (e) {

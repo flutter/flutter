@@ -207,8 +207,8 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
-                )
+                  ],
+                ),
               ],
             ),
           ],
@@ -290,8 +290,8 @@ void main() {
               scrollController: scrollController,
             ),
           );
-        }
-      )
+        },
+      ),
     );
 
     await tester.tap(find.text('Go'));
@@ -307,9 +307,7 @@ void main() {
 
     // Expect the modal dialog box to take all available height.
     expect(
-      tester.getSize(
-        find.byType(ClipRRect)
-      ),
+      tester.getSize(find.byType(ClipRRect)),
       equals(const Size(310.0, 560.0 - 24.0 * 2)),
     );
 
@@ -399,8 +397,8 @@ void main() {
               actionScrollController: actionScrollController,
             ),
           );
-        }
-      )
+        },
+      ),
     );
 
     await tester.tap(find.text('Go'));
@@ -448,7 +446,7 @@ void main() {
               actionScrollController: actionScrollController,
             ),
           );
-        }
+        },
       ),
     );
 
@@ -475,8 +473,10 @@ void main() {
     expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(277.5));
 
     // Check that the button's vertical size is the same.
-    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height,
-        equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height));
+    expect(
+      tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height,
+      equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height),
+    );
   });
 
   testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
@@ -1162,7 +1162,7 @@ void main() {
               ),
             ),
           );
-        }
+        },
       ),
     );
 
@@ -1252,17 +1252,15 @@ RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
-  final RenderObject actionsSection = tester.renderObject(find.byElementPredicate(
-    (Element element) {
-      return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
-    }),
-  );
+  final RenderObject actionsSection = tester.renderObject(find.byElementPredicate((Element element) {
+    return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
+  }));
   assert(actionsSection is RenderBox);
   return actionsSection as RenderBox;
 }
 
 Widget createAppWithButtonThatLaunchesDialog({
-  required WidgetBuilder dialogBuilder
+  required WidgetBuilder dialogBuilder,
 }) {
   return MaterialApp(
     home: Material(
@@ -1296,10 +1294,10 @@ Widget createAppWithCenteredButton(Widget child) {
       child: Center(
         child: ElevatedButton(
           onPressed: null,
-          child: child
+          child: child,
         ),
-      )
-    )
+      ),
+    ),
   );
 }
 

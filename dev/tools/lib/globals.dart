@@ -39,10 +39,10 @@ class ConductorException implements Exception {
   String toString() => 'Exception: $message';
 }
 
-Directory _flutterRoot;
+Directory? _flutterRoot;
 Directory get localFlutterRoot {
   if (_flutterRoot != null) {
-    return _flutterRoot;
+    return _flutterRoot!;
   }
   String filePath;
   const FileSystem fileSystem = LocalFileSystem();
@@ -54,14 +54,14 @@ Directory get localFlutterRoot {
       r'(file:\/\/[^"]*[/\\]dev\/tools[/\\][^"]+\.dart)',
       multiLine: true,
     );
-    final Match match =
+    final Match? match =
         pattern.firstMatch(Uri.decodeFull(platform.script.path));
     if (match == null) {
       throw Exception(
         'Cannot determine path of script!\n${platform.script.path}',
       );
     }
-    filePath = Uri.parse(match.group(1)).path.replaceAll(r'%20', ' ');
+    filePath = Uri.parse(match.group(1)!).path.replaceAll(r'%20', ' ');
   } else {
     filePath = platform.script.toFilePath();
   }
@@ -74,7 +74,7 @@ Directory get localFlutterRoot {
     ),
   );
   _flutterRoot = fileSystem.directory(checkoutsDirname);
-  return _flutterRoot;
+  return _flutterRoot!;
 }
 
 bool assertsEnabled() {
@@ -102,9 +102,9 @@ String getValueFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null ) {
-    return env[envName];
+    return env[envName]!;
   }
-  final String argValue = argResults[name] as String;
+  final String? argValue = argResults[name] as String?;
   if (argValue != null) {
     return argValue;
   }
@@ -130,7 +130,7 @@ List<String> getValuesFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null && env[envName] != '') {
-    return env[envName].split(',');
+    return env[envName]!.split(',');
   }
   final List<String> argValues = argResults[name] as List<String>;
   if (argValues != null) {

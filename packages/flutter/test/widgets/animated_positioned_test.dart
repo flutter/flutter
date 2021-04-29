@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedPositioned.fromRect control test', (WidgetTester tester) async {
@@ -269,7 +269,7 @@ void main() {
         '     parentData: <none> (can use size)\n'
         '     constraints: BoxConstraints(w=59.0, h=71.0)\n'
         '     size: Size(59.0, 71.0)\n'
-        '     additionalConstraints: BoxConstraints(biggest)\n'
+        '     additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
   });

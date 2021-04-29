@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -82,9 +82,9 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.enter): ButtonActivateIntent(),
         },
         child: Material(
           child: Center(
@@ -221,8 +221,10 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(
+      inkFeatures,
+      paints ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+    );
   });
 
   testWidgets('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
@@ -264,8 +266,10 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-           ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(
+      inkFeatures,
+      paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+    );
   });
 
   testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
@@ -1053,6 +1057,118 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
     await gesture3.up();
+  });
+
+  testWidgets('When ink wells are reparented, the old parent can display splash while the new parent can not', (WidgetTester tester) async {
+    final GlobalKey innerKey = GlobalKey();
+    final GlobalKey leftKey = GlobalKey();
+    final GlobalKey rightKey = GlobalKey();
+
+    Widget doubleInkWellRow({
+      required double leftWidth,
+      required double rightWidth,
+      Widget? leftChild,
+      Widget? rightChild,
+    }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: leftWidth+rightWidth,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: leftWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: leftKey,
+                      onTap: () {},
+                      child: Center(
+                        child: SizedBox(
+                          width: leftWidth,
+                          height: 50,
+                          child: leftChild,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: rightWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: rightKey,
+                      onTap: () {},
+                      child: Center(
+                        child: SizedBox(
+                          width: leftWidth,
+                          height: 50,
+                          child: rightChild,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      doubleInkWellRow(
+        leftWidth: 110,
+        rightWidth: 90,
+        leftChild: InkWell(
+          key: innerKey,
+          onTap: () {},
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+
+    // Press inner
+    final TestGesture gesture = await tester.startGesture(const Offset(100, 50), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Switch side
+    await tester.pumpWidget(
+      doubleInkWellRow(
+        leftWidth: 90,
+        rightWidth: 110,
+        rightChild: InkWell(
+          key: innerKey,
+          onTap: () {},
+        ),
+      ),
+    );
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+
+    // A second pointer presses inner
+    final TestGesture gesture2 = await tester.startGesture(const Offset(100, 50), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    await gesture.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+
+    // Press inner
+    await gesture.down(const Offset(100, 50));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Press left
+    await gesture2.down(const Offset(50, 50));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+
+    await gesture.up();
+    await gesture2.up();
   });
 
   testWidgets("Ink wells's splash starts before tap is confirmed and disappear after tap is canceled", (WidgetTester tester) async {

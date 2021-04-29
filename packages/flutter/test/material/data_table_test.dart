@@ -462,7 +462,7 @@ void main() {
     Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
     expect(
       transformOfArrow.transform.getRotation(),
-      equals(Matrix3.identity())
+      equals(Matrix3.identity()),
     );
 
     // Check for descending list.
@@ -474,7 +474,7 @@ void main() {
     transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
     expect(
       transformOfArrow.transform.getRotation(),
-      equals(Matrix3.rotationZ(math.pi))
+      equals(Matrix3.rotationZ(math.pi)),
     );
   });
 
@@ -1152,7 +1152,7 @@ void main() {
               DataCell(Text('A long desert name')),
             ],
           ),
-        ]
+        ],
       );
     }
 
@@ -1226,7 +1226,7 @@ void main() {
               DataCell(Text('Content2')),
             ],
           ),
-        ]
+        ],
       );
     }
 
@@ -1451,7 +1451,7 @@ void main() {
               DataCell(Text('Content1')),
             ],
           ),
-        ]
+        ],
       );
     }
 
@@ -1628,5 +1628,40 @@ void main() {
       tester.getRect(cellContent).left - tester.getRect(padding).left,
       _customHorizontalMargin,
     );
+  });
+
+  testWidgets('DataRow is disabled when onSelectChanged is not set', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Col1')),
+              DataColumn(label: Text('Col2')),
+            ],
+            rows: <DataRow>[
+              DataRow(cells: const <DataCell>[
+                DataCell(Text('Hello')),
+                DataCell(Text('world')),
+              ],
+              onSelectChanged: (bool? value) {},
+              ),
+              const DataRow(cells: <DataCell>[
+                DataCell(Text('Bug')),
+                DataCell(Text('report')),
+              ]),
+              const DataRow(cells: <DataCell>[
+                DataCell(Text('GitHub')),
+                DataCell(Text('issue')),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.widgetWithText(TableRowInkWell, 'Hello'), findsOneWidget);
+    expect(find.widgetWithText(TableRowInkWell, 'Bug'), findsNothing);
+    expect(find.widgetWithText(TableRowInkWell, 'GitHub'), findsNothing);
   });
 }

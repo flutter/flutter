@@ -95,7 +95,7 @@ class TestAssetImage extends AssetImage {
       imageInfo = ImageInfo(image: image, scale: key.scale);
     });
     return FakeImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(imageInfo)
+      SynchronousFuture<ImageInfo>(imageInfo),
     );
   }
 }

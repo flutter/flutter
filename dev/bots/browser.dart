@@ -5,12 +5,11 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:flutter_devicelab/framework/browser.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
-
-import 'package:flutter_devicelab/framework/browser.dart';
 
 /// Runs Chrome, opens the given `appUrl`, and returns the result reported by the
 /// app.
@@ -42,7 +41,7 @@ Future<String> evalTestAppInChrome({
       })
       .add(createStaticHandler(appDirectory));
     shelf_io.serveRequests(server, cascade.handler);
-    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('chrome_user_data_');
+    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
     chrome = await Chrome.launch(ChromeOptions(
       headless: true,
       debugPort: browserDebugPort,
@@ -89,7 +88,7 @@ class AppServer {
       });
     });
     shelf_io.serveRequests(server, cascade.handler);
-    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('chrome_user_data_');
+    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
     final Completer<String> chromeErrorCompleter = Completer<String>();
     chrome = await Chrome.launch(ChromeOptions(
       headless: headless,

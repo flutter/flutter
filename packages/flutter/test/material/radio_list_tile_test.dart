@@ -4,12 +4,12 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import '../rendering/mock_canvas.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget wrap({Widget? child}) {
@@ -23,8 +23,7 @@ Widget wrap({Widget? child}) {
 }
 
 void main() {
-  testWidgets('RadioListTile should initialize according to groupValue',
-      (WidgetTester tester) async {
+  testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
@@ -275,8 +274,7 @@ void main() {
     expect(log, equals(<int>[0]));
   });
 
-  testWidgets('Selected RadioListTile should trigger onChanged when toggleable',
-      (WidgetTester tester) async {
+  testWidgets('Selected RadioListTile should trigger onChanged when toggleable', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
@@ -623,9 +621,9 @@ void main() {
             title: const Text('Title'),
             onChanged: (_){},
             contentPadding: const EdgeInsets.fromLTRB(8, 10, 15, 20),
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
 
     final Rect paddingRect = tester.getRect(find.byType(SafeArea));

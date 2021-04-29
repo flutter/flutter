@@ -178,7 +178,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.always
+          floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
       ),
     );
@@ -193,7 +193,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatingLabelBehavior: FloatingLabelBehavior.never
+          floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
       ),
     );
@@ -1728,6 +1728,49 @@ void main() {
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 0.0);
   });
 
+  group('constraints', () {
+    testWidgets('No InputDecorator constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(buildInputDecorator());
+
+      // Should fill the screen width and be default height
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800, 48));
+    });
+
+    testWidgets('InputDecoratorThemeData constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              inputDecorationTheme: const InputDecorationTheme(
+                constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
+              ),
+            ),
+          ),
+      );
+
+      // Theme settings should make it 300x40 pixels
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(300, 40));
+    });
+
+    testWidgets('InputDecorator constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          theme: ThemeData(
+            inputDecorationTheme: const InputDecorationTheme(
+              constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
+            ),
+          ),
+          decoration: const InputDecoration(
+            constraints: BoxConstraints(maxWidth: 200, maxHeight: 32),
+          ),
+        ),
+      );
+
+      // InputDecoration.constraints should override the theme. It should be
+      // only 200x32 pixels
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(200, 32));
+    });
+  });
+
   group('textAlignVertical position', () {
     group('simple case', () {
       testWidgets('align top (default)', (WidgetTester tester) async {
@@ -3094,7 +3137,7 @@ void main() {
     ]));
 
     final Set<Object> nodeValues = Set<Object>.from(
-      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!)
+      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
     );
     expect(nodeValues.length, 11);
   });
@@ -3139,6 +3182,7 @@ void main() {
         focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
+        constraints: BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
       ),
     );
 
@@ -3155,6 +3199,7 @@ void main() {
     expect(decoration.fillColor, Colors.red);
     expect(decoration.border, InputBorder.none);
     expect(decoration.alignLabelWithHint, true);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
     decoration = const InputDecoration(
@@ -3171,6 +3216,7 @@ void main() {
       fillColor: Colors.blue,
       border: OutlineInputBorder(),
       alignLabelWithHint: false,
+      constraints: BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
@@ -3189,6 +3235,7 @@ void main() {
         focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
+        constraints: BoxConstraints(minWidth: 40, maxWidth: 30, minHeight: 20, maxHeight: 10),
       ),
     );
 
@@ -3207,6 +3254,7 @@ void main() {
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
     expect(decoration.alignLabelWithHint, false);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
   });
 
   testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
