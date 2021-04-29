@@ -223,13 +223,13 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
 }
 
 void SceneUpdateContext::CreateView(int64_t view_id,
+                                    ViewHolder::ViewIdCallback on_view_created,
                                     bool hit_testable,
                                     bool focusable) {
   FML_LOG(INFO) << "CreateView for view holder: " << view_id;
   zx_handle_t handle = (zx_handle_t)view_id;
-  flutter::ViewHolder::Create(handle, nullptr,
-                              scenic::ToViewHolderToken(zx::eventpair(handle)),
-                              nullptr);
+  flutter::ViewHolder::Create(handle, std::move(on_view_created),
+                              scenic::ToViewHolderToken(zx::eventpair(handle)));
   auto* view_holder = ViewHolder::FromId(view_id);
   FML_DCHECK(view_holder);
 
@@ -250,8 +250,10 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
   view_holder->set_focusable(focusable);
 }
 
-void SceneUpdateContext::DestroyView(int64_t view_id) {
-  ViewHolder::Destroy(view_id);
+void SceneUpdateContext::DestroyView(
+    int64_t view_id,
+    ViewHolder::ViewIdCallback on_view_destroyed) {
+  ViewHolder::Destroy(view_id, std::move(on_view_destroyed));
 }
 
 SceneUpdateContext::Entity::Entity(std::shared_ptr<SceneUpdateContext> context)

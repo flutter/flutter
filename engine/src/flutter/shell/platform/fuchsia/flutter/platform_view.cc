@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/window/pointer_data.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
@@ -90,7 +91,8 @@ PlatformView::PlatformView(
       ime_client_(this),
       vsync_offset_(std::move(vsync_offset)),
       vsync_event_handle_(vsync_event_handle),
-      keyboard_listener_binding_(this, std::move(keyboard_listener_request)) {
+      keyboard_listener_binding_(this, std::move(keyboard_listener_request)),
+      weak_factory_(this) {
   // Register all error handlers.
   SetInterfaceErrorHandler(session_listener_binding_, "SessionListener");
   SetInterfaceErrorHandler(ime_, "Input Method Editor");
@@ -220,8 +222,9 @@ void PlatformView::OnScenicEvent(
     std::vector<fuchsia::ui::scenic::Event> events) {
   TRACE_EVENT0("flutter", "PlatformView::OnScenicEvent");
 
+  std::vector<fuchsia::ui::gfx::Event> deferred_view_events;
   bool metrics_changed = false;
-  for (const auto& event : events) {
+  for (auto& event : events) {
     switch (event.Which()) {
       case fuchsia::ui::scenic::Event::Tag::kGfx:
         switch (event.gfx().Which()) {
@@ -278,16 +281,46 @@ void PlatformView::OnScenicEvent(
             break;
           }
           case fuchsia::ui::gfx::Event::Tag::kViewConnected:
-            OnChildViewConnected(event.gfx().view_connected().view_holder_id);
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+            task_runners_.GetUITaskRunner()->PostTask(
+                [view_holder_id =
+                     event.gfx().view_connected().view_holder_id]() {
+                  flutter::SceneHost::OnViewConnected(view_holder_id);
+                });
+#endif  // LEGACY_FUCHSIA_EMBEDDER
+            if (!OnChildViewConnected(
+                    event.gfx().view_connected().view_holder_id)) {
+              deferred_view_events.push_back(std::move(event.gfx()));
+            }
             break;
           case fuchsia::ui::gfx::Event::Tag::kViewDisconnected:
-            OnChildViewDisconnected(
-                event.gfx().view_disconnected().view_holder_id);
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+            task_runners_.GetUITaskRunner()->PostTask(
+                [view_holder_id =
+                     event.gfx().view_disconnected().view_holder_id]() {
+                  flutter::SceneHost::OnViewDisconnected(view_holder_id);
+                });
+#endif  // LEGACY_FUCHSIA_EMBEDDER
+            if (!OnChildViewDisconnected(
+                    event.gfx().view_disconnected().view_holder_id)) {
+              deferred_view_events.push_back(std::move(event.gfx()));
+            }
             break;
           case fuchsia::ui::gfx::Event::Tag::kViewStateChanged:
-            OnChildViewStateChanged(
-                event.gfx().view_state_changed().view_holder_id,
-                event.gfx().view_state_changed().state.is_rendering);
+#if defined(LEGACY_FUCHSIA_EMBEDDER)
+            task_runners_.GetUITaskRunner()->PostTask(
+                [view_holder_id =
+                     event.gfx().view_state_changed().view_holder_id,
+                 state =
+                     event.gfx().view_state_changed().state.is_rendering]() {
+                  flutter::SceneHost::OnViewStateChanged(view_holder_id, state);
+                });
+#endif  // LEGACY_FUCHSIA_EMBEDDER
+            if (!OnChildViewStateChanged(
+                    event.gfx().view_state_changed().view_holder_id,
+                    event.gfx().view_state_changed().state.is_rendering)) {
+              deferred_view_events.push_back(std::move(event.gfx()));
+            }
             break;
           case fuchsia::ui::gfx::Event::Tag::Invalid:
             FML_DCHECK(false) << "Flutter PlatformView::OnScenicEvent: Got "
@@ -327,6 +360,50 @@ void PlatformView::OnScenicEvent(
     }
   }
 
+  // If some View events went unmatched, try processing them again one more time
+  // in case they arrived out-of-order with the View creation callback.
+  if (!deferred_view_events.empty()) {
+    task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
+        [weak = weak_factory_.GetWeakPtr(),
+         deferred_view_events = std::move(deferred_view_events)]() {
+          if (!weak) {
+            FML_LOG(WARNING)
+                << "PlatformView already destroyed when "
+                   "processing deferred view events; dropping events.";
+            return;
+          }
+
+          for (const auto& event : deferred_view_events) {
+            switch (event.Which()) {
+              case fuchsia::ui::gfx::Event::Tag::kViewConnected: {
+                bool view_found = weak->OnChildViewConnected(
+                    event.view_connected().view_holder_id);
+                FML_DCHECK(view_found);
+                break;
+              }
+              case fuchsia::ui::gfx::Event::Tag::kViewDisconnected: {
+                bool view_found = weak->OnChildViewDisconnected(
+                    event.view_disconnected().view_holder_id);
+                FML_DCHECK(view_found);
+                break;
+              }
+              case fuchsia::ui::gfx::Event::Tag::kViewStateChanged: {
+                bool view_found = weak->OnChildViewStateChanged(
+                    event.view_state_changed().view_holder_id,
+                    event.view_state_changed().state.is_rendering);
+                FML_DCHECK(view_found);
+                break;
+              }
+              default:
+                FML_DCHECK(false) << "Flutter PlatformView::OnScenicEvent: Got "
+                                     "an invalid deferred GFX event.";
+                break;
+            }
+          }
+        }));
+  }
+
+  // If any of the viewport metrics changed, inform the engine now.
   if (view_pixel_ratio_.has_value() && view_logical_size_.has_value() &&
       metrics_changed) {
     const float pixel_ratio = *view_pixel_ratio_;
@@ -351,47 +428,19 @@ void PlatformView::OnScenicEvent(
   }
 }
 
-void PlatformView::OnChildViewConnected(scenic::ResourceId view_holder_id) {
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  task_runners_.GetUITaskRunner()->PostTask([view_holder_id]() {
-    flutter::SceneHost::OnViewConnected(view_holder_id);
-  });
-#endif  // LEGACY_FUCHSIA_EMBEDDER
-  std::string call = "{\"method\":\"View.viewConnected\",\"args\":null}";
+bool PlatformView::OnChildViewConnected(scenic::ResourceId view_holder_id) {
+  auto view_id_mapping = child_view_ids_.find(view_holder_id);
+  if (view_id_mapping == child_view_ids_.end()) {
+    return false;
+  }
 
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
-          "flutter/platform_views",
-          std::vector<uint8_t>(call.begin(), call.end()), nullptr);
-  DispatchPlatformMessage(message);
-}
-
-void PlatformView::OnChildViewDisconnected(scenic::ResourceId view_holder_id) {
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  task_runners_.GetUITaskRunner()->PostTask([view_holder_id]() {
-    flutter::SceneHost::OnViewDisconnected(view_holder_id);
-  });
-#endif  // LEGACY_FUCHSIA_EMBEDDER
-  std::string call = "{\"method\":\"View.viewDisconnected\",\"args\":null}";
-
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
-          "flutter/platform_views",
-          std::vector<uint8_t>(call.begin(), call.end()), nullptr);
-  DispatchPlatformMessage(message);
-}
-
-void PlatformView::OnChildViewStateChanged(scenic::ResourceId view_holder_id,
-                                           bool state) {
-#if defined(LEGACY_FUCHSIA_EMBEDDER)
-  task_runners_.GetUITaskRunner()->PostTask([view_holder_id, state]() {
-    flutter::SceneHost::OnViewStateChanged(view_holder_id, state);
-  });
-#endif  // LEGACY_FUCHSIA_EMBEDDER
   std::ostringstream out;
-  std::string str_state = state ? "true" : "false";
-  out << "{\"method\":\"View.viewStateChanged\",\"args\":{\"state\":"
-      << str_state << "}}";
+  out << "{"
+      << "\"method\":\"View.viewConnected\","
+      << "\"args\":{"
+      << "  \"viewId\":" << view_id_mapping->second  // ViewHolderToken handle
+      << "  }"
+      << "}";
   auto call = out.str();
 
   fml::RefPtr<flutter::PlatformMessage> message =
@@ -399,6 +448,59 @@ void PlatformView::OnChildViewStateChanged(scenic::ResourceId view_holder_id,
           "flutter/platform_views",
           std::vector<uint8_t>(call.begin(), call.end()), nullptr);
   DispatchPlatformMessage(message);
+
+  return true;
+}
+
+bool PlatformView::OnChildViewDisconnected(scenic::ResourceId view_holder_id) {
+  auto view_id_mapping = child_view_ids_.find(view_holder_id);
+  if (view_id_mapping == child_view_ids_.end()) {
+    return false;
+  }
+
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewDisconnected\","
+      << "\"args\":{"
+      << "  \"viewId\":" << view_id_mapping->second  // ViewHolderToken handle
+      << "  }"
+      << "}";
+  auto call = out.str();
+
+  fml::RefPtr<flutter::PlatformMessage> message =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          std::vector<uint8_t>(call.begin(), call.end()), nullptr);
+  DispatchPlatformMessage(message);
+
+  return true;
+}
+
+bool PlatformView::OnChildViewStateChanged(scenic::ResourceId view_holder_id,
+                                           bool is_rendering) {
+  auto view_id_mapping = child_view_ids_.find(view_holder_id);
+  if (view_id_mapping == child_view_ids_.end()) {
+    return false;
+  }
+
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewStateChanged\","
+      << "\"args\":{"
+      << "  \"viewId\":" << view_id_mapping->second  // ViewHolderToken handle
+      << "  \"is_rendering\":" << is_rendering       // IsViewRendering
+      << "  \"state\":" << is_rendering              // IsViewRendering
+      << "  }"
+      << "}";
+  auto call = out.str();
+
+  fml::RefPtr<flutter::PlatformMessage> message =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          std::vector<uint8_t>(call.begin(), call.end()), nullptr);
+  DispatchPlatformMessage(message);
+
+  return true;
 }
 
 static flutter::PointerData::Change GetChangeFromPointerEventPhase(
@@ -850,9 +952,27 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       return;
     }
 
-    on_create_view_callback_(view_id->value.GetUint64(),
+    const int64_t view_id_raw = view_id->value.GetUint64();
+    auto on_view_bound =
+        [weak = weak_factory_.GetWeakPtr(),
+         platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+         view_id = view_id_raw](scenic::ResourceId resource_id) {
+          platform_task_runner->PostTask([weak, view_id, resource_id]() {
+            if (!weak) {
+              FML_LOG(WARNING)
+                  << "ViewHolder bound to PlatformView after PlatformView was "
+                     "destroyed; ignoring.";
+              return;
+            }
+
+            FML_DCHECK(weak->child_view_ids_.count(resource_id) == 0);
+            weak->child_view_ids_[resource_id] = view_id;
+          });
+        };
+    on_create_view_callback_(view_id_raw, std::move(on_view_bound),
                              hit_testable->value.GetBool(),
                              focusable->value.GetBool());
+
     // The client is waiting for view creation. Send an empty response back
     // to signal the view was created.
     if (message->response().get()) {
@@ -901,7 +1021,25 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       FML_LOG(ERROR) << "Argument 'viewId' is not a int64";
       return;
     }
-    on_destroy_view_callback_(view_id->value.GetUint64());
+
+    const int64_t view_id_raw = view_id->value.GetUint64();
+    auto on_view_unbound =
+        [weak = weak_factory_.GetWeakPtr(),
+         platform_task_runner = task_runners_.GetPlatformTaskRunner()](
+            scenic::ResourceId resource_id) {
+          platform_task_runner->PostTask([weak, resource_id]() {
+            if (!weak) {
+              FML_LOG(WARNING)
+                  << "ViewHolder unbound from PlatformView after PlatformView"
+                     "was destroyed; ignoring.";
+              return;
+            }
+
+            FML_DCHECK(weak->child_view_ids_.count(resource_id) == 1);
+            weak->child_view_ids_.erase(resource_id);
+          });
+        };
+    on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
   } else if (method->value == "View.requestFocus") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
