@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "flutter/flow/embedded_views.h"
+#include "flutter/flow/view_holder.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -167,9 +168,14 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
     return nullptr;
   }
 
-  void CreateView(int64_t view_id, bool hit_testable, bool focusable);
+  // View manipulation.
+  void CreateView(int64_t view_id,
+                  ViewHolder::ViewIdCallback on_view_created,
+                  bool hit_testable,
+                  bool focusable);
+  void DestroyView(int64_t view_id,
+                   ViewHolder::ViewIdCallback on_view_destroyed);
   void UpdateView(int64_t view_id, bool hit_testable, bool focusable);
-  void DestroyView(int64_t view_id);
   void UpdateView(int64_t view_id,
                   const SkPoint& offset,
                   const SkSize& size,

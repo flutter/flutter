@@ -29,18 +29,20 @@ namespace flutter {
 // This object is created and destroyed on the |Rasterizer|'s thread.
 class ViewHolder {
  public:
-  using BindCallback = std::function<void(scenic::ResourceId)>;
+  using ViewIdCallback = std::function<void(scenic::ResourceId)>;
 
+  // `Create`, `Destroy`, and `FromId` must be executed on the raster thread or
+  // errors will occur.
+  //
+  // `on_bind_callback` and `on_unbind_callback` will likewise execute on the
+  // raster thread; clients are responsible for re-threading the callback if
+  // needed.
   static void Create(zx_koid_t id,
-                     fml::RefPtr<fml::TaskRunner> ui_task_runner,
-                     fuchsia::ui::views::ViewHolderToken view_holder_token,
-                     const BindCallback& on_bind_callback);
-  static void Destroy(zx_koid_t id);
+                     ViewIdCallback on_view_created,
+                     fuchsia::ui::views::ViewHolderToken view_holder_token);
+  static void Destroy(zx_koid_t id, ViewIdCallback on_view_destroyed);
   static ViewHolder* FromId(zx_koid_t id);
 
-  ViewHolder(fml::RefPtr<fml::TaskRunner> ui_task_runner,
-             fuchsia::ui::views::ViewHolderToken view_holder_token,
-             const BindCallback& on_bind_callback);
   ~ViewHolder() = default;
 
   // Sets the properties/opacity of the child view by issuing a Scenic command.
@@ -68,17 +70,19 @@ class ViewHolder {
   void set_focusable(bool value) { focusable_ = value; }
 
  private:
-  fml::RefPtr<fml::TaskRunner> ui_task_runner_;
+  ViewHolder(fuchsia::ui::views::ViewHolderToken view_holder_token,
+             ViewIdCallback on_view_created);
 
   std::unique_ptr<scenic::EntityNode> entity_node_;
   std::unique_ptr<scenic::OpacityNodeHACK> opacity_node_;
   std::unique_ptr<scenic::ViewHolder> view_holder_;
 
   fuchsia::ui::views::ViewHolderToken pending_view_holder_token_;
-  BindCallback pending_bind_callback_;
 
   bool hit_testable_ = true;
   bool focusable_ = true;
+
+  ViewIdCallback on_view_created_;
 
   fuchsia::ui::gfx::ViewProperties pending_properties_;
   bool has_pending_properties_ = false;

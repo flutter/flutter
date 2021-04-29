@@ -475,7 +475,8 @@ void FuchsiaExternalViewEmbedder::EnableWireframe(bool enable) {
   session_.Present();
 }
 
-void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id) {
+void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
+                                             ViewIdCallback on_view_bound) {
   FML_DCHECK(scenic_views_.find(view_id) == scenic_views_.end());
 
   ScenicView new_view = {
@@ -486,6 +487,7 @@ void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id) {
           scenic::ToViewHolderToken(zx::eventpair((zx_handle_t)view_id)),
           "Flutter::PlatformView"),
   };
+  on_view_bound(new_view.view_holder.id());
 
   new_view.opacity_node.SetLabel("flutter::PlatformView::OpacityMutator");
   new_view.entity_node.SetLabel("flutter::PlatformView::TransformMutator");
@@ -497,9 +499,14 @@ void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id) {
   scenic_views_.emplace(std::make_pair(view_id, std::move(new_view)));
 }
 
-void FuchsiaExternalViewEmbedder::DestroyView(int64_t view_id) {
-  size_t erased = scenic_views_.erase(view_id);
-  FML_DCHECK(erased == 1);
+void FuchsiaExternalViewEmbedder::DestroyView(int64_t view_id,
+                                              ViewIdCallback on_view_unbound) {
+  auto scenic_view = scenic_views_.find(view_id);
+  FML_DCHECK(scenic_view != scenic_views_.end());
+  scenic::ResourceId resource_id = scenic_view->second.view_holder.id();
+
+  scenic_views_.erase(scenic_view);
+  on_view_unbound(resource_id);
 }
 
 void FuchsiaExternalViewEmbedder::SetViewProperties(int64_t view_id,
