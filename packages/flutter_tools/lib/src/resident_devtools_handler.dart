@@ -60,21 +60,31 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     Uri devToolsServerAddress,
     @required List<FlutterDevice> flutterDevices,
   }) async {
+    _logger.printStatus('1');
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
+      _logger.printStatus('notStarting');
       return;
     }
     if (devToolsServerAddress != null) {
+      _logger.printStatus('2');
       _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
       _served = true;
+      _logger.printStatus('3');
       await _devToolsLauncher.serve();
     }
+    _logger.printStatus('4');
     await _devToolsLauncher.ready;
+    _logger.printStatus('5');
     final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
+    _logger.printStatus('6');
     await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
+    _logger.printStatus('7');
     await _callConnectedVmServiceUriExtension(devicesWithExtension);
+    _logger.printStatus('8');
     _readyToAnnounce = true;
     if (_residentRunner.reportedDebuggers) {
+      _logger.printStatus('9');
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
       _residentRunner.printDebuggerList(includeObservatory: false);
