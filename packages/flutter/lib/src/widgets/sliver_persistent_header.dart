@@ -196,10 +196,10 @@ class _FloatingHeader extends StatefulWidget {
   _FloatingHeaderState createState() => _FloatingHeaderState();
 }
 
-// A wrapper placed around the widget created by the
-// _SliverPersistentHeaderDelegate for floating headers. This informs the float
-// when pointer scrolling by updating the last known ScrollDirection when
-// scrolling began.
+// A wrapper for the widget created by _SliverPersistentHeaderElement that
+// starts and stops the floating app bar's snap-into-view or snap-out-of-view
+// animation. It also informs the float when pointer scrolling by updating the
+// last known ScrollDirection when scrolling began.
 class _FloatingHeaderState extends State<_FloatingHeader> {
   ScrollPosition? _position;
 
@@ -228,10 +228,18 @@ class _FloatingHeaderState extends State<_FloatingHeader> {
     if (_position == null)
       return;
 
-    // When scroll starts, update the last known active scroll direction.
+    // When a scroll stops, then maybe snap the app bar into view.
+    // Similarly, when a scroll starts, then maybe stop the snap animation.
+    // Update the scrolling direction as well for pointer scrolling updates.
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    if (_position!.isScrollingNotifier.value)
+    if (_position!.isScrollingNotifier.value) {
       header?.updateScrollStartDirection(_position!.userScrollDirection);
+      // Only SliverAppBars support snapping, headers will not snap.
+      header?.maybeStopSnapAnimation(_position!.userScrollDirection);
+    } else {
+      // Only SliverAppBars support snapping, headers will not snap.
+      header?.maybeStartSnapAnimation(_position!.userScrollDirection);
+    }
   }
 
   @override
