@@ -430,7 +430,6 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   int? findIndexByKey(Key key) {
     if (findChildIndexCallback == null)
       return null;
-    assert(key != null);
     final Key childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
@@ -444,7 +443,6 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   @override
   @pragma('vm:notify-debugger-on-exception')
   Widget? build(BuildContext context, int index) {
-    assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount!))
       return null;
     Widget? child;
@@ -544,12 +542,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     this.addSemanticIndexes = true,
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
-  }) : assert(children != null),
-       assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null),
-       assert(addSemanticIndexes != null),
-       assert(semanticIndexCallback != null),
-       _keyToIndex = <Key?, int>{null: 0};
+  }) : _keyToIndex = <Key?, int>{null: 0};
 
   /// Creates a constant version of the delegate that supplies children for
   /// slivers using the given list.
@@ -567,12 +560,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     this.addSemanticIndexes = true,
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
-  }) : assert(children != null),
-       assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null),
-       assert(addSemanticIndexes != null),
-       assert(semanticIndexCallback != null),
-       _keyToIndex = null;
+  }) : _keyToIndex = null;
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
@@ -699,7 +687,6 @@ class SliverChildListDelegate extends SliverChildDelegate {
 
   @override
   int? findIndexByKey(Key key) {
-    assert(key != null);
     final Key childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
@@ -712,15 +699,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    assert(children != null);
     if (index < 0 || index >= children.length)
       return null;
     Widget child = children[index];
     final Key? key = child.key != null? _SaltedValueKey(child.key!) : null;
-    assert(
-      child != null,
-      "The sliver's children must not contain null values, but a null value was found at index $index",
-    );
     if (addRepaintBoundaries)
       child = RepaintBoundary(child: child);
     if (addSemanticIndexes) {
@@ -774,8 +756,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   const SliverMultiBoxAdaptorWidget({
     Key? key,
     required this.delegate,
-  }) : assert(delegate != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// {@template flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   /// The delegate that provides the children for this widget.
@@ -1247,7 +1228,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void forgetChild(Element child) {
-    assert(child != null);
     assert(child.slot != null);
     assert(_childElements.containsKey(child.slot));
     _childElements.remove(child.slot);

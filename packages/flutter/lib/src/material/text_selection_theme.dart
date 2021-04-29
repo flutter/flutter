@@ -72,7 +72,6 @@ class TextSelectionThemeData with Diagnosticable {
   static TextSelectionThemeData? lerp(TextSelectionThemeData? a, TextSelectionThemeData? b, double t) {
     if (a == null && b == null)
       return null;
-    assert(t != null);
     return TextSelectionThemeData(
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),
       selectionColor: Color.lerp(a?.selectionColor, b?.selectionColor, t),

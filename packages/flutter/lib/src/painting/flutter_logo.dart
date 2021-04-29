@@ -109,7 +109,6 @@ class FlutterLogoDecoration extends Decoration {
   ///
   ///  * [Decoration.lerp], which interpolates between arbitrary decorations.
   static FlutterLogoDecoration? lerp(FlutterLogoDecoration? a, FlutterLogoDecoration? b, double t) {
-    assert(t != null);
     assert(a == null || a.debugAssertIsValid());
     assert(b == null || b.debugAssertIsValid());
     if (a == null && b == null)

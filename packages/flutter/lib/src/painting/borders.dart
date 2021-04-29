@@ -157,7 +157,6 @@ class BorderSide {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   BorderSide scale(double t) {
-    assert(t != null);
     return BorderSide(
       color: color,
       width: math.max(0.0, width * t),
@@ -209,9 +208,6 @@ class BorderSide {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
-    assert(a != null);
-    assert(b != null);
-    assert(t != null);
     if (t == 0.0)
       return a;
     if (t == 1.0)
@@ -426,7 +422,6 @@ abstract class ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
-    assert(t != null);
     ShapeBorder? result;
     if (b != null)
       result = b.lerpFrom(a, t);
@@ -581,7 +576,6 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   static _CompoundBorder lerp(ShapeBorder? a, ShapeBorder? b, double t) {
-    assert(t != null);
     assert(a is _CompoundBorder || b is _CompoundBorder); // Not really necessary, but all call sites currently intend this.
     final List<ShapeBorder?> aList = a is _CompoundBorder ? a.borders : <ShapeBorder?>[a];
     final List<ShapeBorder?> bList = b is _CompoundBorder ? b.borders : <ShapeBorder?>[b];

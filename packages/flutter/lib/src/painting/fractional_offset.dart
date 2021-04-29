@@ -179,7 +179,6 @@ class FractionalOffset extends Alignment {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static FractionalOffset? lerp(FractionalOffset? a, FractionalOffset? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

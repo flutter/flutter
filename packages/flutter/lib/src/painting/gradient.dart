@@ -22,11 +22,8 @@ class _ColorsAndStops {
 
 /// Calculate the color at position [t] of the gradient defined by [colors] and [stops].
 Color _sample(List<Color> colors, List<double> stops, double t) {
-  assert(colors != null);
   assert(colors.isNotEmpty);
-  assert(stops != null);
   assert(stops.isNotEmpty);
-  assert(t != null);
   if (t <= stops.first)
     return colors.first;
   if (t >= stops.last)
@@ -288,7 +285,6 @@ abstract class Gradient {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Gradient? lerp(Gradient? a, Gradient? b, double t) {
-    assert(t != null);
     Gradient? result;
     if (b != null)
       result = b.lerpFrom(a, t); // if a is null, this must return non-null
@@ -474,7 +470,6 @@ class LinearGradient extends Gradient {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static LinearGradient? lerp(LinearGradient? a, LinearGradient? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -732,7 +727,6 @@ class RadialGradient extends Gradient {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static RadialGradient? lerp(RadialGradient? a, RadialGradient? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -979,7 +973,6 @@ class SweepGradient extends Gradient {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static SweepGradient? lerp(SweepGradient? a, SweepGradient? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

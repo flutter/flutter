@@ -70,7 +70,6 @@ class MaterialBannerThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static MaterialBannerThemeData lerp(MaterialBannerThemeData? a, MaterialBannerThemeData? b, double t) {
-    assert(t != null);
     return MaterialBannerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),

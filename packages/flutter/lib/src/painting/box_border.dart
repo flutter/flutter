@@ -103,7 +103,6 @@ abstract class BoxBorder extends ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
-    assert(t != null);
     if ((a is Border?) && (b is Border?))
       return Border.lerp(a, b, t);
     if ((a is BorderDirectional?) && (b is BorderDirectional?))
@@ -454,7 +453,6 @@ class Border extends BoxBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Border? lerp(Border? a, Border? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -765,7 +763,6 @@ class BorderDirectional extends BoxBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderDirectional? lerp(BorderDirectional? a, BorderDirectional? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

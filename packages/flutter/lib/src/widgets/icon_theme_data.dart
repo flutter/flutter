@@ -91,7 +91,6 @@ class IconThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static IconThemeData lerp(IconThemeData? a, IconThemeData? b, double t) {
-    assert(t != null);
     return IconThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       opacity: ui.lerpDouble(a?.opacity, b?.opacity, t),

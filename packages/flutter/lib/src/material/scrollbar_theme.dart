@@ -154,7 +154,6 @@ class ScrollbarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
-    assert(t != null);
     return ScrollbarThemeData(
       thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
       showTrackOnHover: t < 0.5 ? a?.showTrackOnHover : b?.showTrackOnHover,

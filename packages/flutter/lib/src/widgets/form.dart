@@ -332,8 +332,7 @@ class FormField<T> extends StatefulWidget {
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
     this.restorationId,
-  }) : assert(builder != null),
-       assert(
+  }) : assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.',

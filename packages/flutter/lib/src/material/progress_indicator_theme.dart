@@ -83,7 +83,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
   static ProgressIndicatorThemeData? lerp(ProgressIndicatorThemeData? a, ProgressIndicatorThemeData? b, double t) {
     if (a == null && b == null)
       return null;
-    assert(t != null);
     return ProgressIndicatorThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       linearTrackColor : Color.lerp(a?.linearTrackColor, b?.linearTrackColor, t),

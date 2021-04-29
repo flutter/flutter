@@ -1493,9 +1493,6 @@ class ThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ThemeData lerp(ThemeData a, ThemeData b, double t) {
-    assert(a != null);
-    assert(b != null);
-    assert(t != null);
     // Warning: make sure these properties are in the exact same order as in
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.

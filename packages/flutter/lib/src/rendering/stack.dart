@@ -135,7 +135,6 @@ class RelativeRect {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static RelativeRect? lerp(RelativeRect? a, RelativeRect? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

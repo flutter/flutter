@@ -833,7 +833,6 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     _CupertinoEdgeShadowDecoration? b,
     double t,
   ) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

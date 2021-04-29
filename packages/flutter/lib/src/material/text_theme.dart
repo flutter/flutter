@@ -689,7 +689,6 @@ class TextTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TextTheme lerp(TextTheme? a, TextTheme? b, double t) {
-    assert(t != null);
     return TextTheme(
       headline1: TextStyle.lerp(a?.headline1, b?.headline1, t),
       headline2: TextStyle.lerp(a?.headline2, b?.headline2, t),

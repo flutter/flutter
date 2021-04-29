@@ -88,7 +88,6 @@ abstract class AlignmentGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentGeometry? lerp(AlignmentGeometry? a, AlignmentGeometry? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -333,7 +332,6 @@ class Alignment extends AlignmentGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Alignment? lerp(Alignment? a, Alignment? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -514,7 +512,6 @@ class AlignmentDirectional extends AlignmentGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentDirectional? lerp(AlignmentDirectional? a, AlignmentDirectional? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

@@ -457,7 +457,6 @@ class ChipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     return ChipThemeData(

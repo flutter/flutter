@@ -130,7 +130,6 @@ abstract class BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusGeometry? lerp(BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     a ??= BorderRadius.zero;
@@ -490,7 +489,6 @@ class BorderRadius extends BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadius? lerp(BorderRadius? a, BorderRadius? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -707,7 +705,6 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusDirectional? lerp(BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

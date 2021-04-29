@@ -120,7 +120,6 @@ class TooltipThemeData with Diagnosticable {
   static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
     if (a == null && b == null)
       return null;
-    assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),

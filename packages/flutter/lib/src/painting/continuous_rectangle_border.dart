@@ -61,7 +61,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -73,7 +72,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),

@@ -81,7 +81,6 @@ class PopupMenuThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     return PopupMenuThemeData(

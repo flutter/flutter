@@ -228,7 +228,6 @@ class ShapeDecoration extends Decoration {
   ///    and which use [ShapeDecoration.lerp] when interpolating two
   ///    [ShapeDecoration]s or a [ShapeDecoration] to or from null.
   static ShapeDecoration? lerp(ShapeDecoration? a, ShapeDecoration? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a != null && b != null) {

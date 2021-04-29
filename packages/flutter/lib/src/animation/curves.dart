@@ -33,7 +33,6 @@ abstract class ParametricCurve<T> {
   /// implementation of [transform], which delegates the remaining logic to
   /// [transformInternal].
   T transform(double t) {
-    assert(t != null);
     assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
     return transformInternal(t);
   }

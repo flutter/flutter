@@ -467,7 +467,6 @@ class BoxConstraints extends Constraints {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxConstraints? lerp(BoxConstraints? a, BoxConstraints? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

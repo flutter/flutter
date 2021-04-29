@@ -199,7 +199,6 @@ class HSVColor {
   ///
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -383,7 +382,6 @@ class HSLColor {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)

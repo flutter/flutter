@@ -521,7 +521,6 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is _OutlineBorder) {
       return _OutlineBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -533,7 +532,6 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is _OutlineBorder) {
       return _OutlineBorder(
         side: BorderSide.lerp(side, b.side, t),
