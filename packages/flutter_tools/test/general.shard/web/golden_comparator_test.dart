@@ -4,91 +4,95 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
-import 'package:test/fake.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-
-final Uri goldenKey = Uri.parse('file://golden_key');
-final Uri goldenKey2 = Uri.parse('file://second_golden_key');
-final Uri testUri = Uri.parse('file://test_uri');
-final Uri testUri2  = Uri.parse('file://second_test_uri');
-final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+import '../../src/fakes.dart';
+import '../../src/testbed.dart';
 
 void main() {
 
   group('Test that TestGoldenComparator', () {
-    FakeProcessManager processManager;
+    Testbed testbed;
+    Uri goldenKey;
+    Uri goldenKey2;
+    Uri testUri;
+    Uri testUri2;
+    Uint8List imageBytes;
+    MockProcessManager mockProcessManager;
+    MockTestCompiler mockCompiler;
 
     setUp(() {
-      processManager = FakeProcessManager.empty();
+      goldenKey = Uri.parse('file://golden_key');
+      goldenKey2 = Uri.parse('file://second_golden_key');
+      testUri = Uri.parse('file://test_uri');
+      testUri2 = Uri.parse('file://second_test_uri');
+      imageBytes = Uint8List.fromList(<int>[1,2,3,4,5]);
+      mockProcessManager = MockProcessManager();
+      mockCompiler = MockTestCompiler();
+      when(mockCompiler.compile(any)).thenAnswer((_) => Future<String>.value('compiler_output'));
+
+      testbed = Testbed(overrides: <Type, Generator>{
+        ProcessManager: () {
+          return mockProcessManager;
+        }
+      });
     });
 
-    testWithoutContext('succeed when golden comparison succeed', () async {
+    test('succeed when golden comparison succeed', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': true,
         'message': 'some message',
       };
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-observatory',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output'
-        ], stdout: jsonEncode(expectedResponse) + '\n',
-      ));
+
+      when(mockProcessManager.start(any, environment: anyNamed('environment')))
+        .thenAnswer((Invocation invocation) async {
+          return FakeProcess(
+            exitCode: Future<int>.value(0),
+            stdout: stdoutFromString(jsonEncode(expectedResponse) + '\n'),
+          );
+      });
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
-        () => FakeTestCompiler(),
-        processManager: processManager,
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
+        () => mockCompiler,
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, null);
-    });
+    }));
 
-    testWithoutContext('fail with error message when golden comparison failed', () async {
+    test('fail with error message when golden comparison failed', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': false,
         'message': 'some message',
       };
 
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-observatory',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output'
-        ], stdout: jsonEncode(expectedResponse) + '\n',
-      ));
+      when(mockProcessManager.start(any, environment: anyNamed('environment')))
+        .thenAnswer((Invocation invocation) async {
+          return FakeProcess(
+            exitCode: Future<int>.value(0),
+            stdout: stdoutFromString(jsonEncode(expectedResponse) + '\n'),
+          );
+      });
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
-        () => FakeTestCompiler(),
-        processManager: processManager,
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
+        () => mockCompiler,
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, 'some message');
-    });
+    }));
 
-    testWithoutContext('reuse the process for the same test file', () async {
+    test('reuse the process for the same test file', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse1 = <String, dynamic>{
         'success': false,
         'message': 'some message',
@@ -98,32 +102,27 @@ void main() {
         'message': 'some other message',
       };
 
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-observatory',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output'
-        ], stdout: jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n',
-      ));
+      when(mockProcessManager.start(any, environment: anyNamed('environment')))
+        .thenAnswer((Invocation invocation) async {
+          return FakeProcess(
+            exitCode: Future<int>.value(0),
+            stdout: stdoutFromString(jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n'),
+          );
+      });
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
-        () => FakeTestCompiler(),
-        processManager: processManager,
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
+        () => mockCompiler,
       );
 
       final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
-
       final String result2 = await comparator.compareGoldens(testUri, imageBytes, goldenKey2, false);
       expect(result2, 'some other message');
-    });
+      verify(mockProcessManager.start(any, environment: anyNamed('environment'))).called(1);
+    }));
 
-    testWithoutContext('does not reuse the process for different test file', () async {
+    test('does not reuse the process for different test file', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse1 = <String, dynamic>{
         'success': false,
         'message': 'some message',
@@ -133,82 +132,57 @@ void main() {
         'message': 'some other message',
       };
 
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-observatory',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output'
-        ], stdout: jsonEncode(expectedResponse1) + '\n',
-      ));
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-observatory',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output'
-        ], stdout: jsonEncode(expectedResponse2) + '\n',
-      ));
+      when(mockProcessManager.start(any, environment: anyNamed('environment')))
+        .thenAnswer((Invocation invocation) async {
+          return FakeProcess(
+            exitCode: Future<int>.value(0),
+            stdout: stdoutFromString(jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n'),
+          );
+      });
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
-        () => FakeTestCompiler(),
-        processManager: processManager,
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
+        () => mockCompiler,
       );
 
       final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
-
       final String result2 = await comparator.compareGoldens(testUri2, imageBytes, goldenKey2, false);
-      expect(result2, 'some other message');
-    });
+      expect(result2, 'some message');
+      verify(mockProcessManager.start(any, environment: anyNamed('environment'))).called(2);
+    }));
 
-    testWithoutContext('removes all temporary files when closed', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
+    test('removes all temporary files when closed', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': true,
         'message': 'some message',
       };
-      final StreamController<List<int>> controller = StreamController<List<int>>();
-      final IOSink stdin = IOSink(controller.sink);
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-observatory',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output'
-        ], stdout: jsonEncode(expectedResponse) + '\n',
-        stdin: stdin,
-      ));
+
+      when(mockProcessManager.start(any, environment: anyNamed('environment')))
+        .thenAnswer((Invocation invocation) async {
+          return FakeProcess(
+            exitCode: Future<int>.value(0),
+            stdout: stdoutFromString(jsonEncode(expectedResponse) + '\n'),
+          );
+      });
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
-        () => FakeTestCompiler(),
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
+        () => mockCompiler,
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, null);
 
       await comparator.close();
-      expect(fileSystem.systemTempDirectory.listSync(recursive: true), isEmpty);
-    });
+      expect(globals.fs.systemTempDirectory.listSync(recursive: true), isEmpty);
+    }));
   });
 }
 
-class FakeTestCompiler extends Fake implements TestCompiler {
-  @override
-  Future<String> compile(Uri mainDart) {
-    return Future<String>.value('compiler_output');
-  }
+Stream<List<int>> stdoutFromString(String string) => Stream<List<int>>.fromIterable(<List<int>>[
+  utf8.encode(string),
+]);
 
-  @override
-  Future<void> dispose() async { }
-}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockTestCompiler extends Mock implements TestCompiler {}
