@@ -619,6 +619,10 @@ class ThemeData with Diagnosticable {
     required this.inputDecorationTheme,
     required this.iconTheme,
     required this.primaryIconTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     required this.accentIconTheme,
     required this.sliderTheme,
     required this.tabBarTheme,
@@ -893,23 +897,31 @@ class ThemeData with Diagnosticable {
   /// overlay on or off for dark themes.
   final Color shadowColor;
 
-  /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
+  /// Obsolete property that was originally used as the foreground
+  /// color for widgets (knobs, text, overscroll edge effect, etc).
   ///
-  /// Accent color is also known as the secondary color.
+  /// The material library no longer uses this property. In most cases
+  /// the theme's [colorScheme] [ColorScheme.secondary] property is now
+  /// used instead.
   ///
-  /// The theme's [colorScheme] property contains [ColorScheme.secondary], as
-  /// well as a color that contrasts well with the secondary color called
-  /// [ColorScheme.onSecondary]. It might be simpler to just configure an app's
-  /// visuals in terms of the theme's [colorScheme].
+  /// Apps should migrate uses of this property to the theme's [colorScheme]
+  /// [ColorScheme.secondary] color. In cases where a color is needed that
+  /// that contrasts well with the secondary color [ColorScheme.onSecondary]
+  /// can be used.
   @Deprecated(
     'Use colorScheme.secondary instead. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
   final Color accentColor;
 
-  /// The brightness of the [accentColor]. Used to determine the color of text
-  /// and icons placed on top of the accent color (e.g. the icons on a floating
-  /// action button).
+  /// Obsolete property that was originally used to determine the color
+  /// of text and icons placed on top of the accent color (e.g. the
+  /// icons on a floating action button).
+  ///
+  /// The material library no longer uses this property. The
+  /// [floatingActionButtonTheme] can be used to configure
+  /// the appearance of [FloatingActionButton]s. The brightness
+  /// of any color can be found with [ThemeData.estimateBrightnessForColor].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
@@ -963,8 +975,7 @@ class ThemeData with Diagnosticable {
   final Color selectedRowColor;
 
   /// The color used for widgets in their inactive (but enabled)
-  /// state. For example, an unchecked checkbox. Usually contrasted
-  /// with the [accentColor]. See also [disabledColor].
+  /// state. For example, an unchecked checkbox. See also [disabledColor].
   final Color unselectedWidgetColor;
 
   /// The color used for widgets that are inoperative, regardless of
@@ -1036,7 +1047,21 @@ class ThemeData with Diagnosticable {
   /// A text theme that contrasts with the primary color.
   final TextTheme primaryTextTheme;
 
-  /// A text theme that contrasts with the accent color.
+  /// Obsolete property that was originally used when a [TextTheme]
+  /// that contrasted well with the [accentColor] was needed.
+  ///
+  /// The material library no longer uses this property and most uses
+  /// of [accentColor] have been replaced with
+  /// the theme's [colorScheme] [ColorScheme.secondaryColor].
+  /// You can configure the color of a [textTheme] [TextStyle] so that it
+  /// contrasts well with the [ColorScheme.secondaryColor] like this:
+  ///
+  /// ```dart
+  /// final ThemeData theme = Theme.of(context);
+  /// theme.textTheme.headline1.copyWith(
+  ///   color: theme.colorScheme.onSecondary,
+  /// )
+  /// ```
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
@@ -1055,7 +1080,12 @@ class ThemeData with Diagnosticable {
   /// An icon theme that contrasts with the primary color.
   final IconThemeData primaryIconTheme;
 
-  /// An icon theme that contrasts with the accent color.
+  /// Obsolete property that was originally used when an [IconTheme]
+  /// that contrasted well with the [accentColor] was needed.
+  ///
+  /// The material library no longer uses this property and most uses
+  /// of [accentColor] have been replaced with
+  /// the theme's [colorScheme] [ColorScheme.secondaryColor].
   final IconThemeData accentIconTheme;
 
   /// The colors and shapes used to render [Slider].
@@ -1182,8 +1212,7 @@ class ThemeData with Diagnosticable {
   /// icon themes of a [NavigationRail].
   final NavigationRailThemeData navigationRailTheme;
 
-  /// The color and geometry [TextTheme] values used to configure [textTheme],
-  /// [primaryTextTheme], and [accentTextTheme].
+  /// The color and geometry [TextTheme] values used to configure [textTheme].
   final Typography typography;
 
   /// Components of the [CupertinoThemeData] to override from the Material
