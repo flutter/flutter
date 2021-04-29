@@ -139,12 +139,20 @@ class PhysicalKeyData {
   /// Lines in this file look like this (without the ///):
   ///  /** Space key. */
   ///  #define GLFW_KEY_SPACE              32,
+  ///  #define GLFW_KEY_LAST               GLFW_KEY_MENU
+
   static Map<String, List<int>> _readGlfwKeyCodes(String headerFile, String nameMap) {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
-    final RegExp definedCodes = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
+    final RegExp definedCodes = RegExp(
+      r'define\s+'
+      r'GLFW_KEY_(?<name>[A-Z0-9_]+)\s+'
+      r'(?<value>[A-Z0-9_]+),?',
+    );
     final Map<String, dynamic> replaced = <String, dynamic>{};
-    for (final Match match in definedCodes.allMatches(headerFile)) {
-      replaced[match.group(1)!] = int.tryParse(match.group(2)!) ?? match.group(2)!.replaceAll('GLFW_KEY_', '');
+    for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
+      final String name = match.namedGroup('name')!;
+      final String value = match.namedGroup('value')!;
+      replaced[name] = int.tryParse(value) ?? value.replaceAll('GLFW_KEY_', '');
     }
     final Map<String, int> glfwNameToKeyCode = <String, int>{};
     replaced.forEach((String key, dynamic value) {

@@ -248,14 +248,18 @@ class LogicalKeyData {
   ///  /** Space key. */
   ///  #define GDK_KEY_space 0x020
   static void _readGtkKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameToGtkName) {
-    final RegExp definedCodes = RegExp(r'#define GDK_KEY_([a-zA-Z0-9_]+)\s*0x([0-9a-f]+),?');
+    final RegExp definedCodes = RegExp(
+      r'#define '
+      r'GDK_KEY_(?<name>[a-zA-Z0-9_]+)\s*'
+      r'0x(?<value>[0-9a-f]+),?',
+    );
     final Map<String, String> gtkNameToFlutterName = reverseMapOfListOfString(nameToGtkName,
         (String flutterName, String gtkName) { print('Duplicate GTK logical name $gtkName'); });
 
-    for (final Match match in definedCodes.allMatches(headerFile)) {
-      final String gtkName = match.group(1)!;
+    for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
+      final String gtkName = match.namedGroup('name')!;
       final String? name = gtkNameToFlutterName[gtkName];
-      final int value = int.parse(match.group(2)!, radix: 16);
+      final int value = int.parse(match.namedGroup('value')!, radix: 16);
       if (name == null) {
         // print('Unmapped GTK logical entry $gtkName');
         continue;
@@ -278,11 +282,15 @@ class LogicalKeyData {
     final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
         (String flutterName, String windowsName) { print('Duplicate Windows logical name $windowsName'); });
 
-    final RegExp definedCodes = RegExp(r'define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?');
-    for (final Match match in definedCodes.allMatches(headerFile)) {
-      final String windowsName = match.group(1)!;
+    final RegExp definedCodes = RegExp(
+      r'define '
+      r'VK_(?<name>[A-Z0-9_]+)\s*'
+      r'(?<value>[A-Z0-9_x]+),?',
+    );
+    for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
+      final String windowsName = match.namedGroup('name')!;
       final String? name = nameToFlutterName[windowsName];
-      final int value = int.tryParse(match.group(2)!)!;
+      final int value = int.tryParse(match.namedGroup('value')!)!;
       if (name == null) {
         print('Unmapped Windows logical entry $windowsName');
         continue;
@@ -313,11 +321,15 @@ class LogicalKeyData {
     final RegExp enumBlock = RegExp(r'enum\s*\{(.*)\};', multiLine: true);
     // Eliminate everything outside of the enum block.
     headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1)!);
-    final RegExp enumEntry = RegExp(r'AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?');
-    for (final Match match in enumEntry.allMatches(headerFile)) {
-      final String androidName = match.group(1)!;
+    final RegExp enumEntry = RegExp(
+      r'AKEYCODE_(?<name>[A-Z0-9_]+)\s*'
+      r'=\s*'
+      r'(?<value>[0-9]+),?',
+    );
+    for (final RegExpMatch match in enumEntry.allMatches(headerFile)) {
+      final String androidName = match.namedGroup('name')!;
       final String? name = nameToFlutterName[androidName];
-      final int value = int.tryParse(match.group(2)!)!;
+      final int value = int.tryParse(match.namedGroup('value')!)!;
       if (name == null) {
         print('Unmapped Android logical entry $androidName');
         continue;
