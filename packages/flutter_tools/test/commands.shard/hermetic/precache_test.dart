@@ -26,7 +26,7 @@ void main() {
   testUsingContext('precache should acquire lock', () async {
     final Platform platform = FakePlatform(environment: <String, String>{});
     final PrecacheCommand command = PrecacheCommand(
-      cache: cache, // Using real cache.
+      cache: cache,
       logger: BufferLogger.test(),
       platform: platform,
       featureFlags: TestFeatureFlags(),
@@ -45,7 +45,7 @@ void main() {
       },
     );
     final PrecacheCommand command = PrecacheCommand(
-      cache: cache, // Using real cache.
+      cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: platform,
