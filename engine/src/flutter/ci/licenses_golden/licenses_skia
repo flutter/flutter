@@ -1,4 +1,4 @@
-Signature: 741b6e1589559db7ca15cb3b94f12354
+Signature: 9d36d88d177b480d5e9a6a5b30240478
 
 UNUSED LICENSES:
 
@@ -641,8 +641,6 @@ FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxy.h
 FILE: ../../../third_party/skia/src/gpu/GrSwizzle.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureAdjuster.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureAdjuster.h
-FILE: ../../../third_party/skia/src/gpu/GrTextureMaker.cpp
-FILE: ../../../third_party/skia/src/gpu/GrTextureMaker.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProducer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureProducer.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProxy.cpp
@@ -1430,7 +1428,6 @@ FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_rt_colorfilter.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_rt_shader.sksl
-FILE: ../../../third_party/skia/src/sksl/sksl_runtime.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 Google Inc. All rights reserved.
@@ -5691,6 +5688,7 @@ FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h
 FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/Matrix.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Paint.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/RuntimeShaderBuilder.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Shader.cpp
