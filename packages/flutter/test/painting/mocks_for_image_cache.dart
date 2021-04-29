@@ -32,7 +32,6 @@ class TestImageInfo implements ImageInfo {
 
   @override
   bool isCloneOf(ImageInfo other) {
-    assert(other != null);
     return other.image.isCloneOf(image)
         && scale == scale
         && other.debugLabel == debugLabel;

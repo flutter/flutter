@@ -419,7 +419,6 @@ void main() {
       required int expectedErrorCount,
       bool enableCheck = true,
     }) {
-      assert(expectedErrorCount != null);
       assert(enableCheck || expectedErrorCount == 0, 'Cannot disable check and expect non-zero error count.');
       final OffsetLayer container = OffsetLayer();
       container.append(layerA);

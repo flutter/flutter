@@ -130,7 +130,6 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.child,
     this.previewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(child != null),
        super(key: key);
 
   /// The widget that can be "opened" with the [CupertinoContextMenu].
@@ -549,7 +548,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     required Rect previousChildRect,
     RouteSettings? settings,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
        _actions = actions,
        _builder = builder,
        _contextMenuLocation = contextMenuLocation,
@@ -844,9 +842,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.onDismiss,
     required this.orientation,
     this.sheetGlobalKey,
-  }) : assert(contextMenuLocation != null),
-       assert(orientation != null),
-       super(key: key);
+  }) : super(key: key);
 
   final List<Widget>? actions;
   final Widget child;
@@ -1174,8 +1170,6 @@ class _ContextMenuSheet extends StatelessWidget {
     required _ContextMenuLocation contextMenuLocation,
     required Orientation orientation,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
-       assert(orientation != null),
        _contextMenuLocation = contextMenuLocation,
        _orientation = orientation,
        super(key: key);

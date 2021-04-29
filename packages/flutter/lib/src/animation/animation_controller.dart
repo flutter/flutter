@@ -239,10 +239,7 @@ class AnimationController extends Animation<double>
     this.upperBound = 1.0,
     this.animationBehavior = AnimationBehavior.normal,
     required TickerProvider vsync,
-  }) : assert(lowerBound != null),
-       assert(upperBound != null),
-       assert(upperBound >= lowerBound),
-       assert(vsync != null),
+  }) : assert(upperBound >= lowerBound),
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
@@ -272,9 +269,7 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
-  }) : assert(value != null),
-       assert(vsync != null),
-       lowerBound = double.negativeInfinity,
+  }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
@@ -360,7 +355,6 @@ class AnimationController extends Animation<double>
   ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
   ///    which start the animation controller.
   set value(double newValue) {
-    assert(newValue != null);
     stop();
     _internalSetValue(newValue);
     notifyListeners();
@@ -649,7 +643,6 @@ class AnimationController extends Animation<double>
     }());
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
-    assert(reverse != null);
     stop();
     return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter));
   }
@@ -736,7 +729,6 @@ class AnimationController extends Animation<double>
   }
 
   TickerFuture _startSimulation(Simulation simulation) {
-    assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
@@ -842,9 +834,7 @@ class AnimationController extends Animation<double>
 
 class _InterpolationSimulation extends Simulation {
   _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve, double scale)
-    : assert(_begin != null),
-      assert(_end != null),
-      assert(duration != null && duration.inMicroseconds > 0),
+    : assert(duration.inMicroseconds > 0),
       _durationInSeconds = (duration.inMicroseconds * scale) / Duration.microsecondsPerSecond;
 
   final double _durationInSeconds;

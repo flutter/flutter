@@ -410,7 +410,7 @@ class FakeTextInputClient implements TextInputClient {
 }
 
 class FakeTextChannel implements MethodChannel {
-  FakeTextChannel(this.outgoing) : assert(outgoing != null);
+  FakeTextChannel(this.outgoing);
 
   Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall)? incoming;

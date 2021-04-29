@@ -126,7 +126,7 @@ class SawTooth extends Curve {
   /// Creates a sawtooth curve.
   ///
   /// The [count] argument must not be null.
-  const SawTooth(this.count) : assert(count != null);
+  const SawTooth(this.count);
 
   /// The number of repetitions of the sawtooth pattern in the unit interval.
   final int count;
@@ -156,10 +156,7 @@ class Interval extends Curve {
   /// Creates an interval curve.
   ///
   /// The arguments must not be null.
-  const Interval(this.begin, this.end, { this.curve = Curves.linear })
-    : assert(begin != null),
-      assert(end != null),
-      assert(curve != null);
+  const Interval(this.begin, this.end, { this.curve = Curves.linear });
 
   /// The largest value for which this interval is 0.0.
   ///
@@ -202,7 +199,7 @@ class Threshold extends Curve {
   /// Creates a threshold curve.
   ///
   /// The [threshold] argument must not be null.
-  const Threshold(this.threshold) : assert(threshold != null);
+  const Threshold(this.threshold);
 
   /// The value before which the curve is 0.0 and after which the curve is 1.0.
   ///
@@ -244,11 +241,7 @@ class Cubic extends Curve {
   /// cubic curves in [Curves].
   ///
   /// The [a] (x1), [b](x2), [c](y1), and [d](y2) arguments must not be null.
-  const Cubic(this.a, this.b, this.c, this.d)
-    : assert(a != null),
-      assert(b != null),
-      assert(c != null),
-      assert(d != null);
+  const Cubic(this.a, this.b, this.c, this.d);
 
   /// The x coordinate of the first control point.
   ///
@@ -547,9 +540,6 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     // 4. Recursively sample the two parts.
     //
     // This algorithm concentrates samples in areas of high curvature.
-    assert(tolerance != null);
-    assert(start != null);
-    assert(end != null);
     assert(end > start);
     // We want to pick a random seed that will keep the result stable if
     // evaluated again, so we use the first non-generated control point.
@@ -606,7 +596,6 @@ abstract class Curve2D extends ParametricCurve<Offset> {
   /// single-valued, it will return the parameter for only one of the values at
   /// the given `x` location.
   double findInverse(double x) {
-    assert(x != null);
     double start = 0.0;
     double end = 1.0;
     late double mid;
@@ -641,7 +630,7 @@ class Curve2DSample {
   /// Creates an object that holds a sample; used with [Curve2D] subclasses.
   ///
   /// All arguments must not be null.
-  const Curve2DSample(this.t, this.value) : assert(t != null), assert(value != null);
+  const Curve2DSample(this.t, this.value);
 
   /// The parametric location of this sample point along the curve.
   final double t;
@@ -711,9 +700,7 @@ class CatmullRomSpline extends Curve2D {
         double tension = 0.0,
         Offset? startHandle,
         Offset? endHandle,
-      }) : assert(controlPoints != null),
-           assert(tension != null),
-           assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
+      }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
            _controlPoints = controlPoints,
@@ -731,9 +718,7 @@ class CatmullRomSpline extends Curve2D {
         double tension = 0.0,
         Offset? startHandle,
         Offset? endHandle,
-      }) : assert(controlPoints != null),
-           assert(tension != null),
-           assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
+      }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
            _controlPoints = null,
@@ -889,8 +874,7 @@ class CatmullRomCurve extends Curve {
   ///
   ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
   CatmullRomCurve(this.controlPoints, {this.tension = 0.0})
-      : assert(tension != null),
-        assert(() {
+      : assert(() {
           return validateControlPoints(
             controlPoints,
             tension: tension,
@@ -906,8 +890,7 @@ class CatmullRomCurve extends Curve {
   /// Same as [new CatmullRomCurve], but it precomputes the internal curve data
   /// structures for a more predictable computation load.
   CatmullRomCurve.precompute(this.controlPoints, {this.tension = 0.0})
-      : assert(tension != null),
-        assert(() {
+      : assert(() {
           return validateControlPoints(
             controlPoints,
             tension: tension,
@@ -992,7 +975,6 @@ class CatmullRomCurve extends Curve {
       double tension = 0.0,
       List<String>? reasons,
     }) {
-    assert(tension != null);
     if (controlPoints == null) {
       assert(() {
         reasons?.add('Supplied control points cannot be null');
@@ -1172,7 +1154,7 @@ class FlippedCurve extends Curve {
   /// Creates a flipped curve.
   ///
   /// The [curve] argument must not be null.
-  const FlippedCurve(this.curve) : assert(curve != null);
+  const FlippedCurve(this.curve);
 
   /// The curve that is being flipped.
   final Curve curve;

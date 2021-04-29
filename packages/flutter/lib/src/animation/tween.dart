@@ -333,8 +333,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 class ReverseTween<T> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
-    : assert(parent != null),
-      super(begin: parent.end, end: parent.begin);
+    : super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///
@@ -513,8 +512,7 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ required this.curve })
-    : assert(curve != null);
+  CurveTween({ required this.curve });
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;

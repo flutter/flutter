@@ -29,9 +29,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key? key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-  })  : assert(animating != null),
-        assert(radius != null),
-        assert(radius > 0.0),
+  })  : assert(radius > 0.0),
         progress = 1.0,
         super(key: key);
 
@@ -45,9 +43,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key? key,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
-  })  : assert(radius != null),
-        assert(radius > 0.0),
-        assert(progress != null),
+  })  : assert(radius > 0.0),
         assert(progress >= 0.0),
         assert(progress <= 1.0),
         animating = false,
