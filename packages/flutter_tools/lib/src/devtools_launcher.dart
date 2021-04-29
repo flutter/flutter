@@ -70,9 +70,11 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         print('launch 2');
         await response.drain<void>();
         if (response.statusCode != io.HttpStatus.ok) {
+          print('>>> status code: ${response.statusCode} -- $response')
           offline = true;
         }
-      } on Exception {
+      } on Exception catch (e) {
+        print('>>>>> EXCEOTION: $e');
         offline = true;
       } on ArgumentError {
         if (!useOverrideUrl) {
