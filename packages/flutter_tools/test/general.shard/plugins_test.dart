@@ -341,7 +341,7 @@ flutter:
       assert(name != null);
       assert(dependencies != null);
 
-      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('plugin.');
+      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
       pluginDirectory
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -874,7 +874,7 @@ dependencies:
       testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
         when(flutterProject.isModule).thenReturn(true);
         final Directory webPluginWithNestedFile =
-            fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
+            fs.systemTempDirectory.createTempSync('flutter_web_plugin_with_nested.');
         webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
   flutter:
     plugin:
@@ -1329,7 +1329,7 @@ flutter:
       Directory projectDir;
       Directory tempDir;
       setUp(() {
-        tempDir = globals.fs.systemTempDirectory.createTempSync('plugin_test.');
+        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_plugin_test.');
         projectDir = tempDir.childDirectory('flutter_project');
       });
 

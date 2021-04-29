@@ -35,8 +35,10 @@ void main() {
     expect(find.text('Header'), findsOneWidget);
     expect(find.text('Footer'), findsOneWidget);
 
-    expect(tester.getBottomLeft(find.byKey(headerKey)).dy,
-           lessThan(tester.getTopLeft(find.byKey(footerKey)).dy));
+    expect(
+      tester.getBottomLeft(find.byKey(headerKey)).dy,
+      lessThan(tester.getTopLeft(find.byKey(footerKey)).dy),
+    );
 
     await tester.pumpWidget(
       const Directionality(

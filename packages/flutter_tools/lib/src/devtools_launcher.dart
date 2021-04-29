@@ -90,11 +90,14 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         // couple scripts. See https://github.com/flutter/devtools/issues/2420.
         return;
       } else {
-        final bool didActivateDevTools = await _activateDevTools();
-        final bool devToolsActive = await _checkForActiveDevTools();
-        if (!didActivateDevTools && !devToolsActive) {
-          // At this point, we failed to activate the DevTools package and the
-          // package is not already active.
+        bool devToolsActive = await _checkForActiveDevTools();
+        await _activateDevTools(throttleUpdates: devToolsActive);
+        if (!devToolsActive) {
+          devToolsActive = await _checkForActiveDevTools();
+        }
+        if (!devToolsActive) {
+          // We don't have devtools installed and installing it failed;
+          // _activateDevTools will have reported the error already.
           return;
         }
       }
@@ -135,51 +138,51 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     }
   }
 
+  static final RegExp _devToolsInstalledPattern = RegExp(r'^devtools ', multiLine: true);
+
+  /// Check if the DevTools package is already active by running "pub global list".
   Future<bool> _checkForActiveDevTools() async {
-    // We are offline, and cannot activate DevTools, so check if the DevTools
-    // package is already active.
-    final io.ProcessResult _pubGlobalListProcess = await _processManager.run(<String>[
-      _pubExecutable,
-      'global',
-      'list',
-    ]);
-    if (_pubGlobalListProcess.stdout.toString().contains('devtools ')) {
-      return true;
-    }
-    return false;
+    final io.ProcessResult _pubGlobalListProcess = await _processManager.run(
+      <String>[ _pubExecutable, 'global', 'list' ],
+    );
+    return _pubGlobalListProcess.stdout.toString().contains(_devToolsInstalledPattern);
   }
 
   /// Helper method to activate the DevTools pub package.
   ///
-  /// Returns a bool indicating whether or not the package was successfully
-  /// activated from pub.
-  Future<bool> _activateDevTools() async {
-    final DateTime now = DateTime.now();
-    // Only attempt to activate DevTools twice a day.
-    final bool shouldActivate =
-        _persistentToolState.lastDevToolsActivationTime == null ||
-        now.difference(_persistentToolState.lastDevToolsActivationTime).inHours >= 12;
-    if (!shouldActivate) {
-      return false;
+  /// If throttleUpdates is true, then this is a no-op if it was run in
+  /// the last twelve hours. It should be set to true if devtools is known
+  /// to already be installed.
+  ///
+  /// Return value indicates if DevTools was installed or updated.
+  Future<bool> _activateDevTools({@required bool throttleUpdates}) async {
+    assert(throttleUpdates != null);
+    const Duration _throttleDuration = Duration(hours: 12);
+    if (throttleUpdates) {
+      if (_persistentToolState.lastDevToolsActivationTime != null &&
+          DateTime.now().difference(_persistentToolState.lastDevToolsActivationTime) < _throttleDuration) {
+        _logger.printTrace('DevTools activation throttled until ${_persistentToolState.lastDevToolsActivationTime.add(_throttleDuration).toLocal()}.');
+        return false; // Throttled.
+      }
     }
-    final Status status = _logger.startProgress(
-      'Activating Dart DevTools...',
-    );
+    final Status status = _logger.startProgress('Activating Dart DevTools...');
     try {
       final io.ProcessResult _devToolsActivateProcess = await _processManager
           .run(<String>[
         _pubExecutable,
         'global',
         'activate',
-        'devtools'
+        'devtools',
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
-        _logger.printError('Error running `pub global activate '
-            'devtools`:\n${_devToolsActivateProcess.stderr}');
-        return false;
+        _logger.printError(
+          'Error running `pub global activate devtools`:\n'
+          '${_devToolsActivateProcess.stderr}'
+        );
+        return false; // Failed to activate.
       }
       _persistentToolState.lastDevToolsActivation = DateTime.now();
-      return true;
+      return true; // Activation succeeded!
     } on Exception catch (e, _) {
       _logger.printError('Error running `pub global activate devtools`: $e');
       return false;

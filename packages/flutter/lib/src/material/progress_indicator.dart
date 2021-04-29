@@ -58,9 +58,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
   /// much actual progress is being made.
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   final double? value;
 
   /// The progress indicator's background color.
@@ -77,9 +74,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// [ProgressIndicatorThemeData.color] will be used. If that
   /// is null then the current theme's [ColorScheme.primary] will
   /// be used by default.
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   /// {@endtemplate}
   final Color? color;
 
@@ -88,9 +82,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If null, the progress indicator is rendered with [color]. If that is null,
   /// then it will use the ambient [ProgressIndicatorThemeData.color]. If that
   /// is also null then it defaults to the current theme's [ColorScheme.primary].
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   final Animation<Color?>? valueColor;
 
   /// {@template flutter.progress_indicator.ProgressIndicator.semanticsLabel}
@@ -99,9 +90,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// This value indicates the purpose of the progress bar, and will be
   /// read out by screen readers to indicate the purpose of this progress
   /// indicator.
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   /// {@endtemplate}
   final String? semanticsLabel;
 
@@ -116,9 +104,6 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// For determinate progress indicators, this will be defaulted to
   /// [ProgressIndicator.value] expressed as a percentage, i.e. `0.1` will
   /// become '10%'.
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   /// {@endtemplate}
   final String? semanticsValue;
 
@@ -347,9 +332,6 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// ambient [ProgressIndicatorThemeData.linearTrackColor] will be used.
   /// If that is null, then the ambient theme's [ColorScheme.background]
   /// will be used to draw the track.
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   /// {@endtemplate}
   @override
   Color? get backgroundColor => super.backgroundColor;
@@ -640,17 +622,11 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// If [CircularProgressIndicator.backgroundColor] is null then the
   /// ambient [ProgressIndicatorThemeData.circularTrackColor] will be used.
   /// If that is null, then the track will not be painted.
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   /// {@endtemplate}
   @override
   Color? get backgroundColor => super.backgroundColor;
 
   /// The width of the line used to draw the circle.
-  ///
-  /// This property is ignored if used in an adaptive constructor inside an iOS
-  /// environment.
   final double strokeWidth;
 
   @override

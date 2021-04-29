@@ -18,10 +18,14 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.descendant(of: find.byKey(const Key('a')), matching: find.byType(SizedBox))),
-           const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0));
-    expect(tester.getRect(find.descendant(of: find.byKey(const Key('b')), matching: find.byType(SizedBox))),
-           const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0));
+    expect(
+      tester.getRect(find.descendant(of: find.byKey(const Key('a')), matching: find.byType(SizedBox))),
+      const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.descendant(of: find.byKey(const Key('b')), matching: find.byType(SizedBox))),
+      const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0),
+    );
   });
 
   testWidgets('CustomScrollView.center', (WidgetTester tester) async {

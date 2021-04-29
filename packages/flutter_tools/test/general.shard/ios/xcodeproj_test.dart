@@ -46,7 +46,7 @@ void main() {
       );
     });
 
-    testWithoutContext('xcodebuild build settings flakes', () async {
+    testUsingContext('xcodebuild build settings flakes', () async {
       const Duration delay = Duration(seconds: 1);
       processManager.processFactory = mocks.flakyProcessFactory(
         flakes: 1,
@@ -59,8 +59,7 @@ void main() {
       when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
           .thenReturn(ProcessResult(0, 1, '', ''));
 
-      expect(await xcodeProjectInterpreter.getBuildSettings(
-        '', scheme: 'Runner', timeout: delay),
+      expect(await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Runner'), timeout: delay),
         const <String, String>{});
       // build settings times out and is killed once, then succeeds.
       verify(processManager.killPid(any)).called(1);
@@ -292,12 +291,12 @@ void main() {
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
-  testWithoutContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
+  testUsingContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
     platform.environment = const <String, String>{};
 
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
-      FakeCommand(
+      const FakeCommand(
         command: <String>[
           'sysctl',
           'hw.optional.arm64',
@@ -312,20 +311,26 @@ void main() {
           '/',
           '-scheme',
           'Free',
-          '-showBuildSettings'
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
         exitCode: 1,
       ),
     ]);
 
-    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
+    expect(
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
+        const <String, String>{});
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('build settings accepts an empty scheme', () async {
+  testUsingContext('build settings passes in the simulator SDK', () async {
     platform.environment = const <String, String>{};
 
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
       kARMCheckCommand,
       FakeCommand(
@@ -334,17 +339,56 @@ void main() {
           'xcodebuild',
           '-project',
           '/',
-          '-showBuildSettings'
+          '-sdk',
+          'iphonesimulator',
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
         exitCode: 1,
       ),
     ]);
 
-    expect(await xcodeProjectInterpreter.getBuildSettings(''), const <String, String>{});
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        buildContext: const XcodeProjectBuildContext(environmentType: EnvironmentType.simulator),
+      ),
+      const <String, String>{},
+    );
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('xcodebuild build settings contains Flutter Xcode environment variables', () async {
+  testUsingContext('build settings accepts an empty scheme', () async {
+    platform.environment = const <String, String>{};
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kARMCheckCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-project',
+          '/',
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+
+    expect(await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext()),
+        const <String, String>{});
+    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('xcodebuild build settings contains Flutter Xcode environment variables', () async {
     platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
       'FLUTTER_XCODE_ARCHS': 'arm64'
@@ -361,13 +405,19 @@ void main() {
           '-scheme',
           'Free',
           '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
           'CODE_SIGN_STYLE=Manual',
           'ARCHS=arm64'
         ],
       ),
     ]);
-    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
+    expect(
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
+        const <String, String>{});
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testWithoutContext('xcodebuild clean contains Flutter Xcode environment variables', () async {
