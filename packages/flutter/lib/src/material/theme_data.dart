@@ -1052,9 +1052,9 @@ class ThemeData with Diagnosticable {
   ///
   /// The material library no longer uses this property and most uses
   /// of [accentColor] have been replaced with
-  /// the theme's [colorScheme] [ColorScheme.secondaryColor].
+  /// the theme's [colorScheme] [ColorScheme.secondary].
   /// You can configure the color of a [textTheme] [TextStyle] so that it
-  /// contrasts well with the [ColorScheme.secondaryColor] like this:
+  /// contrasts well with the [ColorScheme.secondary] like this:
   ///
   /// ```dart
   /// final ThemeData theme = Theme.of(context);
@@ -1085,7 +1085,7 @@ class ThemeData with Diagnosticable {
   ///
   /// The material library no longer uses this property and most uses
   /// of [accentColor] have been replaced with
-  /// the theme's [colorScheme] [ColorScheme.secondaryColor].
+  /// the theme's [colorScheme] [ColorScheme.secondary].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
