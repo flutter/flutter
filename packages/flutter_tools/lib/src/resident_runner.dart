@@ -1424,6 +1424,9 @@ abstract class ResidentRunner extends ResidentHandlers {
   void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
     final DevToolsServerAddress devToolsServerAddress = residentDevtoolsHandler.activeDevToolsServer;
     if (!residentDevtoolsHandler.readyToAnnounce) {
+      globals.printStatus(
+        'DevTools not ready to announce',
+      );
       includeDevtools = false;
     }
     assert(!includeDevtools || devToolsServerAddress != null);
