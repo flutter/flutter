@@ -1385,7 +1385,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void insertRenderObjectChild(covariant RenderObject child, int slot) {
-    assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _currentBeforeChild);
@@ -1398,7 +1397,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void moveRenderObjectChild(covariant RenderObject child, int oldSlot, int newSlot) {
-    assert(newSlot != null);
     assert(_currentlyUpdatingChildIndex == newSlot);
     renderObject.move(child as RenderBox, after: _currentBeforeChild);
   }
@@ -1490,7 +1488,6 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
     this.alwaysIncludeSemantics = false,
     Widget? sliver,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       assert(alwaysIncludeSemantics != null),
        super(key: key, child: sliver);
 
   /// The fraction to scale the sliver child's alpha value.
@@ -1562,8 +1559,7 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
     this.ignoring = true,
     this.ignoringSemantics,
     Widget? sliver,
-  }) : assert(ignoring != null),
-       super(key: key, child: sliver);
+  }) : super(key: key, child: sliver);
 
   /// Whether this sliver is ignored during hit testing.
   ///
@@ -1619,8 +1615,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
     Key? key,
     this.offstage = true,
     Widget? sliver,
-  }) : assert(offstage != null),
-       super(key: key, child: sliver);
+  }) : super(key: key, child: sliver);
 
   /// Whether the sliver child is hidden from the rest of the tree.
   ///
@@ -1690,9 +1685,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     Key? key,
     required this.keepAlive,
     required Widget child,
-  }) : assert(child != null),
-       assert(keepAlive != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// Whether to keep the child alive.
   ///

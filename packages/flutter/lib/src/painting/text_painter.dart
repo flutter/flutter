@@ -64,8 +64,7 @@ class PlaceholderDimensions {
     required this.alignment,
     this.baseline,
     this.baselineOffset,
-  }) : assert(size != null),
-       assert(alignment != null);
+  });
 
   /// A constant representing an empty placeholder.
   static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
@@ -170,10 +169,7 @@ class TextPainter {
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
-       assert(textAlign != null),
-       assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
@@ -231,7 +227,6 @@ class TextPainter {
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textAlign == value)
       return;
     _textAlign = value;
@@ -272,7 +267,6 @@ class TextPainter {
   double get textScaleFactor => _textScaleFactor;
   double _textScaleFactor;
   set textScaleFactor(double value) {
-    assert(value != null);
     if (_textScaleFactor == value)
       return;
     _textScaleFactor = value;
@@ -361,7 +355,6 @@ class TextPainter {
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
-    assert(value != null);
     if (_textWidthBasis == value)
       return;
     _textWidthBasis = value;
@@ -429,7 +422,6 @@ class TextPainter {
   ui.ParagraphStyle _createParagraphStyle([ TextDirection? defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
-    assert(textAlign != null);
     assert(textDirection != null || defaultTextDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     return _text!.style?.getParagraphStyle(
       textAlign: textAlign,
@@ -540,7 +532,6 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!_needsLayout);
-    assert(baseline != null);
     switch (baseline) {
       case TextBaseline.alphabetic:
         return _paragraph!.alphabeticBaseline;
@@ -775,7 +766,6 @@ class TextPainter {
 
   Offset get _emptyOffset {
     assert(!_needsLayout); // implies textDirection is non-null
-    assert(textAlign != null);
     switch (textAlign) {
       case TextAlign.left:
         return Offset.zero;

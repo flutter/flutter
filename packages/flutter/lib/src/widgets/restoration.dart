@@ -60,8 +60,7 @@ class RestorationScope extends StatefulWidget {
     Key? key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// Returns the [RestorationBucket] inserted into the widget tree by the
   /// closest ancestor [RestorationScope] of `context`.
@@ -150,8 +149,7 @@ class UnmanagedRestorationScope extends InheritedWidget {
     Key? key,
     this.bucket,
     required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The [RestorationBucket] that this widget will insert into the widget tree.
   ///
@@ -225,8 +223,7 @@ class RootRestorationScope extends StatefulWidget {
     Key? key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -487,8 +484,6 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   RestorationMixin? _owner;
   void _register(String restorationId, RestorationMixin owner) {
     assert(_debugAssertNotDisposed());
-    assert(restorationId != null);
-    assert(owner != null);
     _restorationId = restorationId;
     _owner = owner;
   }
@@ -836,8 +831,6 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// unless it has been unregistered with [unregisterFromRestoration].
   @protected
   void registerForRestoration(RestorableProperty<Object?> property, String restorationId) {
-    assert(property != null);
-    assert(restorationId != null);
     assert(property._restorationId == null || (_debugDoingRestore && property._restorationId == restorationId),
            'Property is already registered under ${property._restorationId}.',
     );

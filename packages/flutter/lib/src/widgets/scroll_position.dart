@@ -95,10 +95,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     this.keepScrollOffset = true,
     ScrollPosition? oldPosition,
     this.debugLabel,
-  }) : assert(physics != null),
-       assert(context != null),
-       assert(context.vsync != null),
-       assert(keepScrollOffset != null) {
+  }) {
     if (oldPosition != null)
       absorb(oldPosition);
     if (keepScrollOffset)
@@ -212,7 +209,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   @mustCallSuper
   void absorb(ScrollPosition other) {
-    assert(other != null);
     assert(other.context == context);
     assert(_pixels == null);
     if (other.hasContentDimensions) {
@@ -371,7 +367,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void forcePixels(double value) {
     assert(hasPixels);
-    assert(value != null);
     _impliedVelocity = value - pixels;
     _pixels = value;
     notifyListeners();
@@ -437,8 +432,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// The method may be called multiple times in the lifecycle of a
   /// [ScrollPosition] to restore it to different scroll offsets.
   void restoreOffset(double offset, {bool initialRestore = false}) {
-    assert(initialRestore != null);
-    assert(offset != null);
     if (initialRestore) {
       correctPixels(offset);
     } else {
@@ -509,14 +502,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    assert(minScrollExtent != null);
-    assert(maxScrollExtent != null);
     assert(haveDimensions == (_lastMetrics != null));
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimensionOrReceiveCorrection) {
-      assert(minScrollExtent != null);
-      assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
@@ -664,10 +653,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
   }) {
-    assert(alignmentPolicy != null);
     assert(object.attached);
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
-    assert(viewport != null);
 
     Rect? targetRect;
     if (targetRenderObject != null && targetRenderObject != object) {
@@ -790,9 +777,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Curve? curve,
     bool? clamp = true,
   }) {
-    assert(to != null);
-    assert(clamp != null);
-
     if (clamp!)
       to = to.clamp(minScrollExtent, maxScrollExtent);
 
@@ -906,10 +890,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// evaluate the current scroll velocity to be great enough that expensive
   /// operations impacting the UI should be deferred.
   bool recommendDeferredLoading(BuildContext context) {
-    assert(context != null);
     assert(activity != null);
-    assert(activity!.velocity != null);
-    assert(_impliedVelocity != null);
     return physics.recommendDeferredLoading(
       activity!.velocity + _impliedVelocity,
       copyWith(),
