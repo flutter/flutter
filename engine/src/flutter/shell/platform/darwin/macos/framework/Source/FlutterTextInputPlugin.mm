@@ -414,7 +414,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 }
 
 - (void)unmarkText {
-  if (_activeModel != nullptr) {
+  if (_activeModel == nullptr) {
     return;
   }
   _activeModel->CommitComposing();
