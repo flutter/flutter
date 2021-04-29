@@ -459,6 +459,7 @@ def main(argv):
     '%s/flutter/third_party/gn/gn%s' % (SRC_ROOT, exe),
     'gen',
     '--check',
+    '--export-compile-commands',
   ]
 
   if args.ide != '':
@@ -486,30 +487,6 @@ def main(argv):
   except subprocess.CalledProcessError as exc:
     print("Failed to generate gn files: ", exc.returncode, exc.output)
     sys.exit(1)
-
-  if gn_call_result == 0:
-    # Generate/Replace the compile commands database in out.
-    compile_cmd_gen_cmd = [
-      'ninja',
-      '-C',
-      out_dir,
-      '-t',
-      'compdb',
-      'cc',
-      'cxx',
-      'objc',
-      'objcxx',
-      'asm',
-    ]
-
-    try:
-      contents = subprocess.check_output(compile_cmd_gen_cmd, cwd=SRC_ROOT)
-    except subprocess.CalledProcessError as exc:
-      print("Failed to run ninja: ", exc.returncode, exc.output)
-      sys.exit(1)
-    compile_commands = open('%s/out/compile_commands.json' % SRC_ROOT, 'w+')
-    compile_commands.write(contents)
-    compile_commands.close()
 
   return gn_call_result
 
