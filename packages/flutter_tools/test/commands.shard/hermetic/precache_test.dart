@@ -20,23 +20,20 @@ void main() {
 
   setUp(() {
     cache = FakeCache();
-    // Release lock between test cases.
-    cache.releaseLock();
     cache.isUpToDateValue = false;
   });
 
   testUsingContext('precache should acquire lock', () async {
     final Platform platform = FakePlatform(environment: <String, String>{});
     final PrecacheCommand command = PrecacheCommand(
-      cache: cache,
+      cache: cache, // Using real cache.
       logger: BufferLogger.test(),
       platform: platform,
       featureFlags: TestFeatureFlags(),
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 
-    // Do not throw StateError, lock is acquired.
-    expect(() => cache.checkLockAcquired(), returnsNormally);
+    expect(cache.locked, true);
   });
 
   testUsingContext('precache should not re-entrantly acquire lock', () async {
@@ -48,16 +45,14 @@ void main() {
       },
     );
     final PrecacheCommand command = PrecacheCommand(
-      cache: cache,
+      cache: cache, // Using real cache.
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: platform,
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 
-    expect(Cache.isLocked(), isFalse);
-    // Do not throw StateError, acquired reentrantly with FLUTTER_ALREADY_LOCKED.
-    expect(() => cache.checkLockAcquired(), returnsNormally);
+    expect(cache.locked, false);
   });
 
   testUsingContext('precache downloads web artifacts on dev branch when feature is enabled.', () async {
@@ -433,7 +428,18 @@ void main() {
 class FakeCache extends Fake implements Cache {
   bool isUpToDateValue = false;
   bool clearedStampFiles = false;
+  bool locked = false;
   Set<DevelopmentArtifact> artifacts;
+
+  @override
+  Future<void> lock() async {
+    locked = true;
+  }
+
+  @override
+  void releaseLock() {
+    locked = false;
+  }
 
   @override
   Future<bool> isUpToDate() async => isUpToDateValue;
@@ -450,4 +456,7 @@ class FakeCache extends Fake implements Cache {
 
   @override
   Set<String> platformOverrideArtifacts;
+
+  @override
+  bool includeAllPlatforms = false;
 }
