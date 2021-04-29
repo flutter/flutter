@@ -74,8 +74,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           print('>>> status code: ${response.statusCode} -- $response')
           offline = true;
         }
-      } on Exception catch (e) {
+      } on Exception catch (e, st) {
         print('>>>>> EXCEOTION: $e');
+        print('>>>>> Stack: $st');
         offline = true;
       } on ArgumentError {
         if (!useOverrideUrl) {
