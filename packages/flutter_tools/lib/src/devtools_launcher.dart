@@ -71,7 +71,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         print('launch 2');
         await response.drain<void>();
         if (response.statusCode != io.HttpStatus.ok) {
-          print('>>> status code: ${response.statusCode} -- $response')
+          print('>>> status code: ${response.statusCode} -- $response');
           offline = true;
         }
       } on Exception catch (e, st) {
