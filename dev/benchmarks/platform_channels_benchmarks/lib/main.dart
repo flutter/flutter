@@ -53,7 +53,9 @@ Future<void> _runTests() async {
   const int numMessages = 10000;
 
   const BasicMessageChannel<Object> channel = BasicMessageChannel<Object>(
-      'dev.flutter.echo.basic.standard', StandardMessageCodec());
+    'dev.flutter.echo.basic.standard',
+    StandardMessageCodec(),
+  );
   final Stopwatch watch = Stopwatch();
 
   watch.start();
@@ -85,15 +87,13 @@ Future<void> _runTests() async {
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
-    description:
-        '  BasicMessageChannel/StandardMessageCodec/Flutter->Host/Small',
+    description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Small',
     value: smallPayloadTime,
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_small',
   );
   printer.addResult(
-    description:
-        '  BasicMessageChannel/StandardMessageCodec/Flutter->Host/Large',
+    description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Large',
     value: largePayloadTime,
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_large',
@@ -101,7 +101,7 @@ Future<void> _runTests() async {
   printer.printToStdout();
 }
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
@@ -111,11 +111,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Platform Channel Benchmarks',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter Platform Channel Benchmarks'),
     );
   }
 }
@@ -130,18 +130,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   @override
   void initState() {
     _runTests();
     super.initState();
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
   }
 
   @override
@@ -150,25 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: Container(),
     );
   }
 }
