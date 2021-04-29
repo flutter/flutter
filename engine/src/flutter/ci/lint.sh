@@ -33,7 +33,7 @@ DART_BIN="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk/bin"
 DART="${DART_BIN}/dart"
 PUB="${DART_BIN}/pub"
 
-COMPILE_COMMANDS="$SRC_DIR/out/compile_commands.json"
+COMPILE_COMMANDS="$SRC_DIR/out/host_debug/compile_commands.json"
 if [ ! -f "$COMPILE_COMMANDS" ]; then
   (cd "$SRC_DIR"; ./flutter/tools/gn)
 fi
