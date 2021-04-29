@@ -244,8 +244,6 @@ void showAboutDialog({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
-  assert(context != null);
-  assert(useRootNavigator != null);
   showDialog<void>(
     context: context,
     useRootNavigator: useRootNavigator,
@@ -289,8 +287,6 @@ void showLicensePage({
   String? applicationLegalese,
   bool useRootNavigator = false,
 }) {
-  assert(context != null);
-  assert(useRootNavigator != null);
   Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
@@ -530,9 +526,7 @@ class _AboutProgram extends StatelessWidget {
     required this.version,
     this.icon,
     this.legalese,
-  })  : assert(name != null),
-        assert(version != null),
-        super(key: key);
+  })  : super(key: key);
 
   final String name;
   final String version;
@@ -584,9 +578,7 @@ class _PackagesView extends StatefulWidget {
     required this.about,
     required this.isLateral,
     required this.selectedId,
-  })  : assert(about != null),
-        assert(isLateral != null),
-        super(key: key);
+  })  : super(key: key);
 
   final Widget about;
   final bool isLateral;
@@ -1093,11 +1085,7 @@ class _MasterDetailFlow extends StatefulWidget {
     this.masterPageBuilder,
     this.masterViewWidth,
     this.title,
-  })  : assert(masterViewBuilder != null),
-        assert(automaticallyImplyLeading != null),
-        assert(detailPageBuilder != null),
-        assert(displayMode != null),
-        super(key: key);
+  })  : super(key: key);
 
   /// Builder for the master view for lateral navigation.
   ///

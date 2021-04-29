@@ -122,7 +122,6 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   @override
   void insertRenderObjectChild(RenderBox child, Object? slot) {
     insertSlots.add(slot);
-    assert(child != null);
     if (slot == 'stable')
       renderObject.stable = child;
     else
@@ -157,7 +156,6 @@ class SwapperElementWithDeprecatedOverrides extends SwapperElement {
   // ignore: must_call_super
   void insertChildRenderObject(RenderBox child, Object? slot) {
     insertSlots.add(slot);
-    assert(child != null);
     if (slot == 'stable')
       renderObject.stable = child;
     else

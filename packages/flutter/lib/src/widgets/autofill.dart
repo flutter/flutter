@@ -155,8 +155,7 @@ class AutofillGroup extends StatefulWidget {
     Key? key,
     required this.child,
     this.onDisposeAction = AutofillContextAction.commit,
-  }) : assert(child != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// Returns the closest [AutofillGroupState] which encloses the given context.
   ///

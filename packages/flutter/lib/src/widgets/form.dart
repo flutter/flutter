@@ -87,9 +87,7 @@ class Form extends StatefulWidget {
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : assert(child != null),
-       assert(autovalidate != null),
-       assert(
+  }) : assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.',
