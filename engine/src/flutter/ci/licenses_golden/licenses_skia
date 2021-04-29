@@ -1,4 +1,4 @@
-Signature: d02a0c46f7330d30223c139a5512eb5e
+Signature: 741b6e1589559db7ca15cb3b94f12354
 
 UNUSED LICENSES:
 
@@ -620,8 +620,6 @@ FILE: ../../../third_party/skia/src/gpu/GrColorSpaceXform.cpp
 FILE: ../../../third_party/skia/src/gpu/GrColorSpaceXform.h
 FILE: ../../../third_party/skia/src/gpu/GrDirectContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrFixedClip.h
-FILE: ../../../third_party/skia/src/gpu/GrImageTextureMaker.cpp
-FILE: ../../../third_party/skia/src/gpu/GrImageTextureMaker.h
 FILE: ../../../third_party/skia/src/gpu/GrOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/GrOpsRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/GrProgramDesc.cpp
