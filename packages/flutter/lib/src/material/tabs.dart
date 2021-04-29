@@ -24,7 +24,6 @@ import 'tab_indicator.dart';
 import 'theme.dart';
 
 const double _kTabHeight = 46.0;
-const double _kTextAndIconTabHeight = 72.0;
 
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
@@ -70,6 +69,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     this.text,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.kTextAndIconTabHeight = 72,
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(text == null || child == null),
@@ -95,6 +95,11 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// Only useful when used in combination with [icon], and either one of
   /// [text] or [child] is non-null.
   final EdgeInsetsGeometry iconMargin;
+  
+  /// The widget height when there is an icon and text
+  /// 
+  /// useful when the combination of both overflows the defaut height
+  final double kTextAndIconTabHeight;
 
   Widget _buildLabelText() {
     return child ?? Text(text!, softWrap: false, overflow: TextOverflow.fade);
@@ -113,7 +118,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
       height = _kTabHeight;
       label = icon!;
     } else {
-      height = _kTextAndIconTabHeight;
+      height = kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,7 +151,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   @override
   Size get preferredSize {
     if ((text != null || child != null) && icon != null)
-      return const Size.fromHeight(_kTextAndIconTabHeight);
+      return Size.fromHeight(kTextAndIconTabHeight);
     else
       return const Size.fromHeight(_kTabHeight);
   }
