@@ -1,4 +1,4 @@
-Signature: 46c5b23a39ddbd2257084264809759b9
+Signature: eefa6a8c30cbfc512e13a793da5cc103
 
 UNUSED LICENSES:
 
@@ -5036,7 +5036,6 @@ FILE: ../../../third_party/skia/gm/inverseclip.cpp
 FILE: ../../../third_party/skia/gm/labyrinth.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/sample_matrix_constant.cpp
-FILE: ../../../third_party/skia/gm/sample_matrix_variable.cpp
 FILE: ../../../third_party/skia/gm/swizzle.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
 FILE: ../../../third_party/skia/include/core/SkPathTypes.h
