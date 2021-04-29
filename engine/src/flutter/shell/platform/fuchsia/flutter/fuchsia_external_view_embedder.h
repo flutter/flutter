@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FUCHSIA_EXTERNAL_VIEW_EMBEDDER_H_
 
 #include <fuchsia/ui/views/cpp/fidl.h>
+#include <lib/ui/scenic/cpp/id.h>
 #include <lib/ui/scenic/cpp/resources.h>
 #include <lib/ui/scenic/cpp/view_ref_pair.h>
 
@@ -29,6 +30,8 @@
 #include "vulkan_surface_producer.h"
 
 namespace flutter_runner {
+
+using ViewIdCallback = std::function<void(scenic::ResourceId)>;
 
 // This class orchestrates interaction with the Scenic compositor on Fuchsia. It
 // ensures that flutter content and platform view content are both rendered
@@ -89,8 +92,8 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   // |SetViewProperties| doesn't manipulate the view directly -- it sets pending
   // properties for the next |UpdateView| call.
   void EnableWireframe(bool enable);
-  void CreateView(int64_t view_id);
-  void DestroyView(int64_t view_id);
+  void CreateView(int64_t view_id, ViewIdCallback on_view_bound);
+  void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
   void SetViewProperties(int64_t view_id, bool hit_testable, bool focusable);
 
  private:

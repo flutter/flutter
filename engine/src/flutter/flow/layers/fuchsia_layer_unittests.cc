@@ -20,8 +20,6 @@
 #include "flutter/flow/layers/physical_shape_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/flow/view_holder.h"
-#include "flutter/fml/platform/fuchsia/message_loop_fuchsia.h"
-#include "flutter/fml/task_runner.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -251,10 +249,6 @@ class MockSessionWrapper : public flutter::SessionWrapper {
 };
 
 struct TestContext {
-  // Message loop.
-  fml::RefPtr<fml::MessageLoopFuchsia> loop;
-  fml::RefPtr<fml::TaskRunner> task_runner;
-
   // Session.
   fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener> listener_request;
   MockSession mock_session;
@@ -272,10 +266,6 @@ struct TestContext {
 
 std::unique_ptr<TestContext> InitTest() {
   std::unique_ptr<TestContext> context = std::make_unique<TestContext>();
-
-  // Init message loop.
-  context->loop = fml::MakeRefCounted<fml::MessageLoopFuchsia>();
-  context->task_runner = fml::MakeRefCounted<fml::TaskRunner>(context->loop);
 
   // Init Session.
   fuchsia::ui::scenic::SessionPtr session_ptr;
@@ -318,7 +308,7 @@ zx_koid_t GetChildLayerId() {
 class AutoDestroyChildLayerId {
  public:
   AutoDestroyChildLayerId(zx_koid_t id) : id_(id) {}
-  ~AutoDestroyChildLayerId() { ViewHolder::Destroy(id_); }
+  ~AutoDestroyChildLayerId() { ViewHolder::Destroy(id_, nullptr); }
 
  private:
   zx_koid_t id_;
@@ -360,9 +350,10 @@ TEST_F(FuchsiaLayerTest, DISABLED_PhysicalShapeLayersAndChildSceneLayers) {
   const zx_koid_t kChildLayerId1 = GetChildLayerId();
   auto [unused_view_token1, unused_view_holder_token1] =
       scenic::ViewTokenPair::New();
-  ViewHolder::Create(kChildLayerId1, test_context->task_runner,
-                     std::move(unused_view_holder_token1),
-                     /*bind_callback=*/[](scenic::ResourceId id) {});
+  ViewHolder::Create(
+      kChildLayerId1,
+      /*bind_callback=*/[](scenic::ResourceId id) {},
+      std::move(unused_view_holder_token1));
   // Will destroy only when we go out of scope (i.e. end of the test).
   AutoDestroyChildLayerId auto_destroy1(kChildLayerId1);
   auto child_view1 = std::make_shared<ChildSceneLayer>(
@@ -388,9 +379,10 @@ TEST_F(FuchsiaLayerTest, DISABLED_PhysicalShapeLayersAndChildSceneLayers) {
   const zx_koid_t kChildLayerId2 = GetChildLayerId();
   auto [unused_view_token2, unused_view_holder_token2] =
       scenic::ViewTokenPair::New();
-  ViewHolder::Create(kChildLayerId2, test_context->task_runner,
-                     std::move(unused_view_holder_token2),
-                     /*bind_callback=*/[](scenic::ResourceId id) {});
+  ViewHolder::Create(
+      kChildLayerId2,
+      /*bind_callback=*/[](scenic::ResourceId id) {},
+      std::move(unused_view_holder_token2));
   // Will destroy only when we go out of scope (i.e. end of the test).
   AutoDestroyChildLayerId auto_destroy2(kChildLayerId2);
   auto child_view2 = std::make_shared<ChildSceneLayer>(
@@ -604,9 +596,10 @@ TEST_F(FuchsiaLayerTest, DISABLED_OpacityAndTransformLayer) {
   auto [unused_view_token1, unused_view_holder_token1] =
       scenic::ViewTokenPair::New();
 
-  ViewHolder::Create(kChildLayerId1, test_context->task_runner,
-                     std::move(unused_view_holder_token1),
-                     /*bind_callback=*/[](scenic::ResourceId id) {});
+  ViewHolder::Create(
+      kChildLayerId1,
+      /*bind_callback=*/[](scenic::ResourceId id) {},
+      std::move(unused_view_holder_token1));
   // Will destroy only when we go out of scope (i.e. end of the test).
   AutoDestroyChildLayerId auto_destroy1(kChildLayerId1);
   auto child_view1 = std::make_shared<ChildSceneLayer>(

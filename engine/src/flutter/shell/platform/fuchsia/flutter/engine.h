@@ -13,6 +13,7 @@
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/sys/cpp/service_directory.h>
+#include <lib/ui/scenic/cpp/id.h>
 #include <lib/ui/scenic/cpp/view_ref_pair.h>
 #include <lib/zx/event.h>
 
@@ -105,9 +106,12 @@ class Engine final {
   void Terminate();
 
   void DebugWireframeSettingsChanged(bool enabled);
-  void CreateView(int64_t view_id, bool hit_testable, bool focusable);
+  void CreateView(int64_t view_id,
+                  ViewIdCallback on_view_bound,
+                  bool hit_testable,
+                  bool focusable);
   void UpdateView(int64_t view_id, bool hit_testable, bool focusable);
-  void DestroyView(int64_t view_id);
+  void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
   std::shared_ptr<flutter::ExternalViewEmbedder> GetExternalViewEmbedder();
 
   std::unique_ptr<flutter::Surface> CreateSurface();

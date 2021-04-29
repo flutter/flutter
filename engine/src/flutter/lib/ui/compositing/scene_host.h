@@ -12,6 +12,7 @@
 
 #include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "flutter/fml/memory/ref_counted.h"
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "third_party/tonic/dart_library_natives.h"
@@ -59,7 +60,12 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
   tonic::DartPersistentValue view_disconnected_callback_;
   tonic::DartPersistentValue view_state_changed_callback_;
   std::string isolate_service_id_;
+  scenic::ResourceId resource_id_ = 0;
   zx_koid_t koid_ = ZX_KOID_INVALID;
+
+  fml::WeakPtrFactory<SceneHost> weak_factory_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SceneHost);
 };
 
 }  // namespace flutter
