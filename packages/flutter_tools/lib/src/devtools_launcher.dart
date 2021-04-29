@@ -64,6 +64,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         } else {
           uri = Uri.https('pub.dev', '');
         }
+        print(uri);
         final io.HttpClientRequest request = await _httpClient.headUrl(uri);
         print('launch 1');
         final io.HttpClientResponse response = await request.close();
