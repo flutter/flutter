@@ -5,17 +5,17 @@ the `LogicalKeyboardKey` and `PhysicalKeyboardKey` classes.
 
 It generates multiple files across Flutter.  For framework, it generates
 
-* [`keyboard_key.dart`](packages/flutter/lib/src/services/keyboard_key.dart), which contains the definition and list of logical keys and physical keys; and
-* [`keyboard_maps.dart`](packages/flutter/lib/src/services/keyboard_maps.dart), which contains platform-specific immutable maps used for the `RawKeyboard` API.
+* [`keyboard_key.dart`](../../../packages/flutter/lib/src/services/keyboard_key.dart), which contains the definition and list of logical keys and physical keys; and
+* [`keyboard_maps.dart`](../../../packages/flutter/lib/src/services/keyboard_maps.dart), which contains platform-specific immutable maps used for the `RawKeyboard` API.
 
 For engine, it generates one key mapping file for each platform.
 
 It draws information from various source bases, including online
 repositories, and manual mapping in the `data` subdirectory.  It incorporates
 this information into a giant list of physical keys
-([`physical_key_data.json`](dev/tools/gen_keycodes/data/physical_key_data.json)),
+([`physical_key_data.json`](data/physical_key_data.json)),
 and another for logical keys
-([`logical_key_data.json`](dev/tools/gen_keycodes/data/logical_key_data.json)).
+([`logical_key_data.json`](data/logical_key_data.json)).
 The two files are checked in, and can be used as the data source next time so that
 output files can be generated without the Internet.
 

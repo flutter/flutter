@@ -132,9 +132,9 @@ class LogicalKeyData {
       r'DOM_KEY_(?<kind>UNI|MAP)\s*\(\s*'
       r'"(?<name>[^\s]+?)",\s*'
       r'(?<enum>[^\s]+?),\s*'
-      r"(?:0x(?<unicode>[a-fA-F0-9]+)|'(?<char>.)')\s*"
+      r"(?:0[xX](?<unicode>[a-fA-F0-9]+)|'(?<char>.)')\s*"
       r'\)',
-      // Multiline is necessary because some definition spreads across
+      // Multiline is necessary because some definitions spread across
       // multiple lines.
       multiLine: true,
     );
@@ -196,7 +196,7 @@ class LogicalKeyData {
       });
     }
 
-    // Make sure every Numpad keys that we care have been defined.
+    // Make sure every Numpad key that we care about has been defined.
     unusedNumpad.forEach((String key, String value) {
       print('Unuadded numpad key $value');
     });
@@ -406,9 +406,7 @@ class LogicalKeyEntry {
     required this.value,
     required this.name,
     this.keyLabel,
-  })  : assert(name != null),
-        assert(value != null),
-        webNames = <String>[],
+  })  : webNames = <String>[],
         webValues = <int>[],
         macOsKeyCodeNames = <String>[],
         macOsKeyCodeValues = <int>[],
@@ -543,7 +541,7 @@ class LogicalKeyEntry {
 
   @override
   String toString() {
-    return """'$name': (value: ${toHex(value)}) """;
+    return "'$name': (value: ${toHex(value)}) ";
   }
 
   /// Gets the named used for the key constant in the definitions in

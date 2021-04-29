@@ -11,7 +11,7 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-bool _isLetter(String? char) {
+bool _isAsciiLetter(String? char) {
   if (char == null)
     return false;
   const int charUpperA = 0x41;
@@ -169,7 +169,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       // because they are not used by the embedding. Add them manually.
       final List<int>? keyCodes = entry.windowsValues.isNotEmpty
         ? entry.windowsValues
-        : (_isLetter(entry.keyLabel) ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] : null);
+        : (_isAsciiLetter(entry.keyLabel) ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] : null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');

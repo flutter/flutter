@@ -187,15 +187,15 @@ class PhysicalKeyData {
     final Map<int, PhysicalKeyEntry> entries = <int, PhysicalKeyEntry>{};
     final RegExp usbMapRegExp = RegExp(
       r'DOM_CODE\s*\(\s*'
-      r'0x(?<usb>[a-fA-F0-9]+),\s*'
-      r'0x(?<evdev>[a-fA-F0-9]+),\s*'
-      r'0x(?<xkb>[a-fA-F0-9]+),\s*'
-      r'0x(?<win>[a-fA-F0-9]+),\s*'
-      r'0x(?<mac>[a-fA-F0-9]+),\s*'
+      r'0[xX](?<usb>[a-fA-F0-9]+),\s*'
+      r'0[xX](?<evdev>[a-fA-F0-9]+),\s*'
+      r'0[xX](?<xkb>[a-fA-F0-9]+),\s*'
+      r'0[xX](?<win>[a-fA-F0-9]+),\s*'
+      r'0[xX](?<mac>[a-fA-F0-9]+),\s*'
       r'(?:"(?<code>[^\s]+)")?[^")]*?,'
       r'\s*(?<enum>[^\s]+?)\s*'
       r'\)',
-      // Multiline is necessary because some definition spreads across
+      // Multiline is necessary because some definitions spread across
       // multiple lines.
       multiLine: true,
     );
@@ -232,7 +232,7 @@ class PhysicalKeyData {
       // override.
       if (entries.containsKey(newEntry.usbHidCode)) {
         // This is expected for Fn. Warn for other keys.
-        if (!<String>{'Fn'}.contains(newEntry.name)) {
+        if (newEntry.name != 'Fn') {
           print('Duplicate usbHidCode ${newEntry.usbHidCode} of key ${newEntry.name} '
             'conflicts with existing ${entries[newEntry.usbHidCode]!.name}. Keeping the new one.');
         }
@@ -263,7 +263,7 @@ class PhysicalKeyEntry {
     required this.iosScanCode,
     required this.chromiumCode,
     required this.glfwKeyCodes,
-  })  : assert(usbHidCode != null);
+  });
 
   /// Populates the key from a JSON map.
   factory PhysicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map) {
