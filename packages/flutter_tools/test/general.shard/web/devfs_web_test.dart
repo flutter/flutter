@@ -15,9 +15,9 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
-import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -588,7 +588,7 @@ void main() {
   test('calling dispose closes the http server', () => testbed.run(() async {
     await webAssetServer.dispose();
 
-    verify(mockHttpServer.close()).called(1);
+    expect(mockHttpServer.closed, true);
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
@@ -599,17 +599,8 @@ void main() {
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-      projectRootPath: anyNamed('projectRootPath'),
-      fs: anyNamed('fs'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
+    final ResidentCompiler residentCompiler = MockResidentCompiler()
+      ..output = const CompilerOutput('a', 0, <Uri>[]);
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -719,17 +710,8 @@ void main() {
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-      projectRootPath: anyNamed('projectRootPath'),
-      fs: anyNamed('fs'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
+    final ResidentCompiler residentCompiler = MockResidentCompiler()
+      ..output = const CompilerOutput('a', 0, <Uri>[]);
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -836,18 +818,6 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-      projectRootPath: anyNamed('projectRootPath'),
-      fs: anyNamed('fs'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
-
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'any',
       port: 0,
@@ -882,18 +852,6 @@ void main() {
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-      projectRootPath: anyNamed('projectRootPath'),
-      fs: anyNamed('fs'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -937,18 +895,6 @@ void main() {
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-      projectRootPath: anyNamed('projectRootPath'),
-      fs: anyNamed('fs'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -1060,18 +1006,6 @@ void main() {
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-      projectRootPath: anyNamed('projectRootPath'),
-      fs: anyNamed('fs'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
-
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
@@ -1107,5 +1041,29 @@ void main() {
   }));
 }
 
-class MockHttpServer extends Mock implements HttpServer {}
-class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class MockHttpServer extends Fake implements HttpServer {
+  bool closed = false;
+
+  @override
+  Future<void> close({bool force = false}) async {
+    closed = true;
+  }
+}
+
+class MockResidentCompiler extends Fake implements ResidentCompiler {
+  CompilerOutput output;
+
+  @override
+  void addFileSystemRoot(String root) { }
+
+  @override
+  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {
+    String outputPath,
+    PackageConfig packageConfig,
+    String projectRootPath,
+    FileSystem fs,
+    bool suppressErrors = false,
+  }) async {
+    return output;
+  }
+}
