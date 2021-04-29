@@ -523,6 +523,11 @@ class LogicalKeyEntry {
 
   final List<int> fuchsiaValues;
 
+  /// A string indicating the letter on the keycap of a letter key.
+  ///
+  /// This is only used to generate the key label mapping in keyboard_map.dart.
+  /// [LogicalKeyboardKey.keyLabel] uses a different definition and is generated
+  /// differently.
   final String? keyLabel;
 
   /// Creates a JSON map from the key data.
