@@ -50,6 +50,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> launch(Uri vmServiceUri) async {
+    print('START launch');
     // Place this entire method in a try/catch that swallows exceptions because
     // this method is guaranteed not to return a Future that throws.
     try {
@@ -64,7 +65,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           uri = Uri.https('pub.dev', '');
         }
         final io.HttpClientRequest request = await _httpClient.headUrl(uri);
+        print('launch 1');
         final io.HttpClientResponse response = await request.close();
+        print('launch 2');
         await response.drain<void>();
         if (response.statusCode != io.HttpStatus.ok) {
           offline = true;
@@ -88,20 +91,25 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         // here, if available, once DevTools has offline support. DevTools does
         // not work without internet currently due to the failed request of a
         // couple scripts. See https://github.com/flutter/devtools/issues/2420.
+        print('launch return');
         return;
       } else {
         bool devToolsActive = await _checkForActiveDevTools();
+        print('launch 4');
         await _activateDevTools(throttleUpdates: devToolsActive);
+        print('launch 5');
         if (!devToolsActive) {
           devToolsActive = await _checkForActiveDevTools();
+          print('launch 6');
         }
         if (!devToolsActive) {
           // We don't have devtools installed and installing it failed;
           // _activateDevTools will have reported the error already.
+          print('launch return 2');
           return;
         }
       }
-
+      print('launch 7');
       _devToolsProcess = await _processManager.start(<String>[
         _pubExecutable,
         'global',
@@ -132,6 +140,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen(_logger.printError);
+      _logger.printStatus('devToolsUrl set 1');
       devToolsUrl = await completer.future;
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);

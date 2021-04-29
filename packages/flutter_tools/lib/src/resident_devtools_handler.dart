@@ -66,14 +66,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       return;
     }
     if (devToolsServerAddress != null) {
-      _logger.printStatus('2');
+      _logger.printStatus('devToolsUrl set 2');
       _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
       _served = true;
       _logger.printStatus('3');
       await _devToolsLauncher.serve();
     }
-    _logger.printStatus('4');
+    _logger.printStatus('4 --- ');
     await _devToolsLauncher.ready;
     _logger.printStatus('5');
     final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
