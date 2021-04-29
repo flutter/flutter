@@ -210,7 +210,7 @@ abstract class SliverChildDelegate {
 }
 
 class _SaltedValueKey extends ValueKey<Key>{
-  const _SaltedValueKey(Key key): assert(key != null), super(key);
+  const _SaltedValueKey(Key key): super(key);
 }
 
 /// Called to find the new index of a child based on its `key` in case of
@@ -346,11 +346,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     this.addSemanticIndexes = true,
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
-  }) : assert(builder != null),
-       assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null),
-       assert(addSemanticIndexes != null),
-       assert(semanticIndexCallback != null);
+  });
 
   /// Called to build children for the sliver.
   ///

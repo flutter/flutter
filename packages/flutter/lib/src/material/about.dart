@@ -1443,9 +1443,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.detailPageFABlessGutterWidth,
     this.detailPageFABGutterWidth,
     this.masterViewWidth,
-  })  : assert(detailPageBuilder != null),
-        assert(masterViewBuilder != null),
-        super(key: key);
+  })  : super(key: key);
 
   final _MasterViewBuilder masterViewBuilder;
 

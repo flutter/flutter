@@ -187,8 +187,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
     required RenderSliverBoxChildManager childManager,
-  }) : assert(childManager != null),
-       _childManager = childManager {
+  }) : _childManager = childManager {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
       return true;
