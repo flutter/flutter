@@ -40,5 +40,5 @@ void main() {
         processManager.killPid(calculatorPid);
       }
     }
-  }, skip: !platform.isWindows);
+  }, skip: 'Calculator is not installed on windows bots. Keeping around for documentation until we can test this with a CI built UWP app');
 }
