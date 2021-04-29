@@ -14,27 +14,40 @@ class Win32NativeApi extends NativeApi {
   const Win32NativeApi();
 
   @override
-  int launchApp(String amuid, List<String> args) {
+  int launchApp(String auimid, List<String> args) {
     int hResult = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
     if (FAILED(hResult)) {
       throw WindowsException(hResult);
     }
 
-    final Pointer<Utf16> aumid = amuid.toNativeUtf16();
-    final Pointer<Uint32> processId = calloc<Uint32>();
-    final Pointer<Utf16> arguments = args.join(',').toNativeUtf16();
-
-    final ApplicationActivationManager aam = ApplicationActivationManager.createInstance();
-    hResult = aam.ActivateApplication(aumid, arguments, 0, processId);
-    if (FAILED(hResult)) {
-      throw WindowsException(hResult);
+    Pointer<Utf16>? auimidPtr;
+    Pointer<Uint32>? processId;
+    Pointer<Utf16>? arguments;
+    ApplicationActivationManager? aam;
+    try {
+      auimidPtr = auimid.toNativeUtf16();
+      processId = calloc<Uint32>();
+      arguments = args.join(',').toNativeUtf16();
+      aam = ApplicationActivationManager.createInstance();
+      hResult = aam.ActivateApplication(auimidPtr, arguments, 0, processId);
+      if (FAILED(hResult)) {
+        throw WindowsException(hResult);
+      }
+      return processId.value;
+    } finally {
+      if (auimidPtr != null) {
+        free(auimidPtr);
+      }
+      if (processId != null) {
+        free(processId);
+      }
+      if (aam != null) {
+        free(aam.ptr);
+      }
+      if (arguments != null) {
+        free(arguments);
+      }
+      CoUninitialize();
     }
-    final int id = processId.value;
-    free(aumid);
-    free(processId);
-    free(aam.ptr);
-    free(arguments);
-    CoUninitialize();
-    return id;
   }
 }

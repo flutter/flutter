@@ -1231,7 +1231,7 @@ class WindowsUwpProject extends WindowsProject {
   String get packageGuid => _packageGuid ??= getCmakePackageGuid(runnerCmakeFile);
   String _packageGuid;
 
-  File get appManifest => _editableDirectory.childFile('appxmanifest.in');
+  File get appManifest => _editableDirectory.childDirectory('runner_uwp').childFile('appxmanifest.in');
 
   String get packageVersion => _packageVersion ??= parseAppVersion(this);
   String _packageVersion;

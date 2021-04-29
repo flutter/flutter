@@ -7,7 +7,7 @@
 abstract class NativeApi {
   const NativeApi();
 
-  /// Launch the native windows application with the given [amuid], returning the PID
+  /// Launch the native windows application with the given [auimid], returning the PID
   /// if successful.
-  int launchApp(String amuid, List<String> args);
+  int launchApp(String auimid, List<String> args);
 }

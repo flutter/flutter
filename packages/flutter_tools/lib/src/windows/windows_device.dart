@@ -90,12 +90,12 @@ class WindowsUWPDevice extends Device {
        _nativeApi = nativeApi,
        _operatingSystemUtils = operatingSystemUtils,
        _fileSystem = fileSystem,
-      super(
-       'winuwp',
-        platformType: PlatformType.windows,
-        ephemeral: false,
-        category: Category.desktop,
-      );
+       super(
+        'winuwp',
+         platformType: PlatformType.windows,
+         ephemeral: false,
+         category: Category.desktop,
+       );
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -137,7 +137,7 @@ class WindowsUWPDevice extends Device {
   @override
   Future<bool> installApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
     /// The cmake build generates an install powershell script.
-    /// build\winuwp\AppPackages\<app-name>\<app-name>_<app-version>_<cmake-config>\Add-AppDevPackage.ps1
+    /// build\winuwp\runner_uwp\AppPackages\<app-name>\<app-name>_<app-version>_<cmake-config>\Add-AppDevPackage.ps1
     final String binaryName = app.name;
     final String packageVersion = app.projectVersion;
     if (packageVersion == null) {
@@ -145,11 +145,16 @@ class WindowsUWPDevice extends Device {
     }
     final String config = toTitleCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
     final String generated = '${binaryName}_${packageVersion}_${config}_Test';
-    await _processManager.run(<String>[
+    final ProcessResult result = await _processManager.run(<String>[
       'powershell.exe',
-      _fileSystem.path.join('build', 'winuwp', 'AppPackages', binaryName, generated, 'Add-AppDevPackage.ps1'),
+      _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generated, 'Add-AppDevPackage.ps1'),
+      '-Force', // Force uninstall any previous version.
     ]);
-    return true;
+    if (result.exitCode != 0) {
+      _logger.printError(result.stdout.toString());
+      _logger.printError(result.stderr.toString());
+    }
+    return result.exitCode == 0;
   }
 
   @override
@@ -185,8 +190,9 @@ class WindowsUWPDevice extends Device {
         target: mainPath,
       );
     }
-    if (!await isAppInstalled(package)) {
-      await installApp(package);
+    if (!await isAppInstalled(package) && !await installApp(package)) {
+      _logger.printError('Failed to install app package');
+      return LaunchResult.failed();
     }
 
     final String guid = package.id;
@@ -218,7 +224,7 @@ class WindowsUWPDevice extends Device {
       await _logger.terminal.promptForCharInput(<String>['Y', 'y'], logger: _logger,
         prompt: 'To continue start an admin cmd prompt and run the following command:\n'
         '   checknetisolation loopbackexempt -is -n=$pfn\n'
-        'Press "y" once this is complete.'
+        'Press "Y/y" once this is complete.'
       );
     }
 
