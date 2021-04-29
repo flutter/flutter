@@ -879,7 +879,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
       expect(simControl.requests.single.appIdentifier, 'correct');
-      // verify(simControl.launch(any, 'correct', any));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
