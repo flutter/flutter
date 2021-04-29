@@ -1686,10 +1686,10 @@ class MediaQueryFromWindow extends StatefulWidget {
   final Widget child;
 
   @override
-  _MediaQueryFromWindowsState createState() => _MediaQueryFromWindowsState();
+  _MediaQueryFromWindowState createState() => _MediaQueryFromWindowState();
 }
 
-class _MediaQueryFromWindowsState extends State<MediaQueryFromWindow> with WidgetsBindingObserver {
+class _MediaQueryFromWindowState extends State<MediaQueryFromWindow> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
