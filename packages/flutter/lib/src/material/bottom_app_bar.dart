@@ -218,8 +218,6 @@ class BottomAppBar extends StatefulWidget {
     this.notchMargin = 4.0,
     this.child,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(notchMargin != null),
-       assert(clipBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -318,10 +316,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     required this.shape,
     required this.materialKey,
     required this.notchMargin,
-  }) : assert(geometry != null),
-       assert(shape != null),
-       assert(notchMargin != null),
-       super(reclip: geometry);
+  }) : super(reclip: geometry);
 
   final ValueListenable<ScaffoldGeometry> geometry;
   final NotchedShape shape;

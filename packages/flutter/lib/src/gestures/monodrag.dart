@@ -69,8 +69,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-  }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
@@ -276,7 +275,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
-      assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.localPosition);
     }
 
@@ -443,7 +441,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
-    assert(tracker != null);
 
     final DragEndDetails details;
     final String Function() debugReport;

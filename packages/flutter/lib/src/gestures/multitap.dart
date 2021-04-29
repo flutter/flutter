@@ -59,10 +59,7 @@ class _TapTracker {
     required PointerDownEvent event,
     required this.entry,
     required Duration doubleTapMinTime,
-  }) : assert(doubleTapMinTime != null),
-       assert(event != null),
-       assert(event.buttons != null),
-       pointer = event.pointer,
+  }) : pointer = event.pointer,
        _initialGlobalPosition = event.position,
        initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);

@@ -138,7 +138,6 @@ Future<void> dismissItem(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = dismissElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -157,7 +156,6 @@ Future<void> checkFlingItemBeforeMovementEnd(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 

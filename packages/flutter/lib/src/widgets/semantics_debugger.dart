@@ -278,7 +278,6 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (isAdjustable)
       annotations.add('adjustable');
 
-    assert(data.label != null);
     final String message;
     if (data.label.isEmpty) {
       message = annotations.join('; ');

@@ -232,7 +232,6 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// * [EditableTextState.didChangeDependencies], where this method is called
   ///   to update the current [AutofillScope] when needed.
   void register(AutofillClient client) {
-    assert(client != null);
     _clients.putIfAbsent(client.autofillId, () => client);
   }
 

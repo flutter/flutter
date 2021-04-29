@@ -157,9 +157,7 @@ class _ZoomPageTransition extends StatelessWidget {
     required this.animation,
     required this.secondaryAnimation,
     this.child,
-  }) : assert(animation != null),
-       assert(secondaryAnimation != null),
-       super(key: key);
+  }) : super(key: key);
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
@@ -260,9 +258,7 @@ class _ZoomEnterTransition extends StatelessWidget {
     required this.animation,
     this.reverse = false,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null),
-       super(key: key);
+  }) : super(key: key);
 
   final Animation<double> animation;
   final Widget? child;
@@ -339,9 +335,7 @@ class _ZoomExitTransition extends StatelessWidget {
     required this.animation,
     this.reverse = false,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null),
-       super(key: key);
+  }) : super(key: key);
 
   final Animation<double> animation;
   final bool reverse;

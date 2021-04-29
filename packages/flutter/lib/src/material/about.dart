@@ -1603,8 +1603,7 @@ class _DetailView extends StatelessWidget {
     Key? key,
     required _DetailPageBuilder builder,
     Object? arguments,
-  })  : assert(builder != null),
-        _builder = builder,
+  })  : _builder = builder,
         _arguments = arguments,
         super(key: key);
 
