@@ -101,7 +101,7 @@ Future<void> _runTests() async {
   printer.printToStdout();
 }
 
-void main() async {
+void main() {
   runApp(const MyApp());
 }
 
