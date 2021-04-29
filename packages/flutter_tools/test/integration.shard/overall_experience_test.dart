@@ -514,7 +514,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  });
+  }, skip: Platform.isWindows); // TODO(goderbauer): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81486
 
   testWithoutContext('flutter run help output', () async {
     // This test enables all logging so that it checks the exact text of starting up an application.

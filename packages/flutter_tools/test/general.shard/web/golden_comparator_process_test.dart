@@ -7,14 +7,16 @@
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
+import '../../src/testbed.dart';
 
 void main() {
+  final Testbed testbed = Testbed();
+
   group('Test that TestGoldenComparatorProcess', () {
     File imageFile;
     Uri goldenKey;
@@ -33,7 +35,7 @@ void main() {
       );
     });
 
-    testWithoutContext('can pass data', () async {
+    test('can pass data', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': true,
         'message': 'some message',
@@ -42,7 +44,7 @@ void main() {
       final FakeProcess mockProcess = createFakeProcess(jsonEncode(expectedResponse) + '\n');
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
+      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess);
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();
@@ -50,9 +52,9 @@ void main() {
 
       expect(response, expectedResponse);
       expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n');
-    });
+    }));
 
-    testWithoutContext('can handle multiple requests', () async {
+    test('can handle multiple requests', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse1 = <String, dynamic>{
         'success': true,
         'message': 'some message',
@@ -65,7 +67,7 @@ void main() {
       final FakeProcess mockProcess = createFakeProcess(jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n');
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
+      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess);
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response1 = await process.getResponse();
@@ -78,9 +80,9 @@ void main() {
       expect(response1, expectedResponse1);
       expect(response2, expectedResponse2);
       expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n{"imageFile":"second_test_image_file","key":"file://second_golden_key/","update":true}\n');
-    });
+    }));
 
-    testWithoutContext('ignores anything that does not look like JSON', () async {
+    test('ignores anything that does not look like JSON', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': true,
         'message': 'some message',
@@ -95,7 +97,7 @@ Other JSON data after the initial data
 ''');
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess,logger: BufferLogger.test());
+      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess);
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();
@@ -103,7 +105,7 @@ Other JSON data after the initial data
 
       expect(response, expectedResponse);
       expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n');
-    });
+    }));
   });
 }
 

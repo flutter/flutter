@@ -168,7 +168,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             logger: globals.logger,
             fileSystem: globals.fs,
             artifacts: globals.artifacts,
-            processManager: globals.processManager,
             chromiumLauncher: ChromiumLauncher(
               fileSystem: globals.fs,
               platform: globals.platform,
