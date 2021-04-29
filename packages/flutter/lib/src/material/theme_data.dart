@@ -1086,6 +1086,10 @@ class ThemeData with Diagnosticable {
   /// The material library no longer uses this property and most uses
   /// of [accentColor] have been replaced with
   /// the theme's [colorScheme] [ColorScheme.secondaryColor].
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.3.0-0.1.pre.',
+  )
   final IconThemeData accentIconTheme;
 
   /// The colors and shapes used to render [Slider].
