@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   late BoxConstraints getSizeConstraints;
@@ -139,7 +139,7 @@ class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
   void performLayout(Size size) {
     final BoxConstraints constraints = BoxConstraints.loose(
       // Invalid because width and height must be greater than or equal to 0
-      const Size(-1, -1)
+      const Size(-1, -1),
     );
     layoutChild(0, constraints);
   }
@@ -310,19 +310,19 @@ void main() {
           'FlutterError\n'
           '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate\n'
           '   tried to lay out a non-existent child.\n'
-          '   There is no child with the id "1".\n'
+          '   There is no child with the id "1".\n',
       );
     });
 
     testWidgets('layoutChild more than once', (WidgetTester tester) async {
       await expectFlutterErrorMessage(
-          tester: tester,
-          delegate: DuplicateLayoutDelegate(),
-          message:
-            'FlutterError\n'
-            '   The DuplicateLayoutDelegate custom multichild layout delegate\n'
-            '   tried to lay out the child with id "0" more than once.\n'
-            '   Each child must be laid out exactly once.\n'
+        tester: tester,
+        delegate: DuplicateLayoutDelegate(),
+        message:
+          'FlutterError\n'
+          '   The DuplicateLayoutDelegate custom multichild layout delegate\n'
+          '   tried to lay out the child with id "0" more than once.\n'
+          '   Each child must be laid out exactly once.\n',
       );
     });
 
@@ -341,7 +341,7 @@ void main() {
           '   The maximum width must be greater than or equal to the minimum\n'
           '   width.\n'
           '   The maximum height must be greater than or equal to the minimum\n'
-          '   height.\n'
+          '   height.\n',
       );
     });
 
@@ -353,7 +353,7 @@ void main() {
           'FlutterError\n'
           '   The NonExistentPositionDelegate custom multichild layout delegate\n'
           '   tried to position out a non-existent child:\n'
-          '   There is no child with the id "1".\n'
+          '   There is no child with the id "1".\n',
       );
     });
 
@@ -376,7 +376,7 @@ void main() {
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
           '     size: MISSING\n'
-          '     additionalConstraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
+          '     additionalConstraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n',
       );
     });
 
@@ -398,7 +398,7 @@ void main() {
           '   Each child must be laid out exactly once.\n'
           '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
           ' forgot to lay out the following child:\n'
-          '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
+          '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n',
       );
     });
 
@@ -422,7 +422,7 @@ void main() {
           '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
           ' forgot to lay out the following children:\n'
           '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
-          '     3: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
+          '     3: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n',
       );
     });
   });

@@ -477,7 +477,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   final GlobalKey _renderObjectKey = GlobalKey();
   // Keyboard mapping for a focused slider.
-  late Map<LogicalKeySet, Intent> _shortcutMap;
+  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
+      SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
+      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+    };
   // Action mapping for a focused slider.
   late Map<Type, Action<Intent>> _actionMap;
 
@@ -506,12 +511,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     );
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _unlerp(widget.value);
-    _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.up(),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.down(),
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.left(),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.right(),
-    };
     _actionMap = <Type, Action<Intent>>{
       _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(
         onInvoke: _actionHandler,

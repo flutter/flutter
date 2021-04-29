@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('FractionallySizedBox', (WidgetTester tester) async {
@@ -19,7 +19,7 @@ void main() {
           widthFactor: 0.5,
           heightFactor: 0.25,
           child: Container(
-            key: inner
+            key: inner,
           ),
         ),
       ),
@@ -76,7 +76,7 @@ void main() {
             widthFactor: 0.5,
             heightFactor: 0.25,
             child: Container(
-              key: inner
+              key: inner,
             ),
           ),
         ),

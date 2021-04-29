@@ -58,6 +58,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     packagesPath: environment.projectDir.childFile('.packages').path,
     assetDirPath: null,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
+    targetPlatform: targetPlatform,
   );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');

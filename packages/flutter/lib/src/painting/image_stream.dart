@@ -668,7 +668,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// messages, but errors during development will still be reported.
   ///
   /// See [FlutterErrorDetails] for further details on these values.
-  @protected
   @pragma('vm:notify-debugger-on-exception')
   void reportError({
     DiagnosticsNode? context,

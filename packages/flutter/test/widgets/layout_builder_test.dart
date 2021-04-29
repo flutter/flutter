@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
@@ -110,7 +110,7 @@ void main() {
                   width: childWidth,
                   height: childHeight,
                 );
-              }
+              },
             );
           },
         ),
@@ -226,10 +226,10 @@ void main() {
                     width: layoutBuilderSize.width,
                     height: layoutBuilderSize.height,
                   );
-                }
+                },
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -253,7 +253,7 @@ void main() {
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
         return Container();
-      }
+      },
     );
     expect(built, 0);
 
@@ -277,7 +277,7 @@ void main() {
         built += 1;
         MediaQuery.of(context);
         return Container();
-      }
+      },
     );
     expect(built, 0);
 
@@ -325,9 +325,9 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
+  testWidgets(
+    'SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
     (WidgetTester tester) async {
-
       int built = 0;
       final Widget target = Directionality(
         textDirection: TextDirection.ltr,
@@ -357,7 +357,8 @@ void main() {
           child: target,
       ));
       expect(built, 2);
-  });
+    },
+  );
 
   testWidgets('nested SliverLayoutBuilder', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
