@@ -18,9 +18,22 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
     final adb.Device device = await adb.devices.workingDevice;
     await device.unlock();
 
-    final Directory appDir = utils.dir(path.join(
-        utils.flutterDirectory.path, 'dev/benchmarks/platform_channels_benchmarks'));
+    final Directory appDir = utils.dir(path.join(utils.flutterDirectory.path,
+        'dev/benchmarks/platform_channels_benchmarks'));
     final Process flutterProcess = await utils.inDirectory(appDir, () async {
+      final String flutterExe =
+          path.join(utils.flutterDirectory.path, 'bin', 'flutter');
+      final List<String> createArgs = <String>[
+        'create',
+        '--platforms',
+        'ios,android',
+        '--no-overwrite',
+        '-v',
+        '.'
+      ];
+      print('\nExecuting: $flutterExe in $appDir');
+      utils.eval(flutterExe, createArgs);
+
       final List<String> options = <String>[
         '-v',
         // --release doesn't work on iOS due to code signing issues
@@ -35,7 +48,8 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
       );
     });
 
-    final Map<String, double> results = await microbenchmarks.readJsonResults(flutterProcess);
+    final Map<String, double> results =
+        await microbenchmarks.readJsonResults(flutterProcess);
     return TaskResult.success(results,
         benchmarkScoreKeys: results.keys.toList());
   };
