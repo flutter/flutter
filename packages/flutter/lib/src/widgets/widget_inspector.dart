@@ -2974,7 +2974,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
       // errors. See https://github.com/flutter/flutter/issues/74918.
       if (isOverflowError()) {
         final String? devToolsInspectorUri =
-        WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+          WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
         if (devToolsInspectorUri != null) {
           devToolsDiagnostic = DevToolsDeepLinkProperty(
             'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
