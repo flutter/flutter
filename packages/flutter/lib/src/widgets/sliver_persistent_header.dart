@@ -225,8 +225,7 @@ class _FloatingHeaderState extends State<_FloatingHeader> {
   }
 
   void _isScrollingListener() {
-    if (_position == null)
-      return;
+    assert(_position != null);
 
     // When a scroll stops, then maybe snap the app bar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
