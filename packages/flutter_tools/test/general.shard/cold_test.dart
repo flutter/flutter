@@ -206,7 +206,7 @@ class TestFlutterDevice extends FlutterDevice {
     CompileExpression compileExpression,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-    bool disableDds = false,
+    bool enableDds = true,
     bool disableServiceAuthCodes = false,
     int hostVmServicePort,
     int ddsPort,

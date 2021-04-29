@@ -4,6 +4,8 @@
 
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -104,7 +106,21 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
-      rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
+      rawLicenses.complete(
+        kIsWeb
+            // NOTICES for web isn't compressed since we don't have access to
+            // dart:io on the client side and it's already compressed between
+            // the server and client.
+            ? rootBundle.loadString('NOTICES', cache: false)
+            : () async {
+              // The compressed version doesn't have a more common .gz extension
+              // because gradle for Android non-transparently manipulates .gz files.
+              final ByteData licenseBytes = await rootBundle.load('NOTICES.Z');
+              List<int> bytes = licenseBytes.buffer.asUint8List();
+              bytes = gzip.decode(bytes);
+              return utf8.decode(bytes);
+            }(),
+      );
     }, Priority.animation);
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
@@ -272,6 +288,10 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  // TODO(goderbauer): Add pragma (and enable test in
+  //   break_on_framework_exceptions_test.dart) when it works on async methods,
+  //   https://github.com/dart-lang/sdk/issues/45673
+  // @pragma('vm:notify-debugger-on-exception')
   Future<void> handlePlatformMessage(
     String channel,
     ByteData? data,

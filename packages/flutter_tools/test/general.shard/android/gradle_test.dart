@@ -19,10 +19,18 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+
+const String kModulePubspec = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+    androidX: true
+''';
 
 void main() {
   Cache.flutterRoot = getFlutterRoot();
@@ -35,54 +43,42 @@ void main() {
     });
 
     testWithoutContext('getApkDirectory in app projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(
-        getApkDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'app', 'outputs', 'flutter-apk')),
+        getApkDirectory(project).path, '/build/app/outputs/flutter-apk',
       );
     });
 
     testWithoutContext('getApkDirectory in module projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      fileSystem.currentDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(kModulePubspec);
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
+      expect(project.isModule, true);
       expect(
-        getApkDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'host', 'outputs', 'apk')),
+        getApkDirectory(project).path, '/build/host/outputs/apk',
       );
     });
 
     testWithoutContext('getBundleDirectory in app projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(
-        getBundleDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'app', 'outputs', 'bundle')),
+        getBundleDirectory(project).path, '/build/app/outputs/bundle',
       );
     });
 
     testWithoutContext('getBundleDirectory in module projects', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
+      fileSystem.currentDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(kModulePubspec);
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
+      expect(project.isModule, true);
       expect(
-        getBundleDirectory(project).path,
-        equals(fileSystem.path.join('foo', 'host', 'outputs', 'bundle')),
+        getBundleDirectory(project).path, '/build/host/outputs/bundle',
       );
     });
 
@@ -313,19 +309,17 @@ include ':app'
 
   group('Gradle local.properties', () {
     Artifacts localEngineArtifacts;
-    FakePlatform android;
     FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
       localEngineArtifacts = Artifacts.test(localEngine: 'out/android_arm');
-      android = fakePlatform('android');
     });
 
     void testUsingAndroidContext(String description, dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localEngineArtifacts,
-        Platform: () => android,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
@@ -630,12 +624,15 @@ flutter:
     FakeAndroidSdk androidSdk;
     AndroidGradleBuilder builder;
     BufferLogger logger;
+    Platform platform;
 
     setUp(() {
       logger = BufferLogger.test();
       fs = MemoryFileSystem.test();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fakeProcessManager = FakeProcessManager.empty();
       androidSdk = FakeAndroidSdk();
+      platform = FakePlatform(operatingSystem: 'linux');
+
       builder = AndroidGradleBuilder(
         logger: logger,
         processManager: fakeProcessManager,
@@ -643,7 +640,7 @@ flutter:
         artifacts: Artifacts.test(),
         usage: TestUsage(),
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: platform,
       );
     });
 
@@ -708,8 +705,8 @@ plugin2=${plugin2.path}
         'aar_init_script.gradle',
       );
 
-      fakeProcessManager
-        ..addCommand(FakeCommand(
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
           command: <String>[
             'gradlew',
             '-I=$initScript',
@@ -725,8 +722,8 @@ plugin2=${plugin2.path}
             'assembleAarRelease',
           ],
           workingDirectory: plugin1.childDirectory('android').path,
-        ))
-        ..addCommand(FakeCommand(
+        ),
+        FakeCommand(
           command: <String>[
             'gradlew',
             '-I=$initScript',
@@ -742,7 +739,7 @@ plugin2=${plugin2.path}
             'assembleAarRelease',
           ],
           workingDirectory: plugin2.childDirectory('android').path,
-        ));
+        )]);
 
       await builder.buildPluginsAsAar(
         FlutterProject.fromDirectoryTest(androidDirectory),
@@ -759,6 +756,7 @@ plugin2=${plugin2.path}
     }, overrides: <Type, Generator>{
       AndroidSdk: () => androidSdk,
       FileSystem: () => fs,
+      Platform: () => platform,
       ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
     });
@@ -1012,14 +1010,6 @@ plugin1=${plugin1.path}
   }, skip: true); // TODO(jonahwilliams): This is an integration test and should be moved to the integration shard.
 }
 
-FakePlatform fakePlatform(String name) {
-  return FakePlatform(
-    environment: <String, String>{'HOME': '/path/to/home'},
-    operatingSystem: name,
-    stdoutSupportsAnsi: false,
-  );
-}
-
 class FakeGradleUtils extends GradleUtils {
   @override
   String getExecutable(FlutterProject project) {
@@ -1028,5 +1018,3 @@ class FakeGradleUtils extends GradleUtils {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {}
-class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFlutterProject extends Mock implements FlutterProject {}

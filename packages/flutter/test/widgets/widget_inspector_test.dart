@@ -997,7 +997,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       late String pubRootTest;
       if (widgetTracked) {
         final Map<String, Object?> jsonObject = json.decode(
-          service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
+          service.getSelectedWidget(null, 'my-group'),
+        ) as Map<String, Object?>;
         final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
         expect(creationLocation, isNotNull);
         final String fileA = creationLocation['file']! as String;
@@ -1018,7 +1019,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', null));
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 5);
       expect(nodes[0].runtimeType, StringProperty);
       expect(nodes[0].name, 'dummy1');
@@ -1059,7 +1060,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       late String pubRootTest;
       if (widgetTracked) {
         final Map<String, Object?> jsonObject = json.decode(
-          service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
+          service.getSelectedWidget(null, 'my-group'),
+        ) as Map<String, Object?>;
         final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
         expect(creationLocation, isNotNull);
         final String fileA = creationLocation['file']! as String;
@@ -1080,7 +1082,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(StringProperty('dummy2', 'value'));
       builder.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', null));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 5);
       expect(nodes[0].runtimeType, StringProperty);
       expect(nodes[0].name, 'dummy1');
@@ -1128,7 +1130,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
       builder.add(StringProperty('dummy2', 'value'));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 6);
       expect(nodes[0].runtimeType, ErrorSummary);
       expect(nodes[1].runtimeType, DiagnosticsBlock);
@@ -1162,7 +1164,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
       builder.add(StringProperty('dummy2', 'value'));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 4);
       expect(nodes[0].runtimeType, ErrorSummary);
       expect(nodes[1].runtimeType, DiagnosticsBlock);
@@ -1194,7 +1196,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
       builder.add(StringProperty('dummy2', 'value'));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(debugTransformDebugCreator(builder.properties));
       expect(nodes.length, 4);
       expect(nodes[0].runtimeType, ErrorSummary);
       expect(nodes[1].runtimeType, DiagnosticsBlock);
@@ -1929,8 +1931,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // directory.
       final String pubRootTest =
           '/' + segments.take(segments.length - 2).join('/');
-      await service.testExtension(
-          'setPubRootDirectories', <String, String>{'arg0': pubRootTest});
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       final List<Map<Object, Object?>> rebuildEvents =
           service.getEventsDispatched('Flutter.RebuiltWidgets');
@@ -2113,8 +2114,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       service.setSelection(clockDemoElement, 'my-group');
       final Map<String, Object?> jsonObject = (await service.testExtension(
-          'getSelectedWidget',
-          <String, String>{'objectGroup': 'my-group'}))! as Map<String, Object?>;
+        'getSelectedWidget',
+        <String, String>{'objectGroup': 'my-group'},
+      ))! as Map<String, Object?>;
       final Map<String, Object?> creationLocation =
           jsonObject['creationLocation']! as Map<String, Object?>;
       expect(creationLocation, isNotNull);
@@ -2125,8 +2127,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // directory.
       final String pubRootTest =
           '/' + segments.take(segments.length - 2).join('/');
-      await service.testExtension(
-          'setPubRootDirectories', <String, String>{'arg0': pubRootTest});
+      await service.testExtension('setPubRootDirectories', <String, String>{'arg0': pubRootTest});
 
       final List<Map<Object, Object?>> repaintEvents =
           service.getEventsDispatched('Flutter.RepaintWidgets');
@@ -2134,9 +2135,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       expect(service.rebuildCount, equals(0));
       expect(
-          await service.testBoolExtension(
-              'trackRepaintWidgets', <String, String>{'enabled': 'true'}),
-          equals('true'));
+        await service.testBoolExtension('trackRepaintWidgets', <String, String>{'enabled': 'true'}),
+        equals('true'),
+      );
       // Unlike trackRebuildDirtyWidgets, trackRepaintWidgets doesn't force a full
       // rebuild.
       expect(service.rebuildCount, equals(0));
@@ -2201,9 +2202,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // Turn off rebuild counts.
       expect(
-          await service.testBoolExtension(
-              'trackRepaintWidgets', <String, String>{'enabled': 'false'}),
-          equals('false'));
+        await service.testBoolExtension('trackRepaintWidgets', <String, String>{'enabled': 'false'}),
+        equals('false'),
+      );
 
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
@@ -2557,9 +2558,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       try {
         // Enable structured errors.
-        expect(await service.testBoolExtension(
-            'structuredErrors', <String, String>{'enabled': 'true'}),
-            equals('true'));
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'true'}),
+          equals('true'),
+        );
 
         // Create an error.
         FlutterError.reportError(FlutterErrorDetails(
@@ -2580,9 +2582,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Validate that we received an error count.
         expect(error['errorsSinceReload'], 0);
         expect(
-            error['renderedErrorText'],
-            startsWith(
-                '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'));
+          error['renderedErrorText'],
+          startsWith('══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'),
+        );
 
         // Send a second error.
         FlutterError.reportError(FlutterErrorDetails(

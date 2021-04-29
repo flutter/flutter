@@ -11,10 +11,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -33,7 +31,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barRelease/app.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in release mode', () {
@@ -46,7 +44,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barRelease/app.aab');
   });
 
   testWithoutContext("Finds app bundle when flavor doesn't contain underscores in release mode", () {
@@ -59,7 +57,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooRelease', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/fooRelease/app.aab');
   });
 
   testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in release mode", () {
@@ -72,7 +70,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooaRelease', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/fooaRelease/app.aab');
   });
 
   testWithoutContext('Finds app bundle when no flavor is used in release mode', () {
@@ -85,7 +83,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/release/app.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores in debug mode', () {
@@ -98,7 +96,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barDebug/app.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in debug mode', () {
@@ -111,7 +109,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barDebug/app.aab');
   });
 
   testWithoutContext("Finds app bundle when flavor doesn't contain underscores in debug mode", () {
@@ -124,7 +122,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooDebug', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/fooDebug/app.aab');
   });
 
   testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in debug mode", () {
@@ -137,7 +135,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooaDebug', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/fooaDebug/app.aab');
   });
 
   testWithoutContext('Finds app bundle when no flavor is used in debug mode', () {
@@ -150,7 +148,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/debug/app.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores in profile mode', () {
@@ -163,7 +161,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barProfile/app.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in profile mode', () {
@@ -176,7 +174,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barProfile/app.aab');
   });
 
   testWithoutContext("Finds app bundle when flavor doesn't contain underscores in profile mode", () {
@@ -189,7 +187,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooProfile', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/fooProfile/app.aab');
   });
 
   testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in profile mode", () {
@@ -202,7 +200,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooaProfile', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/fooaProfile/app.aab');
   });
 
   testWithoutContext('Finds app bundle when no flavor is used in profile mode', () {
@@ -215,7 +213,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/profile/app.aab');
   });
 
   testWithoutContext('Finds app bundle in release mode - Gradle 3.5', () {
@@ -228,7 +226,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app-release.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/release/app-release.aab');
   });
 
   testWithoutContext('Finds app bundle in profile mode - Gradle 3.5', () {
@@ -241,7 +239,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app-profile.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/profile/app-profile.aab');
   });
 
   testWithoutContext('Finds app bundle in debug mode - Gradle 3.5', () {
@@ -254,7 +252,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/debug/app-debug.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
@@ -267,7 +265,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barRelease/app-foo_bar-release.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 3.5', () {
@@ -280,7 +278,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barRelease/app-foo_bar-release.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
@@ -293,7 +291,7 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app-foo_bar-profile.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barProfile/app-foo_bar-profile.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 3.5', () {
@@ -306,11 +304,10 @@ void main() {
     );
 
     expect(bundle, isNotNull);
-    expect(bundle.path, fileSystem.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
+    expect(bundle.path, '/build/app/outputs/bundle/foo_barDebug/app-foo_bar-debug.aab');
   });
 
-  // Context is required due to build failure analytics event grabbing FlutterCommand.current.
-  testUsingContext('AAB not found', () {
+  testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final TestUsage testUsage = TestUsage();
     expect(
@@ -331,7 +328,7 @@ void main() {
     expect(testUsage.events, contains(
       const TestUsageEvent(
         'build',
-        'unspecified',
+        'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: <String, String> {
           'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
@@ -343,12 +340,7 @@ void main() {
 
 /// Generates a fake app bundle at the location [directoryName]/[fileName].
 FlutterProject generateFakeAppBundle(String directoryName, String fileName, FileSystem fileSystem) {
-  final FlutterProject project = MockFlutterProject();
-  final AndroidProject androidProject = MockAndroidProject();
-
-  when(project.isModule).thenReturn(false);
-  when(project.android).thenReturn(androidProject);
-  when(androidProject.buildDirectory).thenReturn(fileSystem.directory('irrelevant'));
+  final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
   final Directory bundleDirectory = getBundleDirectory(project);
   bundleDirectory
@@ -361,6 +353,3 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName, File
     .createSync();
   return project;
 }
-
-class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFlutterProject extends Mock implements FlutterProject {}

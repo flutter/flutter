@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart' show LogicalKeyboardKey;
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
+import 'package:flutter_test/flutter_test.dart';
 
 import 'states.dart';
 
@@ -113,7 +113,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -147,7 +147,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -181,7 +181,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -218,7 +218,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -252,7 +252,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -321,7 +321,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -355,7 +355,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -390,7 +390,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -413,22 +413,24 @@ void main() {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
-        child: ListView(
-      padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-      children: focusNodes.map((FocusNode focusNode) {
-        return Container(
-          height: 50,
-          color: Colors.green,
-          child: TextField(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+        children: focusNodes.map((FocusNode focusNode) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
               focusNode: focusNode,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )),
-        );
-      }).toList(),
-    )));
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    ));
 
     final Finder finder = find.byType(TextField).first;
     final TextField textField = tester.widget(finder);
@@ -457,7 +459,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -491,7 +493,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -528,7 +530,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -562,7 +564,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -631,7 +633,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -665,7 +667,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -700,7 +702,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -816,7 +818,7 @@ void main() {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                    )
+                    ),
                   ),
                 );
               }).toList(),
@@ -1231,6 +1233,13 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
+    testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(() => ListView(
+      itemExtent: 100,
+      prototypeItem: const SizedBox(),
+    ), throwsAssertionError);
+  });
+
   testWidgets('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
     expect(() => ListView.builder(
       itemBuilder: (BuildContext context, int index) {
@@ -1260,6 +1269,28 @@ void main() {
     ), throwsAssertionError);
   });
 
+  testWidgets('ListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemExtent: 100,
+      prototypeItem: const SizedBox(),
+    ), throwsAssertionError);
+  });
+
+  testWidgets('ListView.custom asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(() => ListView.custom(
+      childrenDelegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) {
+          return const SizedBox();
+        },
+      ),
+      itemExtent: 100,
+      prototypeItem: const SizedBox(),
+    ), throwsAssertionError);
+  });
+
   testWidgets('PrimaryScrollController provides fallback ScrollActions', (WidgetTester tester)  async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1280,7 +1311,7 @@ void main() {
       ),
     );
     final ScrollController controller = PrimaryScrollController.of(
-      tester.element(find.byType(CustomScrollView))
+      tester.element(find.byType(CustomScrollView)),
     )!;
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));

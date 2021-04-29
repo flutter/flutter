@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
@@ -1153,7 +1153,7 @@ class TestPage extends Page<void> {
         return RouteWidget(
           name: name!,
         );
-      }
+      },
     );
   }
 }
@@ -1260,7 +1260,7 @@ class RouteFutureWidgetState extends State<RouteFutureWidget> with RestorationMi
         setState(() {
           value = i;
         });
-      }
+      },
     );
   }
 

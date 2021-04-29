@@ -115,12 +115,6 @@
       "flaky": false
     },
     {
-      "name": "Linux dartdocs",
-      "repo": "flutter",
-      "task_name": "linux_dartdocs",
-      "flaky": false
-    },
-    {
       "name": "Linux docs_test",
       "repo": "flutter",
       "task_name": "linux_docs_test",
@@ -295,12 +289,6 @@
       "flaky": false
     },
     {
-      "name": "Linux gradle_non_android_plugin_test",
-      "repo": "flutter",
-      "task_name": "linux_gradle_non_android_plugin_test",
-      "flaky": false
-    },
-    {
       "name": "Linux gradle_plugin_bundle_test",
       "repo": "flutter",
       "task_name": "linux_gradle_plugin_bundle_test",
@@ -335,6 +323,12 @@
       "repo": "flutter",
       "task_name": "linux_large_image_changer_perf_android",
       "flaky": false
+    },
+    {
+      "name": "Linux animated_image_gc_perf",
+      "repo": "flutter",
+      "task_name": "animated_image_gc_perf",
+      "flaky": true
     },
     {
       "name": "Linux linux_chrome_dev_mode",
@@ -421,28 +415,34 @@
       "flaky": false
     },
     {
-      "name": "Linux tool_integration_tests_1_3",
+      "name": "Linux tool_integration_tests_1_4",
       "repo": "flutter",
-      "task_name": "linux_tool_integration_tests_1_3",
+      "task_name": "linux_tool_integration_tests_1_4",
       "flaky": false
     },
     {
-      "name": "Linux tool_integration_tests_2_3",
+      "name": "Linux tool_integration_tests_2_4",
       "repo": "flutter",
-      "task_name": "linux_tool_integration_tests_2_3",
+      "task_name": "linux_tool_integration_tests_2_4",
       "flaky": false
     },
     {
-      "name": "Linux tool_integration_tests_3_3",
+      "name": "Linux tool_integration_tests_3_4",
       "repo": "flutter",
-      "task_name": "linux_tool_integration_tests_3_3",
+      "task_name": "linux_tool_integration_tests_3_4",
+      "flaky": false
+    },
+    {
+      "name": "Linux tool_integration_tests_4_4",
+      "repo": "flutter",
+      "task_name": "linux_tool_integration_tests_4_4",
       "flaky": false
     },
     {
       "name": "Linux validate_ci_config",
       "repo": "flutter",
       "task_name": "linux_validate_ci_config",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux web_tool_tests",
@@ -556,6 +556,12 @@
       "name": "Linux flutter_plugins",
       "repo": "flutter",
       "task_name": "flutter_plugins",
+      "flaky": false
+    },
+    {
+      "name": "Linux skp_generator",
+      "repo": "flutter",
+      "task_name": "linux_skp_generator",
       "flaky": false
     },
     {
@@ -859,12 +865,6 @@
       "flaky": false
     },
     {
-      "name": "Mac gradle_non_android_plugin_test",
-      "repo": "flutter",
-      "task_name": "mac_gradle_non_android_plugin_test",
-      "flaky": false
-    },
-    {
       "name": "Mac gradle_plugin_bundle_test",
       "repo": "flutter",
       "task_name": "mac_gradle_plugin_bundle_test",
@@ -880,7 +880,7 @@
       "name": "Mac gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "mac_gradle_plugin_light_apk_test",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Mac module_custom_host_app_name_test",
@@ -922,7 +922,7 @@
       "name": "Mac dart_plugin_registry_test",
       "repo": "flutter",
       "task_name": "dart_plugin_registry_test",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Mac tool_tests_general",
@@ -937,21 +937,27 @@
       "flaky": false
     },
     {
-      "name": "Mac tool_integration_tests_1_3",
+      "name": "Mac tool_integration_tests_1_4",
       "repo": "flutter",
-      "task_name": "mac_tool_integration_tests_1_3",
+      "task_name": "mac_tool_integration_tests_1_4",
       "flaky": false
     },
     {
-      "name": "Mac tool_integration_tests_2_3",
+      "name": "Mac tool_integration_tests_2_4",
       "repo": "flutter",
-      "task_name": "mac_tool_integration_tests_2_3",
+      "task_name": "mac_tool_integration_tests_2_4",
       "flaky": false
     },
     {
-      "name": "Mac tool_integration_tests_3_3",
+      "name": "Mac tool_integration_tests_3_4",
       "repo": "flutter",
-      "task_name": "mac_tool_integration_tests_3_3",
+      "task_name": "mac_tool_integration_tests_3_4",
+      "flaky": false
+    },
+    {
+      "name": "Mac tool_integration_tests_4_4",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_4_4",
       "flaky": false
     },
     {
@@ -1243,12 +1249,6 @@
       "flaky": true
     },
     {
-      "name": "Windows gradle_non_android_plugin_test",
-      "repo": "flutter",
-      "task_name": "win_gradle_non_android_plugin_test",
-      "flaky": false
-    },
-    {
       "name": "Windows gradle_plugin_bundle_test",
       "repo": "flutter",
       "task_name": "win_gradle_plugin_bundle_test",
@@ -1297,27 +1297,81 @@
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_1_3",
+      "name": "Windows tool_integration_tests_1_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_1_3",
+      "task_name": "win_tool_integration_tests_1_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_2_3",
+      "name": "Windows tool_integration_tests_2_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_2_3",
+      "task_name": "win_tool_integration_tests_2_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_3_3",
+      "name": "Windows tool_integration_tests_3_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_3_3",
+      "task_name": "win_tool_integration_tests_3_5",
+      "flaky": false
+    },
+    {
+      "name": "Windows tool_integration_tests_4_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_4_5",
+      "flaky": false
+    },
+    {
+      "name": "Windows tool_integration_tests_5_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_5_5",
       "flaky": false
     },
     {
       "name": "Windows web_tool_tests",
       "repo": "flutter",
       "task_name": "win_web_tool_tests",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android complex_layout_win__compile",
+      "repo": "flutter",
+      "task_name": "complex_layout_win__compile",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android basic_material_app_win__compile",
+      "repo": "flutter",
+      "task_name": "basic_material_app_win__compile",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android flutter_gallery_win__compile",
+      "repo": "flutter",
+      "task_name": "flutter_gallery_win__compile",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android windows_chrome_dev_mode",
+      "repo": "flutter",
+      "task_name": "windows_chrome_dev_mode",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android flavors_test_win",
+      "repo": "flutter",
+      "task_name": "flavors_test_win",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android channels_integration_test_win",
+      "repo": "flutter",
+      "task_name": "channels_integration_test_win",
+      "flaky": false
+    },
+    {
+      "name": "Windows_android hot_mode_dev_cycle_win__benchmark",
+      "repo": "flutter",
+      "task_name": "hot_mode_dev_cycle_win__benchmark",
       "flaky": false
     }
   ]

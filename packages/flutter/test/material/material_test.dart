@@ -435,7 +435,7 @@ void main() {
       expect(
         find.byKey(materialKey),
         clipsWithBoundingRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(10.0))
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         ),
       );
     });

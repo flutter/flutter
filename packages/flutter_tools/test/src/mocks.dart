@@ -5,16 +5,11 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -154,50 +149,4 @@ _ProcessFactory flakyProcessFactory({
       stderr: stderr(),
     );
   };
-}
-
-/// Creates a mock process that returns with the given [exitCode], [stdout] and [stderr].
-Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
-  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stdout),
-  ]);
-  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stderr),
-  ]);
-  final Process process = _MockBasicProcess();
-
-  when(process.stdout).thenAnswer((_) => stdoutStream);
-  when(process.stderr).thenAnswer((_) => stderrStream);
-  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
-  return process;
-}
-
-class _MockBasicProcess extends Mock implements Process {}
-
-class MockAndroidDevice extends Mock implements AndroidDevice {
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
-
-  @override
-  bool isSupported() => true;
-
-  @override
-  bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsFlutterExit => false;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
-}
-
-class MockIOSDevice extends Mock implements IOSDevice {
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
-
-  @override
-  bool isSupported() => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }

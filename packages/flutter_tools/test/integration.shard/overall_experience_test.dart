@@ -331,13 +331,13 @@ void main() {
             processManager.killPid(pid, ProcessSignal.sigusr1);
             return null;
           }),
-          Barrier(RegExp(r'^Performing hot reload\.\.\.'), logging: true),
+          Barrier(RegExp(r'^Performing hot reload\.\.\.'), logging: true), // sometimes this includes the "called reassemble" message
           Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms\.$'), /*'called reassemble', (see TODO below)*/ 'called paint'], handler: (String line) {
             processManager.killPid(pid, ProcessSignal.sigusr2);
             return null;
           }),
-          Barrier(RegExp(r'^Performing hot restart\.\.\.')),
-          Multiple(<Pattern>[RegExp(r'^Restarted application in [0-9]+ms.$'), 'called main', 'called paint'], handler: (String line) {
+          Barrier(RegExp(r'^Performing hot restart\.\.\.')), // sametimes this includes the "called main" message
+          Multiple(<Pattern>[RegExp(r'^Restarted application in [0-9]+ms.$'), /*'called main', (see TODO below)*/ 'called paint'], handler: (String line) {
             return 'q';
           }),
           const Barrier('Application finished.'),
@@ -349,13 +349,15 @@ void main() {
       // is verified by the expected transitions above.
       // TODO(ianh): Fix the tool so that the output isn't garbled (right now we're putting debug output from
       // the app on the line where we're spinning the busy signal, rather than adding a newline).
-      expect(result.stdout.where((String line) => line.startsWith('called ') && line != 'called reassemble' /* see todo above*/), <Object>[
+      expect(result.stdout.where((String line) => line.startsWith('called ') &&
+             line != 'called reassemble' /* see todo above*/ &&
+             line != 'called main' /* see todo above*/), <Object>[
         // logs start after we receive the response to sending SIGUSR1
         // SIGUSR1:
         // 'called reassemble', // see todo above, this only sometimes gets included, other times it's on the "performing..." line
         'called paint',
         // SIGUSR2:
-        'called main',
+        // 'called main', // see todo above, this is sometimes on the "performing..." line
         'called paint',
       ]);
       expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
@@ -512,7 +514,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: 'DevTools does not reliably launch on bots currently.'); // TODO(ianh): fix and re-enable test.
+  });
 
   testWithoutContext('flutter run help output', () async {
     // This test enables all logging so that it checks the exact text of starting up an application.
@@ -542,7 +544,7 @@ void main() {
       'Flutter run key commands.',
       startsWith('r Hot reload.'),
       'R Hot restart.',
-      'h Repeat this help message.',
+      'h List all available interactive commands.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
@@ -555,25 +557,25 @@ void main() {
       'Flutter run key commands.',
       startsWith('r Hot reload.'),
       'R Hot restart.',
-      'h Repeat this help message.',
-      'd Detach (terminate "flutter run" but leave application running).',
-      'c Clear the screen',
-      'q Quit (terminate the application on the device).',
-      'b Toggle the platform brightness setting (dark and light mode).            (debugBrightnessOverride)',
       'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
       't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
       'L Dump layer tree to the console.                                               (debugDumpLayerTree)',
       'S Dump accessibility tree in traversal order.                                   (debugDumpSemantics)',
       'U Dump accessibility tree in inverse hit test order.                            (debugDumpSemantics)',
       'i Toggle widget inspector.                                  (WidgetsApp.showWidgetInspectorOverride)',
-      startsWith('I Toggle oversized image inversion'),
       'p Toggle the display of construction lines.                                  (debugPaintSizeEnabled)',
+      'I Toggle oversized image inversion.                                     (debugInvertOversizedImages)',
       'o Simulate different operating systems.                                      (defaultTargetPlatform)',
-      'z Toggle elevation checker.',
-      'g Run source code generators.',
-      'M Write SkSL shaders to a unique file in the project directory.',
+      'b Toggle platform brightness (dark and light mode).                        (debugBrightnessOverride)',
+      'z Toggle elevation checker.                                            (debugCheckElevationsEnabled)',
       'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
+      'M Write SkSL shaders to a unique file in the project directory.',
+      'g Run source code generators.',
+      'h Repeat this help message.',
+      'd Detach (terminate "flutter run" but leave application running).',
+      'c Clear the screen',
+      'q Quit (terminate the application on the device).',
       '',
       contains('Running with sound null safety'),
       '',
