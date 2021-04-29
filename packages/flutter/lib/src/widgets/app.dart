@@ -250,6 +250,8 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
+///  * [MediaQueryFromWindow], which updates [MediaQuery] based on the `window`
+///    changes.
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
@@ -1674,10 +1676,21 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 }
 
-/// Builds [MediaQuery] from `window` by listening to [WidgetsBinding].
+/// Provides a [MediaQuery] which is built and updated using the latest `window`
+/// values.
 ///
-/// It is performed in a standalone widget to rebuild **only** [MediaQuery] and
-/// its dependents when `window` changes, instead of rebuilding the entire widget tree.
+/// Receives `window` updates by listening to [WidgetsBinding].
+///
+/// The standalone widget ensures that it rebuilds **only** [MediaQuery] and
+/// its dependents when `window` changes, instead of rebuilding the entire
+/// widget tree.
+///
+/// It is used by [WidgetsApp] if no other [MediaQuery] is available above it.
+///
+/// See also:
+///
+///  * [MediaQuery], which establishes a subtree in which media queries resolve
+///    to a [MediaQueryData].
 class MediaQueryFromWindow extends StatefulWidget {
   /// Creates a [MediaQueryFromWindow] that provides a [MediaQuery] to its
   /// descendants using the `window` to keep [MediaQueryData] up to date.
