@@ -20,7 +20,7 @@ import 'test_config.dart';
 
 /// Helper class to start golden file comparison in a separate process.
 ///
-/// Golden file comparator is configured using flutter_test_config.dart and that
+/// The golden file comparator is configured using flutter_test_config.dart and that
 /// file can contain arbitrary Dart code that depends on dart:ui. Thus it has to
 /// be executed in a `flutter_tester` environment. This helper class generates a
 /// Dart file configured with flutter_test_config.dart to perform the comparison
