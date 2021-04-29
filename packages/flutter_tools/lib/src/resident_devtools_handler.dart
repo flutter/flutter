@@ -25,12 +25,6 @@ abstract class ResidentDevtoolsHandler {
   /// The current devtools server, or null if one is not running.
   DevToolsServerAddress get activeDevToolsServer;
 
-  /// Whether it's ok to announce the [activeDevToolsServer].
-  ///
-  /// This should only return true once all the devices have been notified
-  /// of the DevTools.
-  bool get readyToAnnounce;
-
   Future<void> hotRestart(List<FlutterDevice> flutterDevices);
 
   Future<void> serveAndAnnounceDevTools({Uri devToolsServerAddress, List<FlutterDevice> flutterDevices});
@@ -50,10 +44,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   @override
   DevToolsServerAddress get activeDevToolsServer => _devToolsLauncher?.activeDevToolsServer;
 
-  @override
-  bool get readyToAnnounce => _readyToAnnounce;
-  bool _readyToAnnounce = false;
-
   // This must be guaranteed not to return a Future that fails.
   @override
   Future<void> serveAndAnnounceDevTools({
@@ -70,15 +60,18 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       await _devToolsLauncher.serve();
     }
     await _devToolsLauncher.ready;
-    final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
-    await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
-    await _callConnectedVmServiceUriExtension(devicesWithExtension);
-    _readyToAnnounce = true;
     if (_residentRunner.reportedDebuggers) {
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
       _residentRunner.printDebuggerList(includeObservatory: false);
     }
+    final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
+    await _maybeCallDevToolsUriServiceExtension(
+      devicesWithExtension,
+    );
+    await _callConnectedVmServiceUriExtension(
+      devicesWithExtension,
+    );
   }
 
   Future<void> _maybeCallDevToolsUriServiceExtension(
@@ -219,9 +212,6 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   DevToolsServerAddress get activeDevToolsServer => null;
-
-  @override
-  bool get readyToAnnounce => false;
 
   @override
   Future<void> hotRestart(List<FlutterDevice> flutterDevices) async {
