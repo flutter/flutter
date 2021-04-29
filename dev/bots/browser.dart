@@ -41,7 +41,7 @@ Future<String> evalTestAppInChrome({
       })
       .add(createStaticHandler(appDirectory));
     shelf_io.serveRequests(server, cascade.handler);
-    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('chrome_user_data_');
+    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
     chrome = await Chrome.launch(ChromeOptions(
       headless: true,
       debugPort: browserDebugPort,
@@ -88,7 +88,7 @@ class AppServer {
       });
     });
     shelf_io.serveRequests(server, cascade.handler);
-    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('chrome_user_data_');
+    final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
     final Completer<String> chromeErrorCompleter = Completer<String>();
     chrome = await Chrome.launch(ChromeOptions(
       headless: headless,

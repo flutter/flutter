@@ -505,7 +505,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert((focusNode == null) == (textEditingController == null)),
        assert(
          !(textEditingController != null && initialValue != null),
-         'textEditingController and initialValue cannot be simultaneously defined.'
+         'textEditingController and initialValue cannot be simultaneously defined.',
        ),
        super(key: key);
 

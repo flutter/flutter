@@ -29,12 +29,12 @@ void main() {
       };
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand())
-        .run(<String>['screenshot', '--type=skia', '--observatory-uri=http://localhost:8181']),
+        .run(<String>['screenshot', '--type=skia', '--observatory-url=http://localhost:8181']),
         throwsA(isA<Exception>().having((dynamic exception) => exception.toString(), 'message', contains('dummy'))),
       );
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand())
-        .run(<String>['screenshot', '--type=rasterizer', '--observatory-uri=http://localhost:8181']),
+        .run(<String>['screenshot', '--type=rasterizer', '--observatory-url=http://localhost:8181']),
         throwsA(isA<Exception>().having((dynamic exception) => exception.toString(), 'message', contains('dummy'))),
       );
     });
@@ -61,7 +61,7 @@ void main() {
 
     testUsingContext('device screenshots cannot provided Observatory', () async {
       await expectLater(() => createTestCommandRunner(ScreenshotCommand())
-        .run(<String>['screenshot',  '--observatory-uri=http://localhost:8181']),
+        .run(<String>['screenshot',  '--observatory-url=http://localhost:8181']),
         throwsToolExit(message: 'Observatory URI cannot be provided for screenshot type device'),
       );
     });
