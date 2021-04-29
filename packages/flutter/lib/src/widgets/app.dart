@@ -1635,21 +1635,17 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    final Localizations localizations = Localizations(
+    Widget child = Localizations(
       locale: appLocale,
       delegates: _localizationsDelegates.toList(),
       child: title,
     );
 
     final MediaQueryData? data = MediaQuery.maybeOf(context);
-
-    Widget mediaQuery;
     if (data == null) {
-      mediaQuery = MediaQueryFromWindow(
-        child: localizations,
+      child = MediaQueryFromWindow(
+        child: child,
       );
-    } else {
-      mediaQuery = localizations;
     }
 
     return RootRestorationScope(
@@ -1665,7 +1661,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             child: DefaultTextEditingActions(
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: mediaQuery,
+                child: child,
               ),
             ),
           ),
