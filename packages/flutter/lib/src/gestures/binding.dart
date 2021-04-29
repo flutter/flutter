@@ -355,19 +355,12 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down) {
-      if (event.kind == PointerDeviceKind.mouse) {
-        assert(_hitTests.containsKey(event.pointer));
-        hitTestResult = HitTestResult();
-        hitTest(hitTestResult, event.position);
-        _hitTests[event.pointer] = hitTestResult;
-      } else {
-        // Because events that occur with the pointer down (like
-        // [PointerMoveEvent]s) should be dispatched to the same place that their
-        // initial PointerDownEvent was, we want to re-use the path we found when
-        // the pointer went down, rather than do hit detection each time we get
-        // such an event.
-        hitTestResult = _hitTests[event.pointer];
-      }
+      // Because events that occur with the pointer down (like
+      // [PointerMoveEvent]s) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
+      hitTestResult = _hitTests[event.pointer];
     }
     assert(() {
       if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
