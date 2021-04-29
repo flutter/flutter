@@ -19,6 +19,7 @@ import '../base/platform.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../project.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
 import 'source.dart';
@@ -102,8 +103,7 @@ class BuildSystemConfig {
 ///
 /// Most targets will invoke an external binary which makes unit testing
 /// trickier. It is recommend that for unit testing that a Fake is used and
-/// provided via the dependency injection system. a [Testbed] may be used to
-/// set up the environment before the test is run. Unit tests should fully
+/// provided via the dependency injection system. Unit tests should fully
 /// exercise the rule, ensuring that the existing input and output verification
 /// logic can run, as well as verifying it correctly handles provided defines
 /// and meets any additional contracts present in the target.
@@ -333,6 +333,7 @@ class Environment {
     @required Platform platform,
     @required String engineVersion,
     @required bool generateDartPluginRegistry,
+    FlutterProject flutterProject,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -374,6 +375,7 @@ class Environment {
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
+      flutterProject: flutterProject,
     );
   }
 
@@ -396,6 +398,7 @@ class Environment {
     @required Logger logger,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
+    FlutterProject flutterProject,
   }) {
     return Environment(
       projectDir: projectDir ?? testDirectory,
@@ -412,6 +415,7 @@ class Environment {
       platform: platform ?? FakePlatform(),
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
+      flutterProject: flutterProject,
     );
   }
 
@@ -431,6 +435,7 @@ class Environment {
     @required this.engineVersion,
     @required this.inputs,
     @required this.generateDartPluginRegistry,
+    @required this.flutterProject,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -507,6 +512,9 @@ class Environment {
   final Artifacts artifacts;
 
   final FileSystem fileSystem;
+
+  /// The current flutter project.
+  final FlutterProject flutterProject;
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String engineVersion;

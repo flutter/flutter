@@ -206,7 +206,7 @@ class _NoContext implements AppContext {
   T get<T>() {
     throw UnsupportedError(
       'context.get<$T> is not supported in test methods. '
-      'Use Testbed or testUsingContext if accessing Zone injected '
+      'Use testUsingContext if accessing Zone injected '
       'values.'
     );
   }

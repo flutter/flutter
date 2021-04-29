@@ -973,7 +973,12 @@ class _TestArtifacts implements Artifacts {
 
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
-    return fileSystem.file(artifact.toString());
+    switch (artifact) {
+      case HostArtifact.flutterWebSdk:
+        return fileSystem.directory(artifact.toString());
+      default:
+        return fileSystem.file(artifact.toString());
+    }
   }
 }
 

@@ -17,7 +17,6 @@ import '../../build_info.dart';
 import '../../cache.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
-import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -100,7 +99,7 @@ class WebEntrypointTarget extends Target {
       environment.fileSystem.file(packageFile),
       logger: environment.logger,
     );
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = environment.flutterProject ?? FlutterProject.current();
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
@@ -198,11 +197,11 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
-    final String librariesSpec = (globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
+    final String librariesSpec = (environment.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
     final List<String> sharedCommandOptions = <String>[
-      globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      environment.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
-      globals.artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
+      environment.artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
       '--libraries-spec=$librariesSpec',
       ...?decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
@@ -219,7 +218,7 @@ class Dart2JSTarget extends Target {
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
-    final ProcessResult kernelResult = await globals.processManager.run(<String>[
+    final ProcessResult kernelResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
       '-o',
       environment.buildDir.childFile('app.dill').path,
@@ -250,13 +249,13 @@ class Dart2JSTarget extends Target {
     final File dart2jsDeps = environment.buildDir
       .childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
-      globals.printError('Warning: dart2js did not produced expected deps list at '
+      environment.logger.printError('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
       return;
     }
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     final Depfile depfile = depfileService.parseDart2js(
       environment.buildDir.childFile('app.dill.deps'),
@@ -302,7 +301,7 @@ class WebReleaseBundle extends Target {
   @override
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      final String basename = globals.fs.path.basename(outputFile.path);
+      final String basename = environment.fileSystem.path.basename(outputFile.path);
       if (!basename.contains('main.dart.js')) {
         continue;
       }
@@ -311,11 +310,11 @@ class WebReleaseBundle extends Target {
         continue;
       }
       outputFile.copySync(
-        environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
+        environment.outputDir.childFile(environment.fileSystem.path.basename(outputFile.path)).path
       );
     }
 
-    final String versionInfo = FlutterProject.current().getVersionInfo();
+    final String versionInfo = (environment.flutterProject ?? FlutterProject.current()).getVersionInfo();
     environment.outputDir
         .childFile('version.json')
         .writeAsStringSync(versionInfo);
@@ -327,8 +326,8 @@ class WebReleaseBundle extends Target {
       targetPlatform: TargetPlatform.web_javascript,
     );
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     depfileService.writeToFile(
       depfile,
@@ -345,9 +344,9 @@ class WebReleaseBundle extends Target {
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
     for (final File inputFile in inputResourceFiles) {
-      final File outputFile = globals.fs.file(globals.fs.path.join(
+      final File outputFile = environment.fileSystem.file(environment.fileSystem.path.join(
         environment.outputDir.path,
-        globals.fs.path.relative(inputFile.path, from: webResources.path)));
+        environment.fileSystem.path.relative(inputFile.path, from: webResources.path)));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
@@ -411,7 +410,7 @@ class WebServiceWorker extends Target {
       .listSync(recursive: true)
       .whereType<File>()
       .where((File file) => !file.path.endsWith('flutter_service_worker.js')
-        && !globals.fs.path.basename(file.path).startsWith('.'))
+        && !environment.fileSystem.path.basename(file.path).startsWith('.'))
       .toList();
 
     final Map<String, String> urlToHash = <String, String>{};
@@ -421,15 +420,15 @@ class WebServiceWorker extends Target {
         file.path.endsWith('.part.js.map')) {
         continue;
       }
-      final String url = globals.fs.path.toUri(
-        globals.fs.path.relative(
+      final String url = environment.fileSystem.path.toUri(
+        environment.fileSystem.path.relative(
           file.path,
           from: environment.outputDir.path),
         ).toString();
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
-      if (globals.fs.path.basename(url) == 'index.html') {
+      if (environment.fileSystem.path.basename(url) == 'index.html') {
         urlToHash['/'] = hash;
       }
     }
@@ -457,8 +456,8 @@ class WebServiceWorker extends Target {
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     depfileService.writeToFile(
       depfile,

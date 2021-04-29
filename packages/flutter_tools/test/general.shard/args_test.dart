@@ -10,17 +10,17 @@ import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../src/common.dart';
-import '../src/testbed.dart';
+import '../src/context.dart';
 
 void main() {
-  test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
+  testUsingContext('Help for command line arguments is consistently styled and complete', () {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     executable.generateCommands(
       verboseHelp: true,
       verbose: true,
     ).forEach(runner.addCommand);
     verifyCommandRunner(runner);
-  }));
+  });
 }
 
 void verifyCommandRunner(CommandRunner<Object> runner) {
