@@ -762,7 +762,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
-///     shortcuts: <ShortcutActivator, Intent>{
+///     shortcuts: <LogicalKeySet, Intent>{
 ///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(),
 ///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(),
 ///     },
@@ -869,7 +869,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
-///     shortcuts: <ShortcutActivator, Intent>{
+///     shortcuts: <LogicalKeySet, Intent>{
 ///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(2),
 ///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(2),
 ///     },
