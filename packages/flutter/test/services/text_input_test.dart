@@ -447,8 +447,8 @@ void main() {
         FakeScribbleElement(elementIdentifier: 'other2', bounds: const Rect.fromLTWH(100.0, 100.0, 100.0, 100.0)),
       ];
 
-      final void Function(FakeScribbleElement) registerElements = (FakeScribbleElement element) => TextInput.registerScribbleElement(element.elementIdentifier, element);
-      final void Function(FakeScribbleElement) unregisterElements = (FakeScribbleElement element) => TextInput.unregisterScribbleElement(element.elementIdentifier);
+      void registerElements(FakeScribbleElement element) => TextInput.registerScribbleElement(element.elementIdentifier, element);
+      void unregisterElements(FakeScribbleElement element) => TextInput.unregisterScribbleElement(element.elementIdentifier);
 
       <FakeScribbleElement>[...targetElements, ...otherElements].forEach(registerElements);
 

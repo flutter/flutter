@@ -2426,7 +2426,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }
 
-      _cachedText == '';
+      _cachedText = '';
       _cachedFirstRect = null;
       _cachedSize = Size.zero;
       _cachedPlaceholder = -1;
