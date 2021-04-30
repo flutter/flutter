@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+import 'dart:math' as math;
+
+import '../../util.dart';
+import 'path_utils.dart';
 
 /// Chops cubic at Y extrema points and writes result to [dest].
 ///
 /// [points] and [dest] are allowed to share underlying storage as long.
-int _chopCubicAtYExtrema(Float32List points, Float32List dest) {
+int chopCubicAtYExtrema(Float32List points, Float32List dest) {
   final double y0 = points[1];
   final double y1 = points[3];
   final double y2 = points[5];
   final double y3 = points[7];
-  _QuadRoots _quadRoots = _findCubicExtrema(y0, y1, y2, y3);
+  QuadRoots _quadRoots = _findCubicExtrema(y0, y1, y2, y3);
   final List<double> roots = _quadRoots.roots;
   if (roots.isEmpty) {
     // No roots, just use input cubic.
@@ -30,12 +34,12 @@ int _chopCubicAtYExtrema(Float32List points, Float32List dest) {
   return rootCount;
 }
 
-_QuadRoots _findCubicExtrema(double a, double b, double c, double d) {
+QuadRoots _findCubicExtrema(double a, double b, double c, double d) {
   // A,B,C scaled by 1/3 to simplify
   final double A = d - a + 3 * (b - c);
   final double B = 2 * (a - b - b + c);
   final double C = b - a;
-  return _QuadRoots()..findRoots(A, B, C);
+  return QuadRoots()..findRoots(A, B, C);
 }
 
 /// Subdivides cubic curve for a list of t values.
@@ -72,7 +76,7 @@ void _chopCubicAt(
       bufferPos += 6;
 
       // watch out in case the renormalized t isn't in range
-      if ((t = _validUnitDivide(
+      if ((t = validUnitDivide(
               tValues[i + 1] - tValues[i], 1.0 - tValues[i])) ==
           null) {
         // Can't renormalize last point, just create a degenerate cubic.
@@ -99,18 +103,18 @@ void _chopCubicAtT(Float32List points, int bufferPos, Float32List outPts,
   final double p2y = points[bufferPos + 5];
   final double p3x = points[bufferPos + 6];
   // If startT == 0 chop at end point and return curve.
-  final double ab1x = _interpolate(p0x, p1x, t);
-  final double ab1y = _interpolate(p0y, p1y, t);
-  final double bc1x = _interpolate(p1x, p2x, t);
-  final double bc1y = _interpolate(p1y, p2y, t);
-  final double cd1x = _interpolate(p2x, p3x, t);
-  final double cd1y = _interpolate(p2y, p3y, t);
-  final double abc1x = _interpolate(ab1x, bc1x, t);
-  final double abc1y = _interpolate(ab1y, bc1y, t);
-  final double bcd1x = _interpolate(bc1x, cd1x, t);
-  final double bcd1y = _interpolate(bc1y, cd1y, t);
-  final double abcd1x = _interpolate(abc1x, bcd1x, t);
-  final double abcd1y = _interpolate(abc1y, bcd1y, t);
+  final double ab1x = interpolate(p0x, p1x, t);
+  final double ab1y = interpolate(p0y, p1y, t);
+  final double bc1x = interpolate(p1x, p2x, t);
+  final double bc1y = interpolate(p1y, p2y, t);
+  final double cd1x = interpolate(p2x, p3x, t);
+  final double cd1y = interpolate(p2y, p3y, t);
+  final double abc1x = interpolate(ab1x, bc1x, t);
+  final double abc1y = interpolate(ab1y, bc1y, t);
+  final double bcd1x = interpolate(bc1x, cd1x, t);
+  final double bcd1y = interpolate(bc1y, cd1y, t);
+  final double abcd1x = interpolate(abc1x, bcd1x, t);
+  final double abcd1y = interpolate(abc1y, bcd1y, t);
 
   // Return left side of curve.
   outPts[outIndex++] = p0x;
@@ -134,7 +138,7 @@ void _chopCubicAtT(Float32List points, int bufferPos, Float32List outPts,
 //
 // Options are Newton Raphson (quadratic convergence with typically
 // 3 iterations or bisection with 16 iterations.
-double? _chopMonoAtY(Float32List _buffer, int bufferStartPos, double y) {
+double? chopMonoAtY(Float32List _buffer, int bufferStartPos, double y) {
   // Translate curve points relative to y.
   final double ycrv0 = _buffer[1 + bufferStartPos] - y;
   final double ycrv1 = _buffer[3 + bufferStartPos] - y;
@@ -180,7 +184,7 @@ double? _chopMonoAtY(Float32List _buffer, int bufferStartPos, double y) {
   return (tNeg + tPos) / 2;
 }
 
-double _evalCubicPts(double c0, double c1, double c2, double c3, double t) {
+double evalCubicPts(double c0, double c1, double c2, double c3, double t) {
   double A = c3 + 3 * (c1 - c2) - c0;
   double B = 3 * (c2 - c1 - c1 + c0);
   double C = 3 * (c1 - c0);
@@ -189,7 +193,7 @@ double _evalCubicPts(double c0, double c1, double c2, double c3, double t) {
 }
 
 // Reusable class to compute bounds without object allocation.
-class _CubicBounds {
+class CubicBounds {
   double minX = 0.0;
   double maxX = 0.0;
   double minY = 0.0;
@@ -337,7 +341,7 @@ class _CubicBounds {
 }
 
 /// Chops cubic spline at startT and stopT, writes result to buffer.
-void _chopCubicBetweenT(
+void chopCubicBetweenT(
     List<double> points, double startT, double stopT, Float32List buffer) {
   assert(startT != 0 || stopT != 0);
   final double p3y = points[7];
@@ -352,18 +356,18 @@ void _chopCubicBetweenT(
   final bool chopStart = startT != 0;
   final double t = chopStart ? startT : stopT;
 
-  final double ab1x = _interpolate(p0x, p1x, t);
-  final double ab1y = _interpolate(p0y, p1y, t);
-  final double bc1x = _interpolate(p1x, p2x, t);
-  final double bc1y = _interpolate(p1y, p2y, t);
-  final double cd1x = _interpolate(p2x, p3x, t);
-  final double cd1y = _interpolate(p2y, p3y, t);
-  final double abc1x = _interpolate(ab1x, bc1x, t);
-  final double abc1y = _interpolate(ab1y, bc1y, t);
-  final double bcd1x = _interpolate(bc1x, cd1x, t);
-  final double bcd1y = _interpolate(bc1y, cd1y, t);
-  final double abcd1x = _interpolate(abc1x, bcd1x, t);
-  final double abcd1y = _interpolate(abc1y, bcd1y, t);
+  final double ab1x = interpolate(p0x, p1x, t);
+  final double ab1y = interpolate(p0y, p1y, t);
+  final double bc1x = interpolate(p1x, p2x, t);
+  final double bc1y = interpolate(p1y, p2y, t);
+  final double cd1x = interpolate(p2x, p3x, t);
+  final double cd1y = interpolate(p2y, p3y, t);
+  final double abc1x = interpolate(ab1x, bc1x, t);
+  final double abc1y = interpolate(ab1y, bc1y, t);
+  final double bcd1x = interpolate(bc1x, cd1x, t);
+  final double bcd1y = interpolate(bc1y, cd1y, t);
+  final double abcd1x = interpolate(abc1x, bcd1x, t);
+  final double abcd1y = interpolate(abc1y, bcd1y, t);
   if (!chopStart) {
     // Return left side of curve.
     buffer[0] = p0x;
@@ -391,18 +395,18 @@ void _chopCubicBetweenT(
   // We chopped at startT, now the right hand side of curve is at
   // abcd1, bcd1, cd1, p3x, p3y. Chop this part using endT;
   final double endT = (stopT - startT) / (1 - startT);
-  final double ab2x = _interpolate(abcd1x, bcd1x, endT);
-  final double ab2y = _interpolate(abcd1y, bcd1y, endT);
-  final double bc2x = _interpolate(bcd1x, cd1x, endT);
-  final double bc2y = _interpolate(bcd1y, cd1y, endT);
-  final double cd2x = _interpolate(cd1x, p3x, endT);
-  final double cd2y = _interpolate(cd1y, p3y, endT);
-  final double abc2x = _interpolate(ab2x, bc2x, endT);
-  final double abc2y = _interpolate(ab2y, bc2y, endT);
-  final double bcd2x = _interpolate(bc2x, cd2x, endT);
-  final double bcd2y = _interpolate(bc2y, cd2y, endT);
-  final double abcd2x = _interpolate(abc2x, bcd2x, endT);
-  final double abcd2y = _interpolate(abc2y, bcd2y, endT);
+  final double ab2x = interpolate(abcd1x, bcd1x, endT);
+  final double ab2y = interpolate(abcd1y, bcd1y, endT);
+  final double bc2x = interpolate(bcd1x, cd1x, endT);
+  final double bc2y = interpolate(bcd1y, cd1y, endT);
+  final double cd2x = interpolate(cd1x, p3x, endT);
+  final double cd2y = interpolate(cd1y, p3y, endT);
+  final double abc2x = interpolate(ab2x, bc2x, endT);
+  final double abc2y = interpolate(ab2y, bc2y, endT);
+  final double bcd2x = interpolate(bc2x, cd2x, endT);
+  final double bcd2y = interpolate(bc2y, cd2y, endT);
+  final double abcd2x = interpolate(abc2x, bcd2x, endT);
+  final double abcd2y = interpolate(abc2y, bcd2y, endT);
   buffer[0] = abcd1x;
   buffer[1] = abcd1y;
   buffer[2] = ab2x;

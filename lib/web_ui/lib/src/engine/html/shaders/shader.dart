@@ -20,14 +20,14 @@ abstract class EngineGradient implements ui.Gradient {
 class GradientSweep extends EngineGradient {
   GradientSweep(this.center, this.colors, this.colorStops, this.tileMode,
       this.startAngle, this.endAngle, this.matrix4)
-      : assert(_offsetIsValid(center)),
+      : assert(offsetIsValid(center)),
         assert(colors != null), // ignore: unnecessary_null_comparison
         assert(tileMode != null), // ignore: unnecessary_null_comparison
         assert(startAngle != null), // ignore: unnecessary_null_comparison
         assert(endAngle != null), // ignore: unnecessary_null_comparison
         assert(startAngle < endAngle),
         super._() {
-    _validateColorStops(colors, colorStops);
+    validateColorStops(colors, colorStops);
   }
 
   @override
@@ -155,14 +155,14 @@ class GradientLinear extends EngineGradient {
     this.colorStops,
     this.tileMode,
     Float32List? matrix,
-  )   : assert(_offsetIsValid(from)),
-        assert(_offsetIsValid(to)),
+  )   : assert(offsetIsValid(from)),
+        assert(offsetIsValid(to)),
         assert(colors != null), // ignore: unnecessary_null_comparison
         assert(tileMode != null), // ignore: unnecessary_null_comparison
-        this.matrix4 = matrix == null ? null : _FastMatrix32(matrix),
+        this.matrix4 = matrix == null ? null : FastMatrix32(matrix),
         super._() {
     if (assertionsEnabled) {
-      _validateColorStops(colors, colorStops);
+      validateColorStops(colors, colorStops);
     }
   }
 
@@ -171,7 +171,7 @@ class GradientLinear extends EngineGradient {
   final List<ui.Color> colors;
   final List<double>? colorStops;
   final ui.TileMode tileMode;
-  final _FastMatrix32? matrix4;
+  final FastMatrix32? matrix4;
 
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
@@ -185,7 +185,7 @@ class GradientLinear extends EngineGradient {
 
   html.CanvasGradient _createCanvasGradient(html.CanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
-    _FastMatrix32? matrix4 = this.matrix4;
+    FastMatrix32? matrix4 = this.matrix4;
     html.CanvasGradient gradient;
     final double offsetX = shaderBounds!.left;
     final double offsetY = shaderBounds.top;
