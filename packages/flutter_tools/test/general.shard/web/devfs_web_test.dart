@@ -37,7 +37,7 @@ void main() {
   Platform linux;
   PackageConfig packages;
   Platform windows;
-  MockHttpServer mockHttpServer;
+  FakeHttpServer httpServer;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -46,12 +46,12 @@ void main() {
   });
 
   setUp(() {
-    mockHttpServer = MockHttpServer();
+    httpServer = FakeHttpServer();
     linux = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     testbed = Testbed(setup: () {
       webAssetServer = WebAssetServer(
-        mockHttpServer,
+        httpServer,
         packages,
         InternetAddress.loopbackIPv4,
         null,
@@ -232,7 +232,7 @@ void main() {
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
     final WebAssetServer webAssetServer = WebAssetServer(
-      mockHttpServer,
+      httpServer,
       packages,
       InternetAddress.loopbackIPv4,
       null,
@@ -251,7 +251,7 @@ void main() {
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
     final WebAssetServer webAssetServer = WebAssetServer(
-      mockHttpServer,
+      httpServer,
       packages,
       InternetAddress.loopbackIPv4,
       null,
@@ -272,7 +272,7 @@ void main() {
 
     expect(
       () => WebAssetServer(
-        mockHttpServer,
+        httpServer,
         packages,
         InternetAddress.loopbackIPv4,
         null,
@@ -292,7 +292,7 @@ void main() {
 
     expect(
       () => WebAssetServer(
-        mockHttpServer,
+        httpServer,
         packages,
         InternetAddress.loopbackIPv4,
         null,
@@ -588,7 +588,7 @@ void main() {
   test('calling dispose closes the http server', () => testbed.run(() async {
     await webAssetServer.dispose();
 
-    expect(mockHttpServer.closed, true);
+    expect(httpServer.closed, true);
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
@@ -599,7 +599,7 @@ void main() {
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler()
+    final ResidentCompiler residentCompiler = FakeResidentCompiler()
       ..output = const CompilerOutput('a', 0, <Uri>[]);
 
     final WebDevFS webDevFS = WebDevFS(
@@ -710,7 +710,7 @@ void main() {
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler()
+    final ResidentCompiler residentCompiler = FakeResidentCompiler()
       ..output = const CompilerOutput('a', 0, <Uri>[]);
 
     final WebDevFS webDevFS = WebDevFS(
@@ -979,7 +979,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync(htmlContent);
     final WebAssetServer webAssetServer = WebAssetServer(
-      MockHttpServer(),
+      FakeHttpServer(),
       PackageConfig.empty,
       InternetAddress.anyIPv4,
       <String, String>{},
@@ -1041,7 +1041,7 @@ void main() {
   }));
 }
 
-class MockHttpServer extends Fake implements HttpServer {
+class FakeHttpServer extends Fake implements HttpServer {
   bool closed = false;
 
   @override
@@ -1050,7 +1050,7 @@ class MockHttpServer extends Fake implements HttpServer {
   }
 }
 
-class MockResidentCompiler extends Fake implements ResidentCompiler {
+class FakeResidentCompiler extends Fake implements ResidentCompiler {
   CompilerOutput output;
 
   @override
