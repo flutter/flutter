@@ -62,6 +62,8 @@ String getBranchName(Branch branch) {
       return 'dev';
     case Branch.stable:
       return 'stable';
+    case Branch.testbinariesonpublish: // TODO
+      return 'testbinariesonpublish';
   }
   return null;
 }
