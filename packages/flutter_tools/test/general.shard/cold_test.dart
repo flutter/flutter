@@ -26,13 +26,13 @@ void main() {
   testUsingContext('Exits with code 2 when when HttpException is thrown '
     'during VM service connection', () async {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    final MockDevice mockDevice = MockDevice()
+    final FakeDevice device = FakeDevice()
       ..supportsHotReload = true
       ..supportsHotRestart = false;
 
     final List<FlutterDevice> devices = <FlutterDevice>[
       TestFlutterDevice(
-        device: mockDevice,
+        device: device,
         generator: residentCompiler,
         exception: const HttpException('Connection closed before full header was received, '
             'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
@@ -50,22 +50,22 @@ void main() {
 
   group('cleanupAtFinish()', () {
     testUsingContext('disposes each device', () async {
-      final MockDevice mockDevice1 = MockDevice();
-      final MockDevice mockDevice2 = MockDevice();
-      final MockFlutterDevice mockFlutterDevice1 = MockFlutterDevice(mockDevice1);
-      final MockFlutterDevice mockFlutterDevice2 = MockFlutterDevice(mockDevice2);
+      final FakeDevice device1 = FakeDevice();
+      final FakeDevice device2 = FakeDevice();
+      final FakeFlutterDevice flutterDevice1 = FakeFlutterDevice(device1);
+      final FakeFlutterDevice flutterDevice2 = FakeFlutterDevice(device2);
 
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice1, mockFlutterDevice2];
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
       await ColdRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
       ).cleanupAtFinish();
 
-      expect(mockFlutterDevice1.stopEchoingDeviceLogCount, 1);
-      expect(mockFlutterDevice2.stopEchoingDeviceLogCount, 1);
-      expect(mockDevice2.wasDisposed, true);
-      expect(mockDevice1.wasDisposed, true);
+      expect(flutterDevice1.stopEchoingDeviceLogCount, 1);
+      expect(flutterDevice2.stopEchoingDeviceLogCount, 1);
+      expect(device2.wasDisposed, true);
+      expect(device1.wasDisposed, true);
     });
   });
 
@@ -78,10 +78,10 @@ void main() {
     });
 
     testUsingContext('calls runCold on attached device', () async {
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice(mockDevice)
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device)
         ..runColdCode = 1;
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
@@ -96,9 +96,9 @@ void main() {
     });
 
     testUsingContext('with traceStartup, no env variable', () async {
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice(mockDevice);
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
@@ -121,9 +121,9 @@ void main() {
     testUsingContext('with traceStartup, env variable', () async {
       fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice(mockDevice);
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
         devices,
@@ -145,8 +145,8 @@ void main() {
   });
 }
 
-class MockFlutterDevice extends Fake implements FlutterDevice {
-  MockFlutterDevice(this.device);
+class FakeFlutterDevice extends Fake implements FlutterDevice {
+  FakeFlutterDevice(this.device);
 
   @override
   Stream<Uri> get observatoryUris => const Stream<Uri>.empty();
@@ -175,7 +175,7 @@ class MockFlutterDevice extends Fake implements FlutterDevice {
   Future<void> initLogReader() async { }
 }
 
-class MockDevice extends Fake implements Device {
+class FakeDevice extends Fake implements Device {
   @override
   bool isSupported() => true;
 
