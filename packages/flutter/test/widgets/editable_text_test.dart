@@ -117,8 +117,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals(serializedActionName));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
   // Regression test for https://github.com/flutter/flutter/issues/34538.
@@ -234,10 +233,8 @@ void main() {
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.maxLines, equals(1));
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.text'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
   testWidgets('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
@@ -345,7 +342,8 @@ void main() {
   });
 
   group('Infer keyboardType from autofillHints', () {
-    testWidgets('infer keyboard types from autofillHints: ios',
+    testWidgets(
+      'infer keyboard types from autofillHints: ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
@@ -379,9 +377,12 @@ void main() {
           // on iOS and macOS.
           kIsWeb ? equals('TextInputType.address') : equals('TextInputType.name'),
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    );
 
-    testWidgets('infer keyboard types from autofillHints: non-ios',
+    testWidgets(
+      'infer keyboard types from autofillHints: non-ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
@@ -410,9 +411,11 @@ void main() {
         await tester.idle();
         expect(tester.testTextInput.editingState!['text'], equals('test'));
         expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.address'));
-      });
+      },
+    );
 
-    testWidgets('inferred keyboard types can be overridden: ios',
+    testWidgets(
+      'inferred keyboard types can be overridden: ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
@@ -442,9 +445,12 @@ void main() {
         await tester.idle();
         expect(tester.testTextInput.editingState!['text'], equals('test'));
         expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    );
 
-    testWidgets('inferred keyboard types can be overridden: non-ios',
+    testWidgets(
+      'inferred keyboard types can be overridden: non-ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
@@ -474,7 +480,8 @@ void main() {
         await tester.idle();
         expect(tester.testTextInput.editingState!['text'], equals('test'));
         expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
-    });
+      },
+    );
   });
 
   testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
@@ -504,10 +511,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.newline'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
@@ -537,10 +542,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.visiblePassword'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.visiblePassword'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
   testWidgets('enableSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
@@ -838,10 +841,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.newline'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
   testWidgets('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
@@ -872,10 +873,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.text'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
   testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1', (WidgetTester tester) async {
@@ -906,10 +905,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.phone'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.phone'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
   testWidgets('multiline keyboard is requested when set implicitly', (WidgetTester tester) async {
@@ -939,10 +936,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.newline'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
   testWidgets('single line inputs have correct default keyboard', (WidgetTester tester) async {
@@ -972,10 +967,8 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs!['inputType']['name'],
-        equals('TextInputType.text'));
-    expect(tester.testTextInput.setClientArgs!['inputAction'],
-        equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs!['inputType']['name'], equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
   testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
@@ -1625,8 +1618,9 @@ void main() {
         home: Column(
           children: <Widget>[
             TextButton(
-                child: Text('Previous Widget', key: previousKey),
-                onPressed: () {}),
+              child: Text('Previous Widget', key: previousKey),
+              onPressed: () {},
+            ),
             EditableText(
               backgroundCursorColor: Colors.grey,
               controller: TextEditingController(),
@@ -1638,7 +1632,9 @@ void main() {
               autofocus: true,
             ),
             TextButton(
-                child: Text('Next Widget', key: nextKey), onPressed: () {}),
+              child: Text('Next Widget', key: nextKey),
+              onPressed: () {},
+            ),
           ],
         ),
       );
@@ -1938,7 +1934,8 @@ void main() {
       focusNode.unfocus();
       await tester.pump();
       verifyAutocorrectionRectVisibility(expectVisible: false);
-  });
+    },
+  );
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
     final TextEditingController controller1 =
@@ -2295,8 +2292,11 @@ void main() {
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 3);
@@ -2317,14 +2317,23 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 0);
@@ -2344,8 +2353,11 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorForwardByCharacter,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 1);
@@ -2389,8 +2401,11 @@ void main() {
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByWord,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 9);
@@ -2411,15 +2426,21 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByWord,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 5);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByWord,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 0);
@@ -2439,15 +2460,21 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorForwardByWord,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 5);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorForwardByWord,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 9);
@@ -2492,8 +2519,11 @@ void main() {
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 4);
@@ -2514,14 +2544,23 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 4);
@@ -2541,15 +2580,21 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorForwardByCharacter,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 1);
     expect(controller.selection.extentOffset, 1);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorForwardByCharacter, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorForwardByCharacter,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 1);
@@ -2594,8 +2639,11 @@ void main() {
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByWord, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByWord,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 14);
@@ -2616,15 +2664,21 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByWord, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByWord,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 5);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorBackwardByWord, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorBackwardByWord,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 14);
@@ -2644,15 +2698,21 @@ void main() {
       ),
     );
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorForwardByWord,
+      doNotExtendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 5);
 
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(semanticsId,
-        SemanticsAction.moveCursorForwardByWord, extendSelection);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      semanticsId,
+      SemanticsAction.moveCursorForwardByWord,
+      extendSelection,
+    );
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 5);
@@ -2700,9 +2760,9 @@ void main() {
                           textDirection: TextDirection.ltr,
                         ),
                       ],
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ],
@@ -2755,7 +2815,7 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
+                  ],
                 ),
               ],
             ),
@@ -2813,8 +2873,8 @@ void main() {
                         ),
                       ],
                     ),
-                  ]
-                )
+                  ],
+                ),
               ],
             ),
           ],
@@ -3014,14 +3074,13 @@ void main() {
                               SemanticsAction.paste,
                             ],
                             value: 'test',
-                            textSelection: TextSelection.collapsed(
-                              offset: controller.text.length),
+                            textSelection: TextSelection.collapsed(offset: controller.text.length),
                             textDirection: TextDirection.ltr,
                           ),
                         ],
                       ),
-                    ]
-                  )
+                    ],
+                  ),
                 ],
               ),
             ],
@@ -3087,8 +3146,7 @@ void main() {
                             SemanticsAction.setText,
                           ],
                           value: '',
-                          textSelection: TextSelection.collapsed(
-                              offset: controller.text.length),
+                          textSelection: TextSelection.collapsed(offset: controller.text.length),
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -3184,7 +3242,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          devicePixelRatio: 1.0
+          devicePixelRatio: 1.0,
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -3215,7 +3273,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-            devicePixelRatio: 1.0
+          devicePixelRatio: 1.0,
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -3256,7 +3314,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-            devicePixelRatio: 1.0
+          devicePixelRatio: 1.0,
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -3533,7 +3591,9 @@ void main() {
         tester.testTextInput.log.clear();
 
         controller.value = TextEditingValue(
-          text: 'a' * 50, selection: const TextSelection(baseOffset: 0, extentOffset: 0));
+          text: 'a' * 50,
+          selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+        );
         await tester.pump();
 
         expect(tester.testTextInput.log, contains(
@@ -3543,10 +3603,12 @@ void main() {
             args: allOf(
               containsPair('x', equals(0)),
               containsPair('y', equals(0)),
-            )
+            ),
           ),
         ));
-    }, skip: isBrowser); // Related to https://github.com/flutter/flutter/issues/66089
+      },
+      skip: isBrowser, // Related to https://github.com/flutter/flutter/issues/66089
+    );
 
     testWidgets(
       'only send updates when necessary',
@@ -3563,18 +3625,22 @@ void main() {
         await tester.pump();
 
         expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
-    });
+      },
+    );
 
     testWidgets(
       'not sent with selection',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(
-          text: 'a' * 100, selection: const TextSelection(baseOffset: 0, extentOffset: 10));
+          text: 'a' * 100,
+          selection: const TextSelection(baseOffset: 0, extentOffset: 10),
+        );
         await tester.pumpWidget(builder());
         await tester.showKeyboard(find.byType(EditableText));
 
         expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
-    });
+      },
+    );
   });
 
   group('setMarkedTextRect', () {
@@ -3634,7 +3700,9 @@ void main() {
             args: containsPair('width', greaterThanOrEqualTo(10)),
           ),
         ));
-    }, skip: isBrowser); // Related to https://github.com/flutter/flutter/issues/66089
+      },
+      skip: isBrowser, // Related to https://github.com/flutter/flutter/issues/66089
+    );
 
     testWidgets(
       'only send updates when necessary',
@@ -3651,7 +3719,8 @@ void main() {
         await tester.pump();
 
         expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setMarkedTextRect'))));
-    });
+      },
+    );
 
     testWidgets(
       'zero matrix paint transform',
@@ -3670,7 +3739,8 @@ void main() {
             containsPair('y', isNotNaN),
           ),
         )));
-    });
+      },
+    );
   });
 
 
@@ -3686,7 +3756,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-            devicePixelRatio: 1.0
+          devicePixelRatio: 1.0,
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -4002,18 +4072,21 @@ void main() {
     }
     if (shortcutModifier) {
       await tester.sendKeyDownEvent(
-          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
-          platform: platform);
+        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
     }
     if (wordModifier) {
       await tester.sendKeyDownEvent(
-          platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
-          platform: platform);
+        platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
     }
     if (lineModifier) {
       await tester.sendKeyDownEvent(
-          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
-          platform: platform);
+        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+        platform: platform,
+      );
     }
     for (final LogicalKeyboardKey key in keys) {
       await tester.sendKeyEvent(key, platform: platform);
@@ -4021,18 +4094,21 @@ void main() {
     }
     if (lineModifier) {
       await tester.sendKeyUpEvent(
-          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
-          platform: platform);
+        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+        platform: platform,
+      );
     }
     if (wordModifier) {
       await tester.sendKeyUpEvent(
-          platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
-          platform: platform);
+        platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
     }
     if (shortcutModifier) {
       await tester.sendKeyUpEvent(
-          platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
-          platform: platform);
+        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
     }
     if (shift) {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
@@ -4630,10 +4706,12 @@ void main() {
     );
     expect(
       controller.text,
-      equals('Now  time for\n'
-          'all good people\n'
-          'to come to the aid\n'
-          'of their country.'),
+      equals(
+        'Now  time for\n'
+        'all good people\n'
+        'to come to the aid\n'
+        'of their country.',
+      ),
       reason: 'on $platform',
     );
     expect(
@@ -4719,180 +4797,183 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
-  testWidgets('keyboard shortcuts respect read-only', (WidgetTester tester) async {
-    final String platform = describeEnum(defaultTargetPlatform).toLowerCase();
-    final TextEditingController controller = TextEditingController(text: testText);
-    controller.selection = const TextSelection(
-      baseOffset: 0,
-      extentOffset: testText.length ~/2,
-      affinity: TextAffinity.upstream,
-    );
-    TextSelection? selection;
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 400,
-          child: EditableText(
-            readOnly: true,
-            controller: controller,
-            autofocus: true,
-            focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
-            selectionControls: materialTextSelectionControls,
-            keyboardType: TextInputType.text,
-            textAlign: TextAlign.right,
-            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
-              selection = newSelection;
-            },
+  testWidgets(
+    'keyboard shortcuts respect read-only',
+    (WidgetTester tester) async {
+      final String platform = describeEnum(defaultTargetPlatform).toLowerCase();
+      final TextEditingController controller = TextEditingController(text: testText);
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: testText.length ~/2,
+        affinity: TextAffinity.upstream,
+      );
+      TextSelection? selection;
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: EditableText(
+              readOnly: true,
+              controller: controller,
+              autofocus: true,
+              focusNode: FocusNode(),
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+                selection = newSelection;
+              },
+            ),
           ),
         ),
-      ),
-    ));
+      ));
 
-    await tester.pump(); // Wait for autofocus to take effect.
+      await tester.pump(); // Wait for autofocus to take effect.
 
-    const String clipboardContent = 'read-only';
-    await Clipboard.setData(const ClipboardData(text: clipboardContent));
+      const String clipboardContent = 'read-only';
+      await Clipboard.setData(const ClipboardData(text: clipboardContent));
 
-    // Paste
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyV,
-      ],
-      shortcutModifier: true,
-      platform: platform,
-    );
+      // Paste
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyV,
+        ],
+        shortcutModifier: true,
+        platform: platform,
+      );
 
-    expect(selection, isNull, reason: 'on $platform');
-    expect(controller.text, equals(testText), reason: 'on $platform');
+      expect(selection, isNull, reason: 'on $platform');
+      expect(controller.text, equals(testText), reason: 'on $platform');
 
-    // Select All
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyA,
-      ],
-      shortcutModifier: true,
-      platform: platform,
-    );
+      // Select All
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyA,
+        ],
+        shortcutModifier: true,
+        platform: platform,
+      );
 
-    expect(
-      selection!,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+      expect(
+        selection!,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: testText.length,
+            affinity: TextAffinity.upstream,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, equals(testText), reason: 'on $platform');
+        reason: 'on $platform',
+      );
+      expect(controller.text, equals(testText), reason: 'on $platform');
 
-    // Cut
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyX,
-      ],
-      shortcutModifier: true,
-      platform: platform,
-    );
+      // Cut
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyX,
+        ],
+        shortcutModifier: true,
+        platform: platform,
+      );
 
-    expect(
-      selection!,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+      expect(
+        selection!,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: testText.length,
+            affinity: TextAffinity.upstream,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, equals(testText), reason: 'on $platform');
-    expect(
-      (await Clipboard.getData(Clipboard.kTextPlain))!.text,
-      equals(clipboardContent),
-      reason: 'on $platform',
-    );
+        reason: 'on $platform',
+      );
+      expect(controller.text, equals(testText), reason: 'on $platform');
+      expect(
+        (await Clipboard.getData(Clipboard.kTextPlain))!.text,
+        equals(clipboardContent),
+        reason: 'on $platform',
+      );
 
-    // Copy
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyC,
-      ],
-      shortcutModifier: true,
-      platform: platform,
-    );
+      // Copy
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyC,
+        ],
+        shortcutModifier: true,
+        platform: platform,
+      );
 
-    expect(
-      selection!,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+      expect(
+        selection!,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: testText.length,
+            affinity: TextAffinity.upstream,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, equals(testText), reason: 'on $platform');
-    expect(
-      (await Clipboard.getData(Clipboard.kTextPlain))!.text,
-      equals(testText),
-      reason: 'on $platform',
-    );
+        reason: 'on $platform',
+      );
+      expect(controller.text, equals(testText), reason: 'on $platform');
+      expect(
+        (await Clipboard.getData(Clipboard.kTextPlain))!.text,
+        equals(testText),
+        reason: 'on $platform',
+      );
 
-    // Delete
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.delete,
-      ],
-      platform: platform,
-    );
-    expect(
-      selection!,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+      // Delete
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.delete,
+        ],
+        platform: platform,
+      );
+      expect(
+        selection!,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: testText.length,
+            affinity: TextAffinity.upstream,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, equals(testText), reason: 'on $platform');
+        reason: 'on $platform',
+      );
+      expect(controller.text, equals(testText), reason: 'on $platform');
 
-    // Backspace
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.backspace,
-      ],
-      platform: platform,
-    );
-    expect(
-      selection!,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: testText.length,
-          affinity: TextAffinity.upstream,
+      // Backspace
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.backspace,
+        ],
+        platform: platform,
+      );
+      expect(
+        selection!,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: testText.length,
+            affinity: TextAffinity.upstream,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, equals(testText), reason: 'on $platform');
-  },
-  skip: kIsWeb,
-  variant: TargetPlatformVariant.all());
+        reason: 'on $platform',
+      );
+      expect(controller.text, equals(testText), reason: 'on $platform');
+    },
+    skip: kIsWeb,
+    variant: TargetPlatformVariant.all(),
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
@@ -6159,7 +6240,7 @@ void main() {
       '[9]: aaaaaaa, aa',
       '[9]: deleting aaaaaaa',
       '[10]: aa, aaaaaaaaa',
-      '[10]: normal aaaaaaaaaaaaaaaaaaaa'
+      '[10]: normal aaaaaaaaaaaaaaaaaaaa',
     ];
 
     expect(formatter.log, referenceLog);
@@ -7468,8 +7549,7 @@ class MockTextFormatter extends TextInputFormatter {
   }
 
 
-  TextEditingValue _handleTextDeletion(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue _handleTextDeletion(TextEditingValue oldValue, TextEditingValue newValue) {
     final String result = 'a' * (formatCallCount - 2);
     log.add('[$formatCallCount]: deleting $result');
     return TextEditingValue(text: newValue.text, selection: newValue.selection, composing: newValue.composing);
@@ -7593,7 +7673,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
   Widget build(BuildContext context) {
     return MediaQuery(
       data: const MediaQueryData(
-          devicePixelRatio: 1.0
+        devicePixelRatio: 1.0,
       ),
       child: Directionality(
         textDirection: TextDirection.ltr,

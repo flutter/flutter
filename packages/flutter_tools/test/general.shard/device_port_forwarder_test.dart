@@ -4,9 +4,10 @@
 
 // @dart = 2.8
 
+import 'dart:io' as io; // ignore: dart_io_import
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -19,12 +20,20 @@ void main() {
   });
 
   testUsingContext('dispose kills process if process was available', () {
-    final MockProcess mockProcess = MockProcess();
-    final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, mockProcess);
+    final FakeProcess process = FakeProcess();
+    final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, process);
     forwardedPort.dispose();
+
     expect(forwardedPort.context, isNotNull);
-    verify(mockProcess.kill());
+    expect(process.killed, true);
   });
 }
 
-class MockProcess extends Mock implements Process {}
+class FakeProcess extends Fake implements Process {
+  bool killed = false;
+
+  @override
+  bool kill([io.ProcessSignal signal =  io.ProcessSignal.sigterm])  {
+    return killed = true;
+  }
+}
