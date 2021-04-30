@@ -467,6 +467,7 @@ void main() {
             return 'q';
           }),
         ],
+        logging: false,
       );
       expect(result.exitCode, 0);
       expect(result.stdout, <Object>[
