@@ -202,6 +202,11 @@ class Layer {
     needs_system_composite_ = value;
   }
 
+  bool subtree_has_platform_view() const { return subtree_has_platform_view_; }
+  void set_subtree_has_platform_view(bool value) {
+    subtree_has_platform_view_ = value;
+  }
+
   // Returns the paint bounds in the layer's local coordinate system
   // as determined during Preroll().  The bounds should include any
   // transform, clip or distortions performed by the layer itself,
@@ -229,6 +234,16 @@ class Layer {
   // Determines if the Paint() method is necessary based on the properties
   // of the indicated PaintContext object.
   bool needs_painting(PaintContext& context) const {
+    if (subtree_has_platform_view_) {
+      // Workaround for the iOS embedder. The iOS embedder expects that
+      // if we preroll it, then we will later call its Paint() method.
+      // Now that we preroll all layers without any culling, we may
+      // call its Preroll() without calling its Paint(). For now, we
+      // will not perform paint culling on any subtree that has a
+      // platform view.
+      // See https://github.com/flutter/flutter/issues/81419
+      return true;
+    }
     // Workaround for Skia bug (quickReject does not reject empty bounds).
     // https://bugs.chromium.org/p/skia/issues/detail?id=10951
     if (paint_bounds_.isEmpty()) {
@@ -264,6 +279,7 @@ class Layer {
   uint64_t unique_id_;
   uint64_t original_layer_id_;
   bool needs_system_composite_;
+  bool subtree_has_platform_view_;
 
   static uint64_t NextUniqueID();
 

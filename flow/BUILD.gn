@@ -112,6 +112,8 @@ if (enable_unittests) {
       "testing/gl_context_switch_test.cc",
       "testing/gl_context_switch_test.h",
       "testing/layer_test.h",
+      "testing/mock_embedder.cc",
+      "testing/mock_embedder.h",
       "testing/mock_layer.cc",
       "testing/mock_layer.h",
       "testing/mock_raster_cache.cc",
