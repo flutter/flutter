@@ -4,6 +4,9 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class CustomDevicesCommand extends FlutterCommand {
@@ -47,14 +50,20 @@ class CustomDevicesResetCommand extends CustomDevicesSubCommand {
   CustomDevicesResetCommand();
 
   @override
-  String get description => 'Reset the config file to its default.';
+  String get description => '''
+Reset the custom devices config file to it's default.
+
+The current config file will be backed up. A `.bak` will be appended to the
+file name of the current config file. If a file already exists with that `.bak`
+file name, it will be deleted.
+''';
 
   @override
   String get name => 'reset';
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    throw UnimplementedError();
+    
   }
 }
 
