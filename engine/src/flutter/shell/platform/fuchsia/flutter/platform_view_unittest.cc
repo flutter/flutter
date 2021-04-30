@@ -597,7 +597,7 @@ TEST_F(PlatformViewTests, CreateViewTest) {
   // Test wireframe callback function. If the message sent to the platform
   // view was properly handled and parsed, this function should be called,
   // setting |wireframe_enabled| to true.
-  int64_t create_view_called = false;
+  bool create_view_called = false;
   auto CreateViewCallback = [&create_view_called](
                                 int64_t view_id,
                                 flutter_runner::ViewIdCallback on_view_bound,
@@ -651,9 +651,10 @@ TEST_F(PlatformViewTests, UpdateViewTest) {
   // Test wireframe callback function. If the message sent to the platform
   // view was properly handled and parsed, this function should be called,
   // setting |wireframe_enabled| to true.
-  int64_t update_view_called = false;
+  bool update_view_called = false;
   auto UpdateViewCallback = [&update_view_called](
-                                int64_t view_id, bool hit_testable,
+                                int64_t view_id, SkRect occlusion_hint,
+                                bool hit_testable,
                                 bool focusable) { update_view_called = true; };
 
   flutter_runner::PlatformView platform_view =
@@ -707,7 +708,7 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
   // Test wireframe callback function. If the message sent to the platform
   // view was properly handled and parsed, this function should be called,
   // setting |wireframe_enabled| to true.
-  int64_t destroy_view_called = false;
+  bool destroy_view_called = false;
   auto DestroyViewCallback =
       [&destroy_view_called](int64_t view_id,
                              flutter_runner::ViewIdCallback on_view_unbound) {

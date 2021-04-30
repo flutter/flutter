@@ -23,6 +23,7 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkPoint.h"
+#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
@@ -94,7 +95,10 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   void EnableWireframe(bool enable);
   void CreateView(int64_t view_id, ViewIdCallback on_view_bound);
   void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
-  void SetViewProperties(int64_t view_id, bool hit_testable, bool focusable);
+  void SetViewProperties(int64_t view_id,
+                         const SkRect& occlusion_hint,
+                         bool hit_testable,
+                         bool focusable);
 
  private:
   // Reset state for a new frame.
@@ -124,13 +128,15 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
     SkPoint offset = SkPoint::Make(0.f, 0.f);
     SkSize scale = SkSize::MakeEmpty();
     SkSize size = SkSize::MakeEmpty();
+    SkRect occlusion_hint = SkRect::MakeEmpty();
     float elevation = 0.f;
     float opacity = 1.f;
-    bool hit_testable = false;
-    bool focusable = false;
+    bool hit_testable = true;
+    bool focusable = true;
 
-    bool pending_hit_testable = false;
-    bool pending_focusable = false;
+    SkRect pending_occlusion_hint = SkRect::MakeEmpty();
+    bool pending_hit_testable = true;
+    bool pending_focusable = true;
   };
 
   struct ScenicLayer {

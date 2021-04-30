@@ -19,6 +19,7 @@
 #include "flutter/fml/task_runner.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkPoint.h"
+#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
@@ -45,7 +46,7 @@ class ViewHolder {
 
   ~ViewHolder() = default;
 
-  // Sets the properties/opacity of the child view by issuing a Scenic command.
+  // Sets the properties of the child view by issuing a Scenic command.
   void SetProperties(double width,
                      double height,
                      double insetTop,
@@ -59,15 +60,14 @@ class ViewHolder {
   void UpdateScene(scenic::Session* session,
                    scenic::ContainerNode& container_node,
                    const SkPoint& offset,
-                   const SkSize& size,
-                   SkAlpha opacity,
-                   bool hit_testable);
+                   SkAlpha opacity);
 
-  bool hit_testable() { return hit_testable_; }
-  void set_hit_testable(bool value) { hit_testable_ = value; }
-
-  bool focusable() { return focusable_; }
-  void set_focusable(bool value) { focusable_ = value; }
+  // Alters various apsects of the ViewHolder's ViewProperties.  The updates
+  // are applied to Scenic on the new |UpdateScene| call.
+  void set_hit_testable(bool value);
+  void set_focusable(bool value);
+  void set_size(const SkSize& size);
+  void set_occlusion_hint(const SkRect& occlusion_hint);
 
  private:
   ViewHolder(fuchsia::ui::views::ViewHolderToken view_holder_token,
@@ -78,14 +78,11 @@ class ViewHolder {
   std::unique_ptr<scenic::ViewHolder> view_holder_;
 
   fuchsia::ui::views::ViewHolderToken pending_view_holder_token_;
-
-  bool hit_testable_ = true;
-  bool focusable_ = true;
-
   ViewIdCallback on_view_created_;
 
-  fuchsia::ui::gfx::ViewProperties pending_properties_;
-  bool has_pending_properties_ = false;
+  fuchsia::ui::gfx::HitTestBehavior hit_test_behavior_ =
+      fuchsia::ui::gfx::HitTestBehavior::kDefault;
+  fuchsia::ui::gfx::ViewProperties view_properties_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ViewHolder);
 };

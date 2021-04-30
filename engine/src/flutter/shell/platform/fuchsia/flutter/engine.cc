@@ -180,9 +180,9 @@ Engine::Engine(Delegate& delegate,
       &Engine::CreateView, this, std::placeholders::_1, std::placeholders::_2,
       std::placeholders::_3, std::placeholders::_4);
 
-  OnUpdateView on_update_view_callback =
-      std::bind(&Engine::UpdateView, this, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3);
+  OnUpdateView on_update_view_callback = std::bind(
+      &Engine::UpdateView, this, std::placeholders::_1, std::placeholders::_2,
+      std::placeholders::_3, std::placeholders::_4);
 
   OnDestroyView on_destroy_view_callback = std::bind(
       &Engine::DestroyView, this, std::placeholders::_1, std::placeholders::_2);
@@ -600,28 +600,31 @@ void Engine::CreateView(int64_t view_id,
           FML_CHECK(external_view_embedder_);
           external_view_embedder_->CreateView(view_id,
                                               std::move(on_view_bound));
-          external_view_embedder_->SetViewProperties(view_id, hit_testable,
-                                                     focusable);
+          external_view_embedder_->SetViewProperties(
+              view_id, SkRect::MakeEmpty(), hit_testable, focusable);
         }
       });
 }
 
-void Engine::UpdateView(int64_t view_id, bool hit_testable, bool focusable) {
+void Engine::UpdateView(int64_t view_id,
+                        SkRect occlusion_hint,
+                        bool hit_testable,
+                        bool focusable) {
   FML_CHECK(shell_);
 
   shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
-      [this, view_id, hit_testable, focusable]() {
+      [this, view_id, occlusion_hint, hit_testable, focusable]() {
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
         if (use_legacy_renderer_) {
           FML_CHECK(legacy_external_view_embedder_);
-          legacy_external_view_embedder_->UpdateView(view_id, hit_testable,
-                                                     focusable);
+          legacy_external_view_embedder_->UpdateView(view_id, occlusion_hint,
+                                                     hit_testable, focusable);
         } else
 #endif
         {
           FML_CHECK(external_view_embedder_);
-          external_view_embedder_->SetViewProperties(view_id, hit_testable,
-                                                     focusable);
+          external_view_embedder_->SetViewProperties(view_id, occlusion_hint,
+                                                     hit_testable, focusable);
         }
       });
 }
