@@ -16,8 +16,7 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
 
-//const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter'; TODO
-const String chromiumRepo = 'https://github.com/christopherfujino/flutter';
+const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
@@ -53,7 +52,7 @@ class PreparePackageException implements Exception {
   }
 }
 
-enum Branch { dev, beta, stable, testbinariesonpublish } // TODO
+enum Branch { dev, beta, stable }
 
 String getBranchName(Branch branch) {
   switch (branch) {
@@ -63,8 +62,6 @@ String getBranchName(Branch branch) {
       return 'dev';
     case Branch.stable:
       return 'stable';
-    case Branch.testbinariesonpublish: // TODO
-      return 'testbinariesonpublish';
   }
   return null;
 }
@@ -77,8 +74,6 @@ Branch fromBranchName(String name) {
       return Branch.dev;
     case 'stable':
       return Branch.stable;
-    case 'testbinariesonpublish': // TODO
-      return Branch.testbinariesonpublish;
     default:
       throw ArgumentError('Invalid branch name.');
   }
@@ -298,7 +293,6 @@ class ArchiveCreator {
     await _installMinGitIfNeeded();
     await _populateCaches();
     await _validate();
-    exit(0);
     await _archiveFiles(_outputFile);
     return _outputFile;
   }
@@ -308,7 +302,13 @@ class ArchiveCreator {
   /// Currently only checks that macOS binaries are codesigned. Will throw a
   /// [PreparePackageException] if the test failes.
   Future<void> _validate() async {
-    // TODO only on strict
+    // Only validate in strict mode, which means `--publish`
+    if (!strict) {
+      return;
+    }
+    if (!platform.isMacOS) {
+      return;
+    }
     // Validate that the dart binary is codesigned
     final String dartPath = path.join(
       flutterRoot.absolute.path,
@@ -323,12 +323,15 @@ class ArchiveCreator {
         <String>[
           'codesign',
           '-vvvv',
+          '--check-notarization',
           dartPath,
         ],
         workingDirectory: flutterRoot,
       );
-    } on PreparePackageException {
-      throw PreparePackageException('The binary $dartPath was not codesigned!');
+    } on PreparePackageException catch (e) {
+      throw PreparePackageException(
+        'The binary $dartPath was not codesigned!\n${e.message}',
+      );
     }
   }
 
