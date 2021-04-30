@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
@@ -26,11 +26,9 @@ void main() {
   testUsingContext('Exits with code 2 when when HttpException is thrown '
     'during VM service connection', () async {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    final MockDevice mockDevice = MockDevice();
-    when(mockDevice.supportsHotReload).thenReturn(true);
-    when(mockDevice.supportsHotRestart).thenReturn(false);
-    when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
-    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
+    final MockDevice mockDevice = MockDevice()
+      ..supportsHotReload = true
+      ..supportsHotRestart = false;
 
     final List<FlutterDevice> devices = <FlutterDevice>[
       TestFlutterDevice(
@@ -51,17 +49,11 @@ void main() {
   });
 
   group('cleanupAtFinish()', () {
-    MockFlutterDevice mockFlutterDeviceFactory(Device device) {
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(device);
-      return mockFlutterDevice;
-    }
-
     testUsingContext('disposes each device', () async {
       final MockDevice mockDevice1 = MockDevice();
       final MockDevice mockDevice2 = MockDevice();
-      final MockFlutterDevice mockFlutterDevice1 = mockFlutterDeviceFactory(mockDevice1);
-      final MockFlutterDevice mockFlutterDevice2 = mockFlutterDeviceFactory(mockDevice2);
+      final MockFlutterDevice mockFlutterDevice1 = MockFlutterDevice(mockDevice1);
+      final MockFlutterDevice mockFlutterDevice2 = MockFlutterDevice(mockDevice2);
 
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice1, mockFlutterDevice2];
 
@@ -70,10 +62,10 @@ void main() {
         target: 'main.dart',
       ).cleanupAtFinish();
 
-      verify(mockDevice1.dispose());
       expect(mockFlutterDevice1.stopEchoingDeviceLogCount, 1);
-      verify(mockDevice2.dispose());
       expect(mockFlutterDevice2.stopEchoingDeviceLogCount, 1);
+      expect(mockDevice2.wasDisposed, true);
+      expect(mockDevice1.wasDisposed, true);
     });
   });
 
@@ -87,12 +79,8 @@ void main() {
 
     testUsingContext('calls runCold on attached device', () async {
       final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route')
-      )).thenAnswer((Invocation invocation) => Future<int>.value(1));
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice(mockDevice)
+        ..runColdCode = 1;
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
@@ -105,20 +93,11 @@ void main() {
       );
 
       expect(result, 1);
-      verify(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route'),
-      ));
     });
 
     testUsingContext('with traceStartup, no env variable', () async {
       final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route')
-      )).thenAnswer((Invocation invocation) => Future<int>.value(0));
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice(mockDevice);
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
@@ -143,12 +122,7 @@ void main() {
       fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
       final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockFlutterDevice.runCold(
-          coldRunner: anyNamed('coldRunner'),
-          route: anyNamed('route')
-      )).thenAnswer((Invocation invocation) => Future<int>.value(0));
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice(mockDevice);
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
@@ -171,7 +145,15 @@ void main() {
   });
 }
 
-class MockFlutterDevice extends Mock implements FlutterDevice {
+class MockFlutterDevice extends Fake implements FlutterDevice {
+  MockFlutterDevice(this.device);
+
+  @override
+  Stream<Uri> get observatoryUris => const Stream<Uri>.empty();
+
+  @override
+  final Device device;
+
   int stopEchoingDeviceLogCount = 0;
 
   @override
@@ -181,10 +163,42 @@ class MockFlutterDevice extends Mock implements FlutterDevice {
 
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
+
+  int runColdCode = 0;
+
+  @override
+  Future<int> runCold({ColdRunner coldRunner, String route}) async {
+    return runColdCode;
+  }
+
+  @override
+  Future<void> initLogReader() async { }
 }
-class MockDevice extends Mock implements Device {
-  MockDevice() {
-    when(isSupported()).thenReturn(true);
+
+class MockDevice extends Fake implements Device {
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool supportsHotReload;
+
+  @override
+  bool supportsHotRestart;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'Android 10';
+
+  @override
+  String get name => 'test';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+
+  bool wasDisposed = false;
+
+  @override
+  Future<void> dispose() async {
+    wasDisposed = true;
   }
 }
 
