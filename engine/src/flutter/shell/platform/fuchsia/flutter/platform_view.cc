@@ -487,9 +487,9 @@ bool PlatformView::OnChildViewStateChanged(scenic::ResourceId view_holder_id,
   out << "{"
       << "\"method\":\"View.viewStateChanged\","
       << "\"args\":{"
-      << "  \"viewId\":" << view_id_mapping->second  // ViewHolderToken handle
-      << "  \"is_rendering\":" << is_rendering       // IsViewRendering
-      << "  \"state\":" << is_rendering              // IsViewRendering
+      << "  \"viewId\":" << view_id_mapping->second << ","  // ViewHolderToken
+      << "  \"is_rendering\":" << is_rendering << ","       // IsViewRendering
+      << "  \"state\":" << is_rendering                     // IsViewRendering
       << "  }"
       << "}";
   auto call = out.str();
