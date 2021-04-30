@@ -2186,7 +2186,7 @@ class WidgetInspector extends StatefulWidget {
   final InspectorSelectButtonBuilder? selectButtonBuilder;
 
   @override
-  _WidgetInspectorState createState() => _WidgetInspectorState();
+  State<WidgetInspector> createState() => _WidgetInspectorState();
 }
 
 class _WidgetInspectorState extends State<WidgetInspector>

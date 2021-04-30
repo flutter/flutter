@@ -892,7 +892,7 @@ class PageView extends StatefulWidget {
   final bool padEnds;
 
   @override
-  _PageViewState createState() => _PageViewState();
+  State<PageView> createState() => _PageViewState();
 }
 
 class _PageViewState extends State<PageView> {

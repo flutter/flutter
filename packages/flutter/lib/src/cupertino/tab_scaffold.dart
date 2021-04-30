@@ -312,7 +312,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
+  State<CupertinoTabScaffold> createState() => _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with RestorationMixin {

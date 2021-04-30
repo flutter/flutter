@@ -1628,7 +1628,7 @@ class RawChip extends StatefulWidget
   final bool tapEnabled;
 
   @override
-  _RawChipState createState() => _RawChipState();
+  State<RawChip> createState() => _RawChipState();
 }
 
 class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip> {

@@ -375,7 +375,7 @@ class ActionListener extends StatefulWidget {
   final Widget child;
 
   @override
-  _ActionListenerState createState() => _ActionListenerState();
+  State<ActionListener> createState() => _ActionListenerState();
 }
 
 class _ActionListenerState extends State<ActionListener> {
@@ -1317,7 +1317,7 @@ class FocusableActionDetector extends StatefulWidget {
   final Widget child;
 
   @override
-  _FocusableActionDetectorState createState() => _FocusableActionDetectorState();
+  State<FocusableActionDetector> createState() => _FocusableActionDetectorState();
 }
 
 class _FocusableActionDetectorState extends State<FocusableActionDetector> {

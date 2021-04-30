@@ -416,7 +416,7 @@ class DefaultTabController extends StatefulWidget {
   }
 
   @override
-  _DefaultTabControllerState createState() => _DefaultTabControllerState();
+  State<DefaultTabController> createState() => _DefaultTabControllerState();
 }
 
 class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {

@@ -776,7 +776,7 @@ class CupertinoTextField extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _CupertinoTextFieldState createState() => _CupertinoTextFieldState();
+  State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

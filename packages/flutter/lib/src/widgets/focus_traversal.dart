@@ -1754,7 +1754,7 @@ class FocusTraversalGroup extends StatefulWidget {
   }
 
   @override
-  _FocusTraversalGroupState createState() => _FocusTraversalGroupState();
+  State<FocusTraversalGroup> createState() => _FocusTraversalGroupState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

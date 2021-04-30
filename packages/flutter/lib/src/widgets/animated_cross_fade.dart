@@ -234,7 +234,7 @@ class AnimatedCrossFade extends StatefulWidget {
   }
 
   @override
-  _AnimatedCrossFadeState createState() => _AnimatedCrossFadeState();
+  State<AnimatedCrossFade> createState() => _AnimatedCrossFadeState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

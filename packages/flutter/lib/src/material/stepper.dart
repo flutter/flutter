@@ -281,7 +281,7 @@ class Stepper extends StatefulWidget {
   final ControlsWidgetBuilder? controlsBuilder;
 
   @override
-  _StepperState createState() => _StepperState();
+  State<Stepper> createState() => _StepperState();
 }
 
 class _StepperState extends State<Stepper> with TickerProviderStateMixin {

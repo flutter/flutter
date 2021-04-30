@@ -3118,7 +3118,7 @@ class Offstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _OffstageElement createElement() => _OffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _OffstageElement(this);
 }
 
 class _OffstageElement extends SingleChildRenderObjectElement {
@@ -6737,7 +6737,7 @@ class MouseRegion extends StatefulWidget {
   final Widget? child;
 
   @override
-  _MouseRegionState createState() => _MouseRegionState();
+  State<MouseRegion> createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -7896,7 +7896,7 @@ class StatefulBuilder extends StatefulWidget {
   final StatefulWidgetBuilder builder;
 
   @override
-  _StatefulBuilderState createState() => _StatefulBuilderState();
+  State<StatefulBuilder> createState() => _StatefulBuilderState();
 }
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
@@ -7918,7 +7918,7 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   final Color color;
 
   @override
-  _RenderColoredBox createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return _RenderColoredBox(color: color);
   }
 

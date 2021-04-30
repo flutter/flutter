@@ -1139,7 +1139,7 @@ class DropdownButton<T> extends StatefulWidget {
   final bool? enableFeedback;
 
   @override
-  _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
+  State<DropdownButton<T>> createState() => _DropdownButtonState<T>();
 }
 
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
