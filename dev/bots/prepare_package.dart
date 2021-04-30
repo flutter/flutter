@@ -76,6 +76,8 @@ Branch fromBranchName(String name) {
       return Branch.dev;
     case 'stable':
       return Branch.stable;
+    case 'testbinariesonpublish': // TODO
+      return Branch.testbinariesonpublish;
     default:
       throw ArgumentError('Invalid branch name.');
   }
