@@ -161,6 +161,7 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 
   context->has_platform_view = child_has_platform_view;
   context->has_texture_layer = child_has_texture_layer;
+  set_subtree_has_platform_view(child_has_platform_view);
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
   if (child_layer_exists_below_) {
