@@ -455,7 +455,7 @@ void main() {
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
       final ProcessTestResult result = await runFlutter(
-        <String>['run', '-dflutter-tester', testScript],
+        <String>['run', '-v', '-dflutter-tester', testScript],
         testDirectory,
         <Transition>[
           Barrier(RegExp(r'^An Observatory debugger and profiler on Flutter test device is available at: ')),
