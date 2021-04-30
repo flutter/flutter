@@ -147,8 +147,7 @@ class WindowsUWPDevice extends Device {
     final String generated = '${binaryName}_${packageVersion}_${config}_Test';
     final ProcessResult result = await _processManager.run(<String>[
       'powershell.exe',
-      _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generated, 'Add-AppDevPackage.ps1'),
-      '-Force', // Force uninstall any previous version.
+      _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generated, 'install.ps1'),
     ]);
     if (result.exitCode != 0) {
       _logger.printError(result.stdout.toString());
@@ -265,8 +264,7 @@ class WindowsUWPDevice extends Device {
 
   @override
   Future<bool> uninstallApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
-    // Not yet implemented, requires manual user uninstall.
-    return true;
+    return false;
   }
 
   @override

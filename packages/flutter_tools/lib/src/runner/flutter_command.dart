@@ -1463,10 +1463,14 @@ DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
+    case TargetPlatform.windows_uwp_x64:
+      if (featureFlags.isWindowsUwpEnabled) {
+        return DevelopmentArtifact.windowsUwp;
+      }
+      return null;
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
-    case TargetPlatform.windows_uwp_x64:
       // No artifacts currently supported.
       return null;
   }
