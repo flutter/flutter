@@ -31,57 +31,48 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   })  : _processManager = processManager,
         _pubExecutable = pubExecutable,
         _logger = logger,
-        _platform = platform,
-        _persistentToolState = persistentToolState,
-        _httpClient = httpClient ?? io.HttpClient();
+        _persistentToolState = persistentToolState;
 
   final ProcessManager _processManager;
   final String _pubExecutable;
   final Logger _logger;
-  final Platform _platform;
   final PersistentToolState _persistentToolState;
-  final io.HttpClient _httpClient;
 
   io.Process _devToolsProcess;
 
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
-  static const String _pubHostedUrlKey = 'PUB_HOSTED_URL';
 
   @override
   Future<void> launch(Uri vmServiceUri) async {
     // Place this entire method in a try/catch that swallows exceptions because
     // this method is guaranteed not to return a Future that throws.
     try {
-      bool offline = false;
-      bool useOverrideUrl = false;
-      try {
-        Uri uri;
-        if (_platform.environment.containsKey(_pubHostedUrlKey)) {
-          useOverrideUrl = true;
-          uri = Uri.parse(_platform.environment[_pubHostedUrlKey]);
-        } else {
-          uri = Uri.https('pub.dev', '');
-        }
-        final io.HttpClientRequest request = await _httpClient.headUrl(uri);
-        final io.HttpClientResponse response = await request.close();
-        await response.drain<void>();
-        if (response.statusCode != io.HttpStatus.ok) {
-          offline = true;
-        }
-      } on Exception {
-        offline = true;
-      } on ArgumentError {
-        if (!useOverrideUrl) {
-          rethrow;
-        }
-        // The user supplied a custom pub URL that was invalid, pretend to be offline
-        // and inform them that the URL was invalid.
-        offline = true;
-        _logger.printError(
-          'PUB_HOSTED_URL was set to an invalid URL: "${_platform.environment[_pubHostedUrlKey]}".'
-        );
-      }
+      final bool offline = false;
+      // bool useOverrideUrl = false;
+      // try {
+      //   final Uri uri = Uri.parse('http://pub.dev');
+      //   final io.HttpClientRequest request = await _httpClient.headUrl(uri);
+      //   final io.HttpClientResponse response = await request.close();
+      //   await response.drain<void>();
+      //   if (response.statusCode != io.HttpStatus.ok) {
+      //     _logger.printError('pub offline: ${response.statusCode}');
+      //     offline = true;
+      //   }
+      // } on Exception catch (e, st) {
+      //   _logger.printError('pub offline: $e', stackTrace: st);
+      //   offline = true;
+      // } on ArgumentError {
+      //   if (!useOverrideUrl) {
+      //     rethrow;
+      //   }
+      //   // The user supplied a custom pub URL that was invalid, pretend to be offline
+      //   // and inform them that the URL was invalid.
+      //   offline = true;
+      //   _logger.printError(
+      //     'PUB_HOSTED_URL was set to an invalid URL: "${_platform.environment[_pubHostedUrlKey]}".'
+      //   );
+      // }
 
       if (offline) {
         // TODO(kenz): we should launch an already activated version of DevTools
