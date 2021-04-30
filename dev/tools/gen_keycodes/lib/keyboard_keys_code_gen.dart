@@ -135,10 +135,10 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   String get _predefinedKeyCodeMap {
     final StringBuffer keyCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      keyCodeMap.writeln('    ${toHex(entry.value, digits: 10)}: ${entry.constantName},');
+      keyCodeMap.writeln('    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
     }
     for (final SynonymKeyInfo synonymInfo in synonyms) {
-      keyCodeMap.writeln('    ${toHex(synonymInfo.value, digits: 10)}: ${synonymInfo.constantName},');
+      keyCodeMap.writeln('    ${toHex(synonymInfo.value, digits: 11)}: ${synonymInfo.constantName},');
     }
     return keyCodeMap.toString().trimRight();
   }
@@ -149,11 +149,11 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   @override
   Map<String, String> mappings() {
     return <String, String>{
-      'PHYSICAL_KEY_MAP': _predefinedHidCodeMap,
       'LOGICAL_KEY_MAP': _predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': _logicalDefinitions,
       'LOGICAL_KEY_SYNONYMS': _logicalSynonyms,
       'LOGICAL_KEY_KEY_LABELS': _logicalKeyLabels,
+      'PHYSICAL_KEY_MAP': _predefinedHidCodeMap,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,
       'PHYSICAL_KEY_DEBUG_NAMES': _physicalDebugNames,
     };
