@@ -58,6 +58,7 @@ document.body.append(loader);
 
 document.addEventListener('dart-app-ready', function (e) {
    loader.parentNode.removeChild(loader); 
+   styleSheet.parentNode.removeChild(styleSheet);
 });
 
 // Attach source mapping.
