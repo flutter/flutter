@@ -1820,8 +1820,6 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will cause an
   /// assert in debug mode, and throw an exception in release mode.
   ///
-  /// This method can be expensive (it walks the element tree).
-  ///
   /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
@@ -2001,8 +1999,6 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will return null.
   /// To throw an exception instead, use [of] instead of this function.
   ///
-  /// This method can be expensive (it walks the element tree).
-  ///
   /// See also:
   ///
   ///  * [of], a similar function to this one that throws if no instance
@@ -2069,8 +2065,6 @@ class Scaffold extends StatefulWidget {
   /// true. This will then set up an [InheritedWidget] relationship with the
   /// [Scaffold] so that the client widget gets rebuilt whenever the [hasDrawer]
   /// value changes.
-  ///
-  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///

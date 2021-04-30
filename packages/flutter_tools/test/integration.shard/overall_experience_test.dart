@@ -514,7 +514,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: 'DevTools does not reliably launch on bots currently.'); // TODO(ianh): fix and re-enable test.
+  }, skip: Platform.isWindows); // TODO(goderbauer): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81486
 
   testWithoutContext('flutter run help output', () async {
     // This test enables all logging so that it checks the exact text of starting up an application.

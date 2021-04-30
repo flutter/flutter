@@ -20,8 +20,6 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// assert(debugCheckHasMaterial(context));
 /// ```
 ///
-/// This method can be expensive (it walks the element tree).
-///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
@@ -64,11 +62,6 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// assert(debugCheckHasMaterialLocalizations(context));
 /// ```
 ///
-/// This function has the side-effect of establishing an inheritance
-/// relationship with the nearest [Localizations] widget (see
-/// [BuildContext.dependOnInheritedWidgetOfExactType]). This is ok if the caller
-/// always also calls [Localizations.of] or [Localizations.localeOf].
-///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterialLocalizations(BuildContext context) {
   assert(() {
@@ -109,8 +102,6 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// assert(debugCheckHasScaffold(context));
 /// ```
 ///
-/// This method can be expensive (it walks the element tree).
-///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffold(BuildContext context) {
   assert(() {
@@ -141,8 +132,6 @@ bool debugCheckHasScaffold(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasScaffoldMessenger(context));
 /// ```
-///
-/// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffoldMessenger(BuildContext context) {
