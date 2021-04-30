@@ -525,7 +525,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   static void debugForgetFrameScene() {
     _lastFrameScene?.rootElement?.remove();
     _lastFrameScene = null;
-    _clipIdCounter = 0;
+    resetSvgClipIds();
     _recycledCanvases.clear();
   }
 

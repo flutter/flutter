@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
+import 'dart:typed_data';
+import 'dart:math' as math;
+
+import 'package:ui/ui.dart' as ui;
+
+import 'browser_detection.dart';
+import 'vector_math.dart';
 
 /// Generic callback signature, used by [_futurize].
 typedef Callback<T> = void Function(T result);
@@ -313,47 +322,6 @@ bool rectContainsOther(ui.Rect rect, ui.Rect other) {
       rect.bottom >= other.bottom;
 }
 
-/// Counter used for generating clip path id inside an svg <defs> tag.
-int _clipIdCounter = 0;
-
-/// Used for clipping and filter svg resources.
-///
-/// Position needs to be absolute since these svgs are sandwiched between
-/// canvas elements and can cause layout shifts otherwise.
-const String kSvgResourceHeader = '<svg width="0" height="0" '
-    'style="position:absolute">';
-
-/// Converts Path to svg element that contains a clip-path definition.
-///
-/// Calling this method updates [_clipIdCounter]. The HTML id of the generated
-/// clip is set to "svgClip${_clipIdCounter}", e.g. "svgClip123".
-String _pathToSvgClipPath(ui.Path path,
-    {double offsetX = 0,
-    double offsetY = 0,
-    double scaleX = 1.0,
-    double scaleY = 1.0}) {
-  _clipIdCounter += 1;
-  final StringBuffer sb = StringBuffer();
-  sb.write(kSvgResourceHeader);
-  sb.write('<defs>');
-
-  final String clipId = 'svgClip$_clipIdCounter';
-
-  if (browserEngine == BrowserEngine.firefox) {
-    // Firefox objectBoundingBox fails to scale to 1x1 units, instead use
-    // no clipPathUnits but write the path in target units.
-    sb.write('<clipPath id=$clipId>');
-    sb.write('<path fill="#FFFFFF" d="');
-  } else {
-    sb.write('<clipPath id=$clipId clipPathUnits="objectBoundingBox">');
-    sb.write('<path transform="scale($scaleX, $scaleY)" fill="#FFFFFF" d="');
-  }
-
-  pathToSvg(path as SurfacePath, sb, offsetX: offsetX, offsetY: offsetY);
-  sb.write('"></path></clipPath></defs></svg');
-  return sb.toString();
-}
-
 /// Converts color to a css compatible attribute value.
 String? colorToCssString(ui.Color? color) {
   if (color == null) {
@@ -418,7 +386,7 @@ String colorComponentsToCssString(int r, int g, int b, int a) {
 /// We need this in [BitmapCanvas] and [RecordingCanvas] to swallow this
 /// Firefox exception without interfering with others (potentially useful
 /// for the programmer).
-bool _isNsErrorFailureException(dynamic e) {
+bool isNsErrorFailureException(dynamic e) {
   return js_util.getProperty(e, 'name') == 'NS_ERROR_FAILURE';
 }
 
@@ -507,34 +475,11 @@ void applyWebkitClipFix(html.Element? containerElement) {
   }
 }
 
-final ByteData? _fontChangeMessage =
-    JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'fontsChange'});
-
-// Font load callbacks will typically arrive in sequence, we want to prevent
-// sendFontChangeMessage of causing multiple synchronous rebuilds.
-// This flag ensures we properly schedule a single call to framework.
-bool _fontChangeScheduled = false;
-
-FutureOr<void> sendFontChangeMessage() async {
-  if (!_fontChangeScheduled) {
-    _fontChangeScheduled = true;
-    // Batch updates into next animationframe.
-    html.window.requestAnimationFrame((num _) {
-      _fontChangeScheduled = false;
-      EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
-        'flutter/system',
-        _fontChangeMessage,
-        (_) {},
-      );
-    });
-  }
-}
-
 // Stores matrix in a form that allows zero allocation transforms.
-class _FastMatrix32 {
+class FastMatrix32 {
   final Float32List matrix;
   double transformedX = 0, transformedY = 0;
-  _FastMatrix32(this.matrix);
+  FastMatrix32(this.matrix);
 
   void transform(double x, double y) {
     transformedX = matrix[12] + (matrix[0] * x) + (matrix[4] * y);
@@ -565,29 +510,6 @@ double convertSigmaToRadius(double sigma) {
 /// not implement a feature, such as clipboard).
 bool isUnsoundNull(dynamic object) {
   return object == null;
-}
-
-bool _offsetIsValid(ui.Offset offset) {
-  assert(!offset.dx.isNaN && !offset.dy.isNaN,
-      'Offset argument contained a NaN value.');
-  return true;
-}
-
-bool _matrix4IsValid(Float32List matrix4) {
-  assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
-  return true;
-}
-
-void _validateColorStops(List<ui.Color> colors, List<double>? colorStops) {
-  if (colorStops == null) {
-    if (colors.length != 2)
-      throw ArgumentError(
-          '"colors" must have length 2 if "colorStops" is omitted.');
-  } else {
-    if (colors.length != colorStops.length)
-      throw ArgumentError(
-          '"colors" and "colorStops" arguments must have equal length.');
-  }
 }
 
 int clampInt(int value, int min, int max) {

@@ -17,14 +17,14 @@ abstract class CkShader extends ManagedSkiaObject<SkShader>
 class CkGradientSweep extends CkShader implements ui.Gradient {
   CkGradientSweep(this.center, this.colors, this.colorStops, this.tileMode,
       this.startAngle, this.endAngle, this.matrix4)
-      : assert(_offsetIsValid(center)),
+      : assert(offsetIsValid(center)),
         assert(colors != null), // ignore: unnecessary_null_comparison
         assert(tileMode != null), // ignore: unnecessary_null_comparison
         assert(startAngle != null), // ignore: unnecessary_null_comparison
         assert(endAngle != null), // ignore: unnecessary_null_comparison
         assert(startAngle < endAngle),
-        assert(matrix4 == null || _matrix4IsValid(matrix4)) {
-    _validateColorStops(colors, colorStops);
+        assert(matrix4 == null || matrix4IsValid(matrix4)) {
+    validateColorStops(colors, colorStops);
   }
 
   final ui.Offset center;
@@ -65,14 +65,14 @@ class CkGradientLinear extends CkShader implements ui.Gradient {
     this.colorStops,
     this.tileMode,
     Float32List? matrix,
-  )   : assert(_offsetIsValid(from)),
-        assert(_offsetIsValid(to)),
+  )   : assert(offsetIsValid(from)),
+        assert(offsetIsValid(to)),
         assert(colors != null), // ignore: unnecessary_null_comparison
         assert(tileMode != null), // ignore: unnecessary_null_comparison
         this.matrix4 = matrix {
     if (assertionsEnabled) {
-      assert(matrix4 == null || _matrix4IsValid(matrix4!));
-      _validateColorStops(colors, colorStops);
+      assert(matrix4 == null || matrix4IsValid(matrix4!));
+      validateColorStops(colors, colorStops);
     }
   }
 

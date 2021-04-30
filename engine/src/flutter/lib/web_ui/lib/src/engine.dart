@@ -38,6 +38,27 @@ export 'engine/alarm_clock.dart';
 import 'engine/browser_detection.dart';
 export 'engine/browser_detection.dart';
 
+import 'engine/html/path_to_svg_clip.dart';
+export 'engine/html/path_to_svg_clip.dart';
+
+import 'engine/html/path/conic.dart';
+export 'engine/html/path/conic.dart';
+
+import 'engine/html/path/cubic.dart';
+export 'engine/html/path/cubic.dart';
+
+import 'engine/html/path/path_iterator.dart';
+export 'engine/html/path/path_iterator.dart';
+
+import 'engine/html/path/path_metrics.dart';
+export 'engine/html/path/path_metrics.dart';
+
+import 'engine/html/path/path_ref.dart';
+export 'engine/html/path/path_ref.dart';
+
+import 'engine/html/path/path_utils.dart';
+export 'engine/html/path/path_utils.dart';
+
 import 'engine/mouse_cursor.dart';
 export 'engine/mouse_cursor.dart';
 
@@ -82,6 +103,9 @@ export 'engine/test_embedding.dart';
 
 import 'engine/ulps.dart';
 export 'engine/ulps.dart';
+
+import 'engine/util.dart';
+export 'engine/util.dart';
 
 import 'engine/validators.dart';
 export 'engine/validators.dart';
@@ -141,13 +165,8 @@ part 'engine/html/image_filter.dart';
 part 'engine/html/offset.dart';
 part 'engine/html/opacity.dart';
 part 'engine/html/painting.dart';
-part 'engine/html/path/conic.dart';
-part 'engine/html/path/cubic.dart';
 part 'engine/html/path/path.dart';
-part 'engine/html/path/path_metrics.dart';
-part 'engine/html/path/path_ref.dart';
 part 'engine/html/path/path_to_svg.dart';
-part 'engine/html/path/path_utils.dart';
 part 'engine/html/path/path_windings.dart';
 part 'engine/html/path/tangent.dart';
 part 'engine/html/picture.dart';
@@ -200,7 +219,7 @@ part 'engine/text_editing/autofill_hint.dart';
 part 'engine/text_editing/input_type.dart';
 part 'engine/text_editing/text_capitalization.dart';
 part 'engine/text_editing/text_editing.dart';
-part 'engine/util.dart';
+part 'engine/font_change_util.dart';
 part 'engine/window.dart';
 
 // The mode the app is running in.
