@@ -69,6 +69,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
+    this.rejectMousePointers = false,
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner, kind: kind);
 
@@ -200,6 +201,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
+  /// Whether this gesture detector should reject pointers from a mouse device type.
+  ///
+  /// This is used by scrollables to force mouse interactions to go through the
+  /// scroll wheel or scrollbar, instead of allowing drag gestures to move them.
+  final bool rejectMousePointers;
+
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -230,6 +237,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerEvent event) {
+    if (rejectMousePointers && event.kind == PointerDeviceKind.mouse) {
+      return false;
+    }
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
@@ -508,7 +518,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   VerticalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    bool rejectMousePointers = false,
+  }) : super(debugOwner: debugOwner, kind: kind, rejectMousePointers: rejectMousePointers);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -549,7 +560,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   HorizontalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    bool rejectMousePointers = false,
+  }) : super(debugOwner: debugOwner, kind: kind, rejectMousePointers: rejectMousePointers);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
