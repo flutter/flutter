@@ -2472,7 +2472,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           );
         },
       ).where((SelectionRect selectionRect) {
-        return renderEditable.paintBounds.overlaps(selectionRect.bounds);
+        if (renderEditable.paintBounds.right < selectionRect.bounds.left || selectionRect.bounds.right < renderEditable.paintBounds.left)
+          return false;
+        if (renderEditable.paintBounds.bottom < selectionRect.bounds.top || selectionRect.bounds.bottom < renderEditable.paintBounds.top)
+          return false;
+        return true;
       }).toList();
       _textInputConnection!.setSelectionRects(rects);
     }
