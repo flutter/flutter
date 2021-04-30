@@ -7,6 +7,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
+import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
@@ -366,6 +368,29 @@ void main() {
     );
     await driverService.stop();
   });
+
+  testWithoutContext('WebDriver error message includes link to documentation', () async {
+    const String link = 'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser';
+    final DriverService driverService = WebDriverService(
+      dartSdkPath: 'dart',
+      processUtils: ProcessUtils(
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
+      ),
+    );
+
+    try {
+      await driverService.startTest(
+        'foo.test',
+        [],
+        {},
+        PackageConfig(<Package>[Package('test', Uri.base)]),
+        browserName: 'chrome',
+      );
+    } on ToolExit catch (ex) {
+      expect(ex.message, contains(link));
+    }
+  });
 }
 
 FlutterDriverService setUpDriverService({
@@ -423,6 +448,8 @@ class FakeDevice extends Fake implements Device {
   bool didUninstallApp = false;
   bool didDispose = false;
   bool failOnce = false;
+  @override
+  final PlatformType platformType = PlatformType.web;
 
   @override
   String get name => 'test';
