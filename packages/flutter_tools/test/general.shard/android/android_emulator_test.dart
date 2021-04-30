@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/android/android_emulator.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -151,7 +153,6 @@ void main() {
             exitCode: 1,
             stderr: errorText,
             stdout: 'dummy text',
-            duration: Duration(milliseconds: 1),
           ),
         ]),
         androidSdk: mockSdk,
@@ -167,12 +168,12 @@ void main() {
       final BufferLogger logger =  BufferLogger.test();
       final AndroidEmulator emulator = AndroidEmulator(emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
+          FakeCommand(
             command: kEmulatorLaunchCommand,
             exitCode: 1,
             stderr: '',
             stdout: 'dummy text',
-            duration: Duration(milliseconds: 50),
+            completer: Completer<void>(),
           ),
         ]),
         androidSdk: mockSdk,
