@@ -383,7 +383,7 @@ void main() {
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
 
-    expect(logger.traceText, contains('Skipping devtools launch because connecting to pub.dev failed: Exception: Connection failed.'));
+    expect(logger.traceText, contains('Skipping devtools launch because connecting to pub.dev failed with Exception: Connection failed.'));
   });
 
   testWithoutContext('DevtoolsLauncher prints trace if connecting to pub.dev returns non-OK status code', () async {
