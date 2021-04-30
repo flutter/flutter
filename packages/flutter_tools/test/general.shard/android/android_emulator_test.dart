@@ -139,7 +139,7 @@ void main() {
         logger: BufferLogger.test(),
       );
 
-      await emulator.launch();
+      await emulator.launch(startupDuration: Duration.zero);
     });
 
     testWithoutContext('prints error on failure', () async {
@@ -158,7 +158,7 @@ void main() {
         logger: logger,
       );
 
-      await emulator.launch();
+      await emulator.launch(startupDuration: Duration.zero);
 
       expect(logger.errorText, contains(errorText));
     });
