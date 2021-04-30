@@ -76,7 +76,7 @@ void main() {
     final AssembleCommand command = AssembleCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)));
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-    await commandRunner.run(<String>['assemble', '-o Output', '-dTargetPlatform=darwin-x64', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(<String>['assemble', '-o Output', '-dTargetPlatform=darwin', '-dDarwinArchs=x86_64', 'debug_macos_bundle_flutter_assets']);
 
     expect(await command.requiredArtifacts, <DevelopmentArtifact>{
       DevelopmentArtifact.macOS,

@@ -211,7 +211,8 @@ void main() {
             textScaleFactor: 2.0,
             size: Size(111.0, 111.0),
             devicePixelRatio: 1.1,
-            padding: EdgeInsets.all(11.0)),
+            padding: EdgeInsets.all(11.0),
+          ),
           child: CircleAvatar(
             child: Builder(
               builder: (BuildContext context) {
@@ -225,7 +226,7 @@ void main() {
                 // This should be overridden to 1.0.
                 expect(data.textScaleFactor, equals(1.0));
                 return const Text('Z');
-              }
+              },
             ),
           ),
         ),

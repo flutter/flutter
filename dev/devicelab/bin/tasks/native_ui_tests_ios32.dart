@@ -44,7 +44,7 @@ Future<void> main() async {
     final String codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
     final String provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
 
-    final String resultBundleTemp = Directory.systemTemp.createTempSync('native_ui_tests_ios32_xcresult.').path;
+    final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_native_ui_tests_ios32_xcresult.').path;
     final String resultBundlePath = path.join(resultBundleTemp, 'result');
     final int testResultExit = await exec(
       'xcodebuild',

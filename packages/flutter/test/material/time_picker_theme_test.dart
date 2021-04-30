@@ -424,18 +424,18 @@ class _TimePickerLauncher extends StatelessWidget {
       home: Material(
         child: Center(
           child: Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () async {
-                    await showTimePicker(
-                      context: context,
-                      initialEntryMode: entryMode,
-                      initialTime: const TimeOfDay(hour: 7, minute: 15),
-                    );
-                  },
-                );
-              }
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('X'),
+                onPressed: () async {
+                  await showTimePicker(
+                    context: context,
+                    initialEntryMode: entryMode,
+                    initialTime: const TimeOfDay(hour: 7, minute: 15),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),

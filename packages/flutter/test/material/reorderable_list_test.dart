@@ -423,14 +423,14 @@ void main() {
         customController.animateTo(
           40.0,
           duration: const Duration(milliseconds: 200),
-          curve: Curves.linear
+          curve: Curves.linear,
         );
         await tester.pumpAndSettle();
         Offset listViewTopLeft = tester.getTopLeft(
           find.byType(ReorderableListView),
         );
         Offset firstBoxTopLeft = tester.getTopLeft(
-          find.byKey(firstBox)
+          find.byKey(firstBox),
         );
         expect(firstBoxTopLeft.dy, listViewTopLeft.dy - 40.0);
 
@@ -467,7 +467,7 @@ void main() {
         );
         final Widget overlay = Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(builder: (BuildContext context) => reorderableList)
+            OverlayEntry(builder: (BuildContext context) => reorderableList),
           ],
         );
         final Widget boilerplate = Localizations(
@@ -874,7 +874,7 @@ void main() {
                     padding: const EdgeInsets.all(24),
                     child: reorderableListView,
                   );
-                })
+                }),
               ],
             ),
           ),

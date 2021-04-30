@@ -16,7 +16,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 
 const String _kEmptyPubspecFile = '''
-name: app_without_plugins
+name: path_provider_example
 
 dependencies:
   flutter:
@@ -27,6 +27,12 @@ const String _kEmptyPackageJson = '''
 {
   "configVersion": 2,
   "packages": [
+     {
+      "name": "path_provider_example",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
   ]
 }
 ''';
@@ -65,53 +71,6 @@ dependencies:
     sdk: flutter
   path_provider_linux: 1.0.0
 ''';
-
-const String _kLinuxRegistrant =
-'//\n'
-'// Generated file. Do not edit.\n'
-'// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.\n'
-'//\n'
-'\n'
-'// @dart = 2.12\n'
-'\n'
-'import \'package:path_provider_example/main.dart\' as entrypoint;\n'
-'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
-'import \'package:path_provider_linux/path_provider_linux.dart\';\n'
-'\n'
-'@pragma(\'vm:entry-point\')\n'
-'class _PluginRegistrant {\n'
-'\n'
-'  @pragma(\'vm:entry-point\')\n'
-'  static void register() {\n'
-'    if (Platform.isLinux) {\n'
-'      try {\n'
-'        PathProviderLinux.registerWith();\n'
-'      } catch (err) {\n'
-'        print(\n'
-'          \'`path_provider_linux` threw an error: \$err. \'\n'
-'          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
-'        );\n'
-'        rethrow;\n'
-'      }\n'
-'\n'
-'    } else if (Platform.isMacOS) {\n'
-'    } else if (Platform.isWindows) {\n'
-'    }\n'
-'  }\n'
-'\n'
-'}\n'
-'\n'
-'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-'typedef _NullaryFunction = dynamic Function();\n'
-'\n'
-'void main(List<String> args) {\n'
-'  if (entrypoint.main is _UnaryFunction) {\n'
-'    (entrypoint.main as _UnaryFunction)(args);\n'
-'  } else {\n'
-'    (entrypoint.main as _NullaryFunction)();\n'
-'  }\n'
-'}\n'
-'';
 
 const String _kSamplePluginPubspec = '''
 name: path_provider_linux
@@ -161,35 +120,36 @@ void main() {
     });
 
     testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
+      final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
-          projectDir: fileSystem.directory('project')..createSync(),
+          projectDir: projectDir,
           artifacts: null,
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
+          defines: <String, String>{
+            kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
+          },
           generateDartPluginRegistry: true);
 
-      final File config = environment.projectDir
+      projectDir
           .childDirectory('.dart_tool')
-          .childFile('package_config.json');
-      config.createSync(recursive: true);
-      config.writeAsStringSync(_kSamplePackageJson);
+          .childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = environment.projectDir.childFile('pubspec.yaml');
-      pubspec.createSync();
+      projectDir.childFile('pubspec.yaml').createSync();
 
-      final File packages = environment.projectDir.childFile('.packages');
-      packages.createSync();
+      projectDir.childFile('.packages').createSync();
 
-      final File generatedMain = environment.projectDir
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+      await DartPluginRegistrantTarget.test(testProject).build(environment);
+
+      final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('generated_main.dart');
-
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
-      await DartPluginRegistrantTarget.test(testProject).build(environment);
-
       expect(generatedMain.existsSync(), isFalse);
     });
 
@@ -207,76 +167,119 @@ void main() {
           },
           generateDartPluginRegistry: true);
 
-      final File config = projectDir
+      projectDir
           .childDirectory('.dart_tool')
-          .childFile('package_config.json');
-      config.createSync(recursive: true);
-      config.writeAsStringSync(_kSamplePackageJson);
+          .childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = projectDir.childFile('pubspec.yaml');
-      pubspec.createSync();
-      pubspec.writeAsStringSync(_kSamplePubspecFile);
+      projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
 
-      final File packages = projectDir.childFile('.packages');
-      packages.createSync();
-      packages.writeAsStringSync(_kSamplePackagesFile);
+      projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
+
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+
+      environment.fileSystem.currentDirectory
+          .childDirectory('path_provider_linux')
+          .childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePluginPubspec);
+
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+      await DartPluginRegistrantTarget.test(testProject).build(environment);
 
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('generated_main.dart');
-      generatedMain.createSync(recursive: true);
-
-      final File mainEntrypoint = projectDir.childDirectory('lib').childFile('main.dart');
-      mainEntrypoint.createSync(recursive: true);
-
-      final File pluginPubspec = environment.fileSystem.currentDirectory.childDirectory('path_provider_linux').childFile('pubspec.yaml');
-      pluginPubspec.createSync(recursive: true);
-      pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
-
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
-      await DartPluginRegistrantTarget.test(testProject).build(environment);
-
       final String mainContent = generatedMain.readAsStringSync();
-      expect(mainContent, equals(_kLinuxRegistrant));
+      expect(
+        mainContent,
+        equals(
+          '//\n'
+          '// Generated file. Do not edit.\n'
+          '// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.\n'
+          '//\n'
+          '\n'
+          '// @dart = 2.12\n'
+          '\n'
+          'import \'package:path_provider_example/main.dart\' as entrypoint;\n'
+          'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
+          'import \'package:path_provider_linux/path_provider_linux.dart\';\n'
+          '\n'
+          '@pragma(\'vm:entry-point\')\n'
+          'class _PluginRegistrant {\n'
+          '\n'
+          '  @pragma(\'vm:entry-point\')\n'
+          '  static void register() {\n'
+          '    if (Platform.isLinux) {\n'
+          '      try {\n'
+          '        PathProviderLinux.registerWith();\n'
+          '      } catch (err) {\n'
+          '        print(\n'
+          '          \'`path_provider_linux` threw an error: \$err. \'\n'
+          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          '        );\n'
+          '        rethrow;\n'
+          '      }\n'
+          '\n'
+          '    } else if (Platform.isMacOS) {\n'
+          '    } else if (Platform.isWindows) {\n'
+          '    }\n'
+          '  }\n'
+          '\n'
+          '}\n'
+          '\n'
+          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
+          'typedef _NullaryFunction = dynamic Function();\n'
+          '\n'
+          'void main(List<String> args) {\n'
+          '  if (entrypoint.main is _UnaryFunction) {\n'
+          '    (entrypoint.main as _UnaryFunction)(args);\n'
+          '  } else {\n'
+          '    (entrypoint.main as _NullaryFunction)();\n'
+          '  }\n'
+          '}\n'
+          ''
+        ),
+      );
     });
 
     testUsingContext('removes generated_main.dart if plugins are removed from pubspec.yaml', () async {
+      final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
-          projectDir: fileSystem.directory('project')..createSync(),
+          projectDir: projectDir,
           artifacts: null,
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
+          defines: <String, String>{
+            kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
+          },
           generateDartPluginRegistry: true);
-      final File config = environment.projectDir
+      final File config = projectDir
           .childDirectory('.dart_tool')
-          .childFile('package_config.json');
-      config.createSync(recursive: true);
-      config.writeAsStringSync(_kSamplePackageJson);
+          .childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
-      final File pubspec = environment.projectDir.childFile('pubspec.yaml');
-      pubspec.createSync();
-      pubspec.writeAsStringSync(_kSamplePubspecFile);
+      final File pubspec = projectDir.childFile('pubspec.yaml')..writeAsStringSync(_kSamplePubspecFile);
 
-      final File packages = environment.projectDir.childFile('.packages');
-      packages.createSync();
-      packages.writeAsStringSync(_kSamplePackagesFile);
+      final File packages = projectDir.childFile('.packages')..writeAsStringSync(_kSamplePackagesFile);
 
-      final File generatedMain = environment.projectDir
+      environment.fileSystem.currentDirectory
+          .childDirectory('path_provider_linux')
+          .childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePluginPubspec);
+
+      final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
           .childFile('generated_main.dart');
 
-      final File pluginPubspec = environment.fileSystem.currentDirectory
-          .childDirectory('path_provider_linux')
-          .childFile('pubspec.yaml');
-
-      pluginPubspec.createSync(recursive: true);
-      pluginPubspec.writeAsStringSync(_kSamplePluginPubspec);
-
-      final FlutterProject testProject = FlutterProject.fromDirectoryTest(environment.projectDir);
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
       expect(generatedMain.existsSync(), isTrue);
 
@@ -287,6 +290,97 @@ void main() {
 
       await DartPluginRegistrantTarget.test(testProject).build(environment);
       expect(generatedMain.existsSync(), isFalse);
+    });
+
+    testUsingContext('target file is outside the current project package', () async {
+      final Directory projectDir = fileSystem.directory('project')..createSync();
+      final Environment environment = Environment.test(
+          fileSystem.currentDirectory,
+          projectDir: projectDir,
+          artifacts: null,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+          defines: <String, String>{
+            kTargetFile: fileSystem.directory('root').childFile('external.dart').absolute.path,
+          },
+          generateDartPluginRegistry: true);
+
+      projectDir
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json')
+          .writeAsStringSync(_kSamplePackageJson);
+
+      projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
+
+      projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
+
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+
+      environment.fileSystem.currentDirectory
+          .childDirectory('path_provider_linux')
+          .childFile('pubspec.yaml')
+          .writeAsStringSync(_kSamplePluginPubspec);
+
+      final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+      await DartPluginRegistrantTarget.test(testProject).build(environment);
+
+      final File generatedMain = projectDir
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_build')
+          .childFile('generated_main.dart');
+
+      final String mainContent = generatedMain.readAsStringSync();
+      expect(
+        mainContent,
+        equals(
+          '//\n'
+          '// Generated file. Do not edit.\n'
+          '// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.\n'
+          '//\n'
+          '\n'
+          '// @dart = 2.12\n'
+          '\n'
+          'import \'file:///root/external.dart\' as entrypoint;\n'
+          'import \'dart:io\'; // flutter_ignore: dart_io_import.\n'
+          'import \'package:path_provider_linux/path_provider_linux.dart\';\n'
+          '\n'
+          '@pragma(\'vm:entry-point\')\n'
+          'class _PluginRegistrant {\n'
+          '\n'
+          '  @pragma(\'vm:entry-point\')\n'
+          '  static void register() {\n'
+          '    if (Platform.isLinux) {\n'
+          '      try {\n'
+          '        PathProviderLinux.registerWith();\n'
+          '      } catch (err) {\n'
+          '        print(\n'
+          '          \'`path_provider_linux` threw an error: \$err. \'\n'
+          '          \'The app may not function as expected until you remove this plugin from pubspec.yaml\'\n'
+          '        );\n'
+          '        rethrow;\n'
+          '      }\n'
+          '\n'
+          '    } else if (Platform.isMacOS) {\n'
+          '    } else if (Platform.isWindows) {\n'
+          '    }\n'
+          '  }\n'
+          '\n'
+          '}\n'
+          '\n'
+          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
+          'typedef _NullaryFunction = dynamic Function();\n'
+          '\n'
+          'void main(List<String> args) {\n'
+          '  if (entrypoint.main is _UnaryFunction) {\n'
+          '    (entrypoint.main as _UnaryFunction)(args);\n'
+          '  } else {\n'
+          '    (entrypoint.main as _NullaryFunction)();\n'
+          '  }\n'
+          '}\n'
+          ''
+        ),
+      );
     });
   });
 }

@@ -79,7 +79,7 @@ class ScrollBehavior {
   /// instead.
   @Deprecated(
     'Migrate to buildOverscrollIndicator. '
-    'This feature was deprecated after v2.1.0-11.0.pre.'
+    'This feature was deprecated after v2.1.0-11.0.pre.',
   )
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     switch (getPlatform(context)) {

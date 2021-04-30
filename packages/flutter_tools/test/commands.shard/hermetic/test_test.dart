@@ -604,6 +604,47 @@ dev_dependencies:
       FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
     ]),
   });
+
+  testUsingContext('Builds the asset manifest by default', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    expect(fileExists, true);
+
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  testUsingContext('Don\'t build the asset manifest if --no-test-assets if informed', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--no-test-assets',
+    ]);
+
+    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    expect(fileExists, false);
+
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
