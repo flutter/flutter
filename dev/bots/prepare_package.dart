@@ -52,7 +52,7 @@ class PreparePackageException implements Exception {
   }
 }
 
-enum Branch { dev, beta, stable }
+enum Branch { dev, beta, stable, testbinariesonpublish } // TODO
 
 String getBranchName(Branch branch) {
   switch (branch) {
