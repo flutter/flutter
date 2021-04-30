@@ -175,7 +175,10 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
                   bool focusable);
   void DestroyView(int64_t view_id,
                    ViewHolder::ViewIdCallback on_view_destroyed);
-  void UpdateView(int64_t view_id, bool hit_testable, bool focusable);
+  void UpdateView(int64_t view_id,
+                  const SkRect& view_occlusion_hint,
+                  bool hit_testable,
+                  bool focusable);
   void UpdateView(int64_t view_id,
                   const SkPoint& offset,
                   const SkSize& size,

@@ -303,26 +303,32 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
           view_holder.hit_testable = view_holder.pending_hit_testable;
         }
 
-        // Set size and focusable.
+        // Set size, occlusion hint, and focusable.
         //
         // Scenic rejects `SetViewProperties` calls with a zero size.
         if (!view_size.isEmpty() &&
             (view_size != view_holder.size ||
+             view_holder.pending_occlusion_hint != view_holder.occlusion_hint ||
              view_holder.pending_focusable != view_holder.focusable)) {
+          view_holder.size = view_size;
+          view_holder.occlusion_hint = view_holder.pending_occlusion_hint;
+          view_holder.focusable = view_holder.pending_focusable;
           view_holder.view_holder.SetViewProperties({
               .bounding_box =
                   {
                       .min = {.x = 0.f, .y = 0.f, .z = -1000.f},
-                      .max = {.x = view_size.fWidth,
-                              .y = view_size.fHeight,
+                      .max = {.x = view_holder.size.fWidth,
+                              .y = view_holder.size.fHeight,
                               .z = 0.f},
                   },
-              .inset_from_min = {.x = 0.f, .y = 0.f, .z = 0.f},
-              .inset_from_max = {.x = 0.f, .y = 0.f, .z = 0.f},
-              .focus_change = view_holder.pending_focusable,
+              .inset_from_min = {.x = view_holder.occlusion_hint.fLeft,
+                                 .y = view_holder.occlusion_hint.fTop,
+                                 .z = 0.f},
+              .inset_from_max = {.x = view_holder.occlusion_hint.fRight,
+                                 .y = view_holder.occlusion_hint.fBottom,
+                                 .z = 0.f},
+              .focus_change = view_holder.focusable,
           });
-          view_holder.size = view_size;
-          view_holder.focusable = view_holder.pending_focusable;
         }
 
         // Attach the ScenicView to the main scene graph.
@@ -509,13 +515,16 @@ void FuchsiaExternalViewEmbedder::DestroyView(int64_t view_id,
   on_view_unbound(resource_id);
 }
 
-void FuchsiaExternalViewEmbedder::SetViewProperties(int64_t view_id,
-                                                    bool hit_testable,
-                                                    bool focusable) {
+void FuchsiaExternalViewEmbedder::SetViewProperties(
+    int64_t view_id,
+    const SkRect& occlusion_hint,
+    bool hit_testable,
+    bool focusable) {
   auto found = scenic_views_.find(view_id);
   FML_DCHECK(found != scenic_views_.end());
   auto& view_holder = found->second;
 
+  view_holder.pending_occlusion_hint = occlusion_hint;
   view_holder.pending_hit_testable = hit_testable;
   view_holder.pending_focusable = focusable;
 }

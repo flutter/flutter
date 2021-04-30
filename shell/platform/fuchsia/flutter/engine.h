@@ -110,8 +110,12 @@ class Engine final {
                   ViewIdCallback on_view_bound,
                   bool hit_testable,
                   bool focusable);
-  void UpdateView(int64_t view_id, bool hit_testable, bool focusable);
+  void UpdateView(int64_t view_id,
+                  SkRect occlusion_hint,
+                  bool hit_testable,
+                  bool focusable);
   void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
+
   std::shared_ptr<flutter::ExternalViewEmbedder> GetExternalViewEmbedder();
 
   std::unique_ptr<flutter::Surface> CreateSurface();
