@@ -2425,6 +2425,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // Place cursor at the end if the selection is invalid when we receive focus.
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }
+
+      _cachedText == '';
+      _cachedFirstRect = null;
+      _cachedSize = Size.zero;
+      _cachedPlaceholder = -1;
     } else {
       WidgetsBinding.instance!.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
@@ -2439,15 +2444,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Size _cachedSize = Size.zero;
   int _cachedPlaceholder = -1;
 
-  void _updateSelectionRects() {
+  void _updateSelectionRects({bool force = false}) {
     if (defaultTargetPlatform != TargetPlatform.iOS)
+      return;
+    // This is to avoid sending selection rects on non-iPad devices
+    if (WidgetsBinding.instance!.window.physicalSize.shortestSide < 1536.0)
       return;
     final String text = buildTextSpan().toPlainText(includeSemanticsLabels: false, includePlaceholders: false);
     final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
     final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection = _scrollController?.position.userScrollDirection ?? ScrollDirection.idle;
     final Size size = renderEditable.size;
-    if (scrollDirection == ScrollDirection.idle && (text != _cachedText ||
+    if (scrollDirection == ScrollDirection.idle && (force || text != _cachedText ||
         _cachedFirstRect != firstRect || _cachedSize != size ||
         _cachedPlaceholder != _placeholderLocation)) {
       _cachedText = text;
@@ -2463,7 +2471,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             position: offset,
           );
         },
-      );
+      ).where((SelectionRect selectionRect) {
+        return renderEditable.paintBounds.overlaps(selectionRect.bounds);
+      }).toList();
       _textInputConnection!.setSelectionRects(rects);
     }
   }
@@ -2711,6 +2721,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               child: _ScribbleFocusable(
                 focusNode: widget.focusNode,
                 editableKey: _editableKey,
+                updateSelectionRects: () {
+                  _openInputConnection();
+                  _updateSelectionRects(force: true);
+                },
                 child: _Editable(
                   key: _editableKey,
                   startHandleLayerLink: _startHandleLayerLink,
@@ -2995,11 +3009,18 @@ class _Editable extends LeafRenderObjectWidget {
 }
 
 class _ScribbleFocusable extends StatefulWidget {
-  const _ScribbleFocusable({Key? key, required this.child, required this.focusNode, required this.editableKey}): super(key: key);
+  const _ScribbleFocusable({
+    Key? key,
+    required this.child,
+    required this.focusNode,
+    required this.editableKey,
+    required this.updateSelectionRects,
+  }): super(key: key);
 
   final Widget child;
   final FocusNode focusNode;
   final GlobalKey editableKey;
+  final VoidCallback updateSelectionRects;
 
   @override
   _ScribbleFocusableState createState() => _ScribbleFocusableState();
@@ -3032,6 +3053,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   void onScribbleFocus(Offset offset) {
     widget.focusNode.requestFocus();
     renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
+    widget.updateSelectionRects();
   }
 
   @override
