@@ -298,6 +298,7 @@ class ArchiveCreator {
     await _installMinGitIfNeeded();
     await _populateCaches();
     await _validate();
+    exit(0);
     await _archiveFiles(_outputFile);
     return _outputFile;
   }
@@ -325,7 +326,6 @@ class ArchiveCreator {
           dartPath,
         ],
         workingDirectory: flutterRoot,
-        failOk: true,
       );
     } on PreparePackageException {
       throw PreparePackageException('The binary $dartPath was not codesigned!');
