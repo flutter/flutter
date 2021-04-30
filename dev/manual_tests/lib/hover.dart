@@ -33,7 +33,7 @@ class HoverDemo extends StatefulWidget {
   const HoverDemo({Key key}) : super(key: key);
 
   @override
-  _HoverDemoState createState() => _HoverDemoState();
+  State<HoverDemo> createState() => _HoverDemoState();
 }
 
 class _HoverDemoState extends State<HoverDemo> {

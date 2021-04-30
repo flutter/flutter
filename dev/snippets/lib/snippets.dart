@@ -60,7 +60,7 @@ class SnippetGenerator {
   /// Injects the [injections] into the [template], and turning the
   /// "description" injection into a comment. Only used for
   /// [SnippetType.sample] snippets.
-  String interpolateTemplate(List<_ComponentTuple> injections, String template, Map<String, Object?> metadata) {
+  String _interpolateTemplate(List<_ComponentTuple> injections, String template, Map<String, Object?> metadata) {
     final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     final String interpolated = template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
@@ -158,7 +158,7 @@ class SnippetGenerator {
   ///
   /// Takes into account the [type] and doesn't substitute in the id and the app
   /// if not a [SnippetType.sample] snippet.
-  String interpolateSkeleton(
+  String _interpolateSkeleton(
     SnippetType type,
     List<_ComponentTuple> injections,
     String skeleton,
@@ -215,7 +215,7 @@ class SnippetGenerator {
 
   /// Parses the input for the various code and description segments, and
   /// returns them in the order found.
-  List<_ComponentTuple> parseInput(String input) {
+  List<_ComponentTuple> _parseInput(String input) {
     bool inCodeBlock = false;
     input = input.trim();
     final List<String> description = <String>[];
@@ -298,7 +298,7 @@ class SnippetGenerator {
     assert(template != null || type != SnippetType.sample);
     assert(metadata['id'] != null);
     assert(!showDartPad || type == SnippetType.sample, 'Only application samples work with dartpad.');
-    final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
+    final List<_ComponentTuple> snippetData = _parseInput(_loadFileAsUtf8(input));
     switch (type) {
       case SnippetType.sample:
         final Directory templatesDir = configuration.templatesDirectory;
@@ -312,7 +312,7 @@ class SnippetGenerator {
           exit(1);
         }
         final String templateContents = _loadFileAsUtf8(templateFile);
-        String app = interpolateTemplate(snippetData, templateContents, metadata);
+        String app = _interpolateTemplate(snippetData, templateContents, metadata);
 
         try {
           app = formatter.format(app);
@@ -343,6 +343,6 @@ class SnippetGenerator {
     }
     final String skeleton =
         _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type, showDartPad: showDartPad));
-    return interpolateSkeleton(type, snippetData, skeleton, metadata);
+    return _interpolateSkeleton(type, snippetData, skeleton, metadata);
   }
 }
