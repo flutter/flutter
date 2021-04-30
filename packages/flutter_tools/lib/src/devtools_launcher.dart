@@ -67,6 +67,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         final io.HttpClientResponse response = await request.close();
         await response.drain<void>();
         if (response.statusCode != io.HttpStatus.ok) {
+          print('>>> Status Code failure: ${response.statusCode}');
+          _logger.printError('>>> Status Code failure: ${response.statusCode}');
           _logger.printTrace(
             'Skipping devtools launch because pub.dev responded with HTTP '
             'status code ${response.statusCode} instead of ${io.HttpStatus.ok}.',
@@ -74,6 +76,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           offline = true;
         }
       } on Exception catch (e) {
+        print('>>> Exception: $e');
+        _logger.printError('>>> Exception: $e');
         _logger.printTrace(
           'Skipping devtools launch because connecting to pub.dev failed with $e',
         );
