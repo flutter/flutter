@@ -16,7 +16,8 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
 
-const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
+//const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter'; TODO
+const String chromiumRepo = 'https://github.com/christopherfujino/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
