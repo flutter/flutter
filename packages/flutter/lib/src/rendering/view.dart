@@ -183,9 +183,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
   HitTestResult hitTestMouseTrackers(Offset position) {
     assert(position != null);
-    // Layer hit testing is done using device pixels, so we have to convert
-    // the logical coordinates of the event location back to device pixels
-    // here.
     final BoxHitTestResult result = BoxHitTestResult();
     hitTest(result, position: position);
     return result;
