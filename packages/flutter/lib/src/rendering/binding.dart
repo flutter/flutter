@@ -282,13 +282,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       assert(event.position != null);
-      _mouseTracker!.updateWithEvent(
-        event,
-        // Mouse events(enter and exit) can be triggered with or without buttons pressed.
-        // If the button is pressed, we need to re-execute the hit test instead of
-        // reusing the cached results to trigger possible events.
-        () => (hitTestResult == null || event.down) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
-      );
+      _mouseTracker!.updateWithEvent(event, () => hitTestResult ?? renderView.hitTestMouseTrackers(event.position));
     }
     super.dispatchEvent(event, hitTestResult);
   }
