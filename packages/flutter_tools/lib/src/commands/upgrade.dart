@@ -244,25 +244,26 @@ class UpgradeCommandRunner {
         // tracking remote to continue.
         throwToolExit(
           'Unable to upgrade Flutter: The Flutter SDK is tracking '
-          '"${localVersion.repositoryUrl}" but "FLUTTER_GIT_URL" is set to "$_flutterGit."\n'
-          'Either remove "FLUTTER_GIT_URL from the environment or set "FLUTTER_GIT_URL" '
-          'to "${localVersion.repositoryUrl}", and retry.\n\n'
-          'If you are okay with losing local changes you made to the SDK, re-install '
-          'Flutter by going to https://flutter.dev/docs/get-started/install.'
+          '"${localVersion.repositoryUrl}" but "FLUTTER_GIT_URL" is set to '
+          '"$_flutterGit".\n'
+          'Either remove "FLUTTER_GIT_URL" from the environment or set '
+          '"FLUTTER_GIT_URL" to "${localVersion.repositoryUrl}", and retry. '
+          'Alternatively, re-install Flutter by going to '
+          'https://flutter.dev/docs/get-started/install.\n'
+          'If this is intentional, it is recommended to use "git" directly to '
+          'keep Flutter SDK up-to date.'
         );
       } else {
-        // Inform that the user has to either set the environment variable, or
-        // change the url of the tracking remote to the Flutter GitHub repository
-        // to continue.
+        // Inform that the user has to set the environment variable to continue.
         throwToolExit(
           'Unable to upgrade Flutter: The Flutter SDK is tracking a non-standard '
           'remote "${localVersion.repositoryUrl}".\n'
-          '  - To use the current remote, set the environment variable "FLUTTER_GIT_URL" '
-          'to "${localVersion.repositoryUrl}", and retry.\n'
-          '  - To use the standard remote, change the url of the tracking remote via '
-          '"git remote" to "https://github.com/flutter/flutter.git", and retry.\n\n'
-          'As an alternative, if you are okay with losing local changes you made '
-          'to the SDK, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+          'Set the environment variable "FLUTTER_GIT_URL" to '
+          '"${localVersion.repositoryUrl}", and retry. '
+          'Alternatively, re-install Flutter by going to '
+          'https://flutter.dev/docs/get-started/install.\n'
+          'If this is intentional, it is recommended to use "git" directly to '
+          'keep Flutter SDK up-to date.'
         );
       }
     }
@@ -304,16 +305,16 @@ class UpgradeCommandRunner {
         throwToolExit(
           'Unable to upgrade Flutter: HEAD does not point to a branch(Are you '
           'in a detached HEAD state?).\n'
-          'Use "flutter channel" to switch to an official channel, and retry.\n\n'
-          'As an alternative, if you are okay with losing local changes you made '
-          'to the SDK, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+          'Use "flutter channel" to switch to an official channel, and retry. '
+          'Alternatively, re-install Flutter by going to '
+          'https://flutter.dev/docs/get-started/install.'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
           'Unable to upgrade Flutter: No upstream repository configured for branch.\n'
-          'Use "git remote" to set an upstream remote for the current branch, and retry.\n\n'
-          'As an alternative, if you are okay with losing local changes you made '
-          'to the SDK, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+          'Re-install Flutter by going to '
+          'https://flutter.dev/docs/get-started/install. Alternatively, use "git" '
+          'directly to configure an upstream for the branch and retry.'
         );
       } else {
         throwToolExit(errorString);

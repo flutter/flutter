@@ -240,8 +240,8 @@ void main() {
       }
       expect(err, isNotNull);
       expect(err.toString(), contains('Unable to upgrade Flutter: No upstream repository configured for branch.'));
-      expect(err.toString(), contains('Use "git remote" to set an upstream remote for the current branch, and retry'));
-      expect(err.toString(), contains('re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
+      expect(err.toString(), contains('Re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
+      expect(err.toString(), contains('use "git" directly to configure an upstream for the branch and retry.'));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -305,9 +305,9 @@ void main() {
         }
         expect(err, isNotNull);
         expect(err.toString(), contains('The Flutter SDK is tracking a non-standard remote "$flutterNonStandardUrlDotGit"'));
-        expect(err.toString(), contains('set the environment variable "FLUTTER_GIT_URL" to "$flutterNonStandardUrlDotGit", and retry.'));
-        expect(err.toString(), contains('change the url of the tracking remote via "git remote" to "https://github.com/flutter/flutter.git", and retry'));
+        expect(err.toString(), contains('Set the environment variable "FLUTTER_GIT_URL" to "$flutterNonStandardUrlDotGit", and retry.'));
         expect(err.toString(), contains('re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
+        expect(err.toString(), contains('it is recommended to use "git" directly to keep Flutter SDK up-to date.'));
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
         ProcessManager: () => processManager,
@@ -352,6 +352,7 @@ void main() {
         expect(err.toString(), contains('but "FLUTTER_GIT_URL" is set to "$flutterStandardUrl"'));
         expect(err.toString(), contains('remove "FLUTTER_GIT_URL" from the environment or set "FLUTTER_GIT_URL" to "$flutterNonStandardUrlDotGit"'));
         expect(err.toString(), contains('re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
+        expect(err.toString(), contains('it is recommended to use "git" directly to keep Flutter SDK up-to date.'));
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
         ProcessManager: () => processManager,
