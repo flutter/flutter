@@ -553,7 +553,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => VerticalDragGestureRecognizer(rejectMousePointers: true),
+              () => VerticalDragGestureRecognizer(rejectMousePointers: _configuration.rejectMousePointers),
               (VerticalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -573,7 +573,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(rejectMousePointers: true),
+              () => HorizontalDragGestureRecognizer(rejectMousePointers: _configuration.rejectMousePointers),
               (HorizontalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown

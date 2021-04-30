@@ -52,6 +52,7 @@ class ScrollBehavior {
   ScrollBehavior copyWith({
     bool scrollbars = true,
     bool overscroll = true,
+    bool rejectMousePointers = false,
     ScrollPhysics? physics,
     TargetPlatform? platform,
   }) {
@@ -61,6 +62,7 @@ class ScrollBehavior {
       overscrollIndicator: overscroll,
       physics: physics,
       platform: platform,
+      rejectMousePointers: rejectMousePointers,
     );
   }
 
@@ -68,6 +70,9 @@ class ScrollBehavior {
   ///
   /// Defaults to the current platform.
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
+
+  /// Whether the scrollable should support click and drag with mice.
+  bool get rejectMousePointers => false;
 
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
@@ -200,6 +205,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.overscrollIndicator = true,
     this.physics,
     this.platform,
+    this.rejectMousePointers = false,
   });
 
   final ScrollBehavior delegate;
@@ -207,6 +213,9 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final bool overscrollIndicator;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
+
+  @override
+  final bool rejectMousePointers;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
@@ -233,12 +242,14 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     bool overscroll = true,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    bool rejectMousePointers = false,
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars,
       overscroll: overscroll,
       physics: physics,
       platform: platform,
+      rejectMousePointers: rejectMousePointers,
     );
   }
 
@@ -259,6 +270,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || oldDelegate.overscrollIndicator != overscrollIndicator
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
+        || oldDelegate.rejectMousePointers != rejectMousePointers
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 
