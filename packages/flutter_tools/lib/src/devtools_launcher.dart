@@ -74,7 +74,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           offline = true;
         }
       } on Exception catch (e) {
-        _logger.printTrace('Skipping devtools launch because connecting to pub.dev failed: $e');
+        _logger.printTrace(
+          'Skipping devtools launch because connecting to pub.dev failed with $e',
+        );
         offline = true;
       } on ArgumentError {
         if (!useOverrideUrl) {
