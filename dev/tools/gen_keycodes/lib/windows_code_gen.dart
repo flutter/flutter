@@ -9,7 +9,7 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-/// Generates the key mapping of Windows, based on the information in the key
+/// Generates the key mapping for Windows, based on the information in the key
 /// data structure given to it.
 class WindowsCodeGenerator extends PlatformCodeGenerator {
   WindowsCodeGenerator(

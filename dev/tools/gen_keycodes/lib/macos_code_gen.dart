@@ -29,7 +29,7 @@ String _toConstantVariableName(String variableName) {
   return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';
 }
 
-/// Generates the key mapping of macOS, based on the information in the key
+/// Generates the key mapping for macOS, based on the information in the key
 /// data structure given to it.
 class MacOsCodeGenerator extends PlatformCodeGenerator {
   MacOsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)

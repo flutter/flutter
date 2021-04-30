@@ -10,7 +10,7 @@ import 'physical_key_data.dart';
 import 'utils.dart';
 
 
-/// Generates the key mapping of GTK, based on the information in the key
+/// Generates the key mapping for GTK, based on the information in the key
 /// data structure given to it.
 class GtkCodeGenerator extends PlatformCodeGenerator {
   GtkCodeGenerator(
