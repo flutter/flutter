@@ -95,7 +95,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// Only useful when used in combination with [icon], and either one of
   /// [text] or [child] is non-null.
   final EdgeInsetsGeometry iconMargin;
-  
+
   /// The widget height when there is an icon and text
   ///
   /// Useful when the combination of both overflows the default height
@@ -151,7 +151,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   @override
   Size get preferredSize {
     if ((text != null || child != null) && icon != null)
-      return Size.fromHeight(kTextAndIconTabHeight);
+    	return Size.fromHeight(kTextAndIconTabHeight);
     else
       return const Size.fromHeight(_kTabHeight);
   }
