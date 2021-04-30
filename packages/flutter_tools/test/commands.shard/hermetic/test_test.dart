@@ -624,7 +624,7 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
-  testUsingContext('Don\'t build the asset manifest if --no-test-assets if informed', () async {
+  testUsingContext("Don't build the asset manifest if --no-test-assets if informed", () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
     final TestCommand testCommand = TestCommand(testRunner: testRunner);
