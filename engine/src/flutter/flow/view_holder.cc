@@ -104,9 +104,7 @@ ViewHolder::ViewHolder(fuchsia::ui::views::ViewHolderToken view_holder_token,
 void ViewHolder::UpdateScene(scenic::Session* session,
                              scenic::ContainerNode& container_node,
                              const SkPoint& offset,
-                             const SkSize& size,
-                             SkAlpha opacity,
-                             bool hit_testable) {
+                             SkAlpha opacity) {
   if (pending_view_holder_token_.value) {
     entity_node_ = std::make_unique<scenic::EntityNode>(session);
     opacity_node_ = std::make_unique<scenic::OpacityNodeHACK>(session);
@@ -131,17 +129,8 @@ void ViewHolder::UpdateScene(scenic::Session* session,
   container_node.AddChild(*opacity_node_);
   opacity_node_->SetOpacity(opacity / 255.0f);
   entity_node_->SetTranslation(offset.x(), offset.y(), -0.1f);
-  entity_node_->SetHitTestBehavior(
-      hit_testable ? fuchsia::ui::gfx::HitTestBehavior::kDefault
-                   : fuchsia::ui::gfx::HitTestBehavior::kSuppress);
-  if (has_pending_properties_) {
-    // TODO(dworsham): This should be derived from size and elevation.  We
-    // should be able to Z-limit the view's box but otherwise it uses all of the
-    // available airspace.
-    view_holder_->SetViewProperties(std::move(pending_properties_));
-
-    has_pending_properties_ = false;
-  }
+  entity_node_->SetHitTestBehavior(hit_test_behavior_);
+  view_holder_->SetViewProperties(view_properties_);
 }
 
 void ViewHolder::SetProperties(double width,
@@ -151,9 +140,32 @@ void ViewHolder::SetProperties(double width,
                                double insetBottom,
                                double insetLeft,
                                bool focusable) {
-  pending_properties_ = ToViewProperties(width, height, insetTop, insetRight,
-                                         insetBottom, insetLeft, focusable);
-  has_pending_properties_ = true;
+  view_properties_ = ToViewProperties(width, height, insetTop, insetRight,
+                                      insetBottom, insetLeft, focusable);
+}
+
+void ViewHolder::set_hit_testable(bool value) {
+  hit_test_behavior_ = value ? fuchsia::ui::gfx::HitTestBehavior::kDefault
+                             : fuchsia::ui::gfx::HitTestBehavior::kSuppress;
+}
+
+void ViewHolder::set_focusable(bool value) {
+  view_properties_.focus_change = value;
+}
+
+void ViewHolder::set_size(const SkSize& size) {
+  // TODO(dworsham): The Z-bound should be derived from elevation.  We should be
+  // able to Z-limit the view's box but otherwise it uses all of the available
+  // airspace.
+  view_properties_.bounding_box.max.x = size.width();
+  view_properties_.bounding_box.max.y = size.height();
+}
+
+void ViewHolder::set_occlusion_hint(const SkRect& occlusion_hint) {
+  view_properties_.inset_from_min.x = occlusion_hint.fLeft;
+  view_properties_.inset_from_min.y = occlusion_hint.fTop;
+  view_properties_.inset_from_max.x = occlusion_hint.fRight;
+  view_properties_.inset_from_max.y = occlusion_hint.fBottom;
 }
 
 }  // namespace flutter

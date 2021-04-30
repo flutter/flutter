@@ -206,17 +206,12 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
     return;
   }
 
-  if (size.width() > 0.f && size.height() > 0.f) {
-    view_holder->SetProperties(size.width(), size.height(), 0, 0, 0, 0,
-                               view_holder->focusable());
+  if (override_hit_testable.has_value()) {
+    view_holder->set_hit_testable(*override_hit_testable);
   }
-
-  bool hit_testable = override_hit_testable.has_value()
-                          ? *override_hit_testable
-                          : view_holder->hit_testable();
+  view_holder->set_size(size);
   view_holder->UpdateScene(session_.get(), top_entity_->embedder_node(), offset,
-                           size, SkScalarRoundToInt(alphaf() * 255),
-                           hit_testable);
+                           SkScalarRoundToInt(alphaf() * 255));
 
   // Assume embedded views are 10 "layers" wide.
   next_elevation_ += 10 * kScenicZElevationBetweenLayers;
@@ -238,6 +233,7 @@ void SceneUpdateContext::CreateView(int64_t view_id,
 }
 
 void SceneUpdateContext::UpdateView(int64_t view_id,
+                                    const SkRect& view_occlusion_hint,
                                     bool hit_testable,
                                     bool focusable) {
   auto* view_holder = ViewHolder::FromId(view_id);
@@ -248,6 +244,7 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
 
   view_holder->set_hit_testable(hit_testable);
   view_holder->set_focusable(focusable);
+  view_holder->set_occlusion_hint(view_occlusion_hint);
 }
 
 void SceneUpdateContext::DestroyView(

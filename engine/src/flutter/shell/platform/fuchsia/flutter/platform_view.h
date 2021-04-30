@@ -30,7 +30,7 @@ namespace flutter_runner {
 
 using OnEnableWireframe = fit::function<void(bool)>;
 using OnCreateView = fit::function<void(int64_t, ViewIdCallback, bool, bool)>;
-using OnUpdateView = fit::function<void(int64_t, bool, bool)>;
+using OnUpdateView = fit::function<void(int64_t, SkRect, bool, bool)>;
 using OnDestroyView = fit::function<void(int64_t, ViewIdCallback)>;
 using OnCreateSurface = fit::function<std::unique_ptr<flutter::Surface>()>;
 

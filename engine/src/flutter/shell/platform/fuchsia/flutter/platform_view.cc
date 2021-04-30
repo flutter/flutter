@@ -1005,9 +1005,47 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       return;
     }
 
-    on_update_view_callback_(view_id->value.GetUint64(),
-                             hit_testable->value.GetBool(),
-                             focusable->value.GetBool());
+    SkRect view_occlusion_hint_raw = SkRect::MakeEmpty();
+    auto view_occlusion_hint = args.FindMember("");
+    if (view_occlusion_hint != args.MemberEnd()) {
+      if (view_occlusion_hint->value.IsArray()) {
+        const auto& view_occlusion_hint_array =
+            view_occlusion_hint->value.GetArray();
+        if (view_occlusion_hint_array.Size() == 4) {
+          bool parse_error = false;
+          for (int i = 0; i < 4; i++) {
+            auto& array_val = view_occlusion_hint_array[i];
+            if (!array_val.IsDouble()) {
+              FML_LOG(ERROR) << "Argument 'viewOcclusionHintLTRB' element " << i
+                             << " is not a double";
+              parse_error = true;
+              break;
+            }
+          }
+
+          if (!parse_error) {
+            view_occlusion_hint_raw =
+                SkRect::MakeLTRB(view_occlusion_hint_array[0].GetDouble(),
+                                 view_occlusion_hint_array[1].GetDouble(),
+                                 view_occlusion_hint_array[2].GetDouble(),
+                                 view_occlusion_hint_array[3].GetDouble());
+          }
+        } else {
+          FML_LOG(ERROR)
+              << "Argument 'viewOcclusionHintLTRB' expected size 4; got "
+              << view_occlusion_hint_array.Size();
+        }
+      } else {
+        FML_LOG(ERROR)
+            << "Argument 'viewOcclusionHintLTRB' is not a double array";
+      }
+    } else {
+      FML_LOG(WARNING) << "Argument 'viewOcclusionHintLTRB' is missing";
+    }
+
+    on_update_view_callback_(
+        view_id->value.GetUint64(), view_occlusion_hint_raw,
+        hit_testable->value.GetBool(), focusable->value.GetBool());
   } else if (method->value == "View.dispose") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
