@@ -26,11 +26,11 @@ class TextShadow {
  public:
   SkColor color = SK_ColorBLACK;
   SkPoint offset;
-  double blur_radius = 0.0;
+  double blur_sigma = 0.0;
 
   TextShadow();
 
-  TextShadow(SkColor color, SkPoint offset, double blur_radius);
+  TextShadow(SkColor color, SkPoint offset, double blur_sigma);
 
   bool operator==(const TextShadow& other) const;
 

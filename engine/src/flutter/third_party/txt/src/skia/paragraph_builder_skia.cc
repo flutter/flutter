@@ -126,7 +126,7 @@ skt::TextStyle TxtToSkia(const TextStyle& txt) {
   for (const txt::TextShadow& txt_shadow : txt.text_shadows) {
     skt::TextShadow shadow;
     shadow.fOffset = txt_shadow.offset;
-    shadow.fBlurSigma = txt_shadow.blur_radius;
+    shadow.fBlurSigma = txt_shadow.blur_sigma;
     shadow.fColor = txt_shadow.color;
     skia.addShadow(shadow);
   }

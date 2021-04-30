@@ -1650,9 +1650,9 @@ void ParagraphTxt::PaintShadow(SkCanvas* canvas,
 
     SkPaint paint;
     paint.setColor(text_shadow.color);
-    if (text_shadow.blur_radius != 0.0) {
+    if (text_shadow.blur_sigma > 0.5) {
       paint.setMaskFilter(SkMaskFilter::MakeBlur(
-          kNormal_SkBlurStyle, text_shadow.blur_radius, false));
+          kNormal_SkBlurStyle, text_shadow.blur_sigma, false));
     }
     canvas->drawTextBlob(record.text(), offset.x() + text_shadow.offset.x(),
                          offset.y() + text_shadow.offset.y(), paint);
