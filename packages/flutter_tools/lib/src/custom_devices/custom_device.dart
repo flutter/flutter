@@ -497,23 +497,21 @@ class CustomDevice extends Device {
       replacementValues
     );
 
-    try {
-      final RunResult result = await _processUtils.run(
-        interpolated,
-        throwOnError: true,
-        timeout: timeout
-      );
+    final RunResult result = await _processUtils.run(
+      interpolated,
+      timeout: timeout
+    );
 
-      // If the user doesn't configure a ping success regex, any ping with exitCode zero
-      // is good enough. Otherwise we check if either stdout or stderr have a match of
-      // the pingSuccessRegex.
-      return _config.pingSuccessRegex == null
-        || _config.pingSuccessRegex.hasMatch(result.stdout)
-        || _config.pingSuccessRegex.hasMatch(result.stderr);
-    } on ProcessException catch (e) {
-      _logger.printError('Error executing ping command for custom device $id: $e');
+    if (result.exitCode != 0) {
       return false;
     }
+
+    // If the user doesn't configure a ping success regex, any ping with exitCode zero
+    // is good enough. Otherwise we check if either stdout or stderr have a match of
+    // the pingSuccessRegex.
+    return _config.pingSuccessRegex == null
+        || _config.pingSuccessRegex.hasMatch(result.stdout)
+        || _config.pingSuccessRegex.hasMatch(result.stderr);
   }
 
   /// Tries to execute the configs postBuild command using [appName] for the
