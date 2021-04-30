@@ -58,7 +58,7 @@ const String kExampleManifest = r'''
 void main() {
   testWithoutContext('Project can parse the app version from the appx manifest', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file('winuwp/appxmanifest.in')
+    fileSystem.file('winuwp/runner_uwp/appxmanifest.in')
       ..createSync(recursive: true)
       ..writeAsStringSync(kExampleManifest);
 
@@ -77,12 +77,64 @@ void main() {
 
   testWithoutContext('Project throws a tool exit if appxmanifest is not valid xml', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file('winuwp/appxmanifest.in')
+    fileSystem.file('winuwp/runner_uwp/appxmanifest.in')
       ..createSync(recursive: true)
       ..writeAsStringSync('[');
 
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(() => flutterProject.windowsUwp.packageVersion, throwsToolExit());
+  });
+
+  testWithoutContext('Can parse the PACKAGE_GUID from the Cmake manifest', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('winuwp/runner_uwp/CMakeLists.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+cmake_minimum_required (VERSION 3.8)
+set(CMAKE_SYSTEM_NAME WindowsStore)
+set(CMAKE_SYSTEM_VERSION 10.0)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+
+include(CMakePrintHelpers)
+
+project ("TestBedUWP")
+
+set(APP_MANIFEST_NAME Package.appxmanifest)
+set(APP_MANIFEST_TARGET_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${APP_MANIFEST_NAME})
+set(SHORT_NAME ${BINARY_NAME})
+set(PACKAGE_GUID "F941A77F-8AE1-4E3E-9611-68FBD3C62AE8")
+
+''');
+
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+
+    expect(flutterProject.windowsUwp.packageGuid, 'F941A77F-8AE1-4E3E-9611-68FBD3C62AE8');
+  });
+
+  testWithoutContext('Returns null if the PACKAGE_GUID cannot be found in the Cmake file', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('winuwp/runner_uwp/CMakeLists.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+cmake_minimum_required (VERSION 3.8)
+set(CMAKE_SYSTEM_NAME WindowsStore)
+set(CMAKE_SYSTEM_VERSION 10.0)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+
+include(CMakePrintHelpers)
+
+project ("TestBedUWP")
+
+set(APP_MANIFEST_NAME Package.appxmanifest)
+set(APP_MANIFEST_TARGET_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${APP_MANIFEST_NAME})
+set(SHORT_NAME ${BINARY_NAME})
+''');
+
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+
+    expect(flutterProject.windowsUwp.packageGuid, null);
   });
 }

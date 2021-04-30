@@ -49,7 +49,7 @@ void main() {
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
     expect(windowsDevice.name, 'Windows (UWP)');
     expect(await windowsDevice.installApp(package), true);
-    expect(await windowsDevice.uninstallApp(package), true);
+    expect(await windowsDevice.uninstallApp(package), false);
     expect(await windowsDevice.isLatestBuildInstalled(package), false);
     expect(await windowsDevice.isAppInstalled(package), false);
     expect(windowsDevice.category, Category.desktop);
@@ -173,7 +173,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
         'powershell.exe',
-        'build/winuwp/AppPackages/testapp/testapp_1.2.3.4_Debug_Test/Add-AppDevPackage.ps1',
+        'build/winuwp/runner_uwp/AppPackages/testapp/testapp_1.2.3.4_Debug_Test/install.ps1',
       ]),
       const FakeCommand(command: <String>[
         'powershell.exe',
@@ -182,7 +182,11 @@ void main() {
         '1234'
       ], stdout: 'ABCDEFG'),
     ]);
-    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(fileSystem: fileSystem, processManager: processManager, nativeApi: nativeApi);
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      nativeApi: nativeApi,
+    );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
     final LaunchResult result = await windowsDevice.startApp(
@@ -201,6 +205,41 @@ void main() {
       '--enable-checked-mode',
       '--verify-entry-points',
     ]);
+  });
+
+   testWithoutContext('WinUWPDevice can launch application in release mode', () async {
+    Cache.flutterRoot = '';
+    final FakeNativeApi nativeApi = FakeNativeApi();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'powershell.exe',
+        'build/winuwp/runner_uwp/AppPackages/testapp/testapp_1.2.3.4_Release_Test/install.ps1',
+      ]),
+      const FakeCommand(command: <String>[
+        'powershell.exe',
+        'packages/flutter_tools/bin/getaumidfromname.ps1',
+        '-Name',
+        '1234'
+      ], stdout: 'ABCDEFG'),
+    ]);
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      nativeApi: nativeApi,
+    );
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+
+    final LaunchResult result = await windowsDevice.startApp(
+      package,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{},
+    );
+
+    expect(result.started, true);
+    expect(nativeApi.requests.single.amuid, 'ABCDEFG');
+    expect(nativeApi.requests.single.args, <String>[]);
   });
 }
 
