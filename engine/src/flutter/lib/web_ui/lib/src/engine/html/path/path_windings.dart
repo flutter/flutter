@@ -39,7 +39,7 @@ class PathWinding {
           _computeQuadWinding();
           break;
         case SPath.kConicVerb:
-          _computeConicWinding(pathRef._conicWeights![iter._conicWeightIndex]);
+          _computeConicWinding(pathRef.conicWeights![iter.conicWeightIndex]);
           break;
         case SPath.kCubicVerb:
           _computeCubicWinding();
@@ -143,7 +143,7 @@ class PathWinding {
       return 0;
     }
 
-    _QuadRoots quadRoots = _QuadRoots();
+    QuadRoots quadRoots = QuadRoots();
     final int n = quadRoots.findRoots(
         startY - 2 * y1 + endY, 2 * (y1 - startY), startY - y);
     assert(n <= 1);
@@ -158,7 +158,7 @@ class PathWinding {
       final double B = 2 * (x1 - C);
       xt = polyEval(A, B, C, t);
     }
-    if (_nearlyEqual(xt, x)) {
+    if (SPath.nearlyEqual(xt, x)) {
       if (x != x2 || y != endY) {
         // don't test end points; they're start points
         _onCurveCount += 1;
@@ -177,7 +177,7 @@ class PathWinding {
     final double y1 = buffer[3];
     final double x2 = buffer[4];
     final double y2 = buffer[5];
-    double? tValueAtExtrema = _validUnitDivide(y0 - y1, y0 - y1 - y1 + y2);
+    double? tValueAtExtrema = validUnitDivide(y0 - y1, y0 - y1 - y1 + y2);
     if (tValueAtExtrema != null) {
       // Chop quad at t value by interpolating along p0-p1 and p1-p2.
       double p01x = x0 + (tValueAtExtrema * (x1 - x0));
@@ -259,7 +259,7 @@ class PathWinding {
     // B = b*w - w * yCept + yCept - a
     B -= C;
     C -= y;
-    final _QuadRoots quadRoots = _QuadRoots();
+    final QuadRoots quadRoots = QuadRoots();
     int n = quadRoots.findRoots(A, 2 * B, C);
     assert(n <= 1);
     double xt;
@@ -271,10 +271,10 @@ class PathWinding {
     } else {
       final double root = quadRoots.root0!;
       xt =
-          _conicEvalNumerator(conic.p0x, conic.p1x, conic.p2x, conic.fW, root) /
-              _conicEvalDenominator(conic.fW, root);
+          Conic.evalNumerator(conic.p0x, conic.p1x, conic.p2x, conic.fW, root) /
+              Conic.evalDenominator(conic.fW, root);
     }
-    if (_nearlyEqual(xt, x)) {
+    if (SPath.nearlyEqual(xt, x)) {
       if (x != conic.p2x || y != conic.p2y) {
         // don't test end points; they're start points
         _onCurveCount += 1;
@@ -285,7 +285,7 @@ class PathWinding {
   }
 
   void _computeCubicWinding() {
-    int n = _chopCubicAtYExtrema(_buffer, _buffer);
+    int n = chopCubicAtYExtrema(_buffer, _buffer);
     for (int i = 0; i <= n; ++i) {
       _windingMonoCubic(i * 3 * 2);
     }
@@ -334,12 +334,12 @@ class PathWinding {
       return;
     }
     // Compute the actual x(t) value.
-    double? t = _chopMonoAtY(_buffer, bufferStartPos, y);
+    double? t = chopMonoAtY(_buffer, bufferStartPos, y);
     if (t == null) {
       return;
     }
-    double xt = _evalCubicPts(px0, px1, px2, px3, t);
-    if (_nearlyEqual(xt, x)) {
+    double xt = evalCubicPts(px0, px1, px2, px3, t);
+    if (SPath.nearlyEqual(xt, x)) {
       if (x != px3 || y != py3) {
         // don't test end points; they're start points
         _onCurveCount += 1;
@@ -348,211 +348,4 @@ class PathWinding {
     }
     _w += xt < x ? dir : 0;
   }
-}
-
-// Iterates through path including generating closing segments.
-class PathIterator {
-  PathIterator(this.pathRef, bool forceClose)
-      : _forceClose = forceClose,
-        _verbCount = pathRef.countVerbs() {
-    _pointIndex = 0;
-    if (!pathRef.isFinite) {
-      // Don't allow iteration through non-finite points, prepare to return
-      // done verb.
-      _verbIndex = pathRef.countVerbs();
-    }
-  }
-
-  final PathRef pathRef;
-  final bool _forceClose;
-  final int _verbCount;
-
-  bool _needClose = false;
-  int _segmentState = SPathSegmentState.kEmptyContour;
-  int _conicWeightIndex = -1;
-  double _lastPointX = 0;
-  double _lastPointY = 0;
-  double _moveToX = 0;
-  double _moveToY = 0;
-  int _verbIndex = 0;
-  int _pointIndex = 0;
-
-  /// Maximum buffer size required for points in [next] calls.
-  static const int kMaxBufferSize = 8;
-
-  /// Returns true if first contour on path is closed.
-  bool isClosedContour() {
-    if (_verbCount == 0 || _verbIndex == _verbCount) {
-      return false;
-    }
-    if (_forceClose) {
-      return true;
-    }
-    int verbIndex = 0;
-    // Skip starting moveTo.
-    if (pathRef.atVerb(verbIndex) == SPath.kMoveVerb) {
-      ++verbIndex;
-    }
-    while (verbIndex < _verbCount) {
-      int verb = pathRef.atVerb(verbIndex++);
-      if (SPath.kMoveVerb == verb) {
-        break;
-      }
-      if (SPath.kCloseVerb == verb) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  int _autoClose(Float32List outPts) {
-    if (_lastPointX != _moveToX || _lastPointY != _moveToY) {
-      // Handle special case where comparison above will return true for
-      // NaN != NaN although it should be false.
-      if (_lastPointX.isNaN ||
-          _lastPointY.isNaN ||
-          _moveToX.isNaN ||
-          _moveToY.isNaN) {
-        return SPath.kCloseVerb;
-      }
-      outPts[0] = _lastPointX;
-      outPts[1] = _lastPointY;
-      outPts[2] = _moveToX;
-      outPts[3] = _moveToY;
-      _lastPointX = _moveToX;
-      _lastPointY = _moveToY;
-      return SPath.kLineVerb;
-    } else {
-      outPts[0] = _moveToX;
-      outPts[1] = _moveToY;
-      return SPath.kCloseVerb;
-    }
-  }
-
-  // Returns true if caller should use moveTo, false if last point of
-  // previous primitive.
-  ui.Offset _constructMoveTo() {
-    if (_segmentState == SPathSegmentState.kAfterMove) {
-      // Set the first return point to move point.
-      _segmentState = SPathSegmentState.kAfterPrimitive;
-      return ui.Offset(_moveToX, _moveToY);
-    }
-    return ui.Offset(
-        pathRef.points[_pointIndex - 2], pathRef.points[_pointIndex - 1]);
-  }
-
-  int peek() {
-    if (_verbIndex < pathRef.countVerbs()) {
-      return pathRef._fVerbs[_verbIndex];
-    }
-    if (_needClose && _segmentState == SPathSegmentState.kAfterPrimitive) {
-      return (_lastPointX != _moveToX || _lastPointY != _moveToY)
-          ? SPath.kLineVerb
-          : SPath.kCloseVerb;
-    }
-    return SPath.kDoneVerb;
-  }
-
-  // Returns next verb and reads associated points into [outPts].
-  int next(Float32List outPts) {
-    if (_verbIndex == pathRef.countVerbs()) {
-      // Close the curve if requested and if there is some curve to close
-      if (_needClose && _segmentState == SPathSegmentState.kAfterPrimitive) {
-        if (SPath.kLineVerb == _autoClose(outPts)) {
-          return SPath.kLineVerb;
-        }
-        _needClose = false;
-        return SPath.kCloseVerb;
-      }
-      return SPath.kDoneVerb;
-    }
-    int verb = pathRef._fVerbs[_verbIndex++];
-    switch (verb) {
-      case SPath.kMoveVerb:
-        if (_needClose) {
-          // Move back one verb.
-          _verbIndex--;
-          final int autoVerb = _autoClose(outPts);
-          if (autoVerb == SPath.kCloseVerb) {
-            _needClose = false;
-          }
-          return autoVerb;
-        }
-        if (_verbIndex == _verbCount) {
-          return SPath.kDoneVerb;
-        }
-        double offsetX = pathRef.points[_pointIndex++];
-        double offsetY = pathRef.points[_pointIndex++];
-        _moveToX = offsetX;
-        _moveToY = offsetY;
-        outPts[0] = offsetX;
-        outPts[1] = offsetY;
-        _segmentState = SPathSegmentState.kAfterMove;
-        _lastPointX = _moveToX;
-        _lastPointY = _moveToY;
-        _needClose = _forceClose;
-        break;
-      case SPath.kLineVerb:
-        final ui.Offset start = _constructMoveTo();
-        double offsetX = pathRef.points[_pointIndex++];
-        double offsetY = pathRef.points[_pointIndex++];
-        outPts[0] = start.dx;
-        outPts[1] = start.dy;
-        outPts[2] = offsetX;
-        outPts[3] = offsetY;
-        _lastPointX = offsetX;
-        _lastPointY = offsetY;
-        break;
-      case SPath.kConicVerb:
-        _conicWeightIndex++;
-        final ui.Offset start = _constructMoveTo();
-        outPts[0] = start.dx;
-        outPts[1] = start.dy;
-        outPts[2] = pathRef.points[_pointIndex++];
-        outPts[3] = pathRef.points[_pointIndex++];
-        _lastPointX = outPts[4] = pathRef.points[_pointIndex++];
-        _lastPointY = outPts[5] = pathRef.points[_pointIndex++];
-        break;
-      case SPath.kQuadVerb:
-        final ui.Offset start = _constructMoveTo();
-        outPts[0] = start.dx;
-        outPts[1] = start.dy;
-        outPts[2] = pathRef.points[_pointIndex++];
-        outPts[3] = pathRef.points[_pointIndex++];
-        _lastPointX = outPts[4] = pathRef.points[_pointIndex++];
-        _lastPointY = outPts[5] = pathRef.points[_pointIndex++];
-        break;
-      case SPath.kCubicVerb:
-        final ui.Offset start = _constructMoveTo();
-        outPts[0] = start.dx;
-        outPts[1] = start.dy;
-        outPts[2] = pathRef.points[_pointIndex++];
-        outPts[3] = pathRef.points[_pointIndex++];
-        outPts[4] = pathRef.points[_pointIndex++];
-        outPts[5] = pathRef.points[_pointIndex++];
-        _lastPointX = outPts[6] = pathRef.points[_pointIndex++];
-        _lastPointY = outPts[7] = pathRef.points[_pointIndex++];
-        break;
-      case SPath.kCloseVerb:
-        verb = _autoClose(outPts);
-        if (verb == SPath.kLineVerb) {
-          // Move back one verb since we constructed line for this close verb.
-          _verbIndex--;
-        } else {
-          _needClose = false;
-          _segmentState = SPathSegmentState.kEmptyContour;
-        }
-        _lastPointX = _moveToX;
-        _lastPointY = _moveToY;
-        break;
-      case SPath.kDoneVerb:
-        assert(_verbIndex == pathRef.countVerbs());
-        break;
-      default:
-        throw FormatException('Unsupport Path verb $verb');
-    }
-    return verb;
-  }
-
-  double get conicWeight => pathRef.atWeight(_conicWeightIndex);
 }

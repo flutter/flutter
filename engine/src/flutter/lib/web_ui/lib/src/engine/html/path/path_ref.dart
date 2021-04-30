@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+import 'dart:js_util' as js_util;
+import 'dart:math' as math;
+
+import 'package:ui/ui.dart' as ui;
+
+import '../../util.dart';
+import 'path_utils.dart';
 
 /// Stores the path verbs, points and conic weights.
 ///
@@ -83,7 +90,7 @@ class PathRef {
   /// points,verbs and weights arrays. If original path is mutated by adding
   /// more verbs, this copy only returns path at the time of copy and shares
   /// typed arrays of original path.
-  PathRef._shallowCopy(PathRef ref)
+  PathRef.shallowCopy(PathRef ref)
       : _fPoints = ref._fPoints,
         _fVerbs = ref._fVerbs {
     _fVerbsCapacity = ref._fVerbsCapacity;
@@ -125,6 +132,10 @@ class PathRef {
   ui.Offset atPoint(int index) {
     return ui.Offset(_fPoints[index * 2], _fPoints[index * 2 + 1]);
   }
+
+  double pointXAt(int index) => _fPoints[index * 2];
+
+  double pointYAt(int index) => _fPoints[index * 2 + 1];
 
   double atWeight(int index) {
     return _conicWeights![index];
@@ -266,11 +277,11 @@ class PathRef {
           dy = vector1_0y.abs();
         }
         if (assertionsEnabled) {
-          final int checkCornerIndex = _nearlyEqual(controlPx, bounds.left)
-              ? (_nearlyEqual(controlPy, bounds.top)
+          final int checkCornerIndex = SPath.nearlyEqual(controlPx, bounds.left)
+              ? (SPath.nearlyEqual(controlPy, bounds.top)
                   ? _Corner.kUpperLeft
                   : _Corner.kLowerLeft)
-              : (_nearlyEqual(controlPy, bounds.top)
+              : (SPath.nearlyEqual(controlPy, bounds.top)
                   ? _Corner.kUpperRight
                   : _Corner.kLowerRight);
           assert(checkCornerIndex == cornerIndex);
@@ -465,7 +476,7 @@ class PathRef {
     _conicWeightsLength = newLength;
   }
 
-  void _append(PathRef source) {
+  void append(PathRef source) {
     final int pointCount = source.countPoints();
     final int curLength = _fPointsLength;
     final int newPointCount = curLength + pointCount;
