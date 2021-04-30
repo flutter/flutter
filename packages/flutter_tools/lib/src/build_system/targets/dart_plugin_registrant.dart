@@ -69,7 +69,9 @@ class DartPluginRegistrantTarget extends Target {
       return true;
     }
     final String platformName = environment.defines[kTargetPlatform];
-    assert(platformName != null);
+    if (platformName == null) {
+      return true;
+    }
     final TargetPlatform targetPlatform = getTargetPlatformForName(platformName);
     // TODO(egarciad): Support Android and iOS.
     // https://github.com/flutter/flutter/issues/52267
