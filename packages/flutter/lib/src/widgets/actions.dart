@@ -257,7 +257,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///   const ActionListenerExample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
+///   State<ActionListenerExample> createState() => _ActionListenerExampleState();
 /// }
 ///
 /// class _ActionListenerExampleState extends State<ActionListenerExample> {
@@ -605,7 +605,7 @@ class ActionDispatcher with Diagnosticable {
 ///   final ValueNotifier<bool> valueNotifier;
 ///
 ///   @override
-///   _SaveButtonState createState() => _SaveButtonState();
+///   State<SaveButton> createState() => _SaveButtonState();
 /// }
 ///
 /// class _SaveButtonState extends State<SaveButton> {
@@ -1129,7 +1129,7 @@ class _ActionsMarker extends InheritedWidget {
 ///   final Widget child;
 ///
 ///   @override
-///   _FadButtonState createState() => _FadButtonState();
+///   State<FadButton> createState() => _FadButtonState();
 /// }
 ///
 /// class _FadButtonState extends State<FadButton> {

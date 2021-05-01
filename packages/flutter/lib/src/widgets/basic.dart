@@ -5494,7 +5494,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   const FlowMenu({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _FlowMenuState createState() => _FlowMenuState();
+///   State<FlowMenu> createState() => _FlowMenuState();
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
@@ -6619,7 +6619,7 @@ class MouseRegion extends StatefulWidget {
   ///   final VoidCallback onExitButton;
   ///
   ///   @override
-  ///   _MyTimedButton createState() => _MyTimedButton();
+  ///   State<MyTimedButton> createState() => _MyTimedButton();
   /// }
   ///
   /// class _MyTimedButton extends State<MyTimedButton> {

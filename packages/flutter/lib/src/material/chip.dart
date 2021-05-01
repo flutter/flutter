@@ -919,7 +919,7 @@ class InputChip extends StatelessWidget
 ///   const MyThreeOptions({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyThreeOptionsState createState() => _MyThreeOptionsState();
+///   State<MyThreeOptions> createState() => _MyThreeOptionsState();
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {

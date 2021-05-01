@@ -151,7 +151,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///   const MyPrefilledText({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
+///   State<MyPrefilledText> createState() => _MyPrefilledTextState();
 /// }
 ///
 /// class _MyPrefilledTextState extends State<MyPrefilledText> {

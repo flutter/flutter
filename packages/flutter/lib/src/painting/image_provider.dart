@@ -241,7 +241,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   final ImageProvider imageProvider;
 ///
 ///   @override
-///   _MyImageState createState() => _MyImageState();
+///   State<MyImage> createState() => _MyImageState();
 /// }
 ///
 /// class _MyImageState extends State<MyImage> {
