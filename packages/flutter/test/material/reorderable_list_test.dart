@@ -1505,6 +1505,51 @@ void main() {
     expect(exception.toString(), contains('No Overlay widget found'));
     expect(exception.toString(), contains('ReorderableListView widgets require an Overlay widget ancestor'));
   });
+
+  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableListView.builder(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  itemExtent: 30,
+                  onReorder: (int fromIndex, int toIndex) {
+                    if (fromIndex < toIndex) {
+                      toIndex--;
+                    }
+                    final int value = numbers.removeAt(fromIndex);
+                    numbers.insert(toIndex, value);
+                  },
+                );
+              },
+            ),
+          ),
+        )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
