@@ -7,7 +7,6 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -379,17 +378,13 @@ void main() {
       ),
     );
 
-    try {
-      await driverService.startTest(
-        'foo.test',
-        [],
-        {},
-        PackageConfig(<Package>[Package('test', Uri.base)]),
-        browserName: 'chrome',
-      );
-    } on ToolExit catch (ex) {
-      expect(ex.message, contains(link));
-    }
+    expect(() => driverService.startTest(
+      'foo.test',
+      [],
+      {},
+      PackageConfig(<Package>[Package('test', Uri.base)]),
+      browserName: 'chrome',
+    ), throwsToolExit(message: RegExp(' $link ')));
   });
 }
 
