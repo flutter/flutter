@@ -319,7 +319,7 @@ void main() {
       const int itemCount = 5;
       int onReorderCallCount = 0;
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
-      
+
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
         if (toIndex > fromIndex) {
