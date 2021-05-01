@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/project.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/test_build_system.dart';
-import '../src/testbed.dart';
 
 // Tests for BundleBuilder.
 void main() {

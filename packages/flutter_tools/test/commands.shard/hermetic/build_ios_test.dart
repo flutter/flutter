@@ -16,7 +16,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
-import '../../src/testbed.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
   @override

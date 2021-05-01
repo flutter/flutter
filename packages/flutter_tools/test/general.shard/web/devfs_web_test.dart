@@ -6,6 +6,7 @@
 
 import 'dart:io' hide Directory, File;
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -20,7 +21,7 @@ import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/testbed.dart';
+import '../../src/context.dart';
 
 const List<int> kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
@@ -31,13 +32,13 @@ const List<int> kTransparentImage = <int>[
 ];
 
 void main() {
-  Testbed testbed;
   WebAssetServer webAssetServer;
   ReleaseAssetServer releaseAssetServer;
   Platform linux;
   PackageConfig packages;
   Platform windows;
   FakeHttpServer httpServer;
+  FileSystem fileSystem;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -46,45 +47,44 @@ void main() {
   });
 
   setUp(() {
+    fileSystem = MemoryFileSystem.test();
     httpServer = FakeHttpServer();
     linux = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
-    testbed = Testbed(setup: () {
-      webAssetServer = WebAssetServer(
-        httpServer,
-        packages,
-        InternetAddress.loopbackIPv4,
-        null,
-        null,
-        null,
-      );
-      releaseAssetServer = ReleaseAssetServer(
-        globals.fs.file('main.dart').uri,
-        fileSystem: null,
-        flutterRoot: null,
-        platform: null,
-        webBuildDirectory: null,
-        basePath: null,
-      );
-    });
+    webAssetServer = WebAssetServer(
+      httpServer,
+      packages,
+      InternetAddress.loopbackIPv4,
+      null,
+      null,
+      null,
+    );
+    releaseAssetServer = ReleaseAssetServer(
+      fileSystem.file('main.dart').uri,
+      fileSystem: fileSystem,
+      flutterRoot: null,
+      platform: null,
+      webBuildDirectory: null,
+      basePath: null,
+    );
   });
 
-  test('Handles against malformed manifest', () => testbed.run(() async {
-    final File source = globals.fs.file('source')
+  testUsingContext('Handles against malformed manifest', () async {
+    final File source = fileSystem.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = globals.fs.file('sourcemap')
+    final File sourcemap = fileSystem.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File metadata = globals.fs.file('metadata')
+    final File metadata = fileSystem.file('metadata')
       ..writeAsStringSync('{}');
 
     // Missing ending offset.
-    final File manifestMissingOffset = globals.fs.file('manifestA')
+    final File manifestMissingOffset = fileSystem.file('manifestA')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0],
         'sourcemap': <int>[0],
         'metadata': <int>[0],
       }}));
-    final File manifestOutOfBounds = globals.fs.file('manifest')
+    final File manifestOutOfBounds = fileSystem.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, 100],
         'sourcemap': <int>[0],
@@ -93,16 +93,19 @@ void main() {
 
     expect(webAssetServer.write(source, manifestMissingOffset, sourcemap, metadata), isEmpty);
     expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap, metadata), isEmpty);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves JavaScript files from in memory cache', () => testbed.run(() async {
-    final File source = globals.fs.file('source')
+  testUsingContext('serves JavaScript files from in memory cache', () async {
+    final File source = fileSystem.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = globals.fs.file('sourcemap')
+    final File sourcemap = fileSystem.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File metadata = globals.fs.file('metadata')
+    final File metadata = fileSystem.file('metadata')
       ..writeAsStringSync('{}');
-    final File manifest = globals.fs.file('manifest')
+    final File manifest = fileSystem.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
@@ -121,17 +124,19 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
     Platform: () => linux,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves metadata files from in memory cache', () => testbed.run(() async {
+  testUsingContext('serves metadata files from in memory cache', () async {
     const String metadataContents = '{"name":"foo"}';
-    final File source = globals.fs.file('source')
+    final File source = fileSystem.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = globals.fs.file('sourcemap')
+    final File sourcemap = fileSystem.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File metadata = globals.fs.file('metadata')
+    final File metadata = fileSystem.file('metadata')
       ..writeAsStringSync(metadataContents);
-    final File manifest = globals.fs.file('manifest')
+    final File manifest = fileSystem.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, sourcemap.lengthSync()],
@@ -146,15 +151,17 @@ void main() {
     expect(single, equals(metadataContents));
   }, overrides: <Type, Generator>{
     Platform: () => linux,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Removes leading slashes for valid requests to avoid requesting outside'
-    ' of served directory', () => testbed.run(() async {
-    globals.fs.file('foo.png').createSync();
-    globals.fs.currentDirectory = globals.fs.directory('project_directory')
+  testUsingContext('Removes leading slashes for valid requests to avoid requesting outside'
+    ' of served directory', () async {
+    fileSystem.file('foo.png').createSync();
+    fileSystem.currentDirectory = fileSystem.directory('project_directory')
       ..createSync();
 
-    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+    final File source = fileSystem.file(fileSystem.path.join('web', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer
@@ -167,16 +174,19 @@ void main() {
       containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('takes base path into account when serving', () => testbed.run(() async {
+  testUsingContext('takes base path into account when serving', () async {
     webAssetServer.basePath = 'base/path';
 
-    globals.fs.file('foo.png').createSync();
-    globals.fs.currentDirectory = globals.fs.directory('project_directory')
+    fileSystem.file('foo.png').createSync();
+    fileSystem.currentDirectory = fileSystem.directory('project_directory')
       ..createSync();
 
-    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+    final File source = fileSystem.file(fileSystem.path.join('web', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
     final Response response =
@@ -191,13 +201,16 @@ void main() {
       containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves index.html at the base path', () => testbed.run(() async {
+  testUsingContext('serves index.html at the base path', () async {
     webAssetServer.basePath = 'base/path';
 
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -207,13 +220,16 @@ void main() {
 
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), htmlContent);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('does not serve outside the base path', () => testbed.run(() async {
+  testUsingContext('does not serve outside the base path', () async {
     webAssetServer.basePath = 'base/path';
 
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -222,11 +238,14 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
     expect(response.statusCode, HttpStatus.notFound);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('parses base path from index.html', () => testbed.run(() async {
+  testUsingContext('parses base path from index.html', () async {
     const String htmlContent = '<html><head><base href="/foo/bar/"></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -241,11 +260,14 @@ void main() {
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('handles lack of base path in index.html', () => testbed.run(() async {
+  testUsingContext('handles lack of base path in index.html', () async {
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -261,11 +283,14 @@ void main() {
 
     // Defaults to "/" when there's no base element.
     expect(webAssetServer.basePath, '');
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('throws if base path is relative', () => testbed.run(() async {
+  testUsingContext('throws if base path is relative', () async {
     const String htmlContent = '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -281,11 +306,14 @@ void main() {
       ),
       throwsToolExit(),
     );
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('throws if base path does not end with slash', () => testbed.run(() async {
+  testUsingContext('throws if base path does not end with slash', () async {
     const String htmlContent = '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -301,9 +329,12 @@ void main() {
       ),
       throwsToolExit(),
     );
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
+  testUsingContext('serves JavaScript files from in memory cache not from manifest', () async {
     webAssetServer.writeFile('foo.js', 'main() {}');
 
     final Response response = await webAssetServer
@@ -316,9 +347,12 @@ void main() {
       containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, utf8.encode('main() {}'));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Returns notModified when the ifNoneMatch header matches the etag', () => testbed.run(() async {
+  testUsingContext('Returns notModified when the ifNoneMatch header matches the etag', () async {
     webAssetServer.writeFile('foo.js', 'main() {}');
 
     final Response response = await webAssetServer
@@ -332,11 +366,14 @@ void main() {
 
     expect(cachedResponse.statusCode, HttpStatus.notModified);
     expect(await cachedResponse.read().toList(), isEmpty);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves index.html when path is unknown', () => testbed.run(() async {
+  testUsingContext('serves index.html when path is unknown', () async {
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -346,13 +383,16 @@ void main() {
 
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), htmlContent);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('does not serve outside the base path', () => testbed.run(() async {
+  testUsingContext('does not serve outside the base path', () async {
     webAssetServer.basePath = 'base/path';
 
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -361,11 +401,14 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
     expect(response.statusCode, HttpStatus.notFound);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('does not serve index.html when path is inside assets or packages', () => testbed.run(() async {
+  testUsingContext('does not serve index.html when path is inside assets or packages', () async {
     const String htmlContent = '<html><head></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
+    final Directory webDir = fileSystem.currentDirectory
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -387,25 +430,31 @@ void main() {
     response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/base/path/packages/foo/bar.dart.js')));
     expect(response.statusCode, HttpStatus.notFound);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves default index.html', () => testbed.run(() async {
+  testUsingContext('serves default index.html', () async {
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
     expect(response.statusCode, HttpStatus.ok);
     expect((await response.read().toList()).first,
       containsAllInOrder(utf8.encode('<html>')));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('handles web server paths without .lib extension', () => testbed.run(() async {
-    final File source = globals.fs.file('source')
+  testUsingContext('handles web server paths without .lib extension', () async {
+    final File source = fileSystem.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = globals.fs.file('sourcemap')
+    final File sourcemap = fileSystem.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File metadata = globals.fs.file('metadata')
+    final File metadata = fileSystem.file('metadata')
       ..writeAsStringSync('{}');
-    final File manifest = globals.fs.file('manifest')
+    final File manifest = fileSystem.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.dart.lib.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
@@ -417,16 +466,19 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.dart.js')));
 
     expect(response.statusCode, HttpStatus.ok);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves JavaScript files from in memory cache on Windows', () => testbed.run(() async {
-    final File source = globals.fs.file('source')
+  testUsingContext('serves JavaScript files from in memory cache on Windows', () async {
+    final File source = fileSystem.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = globals.fs.file('sourcemap')
+    final File sourcemap = fileSystem.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File metadata = globals.fs.file('metadata')
+    final File metadata = fileSystem.file('metadata')
       ..writeAsStringSync('{}');
-    final File manifest = globals.fs.file('manifest')
+    final File manifest = fileSystem.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
@@ -445,10 +497,12 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
     Platform: () => windows,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-   test('serves asset files from in filesystem with url-encoded paths', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', Uri.encodeFull('abcd象形字.png')))
+  testUsingContext('serves asset files from in filesystem with url-encoded paths', () async {
+    final File source = fileSystem.file(fileSystem.path.join('build', 'flutter_assets', Uri.encodeFull('abcd象形字.png')))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer
@@ -461,9 +515,13 @@ void main() {
       containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
-  test('serves files from web directory', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('serves files from web directory', () async {
+    final File source = fileSystem.file(fileSystem.path.join('web', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer
@@ -476,10 +534,13 @@ void main() {
       containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-   test('serves asset files from in filesystem with known mime type on Windows', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo.png'))
+  testUsingContext('serves asset files from in filesystem with known mime type on Windows', () async {
+    final File source = fileSystem.file(fileSystem.path.join('build', 'flutter_assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer
@@ -494,10 +555,12 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type,  Generator>{
     Platform: () => windows,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves Dart files from in filesystem on Linux/macOS', () => testbed.run(() async {
-    final File source = globals.fs.file('foo.dart').absolute
+  testUsingContext('serves Dart files from in filesystem on Linux/macOS', () async {
+    final File source = fileSystem.file('foo.dart').absolute
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() {}');
 
@@ -508,10 +571,12 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type,  Generator>{
     Platform: () => linux,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves asset files from in filesystem with known mime type', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo.png'))
+  testUsingContext('serves asset files from in filesystem with known mime type', () async {
+    final File source = fileSystem.file(fileSystem.path.join('build', 'flutter_assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
 
@@ -523,10 +588,13 @@ void main() {
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves asset files files from in filesystem with unknown mime type and length > 12', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
+  testUsingContext('serves asset files files from in filesystem with unknown mime type and length > 12', () async {
+    final File source = fileSystem.file(fileSystem.path.join('build', 'flutter_assets', 'foo'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(100, 0));
 
@@ -538,10 +606,13 @@ void main() {
       containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves asset files files from in filesystem with unknown mime type and length < 12', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
+  testUsingContext('serves asset files files from in filesystem with unknown mime type and length < 12', () async {
+    final File source = fileSystem.file(fileSystem.path.join('build', 'flutter_assets', 'foo'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -553,10 +624,13 @@ void main() {
       containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves valid etag header for asset files with non-ascii chracters', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'fooπ'))
+  testUsingContext('serves valid etag header for asset files with non-ascii chracters', () async {
+    fileSystem.file(fileSystem.path.join('build', 'flutter_assets', 'fooπ'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -565,13 +639,16 @@ void main() {
     final String etag = response.headers[HttpHeaders.etagHeader];
 
     expect(etag.runes, everyElement(predicate((int char) => char < 255)));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('serves /packages/<package>/<path> files as if they were '
-       'package:<package>/<path> uris', () => testbed.run(() async {
+  testUsingContext('serves /packages/<package>/<path> files as if they were '
+       'package:<package>/<path> uris', () async {
     final Uri expectedUri = packages.resolve(
         Uri.parse('package:flutter_tools/foo.dart'));
-    final File source = globals.fs.file(globals.fs.path.fromUri(expectedUri))
+    final File source = fileSystem.file(fileSystem.path.fromUri(expectedUri))
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -583,16 +660,22 @@ void main() {
       containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('calling dispose closes the http server', () => testbed.run(() async {
+  testUsingContext('calling dispose closes the http server', () async {
     await webAssetServer.dispose();
 
     expect(httpServer.closed, true);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Can start web server with specified assets', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('Can start web server with specified assets', () async {
+    final File outputFile = fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
@@ -630,7 +713,7 @@ void main() {
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
-    webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+    webDevFS.webAssetServer.entrypointCacheDirectory = fileSystem.currentDirectory;
     final String webPrecompiledSdk = globals.artifacts
       .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts
@@ -639,26 +722,26 @@ void main() {
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
-    globals.fs.currentDirectory
+    fileSystem.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
-    globals.fs.file(webPrecompiledSdk)
+    fileSystem.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
-    globals.fs.file(webPrecompiledSdkSourcemaps)
+    fileSystem.file(webPrecompiledSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('THERE');
-    globals.fs.file(webPrecompiledCanvaskitSdk)
+    fileSystem.file(webPrecompiledCanvaskitSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
-    globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
+    fileSystem.file(webPrecompiledCanvaskitSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('CHUM');
 
     await webDevFS.update(
-      mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+      mainUri: fileSystem.file(fileSystem.path.join('lib', 'main.dart')).uri,
       generator: residentCompiler,
       trackWidgetCreation: true,
       bundleFirstUpload: true,
@@ -678,7 +761,7 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
-   globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
+   fileSystem.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
@@ -700,10 +783,12 @@ void main() {
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Can start web server with specified assets in sound null safety mode', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('Can start web server with specified assets in sound null safety mode', () async {
+    final File outputFile = fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
@@ -741,8 +826,8 @@ void main() {
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
-    webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
-    globals.fs.currentDirectory
+    webDevFS.webAssetServer.entrypointCacheDirectory = fileSystem.currentDirectory;
+    fileSystem.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
@@ -755,21 +840,21 @@ void main() {
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
-    globals.fs.file(webPrecompiledSdk)
+    fileSystem.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
-    globals.fs.file(webPrecompiledSdkSourcemaps)
+    fileSystem.file(webPrecompiledSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('THERE');
-    globals.fs.file(webPrecompiledCanvaskitSdk)
+    fileSystem.file(webPrecompiledCanvaskitSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
-    globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
+    fileSystem.file(webPrecompiledCanvaskitSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('CHUM');
 
     await webDevFS.update(
-      mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+      mainUri: fileSystem.file(fileSystem.path.join('lib', 'main.dart')).uri,
       generator: residentCompiler,
       trackWidgetCreation: true,
       bundleFirstUpload: true,
@@ -789,7 +874,7 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
-    globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
+    fileSystem.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
@@ -809,10 +894,12 @@ void main() {
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Can start web server with hostname any', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('Can start web server with hostname any', () async {
+    final File outputFile = fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
@@ -844,10 +931,13 @@ void main() {
 
     expect(uri.host, 'localhost');
     await webDevFS.destroy();
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Can start web server with canvaskit enabled', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('Can start web server with canvaskit enabled', () async {
+    final File outputFile = fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
@@ -887,10 +977,13 @@ void main() {
     expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.canvaskit);
 
     await webDevFS.destroy();
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Can start web server with auto detect enabled', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('Can start web server with auto detect enabled', () async {
+    final File outputFile = fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
@@ -930,9 +1023,12 @@ void main() {
     expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.autoDetect);
 
     await webDevFS.destroy();
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('allows frame embedding', () async {
+  testUsingContext('allows frame embedding', () async {
     final WebAssetServer webAssetServer = await WebAssetServer.start(
       null,
       'localhost',
@@ -955,25 +1051,34 @@ void main() {
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  test('WebAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
+  testUsingContext('WebAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await webAssetServer.handleRequest(
       Request('POST', Uri.parse('http://foobar/something')),
     );
     expect(response.statusCode, 404);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('ReleaseAssetServer responds to POST requests with 404 not found', () => testbed.run(() async {
+  testUsingContext('ReleaseAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await releaseAssetServer.handle(
       Request('POST', Uri.parse('http://foobar/something')),
     );
     expect(response.statusCode, 404);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('WebAssetServer strips leading base href off off asset requests', () => testbed.run(() async {
+  testUsingContext('WebAssetServer strips leading base href off off asset requests', () async {
     const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
-    globals.fs.currentDirectory
+    fileSystem.currentDirectory
       .childDirectory('web')
       .childFile('index.html')
       ..createSync(recursive: true)
@@ -990,13 +1095,16 @@ void main() {
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
     // Not base href.
     expect(() async => webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('DevFS URI includes any specified base path.', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('DevFS URI includes any specified base path.', () async {
+    final File outputFile = fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
-    globals.fs.currentDirectory
+    fileSystem.currentDirectory
       .childDirectory('web')
       .childFile('index.html')
       ..createSync(recursive: true)
@@ -1038,7 +1146,9 @@ void main() {
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 class FakeHttpServer extends Fake implements HttpServer {

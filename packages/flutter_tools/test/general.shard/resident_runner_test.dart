@@ -42,7 +42,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
-import '../src/testbed.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -140,37 +139,24 @@ const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
 final Uri testUri = Uri.parse('foo://bar');
 
 void main() {
-  Testbed testbed;
   MockFlutterDevice mockFlutterDevice;
   MockVMService mockVMService;
   MockDevFS mockDevFS;
-  ResidentRunner residentRunner;
   FakeDevice mockDevice;
   FakeVmServiceHost fakeVmServiceHost;
-  MockDevtoolsLauncher mockDevtoolsLauncher;
+  FileSystem fileSystem;
 
   setUp(() {
-    testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
-        .writeAsStringSync('\n');
-      globals.fs.file(globals.fs.path.join('build', 'app.dill'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('ABC');
-      residentRunner = HotRunner(
-        <FlutterDevice>[
-          mockFlutterDevice,
-        ],
-        stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
-      );
-    });
+    fileSystem = MemoryFileSystem.test();
+    fileSystem.file('.packages')
+      .writeAsStringSync('\n');
+    fileSystem.file(fileSystem.path.join('build', 'app.dill'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('ABC');
     mockFlutterDevice = MockFlutterDevice();
     mockDevice = FakeDevice();
     mockVMService = MockVMService();
     mockDevFS = MockDevFS();
-    mockDevtoolsLauncher = MockDevtoolsLauncher();
 
     // DevFS Mocks
     when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
@@ -219,7 +205,16 @@ void main() {
     });
   });
 
-  testUsingContext('ResidentRunner can attach to device successfully', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can attach to device successfully', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -242,12 +237,13 @@ void main() {
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('ResidentRunner suppresses errors for the initial compilation', () async {
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -255,7 +251,7 @@ void main() {
       setAssetBundlePath,
     ]);
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
-    residentRunner = HotRunner(
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -294,17 +290,19 @@ void main() {
       fs: anyNamed('fs'),
     )).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
+
   // Regression test for https://github.com/flutter/flutter/issues/60613
-  testUsingContext('ResidentRunner calls appFailedToStart if initial compilation fails', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('ResidentRunner calls appFailedToStart if initial compilation fails', () async {
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
-    residentRunner = HotRunner(
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -335,14 +333,17 @@ void main() {
     expect(await residentRunner.run(), 1);
     // Completing this future ensures that the daemon can exit correctly.
     expect(await residentRunner.waitForAppToFinish(), 1);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
-  testUsingContext('ResidentRunner calls appFailedToStart if initial compilation fails - cold mode', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('ResidentRunner calls appFailedToStart if initial compilation fails - cold mode', () async {
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    residentRunner = ColdRunner(
+    final ResidentRunner residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -361,14 +362,17 @@ void main() {
     expect(await residentRunner.run(), 1);
     // Completing this future ensures that the daemon can exit correctly.
     expect(await residentRunner.waitForAppToFinish(), 1);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
-  testUsingContext('ResidentRunner calls appFailedToStart if exception is thrown - cold mode', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('ResidentRunner calls appFailedToStart if exception is thrown - cold mode', () async {
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    residentRunner = ColdRunner(
+    final ResidentRunner residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -387,10 +391,13 @@ void main() {
     expect(await residentRunner.run(), 1);
     // Completing this future ensures that the daemon can exit correctly.
     expect(await residentRunner.waitForAppToFinish(), 1);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner does not suppressErrors if running with an applicationBinary', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+  testUsingContext('ResidentRunner does not suppressErrors if running with an applicationBinary', () async {
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -398,11 +405,11 @@ void main() {
       setAssetBundlePath,
     ]);
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
-    residentRunner = HotRunner(
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
-      applicationBinary: globals.fs.file('app.apk'),
+      applicationBinary: fileSystem.file('app.apk'),
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
@@ -438,11 +445,12 @@ void main() {
       fs: anyNamed('fs'),
     )).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner can attach to device successfully with --fast-start', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can attach to device successfully with --fast-start', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -482,7 +490,7 @@ void main() {
         )
       ),
     ]);
-    residentRunner = HotRunner(
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -512,11 +520,21 @@ void main() {
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner can handle an RPC exception from hot reload', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can handle an RPC exception from hot reload', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -561,11 +579,20 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner fails its operation if the device initialization is not complete', () => testbed.run(() async {
+  testUsingContext('ResidentRunner fails its operation if the device initialization is not complete', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -585,9 +612,21 @@ void main() {
     expect(result.code, 1);
     expect(result.message, contains('Device initialization has not completed.'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner can handle an reload-barred exception from hot reload', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can handle an reload-barred exception from hot reload', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -634,18 +673,18 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner reports hot reload event with null safety analytics', () => testbed.run(() async {
+  testUsingContext('ResidentRunner reports hot reload event with null safety analytics', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
       listViews,
     ]);
-    residentRunner = HotRunner(
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -696,11 +735,12 @@ void main() {
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
     Usage: () => TestUsage(),
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner does not reload sources if no sources changed', () => testbed.run(() async {
+  testUsingContext('ResidentRunner does not reload sources if no sources changed', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
      listViews,
       listViews,
@@ -720,7 +760,7 @@ void main() {
         },
       ),
     ]);
-    residentRunner = HotRunner(
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -758,11 +798,21 @@ void main() {
 
     expect(result.code, 0);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner reports error with missing entrypoint file', () => testbed.run(() async {
+  testUsingContext('ResidentRunner reports error with missing entrypoint file', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -832,15 +882,25 @@ void main() {
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
 
-    expect(globals.fs.file(globals.fs.path.join('lib', 'main.dart')), isNot(exists));
+    expect(fileSystem.file(fileSystem.path.join('lib', 'main.dart')), isNot(exists));
     expect(testLogger.errorText, contains('The entrypoint file (i.e. the file with main())'));
     expect(result.fatal, false);
     expect(result.code, 0);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-   testUsingContext('ResidentRunner resets compilation time on reload reject', () => testbed.run(() async {
+   testUsingContext('ResidentRunner resets compilation time on reload reject', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -918,11 +978,21 @@ void main() {
     expect(result.message, contains('Reload rejected: Failed to hot reload')); // contains error message from reload report.
     expect(result.code, 1);
     verify(mockDevFS.resetLastCompiled()).called(1); // compilation time is reset.
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can send target platform to analytics from hot reload', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -987,11 +1057,11 @@ void main() {
                 ));
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner can perform fast reassemble', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can perform fast reassemble', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       FakeVmServiceRequest(
@@ -1041,7 +1111,7 @@ void main() {
       FakeResidentCompiler(),
       mockDevFS,
     )..vmService = fakeVmServiceHost.vmService;
-    residentRunner = HotRunner(
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
       ],
@@ -1093,16 +1163,24 @@ void main() {
       cdKey(CustomDimensions.fastReassemble), 'true',
     ));
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: () => fileSystem,
     Platform: () => FakePlatform(operatingSystem: 'linux'),
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
     Usage: () => TestUsage(),
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can send target platform to analytics from full restart', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -1163,11 +1241,20 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner can remove breakpoints from paused isolate during hot restart', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can remove breakpoints from paused isolate during hot restart', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -1232,11 +1319,21 @@ void main() {
 
     expect(result.isOk, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner will alternative the name of the dill file uploaded for a hot restart', () => testbed.run(() async {
+  testUsingContext('ResidentRunner will alternative the name of the dill file uploaded for a hot restart', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -1357,11 +1454,21 @@ void main() {
     await residentRunner.restart(fullRestart: true);
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner Can handle an RPC exception from hot restart', () => testbed.run(() async {
+  testUsingContext('ResidentRunner Can handle an RPC exception from hot restart', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -1406,11 +1513,20 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
+  testUsingContext('ResidentRunner uses temp directory when there is no output dill path', () {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
@@ -1420,23 +1536,47 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
+      dillOutputPath: fileSystem.path.join('foobar', 'app.dill'),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner deletes artifact directory on preExit', () => testbed.run(() async {
+  testUsingContext('ResidentRunner deletes artifact directory on preExit', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentRunner.artifactDirectory.childFile('app.dill').createSync();
     await residentRunner.preExit();
 
     expect(residentRunner.artifactDirectory, isNot(exists));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+  testUsingContext('ResidentRunner can run source generation', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
 
-  testUsingContext('ResidentRunner can run source generation', () => testbed.run(() async {
-    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -1445,11 +1585,11 @@ void main() {
     "description": "Sample description"
   }
 }''');
-    globals.fs.file('l10n.yaml').createSync();
-    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+    fileSystem.file('l10n.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     // Create necessary files for [DartPluginRegistrantTarget]
-    final File packageConfig = globals.fs.directory('.dart_tool')
+    final File packageConfig = fileSystem.directory('.dart_tool')
         .childFile('package_config.json');
     packageConfig.createSync(recursive: true);
     packageConfig.writeAsStringSync('''
@@ -1466,18 +1606,30 @@ void main() {
 }
 ''');
     // Start from an empty generated_main.dart file.
-    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').createSync(recursive: true);
+    fileSystem.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').createSync(recursive: true);
 
     await residentRunner.runSourceGenerators();
 
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can run source generation - generation fails', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     // Intentionally define arb file with wrong name. generate_localizations defaults
     // to app_en.arb.
-    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'foo.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -1486,16 +1638,28 @@ void main() {
     "description": "Sample description"
   }
 }''');
-    globals.fs.file('l10n.yaml').createSync();
-    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+    fileSystem.file('l10n.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
     expect(testLogger.errorText, allOf(contains('Exception')));
     expect(testLogger.statusText, isEmpty);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner printHelpDetails hot runner', () => testbed.run(() {
+  testUsingContext('ResidentRunner printHelpDetails hot runner', () {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
     residentRunner.printHelp(details: true);
@@ -1540,9 +1704,21 @@ void main() {
           '',
         ].join('\n')
     ));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner printHelp hot runner', () => testbed.run(() {
+  testUsingContext('ResidentRunner printHelp hot runner', () {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
     residentRunner.printHelp(details: false);
@@ -1571,11 +1747,14 @@ void main() {
           '',
         ].join('\n')
     ));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner printHelpDetails cold runner', () => testbed.run(() {
+  testUsingContext('ResidentRunner printHelpDetails cold runner', () {
     fakeVmServiceHost = null;
-    residentRunner = ColdRunner(
+    final ResidentRunner residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -1605,11 +1784,14 @@ void main() {
           ''
         ].join('\n')
     ));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner printHelp cold runner', () => testbed.run(() {
+  testUsingContext('ResidentRunner printHelp cold runner', () {
     fakeVmServiceHost = null;
-    residentRunner = ColdRunner(
+    final ResidentRunner residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -1638,9 +1820,21 @@ void main() {
           ''
         ].join('\n')
     ));
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
+  testUsingContext('ResidentRunner handles writeSkSL returning no data', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       FakeVmServiceRequest(
@@ -1657,9 +1851,21 @@ void main() {
 
     expect(testLogger.statusText, contains('No data was received'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       FakeVmServiceRequest(
@@ -1677,8 +1883,8 @@ void main() {
     await residentRunner.writeSkSL();
 
     expect(testLogger.statusText, contains('flutter_01.sksl.json'));
-    expect(globals.fs.file('flutter_01.sksl.json'), exists);
-    expect(json.decode(globals.fs.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
+    expect(fileSystem.file('flutter_01.sksl.json'), exists);
+    expect(json.decode(fileSystem.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
       'platform': 'android',
       'name': 'FakeDevice',
       'engineRevision': 'abcdefg',
@@ -1686,14 +1892,21 @@ void main() {
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    FileSystemUtils: () => FileSystemUtils(
-      fileSystem: globals.fs,
-      platform: globals.platform,
-    ),
-    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg')
-  }));
+    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg'),
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
 
-  testUsingContext('ResidentRunner ignores DevToolsLauncher when attaching with enableDevTools: false', () => testbed.run(() async {
+  testUsingContext('ResidentRunner ignores DevToolsLauncher when attaching with enableDevTools: false', () async {
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -1701,20 +1914,18 @@ void main() {
     ]);
     final Future<int> result = residentRunner.attach(enableDevTools: false);
     expect(await result, 0);
-
-    // Verify DevTools was served.
-    verifyNever(mockDevtoolsLauncher.serve());
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ResidentRunner ignores DevtoolsLauncher when attaching with enableDevTools: false - cold mode', () => testbed.run(() async {
+  testUsingContext('ResidentRunner ignores DevtoolsLauncher when attaching with enableDevTools: false - cold mode', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ]);
-    residentRunner = ColdRunner(
+    final ResidentRunner residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -1732,14 +1943,12 @@ void main() {
 
     final Future<int> result = residentRunner.attach(enableDevTools: false);
     expect(await result, 0);
-
-    // Verify DevTools was served.
-    verifyNever(mockDevtoolsLauncher.serve());
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('FlutterDevice will not exit a paused isolate', () => testbed.run(() async {
+  testUsingContext('FlutterDevice will not exit a paused isolate', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       FakeVmServiceRequest(
         method: '_flutter.listViews',
@@ -1766,9 +1975,12 @@ void main() {
 
     expect(mockDevice.appStopped, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('FlutterDevice will exit an isolate that did not register the exit extension method', () => testbed.run(() async {
+  testUsingContext('FlutterDevice will exit an isolate that did not register the exit extension method', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       FakeVmServiceRequest(
         method: '_flutter.listViews',
@@ -1802,9 +2014,12 @@ void main() {
 
     expect(mockDevice.appStopped, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('FlutterDevice can exit from a release mode isolate with no VmService', () => testbed.run(() async {
+  testUsingContext('FlutterDevice can exit from a release mode isolate with no VmService', () async {
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
     );
@@ -1812,9 +2027,12 @@ void main() {
     await flutterDevice.exitApps();
 
     expect(mockDevice.appStopped, true);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('FlutterDevice will call stopApp if the exit request times out', () => testbed.run(() async {
+  testUsingContext('FlutterDevice will call stopApp if the exit request times out', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       FakeVmServiceRequest(
         method: '_flutter.listViews',
@@ -1851,9 +2069,12 @@ void main() {
 
     expect(mockDevice.appStopped, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('FlutterDevice will exit an un-paused isolate', () => testbed.run(() async {
+  testUsingContext('FlutterDevice will exit an un-paused isolate', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       FakeVmServiceRequest(
         method: kListViewsMethod,
@@ -1887,16 +2108,19 @@ void main() {
 
     await expectLater(exitFuture, completes);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+  testUsingContext('HotRunner writes vm service file when providing debugging option', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -1914,19 +2138,20 @@ void main() {
     await residentRunner.run(enableDevTools: true);
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    expect(await fileSystem.file('foo').readAsString(), testUri.toString());
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('HotRunner copies compiled app.dill to cache during startup', () => testbed.run(() async {
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -1944,19 +2169,20 @@ void main() {
     });
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(), 'ABC');
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill')).readAsString(), 'ABC');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('HotRunner copies compiled app.dill to cache during startup with dart defines', () => testbed.run(() async {
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup with dart defines', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -1981,20 +2207,21 @@ void main() {
     });
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join(
+    expect(await fileSystem.file(fileSystem.path.join(
       'build', '187ef4436122d1cc2f40dc2b92f0eba0.cache.dill')).readAsString(), 'ABC');
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('HotRunner copies compiled app.dill to cache during startup with null safety', () => testbed.run(() async {
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup with null safety', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -2019,20 +2246,21 @@ void main() {
     });
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join(
+    expect(await fileSystem.file(fileSystem.path.join(
       'build', '3416d3007730479552122f01c01e326d.cache.dill')).readAsString(), 'ABC');
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('HotRunner does not copy app.dill if a dillOutputPath is given', () => testbed.run(() async {
+  testUsingContext('HotRunner does not copy app.dill if a dillOutputPath is given', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -2051,19 +2279,20 @@ void main() {
     });
     await residentRunner.run(enableDevTools: true);
 
-    expect(globals.fs.file(globals.fs.path.join('build', 'cache.dill')), isNot(exists));
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    expect(fileSystem.file(fileSystem.path.join('build', 'cache.dill')), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('HotRunner copies compiled app.dill to cache during startup with --track-widget-creation', () => testbed.run(() async {
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup with --track-widget-creation', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -2086,19 +2315,20 @@ void main() {
     });
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('HotRunner calls device dispose', () => testbed.run(() async {
+  testUsingContext('HotRunner calls device dispose', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -2116,18 +2346,19 @@ void main() {
 
     await residentRunner.run();
     expect(mockDevice.disposed, true);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
+  testUsingContext('HotRunner handles failure to write vmservice file', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
       setAssetBundlePath,
     ]);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -2147,18 +2378,17 @@ void main() {
     expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+    FileSystem: () => ThrowingForwardingFileSystem(fileSystem),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
 
-  testUsingContext('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
+  testUsingContext('ColdRunner writes vm service file when providing debugging option', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = ColdRunner(
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final ResidentRunner residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -2175,10 +2405,11 @@ void main() {
     });
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
+    expect(await fileSystem.file('foo').readAsString(), testUri.toString());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }), overrides: <Type, Generator>{
-    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('FlutterDevice uses dartdevc configuration when targeting web', () async {
@@ -2197,9 +2428,9 @@ void main() {
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
+      fileSystem.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+      fileSystem.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
@@ -2207,7 +2438,7 @@ void main() {
     expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelDill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -2228,9 +2459,9 @@ void main() {
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), '825b8f791aa86c5057fff6f064542c54.cache.dill'));
+      fileSystem.path.join(getBuildDirectory(), '825b8f791aa86c5057fff6f064542c54.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+      fileSystem.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
@@ -2261,7 +2492,7 @@ void main() {
       contains('--flutter-widget-cache'));
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
   });
@@ -2269,7 +2500,6 @@ void main() {
    testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag when feature is enabled', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice mockDevice = FakeDevice(targetPlatform: TargetPlatform.android_arm);
-
 
     final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
       mockDevice,
@@ -2291,7 +2521,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isExperimentalInvalidationStrategyEnabled: true)
   });
 
-  testUsingContext('connect sets up log reader', () => testbed.run(() async {
+  testUsingContext('connect sets up log reader', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
     final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
@@ -2321,9 +2551,11 @@ void main() {
       Device device,
       Logger logger,
     }) async => mockVMService,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('FlutterDevice handles existing DDS instance', () => testbed.run(() async {
+  testUsingContext('FlutterDevice handles existing DDS instance', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
     final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
@@ -2352,9 +2584,11 @@ void main() {
       Device device,
       Logger logger,
     }) async => mockVMService,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('Handle existing VM service clients DDS error', () => testbed.run(() async {
+  testUsingContext('Handle existing VM service clients DDS error', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice mockDevice = FakeDevice()
       ..dds = DartDevelopmentService();
@@ -2394,9 +2628,11 @@ void main() {
       Device device,
       Logger logger,
     }) async => mockVMService,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
+  testUsingContext('Failed DDS start outputs error message', () async {
     // See https://github.com/flutter/flutter/issues/72385 for context.
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice mockDevice = FakeDevice()
@@ -2436,7 +2672,9 @@ void main() {
       Device device,
       Logger logger,
     }) async => mockVMService,
-  }));
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
   testUsingContext('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android'), 'iOS');
@@ -2446,8 +2684,8 @@ void main() {
     expect(() => nextPlatform('unknown'), throwsAssertionError);
   });
 
-  testUsingContext('cleanupAtFinish shuts down resident devtools handler', () => testbed.run(() async {
-    residentRunner = HotRunner(
+  testUsingContext('cleanupAtFinish shuts down resident devtools handler', () async {
+    final ResidentRunner residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
       ],
@@ -2459,7 +2697,10 @@ void main() {
     await residentRunner.cleanupAtFinish();
 
     expect((residentRunner.residentDevtoolsHandler as NoOpDevtoolsHandler).wasShutdown, true);
-  }));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -2467,7 +2708,6 @@ class MockDartDevelopmentService extends Mock implements DartDevelopmentService 
 class MockVMService extends Mock implements FlutterVmService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
-class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
 class MockDevice extends Mock implements Device {}
 

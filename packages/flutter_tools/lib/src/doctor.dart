@@ -45,13 +45,15 @@ abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get instance => context.get<DoctorValidatorsProvider>();
 
-  static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
+  static final DoctorValidatorsProvider defaultInstance = FlutterDoctorValidatorsProvider();
 
   List<DoctorValidator> get validators;
   List<Workflow> get workflows;
 }
 
-class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
+class FlutterDoctorValidatorsProvider implements DoctorValidatorsProvider {
+  FlutterDoctorValidatorsProvider();
+
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
