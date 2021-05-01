@@ -70,7 +70,7 @@ BuildApp() {
 
   local bundle_sksl_path=""
   if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
-    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+    bundle_sksl_path="-dBundleSkSLPath=${BUNDLE_SKSL_PATH}"
   fi
 
   local code_size_directory=""
