@@ -534,8 +534,7 @@ static void CheckFrameTimings(const std::vector<FrameTiming>& timings,
   }
 }
 
-// TODO(43192): This test is disable because of flakiness.
-TEST_F(ShellTest, DISABLED_ReportTimingsIsCalled) {
+TEST_F(ShellTest, ReportTimingsIsCalled) {
   fml::TimePoint start = fml::TimePoint::Now();
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
@@ -551,6 +550,7 @@ TEST_F(ShellTest, DISABLED_ReportTimingsIsCalled) {
   auto nativeTimingCallback = [&reportLatch,
                                &timestamps](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
+    ASSERT_EQ(timestamps.size(), 0ul);
     timestamps = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
         args, 0, exception);
     reportLatch.Signal();
@@ -1277,6 +1277,7 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   auto nativeTimingCallback = [&reportLatch,
                                &timestamps](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
+    ASSERT_EQ(timestamps.size(), 0ul);
     timestamps = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
         args, 0, exception);
     reportLatch.Signal();

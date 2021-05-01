@@ -25,6 +25,7 @@ void reportTimingsMain() {
       }
     }
     nativeReportTimingsCallback(timestamps);
+    PlatformDispatcher.instance.onReportTimings = (List<FrameTiming> timings) {};
   };
 }
 
