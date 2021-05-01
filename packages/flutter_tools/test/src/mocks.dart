@@ -6,75 +6,11 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
-import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import 'fakes.dart';
-
-/// An SDK installation with several SDK levels (19, 22, 23).
-class MockAndroidSdk extends Mock implements AndroidSdk {
-  static Directory createSdkDirectory({
-    bool withAndroidN = false,
-    bool withSdkManager = true,
-    bool withPlatformTools = true,
-    bool withBuildTools = true,
-  }) {
-    final Directory dir = globals.fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-    final String exe = globals.platform.isWindows ? '.exe' : '';
-    final String bat = globals.platform.isWindows ? '.bat' : '';
-
-    _createDir(dir, 'licenses');
-
-    if (withPlatformTools) {
-      _createSdkFile(dir, 'platform-tools/adb$exe');
-    }
-
-    if (withBuildTools) {
-      _createSdkFile(dir, 'build-tools/19.1.0/aapt$exe');
-      _createSdkFile(dir, 'build-tools/22.0.1/aapt$exe');
-      _createSdkFile(dir, 'build-tools/23.0.2/aapt$exe');
-      if (withAndroidN) {
-        _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt$exe');
-      }
-    }
-
-    _createSdkFile(dir, 'platforms/android-22/android.jar');
-    _createSdkFile(dir, 'platforms/android-23/android.jar');
-    if (withAndroidN) {
-      _createSdkFile(dir, 'platforms/android-N/android.jar');
-      _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
-    }
-
-    if (withSdkManager) {
-      _createSdkFile(dir, 'tools/bin/sdkmanager$bat');
-    }
-
-    return dir;
-  }
-
-  static void _createSdkFile(Directory dir, String filePath, { String contents }) {
-    final File file = dir.childFile(filePath);
-    file.createSync(recursive: true);
-    if (contents != null) {
-      file.writeAsStringSync(contents, flush: true);
-    }
-  }
-
-  static void _createDir(Directory dir, String path) {
-    final Directory directory = globals.fs.directory(globals.fs.path.join(dir.path, path));
-    directory.createSync(recursive: true);
-  }
-
-  static const String _buildProp = r'''
-ro.build.version.incremental=1624448
-ro.build.version.sdk=24
-ro.build.version.codename=REL
-''';
-}
 
 /// A strategy for creating Process objects from a list of commands.
 typedef _ProcessFactory = Process Function(List<String> command);
