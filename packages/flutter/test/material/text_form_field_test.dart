@@ -113,7 +113,7 @@ void main() {
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
-  
+
   testWidgets('TextFormField accepts TextField.noMaxLength as value to maxLength parameter', (WidgetTester tester) async {
     bool asserted;
     try {
@@ -126,7 +126,7 @@ void main() {
     }
     expect(asserted, false);
   });
-  
+
   testWidgets('Passes textAlign to underlying TextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
