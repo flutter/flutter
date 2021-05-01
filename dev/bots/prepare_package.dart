@@ -303,10 +303,7 @@ class ArchiveCreator {
   /// [PreparePackageException] if the test failes.
   Future<void> _validate() async {
     // Only validate in strict mode, which means `--publish`
-    if (!strict) {
-      return;
-    }
-    if (!platform.isMacOS) {
+    if (!strict || !platform.isMacOS) {
       return;
     }
     // Validate that the dart binary is codesigned

@@ -132,7 +132,7 @@ void main() {
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
-          if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter/bin/cache/dart-sdk/bin/dart')}': null,
+          if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
           else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
