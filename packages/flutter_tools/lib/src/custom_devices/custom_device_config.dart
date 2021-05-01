@@ -55,7 +55,7 @@ class JsonRevivalException implements Exception {
 
   @override
   String toString() {
-    return 'JsonRevivalException: $message';
+    return message;
   }
 }
 

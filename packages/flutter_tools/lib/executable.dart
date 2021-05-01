@@ -150,7 +150,13 @@ List<FlutterCommand> generateCommands({
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
   ConfigCommand(verboseHelp: verboseHelp),
-  CustomDevicesCommand(),
+  CustomDevicesCommand(
+    customDevicesConfig: globals.customDevicesConfig,
+    terminal: globals.terminal,
+    platform: globals.platform,
+    fileSystem: globals.fs,
+    logger: globals.logger
+  ),
   CreateCommand(verboseHelp: verboseHelp),
   DaemonCommand(hidden: !verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),

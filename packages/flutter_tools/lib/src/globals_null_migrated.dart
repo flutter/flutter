@@ -26,6 +26,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart';
@@ -218,3 +219,5 @@ FlutterProjectFactory get projectFactory {
     fileSystem: fs,
   );
 }
+
+CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;

@@ -127,8 +127,5 @@ class CustomDevicesConfig {
     );
   }
 
-  // We don't have a setter for devices here because we don't need it and
-  // it also may overwrite any things done by the user that aren't explicitly
-  // tracked by the JSON-representation. For example comments (not possible right now,
-  // but they'd be useful so maybe in the future) or formatting.
+  String get configPath => _config.configPath;
 }
