@@ -52,7 +52,7 @@ class ScrollBehavior {
   ScrollBehavior copyWith({
     bool scrollbars = true,
     bool overscroll = true,
-    bool rejectMousePointers = false,
+    bool enableMouseDrag = false,
     ScrollPhysics? physics,
     TargetPlatform? platform,
   }) {
@@ -62,7 +62,7 @@ class ScrollBehavior {
       overscrollIndicator: overscroll,
       physics: physics,
       platform: platform,
-      rejectMousePointers: rejectMousePointers,
+      enableMouseDrag: enableMouseDrag,
     );
   }
 
@@ -72,7 +72,11 @@ class ScrollBehavior {
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
 
   /// Whether the scrollable should support click and drag with mice.
-  bool get rejectMousePointers => false;
+  ///
+  /// By default this feature is disabled. Enabling it will make it difficult
+  /// or impossible to select text in scrollable containers and is not
+  /// recommended.
+  bool get enableMouseDrag => false;
 
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
@@ -205,7 +209,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.overscrollIndicator = true,
     this.physics,
     this.platform,
-    this.rejectMousePointers = false,
+    this.enableMouseDrag = false,
   });
 
   final ScrollBehavior delegate;
@@ -215,7 +219,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final TargetPlatform? platform;
 
   @override
-  final bool rejectMousePointers;
+  final bool enableMouseDrag;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
@@ -242,14 +246,14 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     bool overscroll = true,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    bool rejectMousePointers = false,
+    bool enableMouseDrag = false,
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars,
       overscroll: overscroll,
       physics: physics,
       platform: platform,
-      rejectMousePointers: rejectMousePointers,
+      enableMouseDrag: enableMouseDrag,
     );
   }
 
@@ -270,7 +274,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || oldDelegate.overscrollIndicator != overscrollIndicator
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
-        || oldDelegate.rejectMousePointers != rejectMousePointers
+        || oldDelegate.enableMouseDrag != enableMouseDrag
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 
