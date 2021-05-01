@@ -5,9 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'package:gen_keycodes/utils.dart';
+import 'package:path/path.dart' as path;
 
 import 'constants.dart';
 import 'physical_key_data.dart';
