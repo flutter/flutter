@@ -380,8 +380,8 @@ void main() {
 
     expect(() => driverService.startTest(
       'foo.test',
-      [],
-      {},
+      <String>[],
+      <String, String>{},
       PackageConfig(<Package>[Package('test', Uri.base)]),
       browserName: 'chrome',
     ), throwsToolExit(message: RegExp(' $link ')));
