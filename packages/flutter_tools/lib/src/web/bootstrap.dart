@@ -44,7 +44,7 @@ var styles = `
     100% {
       transform: rotate(360deg);
     }
-  } 
+  }
 `;
 
 var styleSheet = document.createElement("style")
@@ -57,7 +57,7 @@ loader.className = "flutter-loader";
 document.body.append(loader);
 
 document.addEventListener('dart-app-ready', function (e) {
-   loader.parentNode.removeChild(loader); 
+   loader.parentNode.removeChild(loader);
    styleSheet.parentNode.removeChild(styleSheet);
 });
 
