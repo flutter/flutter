@@ -184,6 +184,8 @@ class FakeDeviceLogReader extends DeviceLogReader {
 
   StreamController<String> _cachedLinesController;
 
+  bool disposed = false;
+
   final List<String> _lineQueue = <String>[];
   StreamController<String> get _linesController {
     _cachedLinesController ??= StreamController<String>
@@ -209,5 +211,6 @@ class FakeDeviceLogReader extends DeviceLogReader {
   Future<void> dispose() async {
     _lineQueue.clear();
     await _linesController.close();
+    disposed = true;
   }
 }
