@@ -1029,7 +1029,7 @@ class ReorderableDragStartListener extends StatelessWidget {
   final int index;
 
   /// Whether the [child] item can be dragged and moved in the list.
-  /// 
+  ///
   /// If true, the item can be moved to another location in the list when the
   /// user taps on the child. If false, tapping on the child will be ignored.
   final bool enabled;
