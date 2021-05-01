@@ -100,6 +100,20 @@ void main() {
     expect(() => data3.detach(), throwsAssertionError);
   });
 
+  test('RenderObject.getTransformTo asserts is argument is not descendant', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject1 = TestRenderObject();
+    renderObject1.attach(owner);
+    final TestRenderObject renderObject2 = TestRenderObject();
+    renderObject2.attach(owner);
+    try {
+      renderObject1.getTransformTo(renderObject2);
+      fail('assertion failure expected but not thrown');
+    } catch (error) {
+      expect(error, isA<AssertionError>());
+    }
+  });
+
   test('PaintingContext.pushClipRect reuses the layer', () {
     _testPaintingContextLayerReuse<ClipRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
       return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer as ClipRectLayer?);
