@@ -4,7 +4,6 @@
 
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -19,6 +18,7 @@ import 'scroll_position.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
+import 'sliver_prototype_extent_list.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
