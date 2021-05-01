@@ -12,10 +12,10 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('Generator', () {
-    Configuration configuration;
-    SnippetGenerator generator;
-    Directory tmpDir;
-    File template;
+    late Configuration configuration;
+    late SnippetGenerator generator;
+    late Directory tmpDir;
+    late File template;
 
     setUp(() {
       tmpDir = Directory.systemTemp.createTempSync('flutter_snippets_test.');

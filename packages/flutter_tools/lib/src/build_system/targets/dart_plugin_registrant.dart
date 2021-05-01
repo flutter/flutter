@@ -45,9 +45,8 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFile = environment.defines[kTargetFile] ??
         environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFile);
-    final Uri mainFileUri = mainFile.uri;
-    assert(packagesFile.path != null);
-    final String mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+    final Uri mainFileUri = mainFile.absolute.uri;
+    final String mainUri = packageConfig.toPackageUri(mainFileUri)?.toString() ?? mainFileUri.toString();
     final File newMainDart = environment.projectDir
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build')

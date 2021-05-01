@@ -761,8 +761,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
     provider.complete(image10x10);
     await precache;
@@ -784,8 +784,8 @@ void main() {
         builder: (BuildContext context) {
           precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
 
     // Two listeners - one is the listener added by precacheImage, the other by the ImageCache.
@@ -819,8 +819,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(imageProvider, context, onError: errorListener);
           return Container();
-        }
-      )
+        },
+      ),
     );
     imageProvider.fail(testException, testStack);
     await precache;
@@ -967,7 +967,7 @@ void main() {
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[]
+      children: <TestSemantics>[],
     )));
     semantics.dispose();
   });
@@ -1506,8 +1506,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
     provider.complete(image10x10);
     await precache;
@@ -1556,8 +1556,8 @@ void main() {
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
           return Container();
-        }
-      )
+        },
+      ),
     );
     provider.complete(image10x10);
     await precache;

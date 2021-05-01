@@ -130,7 +130,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
   final List<RRect> rrects = List<RRect>.generate(3, (int index) {
     return RRect.fromRectAndRadius(
       originalRectangle.shift(
-        boxShadows[index].offset
+        boxShadows[index].offset,
       ).inflate(boxShadows[index].spreadRadius),
       const Radius.circular(2.0),
     );
@@ -160,7 +160,7 @@ void main() {
                 value: value,
                 hint: const Text('Select Value'),
                 decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.fastfood)
+                  prefixIcon: Icon(Icons.fastfood),
                 ),
                 items: menuItems.map((String value) {
                   return DropdownMenuItem<String>(

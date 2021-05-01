@@ -8,14 +8,14 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('flutter run test --route', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
     });
 
     tearDownAll(() async {
-      await driver?.close();
+      await driver.close();
     });
 
     test('sanity check flutter drive --route', () async {
