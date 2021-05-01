@@ -106,12 +106,7 @@ void main() {
     renderObject1.attach(owner);
     final TestRenderObject renderObject2 = TestRenderObject();
     renderObject2.attach(owner);
-    try {
-      renderObject1.getTransformTo(renderObject2);
-      fail('assertion failure expected but not thrown');
-    } catch (error) {
-      expect(error, isA<AssertionError>());
-    }
+    expect(() => renderObject1.getTransformTo(renderObject2), throwsAssertionError);
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
