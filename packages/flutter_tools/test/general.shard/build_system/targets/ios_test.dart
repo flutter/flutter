@@ -103,7 +103,7 @@ void main() {
   });
 
   testUsingContext('DebugIosApplicationBundle', () async {
-    environment.inputs[kBundleSkSLPath] = 'bundle.sksl';
+    environment.defines[kBundleSkSLPath] = 'bundle.sksl';
     environment.defines[kBuildMode] = 'debug';
     environment.defines[kCodesignIdentity] = 'ABC123';
     // Precompiled dart data

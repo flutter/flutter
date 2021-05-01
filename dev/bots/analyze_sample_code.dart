@@ -355,7 +355,10 @@ class SampleChecker {
     } else {
       return Process.runSync(
         _dartExecutable,
-        <String>[path.canonicalize(_snippetsSnapshotPath!), ...args],
+        <String>[
+          path.canonicalize(_snippetsSnapshotPath!),
+          ...args,
+        ],
         workingDirectory: workingDirectory,
       );
     }

@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -593,6 +594,24 @@ class CustomDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  bool get supportsScreenshot => _config.supportsScreenshotting;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    if (supportsScreenshot == false) {
+      throw UnsupportedError('Screenshotting is not supported for this device.');
+    }
+
+    final List<String> interpolated = interpolateCommand(
+      _config.screenshotCommand,
+      <String, String>{},
+    );
+
+    final RunResult result = await _processUtils.run(interpolated, throwOnError: true);
+    await outputFile.writeAsBytes(base64Decode(result.stdout));
+  }
 
   @override
   bool isSupported() {
