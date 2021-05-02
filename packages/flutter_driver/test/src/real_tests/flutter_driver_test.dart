@@ -766,7 +766,6 @@ void main() {
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
     });
   
-
     test('printCommunication = true', () async {
       // Given
       driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: true);
@@ -775,7 +774,6 @@ void main() {
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
 
       // Then
-      print(log);
       expect(log, <String> [
         'WebFlutterDriver: >>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: printCommunication test}',
         'WebFlutterDriver: <<< {isError: false, response: {status: ok}, type: Response}',
@@ -1032,7 +1030,7 @@ String? _checkAndEncode(dynamic script) {
   return script.substring(_kWebScriptPrefix.length, script.length - 2) as String?;
 }
 
-// This function cleanTestOutputFiles
+// This function remove all file in test output directory
 Future<void> _cleanTestOutputFiles() async {
   final Directory fileTestOutputsDirectory = Directory(testOutputsDirectory);
   final List<FileSystemEntity> files = fileTestOutputsDirectory.listSync();
