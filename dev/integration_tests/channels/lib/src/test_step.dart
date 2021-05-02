@@ -49,7 +49,6 @@ class TestStepResult {
           final TestStepResult result = snapshot.error! as TestStepResult;
           return result;
         }
-        
       default:
         throw 'Unsupported state ${snapshot.connectionState}';
     }
