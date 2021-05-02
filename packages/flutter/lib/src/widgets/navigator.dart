@@ -1515,7 +1515,7 @@ class Navigator extends StatefulWidget {
   final List<Page<dynamic>> pages;
 
   /// Called when [pop] is invoked but the current [Route] corresponds to a
-  /// [Page] found in the [pages] list.
+  /// [Page].
   ///
   /// The `result` argument is the value with which the route is to complete
   /// (e.g. the value returned from a dialog).
