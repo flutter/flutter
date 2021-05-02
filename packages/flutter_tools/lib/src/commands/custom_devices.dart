@@ -165,8 +165,6 @@ class CustomDevicesAddCommand extends CustomDevicesSubCommand {
        _platform = platform,
        _logger = logger
   {
-    inputs = StreamQueue<String>(_terminal.keystrokes.map((String s) => s.trim()));
-
     argParser.addFlag(
         _kCheck,
         help: '''
@@ -252,24 +250,32 @@ if it is valid). To make sure the config works use the `--check` option.
   Future<String> askForString(
     String name, {
     String description,
-    RegExp mustMatch,
+    String example,
     String defaultsTo,
+    Future<bool> Function(String) validator,
   }) async {
-    String msg = '$name, $description';
-    if (defaultsTo != null) {
-      msg += ' ($defaultsTo)';
-    }
-    msg += ': ';
+    String msg = description;
 
+    final String exampleOrDefault = <String>[
+      if (example != null) 'example: $example',
+      if (defaultsTo != null) 'defaults to: $defaultsTo'
+    ].join(', ');
+
+    if (exampleOrDefault.isNotEmpty) {
+      msg += ' ($exampleOrDefault)';
+    }
+
+    msg += ':';
+
+    _logger.printStatus(msg);
     while (true) {
-      _logger.printStatus(msg);
       final String input = await inputs.next;
 
-      if (mustMatch != null && !mustMatch.hasMatch(input)) {
-        _logger.printStatus('Invalid input.');
+      if (validator != null && !await validator(input)) {
+        _logger.printStatus('Invalid $name. $name:');
+      } else {
+        return input;
       }
-
-      return input;
     }
   }
 
@@ -280,9 +286,9 @@ if it is valid). To make sure the config works use the `--check` option.
   }) async {
     String msg = '$name, $description: ';
     if (defaultsTo == true) {
-      msg += '[Y/n] ';
+      msg += '[Y/n]';
     } else {
-      msg += '[y/N] ';
+      msg += '[y/N]';
     }
 
     while (true) {
@@ -296,7 +302,7 @@ if it is valid). To make sure the config works use the `--check` option.
       } else if (input.toLowerCase() == 'n') {
         return false;
       } else {
-        _logger.printStatus('Invalid input. Expected is either y or n.');
+        _logger.printStatus('Invalid $name. Expected is either y or n.');
       }
     }
   }
@@ -313,6 +319,8 @@ if it is valid). To make sure the config works use the `--check` option.
 
   Future<FlutterCommandResult> runInteractively() async {
     final bool shouldCheck = boolArg(_kCheck) ?? true;
+
+    inputs = StreamQueue<String>(_terminal.keystrokes.map((String s) => s.trim()));
 
     /*
     final String id;
@@ -333,18 +341,19 @@ if it is valid). To make sure the config works use the `--check` option.
     final String id = await askForString(
       'id',
       description: 'A unique, short identification string for the device.',
-      defaultsTo: 'pi'
+      example: 'pi',
+      validator: (String s) async => s.isNotEmpty
     );
 
     final String label = await askForString(
       'label',
       description: 'A slightly more verbose label for the device.',
-      defaultsTo: 'Raspberry Pi'
+      example: 'Raspberry Pi'
     );
 
     final String sdkNameAndVersion = await askForString(
       'SDK name and version',
-      defaultsTo: 'Raspberry Pi 4 Model B+'
+      example: 'Raspberry Pi 4 Model B+'
     );
 
     final bool enabled = await askForBool(
@@ -356,13 +365,13 @@ if it is valid). To make sure the config works use the `--check` option.
     final String target = await askForString(
       'target',
       description: 'The hostname or IPv4/v6 address of the device.',
-      defaultsTo: 'raspberrypi',
+      example: 'raspberrypi',
     );
 
     final String username = await askForString(
       'username',
       description: 'The username used for ssh\'ing into the remote device.',
-      defaultsTo: 'pi'
+      example: 'pi'
     );
 
     final String remoteRunDebugCommand = await askForString(
@@ -386,9 +395,8 @@ if it is valid). To make sure the config works use the `--check` option.
 
     final String screenshotCommand = await askForString(
       'screenshot command',
-      description: 'The command executed on the remote device for taking a '
-        'screenshot. Example: '
-        r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'"
+      description: 'The command executed on the remote device for taking a screenshot.',
+      example: r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'"
     );
 
     final String sshTarget = '${username != null ? username + '@' : ''}$target';
