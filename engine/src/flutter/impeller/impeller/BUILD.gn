@@ -47,8 +47,6 @@ source_set("impeller") {
   image_sources = [
     "image/Image.cc",
     "image/Image.h",
-    "image/ImageEncoder.cc",
-    "image/ImageEncoder.h",
     "image/ImageResult.cc",
     "image/ImageResult.h",
   ]
@@ -57,6 +55,7 @@ source_set("impeller") {
 
   deps = [
     "//flutter/fml",
+    "//flutter/impeller/third_party/stb",
     "//flutter/runtime:libdart",  # For tracing, seems to be pulled in by FML.
   ]
 }

@@ -17,9 +17,7 @@ class ImageSource;
 
 class Image {
  public:
-  Image();
-
-  Image(fml::RefPtr<const fml::Mapping> sourceAllocation);
+  Image(std::shared_ptr<const fml::Mapping> sourceAllocation);
 
   ~Image();
 
@@ -27,16 +25,8 @@ class Image {
 
   bool isValid() const;
 
-  struct Hash {
-    std::size_t operator()(const Image& key) const;
-  };
-
-  struct Equal {
-    bool operator()(const Image& lhs, const Image& rhs) const;
-  };
-
  private:
-  std::shared_ptr<ImageSource> _source;
+  std::shared_ptr<const fml::Mapping> _source;
 };
 
 }  // namespace image

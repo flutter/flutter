@@ -121,14 +121,6 @@ void Entity::setStrokeSize(double strokeSize) {
   _strokeSize = strokeSize;
 }
 
-const image::Image& Entity::contents() const {
-  return _contents;
-}
-
-void Entity::setContents(image::Image image) {
-  _contents = std::move(image);
-}
-
 const geom::Path& Entity::path() const {
   return _path;
 }

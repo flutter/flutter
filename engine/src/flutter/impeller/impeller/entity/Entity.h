@@ -180,10 +180,6 @@ class Entity {
 
   void setStrokeSize(double strokeSize);
 
-  const image::Image& contents() const;
-
-  void setContents(image::Image image);
-
   const geom::Path& path() const;
 
   void setPath(geom::Path path);
@@ -194,7 +190,7 @@ class Entity {
   geom::Point _anchorPoint;
   geom::Matrix _transformation;
   Color _backgroundColor;
-  image::Image _contents;
+
   geom::Path _path;
   double _opacity;
   Color _strokeColor;

@@ -5,30 +5,17 @@
 
 #include "Image.h"
 #include <stb_image.h>
-#include "ImageSource.h"
 
 namespace rl {
 namespace image {
 
-Image::Image() = default;
-
-Image::Image(fml::RefPtr<const fml::Mapping> sourceAllocation)
-    : _source(ImageSource::Create(std::move(sourceAllocation))) {}
-
-Image::Image(core::FileHandle sourceFile)
-    : _source(ImageSource::Create(std::move(sourceFile))) {}
+Image::Image(std::shared_ptr<const fml::Mapping> sourceAllocation)
+    : _source(std::move(sourceAllocation)) {}
 
 Image::~Image() = default;
 
 ImageResult Image::decode() const {
-  if (_source == nullptr) {
-    return {};
-  }
-
-  _source->prepareForUse();
-
-  if (_source->sourceDataSize() == 0) {
-    RL_LOG("Source data for image decoding was zero sized.");
+  if (!_source) {
     return {};
   }
 
@@ -37,26 +24,25 @@ ImageResult Image::decode() const {
   int comps = 0;
 
   stbi_uc* decoded =
-      stbi_load_from_memory(_source->sourceData(),      // Source Data
-                            _source->sourceDataSize(),  // Source Data Size
-                            &width,                     // Out: Width
-                            &height,                    // Out: Height
-                            &comps,                     // Out: Components
+      stbi_load_from_memory(_source->GetMapping(),  // Source Data
+                            _source->GetSize(),     // Source Data Size
+                            &width,                 // Out: Width
+                            &height,                // Out: Height
+                            &comps,                 // Out: Components
                             STBI_default);
 
-  auto destinationAllocation = fml::RefPtr<const fml::Mapping>{
-      decoded, width * height * comps * sizeof(stbi_uc)};
-
-  /*
-   *  If either the decoded allocation is null or the size works out to be zero,
-   *  the allocation will mark itself as not ready and we know that the decode
-   *  job failed.
-   */
-
-  if (!destinationAllocation.isReady()) {
-    RL_LOG("Destination allocation for image decoding was null.");
+  if (decoded == nullptr) {
+    FML_LOG(ERROR) << "Could not decode image from host memory.";
     return {};
   }
+
+  auto destinationAllocation = std::make_shared<const fml::NonOwnedMapping>(
+      decoded,                                   // bytes
+      width * height * comps * sizeof(stbi_uc),  // byte size
+      [](const uint8_t* data, size_t size) {
+        ::stbi_image_free(const_cast<uint8_t*>(data));
+      }  // release proc
+  );
 
   /*
    *  Make sure we got a valid component set.
@@ -82,7 +68,7 @@ ImageResult Image::decode() const {
   }
 
   if (components == ImageResult::Components::Invalid) {
-    RL_LOG("Could not detect image components when decoding.");
+    FML_LOG(ERROR) << "Could not detect image components when decoding.";
     return {};
   }
 
@@ -95,15 +81,7 @@ ImageResult Image::decode() const {
 }
 
 bool Image::isValid() const {
-  return _source != nullptr;
-}
-
-std::size_t Image::Hash::operator()(const Image& key) const {
-  return std::hash<decltype(key._source)>()(key._source);
-}
-
-bool Image::Equal::operator()(const Image& lhs, const Image& rhs) const {
-  return lhs._source == rhs._source;
+  return static_cast<bool>(_source);
 }
 
 }  // namespace image
