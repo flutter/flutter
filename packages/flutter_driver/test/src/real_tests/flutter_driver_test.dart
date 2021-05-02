@@ -1035,7 +1035,7 @@ Future<void> _cleanTestOutputFiles() async {
   final Directory fileTestOutputsDirectory = Directory(testOutputsDirectory);
   final List<FileSystemEntity> files = fileTestOutputsDirectory.listSync();
   for (final FileSystemEntity file in files) {
-    if (FileSystemEntity.isFileSync(file.path)) {
+    if (await file.exists() && FileSystemEntity.isFileSync(file.path)) {
       await File(file.path).delete();
     }
   }
