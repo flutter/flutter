@@ -153,6 +153,7 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
+    this.cupertinoThumbColor,
     this.mouseCursor,
     this.semanticFormatterCallback,
     this.focusNode,
@@ -190,6 +191,7 @@ class Slider extends StatefulWidget {
     this.mouseCursor,
     this.activeColor,
     this.inactiveColor,
+    this.cupertinoThumbColor,
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
@@ -381,6 +383,14 @@ class Slider extends StatefulWidget {
   ///
   /// Ignored if this slider is created with [Slider.adaptive].
   final Color? inactiveColor;
+
+  /// The color of the thumb when [Slider.adaptive] shows a [CupertinoSlider]
+  ///
+  /// If this color is null, the [CupertinoSlider] will have a white thumb.
+  /// (like the native default iOS slider)
+  ///
+  /// Ignored if this slider is created with [Slider].
+  final Color? cupertinoThumbColor;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -757,6 +767,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         max: widget.max,
         divisions: widget.divisions,
         activeColor: widget.activeColor,
+        thumbColor: widget.cupertinoThumbColor ?? CupertinoColors.white,
       ),
     );
   }
