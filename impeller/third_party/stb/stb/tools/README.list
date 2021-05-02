@@ -1,0 +1,18 @@
+stb_vorbis.c                | audio            | decode ogg vorbis files from file/memory to float/16-bit signed output
+stb_image.h                 | graphics         | image loading/decoding from file/memory: JPG, PNG, TGA, BMP, PSD, GIF, HDR, PIC
+stb_truetype.h              | graphics         | parse, decode, and rasterize characters from truetype fonts
+stb_image_write.h           | graphics         | image writing to disk: PNG, TGA, BMP
+stb_image_resize.h          | graphics         | resize images larger/smaller with good quality
+stb_rect_pack.h             | graphics         | simple 2D rectangle packer with decent quality
+stretchy_buffer.h           | utility          | typesafe dynamic array for C (i.e. approximation to vector<>), doesn't compile as C++
+stb_textedit.h              | user interface   | guts of a text editor for games etc implementing them from scratch
+stb_voxel_render.h          | 3D graphics      | Minecraft-esque voxel rendering "engine" with many more features
+stb_dxt.h                   | 3D graphics      | Fabian "ryg" Giesen's real-time DXT compressor
+stb_perlin.h                | 3D graphics      | revised Perlin noise (3D input, 1D output)
+stb_easy_font.h             | 3D graphics      | quick-and-dirty easy-to-deploy bitmap font for printing frame rate, etc
+stb_tilemap_editor.h        | game dev         | embeddable tilemap editor
+stb_herringbone_wang_tile.h | game dev         | herringbone Wang tile map generator
+stb_c_lexer.h               | parsing          | simplify writing parsers for C-like languages
+stb_divide.h                | math             | more useful 32-bit modulus e.g. "euclidean divide"
+stb.h                       | misc             | helper functions for C, mostly redundant in C++; basically author's personal stuff
+stb_leakcheck.h             | misc             | quick-and-dirty malloc/free leak-checking

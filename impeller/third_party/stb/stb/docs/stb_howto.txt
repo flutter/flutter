@@ -1,0 +1,185 @@
+Lessons learned about how to make a header-file library
+V1.0
+September 2013 Sean Barrett
+
+Things to do in an stb-style header-file library,
+and rationales:
+
+
+1. #define LIBRARYNAME_IMPLEMENTATION
+
+Use a symbol like the above to control creating
+the implementation. (I used a far-less-clear name
+in my first header-file library; it became
+clear that was a mistake once I had multiple
+libraries.)
+
+Include a "header-file" section with header-file
+guards and declarations for all the functions,
+but only guard the implementation with LIBRARYNAME_IMPLEMENTATION,
+not the header-file guard. That way, if client's
+header file X includes your header file for
+declarations, they can still include header file X
+in the source file that creates the implementation;
+if you guard the implementation too, then the first
+include (before the #define) creates the declarations,
+and the second one (after the #define) does nothing.
+
+
+2. AVOID DEPENDENCIES
+
+Don't rely on anything other than the C standard libraries.
+
+(If you're creating a library specifically to leverage/wrap
+some other library, then obviously you can rely on that
+library. But if that library is public domain, you might
+be better off directly embedding the source, to reduce
+dependencies for your clients. But of course now you have
+to update whenever that library updates.)
+
+If you use stdlib, consider wrapping all stdlib calls in
+macros, and then conditionally define those macros to the
+stdlib function, allowing the user to replace them.
+
+For functions with side effects, like memory allocations,
+consider letting the user pass in a context and pass
+that in to the macros. (The stdlib versions will ignore
+the parameter.) Otherwise, users may have to use global
+or thread-local variables to achieve the same effect.
+
+
+3. AVOID MALLOC
+
+You can't always do this, but when you can, embedded developers
+will appreciate it. I almost never bother avoiding, as it's
+too much work (and in some cases is pretty infeasible;
+see http://nothings.org/gamedev/font_rendering_malloc.txt ).
+But it's definitely something one of the things I've gotten
+the most pushback on from potential users.
+
+
+4. ALLOW STATIC IMPLEMENTATION
+
+Have a #define which makes function declarations and
+function definitions static. This makes the implementation
+private to the source file that creates it. This allows
+people to use your library multiple times in their project
+without collision. (This is only necessary if your library
+has configuration macros or global state, or if your
+library has multiple versions that are not backwards
+compatible. I've run into both of those cases.)
+
+
+5. MAKE ACCESSIBLE FROM C
+
+Making your code accessible from C instead of C++ (i.e.
+either coding in C, or using extern "C") makes it more
+straightforward to be used in C and in other languages,
+which often only have support for C bindings, not C++.
+(One of the earliest results I found in googling for
+stb_image was a Haskell wrapper.) Otherwise, people
+have to wrap it in another set of function calls, and
+the whole point here is to make it convenient for people
+to use, isn't it? (See below.)
+
+I prefer to code entirely in C, so the source file that
+instantiates the implementation can be C itself, for
+those crazy people out there who are programming in C.
+But it's probably not a big hardship for a C programmer
+to create a single C++ source file to instantiate your
+library.
+
+
+6. NAMESPACE PRIVATE FUNCTIONS
+
+Try to avoid having names in your source code that
+will cause conflicts with identical names in client
+code. You can do this either by namespacing in C++,
+or prefixing with your library name in C.
+
+In C, generally, I use the same prefix for API
+functions and private symbols, such as "stbtt_"
+for stb_truetype; but private functions (and
+static globals) use a second underscore as
+in "stbtt__" to further minimize the chance of
+additional collisions in the unlikely but not
+impossible event that users write wrapper
+functions that have names of the form "stbtt_".
+(Consider the user that has used "stbtt_foo"
+*successfully*, and then upgrades to a new
+version of your library which has a new private
+function named either "stbtt_foo" or "stbtt__foo".)
+
+Note that the double-underscore is reserved for
+use by the compiler, but (1) there is nothing
+reserved for "middleware", i.e. libraries
+desiring to avoid conflicts with user symbols
+have no other good options, and (2) in practice
+no compilers use double-underscore in the middle
+rather than the beginning/end. (Unfortunately,
+there is at least one videogame-console compiler that
+will warn about double-underscores by default.)
+
+
+7. EASY-TO-COMPLY LICENSE
+
+I make my libraries public domain. You don't have to.
+But my goal in releasing stb-style libraries is to
+reduce friction for potential users as much as
+possible. That means:
+
+    a. easy to build (what this file is mostly about)
+    b. easy to invoke (which requires good API design)
+    c. easy to deploy (which is about licensing)
+
+I choose to place all my libraries in the public
+domain, abjuring copyright, rather than license
+the libraries. This has some benefits and some
+drawbacks.
+
+Any license which is "viral" to modifications
+causes worries for lawyers, even if their programmers
+aren't modifying it.
+
+Any license which requires crediting in documentation
+adds friction which can add up. Valve used to have
+a page with a list of all of these on their web site,
+and it was insane, and obviously nobody ever looked
+at it so why would you care whether your credit appeared
+there?
+
+Permissive licenses like zlib and BSD license are
+perfectly reasonable, but they are very wordy and
+have only two benefits over public domain: legally-mandated
+attribution and liability-control. I do not believe these
+are worth the excessive verbosity and user-unfriendliness
+these licenses induce, especially in the single-file
+case where those licenses tend to be at the top of
+the file, the first thing you see. (To the specific
+points, I have had no trouble receiving attribution
+for my libraries; liability in the face of no explicit
+disclaimer of liability is an open question.)
+
+However, public domain has frictions of its own, because
+public domain declarations aren't necessary recognized
+in the USA and some other locations. For that reason,
+I recommend a declaration along these lines:
+
+// This software is dual-licensed to the public domain and under the following
+// license: you are granted a perpetual, irrevocable license to copy, modify,
+// publish, and distribute this file as you see fit.
+
+I typically place this declaration at the end of the initial
+comment block of the file and just say 'public domain'
+at the top.
+
+I have had people say they couldn't use one of my
+libraries because it was only "public domain" and didn't
+have the additional fallback clause, who asked if
+I could dual-license it under a traditional license.
+
+My answer: they can create a derivative work by
+modifying one character, and then license that however
+they like. (Indeed, *adding* the zlib or BSD license
+would be such a modification!) Unfortunately, their
+lawyers reportedly didn't like that answer. :(

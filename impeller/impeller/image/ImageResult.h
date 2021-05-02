@@ -5,10 +5,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include "Size.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "flutter/fml/memory/ref_counted.h"
 
 namespace rl {
 namespace image {
@@ -27,11 +28,7 @@ class ImageResult {
 
   ImageResult(geom::Size size,
               Components components,
-              fml::RefPtr<const fml::Mapping> allocation);
-
-  ImageResult(ImageResult&&);
-
-  ImageResult& operator=(ImageResult&&);
+              std::shared_ptr<const fml::Mapping> allocation);
 
   ~ImageResult();
 
@@ -41,13 +38,13 @@ class ImageResult {
 
   Components components() const;
 
-  const fml::RefPtr<const fml::Mapping>& allocation() const;
+  const std::shared_ptr<const fml::Mapping>& allocation() const;
 
  private:
-  bool _success;
+  bool _success = false;
   geom::Size _size;
-  Components _components;
-  fml::RefPtr<const fml::Mapping> _allocation;
+  Components _components = Components::Invalid;
+  std::shared_ptr<const fml::Mapping> _allocation;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageResult);
 };
