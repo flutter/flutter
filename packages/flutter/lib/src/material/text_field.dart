@@ -891,6 +891,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   bool get selectionEnabled => widget.selectionEnabled;
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
+  @override
+  bool shouldRespondTo<T extends TextEditingGestureIntent>() {
+    switch (T) {
+      case TapDownTextIntent:
+    }
+  }
+
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
 
   int get _currentLength => _effectiveController.value.text.characters.length;

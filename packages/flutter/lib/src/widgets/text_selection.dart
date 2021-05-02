@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -19,6 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'text_editing_intents.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'visibility.dart';
@@ -955,7 +957,8 @@ class TextSelectionGestureDetectorBuilder {
   /// Returns true if lastSecondaryTapDownPosition was on selection.
   bool get _lastSecondaryTapWasOnSelection {
     assert(renderEditable.lastSecondaryTapDownPosition != null);
-    if (renderEditable.selection == null) {
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null) {
       return false;
     }
 
@@ -963,17 +966,9 @@ class TextSelectionGestureDetectorBuilder {
       renderEditable.lastSecondaryTapDownPosition!,
     );
 
-    return renderEditable.selection!.start <= textPosition.offset
-        && renderEditable.selection!.end >= textPosition.offset;
+    return selection.start <= textPosition.offset
+        && selection.end >= textPosition.offset;
   }
-
-  /// Whether to show the selection toolbar.
-  ///
-  /// It is based on the signal source when a [onTapDown] is called. This getter
-  /// will return true if current [onTapDown] event is triggered by a touch or
-  /// a stylus.
-  bool get shouldShowSelectionToolbar => _shouldShowSelectionToolbar;
-  bool _shouldShowSelectionToolbar = true;
 
   /// The [State] of the [EditableText] for which the builder will provide a
   /// [TextSelectionGestureDetector].
@@ -1064,8 +1059,12 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleTapUp(TapUpDetails details) {
-    if (delegate.selectionEnabled) {
-      renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+    final BuildContext? buildContext = delegate.editableTextKey.currentContext;
+    if (buildContext != null) {
+      Actions.invoke<SingleTapUpTextIntent>(
+        buildContext,
+        SingleTapUpTextIntent(tapUpDetails: details, gestureDelegate: delegate),
+      );
     }
   }
 
@@ -1271,6 +1270,8 @@ class TextSelectionGestureDetectorBuilder {
     );
   }
 }
+
+
 
 /// A gesture detector to respond to non-exclusive event chains for a text field.
 ///

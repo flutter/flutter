@@ -821,6 +821,13 @@ mixin TextSelectionDelegate {
   ///   updating the text editing state.
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
 
+  /// Whether to show the selection toolbar.
+  ///
+  /// It is based on the signal source when a [onTapDown] is called. This getter
+  /// will return true if current [onTapDown] event is triggered by a touch or
+  /// a stylus.
+  bool shouldShowSelectionToolbar = true;
+
   /// Hides the text selection toolbar.
   ///
   /// By default, hideHandles is true, and the toolbar is hidden along with its
