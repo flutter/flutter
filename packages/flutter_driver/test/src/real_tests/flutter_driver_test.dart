@@ -765,7 +765,7 @@ void main() {
       fakeConnection.supportsTimelineAction = true;
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
     });
-  
+
     test('printCommunication = true', () async {
       // Given
       driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: true);
