@@ -2473,4 +2473,44 @@ void main() {
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
+
+  testWidgets(
+      'If cupertinoThumbColor is null, it defaults to CupertinoColors.white',
+      (WidgetTester tester) async {
+    final Widget sliderAdaptive = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Material(
+        child: Slider.adaptive(
+          value: 0,
+          onChanged: (double newValue) {},
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(sliderAdaptive);
+    await tester.pumpAndSettle();
+    final CupertinoSlider widget = tester.widget(find.byType(CupertinoSlider));
+    expect(widget.thumbColor, equals(CupertinoColors.white));
+  });
+
+  testWidgets('Slider.adaptive passes cupertinoThumbColor to CupertinoSlider',
+      (WidgetTester tester) async {
+    final Color color = Colors.amber;
+
+    final Widget sliderAdaptive = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Material(
+        child: Slider.adaptive(
+          value: 0,
+          onChanged: (double newValue) {},
+          cupertinoThumbColor: color,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(sliderAdaptive);
+    await tester.pumpAndSettle();
+    final CupertinoSlider widget = tester.widget(find.byType(CupertinoSlider));
+    expect(widget.thumbColor, equals(color));
+  });
 }
