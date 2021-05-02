@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("metal_library") {
+  assert(defined(invoker.name), "Metal library name must be specified.")
+  assert(defined(invoker.sources), "Metal source files must be specified.")
+
+  metal_library_name = invoker.name
+
+  action("$target_name") {
+    inputs = invoker.sources
+
+    metal_library_path = "$target_out_dir/shaders/$metal_library_name.metallib"
+
+    outputs = [ metal_library_path ]
+
+    script = "//flutter/impeller/tools/metal/build_metal_library.py"
+
+    depfile = "$target_gen_dir/shader_deps/$metal_library_name.depfile"
+
+    args = [
+      "--output",
+      rebase_path(metal_library_path, root_out_dir),
+      "--depfile",
+      rebase_path(depfile),
+    ]
+
+    foreach(source, invoker.sources) {
+      args += [
+        "--source",
+        rebase_path(source, root_out_dir),
+      ]
+    }
+  }
+}

@@ -3,6 +3,12 @@
 # found in the LICENSE file.
 
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/metal/metal_library.gni")
+
+metal_library("impeller_host_shaders") {
+  name = "impeller_host"
+  sources = [ "shaders.metal" ]
+}
 
 executable("host") {
   cflags_objc = flutter_cflags_objc_arc
@@ -26,5 +32,8 @@ executable("host") {
     "ModelIO.framework",
   ]
 
-  deps = [ "//flutter/impeller/impeller" ]
+  deps = [
+    ":impeller_host_shaders",
+    "//flutter/impeller/impeller",
+  ]
 }
