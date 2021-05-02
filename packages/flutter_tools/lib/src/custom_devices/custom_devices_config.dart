@@ -94,16 +94,15 @@ class CustomDevicesConfig {
   /// Get the list of [CustomDeviceConfig]s that are listed in the config file
   /// including disabled ones.
   ///
-  /// Returns an empty list when the config could not be loaded and logs
-  /// any errors.
+  /// Throws a JsonRevivalException when the config could not be parsed. Doesn't
+  /// log any errors.
   List<CustomDeviceConfig> get devices {
     final dynamic json = _config.getValue(_kCustomDevicesConfigKey);
 
     if (json == null) {
       return <CustomDeviceConfig>[];
     } else if (json is! List) {
-      _logger.printError('Could not load custom devices config. config[\'$_kCustomDevicesConfigKey\'] is not a JSON array.');
-      return <CustomDeviceConfig>[];
+      throw const JsonRevivalException('Could not load custom devices config. config[\'$_kCustomDevicesConfigKey\'] is not a JSON array.');
     }
 
     final List<dynamic> typedList = json;
@@ -112,19 +111,63 @@ class CustomDevicesConfig {
       try {
         revived.add(CustomDeviceConfig.fromJson(entry.value));
       } on JsonRevivalException catch (e) {
-        _logger.printError('Could not load custom device from config index ${entry.key}: $e');
+        throw JsonRevivalException('Could not load custom device from config index ${entry.key}: $e');
       }
     }
 
     return revived;
   }
 
+  /// Get the list of [CustomDeviceConfig]s that are listed in the config file
+  /// including disabled ones.
+  ///
+  /// Returns an empty list when the config could not be loaded and logs any
+  /// errors.
+  List<CustomDeviceConfig> tryGetDevices() {
+    try {
+      return devices;
+    } on JsonRevivalException catch (e) {
+      _logger.printError(e.toString());
+      return <CustomDeviceConfig>[];
+    }
+  }
+
   /// Set the list of [CustomDeviceConfig]s in the config file.
+  ///
+  /// It should generally be avoided to call this often, since in many cases
+  /// this means data loss. If you want to add or remove a device from the config,
+  /// consider using [add] or [remove]
   set devices(List<CustomDeviceConfig> configs) {
     _config.setValue(
       _kCustomDevicesConfigKey,
       configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
     );
+  }
+
+  void add(CustomDeviceConfig config) {
+    devices = <CustomDeviceConfig>[
+      ...devices,
+      config
+    ];
+  }
+
+  bool remove(String deviceId) {
+    final List<CustomDeviceConfig> modifiedDevices = devices;
+
+    // we use this instead of filtering
+    final CustomDeviceConfig? device = modifiedDevices
+      .cast<CustomDeviceConfig?>()
+      .singleWhere((CustomDeviceConfig? d) => d!.id == deviceId,
+      orElse: () => null
+    );
+
+    if (device == null) {
+      return false;
+    }
+
+    modifiedDevices.remove(device);
+    devices = modifiedDevices;
+    return true;
   }
 
   String get configPath => _config.configPath;

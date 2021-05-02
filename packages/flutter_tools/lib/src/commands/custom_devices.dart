@@ -102,9 +102,9 @@ List the currently configured custom devices, both enabled and disabled, reachab
     final List<CustomDeviceConfig> devices = _customDevicesConfig.devices;
 
     if (devices.isEmpty) {
-      _logger.printStatus('No valid custom devices found.');
+      _logger.printStatus('No valid custom devices found in "${_customDevicesConfig.configPath}"');
     } else {
-      _logger.printStatus('List of valid custom devices:');
+      _logger.printStatus('List of custom devices in "${_customDevicesConfig.configPath}":');
       for (final CustomDeviceConfig device in devices) {
         _logger.printStatus('id: ${device.id}, label: ${device.label}, enabled: ${!device.disabled}', indent: 2, hangingIndent: 2);
       }
@@ -189,12 +189,26 @@ if it is valid). To make sure the config works use the `--check` option.
       valueHelp: 'JSON config',
       aliases: _kJsonAliases
     );
+
+    argParser.addFlag(
+      _kSsh,
+      help: '''
+Add a ssh-device. This will automatically fill out some of the config options
+for you with good defaults, and in other cases save you some typing. So you'll
+only need to enter some things like hostname and username of the remote device
+instead of entering each individual command.
+
+Defaults to on.
+''',
+      defaultsTo: true,
+      negatable: false
+    );
   }
 
   static const String _kJson = 'json';
   static const List<String> _kJsonAliases = <String>['js'];
   static const String _kCheck = 'check';
-  static const String _kSuccessfullyAdded = 'Successfully added custom device to config.';
+  static const String _kSsh = 'ssh';
 
   final CustomDevicesConfig _customDevicesConfig;
   final Terminal _terminal;
@@ -209,6 +223,7 @@ if it is valid). To make sure the config works use the `--check` option.
   String get name => 'add';
 
   Future<bool> checkConfigWithLogging(CustomDeviceConfig config) async {
+    // ignore: flutter_style_todos
     /// TODO: Implement
     return true;
   }
@@ -242,9 +257,13 @@ if it is valid). To make sure the config works use the `--check` option.
       config
     ];
 
-    _logger.printStatus(_kSuccessfullyAdded);
+    printSuccessfullyAdded();
 
     return FlutterCommandResult.success();
+  }
+
+  void printSuccessfullyAdded() {
+    _logger.printStatus('Successfully added custom device to config file at "${_customDevicesConfig.configPath}".');
   }
 
   Future<String> askForString(
@@ -254,7 +273,7 @@ if it is valid). To make sure the config works use the `--check` option.
     String defaultsTo,
     Future<bool> Function(String) validator,
   }) async {
-    String msg = description;
+    String msg = description ?? name;
 
     final String exampleOrDefault = <String>[
       if (example != null) 'example: $example',
@@ -317,9 +336,11 @@ if it is valid). To make sure the config works use the `--check` option.
     return <String>[];
   }
 
-  Future<FlutterCommandResult> runInteractively() async {
+  Future<FlutterCommandResult> runInteractivelySsh() async {
     final bool shouldCheck = boolArg(_kCheck) ?? true;
 
+    // listen to the keystrokes stream as late as possible, since it's a
+    // single-subscription stream apparently
     inputs = StreamQueue<String>(_terminal.keystrokes.map((String s) => s.trim()));
 
     /*
@@ -421,13 +442,21 @@ if it is valid). To make sure the config works use the `--check` option.
       return FlutterCommandResult.fail();
     }
 
+    _customDevicesConfig.add(config);
+    printSuccessfullyAdded();
     return FlutterCommandResult.success();
+  }
+
+  Future<FlutterCommandResult> runInteractively() async {
+    return FlutterCommandResult.fail();
   }
 
   @override
   Future<FlutterCommandResult> runCommand() {
     if (stringArg(_kJson) != null) {
       return runNonInteractively();
+    } else if (boolArg(_kSsh) == true) {
+      return runInteractivelySsh();
     } else {
       return runInteractively();
     }
@@ -439,7 +468,16 @@ class CustomDevicesDeleteCommand extends CustomDevicesSubCommand {
     @required CustomDevicesConfig customDevicesConfig,
     @required Logger logger,
   }) : _customDevicesConfig = customDevicesConfig,
-        _logger = logger;
+        _logger = logger
+  {
+    argParser.addOption(
+      'id',
+      abbr: 'i',
+      help: 'The id of the custom device to be deleted.',
+      valueHelp: 'device id',
+      mandatory: true,
+    );
+  }
 
   final CustomDevicesConfig _customDevicesConfig;
   final Logger _logger;
@@ -452,6 +490,12 @@ class CustomDevicesDeleteCommand extends CustomDevicesSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final String id = stringArg('id');
+    if (!_customDevicesConfig.remove(id)) {
+      _logger.printError('Couldn\'t find device with id "$id" in device config at "${_customDevicesConfig.configPath}"');
+    } else {
+      _logger.printStatus('Successfully removed device with id "$id" from device config at "${_customDevicesConfig.configPath}"');
+    }
     return FlutterCommandResult.success();
   }
 }
