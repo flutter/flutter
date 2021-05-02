@@ -123,8 +123,7 @@ class MergeableMaterial extends StatefulWidget {
   /// The z-coordinate at which to place all the [Material] slices.
   ///
   /// Defaults to 2, the appropriate elevation for cards.
-  // TODO(ianh): Change this to double.
-  final int elevation;
+  final double elevation;
 
   /// Whether connected pieces of [MaterialSlice] have dividers between them.
   final bool hasDividers;
