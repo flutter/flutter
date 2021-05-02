@@ -597,7 +597,8 @@ void main() {
       await tester.pump();
 
       expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-(4 - 1) * 800 / 2, 0));
-  });
+    },
+  );
 
   testWidgets(
     'PageView large viewportFraction can scroll to the last page and snap',
@@ -633,7 +634,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.getCenter(find.text('2')), const Offset(400, 300));
-  });
+    },
+  );
 
   testWidgets(
     'All visible pages are able to receive touch events',
@@ -680,7 +682,8 @@ void main() {
         await tester.tap(find.text('$index'));
         expect(tappedIndex, index);
       }
-  });
+    },
+  );
 
   testWidgets('the current item remains centered on constraint change', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/50505.

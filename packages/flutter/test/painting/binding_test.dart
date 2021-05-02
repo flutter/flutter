@@ -19,13 +19,12 @@ Future<void> main() async {
       Future<ImageInfo>.value(ImageInfo(
         image: image,
         scale: 1.0,
-      ),
-    )));
+      )),
+    ));
 
     await tester.idle();
     expect(imageCache!.currentSize, 1);
-    final ByteData message = const JSONMessageCodec().encodeMessage(
-      <String, dynamic>{'type': 'memoryPressure'})!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(imageCache!.currentSize, 0);
   });

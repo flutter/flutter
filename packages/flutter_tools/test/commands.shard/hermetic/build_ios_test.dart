@@ -22,12 +22,14 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
-        String scheme,
+        XcodeProjectBuildContext buildContext,
         Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
       'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
       'DEVELOPMENT_TEAM': 'abc',
+      'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
+      'WRAPPER_NAME': 'Runner.app',
     };
   }
 }
@@ -92,12 +94,16 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand _setUpFakeXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
+  FakeCommand _setUpFakeXcodeBuildHandler({ bool verbose = false, bool simulator = false, void Function() onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
         'xcodebuild',
-        '-configuration', 'Release',
+        '-configuration',
+        if (simulator)
+          'Debug'
+        else
+          'Release',
         if (verbose)
           'VERBOSE_SCRIPT_LOGGING=YES'
         else
@@ -105,11 +111,13 @@ void main() {
         '-workspace', 'Runner.xcworkspace',
         '-scheme', 'Runner',
         'BUILD_DIR=/build/ios',
-        '-sdk', 'iphoneos',
+        '-sdk',
+        if (simulator)
+          'iphonesimulator'
+        else
+          'iphoneos',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
-        if (showBuildSettings)
-          '-showBuildSettings',
       ],
       stdout: '''
       TARGET_BUILD_DIR=build/ios/Release-iphoneos
@@ -179,7 +187,26 @@ void main() {
       _setUpFakeXcodeBuildHandler(onRun: () {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
-      _setUpFakeXcodeBuildHandler(showBuildSettings: true),
+      _setUpRsyncCommand(),
+    ]),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ios simulator build invokes xcode build', () async {
+    final BuildCommand command = BuildCommand();
+    _createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ios', '--simulator', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      _setUpFakeXcodeBuildHandler(simulator: true, onRun: () {
+        fileSystem.directory('build/ios/Debug-iphonesimulator/Runner.app').createSync(recursive: true);
+      }),
       _setUpRsyncCommand(),
     ]),
     Platform: () => macosPlatform,
@@ -200,7 +227,6 @@ void main() {
       _setUpFakeXcodeBuildHandler(verbose: true, onRun: () {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
-      _setUpFakeXcodeBuildHandler(verbose: true, showBuildSettings: true),
       _setUpRsyncCommand(),
     ]),
     Platform: () => macosPlatform,
@@ -241,7 +267,6 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      _setUpFakeXcodeBuildHandler(showBuildSettings: true),
       _setUpRsyncCommand(onRun: () => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),

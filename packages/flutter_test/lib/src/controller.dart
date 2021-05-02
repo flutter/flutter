@@ -1096,36 +1096,42 @@ abstract class WidgetController {
   /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
   /// its ancestry tree, this scrolls `S` so as to make `W` visible.
   ///
-  /// Usually the `finder` for this method should be labeled
-  /// `skipOffstage: false`, so that [Finder] deals with widgets that's out of
-  /// the screen correctly.
+  /// Usually the `finder` for this method should be labeled `skipOffstage:
+  /// false`, so that the [Finder] deals with widgets that are off the screen
+  /// correctly.
   ///
-  /// This does not work when the `S` is long and `W` far away from the
-  /// displayed part does not have a cached element yet. See
-  /// https://github.com/flutter/flutter/issues/61458
+  /// This does not work when `S` is long enough, and `W` far away enough from
+  /// the displayed part of `S`, that `S` has not yet cached `W`'s element.
+  /// Consider using [scrollUntilVisible] in such a situation.
   ///
-  /// Shorthand for `Scrollable.ensureVisible(element(finder))`
+  /// See also:
+  ///
+  ///  * [Scrollable.ensureVisible], which is the production API used to
+  ///    implement this method.
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 
   /// Repeatedly scrolls a [Scrollable] by `delta` in the
-  /// [Scrollable.axisDirection] until `finder` is visible.
+  /// [Scrollable.axisDirection] direction until a widget matching `finder` is
+  /// visible.
   ///
-  /// Between each scroll, wait for `duration` time for settling.
+  /// Between each scroll, advances the clock by `duration` time.
   ///
-  /// If `scrollable` is `null`, this will find a [Scrollable].
+  /// Scrolling is performed until the start of the `finder` is visible. This is
+  /// due to the default parameter values of the [Scrollable.ensureVisible] method.
   ///
-  /// Throws a [StateError] if `finder` is not found for maximum `maxScrolls`
-  /// times.
+  /// If `scrollable` is `null`, a [Finder] that looks for a [Scrollable] is
+  /// used instead.
+  ///
+  /// Throws a [StateError] if `finder` is not found after `maxScrolls` scrolls.
   ///
   /// This is different from [ensureVisible] in that this allows looking for
-  /// `finder` that is not built yet, but the caller must specify the scrollable
+  /// `finder` that is not yet built. The caller must specify the scrollable
   /// that will build child specified by `finder` when there are multiple
-  ///[Scrollable]s.
+  /// [Scrollable]s.
   ///
-  /// Scroll is performed until the start of the `finder` is visible. This is
-  /// due to the default parameter values of [Scrollable.ensureVisible] method.
+  /// See also:
   ///
-  /// See also [dragUntilVisible].
+  ///  * [dragUntilVisible], which implements the body of this method.
   Future<void> scrollUntilVisible(
     Finder finder,
     double delta, {
@@ -1157,16 +1163,22 @@ abstract class WidgetController {
         scrollable,
         moveStep,
         maxIteration: maxScrolls,
-        duration: duration);
+        duration: duration,
+      );
     });
   }
 
-  /// Repeatedly drags the `view` by `moveStep` until `finder` is visible.
+  /// Repeatedly drags `view` by `moveStep` until `finder` is visible.
   ///
-  /// Between each operation, wait for `duration` time for settling.
+  /// Between each drag, advances the clock by `duration`.
   ///
-  /// Throws a [StateError] if `finder` is not found for maximum `maxIteration`
-  /// times.
+  /// Throws a [StateError] if `finder` is not found after `maxIteration`
+  /// drags.
+  ///
+  /// See also:
+  ///
+  ///  * [scrollUntilVisible], which wraps this method with an API that is more
+  ///    convenient when dealing with a [Scrollable].
   Future<void> dragUntilVisible(
     Finder finder,
     Finder view,
@@ -1175,10 +1187,10 @@ abstract class WidgetController {
       Duration duration = const Duration(milliseconds: 50),
   }) {
     return TestAsyncUtils.guard<void>(() async {
-      while(maxIteration > 0 && finder.evaluate().isEmpty) {
+      while (maxIteration > 0 && finder.evaluate().isEmpty) {
         await drag(view, moveStep);
         await pump(duration);
-        maxIteration-= 1;
+        maxIteration -= 1;
       }
       await Scrollable.ensureVisible(element(finder));
     });

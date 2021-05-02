@@ -16,7 +16,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import 'code_signing.dart';
@@ -39,7 +38,7 @@ class IOSDeploy {
        _cache = cache,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
-       _binaryPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+       _binaryPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
 
   final Cache _cache;
   final String _binaryPath;
