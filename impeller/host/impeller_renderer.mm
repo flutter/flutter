@@ -5,7 +5,9 @@
 #import <ModelIO/ModelIO.h>
 #import <simd/simd.h>
 
+#include "flutter/fml/logging.h"
 #import "impeller_renderer.h"
+#import "shaders_location.h"
 
 // Include header shared between C code here, which executes Metal API commands,
 // and .metal files
@@ -82,7 +84,16 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
   _mtlVertexDescriptor.layouts[BufferIndexMeshGenerics].stepFunction =
       MTLVertexStepFunctionPerVertex;
 
-  id<MTLLibrary> defaultLibrary = [_device newDefaultLibrary];
+  auto shader_library_path =
+      impeller::ImpellerShadersLocation("impeller_host.metallib");
+
+  FML_CHECK(shader_library_path.has_value());
+
+  NSError* shader_library_error = nil;
+
+  id<MTLLibrary> defaultLibrary =
+      [_device newLibraryWithFile:@(shader_library_path.value().c_str())
+                            error:&shader_library_error];
 
   id<MTLFunction> vertexFunction =
       [defaultLibrary newFunctionWithName:@"vertexShader"];

@@ -19,10 +19,12 @@ executable("host") {
   sources = [
     "ShaderTypes.h",
     "impeller_host_view_controller.h",
-    "impeller_host_view_controller.m",
+    "impeller_host_view_controller.mm",
     "impeller_renderer.h",
-    "impeller_renderer.m",
-    "main.m",
+    "impeller_renderer.mm",
+    "main.mm",
+    "shaders_location.cc",
+    "shaders_location.h",
   ]
 
   libs = [
@@ -34,6 +36,7 @@ executable("host") {
 
   deps = [
     ":impeller_host_shaders",
+    "//flutter/fml",
     "//flutter/impeller/impeller",
   ]
 }
