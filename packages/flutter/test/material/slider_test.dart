@@ -2495,7 +2495,7 @@ void main() {
 
   testWidgets('Slider.adaptive passes cupertinoThumbColor to CupertinoSlider',
       (WidgetTester tester) async {
-    final Color color = Colors.amber;
+    const Color color = Colors.amber;
 
     final Widget sliderAdaptive = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
