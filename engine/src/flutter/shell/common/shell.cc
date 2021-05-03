@@ -1846,4 +1846,8 @@ void Shell::OnDisplayUpdates(DisplayUpdateType update_type,
   display_manager_->HandleDisplayUpdates(update_type, displays);
 }
 
+fml::TimePoint Shell::GetCurrentTimePoint() {
+  return fml::TimePoint::Now();
+}
+
 }  // namespace flutter
