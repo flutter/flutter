@@ -225,7 +225,9 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: '${math.Random().nextInt(10000)}',
+      suffix: '${math.Random(
+        DateTime.now().microsecond * platform.environment['SWARMING_TASK_ID'].hashCode
+      ).nextInt(100000)}',
     );
     baseDirectory.createSync(recursive: true);
 
@@ -304,7 +306,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: '${math.Random().nextInt(10000)}',
+      suffix: '${math.Random(
+        DateTime.now().microsecond * platform.environment['SWARMING_TASK_ID'].hashCode
+      ).nextInt(100000)}',
     );
 
     if (!baseDirectory.existsSync())
