@@ -112,6 +112,7 @@ class ReorderableList extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.itemExtent,
     this.proxyDecorator,
     this.padding,
     this.scrollDirection = Axis.vertical,
@@ -210,6 +211,9 @@ class ReorderableList extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// {@macro flutter.widgets.list_view.itemExtent}
+  final double? itemExtent;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -337,6 +341,7 @@ class ReorderableListState extends State<ReorderableList> {
           padding: widget.padding ?? EdgeInsets.zero,
           sliver: SliverReorderableList(
             key: _sliverReorderableListKey,
+            itemExtent: widget.itemExtent,
             itemBuilder: widget.itemBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
@@ -380,6 +385,7 @@ class SliverReorderableList extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.itemExtent,
     this.proxyDecorator,
   }) : assert(itemCount >= 0),
        super(key: key);
@@ -395,6 +401,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
+
+  /// {@macro flutter.widgets.list_view.itemExtent}
+  final double? itemExtent;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -825,15 +834,19 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    return SliverList(
+    final SliverChildBuilderDelegate childrenDelegate = SliverChildBuilderDelegate(
+      _itemBuilder,
       // When dragging, the dragged item is still in the list but has been replaced
       // by a zero height SizedBox, so that the gap can move around. To make the
       // list extent stable we add a dummy entry to the end.
-      delegate: SliverChildBuilderDelegate(
-        _itemBuilder,
-        childCount: widget.itemCount + (_dragInfo != null ? 1 : 0),
-      ),
+      childCount: widget.itemCount + (_dragInfo != null ? 1 : 0),
     );
+    return widget.itemExtent != null
+      ? SliverFixedExtentList(
+          itemExtent: widget.itemExtent!,
+          delegate: childrenDelegate,
+        )
+      : SliverList(delegate: childrenDelegate);
   }
 }
 

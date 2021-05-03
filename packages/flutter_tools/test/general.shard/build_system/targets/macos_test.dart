@@ -205,7 +205,7 @@ void main() {
         mode: BuildMode.debug,
       ))
       .createSync();
-    environment.inputs[kBundleSkSLPath] = 'bundle.sksl';
+    environment.defines[kBundleSkSLPath] = 'bundle.sksl';
     fileSystem.file(
       artifacts.getArtifactPath(
         Artifact.vmSnapshotData,
