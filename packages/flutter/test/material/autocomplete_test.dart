@@ -44,8 +44,7 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  testWidgets('can filter and select a list of string options',
-      (WidgetTester tester) async {
+  testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
     late String lastSelection;
     await tester.pumpWidget(
       MaterialApp(
@@ -90,8 +89,7 @@ void main() {
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    final TextFormField field =
-        find.byType(TextFormField).evaluate().first.widget as TextFormField;
+    final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, 'chameleon');
     expect(lastSelection, 'chameleon');
 
