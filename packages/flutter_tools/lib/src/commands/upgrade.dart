@@ -233,6 +233,17 @@ class UpgradeCommandRunner {
   ///
   /// Exits tool if the tracking remote is not standard.
   void verifyStandardRemote(FlutterVersion localVersion) {
+    // If localVersion.repositoryUrl is null, exit
+    if (localVersion.repositoryUrl == null) {
+      throwToolExit(
+        'Unable to upgrade Flutter: The Flutter SDK is tracking an "unknown" '
+        'remote.\n'
+        'Re-install Flutter by going to '
+        'https://flutter.dev/docs/get-started/install. Alternatively, use "git" '
+        'directly to configure a valid upstream for the branch and retry.'
+      );
+    }
+
     // Strip `.git` suffix from repository url and _flutterGit
     final String trackingUrl = _stripDotGit(localVersion.repositoryUrl);
     final String flutterGitUrl = _stripDotGit(_flutterGit);

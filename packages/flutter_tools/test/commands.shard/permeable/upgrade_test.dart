@@ -254,6 +254,28 @@ void main() {
       const String flutterStandardUrl = 'https://github.com/flutter/flutter';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
+      testUsingContext('throws toolExit if upstreamUrl is null', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: null,
+        );
+
+        ToolExit err;
+        try {
+         realCommandRunner.verifyStandardRemote(flutterVersion);
+        } on ToolExit catch (e) {
+          err = e;
+        }
+        expect(err, isNotNull);
+        expect(err.toString(), contains('The Flutter SDK is tracking an "unknown" remote.'));
+        expect(err.toString(), contains('Re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
+        expect(err.toString(), contains('use "git" directly to configure a valid upstream for the branch and retry.'));
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
+
       testUsingContext('does not throw toolExit at standard remote url with .git suffix and FLUTTER_GIT_URL unset', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
           channel: 'dev',
