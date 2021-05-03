@@ -69,6 +69,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
+    this.supportedDevices = _kAllPointerDeviceKinds
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner, kind: kind);
 
@@ -200,6 +201,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
+  /// The device types that this gesture recognizer will accept drags from.
+  ///
+  /// If not specified, defaults to all pointer kinds.
+  Set<PointerDeviceKind> supportedDevices;
+
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -230,6 +236,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerEvent event) {
+    if (!supportedDevices.contains(event.kind)) {
+      return false;
+    }
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
@@ -508,7 +517,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   VerticalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind> supportedDevices = _kAllPointerDeviceKinds,
+  }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -532,6 +542,10 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   String get debugDescription => 'vertical drag';
 }
 
+const Set<PointerDeviceKind> _kAllPointerDeviceKinds = <PointerDeviceKind>{
+  ...PointerDeviceKind.values,
+};
+
 /// Recognizes movement in the horizontal direction.
 ///
 /// Used for horizontal scrolling.
@@ -549,7 +563,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   HorizontalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind> supportedDevices = _kAllPointerDeviceKinds,
+  }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
