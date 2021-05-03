@@ -69,7 +69,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-    this.enableMouseDrag = true,
+    this.supportedDevices = PointerDeviceKind.values,
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner, kind: kind);
 
@@ -201,11 +201,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
-  /// Whether this gesture detector should accept pointers from a mouse device type.
+  /// The device types that this gesture recognizer will accept drags from.
   ///
-  /// This is used by scrollables to force mouse interactions to go through the
-  /// scroll wheel or scrollbar, instead of allowing drag gestures to move them.
-  final bool enableMouseDrag;
+  /// If not specified, defaults to all pointer kinds.
+  final List<PointerDeviceKind> supportedDevices;
 
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
@@ -237,7 +236,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerEvent event) {
-    if (!enableMouseDrag && event.kind == PointerDeviceKind.mouse) {
+    if (!supportedDevices.contains(event.kind)) {
       return false;
     }
     if (_initialButtons == null) {
@@ -518,8 +517,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   VerticalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-    bool enableMouseDrag = true,
-  }) : super(debugOwner: debugOwner, kind: kind, enableMouseDrag: enableMouseDrag);
+    List<PointerDeviceKind> supportedDevices = PointerDeviceKind.values,
+  }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -560,8 +559,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   HorizontalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-    bool enableMouseDrag = true,
-  }) : super(debugOwner: debugOwner, kind: kind, enableMouseDrag: enableMouseDrag);
+    List<PointerDeviceKind> supportedDevices = PointerDeviceKind.values,
+  }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
