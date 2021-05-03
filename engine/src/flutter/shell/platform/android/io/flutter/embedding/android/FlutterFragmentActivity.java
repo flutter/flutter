@@ -391,6 +391,12 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   private void ensureFlutterFragmentCreated() {
     if (flutterFragment == null) {
+      // If both activity and fragment have been destroyed, the activity restore may have
+      // already recreated a new instance of the fragment again via the FragmentActivity.onCreate
+      // and the FragmentManager.
+      flutterFragment = retrieveExistingFlutterFragmentIfPossible();
+    }
+    if (flutterFragment == null) {
       // No FlutterFragment exists yet. This must be the initial Activity creation. We will create
       // and add a new FlutterFragment to this Activity.
       flutterFragment = createFlutterFragment();
@@ -602,7 +608,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    if (flutterFragment.isFlutterEngineInjected()) {
+    if (flutterFragment != null && flutterFragment.isFlutterEngineInjected()) {
       // If the FlutterEngine was explicitly built and injected into this FlutterActivity, the
       // builder should explicitly decide whether to automatically register plugins via the
       // FlutterEngine's construction parameter or via the AndroidManifest metadata.
