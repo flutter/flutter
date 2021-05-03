@@ -777,8 +777,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_frame_rasterizer_time_millis',
   '90th_percentile_frame_rasterizer_time_millis',
   '99th_percentile_frame_rasterizer_time_millis',
-  'new_gen_gc_count',
-  'old_gen_gc_count',
 ];
 
 class PerfTestWithSkSL extends PerfTest {
