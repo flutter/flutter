@@ -150,6 +150,14 @@ task:
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
+    - name: docs-linux # linux-only
+      environment:
+        CPU: 4
+        MEMORY: 8G
+      only_if: "$CIRRUS_PR != ''"
+      script:
+        - ./dev/bots/docs.sh
+
     - name: customer_testing-linux
       only_if: "$CIRRUS_PR != ''"
       # environment:
