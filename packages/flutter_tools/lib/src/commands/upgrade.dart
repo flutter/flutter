@@ -237,6 +237,11 @@ class UpgradeCommandRunner {
     final String trackingUrl = _stripDotGit(localVersion.repositoryUrl);
     final String flutterGitUrl = _stripDotGit(_flutterGit);
 
+    // Exempt the flutter GitHub git SSH remote from this check
+    if (trackingUrl == 'git@github.com:flutter/flutter') {
+      return;
+    }
+
     if (trackingUrl != flutterGitUrl) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
         // If `FLUTTER_GIT_URL` is set, inform the user to either remove the

@@ -252,6 +252,7 @@ void main() {
       const String flutterStandardUrlDotGit = 'https://github.com/flutter/flutter.git';
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
       const String flutterStandardUrl = 'https://github.com/flutter/flutter';
+      const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
       testUsingContext('does not throw toolExit at standard remote url with .git suffix and FLUTTER_GIT_URL unset', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
@@ -359,6 +360,25 @@ void main() {
         Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
           'FLUTTER_GIT_URL': flutterStandardUrl,
         }),
+      });
+
+      testUsingContext('exempts standard ssh url from check with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterStandardSshUrlDotGit,
+        );
+
+        ToolExit err;
+        try {
+         realCommandRunner.verifyStandardRemote(flutterVersion);
+        } on ToolExit catch (e) {
+          err = e;
+        }
+        expect(err, isNull);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
       });
     });
 
