@@ -284,6 +284,12 @@ class Engine final : public RuntimeDelegate,
     ///                              library to load.
     ///
     virtual void RequestDartDeferredLibrary(intptr_t loading_unit_id) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Returns the current fml::TimePoint.
+    ///             This method is primarily provided to allow tests to control
+    ///             Any methods that rely on advancing the clock.
+    virtual fml::TimePoint GetCurrentTimePoint() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -916,7 +922,8 @@ class Engine final : public RuntimeDelegate,
   std::shared_ptr<FontCollection> font_collection_;
   ImageDecoder image_decoder_;
   TaskRunners task_runners_;
-  size_t hint_freed_bytes_since_last_idle_ = 0;
+  size_t hint_freed_bytes_since_last_call_ = 0;
+  fml::TimePoint last_hint_freed_call_time_;
   fml::WeakPtrFactory<Engine> weak_factory_;
 
   // |RuntimeDelegate|

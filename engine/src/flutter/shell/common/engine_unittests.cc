@@ -22,6 +22,7 @@ namespace flutter {
 
 namespace {
 class MockDelegate : public Engine::Delegate {
+ public:
   MOCK_METHOD2(OnEngineUpdateSemantics,
                void(SemanticsNodeUpdates, CustomAccessibilityActionUpdates));
   MOCK_METHOD1(OnEngineHandlePlatformMessage,
@@ -34,6 +35,7 @@ class MockDelegate : public Engine::Delegate {
                std::unique_ptr<std::vector<std::string>>(
                    const std::vector<std::string>&));
   MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
+  MOCK_METHOD0(GetCurrentTimePoint, fml::TimePoint());
 };
 
 class MockResponse : public PlatformMessageResponse {
@@ -69,6 +71,7 @@ class MockRuntimeController : public RuntimeController {
   MOCK_METHOD3(LoadDartDeferredLibraryError,
                void(intptr_t, const std::string, bool));
   MOCK_CONST_METHOD0(GetDartVM, DartVM*());
+  MOCK_METHOD2(NotifyIdle, bool(int64_t, size_t));
 };
 
 fml::RefPtr<PlatformMessage> MakePlatformMessage(
@@ -296,6 +299,53 @@ TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     engine->LoadDartDeferredLibraryError(error_id, error_message, true);
+  });
+}
+
+TEST_F(EngineTest, NotifyIdleMoreThanOncePerFiveSeconds) {
+  PostUITaskSync([this] {
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+
+    // Verify we get an initial call with the bytes, since it's 10 seconds.
+    EXPECT_CALL(*mock_runtime_controller, NotifyIdle(200, 100)).Times(1);
+    // Verify that we do not get called again, since it's only been 3 more
+    // seconds.
+    EXPECT_CALL(*mock_runtime_controller, NotifyIdle(400, 0)).Times(1);
+    // Verify that we get called again, since it's now been 6 seconds.
+    EXPECT_CALL(*mock_runtime_controller, NotifyIdle(600, 300 + 500)).Times(1);
+    // Set up mocking of the timepoint logic. Calls at 10, 13, and 16 seconds.
+    EXPECT_CALL(delegate_, GetCurrentTimePoint())
+        .Times(3)
+        .WillOnce(::testing::Return(
+            fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(10))))
+        .WillOnce(::testing::Return(
+            fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(13))))
+        .WillOnce(::testing::Return(
+            fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(16))));
+
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*dispatcher_maker=*/dispatcher_maker_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings_,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
+        /*runtime_controller=*/std::move(mock_runtime_controller));
+
+    // Verifications are above, since we std::moved the unique_ptr for the
+    // mock.
+    engine->HintFreed(100);
+    engine->NotifyIdle(200);
+
+    engine->HintFreed(300);
+    engine->NotifyIdle(400);
+
+    engine->HintFreed(500);
+    engine->NotifyIdle(600);
   });
 }
 
