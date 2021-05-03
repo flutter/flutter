@@ -216,8 +216,6 @@ void main() {
     });
 
     testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
-      realCommandRunner.workingDirectory = '/src/flutter';
-
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
@@ -254,7 +252,7 @@ void main() {
       const String flutterStandardUrl = 'https://github.com/flutter/flutter';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
-      testUsingContext('throws toolExit if upstreamUrl is null', () async {
+      testUsingContext('throws toolExit if repository url is null', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
           channel: 'dev',
           repositoryUrl: null,
