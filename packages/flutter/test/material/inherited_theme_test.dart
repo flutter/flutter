@@ -118,9 +118,6 @@ void main() {
                     PopupMenuItem<int>(value: 2, child: Text('Two')),
                   ];
                 },
-                // The appearance of the menu items' text is defined by the
-                // PopupMenuTheme defined above. Popup menus use
-                // InheritedTheme.captureAll() by default.
                 child: const Text('show popupmenu'),
               ),
             ),

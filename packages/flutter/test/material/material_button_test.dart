@@ -622,8 +622,8 @@ void main() {
       child: Material(
         child: Center(
           child: MaterialButton(
-            onPressed: null,
-            child: Text('Button'), // button is disabled
+            onPressed: null, // button is disabled
+            child: Text('Button'),
           ),
         ),
       ),
