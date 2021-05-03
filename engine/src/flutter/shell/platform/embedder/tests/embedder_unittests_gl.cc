@@ -3495,5 +3495,127 @@ TEST_F(EmbedderTest, ObjectsPostedViaPortsServicedOnSecondaryTaskHeap) {
   }
 }
 
+TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLTexture) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture);
+  builder.SetDartEntrypoint("invalid_backingstore");
+
+  class TestCollectOnce {
+   public:
+    // Collect() should only be called once
+    void Collect() {
+      ASSERT_FALSE(collected_);
+      collected_ = true;
+    }
+
+   private:
+    bool collected_ = false;
+  };
+  fml::AutoResetWaitableEvent latch;
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,  //
+         FlutterBackingStore* backing_store_out,   //
+         void* user_data                           //
+      ) {
+        backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+        // Deliberately set this to be invalid
+        backing_store_out->user_data = nullptr;
+        backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeTexture;
+        backing_store_out->open_gl.texture.target = 0;
+        backing_store_out->open_gl.texture.name = 0;
+        backing_store_out->open_gl.texture.format = 0;
+        backing_store_out->open_gl.texture.user_data = new TestCollectOnce();
+        backing_store_out->open_gl.texture.destruction_callback =
+            [](void* user_data) {
+              reinterpret_cast<TestCollectOnce*>(user_data)->Collect();
+            };
+        return true;
+      };
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+}
+
+TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLFramebuffer) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer);
+  builder.SetDartEntrypoint("invalid_backingstore");
+
+  class TestCollectOnce {
+   public:
+    // Collect() should only be called once
+    void Collect() {
+      ASSERT_FALSE(collected_);
+      collected_ = true;
+    }
+
+   private:
+    bool collected_ = false;
+  };
+  fml::AutoResetWaitableEvent latch;
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,  //
+         FlutterBackingStore* backing_store_out,   //
+         void* user_data                           //
+      ) {
+        backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+        // Deliberately set this to be invalid
+        backing_store_out->user_data = nullptr;
+        backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+        backing_store_out->open_gl.framebuffer.target = 0;
+        backing_store_out->open_gl.framebuffer.name = 0;
+        backing_store_out->open_gl.framebuffer.user_data =
+            new TestCollectOnce();
+        backing_store_out->open_gl.framebuffer.destruction_callback =
+            [](void* user_data) {
+              reinterpret_cast<TestCollectOnce*>(user_data)->Collect();
+            };
+        return true;
+      };
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -379,5 +379,60 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneMetal) {
   ASSERT_TRUE(ImageMatchesFixture("compositor.png", scene_image));
 }
 
+TEST_F(EmbedderTest, CreateInvalidBackingstoreMetalTexture) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kMetalContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetMetalRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture);
+  builder.SetDartEntrypoint("invalid_backingstore");
+
+  class TestCollectOnce {
+   public:
+    // Collect() should only be called once
+    void Collect() {
+      ASSERT_FALSE(collected_);
+      collected_ = true;
+    }
+
+   private:
+    bool collected_ = false;
+  };
+  fml::AutoResetWaitableEvent latch;
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,  //
+         FlutterBackingStore* backing_store_out,   //
+         void* user_data                           //
+      ) {
+        backing_store_out->type = kFlutterBackingStoreTypeMetal;
+        // Deliberately set this to be invalid
+        backing_store_out->user_data = nullptr;
+        backing_store_out->metal.texture.texture = 0;
+        backing_store_out->metal.struct_size = sizeof(FlutterMetalBackingStore);
+        backing_store_out->metal.texture.user_data = new TestCollectOnce();
+        backing_store_out->metal.texture.destruction_callback = [](void* user_data) {
+          reinterpret_cast<TestCollectOnce*>(user_data)->Collect();
+        };
+        return true;
+      };
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.Signal(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
