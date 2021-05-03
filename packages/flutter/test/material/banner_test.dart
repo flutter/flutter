@@ -9,112 +9,336 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Custom background color respected', (WidgetTester tester) async {
     const Color color = Colors.pink;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MaterialBanner(
-          backgroundColor: color,
-          content: const Text('I am a banner'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+    const Key tapTarget = Key('tap-target');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text('MaterialBanner'),
+                  backgroundColor: color,
+                  actions: [
+                    TextButton(
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
-    );
+    ));
 
-    final Container container = _getContainerFromBanner(tester);
-    expect(container.color, color);
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
+
+    expect(_getContainerFromText(tester, 'MaterialBanner').color, color);
   });
 
   testWidgets('Custom content TextStyle respected', (WidgetTester tester) async {
-    const String contentText = 'Content';
     const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MaterialBanner(
-          contentTextStyle: contentTextStyle,
-          content: const Text(contentText),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+    const Key tapTarget = Key('tap-target');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text('MaterialBanner'),
+                  contentTextStyle: contentTextStyle,
+                  actions: [
+                    TextButton(
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
-    );
+    ));
 
-    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, 'MaterialBanner');
     expect(content.text.style, contentTextStyle);
   });
 
   testWidgets('Actions laid out below content if more than one action', (WidgetTester tester) async {
-    const String contentText = 'Content';
+    const Key tapTarget = Key('tap-target');
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MaterialBanner(
-          content: const Text(contentText),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action 1'),
-              onPressed: () { },
-            ),
-            TextButton(
-              child: const Text('Action 2'),
-              onPressed: () { },
-            ),
-          ],
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text('MaterialBanner'),
+                  actions: [
+                    TextButton(
+                      child: const Text('OK'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    ),
+                    TextButton(
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
-    );
+    ));
 
-    final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
+
+    final Offset contentBottomLeft = tester.getBottomLeft(find.text('MaterialBanner'));
     final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     expect(contentBottomLeft.dy, lessThan(actionsTopLeft.dy));
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
   testWidgets('Actions laid out beside content if only one action', (WidgetTester tester) async {
-    const String contentText = 'Content';
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MaterialBanner(
-          content: const Text(contentText),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+    const Key tapTarget = Key('tap-target');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text('MaterialBanner'),
+                  actions: [
+                    TextButton(
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
-    );
+    ));
 
-    final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
+
+    final Offset contentBottomLeft = tester.getBottomLeft(find.text('MaterialBanner'));
     final Offset actionsTopRight = tester.getTopRight(find.byType(OverflowBar));
     expect(contentBottomLeft.dy, greaterThan(actionsTopRight.dy));
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/39574
-  testWidgets('Single action laid out beside content but aligned to the trailing edge', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MaterialBanner(
-          content: const Text('Content'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+  testWidgets('MaterialBanner control test', (WidgetTester tester) async {
+    const String helloMaterialBanner = 'Hello MaterialBanner';
+    const Key tapTarget = Key('tap-target');
+    const Key dismissTarget = Key('dismiss-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text(helloMaterialBanner),
+                  actions: [
+                    TextButton(
+                      key: dismissTarget,
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    )
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
-    );
+    ));
+    expect(find.text(helloMaterialBanner), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text(helloMaterialBanner), findsNothing);
+    await tester.pump(); // schedule animation
+    expect(find.text(helloMaterialBanner), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text(helloMaterialBanner), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+    expect(find.text(helloMaterialBanner), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 1.50s
+    expect(find.text(helloMaterialBanner), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 2.25s
+    expect(find.text(helloMaterialBanner), findsOneWidget);
+    await tester.tap(find.byKey(dismissTarget));
+    await tester.pump(); // begin animation
+    expect(find.text(helloMaterialBanner), findsOneWidget); // frame 0 of dismiss animation
+    await tester.pumpAndSettle(); // 3.75s // last frame of animation, material banner removed from build
+    expect(find.text(helloMaterialBanner), findsNothing);
+  });
+
+  testWidgets('MaterialBanner twice test', (WidgetTester tester) async {
+    int materialBannerCount = 0;
+    const Key tapTarget = Key('tap-target');
+    const Key dismissTarget = Key('dismiss-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                materialBannerCount += 1;
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: Text('banner$materialBannerCount'),
+                  actions: [
+                    TextButton(
+                      key: dismissTarget,
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    )
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsNothing);
+    await tester.tap(find.byKey(tapTarget)); // queue banner1
+    await tester.tap(find.byKey(tapTarget)); // queue banner2
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsNothing);
+    await tester.pump(); // schedule animation for banner1
+    expect(find.text('banner1'), findsOneWidget);
+    expect(find.text('banner2'), findsNothing);
+    await tester.pump(); // begin animation
+    expect(find.text('banner1'), findsOneWidget);
+    expect(find.text('banner2'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame
+    expect(find.text('banner1'), findsOneWidget);
+    expect(find.text('banner2'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 750)); // 1.50s
+    expect(find.text('banner1'), findsOneWidget);
+    expect(find.text('banner2'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 750)); // 2.25s
+    expect(find.text('banner1'), findsOneWidget);
+    expect(find.text('banner2'), findsNothing);
+    await tester.tap(find.byKey(dismissTarget));
+    await tester.pump(); // begin animation
+    expect(find.text('banner1'), findsOneWidget);
+    expect(find.text('banner2'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, material banner removed from build, new material banner put in its place
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 4.50s // animation last frame
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 5.25s
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 6.00s
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsOneWidget);
+    await tester.tap(find.byKey(dismissTarget)); // reverse animation is scheduled
+    await tester.pump(); // begin animation
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750)); // 7.50s // last frame of animation, material banner removed from build
+    expect(find.text('banner1'), findsNothing);
+    expect(find.text('banner2'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39574
+  testWidgets('Single action laid out beside content but aligned to the trailing edge', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text('MaterialBanner'),
+                  actions: [
+                    TextButton(
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
 
     final Offset actionsTopRight = tester.getTopRight(find.byType(OverflowBar));
     final Offset bannerTopRight = tester.getTopRight(find.byType(MaterialBanner));
@@ -123,22 +347,41 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
   testWidgets('Single action laid out beside content but aligned to the trailing edge - RTL', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
+    const Key tapTarget = Key('tap-target');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
         textDirection: TextDirection.rtl,
-          child: MaterialBanner(
-            content: const Text('Content'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Action'),
-                onPressed: () { },
-              ),
-            ],
+        child: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                key: tapTarget,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                    content: const Text('MaterialBanner'),
+                    actions: [
+                      TextButton(
+                        child: const Text('DISMISS'),
+                        onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                      ),
+                    ],
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: const SizedBox(
+                  height: 100.0,
+                  width: 100.0,
+                ),
+              );
+            },
           ),
         ),
       ),
-    );
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
 
     final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
@@ -146,24 +389,42 @@ void main() {
   });
 
   testWidgets('Actions laid out below content if forced override', (WidgetTester tester) async {
-    const String contentText = 'Content';
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MaterialBanner(
-          forceActionsBelow: true,
-          content: const Text(contentText),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+    const Key tapTarget = Key('tap-target');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text('MaterialBanner'),
+                  forceActionsBelow: true,
+                  actions: [
+                    TextButton(
+                      child: const Text('DISMISS'),
+                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
-    );
+    ));
 
-    final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
+
+    final Offset contentBottomLeft = tester.getBottomLeft(find.text('MaterialBanner'));
     final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     expect(contentBottomLeft.dy, lessThan(actionsTopLeft.dy));
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
@@ -290,8 +551,8 @@ void main() {
   });
 }
 
-Container _getContainerFromBanner(WidgetTester tester) {
-  return tester.widget<Container>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first);
+Container _getContainerFromText(WidgetTester tester, String text) {
+  return tester.widget<Container>(find.widgetWithText(Container, text).first);
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
