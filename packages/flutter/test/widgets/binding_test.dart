@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class MemoryPressureObserver with WidgetsBindingObserver {
   bool sawMemoryPressure = false;
@@ -53,8 +53,7 @@ void main() {
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
     final MemoryPressureObserver observer = MemoryPressureObserver();
     WidgetsBinding.instance!.addObserver(observer);
-    final ByteData message = const JSONMessageCodec().encodeMessage(
-      <String, dynamic>{'type': 'memoryPressure'})!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance!.removeObserver(observer);
@@ -87,8 +86,7 @@ void main() {
     WidgetsBinding.instance!.addObserver(observer);
 
     const String testRouteName = 'testRouteName';
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('pushRoute', testRouteName));
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('pushRoute', testRouteName));
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
@@ -102,10 +100,11 @@ void main() {
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
-      'restorationData': <dynamic, dynamic>{'test': 'config'}
+      'restorationData': <dynamic, dynamic>{'test': 'config'},
     };
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('pushRouteInformation', testRouteInformation));
+      const MethodCall('pushRouteInformation', testRouteInformation),
+    );
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, 'testRouteName');
     WidgetsBinding.instance!.removeObserver(observer);
@@ -120,7 +119,8 @@ void main() {
       'state': 'state',
     };
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('pushRouteInformation', testRouteInformation));
+      const MethodCall('pushRouteInformation', testRouteInformation),
+    );
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, 'state');
@@ -137,7 +137,8 @@ void main() {
       'state': null,
     };
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('pushRouteInformation', testRouteInformation));
+      const MethodCall('pushRouteInformation', testRouteInformation),
+    );
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, null);
@@ -218,7 +219,7 @@ void main() {
       equalsIgnoringHashCodes(
         'If this is the initial registration of the callback, or if the\n'
         'callback is asynchronous, then do not use the "rescheduling"\n'
-        'argument.\n'
+        'argument.\n',
       ),
     );
     expect(
@@ -231,7 +232,7 @@ void main() {
       '   and only then if the callback itself is entirely synchronous.\n'
       '   If this is the initial registration of the callback, or if the\n'
       '   callback is asynchronous, then do not use the "rescheduling"\n'
-      '   argument.\n'
+      '   argument.\n',
     );
   });
 

@@ -163,6 +163,7 @@ AnsiTerminal get terminal {
 final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
   stdio: stdio,
   platform: platform,
+  now: DateTime.now(),
 );
 
 /// The global Stdio wrapper.

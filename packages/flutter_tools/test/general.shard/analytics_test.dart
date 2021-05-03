@@ -286,9 +286,7 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync(
-        'flutter_tools_analytics_bots_test.',
-      );
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
     });
 
     tearDown(() {

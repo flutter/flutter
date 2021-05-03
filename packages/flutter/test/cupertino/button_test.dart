@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -274,8 +274,8 @@ void main() {
     )));
 
     BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
-        find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-      ).decoration as BoxDecoration;
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
+    ).decoration as BoxDecoration;
 
     expect(boxDecoration.color, const Color(0x000000FF));
 
@@ -287,8 +287,8 @@ void main() {
     )));
 
     boxDecoration = tester.widget<DecoratedBox>(
-        find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-      ).decoration as BoxDecoration;
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
+    ).decoration as BoxDecoration;
 
     expect(boxDecoration.color, const Color(0x0000FF00));
   });
@@ -317,7 +317,7 @@ void main() {
     );
 
     BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
-      find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
     ).decoration as BoxDecoration;
 
     expect(boxDecoration.color!.value, 0xFF654321);
@@ -335,7 +335,7 @@ void main() {
     );
 
     boxDecoration = tester.widget<DecoratedBox>(
-      find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
     ).decoration as BoxDecoration;
 
     // Disabled color.

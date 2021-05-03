@@ -293,7 +293,7 @@ void main() {
                     title: TestText('title', key: titleKey),
                     subtitle: TestText('subtitle', key: subtitleKey),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -1284,10 +1284,12 @@ void main() {
       paints
         ..rect(
             color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
             color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
 
     // Check when the list tile is disabled.
@@ -1299,7 +1301,8 @@ void main() {
       paints
         ..rect(
             color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
   });
 
@@ -1334,10 +1337,12 @@ void main() {
       paints
         ..rect(
             color: const Color(0x1f000000),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
             color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
 
     // Start hovering
@@ -1353,13 +1358,16 @@ void main() {
       paints
         ..rect(
             color: const Color(0x1f000000),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
             color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
             color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
@@ -1370,10 +1378,12 @@ void main() {
       paints
         ..rect(
             color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
             color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
   });
 
@@ -2024,7 +2034,7 @@ void main() {
   testWidgets('ListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
     Widget buildFrame({
       double? horizontalTitleGap,
-      VisualDensity? visualDensity
+      VisualDensity? visualDensity,
     }) {
       return MediaQuery(
         data: const MediaQueryData(
