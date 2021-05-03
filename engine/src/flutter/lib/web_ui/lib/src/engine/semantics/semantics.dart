@@ -1471,7 +1471,18 @@ class EngineSemanticsOwner {
   /// Updates the semantics tree from data in the [uiUpdate].
   void updateSemantics(ui.SemanticsUpdate uiUpdate) {
     if (!_semanticsEnabled) {
-      return;
+      if (ui.debugEmulateFlutterTesterEnvironment) {
+        // Running Flutter widget tests in a fake environment. Don't enable
+        // engine semantics. Test semantics trees violate invariants in ways
+        // production implementation isn't built to handle. For example, tests
+        // routinely reset semantics node IDs, which is messing up the update
+        // process.
+        return;
+      } else {
+        // Running a real app. Auto-enable engine semantics.
+        semanticsHelper.dispose(); // placeholder no longer needed
+        semanticsEnabled = true;
+      }
     }
 
     final SemanticsUpdate update = uiUpdate as SemanticsUpdate;
