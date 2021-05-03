@@ -319,7 +319,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
     }).length;
     return _GarbageCollectionInfo(
-      oldCount: olddGenGCCount,
+      oldCount: oldGenGCCount,
       newCount: newGenGCCount,
     );
   }
