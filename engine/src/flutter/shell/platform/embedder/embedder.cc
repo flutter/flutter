@@ -469,9 +469,6 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not wrap embedder supplied render texture.";
-    if (texture->destruction_callback) {
-      texture->destruction_callback(texture->user_data);
-    }
     return nullptr;
   }
 
@@ -514,9 +511,6 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not wrap embedder supplied frame-buffer.";
-    if (framebuffer->destruction_callback) {
-      framebuffer->destruction_callback(framebuffer->user_data);
-    }
     return nullptr;
   }
   return surface;
