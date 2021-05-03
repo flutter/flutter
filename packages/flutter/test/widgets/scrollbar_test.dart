@@ -985,6 +985,63 @@ void main() {
     );
   });
 
+  testWidgets('Gestures don\'t crash when no scroll controller attached', (WidgetTester tester) async {
+    final ScrollController primaryScrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: primaryScrollController,
+              child: RawScrollbar(
+                child: SingleChildScrollView(
+                controller: scrollController,
+                child: const SizedBox(
+                  height: 1000.0,
+                  width: 1000.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+
+    // Scroll a bit to show the scrollbar
+    const double scrollAmount = 10.0;
+    final TestGesture scrollGesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
+    // Scroll down by swiping up.
+    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Scrollbar offset has moved by scrollAmount.
+    expect(scrollController.offset, scrollAmount);
+    await scrollGesture.up();
+    await tester.pump();
+
+     // Scroll doesn't move because the scrollbar doesn't handle gestures
+
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(796.0, 550.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, scrollAmount);
+
+    // Long tap on the thumb.
+    await tester.longPressAt(const Offset(796.0, 50.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, scrollAmount);
+  });
+
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
