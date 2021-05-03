@@ -216,31 +216,14 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
   }
 
   if (layoutChanged) {
-    SemanticsObject* nextToFocus = nil;
-    // This property will be -1 if the focus is outside of the flutter
-    // application. In this case, we should not refocus anything.
-    if (last_focused_semantics_object_id_ != kSemanticObjectIdInvalid) {
-      // Tries to refocus the previous focused semantics object to avoid random jumps.
-      nextToFocus = [objects_.get() objectForKey:@(last_focused_semantics_object_id_)];
-      if (!nextToFocus && root) {
-        nextToFocus = FindFirstFocusable(root);
-      }
-    }
     ios_delegate_->PostAccessibilityNotification(UIAccessibilityLayoutChangedNotification,
-                                                 nextToFocus);
+                                                 FindNextFocusableIfNecessary());
   } else if (scrollOccured) {
     // TODO(chunhtai): figure out what string to use for notification. At this
     // point, it is guarantee the previous focused object is still in the tree
     // so that we don't need to worry about focus lost. (e.g. "Screen 0 of 3")
-    SemanticsObject* nextToFocus = nil;
-    if (last_focused_semantics_object_id_ != kSemanticObjectIdInvalid) {
-      nextToFocus = [objects_.get() objectForKey:@(last_focused_semantics_object_id_)];
-      if (!nextToFocus && root) {
-        nextToFocus = FindFirstFocusable(root);
-      }
-    }
     ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification,
-                                                 nextToFocus);
+                                                 FindNextFocusableIfNecessary());
   }
 }
 
@@ -324,19 +307,34 @@ void AccessibilityBridge::VisitObjectsRecursivelyAndRemove(SemanticsObject* obje
     VisitObjectsRecursivelyAndRemove(child, doomed_uids);
 }
 
-SemanticsObject* AccessibilityBridge::FindFirstFocusable(SemanticsObject* object) {
-  if (object.isAccessibilityElement) {
-    return object;
+SemanticsObject* AccessibilityBridge::FindNextFocusableIfNecessary() {
+  // This property will be -1 if the focus is outside of the flutter
+  // application. In this case, we should not refocus anything.
+  if (last_focused_semantics_object_id_ == kSemanticObjectIdInvalid) {
+    return nil;
   }
 
-  SemanticsObject* candidate = nil;
-  for (SemanticsObject* child in [object children]) {
-    if (candidate) {
-      break;
-    }
-    candidate = FindFirstFocusable(child);
+  // Tries to refocus the previous focused semantics object to avoid random jumps.
+  return FindFirstFocusable([objects_.get() objectForKey:@(last_focused_semantics_object_id_)]);
+}
+
+SemanticsObject* AccessibilityBridge::FindFirstFocusable(SemanticsObject* parent) {
+  SemanticsObject* currentObject = parent ?: objects_.get()[@(kRootNodeId)];
+  ;
+  if (!currentObject)
+    return nil;
+
+  if (currentObject.isAccessibilityElement) {
+    return currentObject;
   }
-  return candidate;
+
+  for (SemanticsObject* child in [currentObject children]) {
+    SemanticsObject* candidate = FindFirstFocusable(child);
+    if (candidate) {
+      return candidate;
+    }
+  }
+  return nil;
 }
 
 void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEvent) {
