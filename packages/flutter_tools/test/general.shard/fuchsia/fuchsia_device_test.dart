@@ -610,7 +610,7 @@ void main() {
         stderr: '<error message>',
       ));
 
-      await expectLater(() => device.takeScreenshot(globals.fs.file('file.ppm')), returnsNormally);
+      await device.takeScreenshot(globals.fs.file('file.ppm'));
       expect(
         testLogger.errorText,
         contains('Failed to delete screenshot.ppm from the device:\n<error-message>'),
