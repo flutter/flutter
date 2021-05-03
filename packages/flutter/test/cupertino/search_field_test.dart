@@ -260,38 +260,6 @@ void main() {
   );
 
   testWidgets(
-    'prefix widget visibility',
-    (WidgetTester tester) async {
-      const Key prefixIcon = Key('prefix');
-
-      await tester.pumpWidget(
-        const CupertinoApp(
-          home: Center(
-            child: CupertinoSearchTextField(
-              prefixIcon: SizedBox(
-                key: prefixIcon,
-                width: 50,
-                height: 50,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byIcon(CupertinoIcons.search), findsNothing);
-      expect(find.byKey(prefixIcon), findsOneWidget);
-
-      await tester.enterText(
-          find.byType(CupertinoSearchTextField), 'text input');
-      await tester.pump();
-
-      expect(find.text('text input'), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.search), findsNothing);
-      expect(find.byKey(prefixIcon), findsOneWidget);
-    },
-  );
-
-  testWidgets(
     'suffix widget respects visibility mode',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -499,7 +467,7 @@ void main() {
   );
 
   testWidgets('onTap is properly forwarded to the inner text field',
-      (WidgetTester tester) async {
+          (WidgetTester tester) async {
     int onTapCallCount = 0;
 
     // onTap can be null.
@@ -531,6 +499,7 @@ void main() {
 
   testWidgets('autocorrect is properly forwarded to the inner text field',
       (WidgetTester tester) async {
+
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -541,13 +510,13 @@ void main() {
       ),
     );
 
-    final CupertinoTextField textField =
-        tester.widget(find.byType(CupertinoTextField));
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.autocorrect, false);
   });
 
   testWidgets('enabled is properly forwarded to the inner text field',
       (WidgetTester tester) async {
+
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -558,8 +527,7 @@ void main() {
       ),
     );
 
-    final CupertinoTextField textField =
-        tester.widget(find.byType(CupertinoTextField));
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.enabled, false);
   });
 }
