@@ -607,7 +607,7 @@ void main() {
           'rm /tmp/screenshot.ppm',
         ],
         exitCode: 1,
-        stderr: '<error message>',
+        stderr: '<error-message>',
       ));
 
       await device.takeScreenshot(globals.fs.file('file.ppm'));
