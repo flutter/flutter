@@ -366,6 +366,32 @@ void main() {
     );
     await driverService.stop();
   });
+
+  testWithoutContext('Does not start DDS if --no-dds', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+      getVM,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': '1',
+        }
+      )
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed());
+    final FakeDartDevelopmentService dds = device.dds as FakeDartDevelopmentService;
+
+    expect(dds.started, false);
+    await driverService.reuseApplication(
+      Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
+      false,
+    );
+    expect(dds.started, false);
+  });
 }
 
 FlutterDriverService setUpDriverService({
