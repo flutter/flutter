@@ -18,17 +18,17 @@ final ArgParser argParser = ArgParser()
   ..addOption('stamp');
 
 final List<Replacer> uiPatterns = <Replacer>[
-  AllReplacer('library ui;', 'library dart.ui;'),
-  AllReplacer('part of ui;', 'part of dart.ui;'),
-  AllReplacer(r'''
-import 'src/engine.dart' as engine;
-''', r'''
+  AllReplacer(RegExp(r'library\s+ui;'), 'library dart.ui;'),
+  AllReplacer(RegExp(r'part\s+of\s+ui;'), 'part of dart.ui;'),
+  AllReplacer(RegExp(r'''
+import\s*'src/engine.dart'\s*as\s+engine;
+'''), r'''
 import 'dart:_engine' as engine;
 '''),
-  AllReplacer(
+  AllReplacer(RegExp(
     r'''
-export 'src/engine.dart'
-''',
+export\s*'src/engine.dart'
+'''),
     r'''
 export 'dart:_engine'
 ''',
@@ -36,44 +36,44 @@ export 'dart:_engine'
 ];
 
 final List<Replacer> engineLibraryPatterns = <Replacer>[
-  AllReplacer('library engine;', 'library dart._engine;'),
-  AllReplacer(r'''
-import '../ui.dart' as ui;
-''', r'''
+  AllReplacer(RegExp(r'library\s+engine;'), 'library dart._engine;'),
+  AllReplacer(RegExp(r'''
+import\s*'../ui.dart' as ui;
+'''), r'''
 import 'dart:ui' as ui;
 '''),
-  AllReplacer(r'''
-import 'package:ui/ui.dart' as ui;
-''', r'''
+  AllReplacer(RegExp(r'''
+import\s*'package:ui/ui.dart' as ui;
+'''), r'''
 import 'dart:ui' as ui;
 '''),
   // Remove imports of engine part files.
-  AllReplacer(RegExp(r"import 'engine/.*';"), ''),
+  AllReplacer(RegExp(r"import\s*'engine/.*';"), ''),
   // Replace exports of engine files with "part" directives.
   MappedReplacer(RegExp(r'''
-export 'engine/(.*)';
+export\s*'engine/(.*)';
 '''), (Match match) => '''
 part 'engine/${match.group(1)}';
 '''),
   AllReplacer(
-    'import \'package:js/js.dart\'',
-    'import \'dart:_js_annotations\'',
+    RegExp(r"import\s*'package:js/js.dart'"),
+    r"import 'dart:_js_annotations'",
   ),
 ];
 
 final List<Replacer> enginePartsPatterns = <Replacer>[
-  AllReplacer('part of engine;', 'part of dart._engine;'),
+  AllReplacer(RegExp(r'part\s+of\s+engine;'), 'part of dart._engine;'),
   // Remove library-level JS annotations.
   AllReplacer(RegExp(r'\n@JS(.*)\nlibrary .+;'), ''),
   // Remove library directives.
   AllReplacer(RegExp(r'\nlibrary .+;'), ''),
   // Remove imports/exports from all engine parts.
-  AllReplacer(RegExp(r'import .*'), ''),
-  AllReplacer(RegExp(r'export .*'), ''),
+  AllReplacer(RegExp(r'\nimport\s*.*'), ''),
+  AllReplacer(RegExp(r'\nexport\s*.*'), ''),
 ];
 
 final List<Replacer> sharedPatterns = <Replacer>[
-  AllReplacer("import 'package:meta/meta.dart';", ''),
+  AllReplacer(RegExp(r"import\s*'package:meta/meta.dart';"), ''),
   AllReplacer('@required', ''),
   AllReplacer('@protected', ''),
   AllReplacer('@mustCallSuper', ''),
@@ -92,31 +92,41 @@ void main(List<String> arguments) {
     final File outputFile = File(path.join(
         directory.path, inputFile.path.substring(inputDirectoryPath.length)))
       ..createSync(recursive: true);
-    String source = inputFile.readAsStringSync();
-    final List<Replacer> replacementPatterns = <Replacer>[];
-    replacementPatterns.addAll(sharedPatterns);
-    if (results['ui'] as bool) {
-      replacementPatterns.addAll(uiPatterns);
-    } else if (results['engine'] as bool) {
-      if (inputFilePath.endsWith('lib/src/engine.dart')) {
-        replacementPatterns.addAll(engineLibraryPatterns);
-      } else {
-        source = _preprocessEnginePartFile(source);
-        replacementPatterns.addAll(enginePartsPatterns);
-      }
-    }
-    for (final Replacer replacer in replacementPatterns) {
-      source = replacer.perform(source);
-    }
-    outputFile.writeAsStringSync(source);
+    final String source = inputFile.readAsStringSync();
+    final String rewrittenContent = rewriteFile(
+      source,
+      filePath: inputFilePath,
+      isUi: results['ui'] as bool,
+      isEngine: results['engine'] as bool,
+    );
+    outputFile.writeAsStringSync(rewrittenContent);
     if (results['stamp'] != null) {
       File(results['stamp'] as String).writeAsStringSync('stamp');
     }
   }
 }
 
+String rewriteFile(String source, {String filePath, bool isUi, bool isEngine}) {
+  final List<Replacer> replacementPatterns = <Replacer>[];
+  replacementPatterns.addAll(sharedPatterns);
+  if (isUi) {
+    replacementPatterns.addAll(uiPatterns);
+  } else if (isEngine) {
+    if (filePath.endsWith('lib/src/engine.dart')) {
+      replacementPatterns.addAll(engineLibraryPatterns);
+    } else {
+      source = _preprocessEnginePartFile(source);
+      replacementPatterns.addAll(enginePartsPatterns);
+    }
+  }
+  for (final Replacer replacer in replacementPatterns) {
+    source = replacer.perform(source);
+  }
+  return source;
+}
+
 String _preprocessEnginePartFile(String source) {
-  if (source.contains('\npart of engine;')) {
+  if (source.startsWith('part of engine;') || source.contains('\npart of engine;')) {
     // The file hasn't been migrated yet.
     // Do nothing.
   } else {
