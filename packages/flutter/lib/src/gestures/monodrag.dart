@@ -69,7 +69,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-    this.supportedDevices = PointerDeviceKind.values,
+    this.supportedDevices = _kAllPointerDeviceKinds
   }) : assert(dragStartBehavior != null),
        super(debugOwner: debugOwner, kind: kind);
 
@@ -204,7 +204,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The device types that this gesture recognizer will accept drags from.
   ///
   /// If not specified, defaults to all pointer kinds.
-  final List<PointerDeviceKind> supportedDevices;
+  Set<PointerDeviceKind> supportedDevices;
 
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
@@ -517,7 +517,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   VerticalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-    List<PointerDeviceKind> supportedDevices = PointerDeviceKind.values,
+    Set<PointerDeviceKind> supportedDevices = _kAllPointerDeviceKinds,
   }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
 
   @override
@@ -542,6 +542,10 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   String get debugDescription => 'vertical drag';
 }
 
+const Set<PointerDeviceKind> _kAllPointerDeviceKinds = <PointerDeviceKind>{
+  ...PointerDeviceKind.values,
+};
+
 /// Recognizes movement in the horizontal direction.
 ///
 /// Used for horizontal scrolling.
@@ -559,7 +563,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   HorizontalDragGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-    List<PointerDeviceKind> supportedDevices = PointerDeviceKind.values,
+    Set<PointerDeviceKind> supportedDevices = _kAllPointerDeviceKinds,
   }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
 
   @override

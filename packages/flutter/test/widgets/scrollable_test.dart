@@ -20,7 +20,10 @@ Future<void> pumpTest(
   bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag ? ui.PointerDeviceKind.values : null),
+    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
+      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+      : null,
+    ),
     theme: ThemeData(
       platform: platform,
     ),

@@ -182,9 +182,9 @@ void main() {
   });
 
   testGesture('Should reject mouse drag when configured to ignore mouse pointers - Horizontal', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>[
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{
       PointerDeviceKind.touch,
-    ]) ..dragStartBehavior = DragStartBehavior.down;
+    }) ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     bool didStartDrag = false;
@@ -232,9 +232,9 @@ void main() {
   });
 
   testGesture('Should reject mouse drag when configured to ignore mouse pointers - Vertical', (GestureTester tester) {
-    final VerticalDragGestureRecognizer drag = VerticalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>[
+    final VerticalDragGestureRecognizer drag = VerticalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{
       PointerDeviceKind.touch,
-    ])..dragStartBehavior = DragStartBehavior.down;
+    })..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     bool didStartDrag = false;
