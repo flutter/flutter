@@ -340,11 +340,24 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
-    await action();
+    final vm.Timeline timeline = await traceTimeline(
+      action,
+      streams: <String>['GC'],
+    );
+    // await action();
     await delayForFrameTimings(); // make sure all FrameTimings are reported
     removeTimingsCallback(watcher);
-    final FrameTimingSummarizer frameTimes =
-        FrameTimingSummarizer(frameTimings);
+    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
+    }).length;
+    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
+    }).length;
+    final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(
+      frameTimings,
+      newGenGCCount: newGenGCCount,
+      oldGenGCCount: oldGenGCCount,
+    );
     reportData ??= <String, dynamic>{};
     reportData![reportKey] = frameTimes.summary;
   }
