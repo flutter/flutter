@@ -837,5 +837,39 @@ TEST(KeyboardKeyEmbedderHandlerTest, SynthesizeWithInitialTogglingState) {
   results.clear();
 }
 
+// A key down event for shift right must not be redispatched even if
+// the framework returns unhandled.
+//
+// The reason for this test is documented in |IsEventThatMustNotRedispatch|.
+TEST(KeyboardKeyEmbedderHandlerTest, NeverRedispatchShiftRightKeyDown) {
+  TestKeystate key_state;
+  std::vector<TestFlutterKeyEvent> results;
+  TestFlutterKeyEvent* event;
+  bool last_handled = false;
+
+  std::unique_ptr<KeyboardKeyEmbedderHandler> handler =
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [&results](const FlutterKeyEvent& event,
+                     FlutterKeyEventCallback callback, void* user_data) {
+            results.emplace_back(event, callback, user_data);
+          },
+          key_state.Getter());
+
+  // Press ShiftRight.
+  key_state.Set(VK_RSHIFT, true);
+  handler->KeyboardHook(
+      VK_RSHIFT, kScanCodeShiftRight, WM_KEYDOWN, 0, false, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, false);
+  EXPECT_EQ(results.size(), 1);
+
+  // Framework does not handle it
+  event = &results[0];
+  event->callback(false, event->user_data);
+  // Still responds with handling the event
+  EXPECT_EQ(last_handled, true);
+  results.clear();
+}
+
 }  // namespace testing
 }  // namespace flutter
