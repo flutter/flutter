@@ -234,6 +234,8 @@ void main() {
 
     expect(dds.started, false);
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, enableDds: false), true);
+    expect(dds.started, false);
+
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>[],
