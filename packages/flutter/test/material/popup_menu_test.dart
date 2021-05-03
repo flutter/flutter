@@ -289,6 +289,139 @@ void main() {
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
+  testWidgets('PopupMenuItem onTap callback is called when defined', (WidgetTester tester) async {
+    final List<int> menuItemTapCounters = <int>[0, 0];
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: PopupMenuButton(
+              child: Text("Actions"),
+              itemBuilder: (context) => [
+                  PopupMenuItem(
+                      child: Text('First option'),
+                      onTap: () {
+                          menuItemTapCounters[0]++;
+                      },
+                  ),
+                  PopupMenuItem(
+                      child: Text('Second option'),
+                      onTap: () {
+                          menuItemTapCounters[1]++;
+                      },
+                  ),
+                  PopupMenuItem(
+                      child: Text('Option without onTap'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the first tiem
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[1, 0]);
+
+    // Tap the item again
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 0]);
+
+    // Tap a different item
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Second option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+
+    // Tap an iteem without onTap
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Option without onTap'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+  });
+
+  testWidgets('PopupMenuItem can have both onTap and value', (WidgetTester tester) async {
+    final List<int> menuItemTapCounters = <int>[0, 0];
+    String? selected;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: PopupMenuButton<String>(
+              child: Text("Actions"),
+              onSelected: (value) { selected = value; },
+              itemBuilder: (context) => [
+                  PopupMenuItem(
+                      child: Text('First option'),
+                      value: 'first',
+                      onTap: () {
+                          menuItemTapCounters[0]++;
+                      },
+                  ),
+                  PopupMenuItem(
+                      child: Text('Second option'),
+                      value: 'second',
+                      onTap: () {
+                          menuItemTapCounters[1]++;
+                      },
+                  ),
+                  PopupMenuItem(
+                      value: 'third',
+                      child: Text('Option without onTap'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the first item
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[1, 0]);
+    expect(selected, 'first');
+
+    // Tap the item again
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 0]);
+    expect(selected, 'first');
+
+    // Tap a different item
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Second option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+    expect(selected, 'second');
+
+    // Tap an iteem without onTap
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Option without onTap'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+    expect(selected, 'third');
+  });
+
   testWidgets('PopupMenuItem is only focusable when enabled', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final GlobalKey childKey = GlobalKey();
