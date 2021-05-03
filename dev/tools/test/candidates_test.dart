@@ -19,40 +19,19 @@ void main() {
     const String remoteName = 'origin';
 
     late MemoryFileSystem fileSystem;
-    FakePlatform? platform;
+    late FakePlatform platform;
     late TestStdio stdio;
-    FakeProcessManager? processManager;
+    late FakeProcessManager processManager;
+    final String operatingSystem = const LocalPlatform().operatingSystem;
 
     setUp(() {
       stdio = TestStdio();
       fileSystem = MemoryFileSystem.test();
     });
 
-    tearDown(() {
-      // Ensure these don't get re-used between tests
-      processManager = null;
-      platform = null;
-    });
-
     CommandRunner<void> createRunner({
-      required List<FakeCommand> commands,
-      String? operatingSystem,
+      required Checkouts checkouts,
     }) {
-      operatingSystem ??= const LocalPlatform().operatingSystem;
-      final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
-
-      processManager = FakeProcessManager.list(commands);
-      platform = FakePlatform(
-        environment: <String, String>{'HOME': '/path/to/user/home'},
-        pathSeparator: pathSeparator,
-      );
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory),
-        platform: platform!,
-        processManager: processManager!,
-        stdio: stdio,
-      );
       final CandidatesCommand command = CandidatesCommand(
         checkouts: checkouts,
         flutterRoot: fileSystem.directory(flutterRoot),
@@ -64,34 +43,49 @@ void main() {
       const String currentVersion = '1.2.3';
       const String branch = 'flutter-1.2-candidate.0';
 
-      final CommandRunner<void> runner = createRunner(
-        commands: <FakeCommand>[
-          const FakeCommand(
-            command: <String>['git', 'fetch', remoteName],
-          ),
-          const FakeCommand(
-            command: <String>[flutterBinPath, 'help'],
-          ),
-          const FakeCommand(
-            command: <String>[flutterBinPath, '--version', '--machine'],
-            stdout: '{"frameworkVersion": "$currentVersion"}',
-          ),
-          FakeCommand(
-            command: const <String>[
-              'git',
-              'branch',
-              '--no-color',
-              '--remotes',
-              '--list',
-              '$remoteName/*',
-            ],
-            stdout: <String>[
-              'other-remote/branch1',
-              '$remoteName/$branch',
-            ].join('\n'),
-          ),
-        ],
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['git', 'fetch', remoteName],
+        ),
+        const FakeCommand(
+          command: <String>[flutterBinPath, 'help'],
+        ),
+        const FakeCommand(
+          command: <String>[flutterBinPath, '--version', '--machine'],
+          stdout: '{"frameworkVersion": "$currentVersion"}',
+        ),
+        FakeCommand(
+          command: const <String>[
+            'git',
+            'branch',
+            '--no-color',
+            '--remotes',
+            '--list',
+            '$remoteName/*',
+          ],
+          stdout: <String>[
+            'other-remote/branch1',
+            '$remoteName/$branch',
+          ].join('\n'),
+        ),
+      ]);
+      final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
+
+      platform = FakePlatform(
+        environment: <String, String>{
+          'HOME': <String>['path', 'to', 'home'].join(pathSeparator),
+        },
+        pathSeparator: pathSeparator,
       );
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final CommandRunner<void> runner = createRunner(checkouts: checkouts);
       await runner.run(<String>['candidates', '--$kRemote', remoteName]);
       expect(stdio.stdout.contains('currentVersion = $currentVersion'), true);
       expect(stdio.stdout.contains(branch), true);
