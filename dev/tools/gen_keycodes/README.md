@@ -1,61 +1,47 @@
 ## Keycode Generator
 
 This directory contains a keycode generator that can generate Dart code for
-the `LogicalKeyboardKey` and `PhysicalKeyboardKey` classes. It draws information
-from both the Chromium and Android source bases and incorporates the
-information it finds in those sources into a single key database in JSON form.
+the `LogicalKeyboardKey` and `PhysicalKeyboardKey` classes.
 
-It then generates `keyboard_key.dart` (containing the `LogicalKeyboardKey` and
-`PhysicalKeyboardKey` classes), and `keyboard_maps.dart`, containing
-platform-specific immutable maps for translating platform keycodes and
-information into the pre-defined key values in the `LogicalKeyboardKey` and
-`PhysicalKeyboardKey` classes.
+It generates multiple files across Flutter.  For framework, it generates
 
-The `data` subdirectory contains both some local data files and the templates
-used to generate the source files.
+* [`keyboard_key.dart`](../../../packages/flutter/lib/src/services/keyboard_key.dart), which contains the definition and list of logical keys and physical keys; and
+* [`keyboard_maps.dart`](../../../packages/flutter/lib/src/services/keyboard_maps.dart), which contains platform-specific immutable maps used for the `RawKeyboard` API.
 
-- `data/key_data.json`: contains the merged data from all the other sources.
-  This file will be regenerated if "--collect" is specified for the
-  gen_keycodes script.
-- `data/key_name_to_android_name.json`: contains a mapping from Flutter key
-  names to Android keycode names (with the "KEY\_" prefix stripped off).
-- `data/keyboard_key.tmpl`: contains the template for the `keyboard_key.dart`
-  file. Markers that begin and end with "@@@" denote the locations where
-  generated data will be inserted.
-- `data/keyboard_maps.tmpl`: contains the template for the `keyboard_maps.dart`
-  file. Markers that begin and end with "@@@" denote the locations where
-  generated data will be inserted.
-- `data/printable.json`: contains a mapping between Flutter key name and its
-  printable character. This character is used as the key label.
-- `data/synonyms.json`: contains a mapping between pseudo-keys that represent
-  other keys and the sets of keys they represent. For example, this contains
-  the "shift" key that represents either a "shiftLeft" or "shiftRight" key.
+For engine, it generates one key mapping file for each platform.
+
+It draws information from various source bases, including online
+repositories, and manual mapping in the `data` subdirectory.  It incorporates
+this information into a giant list of physical keys
+([`physical_key_data.json`](data/physical_key_data.json)),
+and another for logical keys
+([`logical_key_data.json`](data/logical_key_data.json)).
+The two files are checked in, and can be used as the data source next time so that
+output files can be generated without the Internet.
 
 ## Running the tool
 
-To run the `gen_keycodes` tool using the checked in `key_data.json` file, run
-it like so:
+The tool can be run based on the existing database. To do this, run:
 
 ```bash
-$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart bin/gen_keycodes.dart
+/PATH/TO/ROOT/bin/gen_keycodes
 ```
 
-This will regenerate the `keyboard_key.dart` and `keyboard_maps.dart` files in
-place.
+The tool can also be run by rebuilding the database by drawing online information
+anew before generating the files. To do this, run:
 
-If you wish to incorporate and parse changes from the Chromium and Android
-source trees, add `--collect` to the command line. The script will download and
-incorporate the changed data automatically. Note that the parsing is specific to
-the format of the source code that it is reading, so if the format of those
-files changes appreciably, you will need to update the parser.
+```bash
+/PATH/TO/ROOT/bin/gen_keycodes --collect
+```
 
-There are other options for manually specifying the file to read in place of the
-downloaded files, use `--help` to see what is available.
+This will generate `physical_key_data.json` and `logical_key_data.json`. These
+files should be checked in.
 
-If the data in those files changes in the future to be unhelpful, then we can
-switch to another data source, or abandon the parsing and maintain
-`key_data.json` manually. All output files and local input files should be
-checked in.
+By default this tool assumes that the gclient directory for flutter/engine
+and the root for the flutter/flutter are placed at the same folder.  If not,
+use `--engine-root=/ENGINE/GCLIENT/ROOT` to specify the engine root.
+
+Other options can be found using `--help`.
 
 ## Key Code ID Scheme
 
