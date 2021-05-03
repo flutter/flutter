@@ -179,7 +179,12 @@ abstract class ShortcutActivator {
   /// [Intent]s are stored in a [Map] and indexed by trigger keys. Subclasses
   /// should make sure that the return value of this method does not change
   /// throughout the lifespan of this object.
-  Iterable<LogicalKeyboardKey> get triggers;
+  ///
+  /// This method might also return null, which means this activator declares
+  /// all keys as the trigger key. All activators whose [triggers] returns null
+  /// will use [accepts] to test against every event. This should only be used
+  /// when necessary.
+  Iterable<LogicalKeyboardKey>? get triggers;
 
   /// Whether the triggering `event` and the keyboard `state` at the time of the
   /// event meet required conditions, providing that the event is a triggering
@@ -193,6 +198,9 @@ abstract class ShortcutActivator {
   /// This method must not cause any side effects for the `state`. Typically
   /// this is only used to query whether [RawKeyboard.keysPressed] contains
   /// a key.
+  ///
+  /// Since [ShortcutActivator] accepts all event types, subclasses might want
+  /// to check the event type in [accepts].
   ///
   /// See also:
   ///
@@ -639,20 +647,22 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     }
   }
 
-  static Map<LogicalKeyboardKey, List<_ActivatorIntentPair>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
-    final Map<LogicalKeyboardKey, List<_ActivatorIntentPair>> result = <LogicalKeyboardKey, List<_ActivatorIntentPair>>{};
+  static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
+    final Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> result = <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
     source.forEach((ShortcutActivator activator, Intent intent) {
-      for (final LogicalKeyboardKey trigger in activator.triggers) {
+      // This intermediate variable is necessary to comply with Dart analyzer.
+      final Iterable<LogicalKeyboardKey?>? nullableTriggers = activator.triggers;
+      for (final LogicalKeyboardKey? trigger in nullableTriggers ?? <LogicalKeyboardKey?>[null]) {
         result.putIfAbsent(trigger, () => <_ActivatorIntentPair>[])
           .add(_ActivatorIntentPair(activator, intent));
       }
     });
     return result;
   }
-  Map<LogicalKeyboardKey, List<_ActivatorIntentPair>> get _indexedShortcuts {
+  Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> get _indexedShortcuts {
     return _indexedShortcutsCache ??= _indexShortcuts(_shortcuts);
   }
-  Map<LogicalKeyboardKey, List<_ActivatorIntentPair>>? _indexedShortcutsCache;
+  Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>>? _indexedShortcutsCache;
 
   /// Returns the [Intent], if any, that matches the current set of pressed
   /// keys.
@@ -662,9 +672,13 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed`
   /// is not supplied.
   Intent? _find(RawKeyEvent event, RawKeyboard state) {
-    final List<_ActivatorIntentPair>? candidates = _indexedShortcuts[event.logicalKey];
-    if (candidates == null)
-      return null;
+    final List<_ActivatorIntentPair>? candidatesByKey = _indexedShortcuts[event.logicalKey];
+    final List<_ActivatorIntentPair>? candidatesByNull = _indexedShortcuts[null];
+    print('key $candidatesByKey null $candidatesByNull');
+    final List<_ActivatorIntentPair> candidates = <_ActivatorIntentPair>[
+      if (candidatesByKey != null) ...candidatesByKey,
+      if (candidatesByNull != null) ...candidatesByNull,
+    ];
     for (final _ActivatorIntentPair activatorIntent in candidates) {
       if (activatorIntent.activator.accepts(event, state)) {
         return activatorIntent.intent;
