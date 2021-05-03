@@ -297,22 +297,22 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: RepaintBoundary(
-            child: PopupMenuButton(
-              child: Text("Actions"),
-              itemBuilder: (context) => [
-                  PopupMenuItem(
-                      child: Text('First option'),
+            child: PopupMenuButton<void>(
+              child: const Text('Actions'),
+              itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
+                  PopupMenuItem<void>(
+                      child: const Text('First option'),
                       onTap: () {
                           menuItemTapCounters[0]++;
                       },
                   ),
-                  PopupMenuItem(
-                      child: Text('Second option'),
+                  PopupMenuItem<void>(
+                      child: const Text('Second option'),
                       onTap: () {
                           menuItemTapCounters[1]++;
                       },
                   ),
-                  PopupMenuItem(
+                  const PopupMenuItem<void>(
                       child: Text('Option without onTap'),
                   ),
               ],
@@ -361,26 +361,26 @@ void main() {
         child: Material(
           child: RepaintBoundary(
             child: PopupMenuButton<String>(
-              child: Text("Actions"),
-              onSelected: (value) { selected = value; },
-              itemBuilder: (context) => [
-                  PopupMenuItem(
-                      child: Text('First option'),
+              child: const Text('Actions'),
+              onSelected: (String value) { selected = value; },
+              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                  PopupMenuItem<String>(
+                      child: const Text('First option'),
                       value: 'first',
                       onTap: () {
                           menuItemTapCounters[0]++;
                       },
                   ),
-                  PopupMenuItem(
-                      child: Text('Second option'),
+                  PopupMenuItem<String>(
+                      child: const Text('Second option'),
                       value: 'second',
                       onTap: () {
                           menuItemTapCounters[1]++;
                       },
                   ),
-                  PopupMenuItem(
-                      value: 'third',
+                 const PopupMenuItem<String>(
                       child: Text('Option without onTap'),
+                      value: 'third',
                   ),
               ],
             ),
