@@ -77,6 +77,7 @@ class ReorderableListView extends StatefulWidget {
     required List<Widget> children,
     required this.onReorder,
     this.itemExtent,
+    this.prototypeItem,
     this.proxyDecorator,
     this.buildDefaultDragHandles = true,
     this.padding,
@@ -96,6 +97,10 @@ class ReorderableListView extends StatefulWidget {
   }) : assert(scrollDirection != null),
        assert(onReorder != null),
        assert(children != null),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both',
+       ),
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
@@ -170,6 +175,7 @@ class ReorderableListView extends StatefulWidget {
     required this.itemCount,
     required this.onReorder,
     this.itemExtent,
+    this.prototypeItem,
     this.proxyDecorator,
     this.buildDefaultDragHandles = true,
     this.padding,
@@ -189,6 +195,10 @@ class ReorderableListView extends StatefulWidget {
   }) : assert(scrollDirection != null),
        assert(itemCount >= 0),
        assert(onReorder != null),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both',
+       ),
        assert(buildDefaultDragHandles != null),
        super(key: key);
 
@@ -327,6 +337,9 @@ class ReorderableListView extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.itemExtent}
   final double? itemExtent;
+
+  /// {@macro flutter.widgets.list_view.prototypeItem}
+  final Widget? prototypeItem;
 
   @override
   _ReorderableListViewState createState() => _ReorderableListViewState();
@@ -551,6 +564,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           sliver: SliverReorderableList(
             itemBuilder: _itemBuilder,
             itemExtent: widget.itemExtent,
+            prototypeItem: widget.prototypeItem,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
