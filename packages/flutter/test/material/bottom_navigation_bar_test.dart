@@ -1537,7 +1537,6 @@ void main() {
                     });
                   },
                   child: const Text('green'),
-                  
                 ),
               ),
               bottomNavigationBar: BottomNavigationBar(
