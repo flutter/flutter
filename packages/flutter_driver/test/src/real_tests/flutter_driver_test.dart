@@ -34,34 +34,28 @@ void main() {
 
   group('VMServiceFlutterDriver with logCommunicationToFile', () {
     late FakeVmService fakeClient;
-    FakeVM fakeVM;
+    late FakeVM fakeVM;
     late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
-    int driverId = 0;
-    setUp(()  async {
-      _cleanTestOutputFiles();
+    int driverId = -1;
+
+    setUp(() {
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
-    });
-
-    tearDown(() {
       driverId++;
     });
 
+
     group('logCommunicationToFile', (){
         test('logCommunicationToFile = true', () async {
-        // Given
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
 
-        // When
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
-        // Then
         final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-        // ignore: avoid_slow_async_io
-        final bool exists = await file.exists();
+        final bool exists = file.existsSync();
         expect(exists, true, reason: 'Not found ${file.path}');
 
         final String commandLog = await file.readAsString();
@@ -81,8 +75,7 @@ void main() {
 
         // Then
         final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-        // ignore: avoid_slow_async_io
-        final bool exists = await file.exists();
+        final bool exists = file.existsSync();
         expect(exists, false, reason: 'because ${file.path} exists');
       });
     });
@@ -90,7 +83,7 @@ void main() {
 
   group('VMServiceFlutterDriver with printCommunication', () {
     late FakeVmService fakeClient;
-    FakeVM fakeVM;
+    late FakeVM fakeVM;
     late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
@@ -103,13 +96,8 @@ void main() {
     });
 
     test('printCommunication = true', () async {
-      // Given
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, printCommunication: true);
-
-      // When
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
-
-      // Then
       expect(log, <String>[
         'VMServiceFlutterDriver: >>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
         'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}'
@@ -117,13 +105,8 @@ void main() {
     });
 
     test('printCommunication = false', () async {
-      // Given
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, printCommunication: false);
-
-      // When
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
-
-      // Then
       expect(log, <String>[]);
     });
   });
@@ -288,8 +271,8 @@ void main() {
 
   group('VMServiceFlutterDriver', () {
     late FakeVmService fakeClient;
-    FakeVM fakeVM;
-    FakeIsolate fakeIsolate;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
@@ -662,8 +645,8 @@ void main() {
 
   group('VMServiceFlutterDriver with custom timeout', () {
     late FakeVmService fakeClient;
-    FakeVM fakeVM;
-    FakeIsolate fakeIsolate;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
@@ -694,30 +677,21 @@ void main() {
   group('WebFlutterDriver with logCommunicationToFile', () {
     late FakeFlutterWebConnection fakeConnection;
     late WebFlutterDriver driver;
-    int driverId = 0;
+    int driverId = -1;
 
     setUp(() {
-      _cleanTestOutputFiles();
       fakeConnection = FakeFlutterWebConnection();
       fakeConnection.supportsTimelineAction = true;
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
-    });
-
-    tearDown(() {
       driverId++;
     });
 
     test('logCommunicationToFile = true', () async {
-      // Given
       driver = WebFlutterDriver.connectedTo(fakeConnection);
-
-      // When
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
 
-      // Then
       final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-      // ignore: avoid_slow_async_io
-      final bool exists = await file.exists();
+      final bool exists = file.existsSync();
       expect(exists, true, reason: 'Not found ${file.path}');
 
       final String commandLog = await file.readAsString();
@@ -729,16 +703,10 @@ void main() {
     });
 
     test('logCommunicationToFile = false', () async {
-      // Given
       driver = WebFlutterDriver.connectedTo(fakeConnection, logCommunicationToFile: false);
-
-      // When
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
-
-      // Then
       final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
-      // ignore: avoid_slow_async_io
-      final bool exists = await file.exists();
+      final bool exists = file.existsSync();
       expect(exists, false, reason: 'because ${file.path} exists');
     });
   });
@@ -755,13 +723,8 @@ void main() {
     });
 
     test('printCommunication = true', () async {
-      // Given
       driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: true);
-
-      // When
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
-
-      // Then
       expect(log, <String> [
         'WebFlutterDriver: >>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: printCommunication test}',
         'WebFlutterDriver: <<< {isError: false, response: {status: ok}, type: Response}',
@@ -769,13 +732,8 @@ void main() {
     });
 
     test('printCommunication = false', () async {
-      // Given
       driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: false);
-
-      // When
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
-
-      // Then
       expect(log, <String> []);
     });
   });
@@ -1015,20 +973,6 @@ String? _checkAndEncode(dynamic script) {
   expect(script.endsWith(_kWebScriptSuffix), isTrue);
   // Strip prefix and suffix
   return script.substring(_kWebScriptPrefix.length, script.length - 2) as String?;
-}
-
-// This function remove all file in test output directory
-Future<void> _cleanTestOutputFiles() async {
-  final Directory fileTestOutputsDirectory = Directory(testOutputsDirectory);
-  // Sometime file is not exists
-  try {
-    final List<FileSystemEntity> files = fileTestOutputsDirectory.listSync();
-    for (final FileSystemEntity file in files) {
-      if (FileSystemEntity.isFileSync(file.path)) {
-        await File(file.path).delete();
-      }
-    }
-  } catch(_) {}
 }
 
 vms.Response? makeFakeResponse(

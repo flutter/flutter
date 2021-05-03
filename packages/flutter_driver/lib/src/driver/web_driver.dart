@@ -10,8 +10,8 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/support/async.dart';
-import 'package:file/file.dart' as f;
-import 'package:path/path.dart' as p;
+import 'package:file/file.dart';
+import 'package:path/path.dart' as path;
 
 import '../common/error.dart';
 import '../common/message.dart';
@@ -146,9 +146,9 @@ class WebFlutterDriver extends FlutterDriver {
       driverLog('WebFlutterDriver', message);
     }
     if (_logCommunicationToFile) {
-      final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
+      final File file = fs.file(path.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
-      file.writeAsStringSync('${DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);
+      file.writeAsStringSync('${DateTime.now()} $message\n', mode: FileMode.append, flush: true);
     }
   }
 
