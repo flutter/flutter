@@ -67,13 +67,10 @@ void main() {
       });
 
       test('logCommunicationToFile = false', () async {
-        // Given
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: false);
 
-        // When
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
-        // Then
         final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
         final bool exists = file.existsSync();
         expect(exists, false, reason: 'because ${file.path} exists');
