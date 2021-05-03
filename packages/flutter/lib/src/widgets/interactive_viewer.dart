@@ -212,10 +212,10 @@ class InteractiveViewer extends StatefulWidget {
   /// logged in the console for illustration.
   ///
   /// ```dart main
-  /// import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
-  ///
   /// import 'package:flutter/material.dart';
   /// import 'package:flutter/widgets.dart';
+  ///
+  /// import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
   ///
   /// void main() => runApp(const IVBuilderExampleApp());
   ///
