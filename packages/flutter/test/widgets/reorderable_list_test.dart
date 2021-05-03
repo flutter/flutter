@@ -308,6 +308,7 @@ class _TestListState extends State<TestList> {
                           height: 100,
                           color: items[index].isOdd ? Colors.red : Colors.green,
                           child: ReorderableDragStartListener(
+                            index: index,
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
@@ -315,7 +316,6 @@ class _TestListState extends State<TestList> {
                                 const Icon(Icons.drag_handle),
                               ],
                             ),
-                            index: index,
                           ),
                         );
                       },

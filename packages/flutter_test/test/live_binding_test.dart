@@ -22,10 +22,10 @@ void main() {
   testWidgets('Input PointerHoverEvent', (WidgetTester tester) async {
     PointerHoverEvent? hoverEvent;
     await tester.pumpWidget(MaterialApp(home: MouseRegion(
-      child: const Text('Test'),
       onHover: (PointerHoverEvent event){
         hoverEvent = event;
       },
+      child: const Text('Test'),
     )));
     await tester.pump();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);

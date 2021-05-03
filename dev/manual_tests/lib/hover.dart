@@ -53,8 +53,8 @@ class _HoverDemoState extends State<HoverDemo> {
           title: const Text('Hover Demo'),
         ),
         floatingActionButton: FloatingActionButton(
-          child: const Text('+'),
           onPressed: () {},
+          child: const Text('+'),
         ),
         body: Center(
           child: Builder(builder: (BuildContext context) {
@@ -65,13 +65,13 @@ class _HoverDemoState extends State<HoverDemo> {
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     TextButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     IconButton(
                       onPressed: () => print('Button pressed'),

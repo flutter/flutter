@@ -82,14 +82,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12.0),
-                      child: Text('CLEAR CART'),
-                    ),
                     onPressed: () {
                       model.clearCart();
                       ExpandingBottomSheet.of(context)!.close();
                     },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text('CLEAR CART'),
+                    ),
                   ),
                 ),
               ],

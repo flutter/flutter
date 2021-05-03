@@ -126,16 +126,16 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('CANCEL'),
               onPressed: () {
                 Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
               },
+              child: const Text('CANCEL'),
             ),
             TextButton(
-              child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
               },
+              child: const Text('DISCARD'),
             ),
           ],
         );
@@ -152,10 +152,10 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         title: Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
           TextButton(
-            child: Text('SAVE', style: theme.textTheme.bodyText2!.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             },
+            child: Text('SAVE', style: theme.textTheme.bodyText2!.copyWith(color: Colors.white)),
           ),
         ],
       ),

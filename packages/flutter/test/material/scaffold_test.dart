@@ -1192,8 +1192,8 @@ void main() {
             body: Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
-              child: _GeometryListener(),
               onPressed: () { },
+              child: _GeometryListener(),
             ),
       )));
 
@@ -1239,8 +1239,8 @@ void main() {
             body: Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
-              child: _GeometryListener(),
               onPressed: () { },
+              child: _GeometryListener(),
             ),
       )));
 
@@ -1307,8 +1307,8 @@ void main() {
             body: Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
-              child: _GeometryListener(),
               onPressed: () { },
+              child: _GeometryListener(),
             ),
       )));
 

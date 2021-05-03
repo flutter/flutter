@@ -361,9 +361,10 @@ void main() {
               ),
               textTheme: ButtonTextTheme.primary,
               child: FlatButton(
-                child: const Text('FlatButton'),
                 onPressed: () {},
                 focusNode: focusNode,
+                child: const Text('FlatButton'),
+                
               ),
             ),
           ),

@@ -1190,8 +1190,8 @@ void main() {
         ),
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.send),
             onPressed: () {},
+            child: const Icon(Icons.send),
           ),
           body: Builder(
             builder: (BuildContext context) {
@@ -1886,8 +1886,8 @@ void main() {
             home: Scaffold(
               resizeToAvoidBottomInset: false,
               floatingActionButton: FloatingActionButton(
-                child: const Icon(Icons.send),
                 onPressed: () {},
+                child: const Icon(Icons.send),
               ),
               body: Builder(
                 builder: (BuildContext context) {
@@ -1985,8 +1985,8 @@ void main() {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
             floatingActionButton: FloatingActionButton(
-              child: const Icon(Icons.send),
               onPressed: () {},
+              child: const Icon(Icons.send),
             ),
             body: Builder(
               builder: (BuildContext context) {
@@ -2178,10 +2178,10 @@ void main() {
               body: Center(
                 child: ElevatedButton(
                   key: transitionTarget,
-                  child: const Text('PUSH'),
                   onPressed: () {
                     Navigator.of(context).pushNamed('/second');
                   },
+                  child: const Text('PUSH'),
                 ),
               ),
               floatingActionButton: FloatingActionButton(

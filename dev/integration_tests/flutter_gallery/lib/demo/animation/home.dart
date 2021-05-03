@@ -501,13 +501,13 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
         id: 'card$index',
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          child: SectionCard(section: allSections[index]),
           onTapUp: (TapUpDetails details) {
             final double xOffset = details.globalPosition.dx;
             setState(() {
               _maybeScroll(midScrollOffset, index, xOffset);
             });
           },
+          child: SectionCard(section: allSections[index]),
         ),
       ));
     }

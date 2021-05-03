@@ -242,8 +242,8 @@ void main() {
         home: Scaffold(
           body: Center(
             child: MaterialButton(
-              child: const Text('MaterialButton'),
               onPressed: () { },
+              child: const Text('MaterialButton'),
             ),
           ),
         ),
@@ -307,9 +307,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -587,8 +587,8 @@ void main() {
       child: Material(
         child: Center(
           child: MaterialButton(
-            child: const Text('Button'),
             onPressed: () { /* to make sure the button is enabled */ },
+            child: const Text('Button'),
           ),
         ),
       ),
@@ -622,8 +622,8 @@ void main() {
       child: Material(
         child: Center(
           child: MaterialButton(
-            child: Text('Button'),
-            onPressed: null, // button is disabled
+            onPressed: null,
+            child: Text('Button'), // button is disabled
           ),
         ),
       ),
@@ -729,8 +729,8 @@ void main() {
             child: Center(
               child: MaterialButton(
                 key: key1,
-                child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
+                child: const SizedBox(width: 50.0, height: 8.0),
               ),
             ),
           ),
@@ -750,8 +750,8 @@ void main() {
             child: Center(
               child: MaterialButton(
                 key: key2,
-                child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
+                child: const SizedBox(width: 50.0, height: 8.0),
               ),
             ),
           ),

@@ -381,7 +381,6 @@ class IconButton extends StatelessWidget {
         onTap: onPressed,
         mouseCursor: mouseCursor,
         enableFeedback: enableFeedback,
-        child: result,
         focusColor: focusColor ?? theme.focusColor,
         hoverColor: hoverColor ?? theme.hoverColor,
         highlightColor: highlightColor ?? theme.highlightColor,
@@ -391,6 +390,7 @@ class IconButton extends StatelessWidget {
           (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
+        child: result,
       ),
     );
   }

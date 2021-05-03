@@ -267,15 +267,15 @@ void main() {
                   children: <Widget>[
                     const Text('drawer'),
                     TextButton(
-                      child: const Text('close'),
                       onPressed: () => Navigator.pop(context),
+                      child: const Text('close'),
                     ),
                   ],
                 ),
               ),
               body: TextButton(
-                child: const Text('button'),
                 onPressed: () { buttonPressed = true; },
+                child: const Text('button'),
               ),
             );
           },

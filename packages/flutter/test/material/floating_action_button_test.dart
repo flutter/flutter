@@ -718,10 +718,10 @@ void main() {
                         ),
                         body: Center(
                           child: ElevatedButton(
-                            child: const Text('POP'),
                             onPressed: () {
                               Navigator.pop(context);
                             },
+                            child: const Text('POP'),
                           ),
                         ),
                       );

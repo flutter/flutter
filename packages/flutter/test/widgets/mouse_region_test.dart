@@ -81,13 +81,13 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: Container(
           color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
 
@@ -118,14 +118,14 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: Container(
           color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -151,14 +151,14 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: Container(
           color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -183,13 +183,13 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     await tester.pump();
@@ -210,13 +210,13 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     await tester.pump();
@@ -262,13 +262,13 @@ void main() {
     expect(exit, isNull);
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     await tester.pump();
@@ -285,13 +285,13 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -320,13 +320,13 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.topLeft,
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -339,13 +339,13 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.center,
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     await tester.pump();
@@ -363,13 +363,13 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.center,
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -382,13 +382,13 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.topLeft,
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     await tester.pump();
@@ -405,14 +405,14 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
         child: Container(
           color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) => enter = details,
-        onHover: (PointerHoverEvent details) => move = details,
-        onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.touch);
@@ -537,23 +537,23 @@ void main() {
         children: <Widget>[
           MouseRegion(
             key: key1,
-            child: const SizedBox(
-              width: 100.0,
-              height: 100.0,
-            ),
             onEnter: (PointerEnterEvent details) => enter1.add(details),
             onHover: (PointerHoverEvent details) => move1.add(details),
             onExit: (PointerExitEvent details) => exit1.add(details),
-          ),
-          MouseRegion(
-            key: key2,
             child: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
+          ),
+          MouseRegion(
+            key: key2,
             onEnter: (PointerEnterEvent details) => enter2.add(details),
             onHover: (PointerHoverEvent details) => move2.add(details),
             onExit: (PointerExitEvent details) => exit2.add(details),
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
           ),
         ],
       ),
@@ -634,14 +634,14 @@ void main() {
       return Container(
         alignment: Alignment.topLeft,
         child: MouseRegion(
+          onEnter: onEnter,
+          onHover: onHover,
+          onExit: onExit,
           child: Container(
             color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
             width: 100.0,
             height: 100.0,
           ),
-          onEnter: onEnter,
-          onHover: onHover,
-          onExit: onExit,
         ),
       );
     }
@@ -1179,7 +1179,7 @@ void main() {
         if (opaque == null) {
           return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, child: child);
         }
-        return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, child: child, opaque: opaque);
+        return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, opaque: opaque, child: child);
       }
 
       return Directionality(
@@ -1743,13 +1743,13 @@ void main() {
   testWidgets('No new frames are scheduled when mouse moves without triggering callbacks', (WidgetTester tester) async {
     await tester.pumpWidget(Center(
       child: MouseRegion(
+        onEnter: (PointerEnterEvent details) {},
+        onHover: (PointerHoverEvent details) {},
+        onExit: (PointerExitEvent details) {},
         child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
-        onEnter: (PointerEnterEvent details) {},
-        onHover: (PointerHoverEvent details) {},
-        onExit: (PointerExitEvent details) {},
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1767,7 +1767,7 @@ void main() {
         child: Draggable<int>(
           feedback: Container(width: 20, height: 20, color: Colors.blue),
           childWhenDragging: Container(width: 20, height: 20, color: Colors.yellow),
-          child: ElevatedButton(child: const Text('Drag me'), onPressed: (){}),
+          child: ElevatedButton(onPressed: (){}, child: const Text('Drag me')),
         ),
       ),
     ));

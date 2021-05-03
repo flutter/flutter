@@ -82,43 +82,43 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           children: <Widget>[
             Expanded(
               child: ElevatedButton(
-                child: const Text('RECORD'),
                 onPressed: listenToFlutterViewEvents,
+                child: const Text('RECORD'),
               ),
             ),
             Expanded(
               child: ElevatedButton(
-                child: const Text('CLEAR'),
                 onPressed: () {
                   setState(() {
                     flutterViewEvents.clear();
                     embeddedViewEvents.clear();
                   });
                 },
+                child: const Text('CLEAR'),
               ),
             ),
             Expanded(
               child: ElevatedButton(
-                child: const Text('SAVE'),
                 onPressed: () {
                   const StandardMessageCodec codec = StandardMessageCodec();
                   saveRecordedEvents(
                     codec.encodeMessage(flutterViewEvents)!, context);
                 },
+                child: const Text('SAVE'),
               ),
             ),
             Expanded(
               child: ElevatedButton(
                 key: const ValueKey<String>('play'),
-                child: const Text('PLAY FILE'),
                 onPressed: () { playEventsFile(); },
+                child: const Text('PLAY FILE'),
               ),
             ),
             Expanded(
               child: ElevatedButton(
                 key: const ValueKey<String>('back'),
-                child: const Text('BACK'),
                 onPressed: () { Navigator.pop(context); },
+                child: const Text('BACK'),
               ),
             ),
           ],

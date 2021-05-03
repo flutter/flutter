@@ -9,15 +9,15 @@ void main() {
   testWidgets('Align smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Align(
-        child: Container(),
         alignment: const Alignment(0.50, 0.50),
+        child: Container(),
       ),
     );
 
     await tester.pumpWidget(
       Align(
-        child: Container(),
         alignment: Alignment.center,
+        child: Container(),
       ),
     );
 
@@ -43,8 +43,8 @@ void main() {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
-        child: SizedBox(width: 100.0, height: 80.0),
         alignment: AlignmentDirectional.topStart,
+        child: SizedBox(width: 100.0, height: 80.0),
       ),
     ));
 
@@ -54,8 +54,8 @@ void main() {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
-        child: SizedBox(width: 100.0, height: 80.0),
         alignment: Alignment.topLeft,
+        child: SizedBox(width: 100.0, height: 80.0),
       ),
     ));
 
@@ -67,8 +67,8 @@ void main() {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
-        child: SizedBox(width: 100.0, height: 80.0),
         alignment: AlignmentDirectional.topStart,
+        child: SizedBox(width: 100.0, height: 80.0),
       ),
     ));
 
@@ -78,8 +78,8 @@ void main() {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
-        child: SizedBox(width: 100.0, height: 80.0),
         alignment: Alignment.topLeft,
+        child: SizedBox(width: 100.0, height: 80.0),
       ),
     ));
 
@@ -93,11 +93,11 @@ void main() {
       SingleChildScrollView(
         child: Align(
           key: alignKey,
+          alignment: Alignment.center,
           child: const SizedBox(
             width: 10.0,
             height: 10.0,
           ),
-          alignment: Alignment.center,
         ),
       ),
     );

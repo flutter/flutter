@@ -127,7 +127,7 @@ void main() {
             title: const Text('The Title'),
             content: const Text('Content'),
             actions: <Widget>[
-              CupertinoDialogAction(child: const Text('Cancel'), isDefaultAction: true, onPressed: () {}),
+              CupertinoDialogAction(isDefaultAction: true, onPressed: () {}, child: const Text('Cancel')),
               const CupertinoDialogAction(child: Text('OK')),
             ],
           ),
@@ -259,8 +259,8 @@ void main() {
 
   testWidgets('Dialog enabled action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(CupertinoDialogAction(
-      child: const Text('Ok'),
       onPressed: () {},
+      child: const Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
@@ -1184,7 +1184,6 @@ void main() {
           builder: (BuildContext context) {
             return Center(
               child: CupertinoButton(
-                child: const Text('X'),
                 onPressed: () {
                   showCupertinoDialog<void>(
                     context: context,
@@ -1201,6 +1200,7 @@ void main() {
                     },
                   );
                 },
+                child: const Text('X'),
               ),
             );
           },

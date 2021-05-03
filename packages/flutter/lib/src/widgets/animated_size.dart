@@ -120,13 +120,13 @@ class _AnimatedSizeState
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
-      child: widget.child,
       alignment: widget.alignment,
       curve: widget.curve,
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
       vsync: this,
       clipBehavior: widget.clipBehavior,
+      child: widget.child,
     );
   }
 }

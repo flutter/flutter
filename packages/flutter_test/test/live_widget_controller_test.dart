@@ -19,12 +19,12 @@ class _CountButtonState extends State<CountButton> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      child: Text('Counter $counter'),
       onPressed: () {
         setState(() {
           counter += 1;
         });
       },
+      child: Text('Counter $counter'),
     );
   }
 }

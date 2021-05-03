@@ -2971,13 +2971,13 @@ void main() {
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: const Text('Change TabController length'),
                     onPressed: () {
                       setState(() {
                         controller.dispose();
                         controller = TabController(vsync: const TestVSync(), length: 3);
                       });
                     },
+                    child: const Text('Change TabController length'),
                   ),
                 ],
               ),
@@ -3116,13 +3116,13 @@ void main() {
                 actions: <Widget>[
                   TextButton(
                     key: const Key('Add tab'),
-                    child: const Text('Add tab'),
                     onPressed: () => _onTabAdd(setState),
+                    child: const Text('Add tab'),
                   ),
                   TextButton(
                     key: const Key('Remove tab'),
-                    child: const Text('Remove tab'),
                     onPressed: () => _onTabRemove(setState),
+                    child: const Text('Remove tab'),
                   ),
                 ],
                 bottom: PreferredSize(
@@ -3419,12 +3419,12 @@ void main() {
                   ),
                   actions: <Widget>[
                     TextButton(
-                      child: const Text('Remove Last Tab'),
                       onPressed: () {
                         setState(() {
                           tabs.removeLast();
                         });
                       },
+                      child: const Text('Remove Last Tab'),
                     ),
                   ],
                 ),

@@ -408,7 +408,6 @@ abstract class ScrollView extends StatelessWidget {
 
     if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
       return NotificationListener<ScrollUpdateNotification>(
-        child: scrollableResult,
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusScope = FocusScope.of(context);
           if (notification.dragDetails != null && focusScope.hasFocus) {
@@ -416,6 +415,7 @@ abstract class ScrollView extends StatelessWidget {
           }
           return false;
         },
+        child: scrollableResult,
       );
     } else {
       return scrollableResult;

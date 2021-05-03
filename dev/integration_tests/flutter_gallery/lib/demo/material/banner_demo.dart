@@ -52,21 +52,21 @@ class _BannerDemoState extends State<BannerDemo> {
       leading: _showLeading ? const CircleAvatar(child: Icon(Icons.access_alarm)) : null,
       actions: <Widget>[
         TextButton(
-          child: const Text('SIGN IN'),
           onPressed: () {
             setState(() {
               _displayBanner = false;
             });
           },
+          child: const Text('SIGN IN'),
         ),
         if (_showMultipleActions)
           TextButton(
-            child: const Text('DISMISS'),
             onPressed: () {
               setState(() {
                 _displayBanner = false;
               });
             },
+            child: const Text('DISMISS'),
           ),
       ],
     );

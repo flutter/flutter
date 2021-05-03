@@ -128,16 +128,16 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
           },
           child: AnimatedBuilder(
             animation: secondaryAnimation,
-            child: FractionalTranslation(
-              translation: primaryTranslationAnimation.value,
-              child: child,
-            ),
             builder: (BuildContext context, Widget? child) {
               return FractionalTranslation(
                 translation: secondaryTranslationAnimation.value,
                 child: child,
               );
             },
+            child: FractionalTranslation(
+              translation: primaryTranslationAnimation.value,
+              child: child,
+            ),
           ),
         );
       },

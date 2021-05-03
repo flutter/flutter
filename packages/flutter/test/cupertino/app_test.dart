@@ -14,7 +14,6 @@ void main() {
         const Hero(tag: 'a', child: Text('foo')),
         Builder(builder: (BuildContext context) {
           return CupertinoButton(
-            child: const Text('next'),
             onPressed: () {
               Navigator.push(
                 context,
@@ -23,6 +22,7 @@ void main() {
                 }),
               );
             },
+            child: const Text('next'),
           );
         }),
       ]),

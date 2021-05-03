@@ -23,8 +23,8 @@ void main() {
                   const Text('I am text!'),
                   const Text('Moar text!!1'),
                   MaterialButton(
-                    child: const Text('Button'),
                     onPressed: () { },
+                    child: const Text('Button'),
                   ),
                 ],
               ),

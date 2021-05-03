@@ -37,12 +37,12 @@ class TogglerState extends State<Toggler> {
             children: <Widget>[
               TextButton(
                 key: const ValueKey<String>('toggle'),
-                child: const Text('Toggle visibility'),
                 onPressed: () {
                   setState(() {
                     _visible = !_visible;
                   });
                 },
+                child: const Text('Toggle visibility'),
               ),
               Expanded(
                 child: ListView(

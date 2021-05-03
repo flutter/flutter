@@ -16,8 +16,8 @@ void main() {
           content: const Text('I am a banner'),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),
@@ -38,8 +38,8 @@ void main() {
           content: const Text(contentText),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),
@@ -59,12 +59,12 @@ void main() {
           content: const Text(contentText),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action 1'),
               onPressed: () { },
+              child: const Text('Action 1'),
             ),
             TextButton(
-              child: const Text('Action 2'),
               onPressed: () { },
+              child: const Text('Action 2'),
             ),
           ],
         ),
@@ -86,8 +86,8 @@ void main() {
           content: const Text(contentText),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),
@@ -108,8 +108,8 @@ void main() {
           content: const Text('Content'),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),
@@ -131,8 +131,8 @@ void main() {
             content: const Text('Content'),
             actions: <Widget>[
               TextButton(
-                child: const Text('Action'),
                 onPressed: () { },
+                child: const Text('Action'),
               ),
             ],
           ),
@@ -155,8 +155,8 @@ void main() {
           content: const Text(contentText),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),

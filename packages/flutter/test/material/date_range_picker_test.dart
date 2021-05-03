@@ -348,7 +348,6 @@ void main() {
              child: Builder(
                builder: (BuildContext context) {
                  return ElevatedButton(
-                   child: const Text('X'),
                    onPressed: () {
                      showDateRangePicker(
                        context: context,
@@ -362,6 +361,7 @@ void main() {
                        },
                      );
                    },
+                   child: const Text('X'),
                  );
                },
              ),

@@ -111,15 +111,15 @@ class ExitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      child: const Tooltip(
-        message: 'Back',
-        child: Text('Exit'),
-        excludeFromSemantics: true,
-      ),
       onPressed: () {
         // The demo is on the root navigator.
         Navigator.of(context, rootNavigator: true).pop();
       },
+      child: const Tooltip(
+        message: 'Back',
+        excludeFromSemantics: true,
+        child: Text('Exit'),
+      ),
     );
   }
 }
@@ -254,17 +254,17 @@ class Tab1RowItem extends StatelessWidget {
                 ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
+                  onPressed: () { },
                   child: const Icon(CupertinoIcons.plus_circled,
                     semanticLabel: 'Add',
                   ),
-                  onPressed: () { },
                 ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
+                  onPressed: () { },
                   child: const Icon(CupertinoIcons.share,
                     semanticLabel: 'Share',
                   ),
-                  onPressed: () { },
                 ),
               ],
             ),
@@ -370,6 +370,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                               minSize: 30.0,
                               padding: const EdgeInsets.symmetric(horizontal: 24.0),
                               borderRadius: BorderRadius.circular(32.0),
+                              onPressed: () { },
                               child: const Text(
                                 'GET',
                                 style: TextStyle(
@@ -378,14 +379,13 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                                   letterSpacing: -0.28,
                                 ),
                               ),
-                              onPressed: () { },
                             ),
                             CupertinoButton.filled(
                               minSize: 30.0,
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(32.0),
-                              child: const Icon(CupertinoIcons.ellipsis),
                               onPressed: () { },
+                              child: const Icon(CupertinoIcons.ellipsis),
                             ),
                           ],
                         ),
@@ -423,12 +423,12 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                       ),
                       child: Center(
                         child: CupertinoButton(
+                          onPressed: () { },
                           child: const Icon(
                             CupertinoIcons.plus_circled,
                             color: CupertinoColors.white,
                             size: 36.0,
                           ),
-                          onPressed: () { },
                         ),
                       ),
                     ),
@@ -808,11 +808,11 @@ class Tab3Dialog extends StatelessWidget {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoButton(
-          child: const Text('Cancel'),
           padding: EdgeInsets.zero,
           onPressed: () {
             Navigator.of(context).pop(false);
           },
+          child: const Text('Cancel'),
         ),
       ),
       child: Center(
@@ -826,10 +826,10 @@ class Tab3Dialog extends StatelessWidget {
             ),
             const Padding(padding: EdgeInsets.only(top: 18.0)),
             CupertinoButton.filled(
-              child: const Text('Sign in'),
               onPressed: () {
                 Navigator.pop(context);
               },
+              child: const Text('Sign in'),
             ),
           ],
         ),

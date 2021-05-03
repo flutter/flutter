@@ -68,7 +68,6 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
               ),
               MaterialButton(
                 key: const ValueKey<String>(alertButtonKeyValue),
-                child: const Text('Alert'),
                 onPressed: () {
                   showDialog<void>(
                     context: context,
@@ -87,16 +86,17 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
                         ),
                         actions: <Widget>[
                           TextButton(
-                            child: const Text('OK', key: ValueKey<String>('$alertKeyValue.OK')),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
+                            child: const Text('OK', key: ValueKey<String>('$alertKeyValue.OK')),
                           ),
                         ],
                       );
                     },
                   );
                 },
+                child: const Text('Alert'),
               ),
             ],
           ),

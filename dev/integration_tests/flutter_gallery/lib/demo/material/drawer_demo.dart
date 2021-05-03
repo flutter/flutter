@@ -255,10 +255,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           title: const Text('Account switching not implemented.'),
           actions: <Widget>[
             TextButton(
-              child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context);
               },
+              child: const Text('OK'),
             ),
           ],
         );

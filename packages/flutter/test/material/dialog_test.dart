@@ -18,7 +18,6 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
         builder: (BuildContext context) {
           return Center(
             child: ElevatedButton(
-              child: const Text('X'),
               onPressed: () {
                 showDialog<void>(
                   context: context,
@@ -30,6 +29,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
                   },
                 );
               },
+              child: const Text('X'),
             ),
           );
         },
@@ -180,8 +180,8 @@ void main() {
 
   testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
     const SimpleDialog dialog = SimpleDialog(
-      children: <Widget>[],
       clipBehavior: Clip.antiAlias,
+      children: <Widget>[],
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -327,8 +327,8 @@ void main() {
       children: <Widget>[
         SimpleDialogOption(
           onPressed: () {},
-          child: const Text('First option'),
           padding: customPadding,
+          child: const Text('First option'),
         ),
       ],
     );
@@ -791,8 +791,8 @@ void main() {
     final List<Widget> children = <Widget>[
       SimpleDialogOption(
         key: childrenKey,
-        child: const Text('child'),
         onPressed: () { },
+        child: const Text('child'),
       ),
     ];
 
@@ -1263,8 +1263,8 @@ void main() {
           viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
-          child: Placeholder(),
           insetPadding: null,
+          child: Placeholder(),
         ),
       ),
     );
@@ -1306,7 +1306,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
@@ -1319,6 +1318,7 @@ void main() {
                       },
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -1421,7 +1421,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
@@ -1434,6 +1433,7 @@ void main() {
                       },
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -1477,7 +1477,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
@@ -1489,6 +1488,7 @@ void main() {
                       },
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -1596,16 +1596,16 @@ void main() {
           return AlertDialog(
             actions: <Widget>[
               TextButton(
-                child: const Text('TRUE'),
                 onPressed: () {
                   Navigator.pop(context, true); // showDialog() returns true
                 },
+                child: const Text('TRUE'),
               ),
               TextButton(
-                child: const Text('FALSE'),
                 onPressed: () {
                   Navigator.pop(context, false); // showDialog() returns false
                 },
+                child: const Text('FALSE'),
               ),
             ],
           );
@@ -1975,10 +1975,10 @@ void main() {
           title: const Text('Title'),
           children: <Widget>[
             SimpleDialogOption(
-              child: const Text('X'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: const Text('X'),
             ),
           ],
         );
@@ -2009,7 +2009,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
@@ -2023,6 +2022,7 @@ void main() {
                       },
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },

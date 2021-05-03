@@ -173,6 +173,7 @@ class GestureDemoState extends State<GestureDemo> {
             child: Container(
               padding: const EdgeInsets.all(4.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Row(
                     children: <Widget>[
@@ -211,7 +212,6 @@ class GestureDemoState extends State<GestureDemo> {
                     ],
                   ),
                 ],
-                crossAxisAlignment: CrossAxisAlignment.start,
               ),
             ),
           ),

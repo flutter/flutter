@@ -834,10 +834,10 @@ void main() {
           ignoringSemantics: false,
           sliver: SliverToBoxAdapter(
             child: GestureDetector(
-              child: const Text('a'),
               onTap: () {
                 events.add('tap');
               },
+              child: const Text('a'),
             ),
           ),
         ),
@@ -856,10 +856,10 @@ void main() {
           ignoringSemantics: true,
           sliver: SliverToBoxAdapter(
             child: GestureDetector(
-              child: const Text('a'),
               onTap: () {
                 events.add('tap');
               },
+              child: const Text('a'),
             ),
           ),
         ),
@@ -878,10 +878,10 @@ void main() {
           ignoringSemantics: true,
           sliver: SliverToBoxAdapter(
             child: GestureDetector(
-              child: const Text('a'),
               onTap: () {
                 events.add('tap');
               },
+              child: const Text('a'),
             ),
           ),
         ),
@@ -900,10 +900,10 @@ void main() {
           ignoringSemantics: false,
           sliver: SliverToBoxAdapter(
             child: GestureDetector(
-              child: const Text('a'),
               onTap: () {
                 events.add('tap');
               },
+              child: const Text('a'),
             ),
           ),
         ),

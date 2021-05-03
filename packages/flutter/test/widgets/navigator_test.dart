@@ -200,13 +200,11 @@ void main() {
                     return MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return ElevatedButton(
-                          child: const Text('Next'),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (BuildContext context) {
                                   return ElevatedButton(
-                                    child: const Text('Inner page'),
                                     onPressed: () {
                                       Navigator.of(context, rootNavigator: true).push(
                                         MaterialPageRoute<void>(
@@ -216,11 +214,13 @@ void main() {
                                         ),
                                       );
                                     },
+                                    child: const Text('Inner page'),
                                   );
                                 },
                               ),
                             );
                           },
+                          child: const Text('Next'),
                         );
                       },
                     );
@@ -1138,19 +1138,16 @@ void main() {
       navigatorKey: key,
       navigatorObservers: <NavigatorObserver>[observer],
       home: TextButton(
-        child: const Text('A'),
         onPressed: () {
           key.currentState!.push<void>(routeB = MaterialPageRoute<void>(
             settings: const RouteSettings(name: 'B'),
             builder: (BuildContext context) {
               return TextButton(
-                child: const Text('B'),
                 onPressed: () {
                   key.currentState!.push<void>(MaterialPageRoute<int>(
                     settings: const RouteSettings(name: 'C'),
                     builder: (BuildContext context) {
                       return TextButton(
-                        child: const Text('C'),
                         onPressed: () {
                           key.currentState!.replace(
                             oldRoute: routeB,
@@ -1162,14 +1159,17 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('C'),
                       );
                     },
                   ));
                 },
+                child: const Text('B'),
               );
             },
           ));
         },
+        child: const Text('A'),
       ),
     ));
     expect(log, <String>['pushed / (previous is <none>)']);
@@ -1232,14 +1232,12 @@ void main() {
         ),
       ),
       home: TextButton(
-        child: const Text('A'),
         onPressed: () {
           key.currentState!.push<void>(routeB = MaterialPageRoute<void>(
             settings: const RouteSettings(name: 'B'),
             builder: (BuildContext context) {
               log.add('building B');
               return TextButton(
-                child: const Text('B'),
                 onPressed: () {
                   key.currentState!.push<void>(MaterialPageRoute<int>(
                     settings: const RouteSettings(name: 'C'),
@@ -1247,7 +1245,6 @@ void main() {
                       log.add('building C');
                       log.add('found ${ModalRoute.of(context)!.settings.name}');
                       return TextButton(
-                        child: const Text('C'),
                         onPressed: () {
                           key.currentState!.replace(
                             oldRoute: routeB,
@@ -1260,14 +1257,17 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('C'),
                       );
                     },
                   ));
                 },
+                child: const Text('B'),
               );
             },
           ));
         },
+        child: const Text('A'),
       ),
     ));
     expect(log, <String>[]);

@@ -205,7 +205,6 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showTimePicker(
                       context: context,
@@ -219,6 +218,7 @@ void main() {
                       },
                     );
                   },
+                  child: const Text('X'),
                 );
               },
             ),

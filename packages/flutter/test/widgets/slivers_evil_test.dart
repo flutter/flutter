@@ -37,9 +37,9 @@ class TestBehavior extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
-      child: child,
       axisDirection: details.direction,
       color: const Color(0xFFFFFFFF),
+      child: child,
     );
   }
 }

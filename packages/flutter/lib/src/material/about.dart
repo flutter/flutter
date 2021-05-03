@@ -404,7 +404,6 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -414,12 +413,13 @@ class AboutDialog extends StatelessWidget {
               applicationLegalese: applicationLegalese,
             );
           },
+          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
         ),
         TextButton(
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
           },
+          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
         ),
       ],
       scrollable: true,

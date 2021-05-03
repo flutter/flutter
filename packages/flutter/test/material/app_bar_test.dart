@@ -2123,12 +2123,12 @@ void main() {
                     snap: snap,
                     actions: <Widget>[
                       TextButton(
-                        child: const Text('snap=false'),
                         onPressed: () {
                           setState(() {
                             snap = false;
                           });
                         },
+                        child: const Text('snap=false'),
                       ),
                     ],
                     flexibleSpace: FlexibleSpaceBar(

@@ -205,12 +205,12 @@ void main() {
               child: Column(
                 children: <Widget>[
                   CupertinoButton(
-                    child: const Text('Button'),
                     onPressed: () {
                       setState(() {
                         value = !value;
                       });
                     },
+                    child: const Text('Button'),
                   ),
                   CupertinoSwitch(
                     key: switchKey,

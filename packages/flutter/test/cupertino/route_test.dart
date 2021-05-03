@@ -377,7 +377,6 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return CupertinoButton(
-              child: const Text('Button'),
               onPressed: () {
                 Navigator.push<void>(context, CupertinoPageRoute<void>(
                   fullscreenDialog: true,
@@ -386,16 +385,17 @@ void main() {
                       children: <Widget>[
                         const Placeholder(),
                         CupertinoButton(
-                          child: const Text('Close'),
                           onPressed: () {
                             Navigator.pop<void>(context);
                           },
+                          child: const Text('Close'),
                         ),
                       ],
                     );
                   },
                 ));
               },
+              child: const Text('Button'),
             );
           },
         ),
@@ -485,19 +485,19 @@ void main() {
               children: <Widget>[
                 const Placeholder(),
                 CupertinoButton(
-                  child: const Text('Button'),
                   onPressed: () {
                     Navigator.push<void>(context, CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
                         return CupertinoButton(
-                          child: const Text('Close'),
                           onPressed: () {
                             Navigator.pop<void>(context);
                           },
+                          child: const Text('Close'),
                         );
                       },
                     ));
                   },
+                  child: const Text('Button'),
                 ),
               ],
             );
@@ -573,20 +573,20 @@ void main() {
               children: <Widget>[
                 const Placeholder(),
                 CupertinoButton(
-                  child: const Text('Button'),
                   onPressed: () {
                     Navigator.push<void>(context, CupertinoPageRoute<void>(
                       fullscreenDialog: true,
                       builder: (BuildContext context) {
                         return CupertinoButton(
-                          child: const Text('Close'),
                           onPressed: () {
                             Navigator.pop<void>(context);
                           },
+                          child: const Text('Close'),
                         );
                       },
                     ));
                   },
+                  child: const Text('Button'),
                 ),
               ],
             );
@@ -1653,12 +1653,12 @@ void main() {
       home: Center(
         child: Builder(builder: (BuildContext context) {
           return ElevatedButton(
-            child: const Text('Home'),
             onPressed: () {
               navigator = Navigator.of(context);
               assert(navigator != null);
               navigator.push<void>(r);
             },
+            child: const Text('Home'),
           );
         }),
       ),
@@ -1854,8 +1854,8 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   Widget _buildHome(BuildContext context) {
     return Center(
       child: CupertinoButton(
-        child: Text('PointerCancelEvents: $counter'),
         onPressed: () => Navigator.pushNamed<void>(context, 'sub'),
+        child: Text('PointerCancelEvents: $counter'),
       ),
     );
   }
@@ -1910,16 +1910,16 @@ class _RestorableModalTestWidget extends StatelessWidget{
           message: const Text('Message'),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('Action One'),
               onPressed: () {
                 Navigator.pop(context);
               },
+              child: const Text('Action One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Action Two'),
               onPressed: () {
                 Navigator.pop(context);
               },
+              child: const Text('Action Two'),
             ),
           ],
         );

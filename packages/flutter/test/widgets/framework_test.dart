@@ -153,11 +153,6 @@ void main() {
                 ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key2,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
@@ -165,6 +160,11 @@ void main() {
                   rebuiltKeyOfSecondChildBeforeLayout =
                     statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
               ),
             ],
           );
@@ -184,11 +184,6 @@ void main() {
           return Column(
             children: <Widget>[
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key2,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
@@ -197,13 +192,13 @@ void main() {
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfFirstChildAfterLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text1',
-                  textDirection: TextDirection.ltr,
-                  key: key1,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
@@ -212,6 +207,11 @@ void main() {
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfSecondChildAfterLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
               ),
             ],
           );
@@ -243,17 +243,17 @@ void main() {
                 ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key2,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfSecondChildBeforeLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
               ),
               const _Stateful(
                 child: Text(
@@ -287,11 +287,6 @@ void main() {
                 ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text3',
-                  textDirection: TextDirection.ltr,
-                  key: key3,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
@@ -300,13 +295,13 @@ void main() {
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfSecondChildAfterLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text3',
+                  textDirection: TextDirection.ltr,
+                  key: key3,
+                ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key2,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
@@ -315,6 +310,11 @@ void main() {
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfThirdChildAfterLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
               ),
             ],
           );
@@ -342,17 +342,17 @@ void main() {
                 ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key1,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfSecondChildBeforeLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
               ),
               const _Stateful(
                 child: Text(
@@ -384,21 +384,16 @@ void main() {
                 ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text3',
-                  textDirection: TextDirection.ltr,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
                 },
+                child: const Text(
+                  'Text3',
+                  textDirection: TextDirection.ltr,
+                ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key1,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
@@ -407,6 +402,11 @@ void main() {
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfThirdChildAfterLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
               ),
             ],
           );
@@ -944,17 +944,17 @@ void main() {
                 ),
               ),
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key2,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfSecondChildBeforeLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
               ),
             ],
           );
@@ -974,11 +974,6 @@ void main() {
           return Column(
             children: <Widget>[
               _Stateful(
-                child: const Text(
-                  'Text2',
-                  textDirection: TextDirection.ltr,
-                  key: key2,
-                ),
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
@@ -987,13 +982,13 @@ void main() {
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfFirstChildAfterLayout = statefulWidget.child.key;
                 },
-              ),
-              _Stateful(
                 child: const Text(
-                  'Text1',
+                  'Text2',
                   textDirection: TextDirection.ltr,
                   key: key2,
                 ),
+              ),
+              _Stateful(
                 onElementRebuild: (StatefulElement element) {
                   // Verifies the early rebuild happens before layout.
                   expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
@@ -1002,6 +997,11 @@ void main() {
                   final _Stateful statefulWidget = element.widget as _Stateful;
                   rebuiltKeyOfSecondChildAfterLayout = statefulWidget.child.key;
                 },
+                child: const Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
               ),
             ],
           );

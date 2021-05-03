@@ -309,12 +309,12 @@ class _OptionsState extends State<Options> {
                       },
                       items: const <DropdownMenuItem<String>>[
                         DropdownMenuItem<String>(
-                          child: Text('Standard'),
                           value: 'standard',
+                          child: Text('Standard'),
                         ),
-                        DropdownMenuItem<String>(child: Text('Comfortable'), value: 'comfortable'),
-                        DropdownMenuItem<String>(child: Text('Compact'), value: 'compact'),
-                        DropdownMenuItem<String>(child: Text('Custom'), value: 'custom'),
+                        DropdownMenuItem<String>(value: 'comfortable', child: Text('Comfortable')),
+                        DropdownMenuItem<String>(value: 'compact', child: Text('Compact')),
+                        DropdownMenuItem<String>(value: 'custom', child: Text('Custom')),
                       ],
                       value: _densityToProfile(widget.model.density),
                     ),

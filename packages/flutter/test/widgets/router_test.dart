@@ -558,7 +558,6 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
     delegate.builder = (BuildContext context, RouteInformation? information) {
       return ElevatedButton(
-        child: Text(information!.location!),
         onPressed: () {
           if (isNavigating) {
             Router.navigate(context, () {
@@ -572,6 +571,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
             });
           }
         },
+        child: Text(information!.location!),
       );
     };
     final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
@@ -746,13 +746,13 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
               children: <Widget>[
                 Text(information!.location!),
                 BackButtonListener(
-                  child: Container(),
                   onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner1',
                       );
                       return SynchronousFuture<bool>(true);
                     },
+                  child: Container(),
                 ),
               ],
             );
@@ -788,13 +788,13 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
               children: <Widget>[
                 Text(information!.location!),
                 BackButtonListener(
-                  child: Container(),
                   onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'first callback',
                       );
                       return SynchronousFuture<bool>(true);
                     },
+                  child: Container(),
                 ),
               ],
             );
@@ -822,13 +822,13 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
           children: <Widget>[
             Text(information!.location!),
             BackButtonListener(
-              child: Container(),
               onBackButtonPressed: () {
                   provider.value = const RouteInformation(
                     location: 'second callback',
                   );
                   return SynchronousFuture<bool>(true);
                 },
+              child: Container(),
             ),
           ],
         );
@@ -867,13 +867,13 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
               children: <Widget>[
                 Text(information!.location!),
                 BackButtonListener(
-                  child: Container(),
                   onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'first callback',
                       );
                       return SynchronousFuture<bool>(true);
                     },
+                  child: Container(),
                 ),
               ],
             );
@@ -942,21 +942,21 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
               children: <Widget>[
                 Text(information!.location!),
                 BackButtonListener(
-                  child: BackButtonListener(
-                    child: Container(),
-                    onBackButtonPressed: () {
-                      provider.value = const RouteInformation(
-                        location: 'popped inner2',
-                      );
-                      return SynchronousFuture<bool>(true);
-                    },
-                  ),
                   onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner1',
                       );
                       return SynchronousFuture<bool>(true);
                     },
+                  child: BackButtonListener(
+                    onBackButtonPressed: () {
+                      provider.value = const RouteInformation(
+                        location: 'popped inner2',
+                      );
+                      return SynchronousFuture<bool>(true);
+                    },
+                    child: Container(),
+                  ),
                 ),
               ],
             );
@@ -997,21 +997,21 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
               children: <Widget>[
                 Text(information!.location!),
                 BackButtonListener(
-                  child: BackButtonListener(
-                    child: Container(),
-                    onBackButtonPressed: () {
-                      provider.value = const RouteInformation(
-                        location: 'popped inner2',
-                      );
-                      return SynchronousFuture<bool>(false);
-                    },
-                  ),
                   onBackButtonPressed: () {
                       provider.value = const RouteInformation(
                         location: 'popped inner1',
                       );
                       return SynchronousFuture<bool>(true);
                     },
+                  child: BackButtonListener(
+                    onBackButtonPressed: () {
+                      provider.value = const RouteInformation(
+                        location: 'popped inner2',
+                      );
+                      return SynchronousFuture<bool>(false);
+                    },
+                    child: Container(),
+                  ),
                 ),
               ],
             );
@@ -1052,13 +1052,13 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
               builder: (BuildContext context, StateSetter setter) {
                 setState = setter;
                 return BackButtonListener(
-                  child: Container(),
                   onBackButtonPressed: () {
                     provider.value = RouteInformation(
                       location: location,
                     );
                     return SynchronousFuture<bool>(true);
                   },
+                  child: Container(),
                 );
               },
             ),

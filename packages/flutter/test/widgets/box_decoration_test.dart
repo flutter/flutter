@@ -275,15 +275,15 @@ Future<void> main() async {
       return Center(
         child: GestureDetector(
           behavior: HitTestBehavior.deferToChild,
+          onTap: () {
+            itemsTapped.add(1);
+          },
           child: Container(
             key: key,
             width: 100.0,
             height: 50.0,
             decoration: BoxDecoration(border: border),
           ),
-          onTap: () {
-            itemsTapped.add(1);
-          },
         ),
       );
     }
@@ -312,15 +312,15 @@ Future<void> main() async {
       return Center(
         child: GestureDetector(
             behavior: HitTestBehavior.deferToChild,
+          onTap: () {
+            itemsTapped.add(1);
+          },
             child: Container(
             key: key,
             width: 100.0,
             height: 50.0,
             decoration: BoxDecoration(border: border, shape: BoxShape.circle),
           ),
-          onTap: () {
-            itemsTapped.add(1);
-          },
         ),
       );
     }
@@ -350,15 +350,15 @@ Future<void> main() async {
       return Center(
         child: GestureDetector(
           behavior: HitTestBehavior.deferToChild,
+          onTap: () {
+            itemsTapped.add(1);
+          },
           child: Container(
             key: key,
             width: 100.0,
             height: 50.0,
             decoration: BoxDecoration(border: border, shape: BoxShape.rectangle, borderRadius: BorderRadius.circular(20.0)),
           ),
-          onTap: () {
-            itemsTapped.add(1);
-          },
         ),
       );
     }
@@ -393,15 +393,15 @@ Future<void> main() async {
         alignment: Alignment.topLeft,
         child:GestureDetector(
           behavior: HitTestBehavior.deferToChild,
+          onTap: () {
+            itemsTapped.add(1);
+          },
           child: Container(
             key: key,
             width: width,
             height: height,
             decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
           ),
-          onTap: () {
-            itemsTapped.add(1);
-          },
         ),
       );
     }
@@ -453,15 +453,15 @@ Future<void> main() async {
         alignment: Alignment.topLeft,
         child:GestureDetector(
           behavior: HitTestBehavior.deferToChild,
+          onTap: () {
+            itemsTapped.add(1);
+          },
           child: Container(
             key: key,
             width: width,
             height: height,
             decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
           ),
-          onTap: () {
-            itemsTapped.add(1);
-          },
         ),
       );
     }
@@ -501,15 +501,15 @@ Future<void> main() async {
         alignment: Alignment.topLeft,
         child:GestureDetector(
           behavior: HitTestBehavior.deferToChild,
+          onTap: () {
+            itemsTapped.add(1);
+          },
           child: Container(
             key: key,
             width: width,
             height: height,
             decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
           ),
-          onTap: () {
-            itemsTapped.add(1);
-          },
         ),
       );
     }

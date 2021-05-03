@@ -1618,8 +1618,8 @@ void main() {
         home: Column(
           children: <Widget>[
             TextButton(
-              child: Text('Previous Widget', key: previousKey),
               onPressed: () {},
+              child: Text('Previous Widget', key: previousKey),
             ),
             EditableText(
               backgroundCursorColor: Colors.grey,
@@ -1632,8 +1632,8 @@ void main() {
               autofocus: true,
             ),
             TextButton(
-              child: Text('Next Widget', key: nextKey),
               onPressed: () {},
+              child: Text('Next Widget', key: nextKey),
             ),
           ],
         ),

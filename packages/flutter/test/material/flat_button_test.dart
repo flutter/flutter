@@ -119,9 +119,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: FlatButton(
-              child: const Text('FlatButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -182,10 +182,10 @@ void main() {
               colorScheme: colorScheme,
               textTheme: ButtonTextTheme.primary,
               child: FlatButton(
-                child: const Text('FlatButton'),
                 onPressed: () {},
                 focusNode: focusNode,
                 textColor: MaterialStateColor.resolveWith(getTextColor),
+                child: const Text('FlatButton'),
               ),
             ),
           ),
@@ -248,10 +248,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: FlatButton(
-              child: const Text('FlatButton'),
               onPressed: () {},
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -374,10 +374,10 @@ void main() {
           body: Center(
             child: FlatButton(
               onPressed: null,
-              child: const Text('FlatButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
               disabledTextColor: unusedDisabledTextColor,
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -399,8 +399,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: FlatButton(
-            child: Container(),
             onPressed: () { /* to make sure the button is enabled */ },
+            child: Container(),
           ),
         ),
       ),
@@ -656,8 +656,8 @@ void main() {
             child: Center(
               child: FlatButton(
                 key: key1,
-                child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
+                child: const SizedBox(width: 50.0, height: 8.0),
               ),
             ),
           ),
@@ -677,8 +677,8 @@ void main() {
             child: Center(
               child: FlatButton(
                 key: key2,
-                child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
+                child: const SizedBox(width: 50.0, height: 8.0),
               ),
             ),
           ),
@@ -697,9 +697,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlatButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -833,10 +833,10 @@ void main() {
             textDirection: TextDirection.ltr,
             child: FlatButton(
               height: buttonHeight,
-              child: const Text('button'),
               onPressed: () {
                 /*ununsed*/
               },
+              child: const Text('button'),
             ),
           ),
         );
@@ -863,10 +863,10 @@ void main() {
             textDirection: TextDirection.ltr,
             child: FlatButton(
               minWidth: buttonMinWidth,
-              child: const Text('button'),
               onPressed: () {
                 /*ununsed*/
               },
+              child: const Text('button'),
             ),
           ),
         );

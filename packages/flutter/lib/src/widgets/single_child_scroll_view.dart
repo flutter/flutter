@@ -338,15 +338,14 @@ class SingleChildScrollView extends StatelessWidget {
         return _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
-          child: contents,
           clipBehavior: clipBehavior,
+          child: contents,
         );
       },
     );
 
     if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
       scrollable = NotificationListener<ScrollUpdateNotification>(
-        child: scrollable,
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusNode = FocusScope.of(context);
           if (notification.dragDetails != null && focusNode.hasFocus) {
@@ -354,6 +353,7 @@ class SingleChildScrollView extends StatelessWidget {
           }
           return false;
         },
+        child: scrollable,
       );
     }
 

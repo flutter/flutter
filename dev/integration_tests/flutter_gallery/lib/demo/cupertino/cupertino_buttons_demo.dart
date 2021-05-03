@@ -55,29 +55,29 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           CupertinoButton(
-                            child: const Text('Cupertino Button'),
                             onPressed: () {
                               setState(() { _pressedCount += 1; });
                             },
+                            child: const Text('Cupertino Button'),
                           ),
                           const CupertinoButton(
-                            child: Text('Disabled'),
                             onPressed: null,
+                            child: Text('Disabled'),
                           ),
                         ],
                       ),
                     ),
                     const Padding(padding: EdgeInsets.all(12.0)),
                     CupertinoButton.filled(
-                      child: const Text('With Background'),
                       onPressed: () {
                         setState(() { _pressedCount += 1; });
                       },
+                      child: const Text('With Background'),
                     ),
                     const Padding(padding: EdgeInsets.all(12.0)),
                     const CupertinoButton.filled(
-                      child: Text('Disabled'),
                       onPressed: null,
+                      child: Text('Disabled'),
                     ),
                   ],
                 ),

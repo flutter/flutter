@@ -791,9 +791,9 @@ void main() {
                   ),
                   builder: (BuildContext context) {
                     return MaterialButton(
-                      child: const Text('BottomSheet'),
                       onPressed: () => Navigator.pop(context),
                       key: tapTargetToClose,
+                      child: const Text('BottomSheet'),
                     );
                   },
                 );
@@ -854,12 +854,12 @@ void main() {
           body: Builder(builder: (BuildContext context) {
             return Center(
               child: ElevatedButton(
-                child: const Text('Press me'),
                 onPressed: () {
                   Scaffold.of(context).showBottomSheet<void>(
                     (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
+                child: const Text('Press me'),
               ),
             );
           }),
@@ -881,13 +881,13 @@ void main() {
           body: Builder(builder: (BuildContext context) {
             return Center(
               child: ElevatedButton(
-                child: const Text('Press me'),
                 onPressed: () {
                   showModalBottomSheet<void>(
                     context: context,
                     builder: (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
+                child: const Text('Press me'),
               ),
             );
           }),
@@ -934,12 +934,12 @@ void main() {
           body: Builder(builder: (BuildContext context) {
             return Center(
               child: ElevatedButton(
-                child: const Text('Press me'),
                 onPressed: () {
                   Scaffold.of(context).showBottomSheet<void>(
                     (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
+                child: const Text('Press me'),
               ),
             );
           }),
@@ -967,13 +967,13 @@ void main() {
           body: Builder(builder: (BuildContext context) {
             return Center(
               child: ElevatedButton(
-                child: const Text('Press me'),
                 onPressed: () {
                   showModalBottomSheet<void>(
                     context: context,
                     builder: (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
+                child: const Text('Press me'),
               ),
             );
           }),
@@ -1001,13 +1001,13 @@ void main() {
           body: Builder(builder: (BuildContext context) {
             return Center(
               child: ElevatedButton(
-                child: const Text('Press me'),
                 onPressed: () {
                   Scaffold.of(context).showBottomSheet<void>(
                     (BuildContext context) => const Text('BottomSheet'),
                     constraints: const BoxConstraints(maxWidth: 100),
                   );
                 },
+                child: const Text('Press me'),
               ),
             );
           }),
@@ -1035,7 +1035,6 @@ void main() {
           body: Builder(builder: (BuildContext context) {
             return Center(
               child: ElevatedButton(
-                child: const Text('Press me'),
                 onPressed: () {
                   showModalBottomSheet<void>(
                     context: context,
@@ -1043,6 +1042,7 @@ void main() {
                     constraints: const BoxConstraints(maxWidth: 100),
                   );
                 },
+                child: const Text('Press me'),
               ),
             );
           }),
@@ -1071,7 +1071,6 @@ class _TestPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: TextButton(
-        child: const Text('Show bottom sheet'),
         onPressed: () {
           if (useRootNavigator != null) {
             showModalBottomSheet<void>(
@@ -1086,6 +1085,7 @@ class _TestPage extends StatelessWidget {
             );
           }
         },
+        child: const Text('Show bottom sheet'),
       ),
     );
   }

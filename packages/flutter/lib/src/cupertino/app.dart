@@ -443,8 +443,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return CupertinoScrollbar(
-          child: child,
           controller: details.controller,
+          child: child,
         );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -490,13 +490,13 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
     return CupertinoButton.filled(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
       child: const Icon(
         CupertinoIcons.search,
         size: 28.0,
         color: CupertinoColors.white,
       ),
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
     );
   }
 

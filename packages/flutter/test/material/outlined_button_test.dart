@@ -259,9 +259,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlinedButton(
-              child: const Text('OutlinedButton'),
               onPressed: () {},
               focusNode: focusNode,
+              child: const Text('OutlinedButton'),
             ),
           ),
         ),
@@ -327,9 +327,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return OutlinedButton(
-                    child: const Text('OutlinedButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('OutlinedButton'),
                   );
                 },
               ),
@@ -578,9 +578,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: OutlinedButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }

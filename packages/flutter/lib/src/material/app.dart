@@ -713,8 +713,8 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
             return Scrollbar(
-              child: child,
               controller: details.controller,
+              child: child,
             );
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -737,9 +737,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return GlowingOverscrollIndicator(
-          child: child,
           axisDirection: details.direction,
           color: Theme.of(context).colorScheme.secondary,
+          child: child,
         );
     }
   }
@@ -770,9 +770,9 @@ class _MaterialAppState extends State<MaterialApp> {
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
     return FloatingActionButton(
-      child: const Icon(Icons.search),
       onPressed: onPressed,
       mini: true,
+      child: const Icon(Icons.search),
     );
   }
 

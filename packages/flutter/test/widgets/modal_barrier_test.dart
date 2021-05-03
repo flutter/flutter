@@ -285,11 +285,11 @@ void main() {
         children: <Widget>[
           const SecondWidget(),
           WillPopScope(
-            child: const SizedBox(),
             onWillPop: () async {
               willPopCalled = true;
               return false;
             },
+            child: const SizedBox(),
           ),
         ],
       ),
@@ -329,11 +329,11 @@ void main() {
         children: <Widget>[
           const SecondWidget(),
           WillPopScope(
-            child: const SizedBox(),
             onWillPop: () async {
               willPopCalled = true;
               return true;
             },
+            child: const SizedBox(),
           ),
         ],
       ),

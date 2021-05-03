@@ -2913,13 +2913,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         DrawerController(
           key: _endDrawerKey,
           alignment: DrawerAlignment.end,
-          child: widget.endDrawer!,
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
           isDrawerOpen: _endDrawerOpened.value,
+          child: widget.endDrawer!,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2939,13 +2939,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         DrawerController(
           key: _drawerKey,
           alignment: DrawerAlignment.start,
-          child: widget.drawer!,
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
           isDrawerOpen: _drawerOpened.value,
+          child: widget.drawer!,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -3179,11 +3179,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _addIfNonNull(
       children,
       _FloatingActionButtonTransition(
-        child: widget.floatingActionButton,
         fabMoveAnimation: _floatingActionButtonMoveController,
         fabMotionAnimator: _floatingActionButtonAnimator,
         geometryNotifier: _geometryNotifier,
         currentController: _floatingActionButtonVisibilityController,
+        child: widget.floatingActionButton,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,
@@ -3247,7 +3247,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
             return CustomMultiChildLayout(
-              children: children,
               delegate: _ScaffoldLayout(
                 extendBody: _extendBody,
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
@@ -3262,6 +3261,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
                 isSnackBarFloating: isSnackBarFloating,
                 snackBarWidth: snackBarWidth,
               ),
+              children: children,
             );
           }),
         ),

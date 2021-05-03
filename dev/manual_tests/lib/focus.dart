@@ -148,8 +148,8 @@ class _FocusDemoState extends State<FocusDemo> {
               title: const Text('Focus Demo'),
             ),
             floatingActionButton: FloatingActionButton(
-              child: const Text('+'),
               onPressed: () {},
+              child: const Text('+'),
             ),
             body: Center(
               child: Builder(builder: (BuildContext context) {

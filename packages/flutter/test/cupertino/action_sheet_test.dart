@@ -53,8 +53,8 @@ void main() {
       boilerplate(
         CupertinoActionSheetAction(
           isDestructiveAction: true,
-          child: const Text('Ok'),
           onPressed: () { },
+          child: const Text('Ok'),
         ),
       ),
     );
@@ -71,8 +71,8 @@ void main() {
 
   testWidgets('Action sheet dark mode', (WidgetTester tester) async {
     final Widget action = CupertinoActionSheetAction(
-      child: const Text('action'),
       onPressed: () {},
+      child: const Text('action'),
     );
 
     Brightness brightness = Brightness.light;
@@ -131,8 +131,8 @@ void main() {
       boilerplate(
         CupertinoActionSheetAction(
           isDefaultAction: true,
-          child: const Text('Ok'),
           onPressed: () { },
+          child: const Text('Ok'),
         ),
       ),
     );
@@ -240,12 +240,12 @@ void main() {
         CupertinoActionSheet(
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Two'),
               onPressed: () { },
+              child: const Text('Two'),
             ),
           ],
           actionScrollController: actionScrollController,
@@ -293,24 +293,24 @@ void main() {
               message: const Text('The message.'),
               actions: <Widget>[
                 CupertinoActionSheetAction(
+                  onPressed: () { },
                   child: const Text('One'),
-                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
+                  onPressed: () { },
                   child: const Text('Two'),
-                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
+                  onPressed: () { },
                   child: const Text('Three'),
-                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
+                  onPressed: () { },
                   child: const Text('Four'),
-                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
-                  child: const Text('Five'),
                   onPressed: () { },
+                  child: const Text('Five'),
                 ),
               ],
               actionScrollController: actionScrollController,
@@ -360,12 +360,12 @@ void main() {
               message: Text('Very long content' * 200),
               actions: <Widget>[
                 CupertinoActionSheetAction(
-                  child: const Text('One'),
                   onPressed: () { },
+                  child: const Text('One'),
                 ),
                 CupertinoActionSheetAction(
-                  child: const Text('Two'),
                   onPressed: () { },
+                  child: const Text('Two'),
                 ),
               ],
               messageScrollController: messageScrollController,
@@ -396,11 +396,11 @@ void main() {
           return CupertinoActionSheet(
             actions: <Widget>[
               CupertinoActionSheetAction(
-                child: const Text('One'),
                 onPressed: () {
                   wasPressed = true;
                   Navigator.pop(context);
                 },
+                child: const Text('One'),
               ),
             ],
           );
@@ -433,12 +433,12 @@ void main() {
             CupertinoActionSheet(
               actions: <Widget>[
                 CupertinoActionSheetAction(
-                  child: const Text('One'),
                   onPressed: () { },
+                  child: const Text('One'),
                 ),
                 CupertinoActionSheetAction(
-                  child: const Text('Two'),
                   onPressed: () { },
+                  child: const Text('Two'),
                 ),
               ],
             ),
@@ -461,12 +461,12 @@ void main() {
             CupertinoActionSheet(
               actions: <Widget>[
                 CupertinoActionSheetAction(
-                  child: const Text('One'),
                   onPressed: () { },
+                  child: const Text('One'),
                 ),
                 CupertinoActionSheetAction(
-                  child: const Text('Two'),
                   onPressed: () { },
+                  child: const Text('Two'),
                 ),
               ],
             ),
@@ -489,13 +489,13 @@ void main() {
           message: Text('Very long content' * 200),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -516,17 +516,17 @@ void main() {
           message: Text('Very long content' * 200),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Two'),
               onPressed: () { },
+              child: const Text('Two'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -546,21 +546,21 @@ void main() {
           message: Text('Very long content' * 200),
           actions: <Widget>[
             CupertinoActionSheetAction(
+              onPressed: () { },
               child: const Text('One'),
-              onPressed: () { },
             ),
             CupertinoActionSheetAction(
+              onPressed: () { },
               child: const Text('Two'),
-              onPressed: () { },
             ),
             CupertinoActionSheetAction(
-              child: const Text('Three'),
               onPressed: () { },
+              child: const Text('Three'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -580,25 +580,25 @@ void main() {
           message: Text('Very long content' * 200),
           actions: <Widget>[
             CupertinoActionSheetAction(
+              onPressed: () { },
               child: const Text('One'),
-              onPressed: () { },
             ),
             CupertinoActionSheetAction(
+              onPressed: () { },
               child: const Text('Two'),
-              onPressed: () { },
             ),
             CupertinoActionSheetAction(
+              onPressed: () { },
               child: const Text('Three'),
-              onPressed: () { },
             ),
             CupertinoActionSheetAction(
-              child: const Text('Four'),
               onPressed: () { },
+              child: const Text('Four'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -618,8 +618,8 @@ void main() {
           message: Text('Very long content' * 200),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
           ],
         ),
@@ -640,12 +640,12 @@ void main() {
           message: Text('Very long content' * 200),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Two'),
               onPressed: () { },
+              child: const Text('Two'),
             ),
           ],
         ),
@@ -663,8 +663,8 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -685,11 +685,11 @@ void main() {
         Builder(builder: (BuildContext context) {
           return CupertinoActionSheet(
             cancelButton: CupertinoActionSheetAction(
-              child: const Text('Cancel'),
               onPressed: () {
                 wasPressed = true;
                 Navigator.pop(context);
               },
+              child: const Text('Cancel'),
             ),
           );
         }),
@@ -721,17 +721,17 @@ void main() {
           message: const Text('The message'),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Two'),
               onPressed: () { },
+              child: const Text('Two'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -758,17 +758,17 @@ void main() {
           message: const Text('The message'),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Two'),
               onPressed: () { },
+              child: const Text('Two'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -835,17 +835,17 @@ void main() {
           message: const Text('The message'),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Two'),
               onPressed: () { },
+              child: const Text('Two'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),
@@ -895,17 +895,17 @@ void main() {
           message: const Text('The message'),
           actions: <Widget>[
             CupertinoActionSheetAction(
-              child: const Text('One'),
               onPressed: () { },
+              child: const Text('One'),
             ),
             CupertinoActionSheetAction(
-              child: const Text('Two'),
               onPressed: () { },
+              child: const Text('Two'),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
             onPressed: () { },
+            child: const Text('Cancel'),
           ),
         ),
       ),

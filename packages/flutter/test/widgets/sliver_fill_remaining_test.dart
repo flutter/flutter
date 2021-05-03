@@ -143,8 +143,8 @@ void main() {
         final List<Widget> slivers = <Widget>[
           sliverBox,
           SliverFillRemaining(
-            child: Container(color: Colors.white),
             hasScrollBody: false,
+            child: Container(color: Colors.white),
           ),
         ];
 
@@ -190,8 +190,8 @@ void main() {
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: ElevatedButton(
-                  child: const Text('bottomCenter button'),
                   onPressed: () {},
+                  child: const Text('bottomCenter button'),
                 ),
               ),
             ),
@@ -263,8 +263,8 @@ void main() {
                 child: Padding(
                   padding: const EdgeInsets.all(50.0),
                   child: ElevatedButton(
-                    child: const Text('center button'),
                     onPressed: () {},
+                    child: const Text('center button'),
                   ),
                 ),
               ),
@@ -296,12 +296,12 @@ void main() {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 const Flexible(
-                  child: Center(child: FlutterLogo(size: 100)),
                   fit: FlexFit.loose,
+                  child: Center(child: FlutterLogo(size: 100)),
                 ),
                 ElevatedButton(
-                  child: const Text('Bottom'),
                   onPressed: () {},
+                  child: const Text('Bottom'),
                 ),
               ],
             ),
@@ -395,8 +395,8 @@ void main() {
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: ElevatedButton(
-                    child: const Text('bottomCenter button'),
                     onPressed: () {},
+                    child: const Text('bottomCenter button'),
                   ),
                 ),
               ),
@@ -452,8 +452,8 @@ void main() {
                   child: Padding(
                     padding: const EdgeInsets.all(50.0),
                     child: ElevatedButton(
-                      child: const Text('center button'),
                       onPressed: () {},
+                      child: const Text('center button'),
                     ),
                   ),
                 ),
@@ -568,12 +568,12 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Flexible(
-                    child: Center(child: FlutterLogo(size: 100)),
                     fit: FlexFit.loose,
+                    child: Center(child: FlutterLogo(size: 100)),
                   ),
                   ElevatedButton(
-                    child: const Text('Bottom'),
                     onPressed: () {},
+                    child: const Text('Bottom'),
                   ),
                 ],
               ),
@@ -683,8 +683,8 @@ void main() {
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: ElevatedButton(
-                    child: const Text('bottomCenter button'),
                     onPressed: () {},
+                    child: const Text('bottomCenter button'),
                   ),
                 ),
               ),
@@ -732,8 +732,8 @@ void main() {
                   child: Padding(
                     padding: const EdgeInsets.all(50.0),
                     child: ElevatedButton(
-                      child: const Text('center button'),
                       onPressed: () {},
+                      child: const Text('center button'),
                     ),
                   ),
                 ),

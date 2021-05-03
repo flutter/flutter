@@ -772,7 +772,6 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   Widget build(BuildContext context) {
     final Animation<double> animation = this.animation;
     return Container(
-      child: widget.child,
       alignment: _alignment?.evaluate(animation),
       padding: _padding?.evaluate(animation),
       decoration: _decoration?.evaluate(animation),
@@ -782,6 +781,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
       transform: _transform?.evaluate(animation),
       transformAlignment: _transformAlignment?.evaluate(animation),
       clipBehavior: widget.clipBehavior,
+      child: widget.child,
     );
   }
 
@@ -1248,13 +1248,13 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      child: widget.child,
       left: _left?.evaluate(animation),
       top: _top?.evaluate(animation),
       right: _right?.evaluate(animation),
       bottom: _bottom?.evaluate(animation),
       width: _width?.evaluate(animation),
       height: _height?.evaluate(animation),
+      child: widget.child,
     );
   }
 
@@ -1385,13 +1385,13 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
     assert(debugCheckHasDirectionality(context));
     return Positioned.directional(
       textDirection: Directionality.of(context),
-      child: widget.child,
       start: _start?.evaluate(animation),
       top: _top?.evaluate(animation),
       end: _end?.evaluate(animation),
       bottom: _bottom?.evaluate(animation),
       width: _width?.evaluate(animation),
       height: _height?.evaluate(animation),
+      child: widget.child,
     );
   }
 
@@ -1532,8 +1532,8 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child,
       alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
+      child: widget.child,
     );
   }
 }
@@ -1919,7 +1919,6 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
   @override
   Widget build(BuildContext context) {
     return PhysicalModel(
-      child: widget.child,
       shape: widget.shape,
       clipBehavior: widget.clipBehavior,
       borderRadius: _borderRadius!.evaluate(animation),
@@ -1928,6 +1927,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       shadowColor: widget.animateShadowColor
           ? _shadowColor!.evaluate(animation)!
           : widget.shadowColor,
+      child: widget.child,
     );
   }
 }

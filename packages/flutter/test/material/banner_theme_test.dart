@@ -56,8 +56,8 @@ void main() {
           content: const Text(contentText),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),
@@ -82,8 +82,8 @@ void main() {
           content: const Text(contentText),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),
@@ -121,8 +121,8 @@ void main() {
           leadingPadding: const EdgeInsets.all(12),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),
@@ -152,8 +152,8 @@ void main() {
           content: const Text('Content'),
           actions: <Widget>[
             TextButton(
-              child: const Text('Action'),
               onPressed: () { },
+              child: const Text('Action'),
             ),
           ],
         ),

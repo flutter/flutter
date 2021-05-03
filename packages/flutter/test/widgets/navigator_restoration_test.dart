@@ -1222,12 +1222,12 @@ class RouteWidgetState extends State<RouteWidget> with RestorationMixin {
       child: Column(
         children: <Widget>[
           GestureDetector(
-            child: Text('Route: ${widget.name}'),
             onTap: () {
               setState(() {
                 counter.value++;
               });
             },
+            child: Text('Route: ${widget.name}'),
           ),
           if (widget.arguments != null)
             Text('Arguments(home): ${widget.arguments}'),

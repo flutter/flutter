@@ -86,9 +86,9 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                         onChanged: (bool v) => setState(() { _includeBackdropFilter = v; }),
                       ),
                       MaterialButton(
-                        key: const Key('bdf-animate'), // this key is used by the driver test
+                        key: const Key('bdf-animate'),
+                        onPressed: () => setState(() { animation.repeat(); }), // this key is used by the driver test
                         child: const Text('Animate'),
-                        onPressed: () => setState(() { animation.repeat(); }),
                       ),
                     ],
                   ),

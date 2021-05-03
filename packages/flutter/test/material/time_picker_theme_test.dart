@@ -426,7 +426,6 @@ class _TimePickerLauncher extends StatelessWidget {
           child: Builder(
             builder: (BuildContext context) {
               return ElevatedButton(
-                child: const Text('X'),
                 onPressed: () async {
                   await showTimePicker(
                     context: context,
@@ -434,6 +433,7 @@ class _TimePickerLauncher extends StatelessWidget {
                     initialTime: const TimeOfDay(hour: 7, minute: 15),
                   );
                 },
+                child: const Text('X'),
               );
             },
           ),

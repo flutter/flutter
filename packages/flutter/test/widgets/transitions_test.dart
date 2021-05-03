@@ -182,9 +182,9 @@ void main() {
     ).animate(controller);
     final Widget widget = AlignTransition(
       alignment: alignmentTween,
-      child: const Text('Ready', textDirection: TextDirection.ltr),
       widthFactor: 0.3,
       heightFactor: 0.4,
+      child: const Text('Ready', textDirection: TextDirection.ltr),
     );
 
     await tester.pumpWidget(widget);

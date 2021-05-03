@@ -282,16 +282,16 @@ class _LeaveBehindListItem extends StatelessWidget {
           title: Text('Do you want to $action this item?'),
           actions: <Widget>[
             TextButton(
-              child: const Text('Yes'),
               onPressed: () {
                 Navigator.pop(context, true); // showDialog() returns true
               },
+              child: const Text('Yes'),
             ),
             TextButton(
-              child: const Text('No'),
               onPressed: () {
                 Navigator.pop(context, false); // showDialog() returns false
               },
+              child: const Text('No'),
             ),
           ],
         );

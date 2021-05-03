@@ -20,7 +20,6 @@ class ModalBottomSheetDemo extends StatelessWidget {
       ),
       body: Center(
         child: ElevatedButton(
-          child: const Text('SHOW BOTTOM SHEET'),
           onPressed: () {
             showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
               return Padding(
@@ -35,6 +34,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
               );
             });
           },
+          child: const Text('SHOW BOTTOM SHEET'),
         ),
       ),
     );

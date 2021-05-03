@@ -243,7 +243,6 @@ void main() {
             return Column(
               children: <Widget>[
                 RawMaterialButton(
-                  child: const Text('Show Modal'),
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
@@ -252,6 +251,7 @@ void main() {
                       },
                     );
                   },
+                  child: const Text('Show Modal'),
                 ),
               ],
             );
@@ -295,7 +295,6 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
           return Column(
               children: <Widget>[
                 RawMaterialButton(
-                  child: const Text('Show Modal'),
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
@@ -306,9 +305,9 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                       },
                     );
                   },
+                  child: const Text('Show Modal'),
                 ),
                 RawMaterialButton(
-                  child: const Text('Show Persistent'),
                   onPressed: () {
                     showBottomSheet<void>(
                       context: context,
@@ -319,6 +318,7 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                       },
                     );
                   },
+                  child: const Text('Show Persistent'),
                 ),
               ],
           );

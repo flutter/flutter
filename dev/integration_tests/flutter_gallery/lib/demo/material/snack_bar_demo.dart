@@ -41,7 +41,6 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
           const Text(_text2),
           Center(
             child: ElevatedButton(
-              child: const Text('SHOW A SNACKBAR'),
               onPressed: () {
                 final int thisSnackBarIndex = _snackBarIndex++;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -56,6 +55,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
                   ),
                 ));
               },
+              child: const Text('SHOW A SNACKBAR'),
             ),
           ),
           const Text(_text3),
@@ -84,11 +84,11 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         builder: buildBody
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
         tooltip: 'Create',
         onPressed: () {
           print('Floating Action Button was pressed');
         },
+        child: const Icon(Icons.add),
       ),
     );
   }

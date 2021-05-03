@@ -1009,7 +1009,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     // Otherwise, listen to the current state of the text entry.
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: _effectiveController,
-      child: editableText,
       builder: (BuildContext context, TextEditingValue? text, Widget? child) {
         return Row(children: <Widget>[
           // Insert a prefix at the front if the prefix visibility mode matches
@@ -1064,6 +1063,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             ),
         ]);
       },
+      child: editableText,
     );
   }
 

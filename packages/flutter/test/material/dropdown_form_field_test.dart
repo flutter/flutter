@@ -652,8 +652,8 @@ void main() {
                 },
                 items: items.map((String string) {
                   return DropdownMenuItem<String>(
-                    child: Text(string),
                     value: string,
+                    child: Text(string),
                   );
                 }).toList(),
               ),
@@ -731,12 +731,12 @@ void main() {
                 items: menuItems.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value),
                     onTap: () {
                       setState(() {
                         currentValue = value;
                       });
                     },
+                    child: Text(value),
                   );
                 }).toList(),
               ),

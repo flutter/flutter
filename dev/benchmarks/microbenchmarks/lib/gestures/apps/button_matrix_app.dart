@@ -37,8 +37,8 @@ class ButtonMatrixAppState extends State<ButtonMatrixApp> {
               children: List<Widget>.filled(
                 10,
                 TextButton(
-                  child: const Text('Faster'),
                   onPressed: () => setState(() { increment += 1; }),
+                  child: const Text('Faster'),
                 ),
               ),
             ),

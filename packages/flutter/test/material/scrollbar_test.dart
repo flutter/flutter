@@ -301,12 +301,12 @@ void main() {
                 data: ThemeData(),
                 child: Scaffold(
                   floatingActionButton: FloatingActionButton(
-                    child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
                         isAlwaysShown = !isAlwaysShown;
                       });
                     },
+                    child: const Icon(Icons.threed_rotation),
                   ),
                   body: Scrollbar(
                     isAlwaysShown: isAlwaysShown,
@@ -355,12 +355,12 @@ void main() {
                 data: ThemeData(),
                 child: Scaffold(
                   floatingActionButton: FloatingActionButton(
-                    child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
                         isAlwaysShown = !isAlwaysShown;
                       });
                     },
+                    child: const Icon(Icons.threed_rotation),
                   ),
                   body: Scrollbar(
                     isAlwaysShown: isAlwaysShown,
@@ -404,12 +404,12 @@ void main() {
                 data: ThemeData(),
                 child: Scaffold(
                   floatingActionButton: FloatingActionButton(
-                    child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
                         isAlwaysShown = !isAlwaysShown;
                       });
                     },
+                    child: const Icon(Icons.threed_rotation),
                   ),
                   body: Scrollbar(
                     isAlwaysShown: isAlwaysShown,
@@ -464,12 +464,12 @@ void main() {
                 data: ThemeData(),
                 child: Scaffold(
                   floatingActionButton: FloatingActionButton(
-                    child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
                         isAlwaysShown = !isAlwaysShown;
                       });
                     },
+                    child: const Icon(Icons.threed_rotation),
                   ),
                   body: Scrollbar(
                     isAlwaysShown: isAlwaysShown,

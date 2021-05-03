@@ -14,7 +14,6 @@ MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? them
         builder: (BuildContext context) {
           return Center(
             child: ElevatedButton(
-              child: const Text('X'),
               onPressed: () {
                 showDialog<void>(
                   context: context,
@@ -23,6 +22,7 @@ MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? them
                   },
                 );
               },
+              child: const Text('X'),
             ),
           );
         },

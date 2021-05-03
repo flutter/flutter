@@ -409,11 +409,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
     }
 
     final Widget box = _SegmentedControlRenderWidget<T>(
-      children: _gestureChildren,
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
       backgroundColors: _backgroundColors,
       borderColor: _borderColor!,
+      children: _gestureChildren,
     );
 
     return Padding(

@@ -35,9 +35,9 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
-          itemExtent: 2000.0, // huge extent to trigger clip
+          itemExtent: 2000.0,
+          clipBehavior: Clip.antiAlias, // huge extent to trigger clip
           children: <Widget>[Container()],
-          clipBehavior: Clip.antiAlias,
         ),
       ),
     );

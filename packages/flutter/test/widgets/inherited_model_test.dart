@@ -109,31 +109,31 @@ void main() {
                       showC,
                       showABC,
                       ElevatedButton(
-                        child: const Text('Increment a'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showA because showA depends on the 'a' aspect
                           // of the ABCModel.
                           setState(() { _a += 1; });
                         },
+                        child: const Text('Increment a'),
                       ),
                       ElevatedButton(
-                        child: const Text('Increment b'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showB because showB depends on the 'b' aspect
                           // of the ABCModel.
                           setState(() { _b += 1; });
                         },
+                        child: const Text('Increment b'),
                       ),
                       ElevatedButton(
-                        child: const Text('Increment c'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showC because showC depends on the 'c' aspect
                           // of the ABCModel.
                           setState(() { _c += 1; });
                         },
+                        child: const Text('Increment c'),
                       ),
                     ],
                   ),
@@ -252,22 +252,22 @@ void main() {
                         showABC,
                         const SizedBox(height: 24.0),
                         ElevatedButton(
-                          child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
+                          child: const Text('Increment a'),
                         ),
                         ElevatedButton(
-                          child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
+                          child: const Text('Increment b'),
                         ),
                         ElevatedButton(
-                          child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
                           },
+                          child: const Text('Increment c'),
                         ),
                       ],
                     ),
@@ -369,30 +369,30 @@ void main() {
                         showABC,
                         const SizedBox(height: 24.0),
                         ElevatedButton(
-                          child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
+                          child: const Text('Increment a'),
                         ),
                         ElevatedButton(
-                          child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
+                          child: const Text('Increment b'),
                         ),
                         ElevatedButton(
-                          child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
                           },
+                          child: const Text('Increment c'),
                         ),
                         ElevatedButton(
-                          child: const Text('rebuild'),
                           onPressed: () {
                             setState(() {
                               // Rebuild both models
                             });
                           },
+                          child: const Text('rebuild'),
                         ),
                       ],
                     ),

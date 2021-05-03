@@ -758,10 +758,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     if (!widget.excludeFromSemantics) {
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
-        child: result,
         position: position,
         allowImplicitScrolling: _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
+        child: result,
       );
     }
 

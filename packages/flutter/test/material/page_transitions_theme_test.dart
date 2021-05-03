@@ -25,8 +25,8 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
-          child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          child: const Text('push'),
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -51,8 +51,8 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
-          child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          child: const Text('push'),
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -84,8 +84,8 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
-          child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          child: const Text('push'),
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -124,8 +124,8 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
-          child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          child: const Text('push'),
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -168,16 +168,16 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
-          child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          child: const Text('push'),
         ),
       ),
       '/b': (BuildContext context) => StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           builtCount++; // Increase [builtCount] each time the widget build
           return TextButton(
-            child: const Text('pop'),
             onPressed: () { Navigator.pop(context); },
+            child: const Text('pop'),
           );
         },
       ),

@@ -88,8 +88,8 @@ void main() {
       const CupertinoApp(
         home: Center(
           child: CupertinoFormRow(
-            child: CupertinoTextField(),
             error: error,
+            child: CupertinoTextField(),
           ),
         ),
       ),
@@ -105,8 +105,8 @@ void main() {
       const CupertinoApp(
         home: Center(
           child: CupertinoFormRow(
-            child: CupertinoTextField(),
             helper: helper,
+            child: CupertinoTextField(),
           ),
         ),
       ),
@@ -123,9 +123,9 @@ void main() {
       const CupertinoApp(
         home: Center(
           child: CupertinoFormRow(
-            child: CupertinoTextField(),
             helper: helper,
             error: error,
+            child: CupertinoTextField(),
           ),
         ),
       ),
@@ -145,9 +145,9 @@ void main() {
       const CupertinoApp(
         home: Center(
           child: CupertinoFormRow(
-            child: CupertinoTextField(),
             helper: helper,
             error: error,
+            child: CupertinoTextField(),
           ),
         ),
       ),

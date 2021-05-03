@@ -80,7 +80,6 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
         child: Builder(
           builder: (BuildContext context) {
             return ElevatedButton(
-              child: const Text('X'),
               onPressed: () async {
                 if (widget.restorationId == null) {
                   widget.onChanged(await showTimePicker(
@@ -92,6 +91,7 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
                   _restorableTimePickerRouteFuture.present();
                 }
               },
+              child: const Text('X'),
             );
           },
         ),
@@ -609,7 +609,6 @@ void _tests() {
             child: Builder(
               builder: (BuildContext context) {
                 return ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showTimePicker(
                       context: context,
@@ -622,6 +621,7 @@ void _tests() {
                       },
                     );
                   },
+                  child: const Text('X'),
                 );
               },
             ),
@@ -726,7 +726,6 @@ void _tests() {
           child: Builder(
             builder: (BuildContext context) {
               return ElevatedButton(
-                child: const Text('X'),
                 onPressed: () async {
                   await showTimePicker(
                     context: context,
@@ -736,6 +735,7 @@ void _tests() {
                     helpText: helperText,
                   );
                 },
+                child: const Text('X'),
               );
             },
           ),
@@ -760,7 +760,6 @@ void _tests() {
             child: Builder(
               builder: (BuildContext context) {
                 return ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showTimePicker(
                       context: context,
@@ -773,6 +772,7 @@ void _tests() {
                       },
                     );
                   },
+                  child: const Text('X'),
                 );
               },
             ),

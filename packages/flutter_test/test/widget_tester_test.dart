@@ -380,7 +380,6 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return ElevatedButton(
-                  child: const Text('Next'),
                   onPressed: () {
                     Navigator.push<void>(context, MaterialPageRoute<void>(
                       builder: (BuildContext context) {
@@ -392,6 +391,7 @@ void main() {
                       },
                     ));
                   },
+                  child: const Text('Next'),
                 );
               } ,
             ),
@@ -418,7 +418,6 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return CupertinoButton(
-                  child: const Text('Next'),
                   onPressed: () {
                     Navigator.push<void>(context, CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
@@ -431,6 +430,7 @@ void main() {
                       },
                     ));
                   },
+                  child: const Text('Next'),
                 );
               } ,
             ),

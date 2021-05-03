@@ -429,9 +429,9 @@ class MaterialButton extends StatelessWidget {
       focusNode: focusNode,
       autofocus: autofocus,
       animationDuration: buttonTheme.getAnimationDuration(this),
-      child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       disabledElevation: disabledElevation ?? 0.0,
+      child: child,
     );
   }
 

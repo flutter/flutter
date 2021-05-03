@@ -432,13 +432,13 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return ElevatedButton(
-                  child: const Text('showModalBottomSheet'),
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) => const Text('modal bottom sheet'),
                     );
                   },
+                  child: const Text('showModalBottomSheet'),
                 );
               },
             ),

@@ -38,10 +38,10 @@ void main() {
         home: CupertinoTabView(
           builder: (BuildContext context) {
             return CupertinoButton(
-              child: const Text('go to second page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('/2');
               },
+              child: const Text('go to second page'),
             );
           },
           routes: <String, WidgetBuilder>{
@@ -129,10 +129,10 @@ void main() {
         home: CupertinoTabView(
           builder: (BuildContext context) {
             return CupertinoButton(
-              child: const Text('go to second page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('/2');
               },
+              child: const Text('go to second page'),
             );
           },
           routes: <String, WidgetBuilder>{
@@ -154,10 +154,10 @@ void main() {
           key: key,
           builder: (BuildContext context) {
             return CupertinoButton(
-              child: const Text('go to second page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('/2');
               },
+              child: const Text('go to second page'),
             );
           },
           routes: <String, WidgetBuilder>{
@@ -247,10 +247,10 @@ void main() {
         home: CupertinoTabView(
           restorationScopeId: 'tab',
           builder: (BuildContext context) => CupertinoButton(
-            child: const Text('home'),
             onPressed: () {
               Navigator.of(context).restorablePushNamed('/2');
             },
+            child: const Text('home'),
           ),
           routes: <String, WidgetBuilder>{
             '/2' : (BuildContext context) => const Text('second route'),

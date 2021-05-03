@@ -22,11 +22,11 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDragStarted: () {
               ++dragStartedCount;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -97,8 +97,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -172,8 +172,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -248,8 +248,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -321,8 +321,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -396,8 +396,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           Stack(
             children: <Widget>[
@@ -489,6 +489,7 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
+            feedback: const Text('Dragging'),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -496,7 +497,6 @@ void main() {
               },
               child: const Text('Button'),
             ),
-            feedback: const Text('Dragging'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -546,8 +546,8 @@ void main() {
         children: <Widget>[
           const LongPressDraggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -595,8 +595,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -659,15 +659,15 @@ void main() {
           Container(height: 400.0),
           const Draggable<int>(
             data: 1,
-            child: Text('H'),
             feedback: Text('Dragging'),
             affinity: Axis.horizontal,
+            child: Text('H'),
           ),
           const Draggable<int>(
             data: 2,
-            child: Text('V'),
             feedback: Text('Dragging'),
             affinity: Axis.vertical,
+            child: Text('V'),
           ),
           Container(height: 500.0),
           Container(height: 500.0),
@@ -770,15 +770,15 @@ void main() {
           Container(width: 400.0),
           const Draggable<int>(
             data: 1,
-            child: Text('H'),
             feedback: Text('Dragging'),
             affinity: Axis.horizontal,
+            child: Text('H'),
           ),
           const Draggable<int>(
             data: 2,
-            child: Text('V'),
             feedback: Text('Dragging'),
             affinity: Axis.vertical,
+            child: Text('V'),
           ),
           Container(width: 500.0),
           Container(width: 500.0),
@@ -880,23 +880,23 @@ void main() {
             Container(width: 400.0),
             const Draggable<int>(
               data: 1,
-              child: Text('H'),
               feedback: Text('H'),
               childWhenDragging: SizedBox(),
               axis: Axis.horizontal,
+              child: Text('H'),
             ),
             const Draggable<int>(
               data: 2,
-              child: Text('V'),
               feedback: Text('V'),
               childWhenDragging: SizedBox(),
               axis: Axis.vertical,
+              child: Text('V'),
             ),
             const Draggable<int>(
               data: 3,
-              child: Text('N'),
               feedback: Text('N'),
               childWhenDragging: SizedBox(),
+              child: Text('N'),
             ),
             Container(width: 500.0),
             Container(width: 500.0),
@@ -1003,32 +1003,32 @@ void main() {
           children: <Widget>[
             Draggable<int>(
               data: 1,
-              child: const Text('Source'),
               feedback: const Text('Dragging'),
               onDragUpdate: (DragUpdateDetails details) {
                 dragDelta += details.delta;
                 updated++;
               },
+              child: const Text('Source'),
             ),
             Draggable<int>(
               data: 2,
-              child: const Text('Vertical Source'),
               feedback: const Text('Vertical Dragging'),
               onDragUpdate: (DragUpdateDetails details) {
                 dragDelta += details.delta;
                 updated++;
               },
               axis: Axis.vertical,
+              child: const Text('Vertical Source'),
             ),
             Draggable<int>(
               data: 3,
-              child: const Text('Horizontal Source'),
               feedback: const Text('Horizontal Dragging'),
               onDragUpdate: (DragUpdateDetails details) {
                 dragDelta += details.delta;
                 updated++;
               },
               axis: Axis.horizontal,
+              child: const Text('Horizontal Source'),
             ),
           ],
         ),
@@ -1151,11 +1151,11 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDraggableCanceled: (Velocity velocity, Offset offset) {
               onDraggableCanceledCalled = true;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1221,13 +1221,13 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDraggableCanceled: (Velocity velocity, Offset offset) {
               onDraggableCanceledCalled = true;
               onDraggableCanceledVelocity = velocity;
               onDraggableCanceledOffset = offset;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1297,13 +1297,13 @@ void main() {
       home: Column(children: <Widget>[
         Draggable<int>(
           data: 1,
-          child: const Text('Source'),
           feedback: const Text('Source'),
           onDraggableCanceled: (Velocity velocity, Offset offset) {
             onDraggableCanceledCalled = true;
             onDraggableCanceledVelocity = velocity;
             onDraggableCanceledOffset = offset;
           },
+          child: const Text('Source'),
         ),
         DragTarget<int>(
           builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1348,12 +1348,12 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDragEnd: (DraggableDetails details) {
               onDragEndCalled = true;
               onDragEndDraggableDetails = details;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1420,8 +1420,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1475,11 +1475,11 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
           onDraggableCanceled: (Velocity velocity, Offset offset) {
             numberOfTimesOnDraggableCanceledCalled++;
           },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1560,11 +1560,11 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDragCompleted: () {
               onDragCompletedCalled = true;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1631,12 +1631,12 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDragEnd: (DraggableDetails details) {
               onDragEndCalled = true;
               onDragEndDraggableDetails = details;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1706,11 +1706,11 @@ void main() {
         children: <Widget>[
           Draggable<int>(
               data: 1,
-              child: const Text('Source'),
               feedback: const Text('Dragging'),
               onDragEnd: (DraggableDetails details) {
                 timesOnDragEndCalled++;
               },
+              child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1750,8 +1750,8 @@ void main() {
             children: const <Widget>[
               Draggable<int>(
                   data: 1,
-                  child: Text('Source'),
                   feedback: Text('Dragging'),
+                  child: Text('Source'),
               ),
             ],
         ),
@@ -1773,11 +1773,11 @@ void main() {
         children: <Widget>[
           Draggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDragCompleted: () {
               onDragCompletedCalled = true;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1842,13 +1842,13 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('IntSource'),
             feedback: Text('IntDragging'),
+            child: Text('IntSource'),
           ),
           const Draggable<double>(
             data: 1.0,
-            child: Text('DoubleSource'),
             feedback: Text('DoubleDragging'),
+            child: Text('DoubleSource'),
           ),
           Stack(
             children: <Widget>[
@@ -1976,8 +1976,8 @@ void main() {
         children: <Widget>[
           Draggable<DragTargetData>(
             data: dragTargetData,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
+            child: const Text('Source'),
           ),
           Stack(
             children: <Widget>[
@@ -2044,8 +2044,8 @@ void main() {
             Draggable<int>(
               data: 1,
               maxSimultaneousDrags: maxSimultaneousDrags,
-              child: const Text('Source'),
               feedback: const Text('Dragging'),
+              child: const Text('Source'),
             ),
             DragTarget<int>(
               builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -2173,13 +2173,13 @@ void main() {
                   didTap = true;
                 },
                 child: Draggable<Object>(
-                  child: Container(
-                    color: const Color(0xFFFFFF00),
-                  ),
                   feedback: Container(
                     width: 100.0,
                     height: 100.0,
                     color: const Color(0xFFFF0000),
+                  ),
+                  child: Container(
+                    color: const Color(0xFFFFFF00),
                   ),
                 ),
               ),
@@ -2209,13 +2209,13 @@ void main() {
               builder: (BuildContext context) => GestureDetector(
                 onTap: () { /* registers a tap recognizer */ },
                 child: Draggable<Object>(
-                  child: Container(
-                    color: const Color(0xFFFFFF00),
-                  ),
                   feedback: Container(
                     width: 100.0,
                     height: 100.0,
                     color: const Color(0xFFFF0000),
+                  ),
+                  child: Container(
+                    color: const Color(0xFFFFFF00),
                   ),
                 ),
               ),
@@ -2241,8 +2241,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -2282,8 +2282,8 @@ void main() {
         children: const <Widget>[
           Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
         ],
       ),
@@ -2303,8 +2303,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -2409,12 +2409,12 @@ void main() {
         children: <Widget>[
           LongPressDraggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDragEnd: (DraggableDetails details) {
               onDragEndCalled = true;
               onDragEndDraggableDetails = details;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -2495,11 +2495,11 @@ void main() {
         children: <Widget>[
           LongPressDraggable<int>(
             data: 1,
-            child: const Text('Source'),
             feedback: const Text('Dragging'),
             onDragCompleted: () {
               onDragCompletedCalled = true;
             },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -2567,11 +2567,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: LongPressDraggable<int>(
         data: 1,
-        child: const Text('Source'),
         feedback: const Text('Dragging'),
         onDragStarted: () {
           onDragStartedCalled = true;
         },
+        child: const Text('Source'),
       ),
     ));
 
@@ -2600,11 +2600,11 @@ void main() {
       home: LongPressDraggable<int>(
         data: 1,
         delay: const Duration(seconds: 2),
-        child: const Text('Source'),
         feedback: const Text('Dragging'),
         onDragStarted: () {
           onDragStartedCalled = true;
         },
+        child: const Text('Source'),
       ),
     ));
     expect(find.text('Source'), findsOneWidget);
@@ -2633,11 +2633,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: LongPressDraggable<int>(
         data: 1,
-        child: const Text('Source'),
         feedback: const Text('Dragging'),
         onDragStarted: () {
           onDragStartedCalled = true;
         },
+        child: const Text('Source'),
       ),
     ));
     expect(find.text('Source'), findsOneWidget);
@@ -2696,9 +2696,9 @@ void main() {
                       settings: settings,
                       builder: (BuildContext context) => const Draggable<int>(
                         data: 1,
-                        child: Text('Source'),
                         feedback: Text('Dragging'),
                         rootOverlay: true,
+                        child: Text('Source'),
                       ),
                     );
                   }
@@ -2752,8 +2752,8 @@ void main() {
         children: <Widget>[
           const Draggable<int>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<Object>(
             builder: (BuildContext context, List<Object?> data, List<dynamic> rejects) {
@@ -2788,8 +2788,8 @@ void main() {
         children: <Widget>[
           const Draggable<Object>(
             data: 1,
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -2824,8 +2824,8 @@ void main() {
       home: Column(
         children: <Widget>[
           const Draggable<Object>(
-            child: Text('Source'),
             feedback: Text('Dragging'),
+            child: Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -2874,25 +2874,25 @@ void main() {
             Container(width: 400.0),
             const Draggable<int>(
               data: 1,
-              child: Text('H'),
               feedback: Text('H'),
               childWhenDragging: SizedBox(),
               axis: Axis.horizontal,
               ignoringFeedbackSemantics: false,
+              child: Text('H'),
             ),
             const Draggable<int>(
               data: 2,
-              child: Text('V'),
               feedback: Text('V'),
               childWhenDragging: SizedBox(),
               axis: Axis.vertical,
               ignoringFeedbackSemantics: false,
+              child: Text('V'),
             ),
             const Draggable<int>(
               data: 3,
-              child: Text('N'),
               feedback: Text('N'),
               childWhenDragging: SizedBox(),
+              child: Text('N'),
             ),
           ],
         ),
@@ -3032,12 +3032,12 @@ void main() {
       home: Column(
         children: <Widget>[
           Draggable<int>(
-            child: const Text('Source'),
             feedback: const Text('Feedback'),
             dragAnchorStrategy: (Draggable<Object> widget, BuildContext context, Offset position) {
               dragAnchorStrategyCalled = true;
               return const Offset(0, 0);
             },
+            child: const Text('Source'),
           ),
         ],
       ),
@@ -3094,12 +3094,12 @@ void main() {
     const Widget widget1 = Placeholder(key: ValueKey<int>(1));
     const Widget widget2 = Placeholder(key: ValueKey<int>(2));
     Offset dummyStrategy(Draggable<Object> draggable, BuildContext context, Offset position) => Offset.zero;
-    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2), isA<Draggable<int>>());
-    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).child, widget1);
-    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).feedback, widget2);
-    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.child).dragAnchor, DragAnchor.child);
-    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.pointer).dragAnchor, DragAnchor.pointer);
-    expect(LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchorStrategy: dummyStrategy).dragAnchorStrategy, dummyStrategy);
+    expect(const LongPressDraggable<int>(feedback: widget2, child: widget1), isA<Draggable<int>>());
+    expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).child, widget1);
+    expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).feedback, widget2);
+    expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.child, child: widget1).dragAnchor, DragAnchor.child);
+    expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.pointer, child: widget1).dragAnchor, DragAnchor.pointer);
+    expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
   });
 }
 
@@ -3116,12 +3116,12 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   await tester.pumpWidget(MaterialApp(
     home: LongPressDraggable<int>(
       data: 1,
-      child: const Text('Source'),
       feedback: const Text('Dragging'),
       hapticFeedbackOnStart: hapticFeedbackOnStart,
       onDragStarted: () {
         onDragStartedCalled = true;
       },
+      child: const Text('Source'),
     ),
   ));
 
@@ -3164,11 +3164,11 @@ Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, do
               children: <Widget>[
                 Draggable<int>(
                   data: 1,
-                  child: const Text('Source'),
                   feedback: const Text('Dragging'),
                   onDragStarted: () {
                     ++dragStartedCount;
                   },
+                  child: const Text('Source'),
                 ),
                 DragTarget<int>(
                   builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {

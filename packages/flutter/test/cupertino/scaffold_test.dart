@@ -320,7 +320,6 @@ void main() {
                   ),
                   child: Center(
                     child: CupertinoButton(
-                      child: const Text('Next'),
                       onPressed: () {
                         Navigator.of(context).push(
                           CupertinoPageRoute<void>(
@@ -331,10 +330,10 @@ void main() {
                                 ),
                                 child: Center(
                                   child: CupertinoButton(
-                                    child: const Text('Back'),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                     },
+                                    child: const Text('Back'),
                                   ),
                                 ),
                               );
@@ -342,6 +341,7 @@ void main() {
                           ),
                         );
                       },
+                      child: const Text('Next'),
                     ),
                   ),
                 );
@@ -420,8 +420,8 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
-          child: Center(),
           backgroundColor: Color(0xFF010203),
+          child: Center(),
         ),
       ),
     );

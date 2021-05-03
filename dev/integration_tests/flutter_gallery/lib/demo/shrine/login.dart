@@ -133,8 +133,8 @@ class PrimaryColorOverride extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      child: child!,
       data: Theme.of(context).copyWith(primaryColor: color),
+      child: child!,
     );
   }
 }

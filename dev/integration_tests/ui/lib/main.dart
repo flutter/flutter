@@ -13,10 +13,6 @@ void main() {
       child: Builder(
         builder: (BuildContext context) {
           return TextButton(
-            child: const Text(
-              'flutter drive lib/xxx.dart',
-              textDirection: TextDirection.ltr,
-            ),
             onPressed: () {
               Navigator.push<Object?>(
                 context,
@@ -34,6 +30,10 @@ void main() {
                 ),
               );
             },
+            child: const Text(
+              'flutter drive lib/xxx.dart',
+              textDirection: TextDirection.ltr,
+            ),
           );
         },
       ),

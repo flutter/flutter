@@ -79,136 +79,136 @@ class HomePage extends StatelessWidget {
         children: <Widget>[
           ElevatedButton(
             key: const Key(kCullOpacityRouteName),
-            child: const Text('Cull opacity'),
             onPressed: () {
               Navigator.pushNamed(context, kCullOpacityRouteName);
             },
+            child: const Text('Cull opacity'),
           ),
           ElevatedButton(
             key: const Key(kCubicBezierRouteName),
-            child: const Text('Cubic Bezier'),
             onPressed: () {
               Navigator.pushNamed(context, kCubicBezierRouteName);
             },
+            child: const Text('Cubic Bezier'),
           ),
           ElevatedButton(
             key: const Key(kBackdropFilterRouteName),
-            child: const Text('Backdrop Filter'),
             onPressed: () {
               Navigator.pushNamed(context, kBackdropFilterRouteName);
             },
+            child: const Text('Backdrop Filter'),
           ),
           ElevatedButton(
             key: const Key(kPostBackdropFilterRouteName),
-            child: const Text('Post Backdrop Filter'),
             onPressed: () {
               Navigator.pushNamed(context, kPostBackdropFilterRouteName);
             },
+            child: const Text('Post Backdrop Filter'),
           ),
           ElevatedButton(
             key: const Key(kSimpleAnimationRouteName),
-            child: const Text('Simple Animation'),
             onPressed: () {
               Navigator.pushNamed(context, kSimpleAnimationRouteName);
             },
+            child: const Text('Simple Animation'),
           ),
           ElevatedButton(
             key: const Key(kPictureCacheRouteName),
-            child: const Text('Picture Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kPictureCacheRouteName);
             },
+            child: const Text('Picture Cache'),
           ),
           ElevatedButton(
             key: const Key(kLargeImagesRouteName),
-            child: const Text('Large Images'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImagesRouteName);
             },
+            child: const Text('Large Images'),
           ),
           ElevatedButton(
             key: const Key(kTextRouteName),
-            child: const Text('Text'),
             onPressed: () {
               Navigator.pushNamed(context, kTextRouteName);
             },
+            child: const Text('Text'),
           ),
           ElevatedButton(
             key: const Key(kFullscreenTextRouteName),
-            child: const Text('Fullscreen Text'),
             onPressed: () {
               Navigator.pushNamed(context, kFullscreenTextRouteName);
             },
+            child: const Text('Fullscreen Text'),
           ),
           ElevatedButton(
             key: const Key(kAnimatedPlaceholderRouteName),
-            child: const Text('Animated Placeholder'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedPlaceholderRouteName);
             },
+            child: const Text('Animated Placeholder'),
           ),
           ElevatedButton(
             key: const Key(kColorFilterAndFadeRouteName),
-            child: const Text('Color Filter and Fade'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterAndFadeRouteName);
             },
+            child: const Text('Color Filter and Fade'),
           ),
           ElevatedButton(
             key: const Key(kFadingChildAnimationRouteName),
-            child: const Text('Fading Child Animation'),
             onPressed: () {
               Navigator.pushNamed(context, kFadingChildAnimationRouteName);
             },
+            child: const Text('Fading Child Animation'),
           ),
           ElevatedButton(
             key: const Key(kImageFilteredTransformAnimationRouteName),
-            child: const Text('ImageFiltered Transform Animation'),
             onPressed: () {
               Navigator.pushNamed(context, kImageFilteredTransformAnimationRouteName);
             },
+            child: const Text('ImageFiltered Transform Animation'),
           ),
           ElevatedButton(
             key: const Key(kMultiWidgetConstructionRouteName),
-            child: const Text('Widget Construction and Destruction'),
             onPressed: () {
               Navigator.pushNamed(context, kMultiWidgetConstructionRouteName);
             },
+            child: const Text('Widget Construction and Destruction'),
           ),
           ElevatedButton(
             key: const Key(kHeavyGridViewRouteName),
-            child: const Text('Heavy Grid View'),
             onPressed: () {
               Navigator.pushNamed(context, kHeavyGridViewRouteName);
             },
+            child: const Text('Heavy Grid View'),
           ),
           ElevatedButton(
             key: const Key(kLargeImageChangerRouteName),
-            child: const Text('Large Image Changer'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImageChangerRouteName);
             },
+            child: const Text('Large Image Changer'),
           ),
           ElevatedButton(
             key: const Key(kStackSizeRouteName),
-            child: const Text('Stack Size'),
             onPressed: () {
               Navigator.pushNamed(context, kStackSizeRouteName);
             },
+            child: const Text('Stack Size'),
           ),
           ElevatedButton(
             key: const Key(kAnimationWithMicrotasksRouteName),
-            child: const Text('Animation With Microtasks'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimationWithMicrotasksRouteName);
             },
+            child: const Text('Animation With Microtasks'),
           ),
           ElevatedButton(
             key: const Key(kAnimatedImageRouteName),
-            child: const Text('Animated Image'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedImageRouteName);
             },
+            child: const Text('Animated Image'),
           ),
         ],
       ),

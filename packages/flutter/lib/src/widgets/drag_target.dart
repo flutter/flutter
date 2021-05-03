@@ -1007,8 +1007,8 @@ class _DragAvatar<T extends Object> extends Drag {
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
       child: IgnorePointer(
-        child: feedback,
         ignoringSemantics: ignoringFeedbackSemantics,
+        child: feedback,
       ),
     );
   }

@@ -454,10 +454,10 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
         floatingActionButton: Builder(
           builder: (BuildContext context) {
             return FloatingActionButton(
-              child: const Icon(Icons.refresh),
               onPressed: () {
                 _play(_allDemos[DefaultTabController.of(context).index]);
               },
+              child: const Icon(Icons.refresh),
             );
           },
         ),

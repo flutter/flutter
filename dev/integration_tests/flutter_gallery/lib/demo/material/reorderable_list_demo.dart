@@ -150,8 +150,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           key: Key(item.value),
           height: 100.0,
           width: 100.0,
-          child: CircleAvatar(child: Text(item.value),
-            backgroundColor: Colors.green,
+          child: CircleAvatar(backgroundColor: Colors.green,child: Text(item.value),
           ),
         );
         break;

@@ -15,8 +15,8 @@ void main() {
         appBar: AppBar(title: const Text('Button Border Test')),
         body: Center(
           child: ElevatedButton(
-            child: const Text('Test'),
             onPressed: () { },
+            child: const Text('Test'),
           ),
         ),
       ),

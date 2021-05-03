@@ -175,10 +175,10 @@ void main() {
       await tester.pumpWidget(
         Flow(
           delegate: OpacityFlowDelegate(opacity),
+          clipBehavior: clip,
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0),
           ],
-          clipBehavior: clip,
         ),
       );
       expect(renderObject.clipBehavior, clip);
@@ -204,10 +204,10 @@ void main() {
       await tester.pumpWidget(
         Flow.unwrapped(
           delegate: OpacityFlowDelegate(opacity),
+          clipBehavior: clip,
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0),
           ],
-          clipBehavior: clip,
         ),
       );
       expect(renderObject.clipBehavior, clip);

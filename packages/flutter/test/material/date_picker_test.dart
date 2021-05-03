@@ -220,7 +220,6 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return ElevatedButton(
-                    child: const Text('X'),
                     onPressed: () {
                       showDatePicker(
                         context: context,
@@ -235,6 +234,7 @@ void main() {
                         },
                       );
                     },
+                    child: const Text('X'),
                   );
                 },
               ),
@@ -313,7 +313,6 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDatePicker(
                       context: context,
@@ -322,6 +321,7 @@ void main() {
                       lastDate: DateTime(2030),
                     );
                   },
+                  child: const Text('X'),
                 );
               },
             ),
@@ -348,7 +348,6 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDatePicker(
                       context: context,
@@ -357,6 +356,7 @@ void main() {
                       lastDate: DateTime(2030),
                     );
                   },
+                  child: const Text('X'),
                 );
               },
             ),
@@ -378,7 +378,6 @@ void main() {
                child: Builder(
                  builder: (BuildContext context) {
                    return ElevatedButton(
-                     child: const Text('X'),
                      onPressed: () {
                        showDatePicker(
                          context: context,
@@ -393,6 +392,7 @@ void main() {
                          },
                        );
                      },
+                     child: const Text('X'),
                    );
                  },
                ),

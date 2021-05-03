@@ -147,7 +147,6 @@ void main() {
               child: Column(
                 children: <Widget>[
                   PopupMenuButton<int>(
-                    child: Text('Tap Me', key: popupButtonKey),
                     enabled: false,
                     itemBuilder: (BuildContext context) {
                       itemBuilderCalled = true;
@@ -160,6 +159,7 @@ void main() {
                     },
                     onSelected: (int selected) => onSelectedCalled = true,
                     onCanceled: () => onCanceledCalled = true,
+                    child: Text('Tap Me', key: popupButtonKey),
                   ),
                 ],
               ),
@@ -222,7 +222,6 @@ void main() {
             children: <Widget>[
               PopupMenuButton<int>(
                 key: popupButtonKey,
-                child: Container(key: childKey),
                 enabled: false,
                 itemBuilder: (BuildContext context) {
                   itemBuilderCalled = true;
@@ -234,6 +233,7 @@ void main() {
                   ];
                 },
                 onSelected: (int selected) => onSelectedCalled = true,
+                child: Container(key: childKey),
               ),
             ],
           ),
@@ -264,7 +264,6 @@ void main() {
                 children: <Widget>[
                   PopupMenuButton<int>(
                     key: popupButtonKey,
-                    child: Container(key: childKey),
                     enabled: false,
                     itemBuilder: (BuildContext context) {
                       return <PopupMenuEntry<int>>[
@@ -275,6 +274,7 @@ void main() {
                       ];
                     },
                     onSelected: (int selected) {},
+                    child: Container(key: childKey),
                   ),
                 ],
               ),
@@ -424,9 +424,9 @@ void main() {
     testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
       expect(() {
         PopupMenuButton<int>(
-            child: const Text('heyo'),
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
+            child: const Text('heyo'),
         );
       }, throwsAssertionError);
     });
@@ -1156,19 +1156,19 @@ void main() {
               onSelected: (String result) {
                 selectedValue = result;
               },
-              child: const Text('Menu Button'),
               initialValue: '1',
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
-                  child: Text('1'),
                   value: '1',
+                  child: Text('1'),
                 ),
                 const PopupMenuDivider(),
                 const PopupMenuItem<String>(
-                  child: Text('2'),
                   value: '2',
+                  child: Text('2'),
                 ),
               ],
+              child: const Text('Menu Button'),
             ),
           ),
         ),
@@ -1206,7 +1206,6 @@ void main() {
           body: Center(
             child: PopupMenuButton<String>(
               key: popupMenuButtonKey,
-              child: const Text('button'),
               onSelected: (String result) { },
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
@@ -1246,6 +1245,7 @@ void main() {
                   ),
                 ];
               },
+              child: const Text('button'),
             ),
           ),
         ),
@@ -1288,7 +1288,6 @@ void main() {
           body: Center(
             child: PopupMenuButton<String>(
               key: popupMenuButtonKey,
-              child: const Text('button'),
               onSelected: (String result) { },
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
@@ -1316,6 +1315,7 @@ void main() {
                   ),
                 ];
               },
+              child: const Text('button'),
             ),
           ),
         ),
@@ -1349,7 +1349,6 @@ void main() {
           body: Center(
             child: PopupMenuButton<String>(
               key: popupMenuButtonKey,
-              child: const Text('button'),
               onSelected: (String result) { },
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
@@ -1393,6 +1392,7 @@ void main() {
                   ),
                 ];
               },
+              child: const Text('button'),
             ),
           ),
         ),
@@ -1439,7 +1439,6 @@ void main() {
           body: Center(
             child: PopupMenuButton<String>(
               key: popupMenuButtonKey,
-              child: const Text('button'),
               onSelected: (String result) { },
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
@@ -1467,6 +1466,7 @@ void main() {
                   ),
                 ];
               },
+              child: const Text('button'),
             ),
           ),
         ),
@@ -1513,7 +1513,6 @@ void main() {
         home: Scaffold(
           body: PopupMenuButton<String>(
             key: popupMenuButtonKey,
-            child: const Text('button'),
             onSelected: (String result) { },
             itemBuilder: (BuildContext context) {
               return <PopupMenuEntry<String>>[
@@ -1527,6 +1526,7 @@ void main() {
                 ),
               ];
             },
+            child: const Text('button'),
           ),
         ),
       );
@@ -1567,8 +1567,8 @@ void main() {
     expect(() {
       PopupMenuButton<int>(
         itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
-        child: Container(),
         icon: const Icon(Icons.error),
+        child: Container(),
       );
     }, throwsAssertionError);
   });
@@ -1982,13 +1982,13 @@ void main() {
             title: const Text('PopupMenu Test'),
           ),
           body: PopupMenuButton<int>(
-            child: const Text('Show Menu'),
             itemBuilder: (BuildContext context) => Iterable<PopupMenuItem<int>>.generate(
               20, (int i) => PopupMenuItem<int>(
                 value: i,
                 child: Text('Item $i'),
               ),
             ).toList(),
+            child: const Text('Show Menu'),
           ),
         ),
       ),
@@ -2024,6 +2024,10 @@ void main() {
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
             actions: <Widget>[PopupMenuButton<int>(
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+              ],
               child: SizedBox(
                 key: buttonKey,
                 height: height,
@@ -2032,10 +2036,6 @@ void main() {
                   color: Colors.pink,
                 ),
               ),
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(child: Text('-1-'), value: 1),
-                const PopupMenuItem<int>(child: Text('-2-'), value: 2),
-              ],
             )],
           ),
           body: Container(),
@@ -2078,7 +2078,6 @@ void main() {
             ),
             child: PopupMenuButton<int>(
               enableFeedback: widgetEnableFeedack,
-              child: const Text('Show Menu'),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem<int>>[
                   const PopupMenuItem<int>(
@@ -2087,6 +2086,7 @@ void main() {
                   ),
                 ];
               },
+              child: const Text('Show Menu'),
             ),
           ),
         ),
@@ -2222,6 +2222,10 @@ void main() {
               children: <Widget>[
                 const SizedBox(height: 100),
                 PopupMenuButton<int>(
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                    const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                  ],
                   child: SizedBox(
                     key: buttonKey,
                     height: 10.0,
@@ -2230,10 +2234,6 @@ void main() {
                       color: Colors.pink,
                     ),
                   ),
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                    const PopupMenuItem<int>(child: Text('-1-'), value: 1),
-                    const PopupMenuItem<int>(child: Text('-2-'), value: 2),
-                  ],
                 ),
                 const SizedBox(height: 600),
               ],

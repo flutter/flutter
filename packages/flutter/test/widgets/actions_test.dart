@@ -930,8 +930,8 @@ void main() {
               descendantsAreFocusable: true,
               child: MaterialButton(
                 focusNode: buttonNode,
-                child: const Text('Test'),
                 onPressed: () {},
+                child: const Text('Test'),
               ),
             ),
           ),
@@ -949,8 +949,8 @@ void main() {
               descendantsAreFocusable: false,
               child: MaterialButton(
                 focusNode: buttonNode,
-                child: const Text('Test'),
                 onPressed: () {},
+                child: const Text('Test'),
               ),
             ),
           ),

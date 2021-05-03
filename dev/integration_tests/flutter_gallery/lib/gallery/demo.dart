@@ -251,11 +251,11 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
+      onPressed: () => launch(documentationUrl!, forceWebView: true),
       child: Semantics(
         label: 'API documentation',
         child: const Icon(CupertinoIcons.book),
       ),
-      onPressed: () => launch(documentationUrl!, forceWebView: true),
     );
   }
 }

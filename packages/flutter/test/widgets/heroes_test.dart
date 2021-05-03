@@ -47,16 +47,16 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         )),
         const SizedBox(height: 100.0, width: 100.0),
         TextButton(
-          child: const Text('two'),
           onPressed: () { Navigator.pushNamed(context, '/two'); },
+          child: const Text('two'),
         ),
         TextButton(
-          child: const Text('twoInset'),
           onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
+          child: const Text('twoInset'),
         ),
         TextButton(
-          child: const Text('simple'),
           onPressed: () { Navigator.pushNamed(context, '/simple'); },
+          child: const Text('simple'),
         ),
       ],
     ),
@@ -66,8 +66,8 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       key: routeTwoKey,
       children: <Widget>[
         TextButton(
-          child: const Text('pop'),
           onPressed: () { Navigator.pop(context); },
+          child: const Text('pop'),
         ),
         const SizedBox(height: 150.0, width: 150.0),
         Card(child: Hero(
@@ -77,8 +77,8 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         )),
         const SizedBox(height: 150.0, width: 150.0),
         TextButton(
-          child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
+          child: const Text('three'),
         ),
       ],
     ),
@@ -92,8 +92,8 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       key: routeTwoKey,
       children: <Widget>[
         TextButton(
-          child: const Text('pop'),
           onPressed: () { Navigator.pop(context); },
+          child: const Text('pop'),
         ),
         const SizedBox(height: 150.0, width: 150.0),
         Card(
@@ -108,8 +108,8 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         ),
         const SizedBox(height: 150.0, width: 150.0),
         TextButton(
-          child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
+          child: const Text('three'),
         ),
       ],
     ),
@@ -148,7 +148,7 @@ class ThreeRoute extends MaterialPageRoute<void> {
 class MutatingRoute extends MaterialPageRoute<void> {
   MutatingRoute()
     : super(builder: (BuildContext context) {
-        return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
+        return Hero(tag: 'a', key: UniqueKey(), child: const Text('MutatingRoute'));
       });
 
   void markNeedsBuild() {
@@ -317,7 +317,6 @@ Future<void> main() async {
                 builder: (BuildContext c) {
                   return Hero(
                     tag: 'hero',
-                    child: Container(),
                     flightShuttleBuilder: (
                       BuildContext flightContext,
                       Animation<double> animation,
@@ -327,6 +326,7 @@ Future<void> main() async {
                     ) {
                       return Container(key: heroKey);
                     },
+                    child: Container(),
                   );
                 },
                 settings: s,
@@ -340,7 +340,6 @@ Future<void> main() async {
       builder: (BuildContext c) {
         return Hero(
           tag: 'hero',
-          child: Container(),
           flightShuttleBuilder: (
             BuildContext flightContext,
             Animation<double> animation,
@@ -350,6 +349,7 @@ Future<void> main() async {
             ) {
             return Container(key: heroKey);
           },
+          child: Container(),
         );
       },
     ));
@@ -372,7 +372,6 @@ Future<void> main() async {
                 builder: (BuildContext c) {
                   return Hero(
                     tag: 'hero',
-                    child: Container(),
                     flightShuttleBuilder: (
                       BuildContext flightContext,
                       Animation<double> animation,
@@ -382,6 +381,7 @@ Future<void> main() async {
                       ) {
                       return Container(key: heroKey);
                     },
+                    child: Container(),
                   );
                 },
                 settings: s,
@@ -430,7 +430,7 @@ Future<void> main() async {
           children: <Widget>[
             const Hero(tag: 'a', child: Text('foo')),
             Builder(builder: (BuildContext context) {
-              return TextButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
+              return TextButton(onPressed: () => Navigator.push(context, route), child: const Text('two'));
             }),
           ],
         ),
@@ -616,7 +616,6 @@ Future<void> main() async {
             Builder(
               builder: (BuildContext context) {
                 return TextButton(
-                  child: const Text('push'),
                   onPressed: () {
                     Navigator.push(context, PageRouteBuilder<void>(
                       pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
@@ -624,6 +623,7 @@ Future<void> main() async {
                       },
                     ));
                   },
+                  child: const Text('push'),
                 );
               },
             ),
@@ -819,8 +819,8 @@ Future<void> main() async {
                 },
               ),
               TextButton(
-                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); },
+                child: const Text('POP'),
               ),
             ],
           ),
@@ -840,8 +840,8 @@ Future<void> main() async {
                     child: Hero(tag: 'H', child: SizedBox(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
                   TextButton(
-                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
+                    child: const Text('PUSH'),
                   ),
                 ],
               );
@@ -917,8 +917,8 @@ Future<void> main() async {
                 child: const Hero(tag: 'H', child: SizedBox(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
               TextButton(
-                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); },
+                child: const Text('POP'),
               ),
               const SizedBox(height: 600.0),
             ],
@@ -946,8 +946,8 @@ Future<void> main() async {
                   // This container will appear at Y=200
                   const Hero(tag: 'H', child: SizedBox(key: homeHeroKey, height: 100.0, width: 100.0)),
                   TextButton(
-                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
+                    child: const Text('PUSH'),
                   ),
                   const SizedBox(height: 600.0),
                 ],
@@ -1023,8 +1023,8 @@ Future<void> main() async {
                   // This container will appear at Y=200
                   const Hero(tag: 'H', child: SizedBox(key: homeHeroKey, height: 100.0, width: 100.0)),
                   TextButton(
-                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
+                    child: const Text('PUSH'),
                   ),
                 ],
               );
@@ -1107,8 +1107,8 @@ Future<void> main() async {
                 ),
               ),
               TextButton(
-                child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); },
+                child: const Text('PUSH C'),
               ),
               const Hero(
                 tag: 'BC',
@@ -1143,8 +1143,8 @@ Future<void> main() async {
                     ),
                   ),
                   TextButton(
-                    child: const Text('PUSH B'),
                     onPressed: () { Navigator.push(context, routeB); },
+                    child: const Text('PUSH B'),
                   ),
                 ],
               );
@@ -1216,8 +1216,8 @@ Future<void> main() async {
                 ),
               ),
               TextButton(
-                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); },
+                child: const Text('POP'),
               ),
             ],
           ),
@@ -1242,8 +1242,8 @@ Future<void> main() async {
                     ),
                   ),
                   TextButton(
-                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); },
+                    child: const Text('PUSH'),
                   ),
                 ],
               );
@@ -1300,8 +1300,8 @@ Future<void> main() async {
               child: SizedBox(height: 100.0, width: 100.0, key: firstKey),
             ),
             TextButton(
-              child: const Text('two'),
               onPressed: () { Navigator.pushNamed(context, '/two'); },
+              child: const Text('two'),
             ),
           ],
         ),
@@ -1313,8 +1313,8 @@ Future<void> main() async {
             SizedBox(
               height: 200.0,
               child: TextButton(
-                child: const Text('pop'),
                 onPressed: () { Navigator.pop(context); },
+                child: const Text('pop'),
               ),
             ),
             Hero(
@@ -1415,8 +1415,8 @@ Future<void> main() async {
               child: SizedBox(height: 100.0, width: 100.0, key: firstKey),
             ),
             TextButton(
-              child: const Text('two'),
               onPressed: () { Navigator.pushNamed(context, '/two'); },
+              child: const Text('two'),
             ),
           ],
         ),
@@ -1428,8 +1428,8 @@ Future<void> main() async {
             SizedBox(
               height: 200.0,
               child: TextButton(
-                child: const Text('pop'),
                 onPressed: () { Navigator.pop(context); },
+                child: const Text('pop'),
               ),
             ),
             Hero(
@@ -1620,13 +1620,11 @@ Future<void> main() async {
             const Hero(tag: 'a', child: Text('foo')),
             Builder(builder: (BuildContext context) {
               return TextButton(
-                child: const Text('two'),
                 onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return Material(
                       child: Hero(
                         tag: 'a',
-                        child: const Text('bar'),
                         flightShuttleBuilder: (
                           BuildContext flightContext,
                           Animation<double> animation,
@@ -1636,10 +1634,12 @@ Future<void> main() async {
                         ) {
                           return const Text('baz');
                         },
+                        child: const Text('bar'),
                       ),
                     );
                   },
                 )),
+                child: const Text('two'),
               );
             }),
           ],
@@ -1663,7 +1663,6 @@ Future<void> main() async {
           children: <Widget>[
             Hero(
               tag: 'a',
-              child: const Text('foo'),
               flightShuttleBuilder: (
                 BuildContext flightContext,
                 Animation<double> animation,
@@ -1671,10 +1670,10 @@ Future<void> main() async {
                 BuildContext fromHeroContext,
                 BuildContext toHeroContext,
               ) { return const Text('baz'); },
+              child: const Text('foo'),
             ),
             Builder(builder: (BuildContext context) {
               return TextButton(
-                child: const Text('two'),
                 onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return const Material(
@@ -1682,6 +1681,7 @@ Future<void> main() async {
                     );
                   },
                 )),
+                child: const Text('two'),
               );
             }),
           ],
@@ -1706,7 +1706,6 @@ Future<void> main() async {
           children: <Widget>[
             Hero(
               tag: 'a',
-              child: const Text('foo'),
               flightShuttleBuilder: (
                 BuildContext flightContext,
                 Animation<double> animation,
@@ -1714,16 +1713,15 @@ Future<void> main() async {
                 BuildContext fromHeroContext,
                 BuildContext toHeroContext,
               ) { return const Text('fromHero text'); },
+              child: const Text('foo'),
             ),
             Builder(builder: (BuildContext context) {
               return TextButton(
-                child: const Text('two'),
                 onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return Material(
                       child: Hero(
                         tag: 'a',
-                        child: const Text('bar'),
                         flightShuttleBuilder: (
                           BuildContext flightContext,
                           Animation<double> animation,
@@ -1731,10 +1729,12 @@ Future<void> main() async {
                           BuildContext fromHeroContext,
                           BuildContext toHeroContext,
                         ) { return const Text('toHero text'); },
+                        child: const Text('bar'),
                       ),
                     );
                   },
                 )),
+                child: const Text('two'),
               );
             }),
           ],
@@ -1759,27 +1759,27 @@ Future<void> main() async {
           children: <Widget>[
             Hero(
               tag: 'a',
-              child: const Text('Batman'),
               placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
                 return const Text('Venom');
               },
+              child: const Text('Batman'),
             ),
             Builder(builder: (BuildContext context) {
               return TextButton(
-                child: const Text('two'),
                 onPressed: () => Navigator.push<void>(context, MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return Material(
                       child: Hero(
                         tag: 'a',
-                        child: const Text('Wolverine'),
                         placeholderBuilder: (BuildContext context, Size size, Widget child) {
                           return const Text('Joker');
                         },
+                        child: const Text('Wolverine'),
                       ),
                     );
                   },
                 )),
+                child: const Text('two'),
               );
             }),
           ],
@@ -2734,7 +2734,6 @@ Future<void> main() async {
             Builder(
               builder: (BuildContext context) {
                 return TextButton(
-                  child: const Text('push'),
                   onPressed: () {
                     Navigator.push(context, PageRouteBuilder<void>(
                       pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
@@ -2751,6 +2750,7 @@ Future<void> main() async {
                       },
                     ));
                   },
+                  child: const Text('push'),
                 );
               },
             ),
@@ -2806,7 +2806,6 @@ Future<void> main() async {
             Builder(
               builder: (BuildContext context) {
                 return TextButton(
-                  child: const Text('push'),
                   onPressed: () {
                     Navigator.push(context, PageRouteBuilder<void>(
                       pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
@@ -2823,6 +2822,7 @@ Future<void> main() async {
                       },
                     ));
                   },
+                  child: const Text('push'),
                 );
               },
             ),

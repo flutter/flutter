@@ -283,8 +283,8 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
-          child: const Text('PUSH'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
+          child: const Text('PUSH'),
         ),
       ),
       '/b': (BuildContext context) => const Text('HELLO'),

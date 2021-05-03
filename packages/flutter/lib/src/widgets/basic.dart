@@ -2653,11 +2653,11 @@ class UnconstrainedBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstraintsTransformBox(
-      child: child,
       textDirection: textDirection,
       alignment: alignment,
       clipBehavior: clipBehavior,
       constraintsTransform: _axisToTransform(constrainedAxis),
+      child: child,
     );
   }
 

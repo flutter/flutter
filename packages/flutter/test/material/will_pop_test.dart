@@ -83,13 +83,13 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: TextButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
                       builder: (BuildContext context) => const SamplePage(),
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -137,7 +137,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: TextButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
@@ -147,6 +146,7 @@ void main() {
                       },
                     ));
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -176,7 +176,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: TextButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
@@ -186,6 +185,7 @@ void main() {
                       },
                     ));
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -229,12 +229,12 @@ void main() {
           return AlertDialog(
             actions: <Widget> [
               TextButton(
-                child: const Text('YES'),
                 onPressed: () { Navigator.of(context).pop(true); },
+                child: const Text('YES'),
               ),
               TextButton(
-                child: const Text('NO'),
                 onPressed: () { Navigator.of(context).pop(false); },
+                child: const Text('NO'),
               ),
             ],
           );
@@ -250,7 +250,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: TextButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
@@ -260,6 +259,7 @@ void main() {
                       },
                     ));
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -336,10 +336,10 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: TextButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(route);
                   },
+                  child: const Text('X'),
                 ),
               );
             },

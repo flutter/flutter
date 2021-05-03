@@ -154,9 +154,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: ElevatedButton(
-              child: const Text('ElevatedButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('ElevatedButton'),
             ),
           ),
         ),
@@ -221,9 +221,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return ElevatedButton(
-                    child: const Text('ElevatedButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('ElevatedButton'),
                   );
                 },
               ),
@@ -348,9 +348,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ElevatedButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -566,8 +566,8 @@ void main() {
               child: ElevatedButton(
                 key: key,
                 style: style,
-                child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
+                child: const SizedBox(width: 50.0, height: 8.0),
               ),
             ),
           ),

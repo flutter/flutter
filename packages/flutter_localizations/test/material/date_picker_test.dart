@@ -242,7 +242,6 @@ void main() {
                 locale: locale,
                 delegates: GlobalMaterialLocalizations.delegates,
                 child: TextButton(
-                  child: const Text('X'),
                   onPressed: () {
                     showDatePicker(
                       context: context,
@@ -251,6 +250,7 @@ void main() {
                       lastDate: lastDate,
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },

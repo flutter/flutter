@@ -187,7 +187,7 @@ linter:
     - recursive_getters
     - sized_box_for_whitespace
     - slash_for_doc_comments
-    # - sort_child_properties_last # not yet tested
+    - sort_child_properties_last
     - sort_constructors_first
     # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first

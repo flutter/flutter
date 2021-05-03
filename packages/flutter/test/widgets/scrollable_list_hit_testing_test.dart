@@ -24,8 +24,8 @@ void main() {
               children: items.map<Widget>((int item) {
                 return GestureDetector(
                   onTap: () { tapped.add(item); },
-                  child: Text('$item'),
                   dragStartBehavior: DragStartBehavior.down,
+                  child: Text('$item'),
                 );
               }).toList(),
             ),
@@ -66,8 +66,8 @@ void main() {
               children: items.map<Widget>((int item) {
                 return GestureDetector(
                   onTap: () { tapped.add(item); },
-                  child: Text('$item'),
                   dragStartBehavior: DragStartBehavior.down,
+                  child: Text('$item'),
                 );
               }).toList(),
             ),

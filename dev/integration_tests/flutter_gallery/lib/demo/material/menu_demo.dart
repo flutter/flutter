@@ -163,10 +163,6 @@ class MenuDemoState extends State<MenuDemo> {
               padding: EdgeInsets.zero,
               initialValue: _simpleValue,
               onSelected: showMenuSelection,
-              child: ListTile(
-                title: const Text('An item with a simple menu'),
-                subtitle: Text(_simpleValue!),
-              ),
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 PopupMenuItem<String>(
                   value: _simpleValue1,
@@ -181,6 +177,10 @@ class MenuDemoState extends State<MenuDemo> {
                   child: Text(_simpleValue3),
                 ),
               ],
+              child: ListTile(
+                title: const Text('An item with a simple menu'),
+                subtitle: Text(_simpleValue!),
+              ),
             ),
             // Pressing the PopupMenuButton on the right of this item shows a menu
             // whose items have checked icons that reflect this app's state.

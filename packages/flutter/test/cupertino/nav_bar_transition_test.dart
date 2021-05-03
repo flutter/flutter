@@ -441,7 +441,6 @@ void main() {
                   ),
                   child: Center(
                     child: CupertinoButton(
-                      child: const Text('Next'),
                       onPressed: () {
                         Navigator.push<void>(context, CupertinoPageRoute<void>(
                           title: 'Tab ${tab + 1} Page 2',
@@ -453,6 +452,7 @@ void main() {
                           },
                         ));
                       },
+                      child: const Text('Next'),
                     ),
                   ),
                 );

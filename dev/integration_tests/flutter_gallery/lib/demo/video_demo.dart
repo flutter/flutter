@@ -127,11 +127,11 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
       return VideoPlayer(widget.controller!);
     }
     return Stack(
+      fit: StackFit.expand,
       children: <Widget>[
         VideoPlayer(widget.controller!),
         const Center(child: CircularProgressIndicator()),
       ],
-      fit: StackFit.expand,
     );
   }
 }
@@ -177,7 +177,6 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
       fit: StackFit.expand,
       children: <Widget>[
         GestureDetector(
-          child: VideoPlayerLoading(controller),
           onTap: () {
             if (!controller!.value.isInitialized) {
               return;
@@ -194,6 +193,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
               controller!.play();
             }
           },
+          child: VideoPlayerLoading(controller),
         ),
         Center(child: imageFadeAnimation),
       ],
@@ -419,6 +419,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       ),
       body: isSupported
         ? ConnectivityOverlay(
+            connectedCompleter: connectedCompleter,
             child: Scrollbar(
               child: ListView(
                 children: <Widget>[
@@ -435,7 +436,6 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
                 ],
               ),
             ),
-            connectedCompleter: connectedCompleter,
           )
         : const Center(
             child: Text(

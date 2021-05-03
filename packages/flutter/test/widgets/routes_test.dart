@@ -1339,7 +1339,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
@@ -1347,6 +1346,7 @@ void main() {
                       ),
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -1401,7 +1401,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
@@ -1410,6 +1409,7 @@ void main() {
                       ),
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -1464,7 +1464,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
@@ -1473,6 +1472,7 @@ void main() {
                       ),
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -1529,7 +1529,6 @@ void main() {
             builder: (BuildContext context) {
               return Center(
                 child: ElevatedButton(
-                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
@@ -1539,6 +1538,7 @@ void main() {
                       ),
                     );
                   },
+                  child: const Text('X'),
                 ),
               );
             },
@@ -1937,9 +1937,9 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: _child,
       scopesRoute: true,
       explicitChildNodes: true,
+      child: _child,
     );
   }
 }

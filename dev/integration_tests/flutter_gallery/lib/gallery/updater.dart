@@ -50,16 +50,16 @@ class UpdaterState extends State<Updater> {
       content: Text('A newer version is available.', style: dialogTextStyle),
       actions: <Widget>[
         TextButton(
-          child: const Text('NO THANKS'),
           onPressed: () {
             Navigator.pop(context, false);
           },
+          child: const Text('NO THANKS'),
         ),
         TextButton(
-          child: const Text('UPDATE'),
           onPressed: () {
             Navigator.pop(context, true);
           },
+          child: const Text('UPDATE'),
         ),
       ],
     );

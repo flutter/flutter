@@ -14,10 +14,10 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTextSelectionToolbarButton(
-            child: const Text('Tap me'),
             onPressed: () {
               pressed = true;
             },
+            child: const Text('Tap me'),
           ),
         ),
       ),
@@ -34,8 +34,8 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTextSelectionToolbarButton(
-            child: const Text('Tap me'),
             onPressed: () { },
+            child: const Text('Tap me'),
           ),
         ),
       ),

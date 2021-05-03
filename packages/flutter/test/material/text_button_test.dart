@@ -149,9 +149,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: TextButton(
-              child: const Text('TextButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('TextButton'),
             ),
           ),
         ),
@@ -216,9 +216,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return TextButton(
-                    child: const Text('TextButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('TextButton'),
                   );
                 },
               ),
@@ -399,8 +399,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: TextButton(
-            child: Container(),
             onPressed: () { /* to make sure the button is enabled */ },
+            child: Container(),
           ),
         ),
       ),
@@ -427,8 +427,8 @@ void main() {
             style: ButtonStyle(
               overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
             ),
-            child: Container(),
             onPressed: () { /* to make sure the button is enabled */ },
+            child: Container(),
           ),
         ),
       ),
@@ -605,8 +605,8 @@ void main() {
             child: Center(
               child: TextButton(
                 key: key,
-                child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () { },
+                child: const SizedBox(width: 50.0, height: 8.0),
               ),
             ),
           ),
@@ -631,9 +631,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: TextButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }

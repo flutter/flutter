@@ -39,7 +39,6 @@ void main() {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           ElevatedButton(
-                            child: const Text('push unwrapped'),
                             onPressed: () {
                               Navigator.of(context).push<void>(
                                 MaterialPageRoute<void>(
@@ -48,9 +47,9 @@ void main() {
                                 ),
                               );
                             },
+                            child: const Text('push unwrapped'),
                           ),
                           ElevatedButton(
-                            child: const Text('push wrapped'),
                             onPressed: () {
                               Navigator.of(context).push<void>(
                                 MaterialPageRoute<void>(
@@ -59,6 +58,7 @@ void main() {
                                 ),
                               );
                             },
+                            child: const Text('push wrapped'),
                           ),
                         ],
                       ),
@@ -111,7 +111,6 @@ void main() {
                 // The appearance of the menu items' text is defined by the
                 // PopupMenuTheme defined above. Popup menus use
                 // InheritedTheme.captureAll() by default.
-                child: const Text('show popupmenu'),
                 onSelected: (int result) { },
                 itemBuilder: (BuildContext context) {
                   return const <PopupMenuEntry<int>>[
@@ -119,6 +118,10 @@ void main() {
                     PopupMenuItem<int>(value: 2, child: Text('Two')),
                   ];
                 },
+                // The appearance of the menu items' text is defined by the
+                // PopupMenuTheme defined above. Popup menus use
+                // InheritedTheme.captureAll() by default.
+                child: const Text('show popupmenu'),
               ),
             ),
           ),
@@ -155,8 +158,8 @@ void main() {
       content: const Text('hello'),
       actions: <Widget>[
         TextButton(
-          child: const Text('action'),
           onPressed: () { },
+          child: const Text('action'),
         ),
       ],
     );
@@ -179,7 +182,6 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       ElevatedButton(
-                        child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -188,9 +190,9 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push unwrapped'),
                       ),
                       ElevatedButton(
-                        child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -199,6 +201,7 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push wrapped'),
                       ),
                     ],
                   ),
@@ -269,7 +272,6 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       ElevatedButton(
-                        child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -278,9 +280,9 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push unwrapped'),
                       ),
                       ElevatedButton(
-                        child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -289,6 +291,7 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push wrapped'),
                       ),
                     ],
                   ),
@@ -373,7 +376,6 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       ElevatedButton(
-                        child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -382,9 +384,9 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push unwrapped'),
                       ),
                       ElevatedButton(
-                        child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -393,6 +395,7 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push wrapped'),
                       ),
                     ],
                   ),
@@ -473,7 +476,6 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       ElevatedButton(
-                        child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -482,9 +484,9 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push unwrapped'),
                       ),
                       ElevatedButton(
-                        child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -493,6 +495,7 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push wrapped'),
                       ),
                     ],
                   ),
@@ -530,12 +533,12 @@ void main() {
     final Widget toggleButtons = Scaffold(
       body: Center(
         child: ToggleButtons(
+          isSelected: const <bool>[true, false],
+          onPressed: (int index) { },
           children: const <Widget>[
             Text('selected'),
             Text('unselected'),
           ],
-          isSelected: const <bool>[true, false],
-          onPressed: (int index) { },
         ),
       ),
     );
@@ -558,7 +561,6 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       ElevatedButton(
-                        child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -567,9 +569,9 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push unwrapped'),
                       ),
                       ElevatedButton(
-                        child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -578,6 +580,7 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push wrapped'),
                       ),
                     ],
                   ),
@@ -622,8 +625,8 @@ void main() {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const RaisedButton(child: Text('disabled'), onPressed: null),
-            RaisedButton(child: const Text('enabled'), onPressed: () { }),
+            const RaisedButton(onPressed: null, child: Text('disabled')),
+            RaisedButton(onPressed: () { }, child: const Text('enabled')),
           ],
         ),
       ),
@@ -647,7 +650,6 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       RaisedButton(
-                        child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -656,9 +658,9 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push unwrapped'),
                       ),
                       RaisedButton(
-                        child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
@@ -667,6 +669,7 @@ void main() {
                             ),
                           );
                         },
+                        child: const Text('push wrapped'),
                       ),
                     ],
                   ),

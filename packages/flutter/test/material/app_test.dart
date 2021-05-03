@@ -101,8 +101,8 @@ void main() {
           builder: (BuildContext context) {
             return Material(
               child: ElevatedButton(
-                child: const Text('X'),
                 onPressed: () { Navigator.of(context).pushNamed('/next'); },
+                child: const Text('X'),
               ),
             );
           },
@@ -258,10 +258,10 @@ void main() {
             builder: (BuildContext context) {
               return Material(
                 child: ElevatedButton(
-                    child: const Text('X'),
                     onPressed: () async {
                       result = Navigator.of(context).pushNamed<Object?>('/a');
                     },
+                    child: const Text('X'),
                 ),
               );
             },
@@ -270,10 +270,10 @@ void main() {
             '/a': (BuildContext context) {
               return Material(
                 child: ElevatedButton(
-                  child: const Text('Y'),
                   onPressed: () {
                     Navigator.of(context).pop('all done');
                   },
+                  child: const Text('Y'),
                 ),
               );
             },

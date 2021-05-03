@@ -672,7 +672,6 @@ void main() {
         body: Center(
           child: Builder(
             builder: (BuildContext context) => GestureDetector(
-              child: const Text('Show licenses'),
               onTap: () {
                 showLicensePage(
                   context: context,
@@ -680,6 +679,7 @@ void main() {
                   applicationVersion: '1.0.0',
                 );
               },
+              child: const Text('Show licenses'),
             ),
           ),
         ),

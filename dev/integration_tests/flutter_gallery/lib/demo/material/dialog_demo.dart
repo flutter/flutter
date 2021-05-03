@@ -95,7 +95,6 @@ class DialogDemoState extends State<DialogDemo> {
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
           ElevatedButton(
-            child: const Text('ALERT'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
@@ -106,20 +105,20 @@ class DialogDemoState extends State<DialogDemo> {
                   ),
                   actions: <Widget>[
                     TextButton(
-                      child: const Text('CANCEL'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
+                      child: const Text('CANCEL'),
                     ),
                     TextButton(
-                      child: const Text('DISCARD'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
+                      child: const Text('DISCARD'),
                     ),
                   ],
                 ),
               );
             },
+            child: const Text('ALERT'),
           ),
           ElevatedButton(
-            child: const Text('ALERT WITH TITLE'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
@@ -131,20 +130,20 @@ class DialogDemoState extends State<DialogDemo> {
                   ),
                   actions: <Widget>[
                     TextButton(
-                      child: const Text('DISAGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
+                      child: const Text('DISAGREE'),
                     ),
                     TextButton(
-                      child: const Text('AGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
+                      child: const Text('AGREE'),
                     ),
                   ],
                 ),
               );
             },
+            child: const Text('ALERT WITH TITLE'),
           ),
           ElevatedButton(
-            child: const Text('SIMPLE'),
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
@@ -172,9 +171,9 @@ class DialogDemoState extends State<DialogDemo> {
                 ),
               );
             },
+            child: const Text('SIMPLE'),
           ),
           ElevatedButton(
-            child: const Text('CONFIRMATION'),
             onPressed: () {
               showTimePicker(
                 context: context,
@@ -189,15 +188,16 @@ class DialogDemoState extends State<DialogDemo> {
                 }
               });
             },
+            child: const Text('CONFIRMATION'),
           ),
           ElevatedButton(
-            child: const Text('FULLSCREEN'),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute<DismissDialogAction>(
                 builder: (BuildContext context) => const FullScreenDialogDemo(),
                 fullscreenDialog: true,
               ));
             },
+            child: const Text('FULLSCREEN'),
           ),
         ]
         // Add a little space between the buttons

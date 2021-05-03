@@ -1531,12 +1531,13 @@ void main() {
             return Scaffold(
               body: Center(
                 child: ElevatedButton(
-                  child: const Text('green'),
                   onPressed: () {
                     setState(() {
                       _backgroundColor = Colors.green;
                     });
                   },
+                  child: const Text('green'),
+                  
                 ),
               ),
               bottomNavigationBar: BottomNavigationBar(

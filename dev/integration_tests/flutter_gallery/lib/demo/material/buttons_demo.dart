@@ -132,14 +132,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             children: <Widget>[
               ElevatedButton(
                 style: style,
-                child: const Text('ELEVATED BUTTON', semanticsLabel: 'ELEVATED BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
+                child: const Text('ELEVATED BUTTON', semanticsLabel: 'ELEVATED BUTTON 1'),
               ),
               const ElevatedButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
                 onPressed: null,
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 1'),
               ),
             ],
           ),
@@ -179,14 +179,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             children: <Widget>[
               TextButton(
                 style: style,
-                child: const Text('TEXT BUTTON', semanticsLabel: 'TEXT BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
+                child: const Text('TEXT BUTTON', semanticsLabel: 'TEXT BUTTON 1'),
               ),
               const TextButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
                 onPressed: null,
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
               ),
             ],
           ),
@@ -226,15 +226,15 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             children: <Widget>[
               OutlinedButton(
                 style: style,
-                child: const Text('OUTLINED BUTTON', semanticsLabel: 'OUTLINED BUTTON 1'),
                 onPressed: () {
                   // Perform some action
                 },
+                child: const Text('OUTLINED BUTTON', semanticsLabel: 'OUTLINED BUTTON 1'),
               ),
               OutlinedButton(
                 style: style,
-                child: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
                 onPressed: null,
+                child: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 5'),
               ),
             ],
           ),
@@ -376,11 +376,11 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return Align(
       alignment: const Alignment(0.0, -0.2),
       child: FloatingActionButton(
-        child: const Icon(Icons.add),
         onPressed: () {
           // Perform some action
         },
         tooltip: 'floating action button',
+        child: const Icon(Icons.add),
       ),
     );
   }

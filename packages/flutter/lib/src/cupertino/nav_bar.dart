@@ -1078,9 +1078,9 @@ class _NavigationBarStaticComponents {
       route.fullscreenDialog
     ) {
       leadingContent = CupertinoButton(
-        child: const Text('Close'),
         padding: EdgeInsets.zero,
         onPressed: () { route.navigator!.maybePop(); },
+        child: const Text('Close'),
       );
     }
 
@@ -1320,6 +1320,14 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
     }
 
     return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: () {
+        if (onPressed != null) {
+          onPressed!();
+        } else {
+          Navigator.maybePop(context);
+        }
+      },
       child: Semantics(
         container: true,
         excludeSemantics: true,
@@ -1347,14 +1355,6 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
           ),
         ),
       ),
-      padding: EdgeInsets.zero,
-      onPressed: () {
-        if (onPressed != null) {
-          onPressed!();
-        } else {
-          Navigator.maybePop(context);
-        }
-      },
     );
   }
 }

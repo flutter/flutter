@@ -277,8 +277,8 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
               children: <Widget>[
                 AnimatedPadding(
                   padding: _cartPaddingFor(numProducts),
-                  child: const Icon(Icons.shopping_cart),
                   duration: const Duration(milliseconds: 225),
+                  child: const Icon(Icons.shopping_cart),
                 ),
                 Container(
                   // Accounts for the overflow number

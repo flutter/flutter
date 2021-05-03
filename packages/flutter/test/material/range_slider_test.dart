@@ -1387,19 +1387,19 @@ void main() {
                     onChanged: onChanged,
                   ),
                   ElevatedButton(
-                    child: const Text('Next'),
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
-                              child: const Text('Inner page'),
                               onPressed: () { Navigator.of(context).pop(); },
+                              child: const Text('Inner page'),
                             );
                           },
                         ),
                       );
                     },
+                    child: const Text('Next'),
                   ),
                 ],
               );

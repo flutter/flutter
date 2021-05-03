@@ -585,7 +585,6 @@ class _HeroFlight {
 
     return AnimatedBuilder(
       animation: _proxyAnimation,
-      child: shuttle,
       builder: (BuildContext context, Widget? child) {
         final Rect rect = heroRectTween.evaluate(_proxyAnimation)!;
         final RelativeRect offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
@@ -604,6 +603,7 @@ class _HeroFlight {
           ),
         );
       },
+      child: shuttle,
     );
   }
 

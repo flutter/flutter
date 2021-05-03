@@ -193,8 +193,8 @@ void main() {
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.send),
           onPressed: () {},
+          child: const Icon(Icons.send),
         ),
         body: Builder(
           builder: (BuildContext context) {
@@ -235,8 +235,8 @@ void main() {
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.send),
           onPressed: () {},
+          child: const Icon(Icons.send),
         ),
         body: Builder(
           builder: (BuildContext context) {

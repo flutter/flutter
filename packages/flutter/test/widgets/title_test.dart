@@ -18,8 +18,8 @@ void main() {
 
   testWidgets('should handle having no title', (WidgetTester tester) async {
     final Title widget = Title(
-      child: Container(),
       color: const Color(0xFF00FF00),
+      child: Container(),
     );
     expect(widget.toString, isNot(throwsException));
     expect(widget.title, equals(''));
@@ -41,8 +41,8 @@ void main() {
     });
 
     await tester.pumpWidget(Title(
-      child: Container(),
       color: const Color(0xFF00FF00),
+      child: Container(),
     ));
 
     expect(log, hasLength(1));

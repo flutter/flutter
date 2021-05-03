@@ -321,8 +321,8 @@ void main() {
                 SliverList(
                   delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
                     return SizedBox(
-                      child: Text('Tile $i'),
                       height: 100.0,
+                      child: Text('Tile $i'),
                     );
                   })),
                 ),

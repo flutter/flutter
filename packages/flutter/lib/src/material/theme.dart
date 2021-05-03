@@ -228,8 +228,8 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      child: widget.child,
       data: _data!.evaluate(animation),
+      child: widget.child,
     );
   }
 
