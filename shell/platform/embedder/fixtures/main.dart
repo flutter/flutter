@@ -920,3 +920,20 @@ void snapshot_large_scene(int max_size) async {
 
   snapshotsCallback(big_image, small_image);
 }
+
+@pragma('vm:entry-point')
+void invalid_backingstore() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    Color red = Color.fromARGB(127, 255, 0, 0);
+    Size size = Size(50.0, 150.0);
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+    builder.addPicture(Offset(10.0, 10.0), CreateColoredBox(red, size)); // red - flutter
+    builder.pop();
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.onDrawFrame = () {
+    signalNativeTest();
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
