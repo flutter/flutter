@@ -28,6 +28,10 @@ void testMain() {
       if (_placeholder != null) {
         _placeholder.remove();
       }
+      if (desktopSemanticsEnabler?.semanticsActivationTimer != null) {
+        desktopSemanticsEnabler.semanticsActivationTimer.cancel();
+        desktopSemanticsEnabler.semanticsActivationTimer = null;
+      }
     });
 
     test('prepare accesibility placeholder', () async {
@@ -69,7 +73,9 @@ void testMain() {
 
         expect(shouldForwardToFramework, true);
       }
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
+        skip: browserEngine == BrowserEngine.edge);
 
     test(
         'Relevants events targeting placeholder should not be forwarded to the framework',
@@ -87,13 +93,31 @@ void testMain() {
       expect(shouldForwardToFramework, false);
     });
 
-    test('disposes of the placeholder', () {
+    test(
+        'After max number of relevant events, events should be forwarded to the framework',
+        () async {
+      // Prework. Attach the placeholder to dom.
       _placeholder = desktopSemanticsEnabler.prepareAccessibilityPlaceholder();
       html.document.body.append(_placeholder);
 
-      expect(_placeholder.isConnected, isTrue);
-      desktopSemanticsEnabler.dispose();
-      expect(_placeholder.isConnected, isFalse);
+      html.Event event = html.MouseEvent('mousedown');
+      _placeholder.dispatchEvent(event);
+
+      bool shouldForwardToFramework =
+          desktopSemanticsEnabler.tryEnableSemantics(event);
+
+      expect(shouldForwardToFramework, false);
+
+      // Send max number of events;
+      for (int i = 1; i <= kMaxSemanticsActivationAttempts; i++) {
+        event = html.MouseEvent('mousedown');
+        _placeholder.dispatchEvent(event);
+
+        shouldForwardToFramework =
+            desktopSemanticsEnabler.tryEnableSemantics(event);
+      }
+
+      expect(shouldForwardToFramework, true);
     });
   });
 
@@ -144,5 +168,7 @@ void testMain() {
       expect(shouldForwardToFramework, true);
     });
   },  // Run the `MobileSemanticsEnabler` only on mobile browsers.
-      skip: isDesktop);
+      skip: operatingSystem == OperatingSystem.linux ||
+          operatingSystem == OperatingSystem.macOs ||
+          operatingSystem == OperatingSystem.windows);
 }
