@@ -199,6 +199,26 @@ public class FlutterFragmentActivityTest {
     assertEquals(0, activity.numberOfEnginesCreated);
   }
 
+  @Test
+  public void itHandlesNewFragmentRecreationDuringRestoreWhenActivityIsRecreated() {
+    FlutterFragmentActivityWithProvidedEngine activity =
+        spy(Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get());
+
+    FlutterFragment fragment = mock(FlutterFragment.class);
+    // Similar to the above case, except here, it's not just the activity that was destroyed and
+    // could have its fragment restored in the fragment manager. Here, both activity and fragment
+    // are destroyed. And the fragment manager recreated the fragment on activity recreate.
+    when(activity.retrieveExistingFlutterFragmentIfPossible()).thenReturn(null, fragment);
+
+    FlutterEngine engine = mock(FlutterEngine.class);
+    when(fragment.getFlutterEngine()).thenReturn(engine);
+
+    activity.onCreate(null);
+    // The framework would have recreated a new fragment but the fragment activity wouldn't have
+    // created a new one again.
+    assertEquals(0, activity.numberOfEnginesCreated);
+  }
+
   static class FlutterFragmentActivityWithProvidedEngine extends FlutterFragmentActivity {
     int numberOfEnginesCreated = 0;
 
