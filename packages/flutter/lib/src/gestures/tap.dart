@@ -394,6 +394,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onSecondaryTap], a similar callback but for a secondary button.
   ///  * [onTapUp], which has the same timing but with details.
   ///  * [GestureDetector.onTap], which exposes this callback.
   GestureTapCallback? onTap;

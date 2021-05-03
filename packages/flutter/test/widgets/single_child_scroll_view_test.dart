@@ -45,7 +45,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.0)
+          child: Container(height: 600.0),
         ),
       ),
     );

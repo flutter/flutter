@@ -11,29 +11,29 @@ void main() {
     final List<int> items = <int>[1, 2, 3];
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-          builder: (BuildContext outerContext, StateSetter setState) {
-            return CustomScrollView(
-              slivers: <Widget>[
-                SliverReorderableList(
-                  itemCount: -1,
-                  onReorder: (int fromIndex, int toIndex) {
-                    setState(() {
-                      if (toIndex > fromIndex) {
-                        toIndex -= 1;
-                      }
-                      items.insert(toIndex, items.removeAt(fromIndex));
-                    });
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                      height: 100,
-                      child: Text('item ${items[index]}'),
-                    );
-                  },
-                ),
-              ],
-            );
-          }
+        builder: (BuildContext outerContext, StateSetter setState) {
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: -1,
+                onReorder: (int fromIndex, int toIndex) {
+                  setState(() {
+                    if (toIndex > fromIndex) {
+                      toIndex -= 1;
+                    }
+                    items.insert(toIndex, items.removeAt(fromIndex));
+                  });
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    height: 100,
+                    child: Text('item ${items[index]}'),
+                  );
+                },
+              ),
+            ],
+          );
+        },
       ),
     ));
     expect(tester.takeException(), isA<AssertionError>());
@@ -43,41 +43,41 @@ void main() {
     final List<int> items = <int>[1, 2, 3];
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-          builder: (BuildContext outerContext, StateSetter setState) {
-            return CustomScrollView(
-              slivers: <Widget>[
-                SliverFixedExtentList(
-                  itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[
-                    const Text('before'),
-                  ]),
-                ),
-                SliverReorderableList(
-                  itemCount: 0,
-                  onReorder: (int fromIndex, int toIndex) {
-                    setState(() {
-                      if (toIndex > fromIndex) {
-                        toIndex -= 1;
-                      }
-                      items.insert(toIndex, items.removeAt(fromIndex));
-                    });
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                      height: 100,
-                      child: Text('item ${items[index]}'),
-                    );
-                  },
-                ),
-                SliverFixedExtentList(
-                  itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[
-                    const Text('after'),
-                  ]),
-                ),
-              ],
-            );
-          }
+        builder: (BuildContext outerContext, StateSetter setState) {
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverFixedExtentList(
+                itemExtent: 50.0,
+                delegate: SliverChildListDelegate(<Widget>[
+                  const Text('before'),
+                ]),
+              ),
+              SliverReorderableList(
+                itemCount: 0,
+                onReorder: (int fromIndex, int toIndex) {
+                  setState(() {
+                    if (toIndex > fromIndex) {
+                      toIndex -= 1;
+                    }
+                    items.insert(toIndex, items.removeAt(fromIndex));
+                  });
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    height: 100,
+                    child: Text('item ${items[index]}'),
+                  );
+                },
+              ),
+              SliverFixedExtentList(
+                itemExtent: 50.0,
+                delegate: SliverChildListDelegate(<Widget>[
+                  const Text('after'),
+                ]),
+              ),
+            ],
+          );
+        },
       ),
     ));
 
@@ -267,6 +267,133 @@ void main() {
     await tester.pumpAndSettle();
     expect(getItemFadeTransition(), findsNothing);
   });
+
+  testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+    expect(() => ReorderableList(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+            key: ValueKey<int>(numbers[index]),
+            height: 20 + numbers[index] * 10,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Text(numbers[index].toString()),
+            )
+        );
+      },
+      itemCount: numbers.length,
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
+  });
+
+  testWidgets('SliverReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+    expect(() => SliverReorderableList(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+            key: ValueKey<int>(numbers[index]),
+            height: 20 + numbers[index] * 10,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Text(numbers[index].toString()),
+            )
+        );
+      },
+      itemCount: numbers.length,
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
+  });
+
+  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    // children with different heights
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    )
+                  );
+                },
+                itemCount: numbers.length,
+                itemExtent: 30,
+                onReorder: (int fromIndex, int toIndex) {
+                  if (fromIndex < toIndex) {
+                    toIndex--;
+                  }
+                  final int value = numbers.removeAt(fromIndex);
+                  numbers.insert(toIndex, value);
+                },
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
+  });
+
+  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableList(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  prototypeItem: const SizedBox(
+                    height: 30,
+                    child: Text('3'),
+                  ),
+                  onReorder: (int oldIndex, int newIndex) {  },
+                );
+              },
+            ),
+          ),
+        )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
+  });
 }
 
 class TestList extends StatefulWidget {
@@ -297,42 +424,42 @@ class _TestListState extends State<TestList> {
           child: IconTheme(
             data: IconThemeData(color: widget.iconColor),
             child: StatefulBuilder(
-                builder: (BuildContext outerContext, StateSetter setState) {
-                  final List<int> items = widget.items;
-                  return CustomScrollView(
-                    slivers: <Widget>[
-                      SliverReorderableList(
-                        itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            key: ValueKey<int>(items[index]),
-                            height: 100,
-                            color: items[index].isOdd ? Colors.red : Colors.green,
-                            child: ReorderableDragStartListener(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text('item ${items[index]}'),
-                                  const Icon(Icons.drag_handle),
-                                ],
-                              ),
-                              index: index,
+              builder: (BuildContext outerContext, StateSetter setState) {
+                final List<int> items = widget.items;
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          key: ValueKey<int>(items[index]),
+                          height: 100,
+                          color: items[index].isOdd ? Colors.red : Colors.green,
+                          child: ReorderableDragStartListener(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text('item ${items[index]}'),
+                                const Icon(Icons.drag_handle),
+                              ],
                             ),
-                          );
-                        },
-                        itemCount: items.length,
-                        onReorder: (int fromIndex, int toIndex) {
-                          setState(() {
-                            if (toIndex > fromIndex) {
-                              toIndex -= 1;
-                            }
-                            items.insert(toIndex, items.removeAt(fromIndex));
-                          });
-                        },
-                        proxyDecorator: widget.proxyDecorator,
-                      ),
-                    ],
-                  );
-                }
+                            index: index,
+                          ),
+                        );
+                      },
+                      itemCount: items.length,
+                      onReorder: (int fromIndex, int toIndex) {
+                        setState(() {
+                          if (toIndex > fromIndex) {
+                            toIndex -= 1;
+                          }
+                          items.insert(toIndex, items.removeAt(fromIndex));
+                        });
+                      },
+                      proxyDecorator: widget.proxyDecorator,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

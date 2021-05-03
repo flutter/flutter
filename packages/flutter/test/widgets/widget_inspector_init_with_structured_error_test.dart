@@ -33,8 +33,7 @@ class StructuredErrorTestService extends TestWidgetInspectorService {
       testHandler = FlutterError.onError;
     });
 
-    testWidgets('ext.flutter.inspector.setStructuredErrors',
-        (WidgetTester tester) async {
+    testWidgets('ext.flutter.inspector.setStructuredErrors', (WidgetTester tester) async {
       // The test framework resets FlutterError.onError, so we set it back to
       // what it was after WidgetInspectorService::initServiceExtensions ran.
       FlutterError.onError = inspectorServiceErrorHandler;

@@ -22,7 +22,8 @@ class CustomDeviceConfig {
     required this.uninstallCommand,
     required this.runDebugCommand,
     this.forwardPortCommand,
-    this.forwardPortSuccessRegex
+    this.forwardPortSuccessRegex,
+    this.screenshotCommand
   }) : assert(forwardPortCommand == null || forwardPortSuccessRegex != null);
 
   factory CustomDeviceConfig.fromJson(dynamic json) {
@@ -40,7 +41,8 @@ class CustomDeviceConfig {
       uninstallCommand: _castStringList(typedMap[_kUninstallCommand]!),
       runDebugCommand: _castStringList(typedMap[_kRunDebugCommand]!),
       forwardPortCommand: _castStringListOrNull(typedMap[_kForwardPortCommand]),
-      forwardPortSuccessRegex: _convertToRegexOrNull(typedMap[_kForwardPortSuccessRegex])
+      forwardPortSuccessRegex: _convertToRegexOrNull(typedMap[_kForwardPortSuccessRegex]),
+      screenshotCommand: _castStringListOrNull(typedMap[_kScreenshotCommand])
     );
   }
 
@@ -56,6 +58,7 @@ class CustomDeviceConfig {
   static const String _kRunDebugCommand = 'runDebug';
   static const String _kForwardPortCommand = 'forwardPort';
   static const String _kForwardPortSuccessRegex = 'forwardPortSuccessRegex';
+  static const String _kScreenshotCommand = 'screenshot';
 
   /// An example device config used for creating the default config file.
   static final CustomDeviceConfig example = CustomDeviceConfig(
@@ -70,7 +73,8 @@ class CustomDeviceConfig {
     uninstallCommand: const <String>['ssh', 'pi@raspberrypi', r'rm -rf "/tmp/${appName}"'],
     runDebugCommand: const <String>['ssh', 'pi@raspberrypi', r'flutter-pi "/tmp/${appName}"'],
     forwardPortCommand: const <String>['ssh', '-o', 'ExitOnForwardFailure=yes', '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}', 'pi@raspberrypi'],
-    forwardPortSuccessRegex: RegExp('Linux')
+    forwardPortSuccessRegex: RegExp('Linux'),
+    screenshotCommand: const <String>['ssh', 'pi@raspberrypi', r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'"]
   );
 
   final String id;
@@ -85,8 +89,11 @@ class CustomDeviceConfig {
   final List<String> runDebugCommand;
   final List<String>? forwardPortCommand;
   final RegExp? forwardPortSuccessRegex;
+  final List<String>? screenshotCommand;
 
   bool get usesPortForwarding => forwardPortCommand != null;
+
+  bool get supportsScreenshotting => screenshotCommand != null;
 
   static List<String> _castStringList(Object object) {
     return (object as List<dynamic>).cast<String>();
@@ -113,7 +120,8 @@ class CustomDeviceConfig {
       _kUninstallCommand: uninstallCommand,
       _kRunDebugCommand: runDebugCommand,
       _kForwardPortCommand: forwardPortCommand,
-      _kForwardPortSuccessRegex: forwardPortSuccessRegex?.pattern
+      _kForwardPortSuccessRegex: forwardPortSuccessRegex?.pattern,
+      _kScreenshotCommand: screenshotCommand,
     };
   }
 
@@ -133,7 +141,9 @@ class CustomDeviceConfig {
     bool explicitForwardPortCommand = false,
     List<String>? forwardPortCommand,
     bool explicitForwardPortSuccessRegex = false,
-    RegExp? forwardPortSuccessRegex
+    RegExp? forwardPortSuccessRegex,
+    bool explicitScreenshotCommand = false,
+    List<String>? screenshotCommand
   }) {
     return CustomDeviceConfig(
       id: id ?? this.id,
@@ -147,7 +157,8 @@ class CustomDeviceConfig {
       uninstallCommand: uninstallCommand ?? this.uninstallCommand,
       runDebugCommand: runDebugCommand ?? this.runDebugCommand,
       forwardPortCommand: explicitForwardPortCommand ? forwardPortCommand : (forwardPortCommand ?? this.forwardPortCommand),
-      forwardPortSuccessRegex: explicitForwardPortSuccessRegex ? forwardPortSuccessRegex : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex)
+      forwardPortSuccessRegex: explicitForwardPortSuccessRegex ? forwardPortSuccessRegex : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
+      screenshotCommand: explicitScreenshotCommand ? screenshotCommand : (screenshotCommand ?? this.screenshotCommand),
     );
   }
 }

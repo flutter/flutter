@@ -271,7 +271,7 @@ void main() {
         '--sdk-root',
         artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.darwin_x64,
+          platform: TargetPlatform.darwin,
           mode: BuildMode.debug,
         ) + '/',
         '--target=flutter',
@@ -288,7 +288,7 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(androidEnvironment
-      ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin_x64)
+      ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
       ..defines[kTrackWidgetCreation] = 'false'
     );

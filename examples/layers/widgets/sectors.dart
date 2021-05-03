@@ -135,7 +135,7 @@ class SectorAppState extends State<SectorApp> {
           child: Container(
             margin: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              border: Border.all()
+              border: Border.all(),
             ),
             padding: const EdgeInsets.all(8.0),
             child: WidgetToRenderBoxAdapter(

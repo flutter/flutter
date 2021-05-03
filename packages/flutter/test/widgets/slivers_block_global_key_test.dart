@@ -48,7 +48,7 @@ Future<void> test(WidgetTester tester, double offset, List<int> keys) {
 // `text`: A space-separated list of expected `key:generation` pairs for the visible SliverList children.
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero)
+    (RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
