@@ -3532,6 +3532,31 @@ void main() {
 
     expect(tabBar.preferredSize, const Size.fromHeight(48.0));
   });
+
+	testWidgets('Correct size for tab bar with child', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 1,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: <Widget>[
+                Tab(
+                  icon: Icon(Icons.check,size: 40),
+                  child: Text("1 - OK",style: TextStyle(fontSize: 25),),
+                  kTextAndIconTabHeight: 85,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
+    expect(firstTab.preferredSize.height, 85);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
