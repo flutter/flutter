@@ -36,7 +36,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   BuildMode buildMode,
 }) async {
   // Check for an SkSL bundle.
-  final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
+  final String shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
   final DevFSContent skslBundle = processSkSLBundle(
     shaderBundlePath,
     engineVersion: environment.engineVersion,
