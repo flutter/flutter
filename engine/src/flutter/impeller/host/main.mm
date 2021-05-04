@@ -6,7 +6,8 @@
 
 #include "impeller_host_view_controller.h"
 
-@interface ImpellerAppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate> {
+@interface ImpellerAppDelegate
+    : NSObject <NSApplicationDelegate, NSWindowDelegate> {
   NSWindow* window_;
   ImpellerHostViewController* view_controller_;
 }
@@ -17,11 +18,11 @@
 - (id)init {
   if (self = [super init]) {
     view_controller_ = [[ImpellerHostViewController alloc] init];
-    window_ =
-        [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
-                                    styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable
-                                      backing:NSBackingStoreBuffered
-                                        defer:NO];
+    window_ = [[NSWindow alloc]
+        initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable
+                    backing:NSBackingStoreBuffered
+                      defer:NO];
     [window_ setContentViewController:view_controller_];
   }
   return self;
@@ -48,7 +49,9 @@ int main(int argc, const char* argv[]) {
   [item.submenu
       addItem:[[NSMenuItem alloc]
                   initWithTitle:[@"Quit "
-                                    stringByAppendingString:[NSProcessInfo processInfo].processName]
+                                    stringByAppendingString:[NSProcessInfo
+                                                                processInfo]
+                                                                .processName]
                          action:@selector(terminate:)
                   keyEquivalent:@"q"]];
   ImpellerAppDelegate* appDelegate = [[ImpellerAppDelegate alloc] init];
