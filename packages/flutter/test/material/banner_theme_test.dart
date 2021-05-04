@@ -50,21 +50,38 @@ void main() {
 
   testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
     const String contentText = 'Content';
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: MaterialBanner(
-          content: const Text(contentText),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text(contentText),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Action'),
+                      onPressed: () { },
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
     ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
 
-    final Container container = _getContainerFromBanner(tester);
+    final Container container = _getContainerFromText(tester, contentText);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.color, const Color(0xffffffff));
     // Default value for ThemeData.typography is Typography.material2014()
@@ -74,23 +91,40 @@ void main() {
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(bannerTheme: bannerTheme),
       home: Scaffold(
-        body: MaterialBanner(
-          leading: const Icon(Icons.ac_unit),
-          content: const Text(contentText),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  leading: const Icon(Icons.ac_unit),
+                  content: const Text(contentText),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Action'),
+                      onPressed: () { },
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
     ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
 
-    final Container container = _getContainerFromBanner(tester);
+    final Container container = _getContainerFromText(tester, contentText);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.color, bannerTheme.backgroundColor);
     expect(content.text.style, bannerTheme.contentTextStyle);
@@ -109,27 +143,44 @@ void main() {
     const TextStyle textStyle = TextStyle(color: Colors.green);
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(bannerTheme: bannerTheme),
       home: Scaffold(
-        body: MaterialBanner(
-          backgroundColor: backgroundColor,
-          leading: const Icon(Icons.ac_unit),
-          contentTextStyle: textStyle,
-          content: const Text(contentText),
-          padding: const EdgeInsets.all(10),
-          leadingPadding: const EdgeInsets.all(12),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  backgroundColor: backgroundColor,
+                  leading: const Icon(Icons.ac_unit),
+                  contentTextStyle: textStyle,
+                  content: const Text(contentText),
+                  padding: const EdgeInsets.all(10),
+                  leadingPadding: const EdgeInsets.all(12),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Action'),
+                      onPressed: () { },
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
     ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
 
-    final Container container = _getContainerFromBanner(tester);
+    final Container container = _getContainerFromText(tester, contentText);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.color, backgroundColor);
     expect(content.text.style, textStyle);
@@ -145,22 +196,40 @@ void main() {
 
   testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
+    const String contentText = 'Content';
+    const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(colorScheme: colorScheme),
       home: Scaffold(
-        body: MaterialBanner(
-          content: const Text('Content'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Action'),
-              onPressed: () { },
-            ),
-          ],
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                  content: const Text(contentText),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Action'),
+                      onPressed: () { },
+                    ),
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
     ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
 
-    final Container container = _getContainerFromBanner(tester);
+    final Container container = _getContainerFromText(tester, contentText);
     expect(container.color, colorScheme.surface);
   });
 }
@@ -174,8 +243,8 @@ MaterialBannerThemeData _bannerTheme() {
   );
 }
 
-Container _getContainerFromBanner(WidgetTester tester) {
-  return tester.widget<Container>(_containerFinder());
+Container _getContainerFromText(WidgetTester tester, String text) {
+  return tester.widget<Container>(find.widgetWithText(Container, text).first);
 }
 
 Finder _containerFinder() {

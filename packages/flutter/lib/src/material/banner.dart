@@ -270,10 +270,10 @@ class _MaterialBannerState extends State<MaterialBanner> {
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = widget.actions.length == 1 && !widget.forceActionsBelow;
-    final EdgeInsetsGeometry padding = this.widget.padding ?? bannerTheme.padding ?? (isSingleRow
+    final EdgeInsetsGeometry padding = widget.padding ?? bannerTheme.padding ?? (isSingleRow
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
-    final EdgeInsetsGeometry leadingPadding = this.widget.leadingPadding
+    final EdgeInsetsGeometry leadingPadding = widget.leadingPadding
         ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
@@ -288,7 +288,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       ),
     );
 
-    final Color backgroundColor = this.widget.backgroundColor
+    final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? theme.colorScheme.surface;
     final TextStyle? textStyle = widget.contentTextStyle
@@ -305,7 +305,6 @@ class _MaterialBannerState extends State<MaterialBanner> {
     Widget materialBanner = Container(
       color: backgroundColor,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Padding(
             padding: padding,

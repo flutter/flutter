@@ -462,6 +462,46 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   // MATERIAL BANNER API
 
+  /// Shows a [MaterialBanner] across all registered [Scaffold]s.
+  ///
+  /// A scaffold can show at most one material banner at a time. If this function is
+  /// called while another material banner is already visible, the given material banner
+  /// will be added to a queue and displayed after the earlier material banners have
+  /// closed.
+  ///
+  /// To remove the [MaterialBanner] with an exit animation, use [hideCurrentMaterialBanner]
+  /// or call [ScaffoldFeatureController.close] on the returned
+  /// [ScaffoldFeatureController]. To remove a [MaterialBanner] suddenly (without an
+  /// animation), use [removeCurrentMaterialBanner].
+  ///
+  /// See [ScaffoldMessenger.of] for information about how to obtain the
+  /// [ScaffoldMessengerState].
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  ///
+  /// Here is an example of showing a [MaterialBanner] when the user presses a button.
+  ///
+  /// ```dart
+  ///   Widget build(BuildContext context) {
+  ///     return OutlinedButton(
+  ///       onPressed: () {
+  ///         ScaffoldMessenger.of(context).showMaterialBanner(
+  ///           const MaterialBanner(
+  ///             content: Text('This is a MaterialBanner'),
+  ///             actions: [
+  ///               TextButton(
+  ///                 child: Text('DISMISS'),
+  ///                 onPressed: null,
+  ///               ),
+  ///             ],
+  ///           ),
+  ///         );
+  ///       },
+  ///       child: const Text('Show MaterialBanner'),
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
   ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason> showMaterialBanner(MaterialBanner materialBanner) {
     _materialBannerController ??= MaterialBanner.createAnimationController(vsync: this)
       ..addStatusListener(_handleMaterialBannerStatusChanged);
@@ -2542,25 +2582,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   // MATERIAL BANNER API
-  final Queue<ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason>> _materialBanners = Queue<ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason>>();
-  AnimationController? _materialBannerController;
-
-  void _handleMaterialBannerStatusChange(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-        assert(_materialBanners.isNotEmpty);
-        setState(() {
-          _materialBanners.removeFirst();
-        });
-        if (_materialBanners.isNotEmpty)
-          _materialBannerController!.forward();
-        break;
-      case AnimationStatus.completed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-    }
-  }
 
   // The _messengerMaterialBanner represents the current MaterialBanner being managed by
   // the ScaffoldMessenger, instead of the Scaffold.
@@ -3469,7 +3490,7 @@ class ScaffoldFeatureController<T extends Widget, U> {
   /// Completes when the feature controlled by this object is no longer visible.
   Future<U> get closed => _completer.future;
 
-  /// Remove the feature (e.g., bottom sheet or snack bar) from the scaffold.
+  /// Remove the feature (e.g., bottom sheet, snack bar, or material banner) from the scaffold.
   final VoidCallback close;
 
   /// Mark the feature (e.g., bottom sheet or snack bar) as needing to rebuild.
