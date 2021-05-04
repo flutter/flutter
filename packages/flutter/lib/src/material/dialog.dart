@@ -205,10 +205,10 @@ class Dialog extends StatelessWidget {
 ///         ),
 ///         actions: <Widget>[
 ///           TextButton(
-///             child: const Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
 ///             },
+///             child: const Text('Approve'),
 ///           ),
 ///         ],
 ///       );

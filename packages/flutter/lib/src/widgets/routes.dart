@@ -516,10 +516,10 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///             const Text('HomePage'),
   ///             // Press this button to open the SecondPage.
   ///             ElevatedButton(
-  ///               child: const Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
   ///               },
+  ///               child: const Text('Second Page >'),
   ///             ),
   ///           ],
   ///         ),
@@ -563,8 +563,8 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           color: Colors.red,
   ///         )
   ///       : ElevatedButton(
-  ///           child: const Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
+  ///           child: const Text('Show Rectangle'),
   ///         );
   ///
   ///     return Scaffold(
@@ -574,7 +574,6 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///           children: <Widget>[
   ///             localNavContent,
   ///             ElevatedButton(
-  ///               child: const Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
   ///                 // visible then it will will pop our local history entry, which
@@ -582,6 +581,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///                 // navigate back to the HomePage.
   ///                 Navigator.of(context).pop();
   ///               },
+  ///               child: const Text('< Back'),
   ///             ),
   ///           ],
   ///         ),

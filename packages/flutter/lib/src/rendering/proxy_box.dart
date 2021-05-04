@@ -3098,8 +3098,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///       key: globalKey,
   ///       child: Center(
   ///         child: TextButton(
-  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
   ///           onPressed: _capturePng,
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
   ///         ),
   ///       ),
   ///     );

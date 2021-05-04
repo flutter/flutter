@@ -90,8 +90,8 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///         ),
 ///       ),
 ///       floatingActionButton: FloatingActionButton(
-///         child: const Icon(Icons.plus_one),
 ///         onPressed: () => _counter.value += 1,
+///         child: const Icon(Icons.plus_one),
 ///       ),
 ///     );
 ///   }

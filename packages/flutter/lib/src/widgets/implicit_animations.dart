@@ -1447,8 +1447,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///           child: const FlutterLogo(),
 ///         ),
 ///         ElevatedButton(
-///           child: const Text('Fade Logo'),
 ///           onPressed: _changeOpacity,
+///           child: const Text('Fade Logo'),
 ///         ),
 ///       ],
 ///     );

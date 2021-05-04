@@ -41,8 +41,8 @@ import 'theme.dart';
 ///       tabBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: CupertinoButton(
-///             child: const Text('Go to first tab'),
 ///             onPressed: () => _controller.index = 0,
+///             child: const Text('Go to first tab'),
 ///           )
 ///         );
 ///       }

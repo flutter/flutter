@@ -95,10 +95,10 @@ enum _ContextMenuLocation {
 ///           ),
 ///           actions: <Widget>[
 ///             CupertinoContextMenuAction(
-///               child: const Text('Action one'),
 ///               onPressed: () {
 ///                 Navigator.pop(context);
 ///               },
+///               child: const Text('Action one'),
 ///             ),
 ///             CupertinoContextMenuAction(
 ///               child: const Text('Action two'),
