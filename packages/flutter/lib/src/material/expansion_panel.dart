@@ -387,7 +387,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// 8, 9, 12, 16, 24.
   ///
   /// By default, the value of elevation is 2.
-  final int elevation;
+  final double elevation;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -560,7 +560,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     return MergeableMaterial(
       hasDividers: true,
       dividerColor: widget.dividerColor,
-      elevation: widget.elevation.toDouble(),
+      elevation: widget.elevation,
       children: items,
     );
   }
