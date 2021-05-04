@@ -553,7 +553,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => VerticalDragGestureRecognizer(),
+              () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
               (VerticalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -565,8 +565,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
-                  ..dragStartBehavior = widget.dragStartBehavior
-                  ..supportedDevices = _configuration.dragDevices;
+                  ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
           };
@@ -574,7 +573,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(),
+              () => HorizontalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
               (HorizontalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -586,8 +585,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
-                  ..dragStartBehavior = widget.dragStartBehavior
-                  ..supportedDevices = _configuration.dragDevices;
+                  ..dragStartBehavior = widget.dragStartBehavior;
               },
             ),
           };

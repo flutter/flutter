@@ -14,4 +14,18 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/66043
   VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
   tracker = VelocityTracker.withKind(PointerDeviceKind.mouse);
+
+  // Changes made in
+  DragGestureRecognizer();
+  DragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  VerticalDragGestureRecognizer();
+  VerticalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  HorizontalDragGestureRecognizer();
+  HorizontalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  GestureRecognizer();
+  GestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  OneSequenceGestureRecognizer();
+  OneSequenceGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  PrimaryPointerGestureRecognizer();
+  PrimaryPointerGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
 }
