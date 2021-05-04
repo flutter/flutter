@@ -4,10 +4,15 @@
 
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/metal/metal_library.gni")
+import("//flutter/testing/testing.gni")
 
 metal_library("impeller_host_shaders") {
   name = "impeller_host"
   sources = [ "shaders.metal" ]
+}
+
+test_fixtures("impeller_host_fixtures") {
+  fixtures = [ "assets/ColorMap.png" ]
 }
 
 executable("host") {
@@ -20,6 +25,8 @@ executable("host") {
 
   sources = [
     "ShaderTypes.h",
+    "assets_location.cc",
+    "assets_location.h",
     "impeller_host_view_controller.h",
     "impeller_host_view_controller.mm",
     "impeller_renderer.h",
@@ -38,6 +45,7 @@ executable("host") {
   ]
 
   deps = [
+    ":impeller_host_fixtures",
     ":impeller_host_shaders",
     "//flutter/fml",
     "//flutter/impeller/impeller",

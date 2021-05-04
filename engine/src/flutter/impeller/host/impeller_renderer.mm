@@ -5,6 +5,7 @@
 #import <ModelIO/ModelIO.h>
 #import <simd/simd.h>
 
+#import "assets_location.h"
 #include "flutter/fml/logging.h"
 #import "impeller_renderer.h"
 #import "shaders_location.h"
@@ -178,9 +179,11 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     MTKTextureLoaderOptionTextureStorageMode : @(MTLStorageModePrivate)
   };
 
-  _colorMap = [textureLoader newTextureWithName:@"ColorMap"
-                                    scaleFactor:1.0
-                                         bundle:nil
+  auto color_map_data = [NSData
+      dataWithContentsOfFile:@(impeller::GetAssetLocation("ColorMap.png")
+                                   .c_str())];
+
+  _colorMap = [textureLoader newTextureWithData:color_map_data
                                         options:textureLoaderOptions
                                           error:&error];
 
