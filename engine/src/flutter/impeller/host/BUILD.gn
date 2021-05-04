@@ -38,5 +38,6 @@ executable("host") {
     ":impeller_host_shaders",
     "//flutter/fml",
     "//flutter/impeller/impeller",
+    "//third_party/glfw",
   ]
 }
