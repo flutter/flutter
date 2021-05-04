@@ -245,14 +245,20 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   LongPressGestureRecognizer({
     Duration? duration,
     double? postAcceptSlopTolerance,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
     Object? debugOwner,
-  }) : super(
-          deadline: duration ?? kLongPressTimeout,
-          postAcceptSlopTolerance: postAcceptSlopTolerance,
-          kind: kind,
-          debugOwner: debugOwner,
-        );
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         deadline: duration ?? kLongPressTimeout,
+         postAcceptSlopTolerance: postAcceptSlopTolerance,
+         supportedDevices: kind == null ? supportedDevices : <PointerDeviceKind>{ kind },
+         debugOwner: debugOwner,
+       );
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;

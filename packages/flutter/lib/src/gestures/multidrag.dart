@@ -201,8 +201,19 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   /// Initialize the object.
   MultiDragGestureRecognizer({
     required Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
@@ -350,8 +361,19 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
   /// Create a gesture recognizer for tracking multiple pointers at once.
   ImmediateMultiDragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   @override
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
@@ -399,8 +421,19 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
   /// but only if they first move horizontally.
   HorizontalMultiDragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   @override
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
@@ -448,8 +481,19 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
   /// but only if they first move vertically.
   VerticalMultiDragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   @override
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
@@ -551,9 +595,20 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   DelayedMultiDragGestureRecognizer({
     this.delay = kLongPressTimeout,
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(delay != null),
-       super(debugOwner: debugOwner, kind: kind);
+       assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   /// The amount of time the pointer must remain in the same place for the drag
   /// to be recognized.

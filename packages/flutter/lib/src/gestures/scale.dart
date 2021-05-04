@@ -250,10 +250,19 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.kind}
   ScaleGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
     this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+       assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null ? supportedDevices : <PointerDeviceKind>{ kind }
+       );
 
   /// Determines what point is used as the starting point in all calculations
   /// involving this gesture.

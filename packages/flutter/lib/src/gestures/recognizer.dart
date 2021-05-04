@@ -61,7 +61,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// The argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
   ///
-  /// {@template flutter.gestures.GestureRecognizer.kind}
+  /// {@template flutter.gestures.GestureRecognizer.supportedDevices}
   /// It's possible to limit this recognizer to a specific set of [PointerDeviceKind]s
   /// by providing the optional [supportedDevices] argument. If [supportedDevices] is null,
   /// the recognizer will accept pointer events from all device kinds.
@@ -240,12 +240,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
          supportedDevices: kind == null
-             ? supportedDevices
-             : <PointerDeviceKind>{ kind },
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
        );
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
@@ -439,8 +438,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
        super(
          debugOwner: debugOwner,
          supportedDevices: kind == null
-             ? supportedDevices
-             : <PointerDeviceKind>{ kind },
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
        );
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this

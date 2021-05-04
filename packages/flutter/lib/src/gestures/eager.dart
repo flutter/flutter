@@ -16,7 +16,19 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create an eager gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.kind}
-  EagerGestureRecognizer({ PointerDeviceKind? kind }) : super(kind: kind);
+  EagerGestureRecognizer({
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
+    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   @override
   void addAllowedPointer(PointerDownEvent event) {

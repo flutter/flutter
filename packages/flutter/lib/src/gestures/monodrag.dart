@@ -79,8 +79,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
        super(
          debugOwner: debugOwner,
          supportedDevices: kind == null
-             ? supportedDevices
-             : <PointerDeviceKind>{ kind },
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
        );
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
@@ -528,8 +528,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
        super(
          debugOwner: debugOwner,
          supportedDevices: kind == null
-             ? supportedDevices
-             : <PointerDeviceKind>{ kind },
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
        );
 
   @override
@@ -580,8 +580,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
        super(
          debugOwner: debugOwner,
          supportedDevices: kind == null
-             ? supportedDevices
-             : <PointerDeviceKind>{ kind },
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
        );
 
   @override

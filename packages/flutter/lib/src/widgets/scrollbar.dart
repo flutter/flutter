@@ -1383,14 +1383,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
   _ThumbPressGestureRecognizer({
     double? postAcceptSlopTolerance,
-    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
     required Object debugOwner,
     required GlobalKey customPaintKey,
     required Duration pressDuration,
   }) : _customPaintKey = customPaintKey,
        super(
          postAcceptSlopTolerance: postAcceptSlopTolerance,
-         kind: kind,
+         supportedDevices: supportedDevices,
          debugOwner: debugOwner,
          duration: pressDuration,
        );

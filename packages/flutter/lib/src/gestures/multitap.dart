@@ -116,8 +116,19 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.kind}
   DoubleTapGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   // Implementation notes:
   //
@@ -459,8 +470,19 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   MultiTapGestureRecognizer({
     this.longTapDelay = Duration.zero,
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+           ? supportedDevices
+           : <PointerDeviceKind>{ kind },
+       );
 
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.
