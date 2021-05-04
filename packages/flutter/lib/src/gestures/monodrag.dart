@@ -66,12 +66,22 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.kind}
   DragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-    this.supportedDevices = _kAllPointerDeviceKinds
+    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+       assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+             ? supportedDevices
+             : <PointerDeviceKind>{ kind },
+       );
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
@@ -201,11 +211,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
-  /// The device types that this gesture recognizer will accept drags from.
-  ///
-  /// If not specified, defaults to all pointer kinds.
-  Set<PointerDeviceKind> supportedDevices;
-
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -236,9 +241,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerEvent event) {
-    if (!supportedDevices.contains(event.kind)) {
-      return false;
-    }
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
@@ -516,9 +518,19 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.kind}
   VerticalDragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-    Set<PointerDeviceKind> supportedDevices = _kAllPointerDeviceKinds,
-  }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+             ? supportedDevices
+             : <PointerDeviceKind>{ kind },
+       );
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -542,10 +554,6 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   String get debugDescription => 'vertical drag';
 }
 
-const Set<PointerDeviceKind> _kAllPointerDeviceKinds = <PointerDeviceKind>{
-  ...PointerDeviceKind.values,
-};
-
 /// Recognizes movement in the horizontal direction.
 ///
 /// Used for horizontal scrolling.
@@ -562,9 +570,19 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.kind}
   HorizontalDragGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-    Set<PointerDeviceKind> supportedDevices = _kAllPointerDeviceKinds,
-  }) : super(debugOwner: debugOwner, kind: kind, supportedDevices: supportedDevices);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       super(
+         debugOwner: debugOwner,
+         supportedDevices: kind == null
+             ? supportedDevices
+             : <PointerDeviceKind>{ kind },
+       );
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
