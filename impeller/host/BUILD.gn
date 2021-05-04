@@ -14,6 +14,8 @@ executable("host") {
   cflags_objc = flutter_cflags_objc_arc
   cflags_objcc = flutter_cflags_objcc_arc
 
+  cflags_objcc += [ "-Wno-auto-var-id" ]
+
   output_name = "impeller"
 
   sources = [
@@ -31,6 +33,7 @@ executable("host") {
     "AppKit.framework",
     "Metal.framework",
     "MetalKit.framework",
+    "QuartzCore.framework",
     "ModelIO.framework",
   ]
 
@@ -38,6 +41,5 @@ executable("host") {
     ":impeller_host_shaders",
     "//flutter/fml",
     "//flutter/impeller/impeller",
-    "//third_party/glfw",
   ]
 }
