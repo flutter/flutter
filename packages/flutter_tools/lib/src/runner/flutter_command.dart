@@ -1393,6 +1393,9 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
+  @override
+  void printUsage() => globals.printStatus(usage);
+
   ApplicationPackageFactory applicationPackages;
 
   /// Gets the parsed command-line option named [name] as `bool`.

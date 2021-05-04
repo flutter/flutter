@@ -46,6 +46,35 @@ void main() {
   }
 
   group('config', () {
+    testUsingContext('only displays configured settings with empty arguments', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>[
+        'config',
+      ]);
+
+      expect(testLogger.statusText.contains(configCommand.usage), false);
+      expect(testLogger.statusText, contains(configCommand.configuredSettings));
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
+    testUsingContext('does not display configured settings with --help', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>[
+        'config',
+        '--help',
+      ]);
+
+      expect(testLogger.statusText, contains(configCommand.usage));
+      expect(testLogger.statusText.contains(configCommand.configuredSettings), false);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
     testUsingContext('machine flag', () async {
       final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
