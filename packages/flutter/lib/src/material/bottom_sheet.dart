@@ -290,12 +290,15 @@ class _BottomSheetState extends State<BottomSheet> {
       );
     }
 
-    return !widget.enableDrag ? bottomSheet : GestureDetector(
-      onVerticalDragStart: _handleDragStart,
-      onVerticalDragUpdate: _handleDragUpdate,
-      onVerticalDragEnd: _handleDragEnd,
-      child: bottomSheet,
-      excludeFromSemantics: true,
+    return !widget.enableDrag ? bottomSheet : MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onVerticalDragStart: _handleDragStart,
+        onVerticalDragUpdate: _handleDragUpdate,
+        onVerticalDragEnd: _handleDragEnd,
+        child: bottomSheet,
+        excludeFromSemantics: true,
+      ),
     );
   }
 }

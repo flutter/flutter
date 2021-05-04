@@ -1060,6 +1060,36 @@ void main() {
     });
 
   });
+
+  testWidgets('a draggable BottomSheet should have a click system mouse cursor', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+      enableDrag: true,
+    );
+
+    await tester.pumpAndSettle();
+    final MouseRegion region = find.ancestor(
+      of: find.text('BottomSheet'),
+      matching: find.byType(MouseRegion),
+    ).evaluate().first.widget as MouseRegion;
+
+    expect(region.cursor, SystemMouseCursors.click);
+  });
 }
 
 class _TestPage extends StatelessWidget {
