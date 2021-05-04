@@ -81,7 +81,7 @@ void main() {
 
   testWidgets('Updating a MultiChildRenderObjectElement to have children with duplicated keys throws', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/81541
-    
+
     const ValueKey<int> key1 = ValueKey<int>(1);
     const ValueKey<int> key2 = ValueKey<int>(2);
 
