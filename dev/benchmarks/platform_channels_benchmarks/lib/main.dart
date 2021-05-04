@@ -101,48 +101,26 @@ Future<void> _runTests() async {
   printer.printToStdout();
 }
 
-void main() {
-  runApp(const MyApp());
-}
+class _BenchmarkWidget extends StatefulWidget {
+  const _BenchmarkWidget(this.tests, {Key key}) : super(key: key);
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+  final Future<void> Function() tests;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Platform Channel Benchmarks',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Platform Channel Benchmarks'),
-    );
-  }
+  _BenchmarkWidgetState createState() => _BenchmarkWidgetState();
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class _BenchmarkWidgetState extends State<_BenchmarkWidget> {
   @override
   void initState() {
-    _runTests();
+    widget.tests();
     super.initState();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Container(),
-    );
-  }
+  Widget build(BuildContext context) => Container();
+}
+
+void main() {
+  runApp(const _BenchmarkWidget(_runTests));
 }
