@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,8 +49,10 @@ List<Object> _makeTestBuffer(int size) {
 }
 
 Future<void> _runTests() async {
-  assert(false,
-      "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  if (kDebugMode) {
+    throw Exception(
+        "Must be run in profile mode! Use 'flutter run --profile'.");
+  }
   const int numMessages = 10000;
 
   const BasicMessageChannel<Object> channel = BasicMessageChannel<Object>(
