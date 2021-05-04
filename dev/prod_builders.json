@@ -769,6 +769,12 @@
       "flaky": false
     },
     {
+      "name": "Mac_android platform channels benchmarks",
+      "repo": "flutter",
+      "task_name": "mac_android_platform_channels_benchmarks",
+      "flaky": true
+    },
+    {
       "name": "Mac_android platform_interaction_test",
       "repo": "flutter",
       "task_name": "mac_android_platform_interaction_test",
@@ -1151,6 +1157,12 @@
       "repo": "flutter",
       "task_name": "mac_ios_platform_channel_sample_test_swift",
       "flaky": false
+    },
+    {
+      "name": "Mac_ios platform channels benchmarks",
+      "repo": "flutter",
+      "task_name": "mac_ios_platform_channels_benchmarks",
+      "flaky": true
     },
     {
       "name": "Mac_ios platform_interaction_test_ios",
