@@ -218,7 +218,6 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
 - (void)drawInMTKView:(nonnull MTKView*)view {
   /// Per frame updates here
-
   dispatch_semaphore_wait(_inFlightSemaphore, DISPATCH_TIME_FOREVER);
 
   id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
@@ -234,9 +233,8 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
   [self _updateGameState];
 
   /// Delay getting the currentRenderPassDescriptor until we absolutely need it
-  /// to avoid
-  ///   holding onto the drawable and blocking the display pipeline any longer
-  ///   than necessary
+  /// to avoid holding onto the drawable and blocking the display pipeline any
+  /// longer than necessary
   MTLRenderPassDescriptor* renderPassDescriptor =
       view.currentRenderPassDescriptor;
 
@@ -293,6 +291,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)mtkView:(nonnull MTKView*)view drawableSizeWillChange:(CGSize)size {
+  NSLog(@"Drawable sized did change: %@", NSStringFromSize(size));
   float aspect = size.width / (float)size.height;
   _projectionMatrix = matrix_perspective_right_hand(65.0f * (M_PI / 180.0f),
                                                     aspect, 0.1f, 100.0f);

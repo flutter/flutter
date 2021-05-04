@@ -19,16 +19,18 @@
   if (self = [super init]) {
     view_controller_ = [[ImpellerHostViewController alloc] init];
     window_ = [[NSWindow alloc]
-        initWithContentRect:NSMakeRect(0, 0, 800, 600)
+        initWithContentRect:NSMakeRect(200, 200, 800, 600)
                   styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable
                     backing:NSBackingStoreBuffered
                       defer:NO];
+    window_.styleMask |= NSWindowStyleMaskResizable;
     [window_ setContentViewController:view_controller_];
   }
   return self;
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
+  [window_ makeMainWindow];
   [window_ setTitle:@"Impeller Host"];
   [window_ makeKeyAndOrderFront:self];
 }
@@ -43,7 +45,7 @@ int main(int argc, const char* argv[]) {
   NSApplication* app = [NSApplication sharedApplication];
   [app setActivationPolicy:NSApplicationActivationPolicyRegular];
   NSMenuItem* item = [[NSMenuItem alloc] init];
-  NSApp.mainMenu = [[NSMenu alloc] init];
+  app.mainMenu = [[NSMenu alloc] init];
   item.submenu = [[NSMenu alloc] init];
   [app.mainMenu addItem:item];
   [item.submenu
