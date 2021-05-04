@@ -15,7 +15,7 @@ import '../src/common.dart';
 
 void main() {
   group('Flutter run for web', () {
-    final BasicProject project = BasicProject();
+    final BasicProjectWithSecondary project = BasicProjectWithSecondary();
     Directory tempDir;
     FlutterRunTestDriver flutter;
 
@@ -52,6 +52,19 @@ void main() {
         project.topLevelFunctionBreakpointLine,
       );
     }
+
+    testWithoutContext('flutter run expression evaluation - can evaluate method from dependent library after hot reload', () async {
+      await start(expressionEvaluation: true);
+      await breakInTopLevelFunction(flutter);
+
+      await evaluateHotReloadedExpresison(flutter, 12);
+
+      project.updateSecondaryReturnValue(24);
+      await flutter.hotReload();
+      await breakInTopLevelFunction(flutter);
+
+      await evaluateHotReloadedExpresison(flutter, 24);
+    });
 
     testWithoutContext('cannot evaluate expression if feature is disabled', () async {
       await start(expressionEvaluation: false);
@@ -244,4 +257,9 @@ void expectError(ObjRef result, String message) {
   expect(result,
     const TypeMatcher<ErrorRef>()
       .having((ErrorRef instance) => instance.message, 'message', message));
+}
+
+Future<void> evaluateHotReloadedExpresison(FlutterTestDriver flutter, int expected) async {
+  final ObjRef res = await flutter.evaluateInFrame('foo()');
+  expectInstance(res, InstanceKind.kDouble, expected.toString());
 }

@@ -27,9 +27,12 @@ abstract class Project {
   String get main;
   String get test => null;
   String get generatedFile => null;
+  String get secondary => null;
   DeferredComponentsConfig get deferredComponents => null;
 
   Uri get mainDart => Uri.parse('package:test/main.dart');
+
+  Uri get secondaryDart => Uri.parse('package:test/bar.dart');
 
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
@@ -42,6 +45,9 @@ abstract class Project {
     }
     if (generatedFile != null) {
       writeFile(fileSystem.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'), generatedFile);
+    }
+    if (secondary != null) {
+      writeFile(fileSystem.path.join(dir.path, 'lib', 'bar.dart'), secondary);
     }
     if (deferredComponents != null) {
       deferredComponents.setUpIn(dir);
