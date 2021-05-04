@@ -3544,7 +3544,7 @@ void main() {
               tabs: <Widget>[
                 Tab(
                   icon: Icon(Icons.check,size: 40),
-                  child: Text("1 - OK",style: TextStyle(fontSize: 25),),
+                  child: Text('1 - OK',style: TextStyle(fontSize: 25),),
                   kTextAndIconTabHeight: 85,
                 ),
               ],
