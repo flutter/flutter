@@ -1591,7 +1591,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (_) async {
+    SystemChannels.mouseCursor.setMockMethodCallHandler((_) async {
       logCursors.add('cursor');
     });
 
