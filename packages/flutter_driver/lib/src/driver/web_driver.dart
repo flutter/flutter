@@ -72,13 +72,12 @@ class WebFlutterDriver extends FlutterDriver {
   /// configurations.
   ///
   /// See [FlutterDriver.connect] for more documentation.
-  static Future<FlutterDriver> connectWeb(
-      {
-        String? hostUrl,
-        bool printCommunication = false,
-        bool logCommunicationToFile = true,
-        Duration? timeout,
-        }) async {
+  static Future<FlutterDriver> connectWeb({
+    String? hostUrl,
+    bool printCommunication = false,
+    bool logCommunicationToFile = true,
+    Duration? timeout,
+  }) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
     final Map<String, dynamic> settings = <String, dynamic>{
       'support-timeline-action': Platform.environment['SUPPORT_TIMELINE_ACTION'] == 'true',
