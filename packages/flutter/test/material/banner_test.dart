@@ -184,7 +184,7 @@ void main() {
                       key: dismissTarget,
                       child: const Text('DISMISS'),
                       onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                    )
+                    ),
                   ],
                 ));
               },
@@ -237,7 +237,7 @@ void main() {
                       key: dismissTarget,
                       child: const Text('DISMISS'),
                       onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                    )
+                    ),
                   ],
                 ));
               },

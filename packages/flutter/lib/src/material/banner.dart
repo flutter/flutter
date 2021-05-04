@@ -62,9 +62,10 @@ enum MaterialBannerClosedReason {
 ///       title: const Text('The MaterialBanner is below'),
 ///     ),
 ///     body: Center(
-///       child: OutlinedButton(
+///       child: ElevatedButton(
+///         child: const Text('Show MaterialBanner'),
 ///         onPressed: () => ScaffoldMessenger.of(context).showMaterialBanner(
-///           MaterialBanner(
+///           const MaterialBanner(
 ///             padding: EdgeInsets.all(20),
 ///             content: Text('Hello, I am a Material Banner'),
 ///             leading: Icon(Icons.agriculture_outlined),
@@ -72,7 +73,7 @@ enum MaterialBannerClosedReason {
 ///             actions: <Widget>[
 ///               TextButton(
 ///                 child: Text('DISMISS'),
-///                 onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+///                 onPressed: null,
 ///               ),
 ///             ],
 ///           ),

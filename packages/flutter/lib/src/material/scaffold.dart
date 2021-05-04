@@ -488,7 +488,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///         ScaffoldMessenger.of(context).showMaterialBanner(
   ///           const MaterialBanner(
   ///             content: Text('This is a MaterialBanner'),
-  ///             actions: [
+  ///             actions: <Widget>[
   ///               TextButton(
   ///                 child: Text('DISMISS'),
   ///                 onPressed: null,
