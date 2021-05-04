@@ -240,7 +240,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
+  }) : assert(kind == null || supportedDevices == null),
+       super(
          debugOwner: debugOwner,
          supportedDevices: kind == null
            ? supportedDevices
