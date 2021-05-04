@@ -60,9 +60,8 @@ class ConfigCommand extends FlutterCommand {
   @override
   bool get shouldUpdateCache => false;
 
-  @override
-  String get usageFooter {
-    // List all config settings. for feature flags, include whether they
+  String get configuredSettings {
+    // List all configured settings. for feature flags, include whether they
     // are available.
     final Map<String, Feature> featuresByName = <String, Feature>{};
     final String channel = globals.flutterVersion.channel;
@@ -88,7 +87,8 @@ class ConfigCommand extends FlutterCommand {
     final bool analyticsEnabled = globals.flutterUsage.enabled &&
                                   !globals.flutterUsage.suppressAnalytics;
     return
-      '\nSettings:\n$values\n\n'
+      'Configured Flutter settings.\n'
+      'Run "flutter config -h" to see all available settings.\n\n$values\n\n'
       'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
   }
 
@@ -159,7 +159,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults.arguments.isEmpty) {
-      globals.printStatus(usage);
+      globals.printStatus(configuredSettings);
     } else {
       globals.printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
