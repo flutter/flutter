@@ -298,24 +298,24 @@ void main() {
         child: Material(
           child: RepaintBoundary(
             child: PopupMenuButton<void>(
-              child: const Text('Actions'),
               itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
                 PopupMenuItem<void>(
-                  child: const Text('First option'),
                   onTap: () {
                     menuItemTapCounters[0] += 1;
                   },
+                  child: const Text('First option'),
                 ),
                 PopupMenuItem<void>(
-                  child: const Text('Second option'),
                   onTap: () {
                     menuItemTapCounters[1] += 1;
                   },
+                  child: const Text('Second option'),
                 ),
                 const PopupMenuItem<void>(
                   child: Text('Option without onTap'),
                 ),
               ],
+              child: const Text('Actions'),
             ),
           ),
         ),
@@ -361,28 +361,28 @@ void main() {
         child: Material(
           child: RepaintBoundary(
             child: PopupMenuButton<String>(
-              child: const Text('Actions'),
               onSelected: (String value) { selected = value; },
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 PopupMenuItem<String>(
-                  child: const Text('First option'),
                   value: 'first',
                   onTap: () {
                     menuItemTapCounters[0] += 1;
                   },
+                  child: const Text('First option'),
                 ),
                 PopupMenuItem<String>(
-                  child: const Text('Second option'),
                   value: 'second',
                   onTap: () {
                     menuItemTapCounters[1] += 1;
                   },
+                  child: const Text('Second option'),
                 ),
                const PopupMenuItem<String>(
-                 child: Text('Option without onTap'),
                  value: 'third',
+                 child: Text('Option without onTap'),
                 ),
               ],
+              child: const Text('Actions'),
             ),
           ),
         ),
