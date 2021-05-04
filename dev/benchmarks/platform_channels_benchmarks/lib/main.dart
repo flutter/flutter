@@ -69,10 +69,11 @@ Future<void> _runTests() async {
   final double smallPayloadTime = watch.elapsedMicroseconds / numMessages;
 
   watch.reset();
+  /// WARNING: Don't change the following line of code, it will invalidate
+  /// `Large` tests.  Instead make a different test.  The size of largeBuffer
+  /// serialized is 14214 bytes.
   final List<Object> largeBuffer = _makeTestBuffer(1000);
-  const StandardMessageCodec codec = StandardMessageCodec();
-  final ByteData data = codec.encodeMessage(largeBuffer);
-  print('Large buffer size: ${data.lengthInBytes}');
+
   int size = 0;
   watch.start();
   for (int i = 0; i < numMessages; ++i) {
