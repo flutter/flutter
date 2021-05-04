@@ -53,7 +53,7 @@ Future<void> _runTests() async {
     throw Exception(
         "Must be run in profile mode! Use 'flutter run --profile'.");
   }
-  const int numMessages = 10000;
+  const int numMessages = 2500;
 
   const BasicMessageChannel<Object> channel = BasicMessageChannel<Object>(
     'dev.flutter.echo.basic.standard',
