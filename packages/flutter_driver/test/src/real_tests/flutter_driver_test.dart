@@ -14,7 +14,7 @@ import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' as vms;
 
 import '../../common.dart';
@@ -54,7 +54,7 @@ void main() {
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
-        final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+        final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
         final bool exists = file.existsSync();
         expect(exists, true, reason: 'Not found ${file.path}');
 
@@ -71,7 +71,7 @@ void main() {
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
 
-        final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+        final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
         final bool exists = file.existsSync();
         expect(exists, false, reason: 'because ${file.path} exists');
       });
@@ -687,7 +687,7 @@ void main() {
       driver = WebFlutterDriver.connectedTo(fakeConnection);
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
 
-      final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+      final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
       final bool exists = file.existsSync();
       expect(exists, true, reason: 'Not found ${file.path}');
 
@@ -702,7 +702,7 @@ void main() {
     test('logCommunicationToFile = false', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection, logCommunicationToFile: false);
       await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
-      final File file = File(p.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+      final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
       final bool exists = file.existsSync();
       expect(exists, false, reason: 'because ${file.path} exists');
     });
