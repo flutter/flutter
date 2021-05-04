@@ -221,27 +221,34 @@ class MaterialBanner extends StatefulWidget {
   _MaterialBannerState createState() => _MaterialBannerState();
 }
 
-class _MaterialBannerState extends State<MaterialBanner> {
+class _MaterialBannerState extends State<MaterialBanner> with TickerProviderStateMixin {
+  // TODO(Calamity210): Remove the private animation once MaterialBanners have migrated to the new API.
+  // A mutable animation is need to allow us to create a fallback animation for backwards compatibility
+  // during the opt-in phase of MaterialBanner's migration to the ScaffoldMessenger API.
+  Animation<double>? _animation;
+
   bool _wasVisible = false;
 
   @override
   void initState() {
     super.initState();
-    widget.animation!.addStatusListener(_onAnimationStatusChanged);
+    _animation = widget.animation ?? (MaterialBanner.createAnimationController(vsync: this)..forward());
+    _animation!.addStatusListener(_onAnimationStatusChanged);
   }
 
   @override
   void didUpdateWidget(MaterialBanner oldWidget) {
-    if (widget.animation != oldWidget.animation) {
-      oldWidget.animation!.removeStatusListener(_onAnimationStatusChanged);
-      widget.animation!.addStatusListener(_onAnimationStatusChanged);
+    if (_animation != oldWidget.animation && oldWidget.animation != null) {
+      _animation!.removeStatusListener(_onAnimationStatusChanged);
+      _animation = widget.animation;
+      _animation!.addStatusListener(_onAnimationStatusChanged);
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
-    widget.animation!.removeStatusListener(_onAnimationStatusChanged);
+    _animation!.removeStatusListener(_onAnimationStatusChanged);
     super.dispose();
   }
 
@@ -265,7 +272,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
 
     assert(widget.actions.isNotEmpty);
-    assert(widget.animation != null);
+    assert(_animation != null);
 
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
@@ -296,9 +303,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.contentTextStyle
         ?? theme.textTheme.bodyText2;
 
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
+    final CurvedAnimation heightAnimation = CurvedAnimation(parent: _animation!, curve: _materialBannerHeightCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
-      parent: widget.animation!,
+      parent: _animation!,
       curve: _materialBannerFadeOutCurve,
       reverseCurve: const Threshold(0.0),
     );
