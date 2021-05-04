@@ -2,59 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-import 'package:path/path.dart' as path;
-import 'package:flutter_devicelab/framework/utils.dart' as utils;
-
-import 'package:flutter_devicelab/tasks/microbenchmarks.dart'
-    as microbenchmarks;
-import 'package:flutter_devicelab/framework/task_result.dart';
-import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/adb.dart' as adb;
-
-TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
-  return () async {
-    adb.deviceOperatingSystem = operatingSystem;
-    final adb.Device device = await adb.devices.workingDevice;
-    await device.unlock();
-
-    final Directory appDir = utils.dir(path.join(utils.flutterDirectory.path,
-        'dev/benchmarks/platform_channels_benchmarks'));
-    final Process flutterProcess = await utils.inDirectory(appDir, () async {
-      final String flutterExe =
-          path.join(utils.flutterDirectory.path, 'bin', 'flutter');
-      final List<String> createArgs = <String>[
-        'create',
-        '--platforms',
-        'ios,android',
-        '--no-overwrite',
-        '-v',
-        '.'
-      ];
-      print('\nExecuting: $flutterExe $createArgs $appDir');
-      utils.eval(flutterExe, createArgs);
-
-      final List<String> options = <String>[
-        '-v',
-        // --release doesn't work on iOS due to code signing issues
-        '--profile',
-        '--no-publish-port',
-        '-d',
-        device.deviceId,
-      ];
-      return microbenchmarks.startFlutter(
-        options: options,
-        canFail: false,
-      );
-    });
-
-    final Map<String, double> results =
-        await microbenchmarks.readJsonResults(flutterProcess);
-    return TaskResult.success(results,
-        benchmarkScoreKeys: results.keys.toList());
-  };
-}
+import 'package:flutter_devicelab/framework/framework.dart' show task;
+import 'package:flutter_devicelab/framework/adb.dart'
+    show DeviceOperatingSystem;
+import 'package:flutter_devicelab/tasks/platform_channels_benchmarks.dart'
+    as platform_channels_benchmarks;
 
 Future<void> main() async {
-  task(runTask(adb.DeviceOperatingSystem.android));
+  await task(
+      platform_channels_benchmarks.runTask(DeviceOperatingSystem.android));
 }
