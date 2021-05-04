@@ -1,12 +1,6 @@
 {
   "builders": [
     {
-      "name": "Linux analyze",
-      "repo": "flutter",
-      "task_name": "linux_analyze",
-      "enabled": true
-    },
-    {
       "name": "Linux build_aar_module_test",
       "repo": "flutter",
       "task_name": "linux_build_aar_module_test",
