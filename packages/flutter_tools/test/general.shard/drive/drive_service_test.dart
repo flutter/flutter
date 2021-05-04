@@ -222,7 +222,7 @@ void main() {
         command: <String>['dart', 'foo.test', '-rexpanded'],
         exitCode: 11,
         environment: <String, String>{
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/'
+          'VM_SERVICE_URL': 'http://127.0.0.1:63426/1UasC_ihpXY=/'
         },
       ),
     ]);
@@ -230,8 +230,12 @@ void main() {
     final Device device = FakeDevice(LaunchResult.succeeded(
       observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
+    final FakeDartDevelopmentService dds = device.dds as FakeDartDevelopmentService;
 
+    expect(dds.started, false);
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, enableDds: false), true);
+    expect(dds.started, false);
+
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>[],
@@ -240,6 +244,7 @@ void main() {
     );
 
     expect(testResult, 11);
+    expect(dds.started, false);
   });
 
   testWithoutContext('Safely stops and uninstalls application', () async {
