@@ -419,9 +419,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     if (globals.androidSdk == null) {
       return;
     }
-    final Directory tempDir = cache.getRoot().createTempSync(
-      'flutter_gradle_wrapper.',
-    );
+    final Directory tempDir = cache.getRoot().createTempSync('flutter_gradle_wrapper.');
     globals.gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...');

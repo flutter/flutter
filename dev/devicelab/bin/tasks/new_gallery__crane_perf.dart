@@ -14,7 +14,7 @@ Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
 
   final Directory galleryParentDir =
-      Directory.systemTemp.createTempSync('new_gallery_test');
+      Directory.systemTemp.createTempSync('flutter_new_gallery_test.');
   final Directory galleryDir =
       Directory(path.join(galleryParentDir.path, 'gallery'));
 

@@ -54,8 +54,8 @@ void main() {
         builder: (BuildContext context) {
           capturedContext = context;
           return Container();
-        }
-      )
+        },
+      ),
     );
 
     expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
@@ -170,7 +170,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -205,7 +205,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -528,7 +528,8 @@ void main() {
       expect(theme.primaryColor, Colors.orange);
     });
 
-    testWidgets("CupertinoThemeData does not override material theme's icon theme",
+    testWidgets(
+      "CupertinoThemeData does not override material theme's icon theme",
       (WidgetTester tester) async {
         const Color materialIconColor = Colors.blue;
         const Color cupertinoIconColor = Colors.black;
@@ -540,7 +541,8 @@ void main() {
 
         expect(buildCount, 1);
         expect(actualIconTheme!.color, materialIconColor);
-    });
+      },
+    );
 
     testWidgets(
       'Changing cupertino theme override triggers rebuilds',

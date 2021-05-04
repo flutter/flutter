@@ -787,10 +787,11 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-          child: HoverFeedback(
-        onEnter: () { numEntrances += 1; },
-        onExit: () { numExits += 1; },
-      )),
+        child: HoverFeedback(
+          onEnter: () { numEntrances += 1; },
+          onExit: () { numExits += 1; },
+        ),
+      ),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
@@ -808,10 +809,11 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-          child: HoverFeedback(
-        onEnter: () { numEntrances += 1; },
-        onExit: () { numExits += 1; },
-      )),
+        child: HoverFeedback(
+          onEnter: () { numEntrances += 1; },
+          onExit: () { numExits += 1; },
+        ),
+      ),
     );
     await tester.pump();
     expect(numEntrances, equals(2));
@@ -829,11 +831,12 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-          child: HoverFeedback(
-        key: feedbackKey,
-        onEnter: () { numEntrances += 1; },
-        onExit: () { numExits += 1; },
-      )),
+        child: HoverFeedback(
+          key: feedbackKey,
+          onEnter: () { numEntrances += 1; },
+          onExit: () { numExits += 1; },
+        ),
+      ),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
@@ -1431,7 +1434,7 @@ void main() {
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
-      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
     ));
     expect(logs, <String>['paint']);
     logs.clear();
@@ -1449,7 +1452,7 @@ void main() {
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
-      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
     ));
 
     expect(logs, <String>['paint', 'hover-enter']);
@@ -1588,7 +1591,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (_) async {
+    SystemChannels.mouseCursor.setMockMethodCallHandler((_) async {
       logCursors.add('cursor');
     });
 
