@@ -4,12 +4,12 @@
 # These owners are mainly team leaders and their sub-teams. Please feel
 # free to claim ownership by adding your handle to corresponding tests.
 #
-# These tests correspond to builder names defined in 
+# These tests correspond to builder names defined in
 # https://github.com/flutter/infra/blob/master/config/framework_config.star
 # and https://github.com/flutter/infra/blob/master/config/devicelab_config.star
 #
 # This file will be used as a reference when new flaky bugs are filed and
-# the TL will be assigned and the sub-team will be labeled by default 
+# the TL will be assigned and the sub-team will be labeled by default
 # for further triage.
 
 # Linux Android DeviceLab tests
