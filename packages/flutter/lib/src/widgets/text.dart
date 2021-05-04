@@ -11,7 +11,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
-import 'selection_arena.dart';
+import 'selection_area.dart';
 
 // Examples can assume:
 // late String _name;

@@ -18,8 +18,8 @@ class SelectionArea extends StatefulWidget {
   }
 }
 
-class _SelectionState {
-  _SelectionState(this.start, this.end);
+class _Selection {
+  _Selection(this.start, this.end);
 
   final TextPosition start;
   final TextPosition end;
@@ -32,11 +32,11 @@ class _RegistrantData {
   Rect? bounds;
 }
 
-class _SelectionAreaState extends State<SelectionArea> with ChangeNotifier implements SelectionRegistrant {
+class _SelectionAreaState extends State<SelectionArea> implements SelectionRegistrant {
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
   final Map<RenderParagraph, _RegistrantData> _selectionCandidates = <RenderParagraph, _RegistrantData>{};
-  final Map<RenderParagraph, _SelectionState> _selectionStates = <RenderParagraph, _SelectionState>{};
+  final Set<RenderParagraph> _selectionStates = <RenderParagraph>{};
 
   Offset? _selectionStart;
   Offset? _selectionEnd;
@@ -53,9 +53,9 @@ class _SelectionAreaState extends State<SelectionArea> with ChangeNotifier imple
 
   @override
   void update(RenderParagraph renderBox, Rect rect) {
-    var tl = renderBox.localToGlobal(rect.topLeft);
-    var br = renderBox.localToGlobal(rect.bottomRight);
-    _selectionCandidates[renderBox]?.bounds = Rect.fromPoints(tl, br);
+    final Offset topLeft = renderBox.localToGlobal(rect.topLeft);
+    final Offset bottomRight = renderBox.localToGlobal(rect.bottomRight);
+    _selectionCandidates[renderBox]?.bounds = Rect.fromPoints(topLeft, bottomRight);
   }
 
   void _handleDragDown(DragDownDetails details) {
@@ -82,44 +82,46 @@ class _SelectionAreaState extends State<SelectionArea> with ChangeNotifier imple
 
   // This logic needs to change based on text direction.
   void _maybeUpdateSelection() {
-    Offset? selectionStartT = _selectionStart;
-    Offset? selectionEndT = _selectionEnd;
+    final Offset? selectionStartT = _selectionStart;
+    final Offset? selectionEndT = _selectionEnd;
     if (selectionEndT == null || selectionStartT == null) {
       if (_selectionStates.isNotEmpty) {
+        for (final RenderParagraph paragraph in _selectionStates) {
+          paragraph.textSelection = null;
+        }
         _selectionStates.clear();
-        notifyListeners();
       }
       return;
     }
-    // First check if we've entirely passed any selected texts.
-    //
-    //  *
-    //       HELLO THERE x
-    //
-    Offset selectionStart = selectionStartT;
-    Offset selectionEnd = selectionEndT;
-    bool didUpdate = false;
-    for (var data in _selectionCandidates.values) {
-      Rect? bounds = data.bounds;
+    // We should just ask each paragraph for a text selection, then it could account for
+    // directionality.
+    final Offset selectionStart = selectionStartT;
+    final Offset selectionEnd = selectionEndT;
+    for (final _RegistrantData data in _selectionCandidates.values) {
+      final Rect? bounds = data.bounds;
       if (bounds == null) {
         continue;
       }
-      var textSelectionStart = Offset(math.max(selectionStart.dx, bounds.topLeft.dx), math.max(selectionStart.dy, bounds.topLeft.dy));
-      var textSelectionEnd = Offset(math.min(selectionEnd.dx, bounds.bottomRight.dx), math.max(selectionEnd.dy, bounds.bottom));
+      if (selectionStart.dy > bounds.bottom || selectionEnd.dy < bounds.top) {
+        data.paragraph.textSelection = null;
+        continue;
+      }
+      Offset modifiedSelectionEnd = selectionEnd;
+        // If the selection end is below the bottom of the text, treat it as having a selection that
+      // extends to the end of the paragraph. This logic has to change for LTR versus RTL.
+      if (selectionEnd.dy > bounds.bottom) {
+        modifiedSelectionEnd = Offset(bounds.right, selectionEnd.dy);
+      }
+      // Otherwise "snap" to the nearest text rect.
 
-      // if (textSelectionStart.dy > bounds.bottom) {
-      //   continue;
-      // }
-      TextPosition startTextPosition = data.paragraph.getPositionForOffset(data.paragraph.globalToLocal(selectionStart));
-      TextPosition endTextPosition = data.paragraph.getPositionForOffset(data.paragraph.globalToLocal(selectionEnd));
+      final TextPosition startTextPosition = data.paragraph.getPositionForOffset(data.paragraph.globalToLocal(selectionStart));
+      final TextPosition endTextPosition = data.paragraph.getPositionForOffset(data.paragraph.globalToLocal(modifiedSelectionEnd));
       if (startTextPosition == endTextPosition) {
         continue;
       }
-      didUpdate = true;
-      _selectionStates[data.paragraph] = _SelectionState(startTextPosition, endTextPosition);
-    }
-    if (didUpdate) {
-      notifyListeners();
+      final TextSelection textSelection = TextSelection(baseOffset: startTextPosition.offset, extentOffset: endTextPosition.offset);
+      data.paragraph.textSelection = textSelection;
+      _selectionStates.add(data.paragraph);
     }
   }
 
@@ -142,49 +144,22 @@ class _SelectionAreaState extends State<SelectionArea> with ChangeNotifier imple
   }
 
   @override
+  void dispose() {
+    for (final RenderParagraph paragraph in _selectionStates) {
+      paragraph.textSelection = null;
+    }
+    _selectionStates.clear();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.translucent,
       excludeFromSemantics: true,
-      child: RenderHackyTextSelectionWidget(this, widget.child),
+      child: widget.child,
     );
-  }
-}
-
-class RenderHackyTextSelectionWidget extends SingleChildRenderObjectWidget {
-  RenderHackyTextSelectionWidget(this._state, Widget child) : super(child: child);
-
-  final _SelectionAreaState _state;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return HackyTextSelectionPainter(_state);
-  }
-
-}
-
-class HackyTextSelectionPainter extends RenderProxyBox {
-  HackyTextSelectionPainter(this._state) {
-    _state.addListener(markNeedsPaint);
-  }
-
-
-  _SelectionAreaState _state;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    super.paint(context, offset);
-    for (var entry in _state._selectionStates.entries) {
-      var start = entry.value.start;
-      var end = entry.value.end;
-      var origin = globalToLocal(_state._selectionCandidates[entry.key]!.bounds!.topLeft);
-      for (var box in entry.key.getBoxesForSelection(TextSelection(baseOffset: start.offset, extentOffset: end.offset, affinity: start.affinity))) {
-        var tl = globalToLocal(entry.key.localToGlobal(Offset(box.left, box.top)));
-        var br = globalToLocal(entry.key.localToGlobal(Offset(box.right, box.bottom)));
-        context.canvas.drawRect(Rect.fromPoints(tl, br), Paint()..color = Color(0xAF6694e8) ..style = PaintingStyle.fill);
-      }
-    }
   }
 }

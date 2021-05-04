@@ -379,6 +379,16 @@ class RenderParagraph extends RenderBox
     return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
+  TextSelection? get textSelection => _textSelection;
+  TextSelection? _textSelection;
+  set textSelection(TextSelection? value) {
+    if (value == textSelection) {
+      return;
+    }
+    _textSelection = value;
+    markNeedsPaint();
+  }
+
   // Intrinsics cannot be calculated without a full layout for
   // alignments that require the baseline (baseline, aboveBaseline,
   // belowBaseline).
@@ -804,6 +814,13 @@ class RenderParagraph extends RenderBox
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
+    }
+    // TODO: themeing
+    final TextSelection? _textSelection = textSelection;
+    if (_textSelection != null) {
+      for (final TextBox textBox in getBoxesForSelection(_textSelection)) {
+        context.canvas.drawRect(textBox.toRect().shift(offset), Paint()..color = const Color(0xAF6694e8) ..style = PaintingStyle.fill);
+      }
     }
   }
 

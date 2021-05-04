@@ -21,7 +21,7 @@ import 'page_storage.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
-import 'selection_arena.dart';
+import 'selection_area.dart';
 import 'transitions.dart';
 
 // Examples can assume:
