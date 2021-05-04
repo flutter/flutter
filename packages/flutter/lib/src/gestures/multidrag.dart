@@ -199,6 +199,8 @@ abstract class MultiDragPointerState {
 ///    start after a long-press gesture.
 abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> extends GestureRecognizer {
   /// Initialize the object.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   MultiDragGestureRecognizer({
     required Object? debugOwner,
     @Deprecated(
@@ -359,6 +361,8 @@ class _ImmediatePointerState extends MultiDragPointerState {
 ///    start after a long-press gesture.
 class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_ImmediatePointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   ImmediateMultiDragGestureRecognizer({
     Object? debugOwner,
     @Deprecated(
@@ -419,6 +423,8 @@ class _HorizontalPointerState extends MultiDragPointerState {
 class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_HorizontalPointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once
   /// but only if they first move horizontally.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   HorizontalMultiDragGestureRecognizer({
     Object? debugOwner,
     @Deprecated(
@@ -479,6 +485,8 @@ class _VerticalPointerState extends MultiDragPointerState {
 class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_VerticalPointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once
   /// but only if they first move vertically.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   VerticalMultiDragGestureRecognizer({
     Object? debugOwner,
     @Deprecated(
@@ -592,6 +600,8 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   /// remain in the same place for [delay] (up to [kTouchSlop]). The [delay]
   /// defaults to [kLongPressTimeout] to match [LongPressGestureRecognizer] but
   /// can be changed for specific behaviors.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DelayedMultiDragGestureRecognizer({
     this.delay = kLongPressTimeout,
     Object? debugOwner,

@@ -49,7 +49,7 @@ void main() {
     GestureBinding.instance!.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
-  testWidgets('VerticalGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+  testWidgets('VerticalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     try {
       VerticalDragGestureRecognizer(
         kind: PointerDeviceKind.touch,
@@ -61,7 +61,7 @@ void main() {
     }
   });
 
-  testWidgets('HorizontalGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+  testWidgets('HorizontalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     try {
       HorizontalDragGestureRecognizer(
         kind: PointerDeviceKind.touch,

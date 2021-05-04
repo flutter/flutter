@@ -48,6 +48,17 @@ void main() {
     final OffsetPair difference = offset2 - offset1;
     expect(difference.local, const Offset(40, 40));
     expect(difference.global, const Offset(40, 40));
+  });
 
+  testWidgets('EagerGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    try {
+      EagerGestureRecognizer(
+        kind: PointerDeviceKind.touch,
+        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+      );
+    } catch(error) {
+      expect(error, isAssertionError);
+      expect(error.toString(), contains('kind == null || supportedDevices == null'));
+    }
   });
 }

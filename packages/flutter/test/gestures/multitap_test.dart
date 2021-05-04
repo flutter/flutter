@@ -146,4 +146,28 @@ void main() {
 
     tap.dispose();
   });
+
+  testWidgets('DoubleTapGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    try {
+      DoubleTapGestureRecognizer(
+        kind: PointerDeviceKind.touch,
+        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+      );
+    } catch(error) {
+      expect(error, isAssertionError);
+      expect(error.toString(), contains('kind == null || supportedDevices == null'));
+    }
+  });
+
+  testWidgets('MultiTapGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    try {
+      MultiTapGestureRecognizer(
+        kind: PointerDeviceKind.touch,
+        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+      );
+    } catch(error) {
+      expect(error, isAssertionError);
+      expect(error.toString(), contains('kind == null || supportedDevices == null'));
+    }
+  });
 }

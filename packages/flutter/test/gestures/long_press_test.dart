@@ -714,4 +714,16 @@ void main() {
     longPress.dispose();
     recognized.clear();
   });
+
+  testWidgets('LongPressGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    try {
+      LongPressGestureRecognizer(
+        kind: PointerDeviceKind.touch,
+        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+      );
+    } catch(error) {
+      expect(error, isAssertionError);
+      expect(error.toString(), contains('kind == null || supportedDevices == null'));
+    }
+  });
 }

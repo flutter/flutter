@@ -231,7 +231,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// Initialize the object.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   OneSequenceGestureRecognizer({
     Object? debugOwner,
     @Deprecated(
@@ -414,7 +414,7 @@ enum GestureRecognizerState {
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   PrimaryPointerGestureRecognizer({
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,

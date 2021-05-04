@@ -28,4 +28,26 @@ void main() {
   OneSequenceGestureRecognizer(kind: PointerDeviceKind.touch);
   PrimaryPointerGestureRecognizer();
   PrimaryPointerGestureRecognizer(kind: PointerDeviceKind.touch);
+  EagerGestureRecognizer();
+  EagerGestureRecognizer(kind: PointerDeviceKind.touch);
+  ForcePressGestureRecognizer();
+  ForcePressGestureRecognizer(kind: PointerDeviceKind.touch);
+  LongPressGestureRecognizer();
+  LongPressGestureRecognizer(kind: PointerDeviceKind.touch);
+  MultiDragGestureRecognizer();
+  MultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+  ImmediateMultiDragGestureRecognizer();
+  ImmediateMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+  HorizontalMultiDragGestureRecognizer();
+  HorizontalMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+  VerticalMultiDragGestureRecognizer();
+  VerticalMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+  DelayedMultiDragGestureRecognizer();
+  DelayedMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+  DoubleTapGestureRecognizer();
+  DoubleTapGestureRecognizer(kind: PointerDeviceKind.touch);
+  MultiTapGestureRecognizer();
+  MultiTapGestureRecognizer(kind: PointerDeviceKind.touch);
+  ScaleGestureRecognizer();
+  ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
 }

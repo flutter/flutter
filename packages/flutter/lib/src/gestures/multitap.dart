@@ -113,7 +113,7 @@ class _TapTracker {
 class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Create a gesture recognizer for double taps.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DoubleTapGestureRecognizer({
     Object? debugOwner,
     @Deprecated(
@@ -467,6 +467,8 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   ///
   /// The [longTapDelay] defaults to [Duration.zero], which means
   /// [onLongTapDown] is called immediately after [onTapDown].
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   MultiTapGestureRecognizer({
     this.longTapDelay = Duration.zero,
     Object? debugOwner,
