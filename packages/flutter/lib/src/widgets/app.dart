@@ -1649,7 +1649,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                   child: Localizations(
                     locale: appLocale,
                     delegates: _localizationsDelegates.toList(),
-                    child: SelectionArea(child: title),
+                    child: title,
                   ),
                 ),
               ),
