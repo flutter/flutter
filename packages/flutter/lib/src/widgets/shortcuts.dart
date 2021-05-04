@@ -160,6 +160,8 @@ class KeySet<T extends KeyboardKey> {
 ///
 ///  * [SingleActivator], an implementation that represents a single key combined
 ///    with modifiers (control, shift, alt, meta).
+///  * [CharacterActivator], an implementation that represents key combinations
+///    that result in the specified character, such as question mark.
 ///  * [LogicalKeySet], an implementation that requires one or more
 ///    [LogicalKeyboardKey]s to be pressed at the same time. Prefer
 ///    [SingleActivator] when possible.
@@ -331,9 +333,6 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     LogicalKeyboardKey.meta: <LogicalKeyboardKey>[LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight],
   };
 
-  /// Returns a description of the key set that is short and readable.
-  ///
-  /// Intended to be used in debug mode for logging purposes.
   @override
   String debugDescribeKeys() {
     final List<LogicalKeyboardKey> sortedKeys = keys.toList()..sort(
@@ -395,7 +394,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 
 /// A shortcut key combination of a single key and modifiers.
 ///
-/// This [ShortcutActivator] implements typical shortcuts such as:
+/// The [SingleActivator] implements typical shortcuts such as:
 ///
 ///  * ArrowLeft
 ///  * Shift + Delete
@@ -420,6 +419,11 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///  * [SingleActivator]s do not consider modifiers to be a trigger key. For
 ///    example, pressing ControlLeft while holding key X *will not* activate a
 ///    `SingleActivator(LogicalKeyboardKey.keyX, control: true)`.
+///
+/// See also:
+///
+///  * [CharacterActivator], an activator that represents key combinations
+///    that result in the specified character, such as question mark.
 class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Create an activator of a trigger key and modifiers.
   ///
@@ -482,21 +486,21 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     this.meta = false,
   }) : // The enumerated check with `identical` is cumbersome but the only way
        // since const constructors can not call functions such as `==` or
-       // `Set.contains`. Checking with `identical` is sufficient since
-       // `LogicalKeyboardKey` only provides cached values.
+       // `Set.contains`. Checking with `identical` might not work when the
+       // key object is created from ID, but it covers common cases.
        assert(
          !identical(trigger, LogicalKeyboardKey.control) &&
-             !identical(trigger, LogicalKeyboardKey.controlLeft) &&
-             !identical(trigger, LogicalKeyboardKey.controlRight) &&
-             !identical(trigger, LogicalKeyboardKey.shift) &&
-             !identical(trigger, LogicalKeyboardKey.shiftLeft) &&
-             !identical(trigger, LogicalKeyboardKey.shiftRight) &&
-             !identical(trigger, LogicalKeyboardKey.alt) &&
-             !identical(trigger, LogicalKeyboardKey.altLeft) &&
-             !identical(trigger, LogicalKeyboardKey.altRight) &&
-             !identical(trigger, LogicalKeyboardKey.meta) &&
-             !identical(trigger, LogicalKeyboardKey.metaLeft) &&
-             !identical(trigger, LogicalKeyboardKey.metaRight),
+         !identical(trigger, LogicalKeyboardKey.controlLeft) &&
+         !identical(trigger, LogicalKeyboardKey.controlRight) &&
+         !identical(trigger, LogicalKeyboardKey.shift) &&
+         !identical(trigger, LogicalKeyboardKey.shiftLeft) &&
+         !identical(trigger, LogicalKeyboardKey.shiftRight) &&
+         !identical(trigger, LogicalKeyboardKey.alt) &&
+         !identical(trigger, LogicalKeyboardKey.altLeft) &&
+         !identical(trigger, LogicalKeyboardKey.altRight) &&
+         !identical(trigger, LogicalKeyboardKey.meta) &&
+         !identical(trigger, LogicalKeyboardKey.metaLeft) &&
+         !identical(trigger, LogicalKeyboardKey.metaRight),
        );
 
   /// The non-modifier key of the shortcut that is pressed after all modifiers
@@ -593,6 +597,111 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   }
 }
 
+/// A shortcut combination that is triggered by a key event of a character.
+///
+/// The [CharacterActivator] is useful when it is desired that the key
+/// combination should result in certain character regardless of keyboard
+/// layouts. For example, `CharacterActivator('?')` is triggered when a key
+/// combination results in a question mark, which is Shift+Slash on a US
+/// keyboard, but Shift+Comma on a French keyboard.
+///
+/// The [CharacterActivator] is less reliable than [SingleActivator] since
+/// it depends on the platform to report event characters. Prefer
+/// [SingleActivator] when possible.
+///
+/// See also:
+///
+///  * [SingleActivator], an activator that represents a single key combined
+///    with modifiers, such as `Ctrl+C`.
+class CharacterActivator with Diagnosticable implements ShortcutActivator {
+  /// Create an activator of a trigger key and modifiers.
+  ///
+  /// The `trigger` should be the non-modifier key that is pressed after all the
+  /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
+  /// a modifier key (sided or unsided).
+  ///
+  /// The `control`, `shift`, `alt`, and `meta` flags represent whether
+  /// the respect modifier keys should be held (true) or released (false)
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// In the following example, the shortcut `Control + C` increases the counter:
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/services.dart';
+  /// ```
+  ///
+  /// ```dart preamble
+  /// class IncrementIntent extends Intent {
+  ///   const IncrementIntent();
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  /// int count = 0;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Shortcuts(
+  ///     shortcuts: const <ShortcutActivator, Intent>{
+  ///       SingleActivator(LogicalKeyboardKey.keyC, control: true): IncrementIntent(),
+  ///     },
+  ///     child: Actions(
+  ///       actions: <Type, Action<Intent>>{
+  ///         IncrementIntent: CallbackAction<IncrementIntent>(
+  ///           onInvoke: (IncrementIntent intent) => setState(() {
+  ///             count = count + 1;
+  ///           }),
+  ///         ),
+  ///       },
+  ///       child: Focus(
+  ///         autofocus: true,
+  ///         child: Column(
+  ///           children: <Widget>[
+  ///             const Text('Add to the counter by pressing Ctrl+C'),
+  ///             Text('count: $count'),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  const CharacterActivator(this.character);
+
+  /// The non-modifier key of the shortcut that is pressed after all modifiers
+  /// to activate the shortcut.
+  ///
+  /// For example, for `Control + C`, [trigger] should be
+  /// [LogicalKeyboardKey.keyC].
+  final String character;
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => null;
+
+  @override
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
+    return event is RawKeyDownEvent
+        && event.character == character;
+  }
+
+  @override
+  String debugDescribeKeys() {
+    String result = '';
+    assert(() {
+      result = "'$character'";
+      return true;
+    }());
+    return result;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('character', character));
+  }
+}
+
 class _ActivatorIntentPair with Diagnosticable {
   const _ActivatorIntentPair(this.activator, this.intent);
   final ShortcutActivator activator;
@@ -674,7 +783,6 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   Intent? _find(RawKeyEvent event, RawKeyboard state) {
     final List<_ActivatorIntentPair>? candidatesByKey = _indexedShortcuts[event.logicalKey];
     final List<_ActivatorIntentPair>? candidatesByNull = _indexedShortcuts[null];
-    print('key $candidatesByKey null $candidatesByNull');
     final List<_ActivatorIntentPair> candidates = <_ActivatorIntentPair>[
       if (candidatesByKey != null) ...candidatesByKey,
       if (candidatesByNull != null) ...candidatesByNull,

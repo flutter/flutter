@@ -1057,4 +1057,24 @@ void main() {
       invoked = 0;
     });
   });
+
+  group('CharacterActivator', () {
+    testWidgets('is triggered on events with correct character', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const CharacterActivator('?'),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Press KeyC: Accepted by DumbLogicalActivator
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 1);
+      invoked = 0;
+    });
+  });
 }
