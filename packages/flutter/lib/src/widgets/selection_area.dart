@@ -1,7 +1,10 @@
+import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import '../../widgets.dart';
 
@@ -104,6 +107,7 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
       }
       if (selectionStart.dy > bounds.bottom || selectionEnd.dy < bounds.top) {
         data.paragraph.textSelection = null;
+        _selectionStates.remove(data.paragraph);
         continue;
       }
       Offset modifiedSelectionEnd = selectionEnd;
@@ -125,9 +129,44 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
     }
   }
 
+  void _onKeyEvent(RawKeyEvent event) {
+    if (event.isControlPressed && event.isKeyPressed(LogicalKeyboardKey.keyC)) {
+      _onCopy();
+    }
+  }
+
+  void _onCopy() {
+    if (_selectionStates.isEmpty)
+      return;
+    // The order in which these should be concatenated is ???. For now this
+    // sorts by the top left corner.
+    final List<_CopyData> paragraphs = <_CopyData>[];
+    for (final RenderParagraph paragraph in _selectionStates) {
+      // This should be handled in the inline span.
+      final TextSelection? textSelection = paragraph.textSelection;
+      if (textSelection == null) {
+        continue;
+      }
+      final String plainText = paragraph.text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false);
+      final _RegistrantData? registrantData = _selectionCandidates[paragraph];
+      if (registrantData == null) {
+        continue;
+      }
+      paragraphs.add(_CopyData(registrantData.bounds!.topLeft, plainText.substring(textSelection.start, textSelection.end)));
+    }
+    paragraphs.sort();
+    final StringBuffer buffer = StringBuffer();
+    for (final _CopyData data in paragraphs) {
+      buffer.write(data.data);
+      buffer.write(' ');
+    }
+    Clipboard.setData(ClipboardData(text: buffer.toString()));
+  }
+
   @override
   void initState() {
     super.initState();
+    RawKeyboard.instance.addListener(_onKeyEvent);
     _gestureRecognizers[VerticalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
       () => VerticalDragGestureRecognizer(),
       (VerticalDragGestureRecognizer instance) {
@@ -145,6 +184,7 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
 
   @override
   void dispose() {
+    RawKeyboard.instance.removeListener(_onKeyEvent);
     for (final RenderParagraph paragraph in _selectionStates) {
       paragraph.textSelection = null;
     }
@@ -161,5 +201,26 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
       excludeFromSemantics: true,
       child: widget.child,
     );
+  }
+}
+
+class _CopyData implements Comparable<_CopyData> {
+  _CopyData(this.topLeft, this.data);
+
+  final Offset topLeft;
+  final String data;
+
+  @override
+  int compareTo(_CopyData other) {
+    if (other.topLeft.dy < topLeft.dy) {
+      return -1;
+    } else if (other.topLeft.dy > topLeft.dy) {
+      return 1;
+    } else if (other.topLeft.dx < topLeft.dx) {
+      return -1;
+    } else if (other.topLeft.dx > topLeft.dx) {
+      return 1;
+    }
+    return 0;
   }
 }
