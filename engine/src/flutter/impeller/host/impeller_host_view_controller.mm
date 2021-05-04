@@ -12,9 +12,9 @@
 }
 
 - (void)loadView {
-  view_ = [[MTKView alloc] init];
+  view_ = [[MTKView alloc] initWithFrame:NSMakeRect(0, 0, 800, 600)];
   view_.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-  [self setView:view_];
+  self.view = view_;
 }
 
 - (void)viewDidLoad {
