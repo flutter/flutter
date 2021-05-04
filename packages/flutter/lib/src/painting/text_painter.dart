@@ -64,7 +64,7 @@ class PlaceholderDimensions {
     required this.alignment,
     this.baseline,
     this.baselineOffset,
-    this.range,
+    this.range = TextRange.empty,
   }) : assert(size != null),
        assert(alignment != null);
 
@@ -103,7 +103,7 @@ class PlaceholderDimensions {
   ///
   /// This value is only relevant when used in TextFields/Editable widgets
   /// as replacements for strings of regular text.
-  final TextRange? range;
+  final TextRange range;
 
   @override
   String toString() {
@@ -456,22 +456,23 @@ class TextPainter {
     }
     int adjustment = 0;
     for (final PlaceholderDimensions dims in _placeholderDimensions!) {
-      if (dims.range != null) {
-        if (dims.range!.end <= offset) {
-          // placeholders are represented as a single replacement character,
-          // so we subtract 1 from the length to account for it.
-          adjustment += dims.range!.end - dims.range!.start - 1;
-        } else if (dims.range!.end > offset && offset >= dims.range!.start) {
-          // Within the range.
-          // place offset at beginning or end of placeholder depending on
-          // which half it is in.
-          adjustment += offset - dims.range!.start;
-          if (offset > dims.range!.start + dims.range!.end / 2) {
-            adjustment--;
-          }
-        } else {
-          break;
+      if (!dims.isValid()) {
+        continue;
+      }
+      if (dims.range.end <= offset) {
+        // placeholders are represented as a single replacement character,
+        // so we subtract 1 from the length to account for it.
+        adjustment += dims.range.end - dims.range.start - 1;
+      } else if (dims.range.end > offset && offset >= dims.range.start) {
+        // Within the range.
+        // place offset at beginning or end of placeholder depending on
+        // which half it is in.
+        adjustment += offset - dims.range.start;
+        if (offset > dims.range.start + dims.range.end / 2) {
+          adjustment--;
         }
+      } else {
+        break;
       }
     }
     return offset - adjustment;
@@ -485,12 +486,13 @@ class TextPainter {
       return offset;
     }
     for (final PlaceholderDimensions dims in _placeholderDimensions!) {
-      if (dims.range != null) {
-        if (offset > dims.range!.end || offset > dims.range!.start && offset <= dims.range!.end) {
-          offset += dims.range!.end - dims.range!.start - 1;
-        } else  {
-          break;
-        }
+      if (!dims.isValid()) {
+        continue;
+      }
+      if (offset > dims.range.end || offset > dims.range.start && offset <= dims.range.end) {
+        offset += dims.range.end - dims.range.start - 1;
+      } else  {
+        break;
       }
     }
     return offset;

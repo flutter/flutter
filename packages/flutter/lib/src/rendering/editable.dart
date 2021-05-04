@@ -316,10 +316,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   late List<PlaceholderSpan> _placeholderSpans;
   void _extractPlaceholderSpans(InlineSpan? span) {
     _placeholderSpans = <PlaceholderSpan>[];
-    if (span == null) {
-      return;
-    }
-    span.visitChildren((InlineSpan span) {
+    span?.visitChildren((InlineSpan span) {
       if (span is PlaceholderSpan) {
         _placeholderSpans.add(span);
       }
@@ -2312,7 +2309,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// The text to display.
-  TextSpan? get text => _textPainter.text as TextSpan?;
+  InlineSpan? get text => _textPainter.text as InlineSpan?;
   final TextPainter _textPainter;
   set text(InlineSpan? value) {
     if (_textPainter.text == value)
@@ -2854,7 +2851,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in combineSemanticsInfo(_semanticsInfo!)) {
-      // assert(!info.isPlaceholder);
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
@@ -3311,15 +3307,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // Hit test text spans.
-    final bool hitText;
+    final bool hitText = false;
     final Offset effectivePosition = position - _paintOffset;
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));
       hitText = true;
-    } else {
-      hitText = false;
     }
 
     // Hit test render object children
@@ -3647,16 +3641,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         );
         childSize = child.size;
         switch (_placeholderSpans[childIndex].alignment) {
-          case ui.PlaceholderAlignment.baseline: {
+          case ui.PlaceholderAlignment.baseline:
             baselineOffset = child.getDistanceToBaseline(
               _placeholderSpans[childIndex].baseline!,
             );
             break;
-          }
-          default: {
+          default:
             baselineOffset = null;
             break;
-          }
         }
       } else {
         assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
@@ -3672,7 +3664,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions);
     return placeholderDimensions;
   }
 
@@ -3759,14 +3750,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline: {
+        case ui.PlaceholderAlignment.belowBaseline:
           return false;
-        }
         case ui.PlaceholderAlignment.top:
         case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom: {
+        case ui.PlaceholderAlignment.bottom:
           continue;
-        }
       }
     }
     return true;
@@ -3945,7 +3934,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         Matrix4.diagonal3Values(scale, scale, scale),
         (PaintingContext context, Offset offset) {
           context.paintChild(
-            child!,
+            child,
             offset,
           );
         },
