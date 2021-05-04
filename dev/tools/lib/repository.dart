@@ -519,6 +519,75 @@ class FrameworkRepository extends Repository {
   }
 }
 
+/// A wrapper around the host repository that is executing the conductor.
+///
+/// [Repository] methods that mutate the underlying repository will throw a
+/// [ConductorException].
+class HostFrameworkRepository extends FrameworkRepository {
+  HostFrameworkRepository({
+    required Checkouts checkouts,
+    String name = 'host-framework',
+    bool useExistingCheckout = false,
+    required String upstreamPath,
+  }) : super(
+    checkouts,
+    name: name,
+    fetchRemote: Remote(
+      name: RemoteName.upstream,
+      url: 'file://$upstreamPath/',
+    ),
+    localUpstream: false,
+    useExistingCheckout: useExistingCheckout,
+  ) {
+    _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
+  }
+
+  @override
+  Directory get checkoutDirectory => _checkoutDirectory!;
+
+  @override
+  void newBranch(String branchName) {
+    throw ConductorException('newBranch not implemented for the host repository');
+  }
+
+  @override
+  void checkout(String ref) {
+    throw ConductorException('checkout not implemented for the host repository');
+  }
+
+  @override
+  String cherryPick(String commit) {
+    throw ConductorException('cherryPick not implemented for the host repository');
+  }
+
+  @override
+  String reset(String ref) {
+    throw ConductorException('reset not implemented for the host repository');
+  }
+
+  @override
+  void tag(String commit, String tagName, String remote) {
+    throw ConductorException('tag not implemented for the host repository');
+  }
+
+  @override
+  void updateChannel(
+    String commit,
+    String remote,
+    String branch, {
+    bool force = false,
+  }) {
+    throw ConductorException('updateChannel not implemented for the host repository');
+  }
+
+  @override
+  String authorEmptyCommit([String message = 'An empty commit']) {
+    throw ConductorException(
+      'authorEmptyCommit not implemented for the host repository',
+    );
+  }
+}
+
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
