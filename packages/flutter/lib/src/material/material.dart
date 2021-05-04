@@ -310,6 +310,8 @@ class Material extends StatefulWidget {
   /// ```dart
   /// MaterialInkController inkController = Material.of(context);
   /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
   static MaterialInkController? of(BuildContext context) {
     return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
   }
