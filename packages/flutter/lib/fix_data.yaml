@@ -14,9 +14,8 @@
 
 version: 1
 transforms:
-#TODO(Piinks): update these with PR number once opened
 
-  # Changes made in https://github.com/flutter/flutter/pull/TBD
+  # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
     element:
@@ -40,7 +39,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[kind]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/TBD
+  # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
     element:
@@ -64,7 +63,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[kind]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/TBD
+  # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
     element:
@@ -88,7 +87,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[kind]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/TBD
+  # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
     element:
@@ -112,7 +111,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[kind]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/TBD
+  # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
     element:
@@ -136,7 +135,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[kind]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/TBD
+  # Changes made in https://github.com/flutter/flutter/pull/81858
   - title: "Migrate to 'supportedDevices'"
     date: 2021-05-04
     element:
