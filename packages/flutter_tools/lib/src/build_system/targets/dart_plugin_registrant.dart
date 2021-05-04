@@ -74,7 +74,7 @@ class DartPluginRegistrantTarget extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(platformName);
     // TODO(egarciad): Support Android and iOS.
     // https://github.com/flutter/flutter/issues/52267
-    return targetPlatform != TargetPlatform.darwin_x64 &&
+    return targetPlatform != TargetPlatform.darwin &&
            targetPlatform != TargetPlatform.linux_x64 &&
            targetPlatform != TargetPlatform.linux_arm64 &&
            targetPlatform != TargetPlatform.windows_x64 &&
