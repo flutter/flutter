@@ -5,11 +5,13 @@
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
+import 'selection_arena.dart';
 
 // Examples can assume:
 // late String _name;
@@ -516,6 +518,7 @@ class Text extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SelectionRegistrant? selectionRegistrant = SelectionArea.of(context);
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = style;
     if (style == null || style!.inherit)
@@ -538,6 +541,7 @@ class Text extends StatelessWidget {
         text: data,
         children: textSpan != null ? <InlineSpan>[textSpan!] : null,
       ),
+      selectionRegistrant: selectionRegistrant,
     );
     if (semanticsLabel != null) {
       result = Semantics(

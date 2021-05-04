@@ -24,6 +24,7 @@ import 'performance_overlay.dart';
 import 'restoration.dart';
 import 'router.dart';
 import 'scrollable.dart';
+import 'selection_arena.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
 import 'text.dart';
@@ -1648,7 +1649,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                   child: Localizations(
                     locale: appLocale,
                     delegates: _localizationsDelegates.toList(),
-                    child: title,
+                    child: SelectionArea(child: title),
                   ),
                 ),
               ),

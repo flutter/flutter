@@ -5711,6 +5711,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.selectionRegistrant,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5736,6 +5737,8 @@ class RichText extends MultiChildRenderObjectWidget {
     });
     return result;
   }
+
+  final SelectionRegistrant? selectionRegistrant;
 
   /// The text to display in this widget.
   final InlineSpan text;
@@ -5813,6 +5816,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.maybeLocaleOf(context),
+      selectionRegistrant: selectionRegistrant,
     );
   }
 
@@ -5830,7 +5834,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
-      ..locale = locale ?? Localizations.maybeLocaleOf(context);
+      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..selectionRegistrant = selectionRegistrant;
   }
 
   @override

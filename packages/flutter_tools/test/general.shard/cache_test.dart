@@ -244,24 +244,21 @@ void main() {
     });
 
     testWithoutContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
-      final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
-      final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
-      final IosUsbArtifacts artifact3 = MockIosUsbArtifacts();
-      when(artifact1.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/alpha:/path/to/beta',
-          });
-      when(artifact2.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/gamma:/path/to/delta:/path/to/epsilon',
-          });
-      when(artifact3.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '',
-          });
+      final FakeCachedArtifact artifact1 = FakeCachedArtifact()
+        ..environment = <String, String>{
+          'DYLD_LIBRARY_PATH': '/path/to/alpha:/path/to/beta',
+        };
+      final FakeCachedArtifact artifact2 = FakeCachedArtifact()
+        ..environment = <String, String>{
+          'DYLD_LIBRARY_PATH': '/path/to/gamma:/path/to/delta:/path/to/epsilon',
+        };
+      final FakeCachedArtifact artifact3 = FakeCachedArtifact()
+        ..environment = <String, String>{
+          'DYLD_LIBRARY_PATH': '',
+        };
       final Cache cache = Cache.test(
-        artifacts: <CachedArtifact>[artifact1, artifact2, artifact3],
         processManager: FakeProcessManager.any(),
+        artifacts: <CachedArtifact>[artifact1, artifact2, artifact3],
       );
 
       expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');
@@ -335,11 +332,9 @@ void main() {
     artifactDir.childFile('unused_url_path').createSync();
 
     final FakeCachedArtifact artifact = FakeCachedArtifact(
-      cache: cache,
       binaryDirs: <List<String>>[
         <String>['bin_dir', 'unused_url_path'],
       ],
-      requiredArtifacts: DevelopmentArtifact.universal,
     );
     await artifact.updateInner(MockArtifactUpdater(), fileSystem, operatingSystemUtils);
     final Directory dir = fileSystem.systemTempDirectory
@@ -368,11 +363,11 @@ void main() {
     artifactDir.childFile('unused_url_path').createSync();
 
     final FakeCachedArtifact artifact = FakeCachedArtifact(
-      cache: cache,
+      // cache: cache,
       binaryDirs: <List<String>>[
         <String>['bin_dir', 'unused_url_path'],
       ],
-      requiredArtifacts: DevelopmentArtifact.universal,
+      // requiredArtifacts: DevelopmentArtifact.universal,
     );
     await artifact.updateInner(MockArtifactUpdater(), fileSystem, operatingSystemUtils);
     expect(unzippedFramework, exists);
@@ -651,7 +646,7 @@ void main() {
 
   testWithoutContext('Cache can delete stampfiles of artifacts', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final ArtifactSet artifactSet = FakeCachedArtifact();
     final BufferLogger logger = BufferLogger.test();
 
     when(artifactSet.stampName).thenReturn('STAMP');
@@ -679,7 +674,7 @@ void main() {
 
    testWithoutContext('Cache does not attempt to delete already missing stamp files', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final ArtifactSet artifactSet = FakeCachedArtifact();
     final BufferLogger logger = BufferLogger.test();
 
     when(artifactSet.stampName).thenReturn('STAMP');
@@ -706,10 +701,9 @@ void main() {
 
   testWithoutContext('Cache catches file system exception from missing tool stamp file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final ArtifactSet artifactSet = MockIosUsbArtifacts();
+    final ArtifactSet artifactSet = FakeCachedArtifact();
     final BufferLogger logger = BufferLogger.test();
 
-    when(artifactSet.stampName).thenReturn('STAMP');
     final Cache cache = Cache(
       artifacts: <ArtifactSet>[
         artifactSet,
@@ -734,12 +728,10 @@ void main() {
     final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform(operatingSystem: 'linux'));
 
     when(cache.getWebSdkDirectory()).thenReturn(webStuff);
-    when(artifactUpdater.downloadZipArchive('Downloading Web SDK...', any, any))
-      .thenAnswer((Invocation invocation) async {
-        final Directory location = invocation.positionalArguments[2] as Directory;
-        location.createSync(recursive: true);
-        location.childFile('foo').createSync();
-      });
+    artifactUpdater.downloadZipArchiveCallback = (String message, Uri uri, Directory location) {
+      location.createSync(recursive: true);
+      location.childFile('foo').createSync();
+    };
     webStuff.childFile('bar').createSync(recursive: true);
 
     webSdk.updateInner(artifactUpdater, fileSystem, MockOperatingSystemUtils());
@@ -796,7 +788,7 @@ void main() {
     final PubDependencies pubDependencies = PubDependencies(
       flutterRoot: () => '',
       logger: logger,
-      pub: () => MockPub(),
+      pub: () => FakePub(),
     );
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // no package config
@@ -834,7 +826,7 @@ void main() {
   testWithoutContext('PubDependencies updates via pub get', () async {
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final MockPub pub = MockPub();
+    final FakePub pub = FakePub();
     final PubDependencies pubDependencies = PubDependencies(
       flutterRoot: () => '',
       logger: logger,
@@ -843,10 +835,7 @@ void main() {
 
     await pubDependencies.update(MockArtifactUpdater(), logger, fileSystem, MockOperatingSystemUtils());
 
-    verify(pub.get(
-      context: PubContext.pubGet,
-      directory: 'packages/flutter_tools',
-    )).called(1);
+    expect(pub.ranGet, true);
   });
 
   group('AndroidMavenArtifacts', () {
@@ -914,15 +903,12 @@ void main() {
   });
 }
 
-class FakeCachedArtifact extends EngineCachedArtifact {
+class FakeCachedArtifact implements EngineCachedArtifact {
   FakeCachedArtifact({
-    String stampName = 'STAMP',
-    @required Cache cache,
-    DevelopmentArtifact requiredArtifacts,
     this.binaryDirs = const <List<String>>[],
     this.licenseDirs = const <String>[],
     this.packageDirs = const <String>[],
-  }) : super(stampName, cache, requiredArtifacts);
+  });
 
   final List<List<String>> binaryDirs;
   final List<String> licenseDirs;
@@ -936,6 +922,60 @@ class FakeCachedArtifact extends EngineCachedArtifact {
 
   @override
   List<String> getPackageDirs() => packageDirs;
+
+  @override
+  Map<String, String> environment;
+
+  @override
+  Cache cache;
+
+  @override
+  Future<bool> checkForArtifacts(String engineVersion) {
+    throw UnimplementedError();
+  }
+
+  @override
+  DevelopmentArtifact get developmentArtifact => throw UnimplementedError();
+
+  @override
+  bool get ignorePlatformFiltering => throw UnimplementedError();
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) {
+    throw UnimplementedError();
+  }
+
+  @override
+  bool isUpToDateInner(FileSystem fileSystem) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Directory get location => throw UnimplementedError();
+
+  @override
+  String get name => throw UnimplementedError();
+
+  @override
+  String get stampName => 'STAMP';
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async { }
+
+  @override
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async { }
+
+  @override
+  String get version => throw UnimplementedError();
 }
 
 class FakeSimpleArtifact extends CachedArtifact {
@@ -962,14 +1002,44 @@ class FakeDownloadedArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
-class MockArtifactUpdater extends Mock implements ArtifactUpdater {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
-class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
-class MockPub extends Mock implements Pub {}
+
+class MockArtifactUpdater extends Fake implements ArtifactUpdater {
+  void Function(String message, Uri url, Directory location) downloadZipArchiveCallback;
+
+  @override
+  Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
+    downloadZipArchiveCallback?.call(message, url, location);
+  }
+
+  @override
+  Future<void> downloadZippedTarball(String message, Uri url, Directory location) async { }
+
+  @override
+  void removeDownloadedFiles() { }
+}
+
+class FakePub extends Fake implements Pub {
+  bool ranGet = false;
+
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+  }) async {
+    ranGet = true;
+  }
+}
 
 class FakeCache extends Cache {
   FakeCache({
@@ -992,6 +1062,7 @@ class FakeCache extends Cache {
     return stampFile;
   }
 }
+
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool reinitialized = false;
 
