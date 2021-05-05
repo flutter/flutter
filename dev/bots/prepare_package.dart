@@ -11,7 +11,7 @@ import 'package:args/args.dart';
 import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart' show required;
+import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
@@ -591,7 +591,11 @@ class ArchivePublisher {
         dest: destGsPath,
       );
       assert(tempDir.existsSync());
-      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: false);
+      await updateMetadata(
+        '$releaseFolder/${getMetadataFilename(platform)}',
+        newBucket: false,
+        baseUrl: releaseFolder,
+      );
     }
   }
 
@@ -629,7 +633,12 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata(String gsPath, {bool newBucket=true}) async {
+  @visibleForTesting
+  Future<void> updateMetadata(
+    String gsPath, {
+    bool newBucket=true,
+    @required String baseUrl,
+  }) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -655,15 +664,16 @@ class ArchivePublisher {
 
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       metadataFile.writeAsStringSync(encoder.convert(jsonData));
+      print(metadataFile.path);
     }
-    await _cloudCopy(
-      src: metadataFile.absolute.path,
-      dest: gsPath,
-      // This metadata file is used by the website, so we don't want a long
-      // latency between publishing a release and it being available on the
-      // site.
-      cacheSeconds: shortCacheSeconds,
-    );
+    //await _cloudCopy(
+    //  src: metadataFile.absolute.path,
+    //  dest: gsPath,
+    //  // This metadata file is used by the website, so we don't want a long
+    //  // latency between publishing a release and it being available on the
+    //  // site.
+    //  cacheSeconds: shortCacheSeconds,
+    //);
   }
 
   Future<String> _runGsUtil(
