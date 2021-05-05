@@ -9,6 +9,7 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, Tex
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -61,18 +62,24 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 }
 
 abstract class SelectionRegistrant {
-  void add(RenderParagraph paragraph);
+  void update(Selectable<Object> selectable, Rect global);
 
-  void update(RenderParagraph paragraph, Rect bounds);
+  void remove(Selectable<Object> selectable);
+}
 
-  void remove(RenderParagraph paragraph);
+abstract class Selectable<T> {
+  bool update(Offset start, Offset end);
+
+  T? copy();
+
+  void clear();
 }
 
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
              RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
-                  RelayoutWhenSystemFontsChangeMixin {
+                  RelayoutWhenSystemFontsChangeMixin implements Selectable<String> {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -125,12 +132,6 @@ class RenderParagraph extends RenderBox
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData)
       child.parentData = TextParentData();
-  }
-
-  @override
-  void attach(covariant PipelineOwner owner) {
-    super.attach(owner);
-    _selectionRegistrant?.add(this);
   }
 
   @override
@@ -322,7 +323,6 @@ class RenderParagraph extends RenderBox
     }
     _selectionRegistrant?.remove(this);
     _selectionRegistrant = value;
-    _selectionRegistrant?.add(this);
   }
 
   @override
@@ -379,13 +379,38 @@ class RenderParagraph extends RenderBox
     return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
-  TextSelection? get textSelection => _textSelection;
   TextSelection? _textSelection;
-  set textSelection(TextSelection? value) {
-    if (value == textSelection) {
-      return;
+
+  @override
+  bool update(Offset start, Offset end) {
+    final Offset localStart = globalToLocal(start);
+    final Offset localEnd = globalToLocal(end);
+    final TextPosition startText = getPositionForOffset(localStart);
+    final TextPosition endText = getPositionForOffset(localEnd);
+    if (startText == endText) {
+      return false;
     }
-    _textSelection = value;
+    _textSelection = TextSelection(baseOffset: startText.offset, extentOffset: endText.offset);
+    markNeedsPaint();
+    return true;
+  }
+
+  @override
+  String? copy() {
+    final TextSelection? textSelection = _textSelection;
+    if (textSelection == null)
+      return null;
+
+    final String plainText = text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false);
+    return plainText.substring(textSelection.start, textSelection.end);
+  }
+
+  @override
+  void clear() {
+    if (_textSelection == null)
+      return;
+
+    _textSelection = null;
     markNeedsPaint();
   }
 
@@ -744,6 +769,10 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  Rect _toGlobalRect(Rect rect) {
+    return Rect.fromPoints(localToGlobal(rect.topLeft), localToGlobal(rect.bottomRight));
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
@@ -757,7 +786,7 @@ class RenderParagraph extends RenderBox
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
     _layoutTextWithConstraints(constraints);
-    _selectionRegistrant?.update(this, offset & size);
+    _selectionRegistrant?.update(this, _toGlobalRect(offset & size));
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
@@ -816,9 +845,9 @@ class RenderParagraph extends RenderBox
       context.canvas.restore();
     }
     // TODO: themeing
-    final TextSelection? _textSelection = textSelection;
-    if (_textSelection != null) {
-      for (final TextBox textBox in getBoxesForSelection(_textSelection)) {
+    final TextSelection? textSelection = _textSelection;
+    if (textSelection != null) {
+      for (final TextBox textBox in getBoxesForSelection(textSelection)) {
         context.canvas.drawRect(textBox.toRect().shift(offset), Paint()..color = const Color(0xAF6694e8) ..style = PaintingStyle.fill);
       }
     }

@@ -1,5 +1,3 @@
-import 'dart:collection';
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -9,56 +7,50 @@ import 'package:flutter/services.dart';
 import '../../widgets.dart';
 
 class SelectionArea extends StatefulWidget {
-  const SelectionArea({required this.child, Key? key}) : super(key: key);
+  const SelectionArea({
+    required this.child,
+    Key? key,
+    this.enabled = true,
+  }) : super(key: key);
 
   final Widget child;
+
+  /// Whether this selection area enables text selection in descendant widgets.
+  ///
+  /// Defaults to `true`. If set to `false`, child text widgets cannot be selected
+  /// unless they are an editable subtype, or if the subtree is wrapped in a separate
+  /// selection area widget.
+  final bool enabled;
 
   @override
   _SelectionAreaState createState() => _SelectionAreaState();
 
   static SelectionRegistrant? of(BuildContext context) {
-    return context.findAncestorStateOfType<_SelectionAreaState>();
+    final _SelectionAreaState? registrant = context.findAncestorStateOfType<_SelectionAreaState>();
+    if (registrant == null || !registrant.widget.enabled) {
+      return null;
+    }
+    return registrant;
   }
-}
-
-class _Selection {
-  _Selection(this.start, this.end);
-
-  final TextPosition start;
-  final TextPosition end;
-}
-
-class _RegistrantData {
-  _RegistrantData(this.paragraph);
-
-  final RenderParagraph paragraph;
-  Rect? bounds;
 }
 
 class _SelectionAreaState extends State<SelectionArea> implements SelectionRegistrant {
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
-  final Map<RenderParagraph, _RegistrantData> _selectionCandidates = <RenderParagraph, _RegistrantData>{};
-  final Set<RenderParagraph> _selectionStates = <RenderParagraph>{};
+  final Map<Selectable<Object>, Rect> _selectionCandidates = <Selectable<Object>, Rect>{};
+  final Set<Selectable<Object>> _selectionStates = <Selectable<Object>>{};
 
   Offset? _selectionStart;
   Offset? _selectionEnd;
 
   @override
-  void add(RenderParagraph renderBox) {
-    _selectionCandidates[renderBox] = _RegistrantData(renderBox);
+  void update(Selectable<Object> selectable, Rect globalRect) {
+    _selectionCandidates[selectable] = globalRect;
   }
 
   @override
-  void remove(RenderParagraph renderBox) {
-    _selectionCandidates.remove(renderBox);
-  }
-
-  @override
-  void update(RenderParagraph renderBox, Rect rect) {
-    final Offset topLeft = renderBox.localToGlobal(rect.topLeft);
-    final Offset bottomRight = renderBox.localToGlobal(rect.bottomRight);
-    _selectionCandidates[renderBox]?.bounds = Rect.fromPoints(topLeft, bottomRight);
+  void remove(Selectable<Object> selectable) {
+    _selectionCandidates.remove(selectable);
   }
 
   void _handleDragDown(DragDownDetails details) {
@@ -75,9 +67,17 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
     _maybeUpdateSelection();
   }
 
-  void _handleDragEnd(DragEndDetails details) { }
+  void _handleDragEnd(DragEndDetails details) {}
 
   void _handleDragCancel() {
+    _selectionStart = null;
+    _selectionEnd = null;
+    _maybeUpdateSelection();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    if (details.kind != PointerDeviceKind.mouse)
+      return;
     _selectionStart = null;
     _selectionEnd = null;
     _maybeUpdateSelection();
@@ -89,43 +89,23 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
     final Offset? selectionEndT = _selectionEnd;
     if (selectionEndT == null || selectionStartT == null) {
       if (_selectionStates.isNotEmpty) {
-        for (final RenderParagraph paragraph in _selectionStates) {
-          paragraph.textSelection = null;
+        for (final Selectable<Object> selectable in _selectionStates) {
+          selectable.clear();
         }
         _selectionStates.clear();
       }
       return;
     }
-    // We should just ask each paragraph for a text selection, then it could account for
-    // directionality.
     final Offset selectionStart = selectionStartT;
     final Offset selectionEnd = selectionEndT;
-    for (final _RegistrantData data in _selectionCandidates.values) {
-      final Rect? bounds = data.bounds;
+    for (final Selectable<Object> data in _selectionCandidates.keys) {
+      final Rect? bounds = _selectionCandidates[data];
       if (bounds == null) {
         continue;
       }
-      if (selectionStart.dy > bounds.bottom || selectionEnd.dy < bounds.top) {
-        data.paragraph.textSelection = null;
-        _selectionStates.remove(data.paragraph);
-        continue;
+      if (data.update(selectionStart, selectionEnd)) {
+        _selectionStates.add(data);
       }
-      Offset modifiedSelectionEnd = selectionEnd;
-        // If the selection end is below the bottom of the text, treat it as having a selection that
-      // extends to the end of the paragraph. This logic has to change for LTR versus RTL.
-      if (selectionEnd.dy > bounds.bottom) {
-        modifiedSelectionEnd = Offset(bounds.right, selectionEnd.dy);
-      }
-      // Otherwise "snap" to the nearest text rect.
-
-      final TextPosition startTextPosition = data.paragraph.getPositionForOffset(data.paragraph.globalToLocal(selectionStart));
-      final TextPosition endTextPosition = data.paragraph.getPositionForOffset(data.paragraph.globalToLocal(modifiedSelectionEnd));
-      if (startTextPosition == endTextPosition) {
-        continue;
-      }
-      final TextSelection textSelection = TextSelection(baseOffset: startTextPosition.offset, extentOffset: endTextPosition.offset);
-      data.paragraph.textSelection = textSelection;
-      _selectionStates.add(data.paragraph);
     }
   }
 
@@ -140,25 +120,23 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
       return;
     // The order in which these should be concatenated is ???. For now this
     // sorts by the top left corner.
-    final List<_CopyData> paragraphs = <_CopyData>[];
-    for (final RenderParagraph paragraph in _selectionStates) {
-      // This should be handled in the inline span.
-      final TextSelection? textSelection = paragraph.textSelection;
-      if (textSelection == null) {
+    final List<_CopyData<Object>> copyData = <_CopyData<Object>>[];
+    for (final Selectable<Object> selectable in _selectionStates) {
+      final Rect? bounds = _selectionCandidates[selectable];
+      if (bounds == null) {
         continue;
       }
-      final String plainText = paragraph.text.toPlainText(includePlaceholders: true, includeSemanticsLabels: false);
-      final _RegistrantData? registrantData = _selectionCandidates[paragraph];
-      if (registrantData == null) {
+      final Object? data = selectable.copy();
+      if (data == null) {
         continue;
       }
-      paragraphs.add(_CopyData(registrantData.bounds!.topLeft, plainText.substring(textSelection.start, textSelection.end)));
+      copyData.add(_CopyData<Object>(bounds.topLeft, data));
     }
-    paragraphs.sort();
+    copyData.sort();
+    // TODO: support more types than strings
     final StringBuffer buffer = StringBuffer();
-    for (final _CopyData data in paragraphs) {
-      buffer.write(data.data);
-      buffer.write(' ');
+    for (final _CopyData<Object> data in copyData) {
+      buffer.writeln(data.data); // Not sure what separator to use.
     }
     Clipboard.setData(ClipboardData(text: buffer.toString()));
   }
@@ -180,13 +158,20 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
           ..supportedDevices = <PointerDeviceKind>{PointerDeviceKind.mouse};
       },
     );
+    _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+        () => TapGestureRecognizer(debugOwner: this),
+        (TapGestureRecognizer instance) {
+          instance
+            .onTapDown = _handleTapDown;
+        },
+      );
   }
 
   @override
   void dispose() {
     RawKeyboard.instance.removeListener(_onKeyEvent);
-    for (final RenderParagraph paragraph in _selectionStates) {
-      paragraph.textSelection = null;
+    for (final Selectable<Object> selectable in _selectionStates) {
+      selectable.clear();
     }
     _selectionStates.clear();
     super.dispose();
@@ -204,22 +189,22 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
   }
 }
 
-class _CopyData implements Comparable<_CopyData> {
+class _CopyData<T> implements Comparable<_CopyData<T>> {
   _CopyData(this.topLeft, this.data);
 
   final Offset topLeft;
-  final String data;
+  final T data;
 
   @override
-  int compareTo(_CopyData other) {
+  int compareTo(_CopyData<T> other) {
     if (other.topLeft.dy < topLeft.dy) {
-      return -1;
+      return 1;
     } else if (other.topLeft.dy > topLeft.dy) {
-      return 1;
-    } else if (other.topLeft.dx < topLeft.dx) {
       return -1;
-    } else if (other.topLeft.dx > topLeft.dx) {
+    } else if (other.topLeft.dx < topLeft.dx) {
       return 1;
+    } else if (other.topLeft.dx > topLeft.dx) {
+      return -1;
     }
     return 0;
   }
