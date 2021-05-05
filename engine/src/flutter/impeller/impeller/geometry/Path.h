@@ -23,56 +23,57 @@ class Path {
 
   ~Path();
 
-  size_t componentCount() const;
+  size_t GetComponentCount() const;
 
-  Path& addLinearComponent(Point p1, Point p2);
+  Path& AddLinearComponent(Point p1, Point p2);
 
-  Path& addQuadraticComponent(Point p1, Point cp, Point p2);
+  Path& AddQuadraticComponent(Point p1, Point cp, Point p2);
 
-  Path& addCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
+  Path& AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
 
   template <class T>
   using Applier = std::function<void(size_t index, const T& component)>;
-  void enumerateComponents(Applier<LinearPathComponent> linearApplier,
+  void EnumerateComponents(Applier<LinearPathComponent> linearApplier,
                            Applier<QuadraticPathComponent> quadApplier,
                            Applier<CubicPathComponent> cubicApplier) const;
 
-  bool linearComponentAtIndex(size_t index, LinearPathComponent& linear) const;
+  bool GetLinearComponentAtIndex(size_t index,
+                                 LinearPathComponent& linear) const;
 
-  bool quadraticComponentAtIndex(size_t index,
-                                 QuadraticPathComponent& quadratic) const;
+  bool GetQuadraticComponentAtIndex(size_t index,
+                                    QuadraticPathComponent& quadratic) const;
 
-  bool cubicComponentAtIndex(size_t index, CubicPathComponent& cubic) const;
+  bool GetCubicComponentAtIndex(size_t index, CubicPathComponent& cubic) const;
 
-  bool updateLinearComponentAtIndex(size_t index,
+  bool UpdateLinearComponentAtIndex(size_t index,
                                     const LinearPathComponent& linear);
 
-  bool updateQuadraticComponentAtIndex(size_t index,
+  bool UpdateQuadraticComponentAtIndex(size_t index,
                                        const QuadraticPathComponent& quadratic);
 
-  bool updateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
+  bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
 
   using SmoothPointsEnumerator = std::function<bool(std::vector<Point> points)>;
-  void smoothPoints(SmoothPointsEnumerator enumerator,
-                    const SmoothingApproximation& approximation) const;
+  void EnumerateSmoothPoints(SmoothPointsEnumerator enumerator,
+                             const SmoothingApproximation& approximation) const;
 
-  Rect boundingBox() const;
+  Rect GetBoundingBox() const;
 
  private:
   struct ComponentIndexPair {
-    ComponentType type;
-    size_t index;
+    ComponentType type = ComponentType::Linear;
+    size_t index = 0;
 
-    ComponentIndexPair() : type(ComponentType::Linear), index(0) {}
+    ComponentIndexPair() {}
 
     ComponentIndexPair(ComponentType aType, size_t aIndex)
         : type(aType), index(aIndex) {}
   };
 
-  std::vector<ComponentIndexPair> _components;
-  std::vector<LinearPathComponent> _linears;
-  std::vector<QuadraticPathComponent> _quads;
-  std::vector<CubicPathComponent> _cubics;
+  std::vector<ComponentIndexPair> components_;
+  std::vector<LinearPathComponent> linears_;
+  std::vector<QuadraticPathComponent> quads_;
+  std::vector<CubicPathComponent> cubics_;
 };
 
 }  // namespace geom

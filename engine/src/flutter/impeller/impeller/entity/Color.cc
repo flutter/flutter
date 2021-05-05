@@ -94,13 +94,13 @@ std::string ColorHSB::toString() const {
 
 Color::Color(const ColorHSB& hsbColor) : Color(hsbColor.toRGBA()) {}
 
-std::string Color::toString() const {
+std::string Color::ToString() const {
   std::stringstream stream;
   stream << red << "," << green << "," << blue << "," << alpha;
   return stream.str();
 }
 
-void Color::fromString(const std::string& str) {
+void Color::FromString(const std::string& str) {
   std::stringstream stream(str);
   stream >> red;
   stream.ignore();
