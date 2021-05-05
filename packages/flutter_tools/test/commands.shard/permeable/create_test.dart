@@ -90,6 +90,7 @@ void main() {
       projectDir,
       <String>['-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
@@ -117,6 +118,7 @@ void main() {
       projectDir,
       <String>['-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
@@ -146,6 +148,7 @@ void main() {
       '.ios/Flutter/flutter_project.podspec',
       '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
+      'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.yaml',
       'README.md',
@@ -380,6 +383,7 @@ void main() {
       projectDir,
       <String>['--template=package'],
       <String>[
+        'analysis_options.yaml',
         'lib/flutter_project.dart',
         'test/flutter_project_test.dart',
       ],
@@ -417,6 +421,7 @@ void main() {
       projectDir,
       <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'example/lib/main.dart',
         'flutter_project.iml',
         'lib/flutter_project.dart',
@@ -500,6 +505,7 @@ void main() {
       projectDir,
       <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'ios,android'],
       <String>[
+        'analysis_options.yaml',
         'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
         'example/android/app/src/main/kotlin/com/example/flutter_project_example/MainActivity.kt',
         'example/ios/Runner/AppDelegate.swift',
@@ -592,6 +598,7 @@ void main() {
       '.gitignore',
       '.metadata',
       '.packages',
+      'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.lock',
       'pubspec.yaml',
