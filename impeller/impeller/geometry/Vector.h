@@ -15,20 +15,20 @@ namespace geom {
 struct Vector3 {
   union {
     struct {
-      double x;
-      double y;
-      double z;
+      double x = 0.0;
+      double y = 0.0;
+      double z = 0.0;
     };
     double e[3];
   };
 
-  Vector3() : x(0.0), y(0.0), z(0.0) {}
+  Vector3() {}
 
-  Vector3(const Point& p) : x(p.x), y(p.y), z(0.0) {}
+  Vector3(const Point& p) : x(p.x), y(p.y) {}
 
-  Vector3(const Size& s) : x(s.width), y(s.height), z(0.0) {}
+  Vector3(const Size& s) : x(s.width), y(s.height) {}
 
-  Vector3(double x, double y) : x(x), y(y), z(0.0) {}
+  Vector3(double x, double y) : x(x), y(y) {}
 
   Vector3(double x, double y, double z) : x(x), y(y), z(z) {}
 
@@ -37,18 +37,18 @@ struct Vector3 {
    *
    *  @return the calculated length.
    */
-  double length() const { return sqrt(x * x + y * y + z * z); }
+  double Length() const { return sqrt(x * x + y * y + z * z); }
 
-  Vector3 normalize() const {
-    const auto len = length();
+  Vector3 Normalize() const {
+    const auto len = Length();
     return {x / len, y / len, z / len};
   }
 
-  double dot(const Vector3& other) const {
+  double Dot(const Vector3& other) const {
     return ((x * other.x) + (y * other.y) + (z * other.z));
   }
 
-  Vector3 cross(const Vector3& other) const {
+  Vector3 Cross(const Vector3& other) const {
     return {
         (y * other.z) - (z * other.y),  //
         (z * other.x) - (x * other.z),  //
@@ -95,29 +95,29 @@ struct Vector3 {
     };
   }
 
-  std::string toString() const;
+  std::string ToString() const;
 };
 
 struct Vector4 {
   union {
     struct {
-      double x;
-      double y;
-      double z;
-      double w;
+      double x = 0.0;
+      double y = 0.0;
+      double z = 0.0;
+      double w = 1.0;
     };
     double e[4];
   };
 
-  Vector4() : x(0.0), y(0.0), z(0.0), w(1.0) {}
+  Vector4() {}
 
   Vector4(double x, double y, double z, double w) : x(x), y(y), z(z), w(w) {}
 
-  Vector4(const Vector3& v) : x(v.x), y(v.y), z(v.z), w(1.0) {}
+  Vector4(const Vector3& v) : x(v.x), y(v.y), z(v.z) {}
 
-  Vector4(const Point& p) : x(p.x), y(p.y), z(0.0), w(1.0) {}
+  Vector4(const Point& p) : x(p.x), y(p.y) {}
 
-  Vector4 normalize() const {
+  Vector4 Normalize() const {
     const double inverse = 1.0 / sqrt(x * x + y * y + z * z + w * w);
     return Vector4(x * inverse, y * inverse, z * inverse, w * inverse);
   }
@@ -138,7 +138,7 @@ struct Vector4 {
     return Vector4(x - v.x, y - v.y, z - v.z, w - v.w);
   }
 
-  std::string toString() const;
+  std::string ToString() const;
 };
 
 }  // namespace geom

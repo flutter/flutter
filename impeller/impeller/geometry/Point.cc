@@ -8,27 +8,27 @@
 namespace rl {
 namespace geom {
 
-std::string Point::toString() const {
+std::string Point::ToString() const {
   std::stringstream stream;
   stream << x << "," << y;
   return stream.str();
 }
 
-void Point::fromString(const std::string& str) {
+void Point::FromString(const std::string& str) {
   std::stringstream stream(str);
   stream >> x;
   stream.ignore();
   stream >> y;
 }
 
-double Point::distanceSquared(const Point& p) const {
+double Point::GetDistanceSquared(const Point& p) const {
   double dx = p.x - x;
   double dy = p.y - y;
   return dx * dx + dy * dy;
 }
 
-double Point::distance(const Point& p) const {
-  return sqrt(distanceSquared(p));
+double Point::GetDistance(const Point& p) const {
+  return sqrt(GetDistanceSquared(p));
 }
 
 }  // namespace geom

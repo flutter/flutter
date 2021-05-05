@@ -62,7 +62,7 @@ geom::Matrix Entity::GetModelMatrix() const {
    *  The translation accounts for the offset in the origin of the bounds
    *  of the entity and its position about its anchor point.
    */
-  auto translation = geom::Matrix::Translation(
+  auto translation = geom::Matrix::MakeTranslation(
       {-bounds_.origin.x + position_.x - (bounds_.size.width * anchor_point_.x),
        -bounds_.origin.y + position_.y -
            (bounds_.size.height * anchor_point_.y)});
@@ -73,15 +73,15 @@ geom::Matrix Entity::GetModelMatrix() const {
    *  matrix adjustment and also the two matrix multiplications.
    */
 
-  if (transformation_.isIdentity()) {
+  if (transformation_.IsIdentity()) {
     return translation;
   }
 
   auto anchorAdjustment =
-      geom::Matrix::Translation({-anchor_point_.x * bounds_.size.width,
-                                 -anchor_point_.y * bounds_.size.height});
+      geom::Matrix::MakeTranslation({-anchor_point_.x * bounds_.size.width,
+                                     -anchor_point_.y * bounds_.size.height});
 
-  return translation * anchorAdjustment.invert() * transformation_ *
+  return translation * anchorAdjustment.Invert() * transformation_ *
          anchorAdjustment;
 }
 

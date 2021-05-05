@@ -20,12 +20,12 @@ class Image {
 
   ~Image();
 
-  ImageResult decode() const;
+  ImageResult Decode() const;
 
-  bool isValid() const;
+  bool IsValid() const;
 
  private:
-  std::shared_ptr<const fml::Mapping> _source;
+  std::shared_ptr<const fml::Mapping> source_;
 };
 
 }  // namespace image
