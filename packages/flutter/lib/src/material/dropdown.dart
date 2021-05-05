@@ -1405,10 +1405,31 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (items.isEmpty) {
       innerItemsWidget = Container();
     } else {
+      // The [DropdownMenuItem]s that go into the [IndexedStack] later have
+      // to be recreated to avoid key duplication, particularly when [GlobalKey]s
+      // are used.
+      late final List<Widget> buttonItems;
+      if (widget.selectedItemBuilder == null) {
+        if (widget.items == null) {
+          buttonItems = <Widget>[];
+        } else {
+          buttonItems = widget.items!.map<DropdownMenuItem<T>>((DropdownMenuItem<T> item) {
+            return DropdownMenuItem<T>(
+              // The keys from the original list is left out.
+              onTap: item.onTap,
+              child: item.child,
+              enabled: item.enabled,
+            );
+          }).toList();
+        }
+      } else {
+        buttonItems = List<Widget>.from(widget.selectedItemBuilder!(context));
+      }
+
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,
         alignment: AlignmentDirectional.centerStart,
-        children: widget.isDense ? items : items.map((Widget item) {
+        children: widget.isDense ? buttonItems : buttonItems.map((Widget item) {
           return widget.itemHeight != null
             ? SizedBox(height: widget.itemHeight, child: item)
             : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
