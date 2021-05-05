@@ -258,4 +258,16 @@ void main() {
   ThemeData.raw(
     textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  Draggable draggable = Draggable();
+  draggable = Draggable(dragAnchorStrategy: childDragAnchorStrategy);
+  draggable = Draggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  draggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  longPressDraggable.dragAnchorStrategy;
 }

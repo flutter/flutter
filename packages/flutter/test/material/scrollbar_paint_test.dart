@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -83,13 +83,13 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
+          padding: EdgeInsets.fromLTRB(0, 20, 0, 34),
         ),
         child: Scaffold(
           appBar: AppBar(title: const Text('Title')),
           body: Scrollbar(
             child: ListView(
-              children: const <Widget>[SizedBox(width: 4000, height: 4000)]
+              children: const <Widget>[SizedBox(width: 4000, height: 4000)],
             ),
           ),
         ),
@@ -127,13 +127,13 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
+          padding: EdgeInsets.fromLTRB(0, 20, 0, 34),
         ),
         child: Scaffold(
           appBar: AppBar(title: const Text('Title')),
           body: Scrollbar(
             child: ListView(
-              children: const <Widget>[SizedBox(width: 40, height: 40)]
+              children: const <Widget>[SizedBox(width: 40, height: 40)],
             ),
           ),
         ),

@@ -56,9 +56,9 @@ void main() {
 
   Future<void> prepareDatePicker(
     WidgetTester tester,
-    Future<void> Function(Future<DateTime?> date) callback,
-    { TextDirection textDirection = TextDirection.ltr }
-  ) async {
+    Future<void> Function(Future<DateTime?> date) callback, {
+    TextDirection textDirection = TextDirection.ltr,
+  }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -303,7 +303,7 @@ void main() {
       // Test that the defaults work
       const DialogTheme datePickerDefaultDialogTheme = DialogTheme(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0))
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
         elevation: 24,
       );
@@ -337,7 +337,7 @@ void main() {
       // Test that it honors ThemeData.dialogTheme settings
       const DialogTheme customDialogTheme = DialogTheme(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(40.0))
+          borderRadius: BorderRadius.all(Radius.circular(40.0)),
         ),
         elevation: 50,
       );
@@ -651,7 +651,7 @@ void main() {
         expect(
           Material.of(tester.element(find.text('2'))),
           // The current day should be painted with a circle outline
-          paints..circle(color: todayColor, style: PaintingStyle.stroke, strokeWidth: 1.0)
+          paints..circle(color: todayColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
         );
       });
     });
@@ -1053,8 +1053,7 @@ void main() {
 
         // Should have selected Jan 18
         expect(await date, DateTime(2016, DateTime.january, 19));
-      },
-      textDirection: TextDirection.rtl);
+      }, textDirection: TextDirection.rtl);
     });
   });
 
@@ -1254,7 +1253,7 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
         arguments: <String, dynamic>{
           'selectedDate': _selectedDate.value.millisecondsSinceEpoch,
           'datePickerEntryMode': widget.datePickerEntryMode.index,
-        }
+        },
       );
     },
   );

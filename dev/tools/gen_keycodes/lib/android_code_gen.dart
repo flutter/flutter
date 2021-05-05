@@ -5,36 +5,23 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'logical_key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 
-/// Generates the key mapping of Android, based on the information in the key
+/// Generates the key mapping for Android, based on the information in the key
 /// data structure given to it.
 class AndroidCodeGenerator extends PlatformCodeGenerator {
-  AndroidCodeGenerator(KeyData keyData) : super(keyData);
+  AndroidCodeGenerator(PhysicalKeyData physicalData, LogicalKeyData logicalData)
+    : super(physicalData, logicalData);
 
   /// This generates the map of Android key codes to logical keys.
   String get _androidKeyCodeMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
-      if (entry.androidKeyCodes != null) {
-        for (final int code in entry.androidKeyCodes.cast<int>()) {
-          androidKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
-        }
-      }
-    }
-    return androidKeyCodeMap.toString().trimRight();
-  }
-
-  /// This generates the map of Android number pad key codes to logical keys.
-  String get _androidNumpadMap {
-    final StringBuffer androidKeyCodeMap = StringBuffer();
-    for (final Key entry in numpadKeyData) {
-      if (entry.androidKeyCodes != null) {
-        for (final int code in entry.androidKeyCodes.cast<int>()) {
-          androidKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
-        }
+    for (final LogicalKeyEntry entry in logicalData.entries) {
+      for (final int code in entry.androidValues) {
+        androidKeyCodeMap.writeln('          put(${toHex(code, digits: 10)}L, ${toHex(entry.value, digits: 10)}L); // ${entry.constantName}');
       }
     }
     return androidKeyCodeMap.toString().trimRight();
@@ -43,10 +30,10 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Android scan codes to physical keys.
   String get _androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.androidScanCodes != null) {
         for (final int code in entry.androidScanCodes.cast<int>()) {
-          androidScanCodeMap.writeln('  { $code, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
+          androidScanCodeMap.writeln('          put(${toHex(code, digits: 10)}L, ${toHex(entry.usbHidCode, digits: 10)}L); // ${entry.constantName}');
         }
       }
     }
@@ -54,14 +41,17 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   }
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_map_android_cc.tmpl');
+  String get templatePath => path.join(dataRoot, 'android_keyboard_map_java.tmpl');
+
+  @override
+  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot, 'shell', 'platform',
+      path.join('android', 'io', 'flutter', 'embedding', 'android', 'KeyboardMap.java'));
 
   @override
   Map<String, String> mappings() {
     return <String, String>{
       'ANDROID_SCAN_CODE_MAP': _androidScanCodeMap,
       'ANDROID_KEY_CODE_MAP': _androidKeyCodeMap,
-      'ANDROID_NUMPAD_MAP': _androidNumpadMap,
     };
   }
 }

@@ -14,9 +14,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
-import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;

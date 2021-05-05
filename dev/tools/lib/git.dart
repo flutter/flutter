@@ -4,7 +4,6 @@
 
 import 'dart:io';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import './globals.dart';
@@ -18,21 +17,21 @@ class Git {
   String getOutput(
     List<String> args,
     String explanation, {
-    @required String workingDirectory,
+    required String workingDirectory,
+    bool allowFailures = false,
   }) {
     final ProcessResult result = _run(args, workingDirectory);
     if (result.exitCode == 0) {
       return stdoutToString(result.stdout);
     }
     _reportFailureAndExit(args, workingDirectory, result, explanation);
-    return null; // for the analyzer's sake
   }
 
   int run(
     List<String> args,
     String explanation, {
     bool allowNonZeroExitCode = false,
-    @required String workingDirectory,
+    required String workingDirectory,
   }) {
     final ProcessResult result = _run(args, workingDirectory);
     if (result.exitCode != 0 && !allowNonZeroExitCode) {
@@ -49,7 +48,7 @@ class Git {
     );
   }
 
-  void _reportFailureAndExit(
+  Never _reportFailureAndExit(
     List<String> args,
     String workingDirectory,
     ProcessResult result,
@@ -68,6 +67,15 @@ class Git {
       message.writeln('stdout from git:\n${result.stdout}\n');
     if ((result.stderr as String).isNotEmpty)
       message.writeln('stderr from git:\n${result.stderr}\n');
-    throw Exception(message);
+    throw GitException(message.toString());
   }
+}
+
+class GitException implements Exception {
+  GitException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'Exception: $message';
 }
