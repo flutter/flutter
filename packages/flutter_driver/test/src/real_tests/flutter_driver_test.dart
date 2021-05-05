@@ -44,12 +44,12 @@ void main() {
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
-      driverId++;
+      driverId += 1;
     });
 
 
-    group('logCommunicationToFile', (){
-        test('logCommunicationToFile = true', () async {
+    group('logCommunicationToFile', () {
+      test('logCommunicationToFile = true', () async {
         driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
 
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
@@ -680,7 +680,7 @@ void main() {
       fakeConnection = FakeFlutterWebConnection();
       fakeConnection.supportsTimelineAction = true;
       fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
-      driverId++;
+      driverId += 1;
     });
 
     test('logCommunicationToFile = true', () async {

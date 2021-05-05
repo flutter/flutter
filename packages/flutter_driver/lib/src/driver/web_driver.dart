@@ -90,10 +90,10 @@ class WebFlutterDriver extends FlutterDriver {
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl!, settings, timeout: timeout);
     return WebFlutterDriver.connectedTo(
-        connection,
-        printCommunication: printCommunication,
-        logCommunicationToFile: logCommunicationToFile,
-      );
+      connection,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
+    );
   }
 
   @override
