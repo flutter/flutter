@@ -171,6 +171,7 @@
         "templates/module/common/.idea/modules.xml.tmpl",
         "templates/module/common/.idea/workspace.xml.tmpl",
         "templates/module/common/.metadata.tmpl",
+        "templates/module/common/analysis_options.yaml.tmpl",
         "templates/module/common/lib/main.dart.tmpl",
         "templates/module/common/projectName.iml.tmpl",
         "templates/module/common/projectName_android.iml.tmpl",
