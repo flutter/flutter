@@ -54,7 +54,7 @@ void main() {
         'config',
       ]);
 
-      expect(testLogger.statusText.contains(configCommand.usage), false);
+      expect(testLogger.statusText, isNot(contains(configCommand.usage)));
       expect(testLogger.statusText, contains(configCommand.configuredSettings));
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
@@ -70,7 +70,7 @@ void main() {
       ]);
 
       expect(testLogger.statusText, contains(configCommand.usage));
-      expect(testLogger.statusText.contains(configCommand.configuredSettings), false);
+      expect(testLogger.statusText, isNot(contains(configCommand.configuredSettings)));
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
