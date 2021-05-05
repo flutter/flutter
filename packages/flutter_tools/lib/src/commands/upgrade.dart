@@ -20,6 +20,9 @@ import '../version.dart';
 /// The flutter GitHub repository.
 String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
+/// The official docs to install Flutter.
+String get _flutterInstallDocs => 'https://flutter.dev/docs/get-started/install';
+
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
     @required bool verboseHelp,
@@ -238,9 +241,8 @@ class UpgradeCommandRunner {
       throwToolExit(
         'Unable to upgrade Flutter: The Flutter SDK is tracking an "unknown" '
         'remote.\n'
-        'Re-install Flutter by going to '
-        'https://flutter.dev/docs/get-started/install. Alternatively, use "git" '
-        'directly to configure a valid upstream for the branch and retry.'
+        'Re-install Flutter by going to $_flutterInstallDocs. Alternatively, use '
+        '"git" directly to configure a valid upstream for the branch and retry.'
       );
     }
 
@@ -264,27 +266,28 @@ class UpgradeCommandRunner {
           '"$_flutterGit".\n'
           'Either remove "FLUTTER_GIT_URL" from the environment or set '
           '"FLUTTER_GIT_URL" to "${localVersion.repositoryUrl}", and retry. '
-          'Alternatively, re-install Flutter by going to '
-          'https://flutter.dev/docs/get-started/install.\n'
-          'If this is intentional, it is recommended to use "git" directly to '
-          'keep Flutter SDK up-to date.'
-        );
-      } else {
-        // Inform that the user has to set the environment variable to continue.
-        throwToolExit(
-          'Unable to upgrade Flutter: The Flutter SDK is tracking a non-standard '
-          'remote "${localVersion.repositoryUrl}".\n'
-          'Set the environment variable "FLUTTER_GIT_URL" to '
-          '"${localVersion.repositoryUrl}", and retry. '
-          'Alternatively, re-install Flutter by going to '
-          'https://flutter.dev/docs/get-started/install.\n'
+          'Alternatively, re-install Flutter by going to $_flutterInstallDocs.\n'
           'If this is intentional, it is recommended to use "git" directly to '
           'keep Flutter SDK up-to date.'
         );
       }
+      // If `FLUTTER_GIT_URL` is unset, inform that the user has to set the
+      // environment variable to continue.
+      throwToolExit(
+        'Unable to upgrade Flutter: The Flutter SDK is tracking a non-standard '
+        'remote "${localVersion.repositoryUrl}".\n'
+        'Set the environment variable "FLUTTER_GIT_URL" to '
+        '"${localVersion.repositoryUrl}", and retry. '
+        'Alternatively, re-install Flutter by going to $_flutterInstallDocs.\n'
+        'If this is intentional, it is recommended to use "git" directly to '
+        'keep Flutter SDK up-to date.'
+      );
     }
   }
 
+  // Strips ".git" suffix from a given string, preferably an url.
+  // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.
+  // URLs without ".git" suffix will be unaffected.
   String _stripDotGit(String url) {
     final RegExp pattern = RegExp(r'(.*)(\.git)$');
     final RegExpMatch match = pattern.firstMatch(url);
@@ -319,18 +322,16 @@ class UpgradeCommandRunner {
       final String errorString = e.toString();
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
-          'Unable to upgrade Flutter: HEAD does not point to a branch(Are you '
+          'Unable to upgrade Flutter: HEAD does not point to a branch (Are you '
           'in a detached HEAD state?).\n'
           'Use "flutter channel" to switch to an official channel, and retry. '
-          'Alternatively, re-install Flutter by going to '
-          'https://flutter.dev/docs/get-started/install.'
+          'Alternatively, re-install Flutter by going to $_flutterInstallDocs.'
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
           'Unable to upgrade Flutter: No upstream repository configured for branch.\n'
-          'Re-install Flutter by going to '
-          'https://flutter.dev/docs/get-started/install. Alternatively, use "git" '
-          'directly to configure an upstream for the branch and retry.'
+          'Re-install Flutter by going to $_flutterInstallDocs. Alternatively, use '
+          '"git" directly to configure an upstream for the branch and retry.'
         );
       } else {
         throwToolExit(errorString);

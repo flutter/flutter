@@ -280,13 +280,7 @@ void main() {
           repositoryUrl: flutterStandardUrlDotGit,
         );
 
-        ToolExit err;
-        try {
-         realCommandRunner.verifyStandardRemote(flutterVersion);
-        } on ToolExit catch (e) {
-          err = e;
-        }
-        expect(err, isNull);
+        expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
         ProcessManager: () => processManager,
@@ -299,13 +293,7 @@ void main() {
           repositoryUrl: flutterStandardUrl,
         );
 
-        ToolExit err;
-        try {
-         realCommandRunner.verifyStandardRemote(flutterVersion);
-        } on ToolExit catch (e) {
-          err = e;
-        }
-        expect(err, isNull);
+        expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
         ProcessManager: () => processManager,
@@ -341,13 +329,7 @@ void main() {
           repositoryUrl: flutterNonStandardUrlDotGit,
         );
 
-        ToolExit err;
-        try {
-         realCommandRunner.verifyStandardRemote(flutterVersion);
-        } on ToolExit catch (e) {
-          err = e;
-        }
-        expect(err, isNull);
+        expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
         ProcessManager: () => processManager,
@@ -388,13 +370,7 @@ void main() {
           repositoryUrl: flutterStandardSshUrlDotGit,
         );
 
-        ToolExit err;
-        try {
-         realCommandRunner.verifyStandardRemote(flutterVersion);
-        } on ToolExit catch (e) {
-          err = e;
-        }
-        expect(err, isNull);
+        expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
         ProcessManager: () => processManager,
