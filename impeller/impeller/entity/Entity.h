@@ -1,7 +1,6 @@
-/*
- *  This source file is part of the Radar project.
- *  Licensed under the MIT License. See LICENSE file for details.
- */
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #pragma once
 
@@ -16,49 +15,7 @@ namespace entity {
 
 class Entity {
  public:
-  using PropertyMaskType = uint16_t;
-
-  enum class Property : PropertyMaskType {
-    None,
-
-    AddedTo,
-    RemovedFrom,
-    Bounds,
-    Position,
-    AnchorPoint,
-    Transformation,
-    BackgroundColor,
-    Contents,
-    Path,
-    Opacity,
-    StrokeSize,
-    StrokeColor,
-    MakeRoot,
-
-    Sentinel,
-  };
-
-#define RL_MASK(x) x##Mask = (1 << static_cast<uint32_t>(Property::x))
-  enum PropertyMask {
-    RL_MASK(AddedTo),
-    RL_MASK(RemovedFrom),
-    RL_MASK(Bounds),
-    RL_MASK(Position),
-    RL_MASK(AnchorPoint),
-    RL_MASK(Transformation),
-    RL_MASK(BackgroundColor),
-    RL_MASK(Contents),
-    RL_MASK(Path),
-    RL_MASK(Opacity),
-    RL_MASK(StrokeSize),
-    RL_MASK(StrokeColor),
-    RL_MASK(MakeRoot),
-  };
-#undef RL_MASK
-
   Entity();
-
-  Entity(Entity&& entity);
 
   ~Entity();
 
@@ -187,14 +144,14 @@ class Entity {
  private:
   geom::Rect _bounds;
   geom::Point _position;
-  geom::Point _anchorPoint;
+  geom::Point _anchorPoint = {0.5, 0.5};
   geom::Matrix _transformation;
   Color _backgroundColor;
 
   geom::Path _path;
-  double _opacity;
-  Color _strokeColor;
-  double _strokeSize;
+  double _opacity = 1.0;
+  Color _strokeColor = Color::Black();
+  double _strokeSize = 1.0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Entity);
 };

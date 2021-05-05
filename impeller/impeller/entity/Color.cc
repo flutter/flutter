@@ -1,7 +1,6 @@
-/*
- *  This source file is part of the Radar project.
- *  Licensed under the MIT License. See LICENSE file for details.
- */
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "Color.h"
 #include <algorithm>
@@ -28,8 +27,9 @@ ColorHSB ColorHSB::FromRGB(Color rgb) {
   v = fmax(R, G);
   v = fmax(v, B);
 
-  if (v == x)
+  if (v == x) {
     return ColorHSB(0.0, 0.0, v, rgb.alpha);
+  }
 
   f = (R == x) ? G - B : ((G == x) ? B - R : R - G);
   i = (R == x) ? 3 : ((G == x) ? 5 : 1);
@@ -48,18 +48,21 @@ Color ColorHSB::toRGBA() const {
 
   int64_t i = 0;
 
-  if (h == 0)
+  if (h == 0) {
     h = 0.01;
+  }
 
-  if (h == 0.0)
+  if (h == 0.0) {
     return Color(v, v, v, alpha);
+  }
 
   i = static_cast<int64_t>(floor(h));
 
   f = h - i;
 
-  if (!(i & 1))
+  if (!(i & 1)) {
     f = 1 - f;
+  }
 
   m = v * (1 - s);
   n = v * (1 - s * f);
