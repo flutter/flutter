@@ -411,9 +411,9 @@ void main() {
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(
-          home: ReorderableListView.builder(
+          home: ReorderableList(
             itemCount: itemCount,
-            itemBuilder: (_, int index) {
+            itemBuilder: (BuildContext context, int index) {
               return SizedBox(
                 key: ValueKey<int>(items[index]),
                 height: 100,
@@ -424,7 +424,6 @@ void main() {
               );
             },
             onReorder: handleReorder,
-            buildDefaultDragHandles: false,
           ),
         ),
       );
@@ -458,9 +457,9 @@ void main() {
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(
-          home: ReorderableListView.builder(
+          home: ReorderableList(
             itemCount: itemCount,
-            itemBuilder: (_, int index) {
+            itemBuilder: (BuildContext context, int index) {
               return SizedBox(
                 key: ValueKey<int>(items[index]),
                 height: 100,
@@ -472,7 +471,6 @@ void main() {
               );
             },
             onReorder: handleReorder,
-            buildDefaultDragHandles: false,
           ),
         ),
       );
@@ -508,9 +506,9 @@ void main() {
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(
-          home: ReorderableListView.builder(
+          home: ReorderableList(
             itemCount: itemCount,
-            itemBuilder: (_, int index) {
+            itemBuilder: (BuildContext context, int index) {
               return SizedBox(
                 key: ValueKey<int>(items[index]),
                 height: 100,
@@ -521,12 +519,10 @@ void main() {
               );
             },
             onReorder: handleReorder,
-            buildDefaultDragHandles: false,
           ),
         ),
       );
       await tester.pumpAndSettle();
-
 
       // Start gesture on first item
       final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
@@ -557,9 +553,9 @@ void main() {
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(
-          home: ReorderableListView.builder(
+          home: ReorderableList(
             itemCount: itemCount,
-            itemBuilder: (_, int index) {
+            itemBuilder: (BuildContext context, int index) {
               return SizedBox(
                 key: ValueKey<int>(items[index]),
                 height: 100,
@@ -571,7 +567,6 @@ void main() {
               );
             },
             onReorder: handleReorder,
-            buildDefaultDragHandles: false,
           ),
         ),
       );
@@ -590,7 +585,6 @@ void main() {
       expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
     });
   });
-
 }
 
 class TestList extends StatefulWidget {
