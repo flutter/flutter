@@ -1,7 +1,6 @@
-/*
- *  This source file is part of the Radar project.
- *  Licensed under the MIT License. See LICENSE file for details.
- */
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "Point.h"
 #include <sstream>
@@ -20,6 +19,16 @@ void Point::fromString(const std::string& str) {
   stream >> x;
   stream.ignore();
   stream >> y;
+}
+
+double Point::distanceSquared(const Point& p) const {
+  double dx = p.x - x;
+  double dy = p.y - y;
+  return dx * dx + dy * dy;
+}
+
+double Point::distance(const Point& p) const {
+  return sqrt(distanceSquared(p));
 }
 
 }  // namespace geom

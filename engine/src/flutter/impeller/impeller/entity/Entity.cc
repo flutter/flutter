@@ -1,17 +1,13 @@
-/*
- *  This source file is part of the Radar project.
- *  Licensed under the MIT License. See LICENSE file for details.
- */
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "Entity.h"
 
 namespace rl {
 namespace entity {
 
-Entity::Entity()
-    : _anchorPoint(geom::Point(0.5, 0.5)), _opacity(1.0), _strokeSize(1.0) {}
-
-Entity::Entity(Entity&&) = default;
+Entity::Entity() = default;
 
 Entity::~Entity() = default;
 
