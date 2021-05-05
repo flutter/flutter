@@ -73,50 +73,56 @@ void main() {
   });
 
   testWidgets('Need at least 2 children', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
     groupValue = null;
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         CupertinoSlidingSegmentedControl<int>(
-          children: children,
+          children: const <int, Widget>{},
           groupValue: groupValue,
           onValueChanged: defaultCallback,
         ),
-      );
-      fail('Should not be possible to create a segmented control with no children');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
-    try {
-      children[0] = const Text('Child 1');
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
 
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         CupertinoSlidingSegmentedControl<int>(
-          children: children,
+          children: const <int, Widget>{0: Text('Child 1')},
           groupValue: groupValue,
           onValueChanged: defaultCallback,
         ),
-      );
-      fail('Should not be possible to create a segmented control with just one child');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
 
     groupValue = -1;
-    try {
-      children[1] = const Text('Child 2');
-      children[2] = const Text('Child 3');
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         CupertinoSlidingSegmentedControl<int>(
-          children: children,
+          children: const <int, Widget>{
+            0: Text('Child 1'),
+            1: Text('Child 2'),
+            2: Text('Child 3'),
+          },
           groupValue: groupValue,
           onValueChanged: defaultCallback,
         ),
-      );
-      fail('Should not be possible to create a segmented control with a groupValue pointing to a non-existent child');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('groupValue must be either null or one of the keys in the children map'));
-    }
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('groupValue must be either null or one of the keys in the children map'),
+      )),
+    );
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {

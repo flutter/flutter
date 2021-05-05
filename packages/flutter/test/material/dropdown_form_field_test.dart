@@ -576,8 +576,8 @@ void main() {
         );
       }).toList();
 
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DropdownButtonFormField<String>(
@@ -587,15 +587,13 @@ void main() {
             ),
           ),
         ),
-      );
-
-      fail('Should not be possible to have duplicate item value');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
-      );
-    }
+      )),
+    );
   });
 
   testWidgets('DropdownButtonFormField value should only appear in one menu item', (WidgetTester tester) async {
@@ -607,8 +605,8 @@ void main() {
         );
       }).toList();
 
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DropdownButton<String>(
@@ -618,15 +616,13 @@ void main() {
             ),
           ),
         ),
-      );
-
-      fail('Should not be possible to have no items with passed in value');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
-      );
-    }
+      )),
+    );
   });
 
   testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {

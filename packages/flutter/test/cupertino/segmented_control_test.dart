@@ -85,35 +85,37 @@ void main() {
   });
 
   testWidgets('Need at least 2 children', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
-            children: children,
+            children: const <int, Widget>{},
             onValueChanged: (int newValue) { },
           ),
         ),
-      );
-      fail('Should not be possible to create a segmented control with no children');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
-    try {
-      children[0] = const Text('Child 1');
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
 
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
-            children: children,
+            children: const <int, Widget>{0: Text('Child 1')},
             onValueChanged: (int newValue) { },
           ),
         ),
-      );
-      fail('Should not be possible to create a segmented control with just one child');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {
@@ -208,8 +210,8 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
@@ -217,14 +219,13 @@ void main() {
             groupValue: 2,
           ),
         ),
-      );
-      fail(
-        'Should not be possible to create segmented control in which '
-        'value is not the key of one of the children widgets',
-      );
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children'));
-    }
+      ),
+      throwsA(isA<AssertionError>().having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children'),
+      )),
+    );
   });
 
   testWidgets('Widgets have correct default text/icon styles, change correctly on selection', (WidgetTester tester) async {

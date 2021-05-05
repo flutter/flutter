@@ -968,30 +968,41 @@ void main() {
       );
       expect(isHit, isTrue);
       expect(ran, isTrue);
+      isHit = false;
       ran = false;
 
-      try {
-        isHit = result.addWithOutOfBandPosition(
-          paintTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
-          hitTest: (BoxHitTestResult result) {
-            fail('non-invertible transform should be caught');
-          },
-        );
-        fail('no exception thrown');
-      } on AssertionError catch (e) {
-        expect(e.message, 'paintTransform must be invertible.');
-      }
+      expect(
+        () {
+          isHit = result.addWithOutOfBandPosition(
+            paintTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
+            hitTest: (BoxHitTestResult result) {
+              fail('non-invertible transform should be caught');
+            },
+          );
+        },
+        throwsA(isA<AssertionError>().having(
+          (AssertionError error) => error.message,
+          'message',
+          'paintTransform must be invertible.',
+        )),
+      );
+      expect(isHit, isFalse);
 
-      try {
-        isHit = result.addWithOutOfBandPosition(
-          hitTest: (BoxHitTestResult result) {
-            fail('addWithOutOfBandPosition should need some transformation of some sort');
-          },
-        );
-        fail('no exception thrown');
-      } on AssertionError catch (e) {
-        expect(e.message, 'Exactly one transform or offset argument must be provided.');
-      }
+      expect(
+        () {
+          isHit = result.addWithOutOfBandPosition(
+            hitTest: (BoxHitTestResult result) {
+              fail('addWithOutOfBandPosition should need some transformation of some sort');
+            },
+          );
+        },
+        throwsA(isA<AssertionError>().having(
+          (AssertionError error) => error.message,
+          'message',
+          'Exactly one transform or offset argument must be provided.',
+        )),
+      );
+      expect(isHit, isFalse);
     });
 
     test('error message', () {

@@ -531,13 +531,14 @@ void main() {
         fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{
           'message': 'This is a failure',
         }, isError: true);
-        try {
-          await driver.waitFor(find.byTooltip('foo'));
-          fail('expected an exception');
-        } catch (error) {
-          expect(error, isA<DriverError>());
-          expect((error as DriverError).message, 'Error in Flutter application: {message: This is a failure}');
-        }
+        await expectLater(
+          () => driver.waitFor(find.byTooltip('foo')),
+          throwsA(isA<DriverError>().having(
+            (DriverError error) => error.message,
+            'message',
+            'Error in Flutter application: {message: This is a failure}',
+          )),
+        );
       });
 
       test('uncaught remote error', () async {
