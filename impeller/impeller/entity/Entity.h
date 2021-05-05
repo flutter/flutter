@@ -26,14 +26,14 @@ class Entity {
    *
    *  @return the frame of the entity
    */
-  geom::Rect frame() const;
+  geom::Rect GetFrame() const;
 
   /**
    *  Set the frame of the entity
    *
    *  @param frame the new frame
    */
-  void setFrame(const geom::Rect& frame);
+  void SetFrame(const geom::Rect& frame);
 
   /**
    *  The bounds specifies the origin and size of the entity in its own
@@ -41,14 +41,14 @@ class Entity {
    *
    *  @return the bounds of the entity
    */
-  const geom::Rect& bounds() const;
+  const geom::Rect& GetBounds() const;
 
   /**
    *  Set the bounds of the entity
    *
    *  @param bounds the new bounds
    */
-  void setBounds(const geom::Rect& bounds);
+  void SetBounds(const geom::Rect& bounds);
 
   /**
    *  The position specifies the coordinates of the anchor position of the
@@ -56,63 +56,63 @@ class Entity {
    *
    *  @return the position of the entity
    */
-  const geom::Point& position() const;
+  const geom::Point& GetPosition() const;
 
   /**
    *  Sets the position of the entity
    *
    *  @param point the new position
    */
-  void setPosition(const geom::Point& point);
+  void SetPosition(const geom::Point& point);
 
   /**
    *  The position of the anchor point within this node in unit space
    *
    *  @return the anchor point
    */
-  const geom::Point& anchorPoint() const;
+  const geom::Point& GetAnchorPoint() const;
 
   /**
    *  Sets the new anchor point of this node
    *
    *  @param anchorPoint the new anchor point
    */
-  void setAnchorPoint(const geom::Point& anchorPoint);
+  void SetAnchorPoint(const geom::Point& anchorPoint);
 
   /**
    *  The transformation that is applied to the entity about its anchor point
    *
    *  @return the transformation applied to the node
    */
-  const geom::Matrix& transformation() const;
+  const geom::Matrix& GetTransformation() const;
 
   /**
    *  Sets the transformation of the entity
    *
    *  @param transformation the new transformation
    */
-  void setTransformation(const geom::Matrix& transformation);
+  void SetTransformation(const geom::Matrix& transformation);
 
   /**
    *  The model matrix of the entity
    *
    *  @return the view matrix
    */
-  geom::Matrix modelMatrix() const;
+  geom::Matrix GetModelMatrix() const;
 
   /**
    *  The background color of the entity
    *
    *  @return the background color
    */
-  const Color& backgroundColor() const;
+  const Color& GetBackgroundColor() const;
 
   /**
    *  Set the new background color of the entity
    *
    *  @param backgroundColor the new background color
    */
-  void setBackgroundColor(const Color& backgroundColor);
+  void SetBackgroundColor(const Color& backgroundColor);
 
   /**
    *  The opacity of the entity. 0.0 is fully transparent and 1.0 is fully
@@ -120,38 +120,38 @@ class Entity {
    *
    *  @return the opacity of the entity
    */
-  const double& opacity() const;
+  const double& GetOpacity() const;
 
   /**
    *  Set the new opacity of the entity
    *
    *  @param opacity the new opacity
    */
-  void setOpacity(double opacity);
+  void SetOpacity(double opacity);
 
-  const Color& strokeColor() const;
+  const Color& GetStrokeColor() const;
 
-  void setStrokeColor(const Color& strokeColor);
+  void SetStrokeColor(const Color& strokeColor);
 
-  double strokeSize() const;
+  double GetStrokeSize() const;
 
-  void setStrokeSize(double strokeSize);
+  void SetStrokeSize(double strokeSize);
 
-  const geom::Path& path() const;
+  const geom::Path& GetPath() const;
 
-  void setPath(geom::Path path);
+  void SetPath(geom::Path path);
 
  private:
-  geom::Rect _bounds;
-  geom::Point _position;
-  geom::Point _anchorPoint = {0.5, 0.5};
-  geom::Matrix _transformation;
-  Color _backgroundColor;
+  geom::Rect bounds_;
+  geom::Point position_;
+  geom::Point anchor_point_ = {0.5, 0.5};
+  geom::Matrix transformation_;
+  Color background_color_;
 
-  geom::Path _path;
-  double _opacity = 1.0;
-  Color _strokeColor = Color::Black();
-  double _strokeSize = 1.0;
+  geom::Path path_;
+  double opacity_ = 1.0;
+  Color stroke_color_ = Color::Black();
+  double stroke_size_ = 1.0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Entity);
 };
