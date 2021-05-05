@@ -278,7 +278,7 @@ void main() {
   testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
     const double desiredHeight = 150.0;
     await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
+      home: Scaffold(
       body: Autocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
           return kOptions.where((String option) {
@@ -322,14 +322,14 @@ void main() {
 
     const double maxOptionsHeight = 250.0;
     await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
+      home: Scaffold(
       body: Autocomplete<String>(
+        optionsMaxHeight: maxOptionsHeight,
         optionsBuilder: (TextEditingValue textEditingValue) {
           return kOptions.where((String option) {
             return option.contains(textEditingValue.text.toLowerCase());
           });
         },
-        optionsMaxHeight: maxOptionsHeight,
       ),
     )));
 
