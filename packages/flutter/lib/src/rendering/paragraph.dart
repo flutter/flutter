@@ -93,7 +93,6 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
-    SelectionRegistrant? selectionRegistrant,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -103,7 +102,6 @@ class RenderParagraph extends RenderBox
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
-       _selectionRegistrant = selectionRegistrant,
        _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = TextPainter(
@@ -126,12 +124,6 @@ class RenderParagraph extends RenderBox
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData)
       child.parentData = TextParentData();
-  }
-
-  @override
-  void detach() {
-    super.detach();
-    _selectionRegistrant?.remove(this);
   }
 
   final TextPainter _textPainter;
@@ -307,16 +299,6 @@ class RenderParagraph extends RenderBox
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
-  }
-
-  SelectionRegistrant? get selectionRegistrant => _selectionRegistrant;
-  SelectionRegistrant? _selectionRegistrant;
-  set selectionRegistrant(SelectionRegistrant? value) {
-    if (value == _selectionRegistrant) {
-      return;
-    }
-    _selectionRegistrant?.remove(this);
-    _selectionRegistrant = value;
   }
 
   @override
@@ -761,10 +743,6 @@ class RenderParagraph extends RenderBox
     }
   }
 
-  Rect _toGlobalRect(Rect rect) {
-    return Rect.fromPoints(localToGlobal(rect.topLeft), localToGlobal(rect.bottomRight));
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
@@ -778,7 +756,6 @@ class RenderParagraph extends RenderBox
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
     _layoutTextWithConstraints(constraints);
-    _selectionRegistrant?.update(this, _toGlobalRect(offset & size));
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
