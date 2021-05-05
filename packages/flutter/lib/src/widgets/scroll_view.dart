@@ -1490,11 +1490,12 @@ class ListView extends BoxScrollView {
   ///  * [SliverFixedExtentList], the sliver used internally when this property
   ///    is provided. It constrains its box children to have a specific given
   ///    extent along the main axis.
-  /// {@endtemplate}
   ///  * The [prototypeItem] property, which allows forcing the children's
   ///    extent to be the same as the given widget.
+  /// {@endtemplate}
   final double? itemExtent;
 
+  /// {@template flutter.widgets.list_view.prototypeItem}
   /// If non-null, forces the children to have the same extent as the given
   /// widget in the scroll direction.
   ///
@@ -1510,6 +1511,7 @@ class ListView extends BoxScrollView {
   ///    extent as a prototype item along the main axis.
   ///  * The [itemExtent] property, which allows forcing the children's extent
   ///    to a given value.
+  /// {@endtemplate}
   final Widget? prototypeItem;
 
   /// A delegate that provides the children for the [ListView].
