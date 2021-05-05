@@ -222,12 +222,12 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.blue[600],
 ///   alignment: Alignment.center,
+///   transform: Matrix4.rotationZ(0.1),
 ///   child: Text('Hello World',
 ///     style: Theme.of(context)
 ///         .textTheme
 ///         .headline4!
 ///         .copyWith(color: Colors.white)),
-///   transform: Matrix4.rotationZ(0.1),
 /// )
 /// ```
 /// {@end-tool}
