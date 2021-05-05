@@ -9,12 +9,12 @@ namespace rl {
 namespace image {
 
 Image::Image(std::shared_ptr<const fml::Mapping> sourceAllocation)
-    : _source(std::move(sourceAllocation)) {}
+    : source_(std::move(sourceAllocation)) {}
 
 Image::~Image() = default;
 
-ImageResult Image::decode() const {
-  if (!_source) {
+ImageResult Image::Decode() const {
+  if (!source_) {
     return {};
   }
 
@@ -23,8 +23,8 @@ ImageResult Image::decode() const {
   int comps = 0;
 
   stbi_uc* decoded =
-      stbi_load_from_memory(_source->GetMapping(),  // Source Data
-                            _source->GetSize(),     // Source Data Size
+      stbi_load_from_memory(source_->GetMapping(),  // Source Data
+                            source_->GetSize(),     // Source Data Size
                             &width,                 // Out: Width
                             &height,                // Out: Height
                             &comps,                 // Out: Components
@@ -79,8 +79,8 @@ ImageResult Image::decode() const {
   };
 }
 
-bool Image::isValid() const {
-  return static_cast<bool>(_source);
+bool Image::IsValid() const {
+  return static_cast<bool>(source_);
 }
 
 }  // namespace image

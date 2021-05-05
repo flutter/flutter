@@ -153,17 +153,17 @@ void Path::smoothPoints(SmoothPointsEnumerator enumerator,
   for (const auto& component : _components) {
     switch (component.type) {
       case ComponentType::Linear: {
-        if (!enumerator(_linears[component.index].smoothPoints())) {
+        if (!enumerator(_linears[component.index].SmoothPoints())) {
           return;
         }
       } break;
       case ComponentType::Quadratic: {
-        if (!enumerator(_quads[component.index].smoothPoints(approximation))) {
+        if (!enumerator(_quads[component.index].SmoothPoints(approximation))) {
           return;
         }
       } break;
       case ComponentType::Cubic: {
-        if (!enumerator(_cubics[component.index].smoothPoints(approximation))) {
+        if (!enumerator(_cubics[component.index].SmoothPoints(approximation))) {
           return;
         }
       } break;
@@ -175,15 +175,15 @@ Rect Path::boundingBox() const {
   Rect box;
 
   for (const auto& linear : _linears) {
-    box = box.withPoints(linear.extrema());
+    box = box.WithPoints(linear.Extrema());
   }
 
   for (const auto& quad : _quads) {
-    box = box.withPoints(quad.extrema());
+    box = box.WithPoints(quad.Sxtrema());
   }
 
   for (const auto& cubic : _cubics) {
-    box = box.withPoints(cubic.extrema());
+    box = box.WithPoints(cubic.Extrema());
   }
 
   return box;

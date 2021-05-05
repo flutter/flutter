@@ -17,40 +17,40 @@ class PathBuilder {
 
   ~PathBuilder();
 
-  Path path() const;
+  Path CreatePath() const;
 
-  PathBuilder& moveTo(Point point, bool relative = false);
+  PathBuilder& MoveTo(Point point, bool relative = false);
 
-  PathBuilder& close();
+  PathBuilder& Close();
 
-  PathBuilder& lineTo(Point point, bool relative = false);
+  PathBuilder& LineTo(Point point, bool relative = false);
 
-  PathBuilder& horizontalLineTo(double x, bool relative = false);
+  PathBuilder& HorizontalLineTo(double x, bool relative = false);
 
-  PathBuilder& verticalLineTo(double y, bool relative = false);
+  PathBuilder& VerticalLineTo(double y, bool relative = false);
 
-  PathBuilder& quadraticCurveTo(Point point,
+  PathBuilder& QuadraticCurveTo(Point point,
                                 Point controlPoint,
                                 bool relative = false);
 
-  PathBuilder& smoothQuadraticCurveTo(Point point, bool relative = false);
+  PathBuilder& SmoothQuadraticCurveTo(Point point, bool relative = false);
 
-  PathBuilder& cubicCurveTo(Point point,
+  PathBuilder& CubicCurveTo(Point point,
                             Point controlPoint1,
                             Point controlPoint2,
                             bool relative = false);
 
-  PathBuilder& smoothCubicCurveTo(Point point,
+  PathBuilder& SmoothCubicCurveTo(Point point,
                                   Point controlPoint2,
                                   bool relative = false);
 
-  PathBuilder& addRect(Rect rect);
+  PathBuilder& AddRect(Rect rect);
 
-  PathBuilder& addRoundedRect(Rect rect, double radius);
+  PathBuilder& AddRoundedRect(Rect rect, double radius);
 
-  PathBuilder& addCircle(const Point& center, double radius);
+  PathBuilder& AddCircle(const Point& center, double radius);
 
-  PathBuilder& addEllipse(const Point& center, const Size& size);
+  PathBuilder& AddEllipse(const Point& center, const Size& size);
 
   struct RoundingRadii {
     double topLeft;
@@ -71,16 +71,16 @@ class PathBuilder {
           bottomRight(pBottomRight) {}
   };
 
-  PathBuilder& addRoundedRect(Rect rect, RoundingRadii radii);
+  PathBuilder& AddRoundedRect(Rect rect, RoundingRadii radii);
 
  private:
-  Point _subpathStart;
-  Point _current;
-  Path _prototype;
+  Point subpath_start_;
+  Point current_;
+  Path prototype_;
 
-  Point reflectedQuadraticControlPoint1() const;
+  Point ReflectedQuadraticControlPoint1() const;
 
-  Point reflectedCubicControlPoint1() const;
+  Point ReflectedCubicControlPoint1() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PathBuilder);
 };

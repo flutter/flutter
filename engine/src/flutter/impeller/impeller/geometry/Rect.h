@@ -16,11 +16,15 @@ struct Rect {
   Size size;
 
   Rect() : origin({0.0, 0.0}), size({0.0, 0.0}) {}
+
   Rect(Size size) : origin({0.0, 0.0}), size(size) {}
+
   Rect(Point origin, Size size) : origin(origin), size(size) {}
+
   Rect(const double components[4])
       : origin(components[0], components[1]),
         size(components[2], components[3]) {}
+
   Rect(double x, double y, double width, double height)
       : origin(x, y), size(width, height) {}
 
@@ -51,20 +55,20 @@ struct Rect {
     return origin == r.origin && size == r.size;
   }
 
-  bool contains(const Point& p) const {
+  bool Contains(const Point& p) const {
     return p.x >= origin.x && p.x <= size.width && p.y >= origin.y &&
            p.y <= size.height;
   }
 
-  bool isZero() const { return size.isZero(); }
+  bool IsZero() const { return size.IsZero(); }
 
-  Rect withPoint(const Point& p) const;
+  Rect WithPoint(const Point& p) const;
 
-  Rect withPoints(const std::vector<Point>& points) const;
+  Rect WithPoints(const std::vector<Point>& points) const;
 
-  std::string toString() const;
+  std::string ToString() const;
 
-  void fromString(const std::string& str);
+  void FromString(const std::string& str);
 };
 
 }  // namespace geom

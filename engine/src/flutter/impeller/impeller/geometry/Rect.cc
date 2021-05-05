@@ -8,7 +8,7 @@
 namespace rl {
 namespace geom {
 
-Rect Rect::withPoint(const Point& p) const {
+Rect Rect::WithPoint(const Point& p) const {
   Rect copy = *this;
   if (p.x < origin.x) {
     copy.origin.x = p.x;
@@ -31,22 +31,22 @@ Rect Rect::withPoint(const Point& p) const {
   return copy;
 }
 
-Rect Rect::withPoints(const std::vector<Point>& points) const {
+Rect Rect::WithPoints(const std::vector<Point>& points) const {
   Rect box = *this;
   for (const auto& point : points) {
-    box = box.withPoint(point);
+    box = box.WithPoint(point);
   }
   return box;
 }
 
-std::string Rect::toString() const {
+std::string Rect::ToString() const {
   std::stringstream stream;
   stream << origin.x << "," << origin.y << "," << size.width << ","
          << size.height;
   return stream.str();
 }
 
-void Rect::fromString(const std::string& str) {
+void Rect::FromString(const std::string& str) {
   std::stringstream stream(str);
   stream >> origin.x;
   stream.ignore();

@@ -85,12 +85,12 @@ Matrix::Matrix(const Decomposition& d) : Matrix() {
   }
 }
 
-Matrix Matrix::Orthographic(double left,
-                            double right,
-                            double bottom,
-                            double top,
-                            double nearZ,
-                            double farZ) {
+Matrix Matrix::MakeOrthographic(double left,
+                                double right,
+                                double bottom,
+                                double top,
+                                double nearZ,
+                                double farZ) {
   double ral = right + left;
   double rsl = right - left;
   double tab = top + bottom;
@@ -106,14 +106,15 @@ Matrix Matrix::Orthographic(double left,
   // clang-format on
 }
 
-Matrix Matrix::Orthographic(const Size& size) {
-  return Matrix::Orthographic(0, size.width, size.height, 0, -INT_MAX, INT_MAX);
+Matrix Matrix::MakeOrthographic(const Size& size) {
+  return Matrix::MakeOrthographic(0, size.width, size.height, 0, -INT_MAX,
+                                  INT_MAX);
 }
 
-Matrix Matrix::Perspective(double fov,
-                           double aspect,
-                           double nearZ,
-                           double farZ) {
+Matrix Matrix::MakePerspective(double fov,
+                               double aspect,
+                               double nearZ,
+                               double farZ) {
   double cotan = 1.0 / tan(fov / 2.0);
 
   return Matrix(cotan / aspect, 0.0, 0.0, 0.0,                        //
@@ -123,16 +124,16 @@ Matrix Matrix::Perspective(double fov,
   );
 }
 
-Matrix Matrix::LookAt(const Vector3& eye,
-                      const Vector3& center,
-                      const Vector3& up) {
-  auto n = (eye - center).normalize();
-  auto u = (up.cross(n)).normalize();
-  auto v = n.cross(u);
+Matrix Matrix::MakeLookAt(const Vector3& eye,
+                          const Vector3& center,
+                          const Vector3& up) {
+  auto n = (eye - center).Normalize();
+  auto u = (up.Cross(n)).Normalize();
+  auto v = n.Cross(u);
   return {u.x,           v.x,           n.x,           0.0,  //
           u.y,           v.y,           n.y,           0.0,  //
           u.z,           v.z,           n.z,           0.0,  //
-          (-u).dot(eye), (-v).dot(eye), (-n).dot(eye), 1.0};
+          (-u).Dot(eye), (-v).Dot(eye), (-n).Dot(eye), 1.0};
 }
 
 Matrix Matrix::operator+(const Matrix& o) const {
@@ -144,7 +145,7 @@ Matrix Matrix::operator+(const Matrix& o) const {
   );
 }
 
-std::string Matrix::toString() const {
+std::string Matrix::ToString() const {
   std::stringstream stream;
   for (int i = 0, limit = 16; i < limit; i++) {
     stream << m[i];
@@ -155,7 +156,7 @@ std::string Matrix::toString() const {
   return stream.str();
 }
 
-void Matrix::fromString(const std::string& str) {
+void Matrix::FromString(const std::string& str) {
   std::stringstream stream(str);
   for (int i = 0; i < 16; i++) {
     stream >> m[i];
@@ -163,7 +164,7 @@ void Matrix::fromString(const std::string& str) {
   }
 }
 
-Matrix Matrix::invert() const {
+Matrix Matrix::Invert() const {
   Matrix tmp{
       m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] +
           m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10],
@@ -228,7 +229,7 @@ Matrix Matrix::invert() const {
           tmp.m[12] * det, tmp.m[13] * det, tmp.m[14] * det, tmp.m[15] * det};
 }
 
-Matrix Matrix::transpose() const {
+Matrix Matrix::Transpose() const {
   return {
       m[0], m[4], m[8],  m[12],  //
       m[1], m[5], m[9],  m[13],  //
@@ -237,7 +238,7 @@ Matrix Matrix::transpose() const {
   };
 }
 
-double Matrix::determinant() const {
+double Matrix::GetDeterminant() const {
   auto a00 = e[0][0];
   auto a01 = e[0][1];
   auto a02 = e[0][2];
@@ -275,7 +276,7 @@ double Matrix::determinant() const {
  *  Adapted for Radar from Graphics Gems:
  *  http://www.realtimerendering.com/resources/GraphicsGems/gemsii/unmatrix.c
  */
-Matrix::DecompositionResult Matrix::decompose() const {
+Matrix::DecompositionResult Matrix::Decompose() const {
   /*
    *  Normalize the matrix.
    */
@@ -302,7 +303,7 @@ Matrix::DecompositionResult Matrix::decompose() const {
 
   perpectiveMatrix.e[3][3] = 1;
 
-  if (perpectiveMatrix.determinant() == 0.0) {
+  if (perpectiveMatrix.GetDeterminant() == 0.0) {
     return {false, {}};
   }
 
@@ -327,7 +328,7 @@ Matrix::DecompositionResult Matrix::decompose() const {
      *  prhs by the inverse.
      */
 
-    result.perspective = rightHandSide * perpectiveMatrix.invert().transpose();
+    result.perspective = rightHandSide * perpectiveMatrix.Invert().Transpose();
 
     /*
      *  Clear the perspective partition.
@@ -359,35 +360,35 @@ Matrix::DecompositionResult Matrix::decompose() const {
   /*
    *  Compute X scale factor and normalize first row.
    */
-  result.scale.x = row[0].length();
-  row[0] = row[0].normalize();
+  result.scale.x = row[0].Length();
+  row[0] = row[0].Normalize();
 
   /*
    *  Compute XY shear factor and make 2nd row orthogonal to 1st.
    */
-  result.shear.xy = row[0].dot(row[1]);
+  result.shear.xy = row[0].Dot(row[1]);
   row[1] = Vector3::Combine(row[1], 1.0, row[0], -result.shear.xy);
 
   /*
    *  Compute Y scale and normalize 2nd row.
    */
-  result.scale.y = row[1].length();
-  row[1] = row[1].normalize();
+  result.scale.y = row[1].Length();
+  row[1] = row[1].Normalize();
   result.shear.xy /= result.scale.y;
 
   /*
    *  Compute XZ and YZ shears, orthogonalize 3rd row.
    */
-  result.shear.xz = row[0].dot(row[2]);
+  result.shear.xz = row[0].Dot(row[2]);
   row[2] = Vector3::Combine(row[2], 1.0, row[0], -result.shear.xz);
-  result.shear.yz = row[1].dot(row[2]);
+  result.shear.yz = row[1].Dot(row[2]);
   row[2] = Vector3::Combine(row[2], 1.0, row[1], -result.shear.yz);
 
   /*
    *  Next, get Z scale and normalize 3rd row.
    */
-  result.scale.z = row[2].length();
-  row[2] = row[2].normalize();
+  result.scale.z = row[2].Length();
+  row[2] = row[2].Normalize();
 
   result.shear.xz /= result.scale.z;
   result.shear.yz /= result.scale.z;
@@ -397,7 +398,7 @@ Matrix::DecompositionResult Matrix::decompose() const {
    *  Check for a coordinate system flip.  If the determinant
    *  is -1, then negate the matrix and the scaling factors.
    */
-  if (row[0].dot(row[1].cross(row[2])) < 0) {
+  if (row[0].Dot(row[1].Cross(row[2])) < 0) {
     result.scale.x *= -1;
     result.scale.y *= -1;
     result.scale.z *= -1;
@@ -436,7 +437,7 @@ Matrix::DecompositionResult Matrix::decompose() const {
   return DecompositionResult(true, result);
 }
 
-uint64_t Matrix::Decomposition::componentsMask() const {
+uint64_t Matrix::Decomposition::GetComponentsMask() const {
   uint64_t mask = 0;
 
   Quaternion noRotation(0.0, 0.0, 0.0, 1.0);
@@ -467,14 +468,14 @@ uint64_t Matrix::Decomposition::componentsMask() const {
   return mask;
 }
 
-std::string Matrix::Decomposition::toString() const {
+std::string Matrix::Decomposition::ToString() const {
   std::stringstream stream;
 
-  stream << "Translation: " << translation.toString() << std::endl;
-  stream << "Scale: " << scale.toString() << std::endl;
-  stream << "Shear: " << shear.toString() << std::endl;
-  stream << "Perspective: " << perspective.toString() << std::endl;
-  stream << "Rotation: " << rotation.toString() << std::endl;
+  stream << "Translation: " << translation.ToString() << std::endl;
+  stream << "Scale: " << scale.ToString() << std::endl;
+  stream << "Shear: " << shear.ToString() << std::endl;
+  stream << "Perspective: " << perspective.ToString() << std::endl;
+  stream << "Rotation: " << rotation.ToString() << std::endl;
 
   return stream.str();
 }

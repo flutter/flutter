@@ -31,19 +31,19 @@ class ImageResult {
 
   ~ImageResult();
 
-  const geom::Size& size() const;
+  const geom::Size& GetSize() const;
 
-  bool wasSuccessful() const;
+  bool WasSuccessful() const;
 
-  Components components() const;
+  Components GetComponents() const;
 
-  const std::shared_ptr<const fml::Mapping>& allocation() const;
+  const std::shared_ptr<const fml::Mapping>& Allocation() const;
 
  private:
-  bool _success = false;
-  geom::Size _size;
-  Components _components = Components::Invalid;
-  std::shared_ptr<const fml::Mapping> _allocation;
+  bool success_ = false;
+  geom::Size size_;
+  Components components_ = Components::Invalid;
+  std::shared_ptr<const fml::Mapping> allocation_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageResult);
 };

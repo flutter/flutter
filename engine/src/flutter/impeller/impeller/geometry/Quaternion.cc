@@ -8,8 +8,8 @@
 namespace rl {
 namespace geom {
 
-Quaternion Quaternion::slerp(const Quaternion& to, double time) const {
-  double cosine = dot(to);
+Quaternion Quaternion::Slerp(const Quaternion& to, double time) const {
+  double cosine = Dot(to);
   if (fabs(cosine) < 1.0 - 1e-3 /* epsilon */) {
     /*
      *  Spherical Interpolation.
@@ -24,11 +24,11 @@ Quaternion Quaternion::slerp(const Quaternion& to, double time) const {
     /*
      *  Linear Interpolation.
      */
-    return (*this * (1.0 - time) + to * time).normalize();
+    return (*this * (1.0 - time) + to * time).Normalize();
   }
 }
 
-std::string Quaternion::toString() const {
+std::string Quaternion::ToString() const {
   std::stringstream stream;
   stream << "{" << x << ", "
          << ", " << y << ", " << z << ", " << w << "}";

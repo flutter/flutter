@@ -38,20 +38,20 @@ struct Size {
     return {width - s.width, height - s.height};
   }
 
-  Size unionWith(const Size& o) const {
+  Size Union(const Size& o) const {
     return {
         std::max(width, o.width),
         std::max(height, o.height),
     };
   }
 
-  bool isZero() const { return width * height == 0.0; }
+  bool IsZero() const { return width * height == 0.0; }
 
-  bool isPositive() const { return width > 0.0 && height > 0.0; }
+  bool IsPositive() const { return width > 0.0 && height > 0.0; }
 
-  std::string toString() const;
+  std::string ToString() const;
 
-  void fromString(const std::string& str);
+  void FromString(const std::string& str);
 };
 
 }  // namespace geom

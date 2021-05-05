@@ -56,54 +56,54 @@ static inline double CubicSolveDerivative(double t,
          3 * p3 * t * t;
 }
 
-Point LinearPathComponent::solve(double time) const {
+Point LinearPathComponent::Solve(double time) const {
   return {
       LinearSolve(time, p1.x, p2.x),  // x
       LinearSolve(time, p1.y, p2.y),  // y
   };
 }
 
-std::vector<Point> LinearPathComponent::smoothPoints() const {
+std::vector<Point> LinearPathComponent::SmoothPoints() const {
   return {p1, p2};
 }
 
-std::vector<Point> LinearPathComponent::extrema() const {
+std::vector<Point> LinearPathComponent::Extrema() const {
   return {p1, p2};
 }
 
-Point QuadraticPathComponent::solve(double time) const {
+Point QuadraticPathComponent::Solve(double time) const {
   return {
       QuadraticSolve(time, p1.x, cp.x, p2.x),  // x
       QuadraticSolve(time, p1.y, cp.y, p2.y),  // y
   };
 }
 
-Point QuadraticPathComponent::solveDerivative(double time) const {
+Point QuadraticPathComponent::SolveDerivative(double time) const {
   return {
       QuadraticSolveDerivative(time, p1.x, cp.x, p2.x),  // x
       QuadraticSolveDerivative(time, p1.y, cp.y, p2.y),  // y
   };
 }
 
-std::vector<Point> QuadraticPathComponent::smoothPoints(
+std::vector<Point> QuadraticPathComponent::SmoothPoints(
     const SmoothingApproximation& approximation) const {
   CubicPathComponent elevated(*this);
-  return elevated.smoothPoints(approximation);
+  return elevated.SmoothPoints(approximation);
 }
 
-std::vector<Point> QuadraticPathComponent::extrema() const {
+std::vector<Point> QuadraticPathComponent::Sxtrema() const {
   CubicPathComponent elevated(*this);
-  return elevated.extrema();
+  return elevated.Extrema();
 }
 
-Point CubicPathComponent::solve(double time) const {
+Point CubicPathComponent::Solve(double time) const {
   return {
       CubicSolve(time, p1.x, cp1.x, cp2.x, p2.x),  // x
       CubicSolve(time, p1.y, cp1.y, cp2.y, p2.y),  // y
   };
 }
 
-Point CubicPathComponent::solveDerivative(double time) const {
+Point CubicPathComponent::SolveDerivative(double time) const {
   return {
       CubicSolveDerivative(time, p1.x, cp1.x, cp2.x, p2.x),  // x
       CubicSolveDerivative(time, p1.y, cp1.y, cp2.y, p2.y),  // y
@@ -157,8 +157,8 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
        */
       k = d.x * d.x + d.y * d.y;
       if (k == 0) {
-        d2 = p1.distanceSquared(p2);
-        d3 = p4.distanceSquared(p3);
+        d2 = p1.GetDistanceSquared(p2);
+        d3 = p4.GetDistanceSquared(p3);
       } else {
         k = 1.0 / k;
         da1 = p2.x - p1.x;
@@ -176,19 +176,19 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
         }
 
         if (d2 <= 0) {
-          d2 = p2.distanceSquared(p1);
+          d2 = p2.GetDistanceSquared(p1);
         } else if (d2 >= 1) {
-          d2 = p2.distanceSquared(p4);
+          d2 = p2.GetDistanceSquared(p4);
         } else {
-          d2 = p2.distanceSquared({p1.x + d2 * d.x, p1.y + d2 * d.y});
+          d2 = p2.GetDistanceSquared({p1.x + d2 * d.x, p1.y + d2 * d.y});
         }
 
         if (d3 <= 0) {
-          d3 = p3.distanceSquared(p1);
+          d3 = p3.GetDistanceSquared(p1);
         } else if (d3 >= 1) {
-          d3 = p3.distanceSquared(p4);
+          d3 = p3.GetDistanceSquared(p4);
         } else {
-          d3 = p3.distanceSquared({p1.x + d3 * d.x, p1.y + d3 * d.y});
+          d3 = p3.GetDistanceSquared({p1.x + d3 * d.x, p1.y + d3 * d.y});
         }
       }
 
@@ -334,7 +334,7 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
   CubicPathSmoothenRecursive(approx, points, p1234, p234, p34, p4, level + 1);
 }
 
-std::vector<Point> CubicPathComponent::smoothPoints(
+std::vector<Point> CubicPathComponent::SmoothPoints(
     const SmoothingApproximation& approximation) const {
   std::vector<Point> points;
   points.emplace_back(p1);
@@ -398,7 +398,7 @@ static void CubicPathBoundingPopulateValues(std::vector<double>& values,
   }
 }
 
-std::vector<Point> CubicPathComponent::extrema() const {
+std::vector<Point> CubicPathComponent::Extrema() const {
   /*
    *  As described in: https://pomax.github.io/bezierinfo/#extremities
    */
@@ -410,7 +410,7 @@ std::vector<Point> CubicPathComponent::extrema() const {
   std::vector<Point> points;
 
   for (const auto& value : values) {
-    points.emplace_back(solve(value));
+    points.emplace_back(Solve(value));
   }
 
   return points;
