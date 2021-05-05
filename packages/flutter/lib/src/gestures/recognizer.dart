@@ -51,7 +51,8 @@ enum DragStartBehavior {
 ///
 /// See also:
 ///
-///  * [GestureDetector], the widget that is used to detect gestures.
+///  * [GestureDetector], the widget that is used to detect built-in gestures.
+///  * [RawGestureDetector], the widget that is used to detect custom gestures.
 ///  * [debugPrintRecognizerCallbacksTrace], a flag that can be set to help
 ///    debug issues with gesture recognizers.
 abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableTreeMixin {
@@ -460,6 +461,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       initialPosition = OffsetPair(local: event.localPosition, global: event.position);
       if (deadline != null)
         _timer = Timer(deadline!, () => didExceedDeadlineWithEvent(event));
+    }
+  }
+
+  @override
+  void handleNonAllowedPointer(PointerDownEvent event) {
+    if (!_gestureAccepted) {
+      super.handleNonAllowedPointer(event);
     }
   }
 

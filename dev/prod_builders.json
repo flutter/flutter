@@ -1297,27 +1297,33 @@
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_1_4",
+      "name": "Windows tool_integration_tests_1_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_1_4",
+      "task_name": "win_tool_integration_tests_1_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_2_4",
+      "name": "Windows tool_integration_tests_2_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_2_4",
+      "task_name": "win_tool_integration_tests_2_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_3_4",
+      "name": "Windows tool_integration_tests_3_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_3_4",
+      "task_name": "win_tool_integration_tests_3_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_4_4",
+      "name": "Windows tool_integration_tests_4_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_4_4",
+      "task_name": "win_tool_integration_tests_4_5",
+      "flaky": false
+    },
+    {
+      "name": "Windows tool_integration_tests_5_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_5_5",
       "flaky": false
     },
     {

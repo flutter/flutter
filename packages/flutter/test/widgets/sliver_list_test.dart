@@ -173,7 +173,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -196,7 +196,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pump();
     // We need second pump to ensure the scheduled animation gets run.
@@ -233,7 +233,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -260,7 +260,7 @@ void main() {
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
-      )
+      ),
     );
     await tester.pump();
     // We need second pump to ensure the scheduled animation gets run.

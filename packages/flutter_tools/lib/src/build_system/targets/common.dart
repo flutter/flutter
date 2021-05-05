@@ -66,11 +66,19 @@ const String kFileSystemRoots = 'FileSystemRoots';
 
 /// The define to control what iOS architectures are built for.
 ///
-/// This is expected to be a comma-separated list of architectures. If not
+/// This is expected to be a space-delimited list of architectures. If not
 /// provided, defaults to arm64.
 ///
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
+
+/// The define to control what macOS architectures are built for.
+///
+/// This is expected to be a space-delimited list of architectures. If not
+/// provided, defautls to x86_64.
+///
+/// Supported values are x86_64 and arm64.
+const String kDarwinArchs = 'DarwinArchs';
 
 /// Path to the SDK root to be used as the isysroot.
 const String kSdkRoot = 'SdkRoot';
@@ -254,7 +262,7 @@ class KernelSnapshot extends Target {
     // See https://github.com/flutter/flutter/issues/44724
     bool forceLinkPlatform;
     switch (targetPlatform) {
-      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;

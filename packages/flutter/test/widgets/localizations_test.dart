@@ -18,7 +18,7 @@ void main() {
         WidgetsLocalizationsDelegate(),
         delegate,
       ],
-      child: const Text('loaded')
+      child: const Text('loaded'),
     ));
     final dynamic state = tester.state(find.byType(Localizations));
     expect(state!.locale, isNull);

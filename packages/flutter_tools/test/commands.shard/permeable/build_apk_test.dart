@@ -143,6 +143,11 @@ void main() {
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment')))
         .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'assembleRelease', '')));
+
+      when(mockProcessManager.runSync(<String>['mdfind', 'kMDItemCFBundleIdentifier="com.google.android.studio*"'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')))
+          .thenReturn(ProcessResult(0, 0, '', ''));
       // Fallback with error.
       final Process process = createMockProcess(exitCode: 1);
       when(mockProcessManager.start(any,
