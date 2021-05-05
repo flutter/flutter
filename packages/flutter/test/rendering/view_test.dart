@@ -50,8 +50,11 @@ void main() {
   test('ViewConfiguration == and hashCode', () {
     final ViewConfiguration viewConfigurationA = createViewConfiguration();
     final ViewConfiguration viewConfigurationB = createViewConfiguration();
+    final ViewConfiguration viewConfigurationC = createViewConfiguration(devicePixelRatio: 3.0);
 
     expect(viewConfigurationA == viewConfigurationB, true);
+    expect(viewConfigurationA != viewConfigurationC, true);
     expect(viewConfigurationA.hashCode, viewConfigurationB.hashCode);
+    expect(viewConfigurationA.hashCode != viewConfigurationC.hashCode, true);
   });
 }
