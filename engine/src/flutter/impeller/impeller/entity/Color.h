@@ -19,24 +19,24 @@ struct Color {
   /**
    *  The red color component (0 to 1)
    */
-  double red;
+  double red = 0.0;
 
   /**
    *  The green color component (0 to 1)
    */
-  double green;
+  double green = 0.0;
 
   /**
    *  The blue color component (0 to 1)
    */
-  double blue;
+  double blue = 0.0;
 
   /**
    *  The alpha component of the color (0 to 1)
    */
-  double alpha;
+  double alpha = 0.0;
 
-  Color() : red(0.0), green(0.0), blue(0.0), alpha(0.0) {}
+  Color() {}
 
   Color(const ColorHSB& hsbColor);
 
@@ -50,9 +50,9 @@ struct Color {
 
   Color operator+(const Color& other) const;
 
-  std::string toString() const;
+  std::string ToString() const;
 
-  void fromString(const std::string& str);
+  void FromString(const std::string& str);
 
   static Color White() { return {1.0, 1.0, 1.0, 1.0}; }
 

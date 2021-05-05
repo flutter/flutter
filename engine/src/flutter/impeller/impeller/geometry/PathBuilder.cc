@@ -30,7 +30,7 @@ PathBuilder& PathBuilder::Close() {
 
 PathBuilder& PathBuilder::LineTo(Point point, bool relative) {
   point = relative ? current_ + point : point;
-  prototype_.addLinearComponent(current_, point);
+  prototype_.AddLinearComponent(current_, point);
   current_ = point;
   return *this;
 }
@@ -38,7 +38,7 @@ PathBuilder& PathBuilder::LineTo(Point point, bool relative) {
 PathBuilder& PathBuilder::HorizontalLineTo(double x, bool relative) {
   Point endpoint =
       relative ? Point{current_.x + x, current_.y} : Point{x, current_.y};
-  prototype_.addLinearComponent(current_, endpoint);
+  prototype_.AddLinearComponent(current_, endpoint);
   current_ = endpoint;
   return *this;
 }
@@ -46,7 +46,7 @@ PathBuilder& PathBuilder::HorizontalLineTo(double x, bool relative) {
 PathBuilder& PathBuilder::VerticalLineTo(double y, bool relative) {
   Point endpoint =
       relative ? Point{current_.x, current_.y + y} : Point{current_.x, y};
-  prototype_.addLinearComponent(current_, endpoint);
+  prototype_.AddLinearComponent(current_, endpoint);
   current_ = endpoint;
   return *this;
 }
@@ -56,7 +56,7 @@ PathBuilder& PathBuilder::QuadraticCurveTo(Point point,
                                            bool relative) {
   point = relative ? current_ + point : point;
   controlPoint = relative ? current_ + controlPoint : controlPoint;
-  prototype_.addQuadraticComponent(current_, controlPoint, point);
+  prototype_.AddQuadraticComponent(current_, controlPoint, point);
   current_ = point;
   return *this;
 }
@@ -66,13 +66,13 @@ Point PathBuilder::ReflectedQuadraticControlPoint1() const {
    *  If there is no previous command or if the previous command was not a
    *  quadratic, assume the control point is coincident with the current point.
    */
-  if (prototype_.componentCount() == 0) {
+  if (prototype_.GetComponentCount() == 0) {
     return current_;
   }
 
   QuadraticPathComponent quad;
-  if (!prototype_.quadraticComponentAtIndex(prototype_.componentCount() - 1,
-                                            quad)) {
+  if (!prototype_.GetQuadraticComponentAtIndex(
+          prototype_.GetComponentCount() - 1, quad)) {
     return current_;
   }
 
@@ -100,7 +100,7 @@ PathBuilder& PathBuilder::CubicCurveTo(Point point,
   controlPoint1 = relative ? current_ + controlPoint1 : controlPoint1;
   controlPoint2 = relative ? current_ + controlPoint2 : controlPoint2;
   point = relative ? current_ + point : point;
-  prototype_.addCubicComponent(current_, controlPoint1, controlPoint2, point);
+  prototype_.AddCubicComponent(current_, controlPoint1, controlPoint2, point);
   current_ = point;
   return *this;
 }
@@ -111,13 +111,13 @@ Point PathBuilder::ReflectedCubicControlPoint1() const {
    *  cubic, assume the first control point is coincident with the current
    *  point.
    */
-  if (prototype_.componentCount() == 0) {
+  if (prototype_.GetComponentCount() == 0) {
     return current_;
   }
 
   CubicPathComponent cubic;
-  if (!prototype_.cubicComponentAtIndex(prototype_.componentCount() - 1,
-                                        cubic)) {
+  if (!prototype_.GetCubicComponentAtIndex(prototype_.GetComponentCount() - 1,
+                                           cubic)) {
     return current_;
   }
 
@@ -151,10 +151,10 @@ PathBuilder& PathBuilder::AddRect(Rect rect) {
   auto bottomRight = rect.origin + Point{rect.size.width, rect.size.height};
   auto topRight = rect.origin + Point{rect.size.width, 0.0};
 
-  prototype_.addLinearComponent(topLeft, bottomLeft)
-      .addLinearComponent(bottomLeft, bottomRight)
-      .addLinearComponent(bottomRight, topRight)
-      .addLinearComponent(topRight, topLeft);
+  prototype_.AddLinearComponent(topLeft, bottomLeft)
+      .AddLinearComponent(bottomLeft, bottomRight)
+      .AddLinearComponent(bottomRight, topRight)
+      .AddLinearComponent(topRight, topLeft);
 
   return *this;
 }
@@ -165,28 +165,28 @@ PathBuilder& PathBuilder::AddCircle(const Point& center, double radius) {
   const double diameter = radius * 2.0;
   const double magic = kArcApproximationMagic * radius;
 
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {center.x + radius, center.y},                     //
       {center.x + radius + magic, center.y},             //
       {center.x + diameter, center.y + radius - magic},  //
       {center.x + diameter, center.y + radius}           //
   );
 
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {center.x + diameter, center.y + radius},          //
       {center.x + diameter, center.y + radius + magic},  //
       {center.x + radius + magic, center.y + diameter},  //
       {center.x + radius, center.y + diameter}           //
   );
 
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {center.x + radius, center.y + diameter},          //
       {center.x + radius - magic, center.y + diameter},  //
       {center.x, center.y + radius + magic},             //
       {center.x, center.y + radius}                      //
   );
 
-  prototype_.addCubicComponent({center.x, center.y + radius},          //
+  prototype_.AddCubicComponent({center.x, center.y + radius},          //
                                {center.x, center.y + radius - magic},  //
                                {center.x + radius - magic, center.y},  //
                                {center.x + radius, center.y}           //
@@ -211,14 +211,14 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   /*
    *  Top line.
    */
-  prototype_.addLinearComponent(
+  prototype_.AddLinearComponent(
       {rect.origin.x + radii.topLeft, rect.origin.y},
       {rect.origin.x + rect.size.width - radii.topRight, rect.origin.y});
 
   /*
    *  Top right arc.
    */
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {rect.origin.x + rect.size.width - radii.topRight, rect.origin.y},
       {rect.origin.x + rect.size.width - radii.topRight + magicTopRight,
        rect.origin.y},
@@ -229,7 +229,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   /*
    *  Right line.
    */
-  prototype_.addLinearComponent(
+  prototype_.AddLinearComponent(
       {rect.origin.x + rect.size.width, rect.origin.y + radii.topRight},
       {rect.origin.x + rect.size.width,
        rect.origin.y + rect.size.height - radii.bottomRight});
@@ -237,7 +237,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   /*
    *  Bottom right arc.
    */
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {rect.origin.x + rect.size.width,
        rect.origin.y + rect.size.height - radii.bottomRight},
       {rect.origin.x + rect.size.width,
@@ -250,7 +250,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   /*
    *  Bottom line.
    */
-  prototype_.addLinearComponent(
+  prototype_.AddLinearComponent(
       {rect.origin.x + rect.size.width - radii.bottomRight,
        rect.origin.y + rect.size.height},
       {rect.origin.x + radii.bottomLeft, rect.origin.y + rect.size.height});
@@ -258,7 +258,7 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   /*
    *  Bottom left arc.
    */
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {rect.origin.x + radii.bottomLeft, rect.origin.y + rect.size.height},
       {rect.origin.x + radii.bottomLeft - magicBottomLeft,
        rect.origin.y + rect.size.height},
@@ -269,14 +269,14 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   /*
    *  Left line.
    */
-  prototype_.addLinearComponent(
+  prototype_.AddLinearComponent(
       {rect.origin.x, rect.origin.y + rect.size.height - radii.bottomLeft},
       {rect.origin.x, rect.origin.y + radii.topLeft});
 
   /*
    *  Top left arc.
    */
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {rect.origin.x, rect.origin.y + radii.topLeft},
       {rect.origin.x, rect.origin.y + radii.topLeft - magicTopLeft},
       {rect.origin.x + radii.topLeft - magicTopLeft, rect.origin.y},
@@ -292,28 +292,28 @@ PathBuilder& PathBuilder::AddEllipse(const Point& center, const Size& radius) {
   const Size magic = {kArcApproximationMagic * radius.width,
                       kArcApproximationMagic * radius.height};
 
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {center.x + radius.width, center.y},                                   //
       {center.x + radius.width + magic.width, center.y},                     //
       {center.x + diameter.width, center.y + radius.height - magic.height},  //
       {center.x + diameter.width, center.y + radius.height}                  //
   );
 
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {center.x + diameter.width, center.y + radius.height},                 //
       {center.x + diameter.width, center.y + radius.height + magic.height},  //
       {center.x + radius.width + magic.width, center.y + diameter.height},   //
       {center.x + radius.width, center.y + diameter.height}                  //
   );
 
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {center.x + radius.width, center.y + diameter.height},                //
       {center.x + radius.width - magic.width, center.y + diameter.height},  //
       {center.x, center.y + radius.height + magic.height},                  //
       {center.x, center.y + radius.height}                                  //
   );
 
-  prototype_.addCubicComponent(
+  prototype_.AddCubicComponent(
       {center.x, center.y + radius.height},                 //
       {center.x, center.y + radius.height - magic.height},  //
       {center.x + radius.width - magic.width, center.y},    //
