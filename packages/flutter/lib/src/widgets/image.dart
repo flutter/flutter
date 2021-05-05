@@ -19,7 +19,6 @@ import 'localizations.dart';
 import 'media_query.dart';
 import 'placeholder.dart';
 import 'scroll_aware_image_provider.dart';
-import 'selection_area.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
@@ -1343,8 +1342,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       invertColors: _invertColors,
       isAntiAlias: widget.isAntiAlias,
       filterQuality: widget.filterQuality,
-      // Default to true for testing.
-      selectionRegistrant: SelectionArea.of(context),
     );
 
     if (!widget.excludeFromSemantics) {

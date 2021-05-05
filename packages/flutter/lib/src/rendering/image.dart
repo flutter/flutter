@@ -44,7 +44,6 @@ class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
     bool invertColors = false,
     bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.low,
-    SelectionRegistrant? selectionRegistrant,
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
@@ -65,8 +64,7 @@ class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
        _invertColors = invertColors,
        _textDirection = textDirection,
        _isAntiAlias = isAntiAlias,
-       _filterQuality = filterQuality,
-       _selectionRegistrant = selectionRegistrant {
+       _filterQuality = filterQuality {
     _updateColorFilter();
   }
 
@@ -321,15 +319,6 @@ class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
     markNeedsPaint();
   }
 
-  SelectionRegistrant? _selectionRegistrant;
-  SelectionRegistrant? get selectionRegistrant => _selectionRegistrant;
-  set selectionRegistrant(SelectionRegistrant? value) {
-    if (value == _selectionRegistrant) {
-      return;
-    }
-    _selectionRegistrant = value;
-  }
-
   /// Find a size for the render image within the given constraints.
   ///
   ///  - The dimensions of the RenderImage must fit within the constraints.
@@ -403,7 +392,6 @@ class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
       return;
     _resolve();
     _lastRect = offset & size;
-    _selectionRegistrant?.update(this, Rect.fromPoints(localToGlobal(_lastRect.topLeft), localToGlobal(_lastRect.bottomRight)));
     assert(_resolvedAlignment != null);
     assert(_flipHorizontally != null);
     paintImage(
@@ -445,12 +433,6 @@ class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
-  }
-
-  @override
-  void detach() {
-    _selectionRegistrant?.remove(this);
-    super.detach();
   }
 
   @override

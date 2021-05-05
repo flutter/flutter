@@ -5711,7 +5711,6 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
-    this.selectionRegistrant,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5737,10 +5736,6 @@ class RichText extends MultiChildRenderObjectWidget {
     });
     return result;
   }
-
-  /// The current selection registrant handle, or `null` if selection is disabled for this
-  /// paragraph.
-  final SelectionRegistrant? selectionRegistrant;
 
   /// The text to display in this widget.
   final InlineSpan text;
@@ -5818,7 +5813,6 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.maybeLocaleOf(context),
-      selectionRegistrant: selectionRegistrant,
     );
   }
 
@@ -5836,8 +5830,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
-      ..locale = locale ?? Localizations.maybeLocaleOf(context)
-      ..selectionRegistrant = selectionRegistrant;
+      ..locale = locale ?? Localizations.maybeLocaleOf(context);
   }
 
   @override
@@ -5889,7 +5882,6 @@ class RawImage extends LeafRenderObjectWidget {
     this.invertColors = false,
     this.filterQuality = FilterQuality.low,
     this.isAntiAlias = false,
-    this.selectionRegistrant,
   }) : assert(scale != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -5903,8 +5895,6 @@ class RawImage extends LeafRenderObjectWidget {
   /// Creators of a [RawImage] are expected to call [Image.dispose] on this
   /// image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
-
-  final SelectionRegistrant? selectionRegistrant;
 
   /// A string identifying the source of the image.
   final String? debugImageLabel;
@@ -6048,7 +6038,6 @@ class RawImage extends LeafRenderObjectWidget {
       invertColors: invertColors,
       filterQuality: filterQuality,
       isAntiAlias: isAntiAlias,
-      selectionRegistrant: selectionRegistrant,
     );
   }
 
@@ -6074,8 +6063,7 @@ class RawImage extends LeafRenderObjectWidget {
       ..matchTextDirection = matchTextDirection
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
-      ..filterQuality = filterQuality
-      ..selectionRegistrant = selectionRegistrant;
+      ..filterQuality = filterQuality;
   }
 
   @override

@@ -24,89 +24,61 @@ class SelectionArea extends StatefulWidget {
 
   @override
   _SelectionAreaState createState() => _SelectionAreaState();
-
-  static SelectionRegistrant? of(BuildContext context) {
-    final _SelectionAreaState? registrant = context.findAncestorStateOfType<_SelectionAreaState>();
-    if (registrant == null || !registrant.widget.enabled) {
-      return null;
-    }
-    return registrant;
-  }
 }
 
-class _SelectionAreaState extends State<SelectionArea> implements SelectionRegistrant {
+class _SelectionAreaState extends State<SelectionArea> {
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
-  final Map<Selectable<Object>, Rect> _selectionCandidates = <Selectable<Object>, Rect>{};
-  final Set<Selectable<Object>> _selectionStates = <Selectable<Object>>{};
 
-  Offset? _selectionStart;
-  Offset? _selectionEnd;
-
-  @override
-  void update(Selectable<Object> selectable, Rect globalRect) {
-    _selectionCandidates[selectable] = globalRect;
-  }
-
-  @override
-  void remove(Selectable<Object> selectable) {
-    _selectionCandidates.remove(selectable);
-  }
+  BoxHitTestResult Function(Offset)? _hitTest;
+  _SelectionRegion? _region;
 
   void _handleDragDown(DragDownDetails details) {
-    _selectionStart = null;
-    _selectionEnd = null;
+    _cancelSelection();
   }
 
   void _handleDragStart(DragStartDetails details) {
-    _selectionStart = details.globalPosition;
+    _startSelection(details.localPosition);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    _selectionEnd = details.globalPosition;
-    _maybeUpdateSelection();
+    _updateSelection(details.localPosition);
   }
 
   void _handleDragEnd(DragEndDetails details) {}
 
   void _handleDragCancel() {
-    _selectionStart = null;
-    _selectionEnd = null;
-    _maybeUpdateSelection();
+    _cancelSelection();
   }
 
   void _handleTapDown(TapDownDetails details) {
     if (details.kind != PointerDeviceKind.mouse)
       return;
-    _selectionStart = null;
-    _selectionEnd = null;
-    _maybeUpdateSelection();
+    _cancelSelection();
   }
 
-  // This logic needs to change based on text direction.
-  void _maybeUpdateSelection() {
-    final Offset? selectionStartT = _selectionStart;
-    final Offset? selectionEndT = _selectionEnd;
-    if (selectionEndT == null || selectionStartT == null) {
-      if (_selectionStates.isNotEmpty) {
-        for (final Selectable<Object> selectable in _selectionStates) {
-          selectable.clear();
-        }
-        _selectionStates.clear();
-      }
+  void _startSelection(Offset offset) {
+    if (_hitTest == null)
       return;
-    }
-    final Offset selectionStart = selectionStartT;
-    final Offset selectionEnd = selectionEndT;
-    for (final Selectable<Object> data in _selectionCandidates.keys) {
-      final Rect? bounds = _selectionCandidates[data];
-      if (bounds == null) {
-        continue;
-      }
-      if (data.update(selectionStart, selectionEnd)) {
-        _selectionStates.add(data);
-      }
-    }
+    final BoxHitTestResult result = _hitTest!(offset);
+    _region = _SelectionRegion(offset)..add(result);
+  }
+
+  void _updateSelection(Offset offset) {
+    if (_hitTest == null)
+      return;
+    final BoxHitTestResult result = _hitTest!(offset);
+    _region!.add(result);
+    _region!.updateSelections(offset);
+  }
+
+  void _cancelSelection() {
+    final _SelectionRegion? region = _region;
+    if (region == null)
+      return;
+    for (final Selectable<Object> selectable in region.selectables)
+      selectable.clear();
+    _region = null;
   }
 
   void _onKeyEvent(RawKeyEvent event) {
@@ -116,27 +88,19 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
   }
 
   void _onCopy() {
-    if (_selectionStates.isEmpty)
+    final _SelectionRegion? region = _region;
+    if (region == null || region.selectables.isEmpty)
       return;
     // The order in which these should be concatenated is ???. For now this
-    // sorts by the top left corner.
-    final List<_CopyData<Object>> copyData = <_CopyData<Object>>[];
-    for (final Selectable<Object> selectable in _selectionStates) {
-      final Rect? bounds = _selectionCandidates[selectable];
-      if (bounds == null) {
-        continue;
-      }
+    // sorts by the order in which the selectables were added.
+    final StringBuffer buffer = StringBuffer();
+    for (final Selectable<Object> selectable in region.selectables) {
       final Object? data = selectable.copy();
       if (data == null) {
         continue;
       }
-      copyData.add(_CopyData<Object>(bounds.topLeft, data));
-    }
-    copyData.sort();
-    // TODO: support more types than strings
-    final StringBuffer buffer = StringBuffer();
-    for (final _CopyData<Object> data in copyData) {
-      buffer.writeln(data.data); // Not sure what separator to use.
+      // TODO: support more types than strings
+      buffer.writeln(data); // Not sure what separator to use.
     }
     Clipboard.setData(ClipboardData(text: buffer.toString()));
   }
@@ -170,10 +134,13 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
   @override
   void dispose() {
     RawKeyboard.instance.removeListener(_onKeyEvent);
-    for (final Selectable<Object> selectable in _selectionStates) {
-      selectable.clear();
+    final _SelectionRegion? region = _region;
+    if (region != null) {
+      for (final Selectable<Object> selectable in region.selectables) {
+        selectable.clear();
+      }
     }
-    _selectionStates.clear();
+    _region = null;
     super.dispose();
   }
 
@@ -184,28 +151,66 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionRegis
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.translucent,
       excludeFromSemantics: true,
-      child: widget.child,
+      child: _SelectionArea(this, widget.child),
     );
   }
 }
 
-class _CopyData<T> implements Comparable<_CopyData<T>> {
-  _CopyData(this.topLeft, this.data);
 
-  final Offset topLeft;
-  final T data;
+class _SelectionRegion {
+  _SelectionRegion(this.start) : end = start;
+
+  Offset start;
+  Offset end;
+
+  final Set<Selectable<Object>> selectables = <Selectable<Object>>{};
+  final Map<Selectable<Object>, HitTestEntry> entries = <Selectable<Object>, HitTestEntry>{};
+
+  void add(BoxHitTestResult result) {
+    for (final HitTestEntry entry in result.path) {
+      final HitTestTarget target = entry.target;
+      if (target is Selectable<Object>) {
+        final Selectable<Object> selectable = target as Selectable<Object>;
+        if (!selectables.contains(selectable)) {
+          selectables.add(selectable);
+        }
+        entries[selectable] = entry;
+      }
+    }
+  }
+
+  void updateSelections(Offset updatedEnd) {
+    end = updatedEnd;
+    for (final MapEntry<Selectable<Object>, HitTestEntry> entry in entries.entries) {
+      final Offset startOffset = MatrixUtils.transformPoint(entry.value.transform!, start);
+      final Offset endOffset = MatrixUtils.transformPoint(entry.value.transform!, end);
+      entry.key.update(startOffset, endOffset);
+    }
+  }
+}
+
+class _SelectionArea extends SingleChildRenderObjectWidget {
+  _SelectionArea(this._state, Widget child) : super(child: child);
+
+  final _SelectionAreaState _state;
 
   @override
-  int compareTo(_CopyData<T> other) {
-    if (other.topLeft.dy < topLeft.dy) {
-      return 1;
-    } else if (other.topLeft.dy > topLeft.dy) {
-      return -1;
-    } else if (other.topLeft.dx < topLeft.dx) {
-      return 1;
-    } else if (other.topLeft.dx > topLeft.dx) {
-      return -1;
-    }
-    return 0;
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderSelectionArea(_state);
+  }
+
+}
+
+class _RenderSelectionArea extends RenderProxyBox {
+  _RenderSelectionArea(this._state) {
+    _state._hitTest = performSelectionTest;
+  }
+
+  _SelectionAreaState _state;
+
+  BoxHitTestResult performSelectionTest(Offset offset) {
+    final BoxHitTestResult result = BoxHitTestResult();
+    hitTestChildren(result, position: offset);
+    return result;
   }
 }

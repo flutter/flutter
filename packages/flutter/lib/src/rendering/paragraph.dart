@@ -61,12 +61,6 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
   int get hashCode => hashValues(PlaceholderSpanIndexSemanticsTag, index);
 }
 
-abstract class SelectionRegistrant {
-  void update(Selectable<Object> selectable, Rect global);
-
-  void remove(Selectable<Object> selectable);
-}
-
 abstract class Selectable<T> {
   bool update(Offset start, Offset end);
 
@@ -383,10 +377,8 @@ class RenderParagraph extends RenderBox
 
   @override
   bool update(Offset start, Offset end) {
-    final Offset localStart = globalToLocal(start);
-    final Offset localEnd = globalToLocal(end);
-    final TextPosition startText = getPositionForOffset(localStart);
-    final TextPosition endText = getPositionForOffset(localEnd);
+    final TextPosition startText = getPositionForOffset(start);
+    final TextPosition endText = getPositionForOffset(end);
     if (startText == endText) {
       return false;
     }
