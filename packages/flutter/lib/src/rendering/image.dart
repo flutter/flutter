@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
+
+import 'package:flutter/rendering.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -18,7 +21,7 @@ export 'package:flutter/painting.dart' show
 ///
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
-class RenderImage extends RenderBox {
+class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
   /// Creates a render box that displays an image.
   ///
   /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments
@@ -41,6 +44,7 @@ class RenderImage extends RenderBox {
     bool invertColors = false,
     bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.low,
+    SelectionRegistrant? selectionRegistrant,
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
@@ -61,7 +65,8 @@ class RenderImage extends RenderBox {
        _invertColors = invertColors,
        _textDirection = textDirection,
        _isAntiAlias = isAntiAlias,
-       _filterQuality = filterQuality {
+       _filterQuality = filterQuality,
+       _selectionRegistrant = selectionRegistrant {
     _updateColorFilter();
   }
 
@@ -316,6 +321,15 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
+  SelectionRegistrant? _selectionRegistrant;
+  SelectionRegistrant? get selectionRegistrant => _selectionRegistrant;
+  set selectionRegistrant(SelectionRegistrant? value) {
+    if (value == _selectionRegistrant) {
+      return;
+    }
+    _selectionRegistrant = value;
+  }
+
   /// Find a size for the render image within the given constraints.
   ///
   ///  - The dimensions of the RenderImage must fit within the constraints.
@@ -381,11 +395,15 @@ class RenderImage extends RenderBox {
     size = _sizeForConstraints(constraints);
   }
 
+  Rect _lastRect = Rect.zero;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_image == null)
       return;
     _resolve();
+    _lastRect = offset & size;
+    _selectionRegistrant?.update(this, Rect.fromPoints(localToGlobal(_lastRect.topLeft), localToGlobal(_lastRect.bottomRight)));
     assert(_resolvedAlignment != null);
     assert(_flipHorizontally != null);
     paintImage(
@@ -404,6 +422,10 @@ class RenderImage extends RenderBox {
       filterQuality: _filterQuality,
       isAntiAlias: _isAntiAlias,
     );
+    // TODO: themeing.
+    if (_selected) {
+      context.canvas.drawRect(_lastRect, Paint()..color = const Color(0xAF6694e8) ..style = PaintingStyle.fill);
+    }
   }
 
   @override
@@ -424,4 +446,41 @@ class RenderImage extends RenderBox {
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
+
+  @override
+  void detach() {
+    _selectionRegistrant?.remove(this);
+    super.detach();
+  }
+
+  @override
+  void clear() {
+    if (_selected ==  false)
+      return;
+    _selected = false;
+    markNeedsPaint();
+  }
+
+  @override
+  Future<ByteData?>? copy() {
+    if (_selected == false)
+      return null;
+    return _image?.toByteData(); // This is async :(
+  }
+
+  @override
+  bool update(Offset start, Offset end) {
+    final Rect localRect = Rect.fromPoints(globalToLocal(start), globalToLocal(end));
+    final Rect intersection = _lastRect.intersect(localRect);
+    if (intersection.width < 0 || intersection.height < 0) {
+      return false;
+    }
+    if (!_selected) {
+      _selected = true;
+      markNeedsPaint();
+    }
+    return true;
+  }
+
+  bool _selected = false;
 }

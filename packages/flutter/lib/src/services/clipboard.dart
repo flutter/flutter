@@ -3,9 +3,20 @@
 // found in the LICENSE file.
 
 
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
+
+/// A descriptor for the type of data contained in a [ClipboardData].
+enum ClipboardDataType {
+  /// A `text/plain` data type contained in clipboard.
+  text,
+
+  /// An image encoded as a png.
+  image,
+}
 
 /// Data stored on the system clipboard.
 ///
@@ -13,11 +24,24 @@ import 'system_channels.dart';
 /// structure currently supports only plain text data, in the [text] property.
 @immutable
 class ClipboardData {
+  //// Deprecated? Or updated to require type.
   /// Creates data for the system clipboard.
-  const ClipboardData({ this.text });
+  const ClipboardData({ this.text }) : dataType = ClipboardDataType.text, image = null;
+
+  /// Creates image data for the system clipboard.
+  const ClipboardData.image(this.image) : dataType = ClipboardDataType.image, text = null;
+
+  /// Creates text data for the system clipboard.
+  const ClipboardData.text(this.text) : dataType = ClipboardDataType.text, image = null;
 
   /// Plain text variant of this clipboard data.
   final String? text;
+
+  /// Image variant of this clipboard data.
+  final Uint8List? image;
+
+  /// The type of data contained in this entity.
+  final ClipboardDataType dataType;
 }
 
 /// Utility methods for interacting with the system's clipboard.
@@ -33,12 +57,18 @@ class Clipboard {
   /// Used with [getData].
   static const String kTextPlain = 'text/plain';
 
+  /// A PNG encoded image.
+  ///
+  /// USed with [getData].
+  static const String kImagePng = 'image/png';
+
   /// Stores the given clipboard data on the clipboard.
   static Future<void> setData(ClipboardData data) async {
     await SystemChannels.platform.invokeMethod<void>(
       'Clipboard.setData',
       <String, dynamic>{
         'text': data.text,
+        'image': data.image,
       },
     );
   }
@@ -57,6 +87,17 @@ class Clipboard {
     );
     if (result == null)
       return null;
-    return ClipboardData(text: result['text'] as String?);
+    if (result.containsKey('text')) {
+      return ClipboardData.text(result['text'] as String?);
+    }
+    if (result.containsKey('image')) {
+      /// JSON is not good at this.
+      final List<int>? data = (result['image'] as List<dynamic>?)?.cast<int>().toList();
+      if (data == null) {
+        return null;
+      }
+      return ClipboardData.image(Uint8List.fromList(data));
+    }
+    return null;
   }
 }
