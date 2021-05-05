@@ -41,6 +41,9 @@ void main() {
       final ContainerLayer firstLayer = view.debugLayer!;
       view.configuration = createViewConfiguration();
       expect(identical(view.debugLayer, firstLayer), true);
+
+      view.configuration = createViewConfiguration(devicePixelRatio: 5.0);
+      expect(identical(view.debugLayer, firstLayer), false);
     });
   });
 
