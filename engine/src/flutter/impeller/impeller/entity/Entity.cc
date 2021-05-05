@@ -11,61 +11,61 @@ Entity::Entity() = default;
 
 Entity::~Entity() = default;
 
-geom::Rect Entity::frame() const {
-  geom::Point origin(_position.x - (_bounds.size.width * _anchorPoint.x),
-                     _position.y - (_bounds.size.height * _anchorPoint.y));
+geom::Rect Entity::GetFrame() const {
+  geom::Point origin(position_.x - (bounds_.size.width * anchor_point_.x),
+                     position_.y - (bounds_.size.height * anchor_point_.y));
 
-  return geom::Rect(origin, _bounds.size);
+  return geom::Rect(origin, bounds_.size);
 }
 
-void Entity::setFrame(const geom::Rect& frame) {
-  setBounds(geom::Rect(_bounds.origin, frame.size));
-  setPosition(
-      geom::Point(frame.origin.x + (_anchorPoint.x * frame.size.width),
-                  frame.origin.y + (_anchorPoint.y * frame.size.height)));
+void Entity::SetFrame(const geom::Rect& frame) {
+  SetBounds(geom::Rect(bounds_.origin, frame.size));
+  SetPosition(
+      geom::Point(frame.origin.x + (anchor_point_.x * frame.size.width),
+                  frame.origin.y + (anchor_point_.y * frame.size.height)));
 }
 
-const geom::Rect& Entity::bounds() const {
-  return _bounds;
+const geom::Rect& Entity::GetBounds() const {
+  return bounds_;
 }
 
-void Entity::setBounds(const geom::Rect& bounds) {
-  _bounds = bounds;
+void Entity::SetBounds(const geom::Rect& bounds) {
+  bounds_ = bounds;
 }
 
-const geom::Point& Entity::position() const {
-  return _position;
+const geom::Point& Entity::GetPosition() const {
+  return position_;
 }
 
-void Entity::setPosition(const geom::Point& position) {
-  _position = position;
+void Entity::SetPosition(const geom::Point& position) {
+  position_ = position;
 }
 
-const geom::Point& Entity::anchorPoint() const {
-  return _anchorPoint;
+const geom::Point& Entity::GetAnchorPoint() const {
+  return anchor_point_;
 }
 
-void Entity::setAnchorPoint(const geom::Point& anchorPoint) {
-  _anchorPoint = anchorPoint;
+void Entity::SetAnchorPoint(const geom::Point& anchorPoint) {
+  anchor_point_ = anchorPoint;
 }
 
-const geom::Matrix& Entity::transformation() const {
-  return _transformation;
+const geom::Matrix& Entity::GetTransformation() const {
+  return transformation_;
 }
 
-void Entity::setTransformation(const geom::Matrix& transformation) {
-  _transformation = transformation;
+void Entity::SetTransformation(const geom::Matrix& transformation) {
+  transformation_ = transformation;
 }
 
-geom::Matrix Entity::modelMatrix() const {
+geom::Matrix Entity::GetModelMatrix() const {
   /*
    *  The translation accounts for the offset in the origin of the bounds
    *  of the entity and its position about its anchor point.
    */
   auto translation = geom::Matrix::Translation(
-      {-_bounds.origin.x + _position.x - (_bounds.size.width * _anchorPoint.x),
-       -_bounds.origin.y + _position.y -
-           (_bounds.size.height * _anchorPoint.y)});
+      {-bounds_.origin.x + position_.x - (bounds_.size.width * anchor_point_.x),
+       -bounds_.origin.y + position_.y -
+           (bounds_.size.height * anchor_point_.y)});
 
   /*
    *  The transformation of an entity is applied about is anchor point. However,
@@ -73,56 +73,56 @@ geom::Matrix Entity::modelMatrix() const {
    *  matrix adjustment and also the two matrix multiplications.
    */
 
-  if (_transformation.isIdentity()) {
+  if (transformation_.isIdentity()) {
     return translation;
   }
 
   auto anchorAdjustment =
-      geom::Matrix::Translation({-_anchorPoint.x * _bounds.size.width,
-                                 -_anchorPoint.y * _bounds.size.height});
+      geom::Matrix::Translation({-anchor_point_.x * bounds_.size.width,
+                                 -anchor_point_.y * bounds_.size.height});
 
-  return translation * anchorAdjustment.invert() * _transformation *
+  return translation * anchorAdjustment.invert() * transformation_ *
          anchorAdjustment;
 }
 
-const Color& Entity::backgroundColor() const {
-  return _backgroundColor;
+const Color& Entity::GetBackgroundColor() const {
+  return background_color_;
 }
 
-void Entity::setBackgroundColor(const Color& backgroundColor) {
-  _backgroundColor = backgroundColor;
+void Entity::SetBackgroundColor(const Color& backgroundColor) {
+  background_color_ = backgroundColor;
 }
 
-const double& Entity::opacity() const {
-  return _opacity;
+const double& Entity::GetOpacity() const {
+  return opacity_;
 }
 
-void Entity::setOpacity(double opacity) {
-  _opacity = opacity;
+void Entity::SetOpacity(double opacity) {
+  opacity_ = opacity;
 }
 
-const Color& Entity::strokeColor() const {
-  return _strokeColor;
+const Color& Entity::GetStrokeColor() const {
+  return stroke_color_;
 }
 
-void Entity::setStrokeColor(const Color& strokeColor) {
-  _strokeColor = strokeColor;
+void Entity::SetStrokeColor(const Color& strokeColor) {
+  stroke_color_ = strokeColor;
 }
 
-double Entity::strokeSize() const {
-  return _strokeSize;
+double Entity::GetStrokeSize() const {
+  return stroke_size_;
 }
 
-void Entity::setStrokeSize(double strokeSize) {
-  _strokeSize = strokeSize;
+void Entity::SetStrokeSize(double strokeSize) {
+  stroke_size_ = strokeSize;
 }
 
-const geom::Path& Entity::path() const {
-  return _path;
+const geom::Path& Entity::GetPath() const {
+  return path_;
 }
 
-void Entity::setPath(geom::Path path) {
-  _path = std::move(path);
+void Entity::SetPath(geom::Path path) {
+  path_ = std::move(path);
 }
 
 }  // namespace entity

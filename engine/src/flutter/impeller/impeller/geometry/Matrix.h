@@ -287,7 +287,7 @@ struct Matrix {
 static_assert(sizeof(struct Matrix) == sizeof(double) * 16,
               "The matrix must be of consistent size.");
 
-static inline Vector4 operator*(const Vector4& v, const Matrix& m) {
+inline Vector4 operator*(const Vector4& v, const Matrix& m) {
   return Vector4(v.x * m.m[0] + v.y * m.m[4] + v.z * m.m[8] + v.w * m.m[12],
                  v.x * m.m[1] + v.y * m.m[5] + v.z * m.m[9] + v.w * m.m[13],
                  v.x * m.m[2] + v.y * m.m[6] + v.z * m.m[10] + v.w * m.m[14],

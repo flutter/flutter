@@ -29,17 +29,23 @@ struct Point {
   Point operator-() const { return {-x, -y}; }
 
   Point operator+(const Point& p) const { return {x + p.x, y + p.y}; }
+
   Point operator+(const Size& s) const { return {x + s.width, y + s.height}; }
 
   Point operator-(const Point& p) const { return {x - p.x, y - p.y}; }
+
   Point operator-(const Size& s) const { return {x - s.width, y - s.height}; }
 
   Point operator*(double scale) const { return {x * scale, y * scale}; }
+
   Point operator*(const Point& p) const { return {x * p.x, y * p.y}; }
+
   Point operator*(const Size& s) const { return {x * s.width, y * s.height}; }
 
   Point operator/(double d) const { return {x / d, y / d}; }
+
   Point operator/(const Point& p) const { return {x / p.x, y / p.y}; }
+
   Point operator/(const Size& s) const { return {x / s.width, y / s.height}; }
 
   double distanceSquared(const Point& p) const;
