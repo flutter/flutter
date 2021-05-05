@@ -6,6 +6,7 @@ import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/selection_area.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -534,6 +535,7 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      selectionService: SelectionArea.of(context),
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

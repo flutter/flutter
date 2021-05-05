@@ -21,7 +21,7 @@ export 'package:flutter/painting.dart' show
 ///
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
-class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
+class RenderImage extends RenderBox implements Selectable {
   /// Creates a render box that displays an image.
   ///
   /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments
@@ -447,21 +447,25 @@ class RenderImage extends RenderBox implements Selectable<Future<ByteData?>> {
   Future<ByteData?>? copy() {
     if (_selected == false)
       return null;
-    return _image?.toByteData(); // This is async :(
+    return _image?.toByteData();
   }
 
   @override
-  bool update(Offset start, Offset end) {
-    final Rect localRect = Rect.fromPoints(globalToLocal(start), globalToLocal(end));
-    final Rect intersection = _lastRect.intersect(localRect);
-    if (intersection.width < 0 || intersection.height < 0) {
-      return false;
-    }
-    if (!_selected) {
-      _selected = true;
-      markNeedsPaint();
-    }
-    return true;
+  Type get contentType => ByteData;
+
+  @override
+  bool update(Rect rect) {
+    // final Rect localRect = Rect.fromPoints(globalToLocal(start), globalToLocal(end));
+    // final Rect intersection = _lastRect.intersect(localRect);
+    // if (intersection.width < 0 || intersection.height < 0) {
+    //   return false;
+    // }
+    // if (!_selected) {
+    //   _selected = true;
+    //   markNeedsPaint();
+    // }
+    // return true;
+    return false;
   }
 
   bool _selected = false;

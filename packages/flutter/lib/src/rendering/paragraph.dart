@@ -61,10 +61,16 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
   int get hashCode => hashValues(PlaceholderSpanIndexSemanticsTag, index);
 }
 
-abstract class Selectable<T> {
-  bool update(Offset start, Offset end);
+abstract class SelectionService {
+  void add(Selectable selectable);
 
-  T? copy();
+  void remove(Selectable selectable);
+}
+
+abstract class Selectable {
+  void update(Rect rect);
+
+  Object? copy();
 
   void clear();
 }
@@ -73,7 +79,7 @@ abstract class Selectable<T> {
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
              RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
-                  RelayoutWhenSystemFontsChangeMixin implements Selectable<String> {
+                  RelayoutWhenSystemFontsChangeMixin implements Selectable {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -93,6 +99,7 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
+    SelectionService? selectionService,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -104,6 +111,7 @@ class RenderParagraph extends RenderBox
        assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
+       _selectionService = selectionService,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -160,6 +168,16 @@ class RenderParagraph extends RenderBox
       }
       return true;
     });
+  }
+
+  SelectionService? _selectionService;
+  SelectionService? get selectionService => _selectionService;
+  set selectionService(SelectionService? value) {
+    if (value == selectionService)
+      return;
+    selectionService?.remove(this);
+    _selectionService = value;
+    selectionService?.add(this);
   }
 
   /// How the text should be aligned horizontally.
@@ -356,11 +374,60 @@ class RenderParagraph extends RenderBox
   }
 
   TextSelection? _textSelection;
+  Rect? _lastRect;
+
+  /// Clear the current text selection, but only mark for a paint if it has
+  /// been set to a non-null value.
+  void _clearSelection() {
+    if (_textSelection != null)
+      markNeedsPaint();
+    _textSelection = null;
+  }
 
   @override
-  bool update(Offset start, Offset end) {
-    final TextPosition startText = getPositionForOffset(start);
-    final TextPosition endText = getPositionForOffset(end);
+  bool update(Rect rect) {
+    final Rect? boundingRect = _lastRect;
+    // This RO has not been laid out yet, it can't be selected.
+    if (boundingRect == null) {
+      _clearSelection();
+      return false;
+    }
+    if (rect.isInfinite) {
+      _textSelection = TextSelection(baseOffset: 0, extentOffset: getPositionForOffset(Offset.infinite).offset);
+      markNeedsPaint();
+      return true;
+    }
+    final Matrix4 transform = getTransformTo(null);
+    transform.invert();
+    Rect selectionRect = MatrixUtils.transformRect(transform, rect);
+    final Rect intersection = _lastRect!.intersect(selectionRect);
+    // If width or height are negative, there is no overlap between
+    // the selection rect and the estimated bounds of this RO.
+    if (intersection.width < 0 || intersection.height < 0) {
+      _clearSelection();
+      return false;
+    }
+    // If the selection entirely clears the bounding box, expand it to the maximum
+    // width.
+    if (selectionRect.top < boundingRect.top && selectionRect.bottom > boundingRect.bottom)
+      selectionRect = Rect.fromLTRB(
+        math.min(selectionRect.left, boundingRect.left),
+        selectionRect.top,
+        math.max(selectionRect.right, boundingRect.right),
+        selectionRect.bottom,
+      );
+    TextPosition startText;
+    TextPosition endText;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        startText = getPositionForOffset(selectionRect.topRight);
+        endText = getPositionForOffset(selectionRect.bottomLeft);
+        break;
+      case TextDirection.ltr:
+        startText = getPositionForOffset(selectionRect.topLeft);
+        endText = getPositionForOffset(selectionRect.bottomRight);
+        break;
+    }
     if (startText == endText) {
       return false;
     }
@@ -756,6 +823,7 @@ class RenderParagraph extends RenderBox
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
     _layoutTextWithConstraints(constraints);
+    _lastRect = offset & size;
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
@@ -1030,6 +1098,18 @@ class RenderParagraph extends RenderBox
   void clearSemantics() {
     super.clearSemantics();
     _cachedChildNodes = null;
+  }
+
+  @override
+  void detach() {
+    selectionService?.remove(this);
+    super.detach();
+  }
+
+  @override
+  void attach(covariant PipelineOwner owner) {
+    selectionService?.add(this);
+    super.attach(owner);
   }
 
   @override
