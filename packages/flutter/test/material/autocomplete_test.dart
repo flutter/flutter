@@ -280,7 +280,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
       body: Autocomplete<String>(
-        optionsMaxHeight: desiredHeight,      
+        optionsMaxHeight: desiredHeight,
         optionsBuilder: (TextEditingValue textEditingValue) {
           return kOptions.where((String option) {
             return option.contains(textEditingValue.text.toLowerCase());
@@ -324,7 +324,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
       body: Autocomplete<String>(
-        optionsMaxHeight: maxOptionsHeight,      
+        optionsMaxHeight: maxOptionsHeight,
         optionsBuilder: (TextEditingValue textEditingValue) {
           return kOptions.where((String option) {
             return option.contains(textEditingValue.text.toLowerCase());
