@@ -1,7 +1,6 @@
-/*
- *  This source file is part of the Radar project.
- *  Licensed under the MIT License. See LICENSE file for details.
- */
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #pragma once
 
@@ -16,13 +15,15 @@ struct Point {
   double x;
   double y;
 
-  Point() : x(0.0), y(0.0) {}
-  Point(double x, double y) : x(x), y(y) {}
+  constexpr Point() : x(0.0), y(0.0) {}
+
+  constexpr Point(double x, double y) : x(x), y(y) {}
 
   /*
    *  Operator overloads
    */
   bool operator==(const Point& p) const { return p.x == x && p.y == y; }
+
   bool operator!=(const Point& p) const { return p.x != x || p.y != y; }
 
   Point operator-() const { return {-x, -y}; }
@@ -41,13 +42,9 @@ struct Point {
   Point operator/(const Point& p) const { return {x / p.x, y / p.y}; }
   Point operator/(const Size& s) const { return {x / s.width, y / s.height}; }
 
-  double distanceSquared(const Point& p) const {
-    double dx = p.x - x;
-    double dy = p.y - y;
-    return dx * dx + dy * dy;
-  }
+  double distanceSquared(const Point& p) const;
 
-  double distance(const Point& p) const { return sqrt(distanceSquared(p)); }
+  double distance(const Point& p) const;
 
   std::string toString() const;
 
