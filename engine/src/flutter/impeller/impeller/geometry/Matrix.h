@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <utility>
+
 #include "Point.h"
 #include "Quaternion.h"
 #include "Shear.h"
@@ -37,9 +38,9 @@ struct Matrix {
       Rotation = 1 << 4,
     };
 
-    uint64_t componentsMask() const;
+    uint64_t GetComponentsMask() const;
 
-    std::string toString() const;
+    std::string ToString() const;
   };
 
   using DecompositionResult =
@@ -66,7 +67,7 @@ struct Matrix {
 
   Matrix(const Decomposition& decomposition);
 
-  static Matrix Translation(const Vector3& t) {
+  static Matrix MakeTranslation(const Vector3& t) {
     // clang-format off
     return Matrix(1.0, 0.0, 0.0, 0.0,
                   0.0, 1.0, 0.0, 0.0,
@@ -75,7 +76,7 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix Scale(const Vector3& s) {
+  static Matrix MakeScale(const Vector3& s) {
     // clang-format off
     return Matrix(s.x, 0.0, 0.0, 0.0,
                   0.0, s.y, 0.0, 0.0,
@@ -84,8 +85,8 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix Rotation(double radians, const Vector4& r) {
-    const Vector4 v = r.normalize();
+  static Matrix MakeRotation(double radians, const Vector4& r) {
+    const Vector4 v = r.Normalize();
 
     const double cosine = cos(radians);
     const double cosp = 1.0f - cosine;
@@ -115,7 +116,7 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix RotationX(double radians) {
+  static Matrix MakeRotationX(double radians) {
     double cosine = cos(radians);
     double sine = sin(radians);
     // clang-format off
@@ -128,7 +129,7 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix RotationY(double radians) {
+  static Matrix MakeRotationY(double radians) {
     double cosine = cos(radians);
     double sine = sin(radians);
 
@@ -142,7 +143,7 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix RotationZ(double radians) {
+  static Matrix MakeRotationZ(double radians) {
     double cosine = cos(radians);
     double sine = sin(radians);
 
@@ -156,7 +157,35 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix translate(const Vector3& t) const {
+  static Matrix MakeOrthographic(double left,
+                                 double right,
+                                 double bottom,
+                                 double top,
+                                 double nearZ,
+                                 double farZ);
+
+  static Matrix MakeOrthographic(const Size& size);
+
+  /**
+   *  Specify a viewing frustum in the worlds coordinate system.
+   *
+   *  @param fov    angle of the field of view (in radians).
+   *  @param aspect aspect ratio.
+   *  @param nearZ  near clipping plane.
+   *  @param farZ   far clipping plane.
+   *
+   *  @return the perspective projection matrix.
+   */
+  static Matrix MakePerspective(double fov,
+                                double aspect,
+                                double nearZ,
+                                double farZ);
+
+  static Matrix MakeLookAt(const Vector3& eye,
+                           const Vector3& center,
+                           const Vector3& up);
+
+  Matrix Translate(const Vector3& t) const {
     // clang-format off
     return Matrix(m[0], m[1], m[2], m[3],
                   m[4], m[5], m[6], m[7],
@@ -168,7 +197,7 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix scale(const Vector3& s) const {
+  Matrix Scale(const Vector3& s) const {
     // clang-format off
     return Matrix(m[0] * s.x, m[1] * s.x, m[2] * s.x , m[3] * s.x,
                   m[4] * s.y, m[5] * s.y, m[6] * s.y , m[7] * s.y,
@@ -177,7 +206,7 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix multiply(const Matrix& o) const {
+  Matrix Multiply(const Matrix& o) const {
     // clang-format off
     return Matrix(
         m[0] * o.m[0]  + m[4] * o.m[1]  + m[8]  * o.m[2]  + m[12] * o.m[3],
@@ -199,18 +228,18 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix transpose() const;
+  Matrix Transpose() const;
 
-  Matrix invert() const;
+  Matrix Invert() const;
 
-  double determinant() const;
+  double GetDeterminant() const;
 
-  bool isAffine() const {
+  bool IsAffine() const {
     return (m[2] == 0 && m[3] == 0 && m[6] == 0 && m[7] == 0 && m[8] == 0 &&
             m[9] == 0 && m[10] == 1 && m[11] == 0 && m[14] == 0 && m[15] == 1);
   }
 
-  bool isIdentity() const {
+  bool IsIdentity() const {
     return (
         // clang-format off
         m[0]  == 1.0 && m[1]  == 0.0 && m[2]  == 0.0 && m[3]  == 0.0 &&
@@ -221,7 +250,7 @@ struct Matrix {
     );
   }
 
-  DecompositionResult decompose() const;
+  DecompositionResult Decompose() const;
 
   bool operator==(const Matrix& m) const {
     // clang-format off
@@ -241,47 +270,19 @@ struct Matrix {
     // clang-format on
   }
 
-  Matrix operator+(const Vector3& t) const { return translate(t); }
+  Matrix operator+(const Vector3& t) const { return Translate(t); }
 
-  Matrix operator-(const Vector3& t) const { return translate(-t); }
+  Matrix operator-(const Vector3& t) const { return Translate(-t); }
 
-  Matrix operator*(const Vector3& s) const { return scale(s); }
+  Matrix operator*(const Vector3& s) const { return Scale(s); }
 
-  Matrix operator*(const Matrix& m) const { return multiply(m); }
+  Matrix operator*(const Matrix& m) const { return Multiply(m); }
 
   Matrix operator+(const Matrix& m) const;
 
-  static Matrix Orthographic(double left,
-                             double right,
-                             double bottom,
-                             double top,
-                             double nearZ,
-                             double farZ);
+  std::string ToString() const;
 
-  static Matrix Orthographic(const Size& size);
-
-  /**
-   *  Specify a viewing frustum in the worlds coordinate system.
-   *
-   *  @param fov    angle of the field of view (in radians).
-   *  @param aspect aspect ratio.
-   *  @param nearZ  near clipping plane.
-   *  @param farZ   far clipping plane.
-   *
-   *  @return the perspective projection matrix.
-   */
-  static Matrix Perspective(double fov,
-                            double aspect,
-                            double nearZ,
-                            double farZ);
-
-  static Matrix LookAt(const Vector3& eye,
-                       const Vector3& center,
-                       const Vector3& up);
-
-  std::string toString() const;
-
-  void fromString(const std::string& str);
+  void FromString(const std::string& str);
 };
 
 static_assert(sizeof(struct Matrix) == sizeof(double) * 16,

@@ -12,27 +12,27 @@ ImageResult::ImageResult() = default;
 ImageResult::ImageResult(geom::Size size,
                          Components components,
                          std::shared_ptr<const fml::Mapping> allocation)
-    : _success(true),
-      _size(size),
-      _components(components),
-      _allocation(std::move(allocation)) {}
+    : success_(true),
+      size_(size),
+      components_(components),
+      allocation_(std::move(allocation)) {}
 
 ImageResult::~ImageResult() = default;
 
-bool ImageResult::wasSuccessful() const {
-  return _success;
+bool ImageResult::WasSuccessful() const {
+  return success_;
 }
 
-const geom::Size& ImageResult::size() const {
-  return _size;
+const geom::Size& ImageResult::GetSize() const {
+  return size_;
 }
 
-ImageResult::Components ImageResult::components() const {
-  return _components;
+ImageResult::Components ImageResult::GetComponents() const {
+  return components_;
 }
 
-const std::shared_ptr<const fml::Mapping>& ImageResult::allocation() const {
-  return _allocation;
+const std::shared_ptr<const fml::Mapping>& ImageResult::Allocation() const {
+  return allocation_;
 }
 
 }  // namespace image

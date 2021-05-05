@@ -29,7 +29,7 @@ struct Shear {
 
   bool operator!=(const Shear& o) const { return !(*this == o); }
 
-  std::string toString() const;
+  std::string ToString() const;
 };
 
 }  // namespace geom

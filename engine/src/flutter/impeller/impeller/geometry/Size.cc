@@ -8,13 +8,13 @@
 namespace rl {
 namespace geom {
 
-std::string Size::toString() const {
+std::string Size::ToString() const {
   std::stringstream stream;
   stream << width << "," << height;
   return stream.str();
 }
 
-void Size::fromString(const std::string& str) {
+void Size::FromString(const std::string& str) {
   std::stringstream stream(str);
   stream >> width;
   stream.ignore();

@@ -12,10 +12,10 @@ namespace rl {
 namespace geom {
 
 struct Point {
-  double x;
-  double y;
+  double x = 0.0;
+  double y = 0.0;
 
-  constexpr Point() : x(0.0), y(0.0) {}
+  constexpr Point() = default;
 
   constexpr Point(double x, double y) : x(x), y(y) {}
 
@@ -48,13 +48,13 @@ struct Point {
 
   Point operator/(const Size& s) const { return {x / s.width, y / s.height}; }
 
-  double distanceSquared(const Point& p) const;
+  double GetDistanceSquared(const Point& p) const;
 
-  double distance(const Point& p) const;
+  double GetDistance(const Point& p) const;
 
-  std::string toString() const;
+  std::string ToString() const;
 
-  void fromString(const std::string& str);
+  void FromString(const std::string& str);
 };
 
 }  // namespace geom

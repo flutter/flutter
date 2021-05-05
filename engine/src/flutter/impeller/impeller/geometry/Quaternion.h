@@ -12,15 +12,15 @@ namespace geom {
 struct Quaternion {
   union {
     struct {
-      double x;
-      double y;
-      double z;
-      double w;
+      double x = 0.0;
+      double y = 0.0;
+      double z = 0.0;
+      double w = 1.0;
     };
     double e[4];
   };
 
-  Quaternion() : x(0.0), y(0.0), z(0.0), w(1.0) {}
+  Quaternion() {}
 
   Quaternion(double px, double py, double pz, double pw)
       : x(px), y(py), z(pz), w(pw) {}
@@ -33,18 +33,18 @@ struct Quaternion {
     w = cos(angle * 0.5);
   }
 
-  double dot(const Quaternion& q) const {
+  double Dot(const Quaternion& q) const {
     return x * q.x + y * q.y + z * q.z + w * q.w;
   }
 
-  double length() const { return sqrt(x * x + y * y + z * z + w * w); }
+  double Length() const { return sqrt(x * x + y * y + z * z + w * w); }
 
-  Quaternion normalize() const {
-    auto m = 1.0 / length();
+  Quaternion Normalize() const {
+    auto m = 1.0 / Length();
     return {x * m, y * m, z * m, w * m};
   }
 
-  Quaternion slerp(const Quaternion& to, double time) const;
+  Quaternion Slerp(const Quaternion& to, double time) const;
 
   Quaternion operator*(const Quaternion& o) const {
     return {
@@ -75,7 +75,7 @@ struct Quaternion {
     return x != o.x || y != o.y || z != o.z || w != o.w;
   }
 
-  std::string toString() const;
+  std::string ToString() const;
 };
 
 }  // namespace geom

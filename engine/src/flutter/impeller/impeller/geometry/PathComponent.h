@@ -39,11 +39,11 @@ struct LinearPathComponent {
 
   LinearPathComponent(Point ap1, Point ap2) : p1(ap1), p2(ap2) {}
 
-  Point solve(double time) const;
+  Point Solve(double time) const;
 
-  std::vector<Point> smoothPoints() const;
+  std::vector<Point> SmoothPoints() const;
 
-  std::vector<Point> extrema() const;
+  std::vector<Point> Extrema() const;
 
   bool operator==(const LinearPathComponent& other) const {
     return p1 == other.p1 && p2 == other.p2;
@@ -60,14 +60,14 @@ struct QuadraticPathComponent {
   QuadraticPathComponent(Point ap1, Point acp, Point ap2)
       : p1(ap1), cp(acp), p2(ap2) {}
 
-  Point solve(double time) const;
+  Point Solve(double time) const;
 
-  Point solveDerivative(double time) const;
+  Point SolveDerivative(double time) const;
 
-  std::vector<Point> smoothPoints(
+  std::vector<Point> SmoothPoints(
       const SmoothingApproximation& approximation) const;
 
-  std::vector<Point> extrema() const;
+  std::vector<Point> Sxtrema() const;
 
   bool operator==(const QuadraticPathComponent& other) const {
     return p1 == other.p1 && cp == other.cp && p2 == other.p2;
@@ -91,14 +91,14 @@ struct CubicPathComponent {
   CubicPathComponent(Point ap1, Point acp1, Point acp2, Point ap2)
       : p1(ap1), cp1(acp1), cp2(acp2), p2(ap2) {}
 
-  Point solve(double time) const;
+  Point Solve(double time) const;
 
-  Point solveDerivative(double time) const;
+  Point SolveDerivative(double time) const;
 
-  std::vector<Point> smoothPoints(
+  std::vector<Point> SmoothPoints(
       const SmoothingApproximation& approximation) const;
 
-  std::vector<Point> extrema() const;
+  std::vector<Point> Extrema() const;
 
   bool operator==(const CubicPathComponent& other) const {
     return p1 == other.p1 && cp1 == other.cp1 && cp2 == other.cp2 &&
