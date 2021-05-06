@@ -2624,6 +2624,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   }
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
+    print('#$line#');
     final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
     final List<String> lineComponents = line.trim().split(analyzerSeparator);
     final String lintName = lineComponents.removeLast();
@@ -2631,7 +2632,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     return '$location: $lintName';
   }
   final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
-      .where((String line) => line.isNotEmpty && !line.contains('Analyzing'))
+      .where((String line) => line.trim().isNotEmpty && !line.startsWith('Analyzing'))
       .map(lineParser).toList();
   expect(errors, unorderedEquals(expectedFailures));
 }
