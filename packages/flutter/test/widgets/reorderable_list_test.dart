@@ -122,7 +122,7 @@ void main() {
     expect(items, orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
 
     // Drag item 0 downwards more than halfway to displace item 1.
-    await pressDragRelease(tester.getCenter(find.text('item 0')), const Offset(0, 151));
+    await pressDragRelease(tester.getCenter(find.text('item 0')), const Offset(0, 51));
     check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7]);
     expect(tester.getTopLeft(find.text('item 1')), Offset.zero);
     expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 100));
@@ -136,7 +136,7 @@ void main() {
     expect(items, orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
 
     // Drag item 1 to item 3
-    await pressDragRelease(tester.getCenter(find.text('item 1')), const Offset(0, 251));
+    await pressDragRelease(tester.getCenter(find.text('item 1')), const Offset(0, 151));
     check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7]);
     expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
     expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 300));
@@ -433,7 +433,7 @@ void main() {
       await tester.pump(kPressTimeout);
 
       // Drag enough to move down the first item
-      await drag.moveBy(const Offset(0, 150));
+      await drag.moveBy(const Offset(0, 50));
       await tester.pump();
       await drag.up();
       await tester.pumpAndSettle();
