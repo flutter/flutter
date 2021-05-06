@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "ImageResult.h"
-#include "Size.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "image_result.h"
+#include "size.h"
 
 namespace impeller {
 

@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "Color.h"
-#include "Image.h"
-#include "Matrix.h"
-#include "Path.h"
-#include "Rect.h"
+#include "color.h"
+#include "image.h"
+#include "matrix.h"
+#include "path.h"
+#include "rect.h"
 
 namespace impeller {
 

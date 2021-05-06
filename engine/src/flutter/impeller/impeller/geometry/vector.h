@@ -6,8 +6,8 @@
 
 #include <cmath>
 #include <string>
-#include "Point.h"
-#include "Size.h"
+#include "point.h"
+#include "size.h"
 
 namespace impeller {
 

@@ -5,8 +5,8 @@
 #pragma once
 
 #include <vector>
-#include "Point.h"
-#include "Size.h"
+#include "point.h"
+#include "size.h"
 
 namespace impeller {
 

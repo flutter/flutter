@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include "Rect.h"
+#include "rect.h"
 
 namespace impeller {
 
