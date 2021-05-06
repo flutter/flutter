@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async' show FutureOr;
-import 'dart:io' as io show OSError, SocketException;
-import 'dart:math' as math show Random;
+import 'dart:io' as io show OSError, SocketException, Directory;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
@@ -120,47 +119,6 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   @override
   Uri getTestUri(Uri key, int? version) => key;
 
-  /// Calculate the appropriate basedir for the current test context.
-  ///
-  /// The optional [suffix] argument is used by the
-  /// [FlutterPostSubmitFileComparator] and the [FlutterPreSubmitFileComparator].
-  /// These [FlutterGoldenFileComparators] randomize their base directories to
-  /// maintain thread safety while using the `goldctl` tool.
-  @protected
-  @visibleForTesting
-  static Directory getBaseDirectory(
-    LocalFileComparator defaultComparator,
-    Platform platform, {
-    String suffix = '',
-    bool local = false,
-  }) {
-    const FileSystem fs = LocalFileSystem();
-    final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    Directory comparisonRoot;
-
-    if (!local) {
-      comparisonRoot = fs.systemTempDirectory.childDirectory(
-        'skia_goldens_$suffix'
-      );
-    } else {
-      comparisonRoot = flutterRoot.childDirectory(
-        fs.path.join(
-          'bin',
-          'cache',
-          'pkg',
-          'skia_goldens',
-        )
-      );
-    }
-
-    final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    final String testDirectoryRelativePath = fs.path.relative(
-      testDirectory.path,
-      from: flutterRoot.path,
-    );
-    return comparisonRoot.childDirectory(testDirectoryRelativePath);
-  }
-
   /// Returns the golden [File] identified by the given [Uri].
   @protected
   File getGoldenFile(Uri uri) {
@@ -222,13 +180,10 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
-      defaultComparator,
-      platform,
-      suffix: '${math.Random(
-        DateTime.now().microsecond * platform.environment['SWARMING_TASK_ID'].hashCode
-      ).nextInt(100000)}',
-    );
+    final Directory baseDirectory = io.Directory.systemTemp.createTempSync(
+        'flutter_postsubmit_goldens.'
+    ) as Directory;
+
     baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
@@ -303,13 +258,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
-      defaultComparator,
-      platform,
-      suffix: '${math.Random(
-        DateTime.now().microsecond * platform.environment['SWARMING_TASK_ID'].hashCode
-      ).nextInt(100000)}',
-    );
+    final Directory baseDirectory = testBasedir ?? io.Directory.systemTemp.createTempSync(
+        'flutter_presubmit_goldens.'
+    ) as Directory;
 
     if (!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
@@ -470,11 +421,26 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     Directory? baseDirectory,
   }) async {
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
-      defaultComparator,
-      platform,
-      local: true,
-    );
+
+    if (baseDirectory == null) {
+      const FileSystem fs = LocalFileSystem();
+      final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
+      final Directory comparisonRoot = flutterRoot.childDirectory(
+        fs.path.join(
+          'bin',
+          'cache',
+          'pkg',
+          'skia_goldens',
+        )
+      );
+
+      final Directory testDirectory = fs.directory(defaultComparator.basedir);
+      final String testDirectoryRelativePath = fs.path.relative(
+        testDirectory.path,
+        from: flutterRoot.path,
+      );
+      baseDirectory = comparisonRoot.childDirectory(testDirectoryRelativePath);
+    }
 
     if(!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);

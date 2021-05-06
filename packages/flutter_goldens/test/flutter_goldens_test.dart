@@ -321,23 +321,6 @@ void main() {
       );
     });
 
-    test('calculates the basedir correctly from defaultComparator for local testing', () async {
-      final FakeLocalFileComparator defaultComparator = FakeLocalFileComparator();
-      final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT'])
-        ..createSync(recursive: true);
-      defaultComparator.basedir = flutterRoot.childDirectory('baz').uri;
-
-      final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(
-        defaultComparator,
-        platform,
-        local: true,
-      );
-      expect(
-        basedir.uri,
-        fs.directory('/flutter/bin/cache/pkg/skia_goldens/baz').uri,
-      );
-    });
-
     test('ignores version number', () {
       final Uri key = comparator.getTestUri(Uri.parse('foo.png'), 1);
       expect(key, Uri.parse('foo.png'));
@@ -739,7 +722,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
 }
 
-class FakeLocalFileComparator extends Fake implements LocalFileComparator {
+class FakeGoldenFileComparator extends Fake implements FlutterGoldenFileComparator {
   @override
   late Uri basedir;
 }
