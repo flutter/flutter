@@ -722,11 +722,6 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
 }
 
-class FakeGoldenFileComparator extends Fake implements FlutterGoldenFileComparator {
-  @override
-  late Uri basedir;
-}
-
 class FakeDirectory extends Fake implements Directory {
   late bool existsSyncValue;
   @override
