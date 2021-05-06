@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async' show FutureOr;
-import 'dart:io' as io show OSError, SocketException, Directory;
+import 'dart:io' as io show OSError, SocketException;
+import 'dart:math' as math show Random;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
@@ -119,6 +120,44 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   @override
   Uri getTestUri(Uri key, int? version) => key;
 
+  /// Calculate the appropriate basedir for the current test context.
+  ///
+  /// The optional [suffix] argument is used by the
+  /// [FlutterPostSubmitFileComparator] and the [FlutterPreSubmitFileComparator].
+  /// These [FlutterGoldenFileComparators] randomize their base directories to
+  /// maintain thread safety while using the `goldctl` tool.
+  @protected
+  @visibleForTesting
+  static Directory getBaseDirectory(
+    LocalFileComparator defaultComparator,
+    Platform platform, {
+    String? suffix,
+  }) {
+    const FileSystem fs = LocalFileSystem();
+    final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
+    Directory comparisonRoot;
+
+    if (suffix != null) {
+      comparisonRoot = fs.systemTempDirectory.createTempSync(suffix);
+    } else {
+      comparisonRoot = flutterRoot.childDirectory(
+        fs.path.join(
+          'bin',
+          'cache',
+          'pkg',
+          'skia_goldens',
+        )
+      );
+    }
+
+    final Directory testDirectory = fs.directory(defaultComparator.basedir);
+    final String testDirectoryRelativePath = fs.path.relative(
+      testDirectory.path,
+      from: flutterRoot.path,
+    );
+    return comparisonRoot.childDirectory(testDirectoryRelativePath);
+  }
+
   /// Returns the golden [File] identified by the given [Uri].
   @protected
   File getGoldenFile(Uri uri) {
@@ -180,9 +219,11 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    const FileSystem fs = LocalFileSystem();
-    final Directory baseDirectory = fs.systemTempDirectory.createTempSync('flutter_postsubmit_goldens.');
-
+    final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
+      defaultComparator,
+      platform,
+      suffix: 'flutter_goldens_postsubmit',
+    );
     baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
@@ -257,8 +298,11 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    const FileSystem fs = LocalFileSystem();
-    final Directory baseDirectory = fs.systemTempDirectory.createTempSync('flutter_presubmit_goldens.');
+    final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
+      defaultComparator,
+      platform,
+      suffix: 'flutter_goldens_presubmit',
+    );
 
     if (!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
@@ -419,26 +463,10 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     Directory? baseDirectory,
   }) async {
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-
-    if (baseDirectory == null) {
-      const FileSystem fs = LocalFileSystem();
-      final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-      final Directory comparisonRoot = flutterRoot.childDirectory(
-        fs.path.join(
-          'bin',
-          'cache',
-          'pkg',
-          'skia_goldens',
-        )
-      );
-
-      final Directory testDirectory = fs.directory(defaultComparator.basedir);
-      final String testDirectoryRelativePath = fs.path.relative(
-        testDirectory.path,
-        from: flutterRoot.path,
-      );
-      baseDirectory = comparisonRoot.childDirectory(testDirectoryRelativePath);
-    }
+    baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
+      defaultComparator,
+      platform,
+    );
 
     if(!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);
