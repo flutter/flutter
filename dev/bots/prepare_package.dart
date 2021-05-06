@@ -592,10 +592,7 @@ class ArchivePublisher {
         dest: destGsPath,
       );
       assert(tempDir.existsSync());
-      await _updateMetadata(
-        '$releaseFolder/${getMetadataFilename(platform)}',
-        newBucket: isNew,
-      );
+      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: isNew);
     }
   }
 
