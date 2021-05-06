@@ -116,6 +116,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// default fields were determined using the comparison tool in
   /// https://github.com/flutter/platform_tests/.
   ///
+  /// To customize the prefix icon, pass a [Widget] to [prefixIcon]. This
+  /// defaults to the search icon.
+  ///
   /// To customize the suffix icon, pass an [Icon] to [suffixIcon]. This
   /// defaults to the X-Mark.
   ///
@@ -293,7 +296,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
-  /// respond to touch events including the [suffixIcon] and the search button.
+  /// respond to touch events including the [prefixIcon] and [suffixIcon] button.
   final bool? enabled;
 
   @override

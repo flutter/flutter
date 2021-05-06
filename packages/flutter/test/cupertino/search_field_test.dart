@@ -259,9 +259,7 @@ void main() {
     },
   );
 
-  testWidgets(
-    'prefix widget visibility',
-    (WidgetTester tester) async {
+  testWidgets('prefix widget visibility', (WidgetTester tester) async {
       const Key prefixIcon = Key('prefix');
 
       await tester.pumpWidget(
@@ -288,8 +286,7 @@ void main() {
       expect(find.text('text input'), findsOneWidget);
       expect(find.byIcon(CupertinoIcons.search), findsNothing);
       expect(find.byKey(prefixIcon), findsOneWidget);
-    },
-  );
+  });
 
   testWidgets(
     'suffix widget respects visibility mode',
