@@ -409,7 +409,7 @@ void main() {
       });
 
 
-      test('updates base_url to new bucket', () async {
+      test('updates base_url from old bucket to new bucket', () async {
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
