@@ -442,16 +442,16 @@ class LogicalKeyEntry {
       name = map['name'] as String,
       webNames = _toNonEmptyArray<String>(map['names']['web']),
       macOsKeyCodeNames = _toNonEmptyArray<String>(map['names']['macOs']),
-      macOsKeyCodeValues = _toNonEmptyArray<int>(map['values']['macOs']),
+      macOsKeyCodeValues = _toNonEmptyArray<int>(map['values']?['macOs']),
       iosKeyCodeNames = _toNonEmptyArray<String>(map['names']['ios']),
-      iosKeyCodeValues = _toNonEmptyArray<int>(map['values']['ios']),
+      iosKeyCodeValues = _toNonEmptyArray<int>(map['values']?['ios']),
       gtkNames = _toNonEmptyArray<String>(map['names']['gtk']),
-      gtkValues = _toNonEmptyArray<int>(map['values']['gtk']),
+      gtkValues = _toNonEmptyArray<int>(map['values']?['gtk']),
       windowsNames = _toNonEmptyArray<String>(map['names']['windows']),
-      windowsValues = _toNonEmptyArray<int>(map['values']['windows']),
+      windowsValues = _toNonEmptyArray<int>(map['values']?['windows']),
       androidNames = _toNonEmptyArray<String>(map['names']['android']),
-      androidValues = _toNonEmptyArray<int>(map['values']['android']),
-      fuchsiaValues = _toNonEmptyArray<int>(map['values']['fuchsia']),
+      androidValues = _toNonEmptyArray<int>(map['values']?['android']),
+      fuchsiaValues = _toNonEmptyArray<int>(map['values']?['fuchsia']),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
