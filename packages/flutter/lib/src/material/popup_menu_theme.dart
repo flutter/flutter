@@ -38,6 +38,7 @@ class PopupMenuThemeData with Diagnosticable {
     this.elevation,
     this.textStyle,
     this.enableFeedback,
+    this.padding,
   });
 
   /// The background color of the popup menu.
@@ -57,6 +58,12 @@ class PopupMenuThemeData with Diagnosticable {
   /// If [PopupMenuButton.enableFeedback] is provided, [enableFeedback] is ignored.
   final bool? enableFeedback;
 
+  /// If specified, defines the padding for the popup menu ([_PopupMenu])
+  /// of [PopupMenuButton].
+  ///
+  /// If [PopupMenuButton.menuPadding] is provided, [padding] is ignored.
+  final EdgeInsetsGeometry? padding;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
@@ -65,6 +72,7 @@ class PopupMenuThemeData with Diagnosticable {
     double? elevation,
     TextStyle? textStyle,
     bool? enableFeedback,
+    EdgeInsets? padding,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -72,6 +80,7 @@ class PopupMenuThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       textStyle: textStyle ?? this.textStyle,
       enableFeedback: enableFeedback ?? this.enableFeedback,
+      padding: padding ?? this.padding,
     );
   }
 
@@ -90,6 +99,7 @@ class PopupMenuThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
     );
   }
 
@@ -101,6 +111,7 @@ class PopupMenuThemeData with Diagnosticable {
       elevation,
       textStyle,
       enableFeedback,
+      padding,
     );
   }
 
@@ -115,7 +126,8 @@ class PopupMenuThemeData with Diagnosticable {
         && other.color == color
         && other.shape == shape
         && other.textStyle == textStyle
-        && other.enableFeedback == enableFeedback;
+        && other.enableFeedback == enableFeedback
+        && other.padding == padding;
   }
 
   @override
@@ -126,6 +138,7 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }
 

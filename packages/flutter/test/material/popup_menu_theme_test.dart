@@ -12,6 +12,7 @@ PopupMenuThemeData _popupMenuTheme() {
     shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
     elevation: 12.0,
     textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
+    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
   );
 }
 
@@ -191,6 +192,7 @@ void main() {
     );
     const double elevation = 7.0;
     const TextStyle textStyle = TextStyle(color: Color(0x00000000), textBaseline: TextBaseline.alphabetic);
+    final EdgeInsets menuPadding = EdgeInsets.zero;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(popupMenuTheme: popupMenuTheme),
@@ -203,6 +205,7 @@ void main() {
               elevation: elevation,
               color: color,
               shape: shape,
+              menuPadding: menuPadding,
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<void>>[
                   PopupMenuItem<void>(
@@ -246,12 +249,20 @@ void main() {
       ).last,
     );
     expect(text.style, textStyle);
+
+    /// PopupMenu widget is private so in order to test padding the widget
+    /// with the popup padding is extracted.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>
+      (find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, menuPadding);
   });
 
   testWidgets('ThemeData.popupMenuTheme properties are utilized', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
+
+    final EdgeInsets themePadding = EdgeInsets.zero;
 
     await tester.pumpWidget(MaterialApp(
       key: popupButtonApp,
@@ -264,6 +275,7 @@ void main() {
                 shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 elevation: 6.0,
                 textStyle: const TextStyle(color: Color(0xfffff000), textBaseline: TextBaseline.alphabetic),
+                padding: themePadding,
               ),
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
@@ -310,5 +322,11 @@ void main() {
       ).last,
     );
     expect(text.style.color, const Color(0xfffff000));
+
+    /// PopupMenu widget is private so in order to test padding we extract
+    /// the widget which holds the padding.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>
+      (find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, themePadding);
   });
 }
