@@ -121,7 +121,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeFinderExtendedAttributes(app.project.hostAppRoot, globals.processUtils, globals.logger);
+  await removeFinderExtendedAttributes(app.project.parent.directory, globals.processUtils, globals.logger);
 
   final XcodeProjectInfo projectInfo = await app.project.projectInfo();
   final String scheme = projectInfo.schemeFor(buildInfo);
@@ -471,19 +471,19 @@ Future<XcodeBuildResult> buildXcodeProject({
 /// Extended attributes applied by Finder can cause code signing errors. Remove them.
 /// https://developer.apple.com/library/archive/qa/qa1940/_index.html
 @visibleForTesting
-Future<void> removeFinderExtendedAttributes(Directory iosProjectDirectory, ProcessUtils processUtils, Logger logger) async {
+Future<void> removeFinderExtendedAttributes(Directory projectDirectory, ProcessUtils processUtils, Logger logger) async {
   final bool success = await processUtils.exitsHappy(
     <String>[
       'xattr',
       '-r',
       '-d',
       'com.apple.FinderInfo',
-      iosProjectDirectory.path,
+      projectDirectory.path,
     ]
   );
   // Ignore all errors, for example if directory is missing.
   if (!success) {
-    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${iosProjectDirectory.path}');
+    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${projectDirectory.path}');
   }
 }
 
