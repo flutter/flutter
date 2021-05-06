@@ -7,11 +7,11 @@
 #include <cmath>
 #include <utility>
 
-#include "Point.h"
-#include "Quaternion.h"
-#include "Shear.h"
-#include "Size.h"
-#include "Vector.h"
+#include "point.h"
+#include "quaternion.h"
+#include "shear.h"
+#include "size.h"
+#include "vector.h"
 
 namespace impeller {
 

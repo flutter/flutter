@@ -15,40 +15,40 @@ source_set("impeller") {
   ]
 
   geometry_sources = [
-    "geometry/Matrix.cc",
-    "geometry/Matrix.h",
-    "geometry/Path.cc",
-    "geometry/Path.h",
-    "geometry/PathBuilder.cc",
-    "geometry/PathBuilder.h",
-    "geometry/PathComponent.cc",
-    "geometry/PathComponent.h",
-    "geometry/Point.cc",
-    "geometry/Point.h",
-    "geometry/Quaternion.cc",
-    "geometry/Quaternion.h",
-    "geometry/Rect.cc",
-    "geometry/Rect.h",
-    "geometry/Shear.cc",
-    "geometry/Shear.h",
-    "geometry/Size.cc",
-    "geometry/Size.h",
-    "geometry/Vector.cc",
-    "geometry/Vector.h",
+    "geometry/matrix.cc",
+    "geometry/matrix.h",
+    "geometry/path.cc",
+    "geometry/path.h",
+    "geometry/path_builder.cc",
+    "geometry/path_builder.h",
+    "geometry/path_component.cc",
+    "geometry/path_component.h",
+    "geometry/point.cc",
+    "geometry/point.h",
+    "geometry/quaternion.cc",
+    "geometry/quaternion.h",
+    "geometry/rect.cc",
+    "geometry/rect.h",
+    "geometry/shear.cc",
+    "geometry/shear.h",
+    "geometry/size.cc",
+    "geometry/size.h",
+    "geometry/vector.cc",
+    "geometry/vector.h",
   ]
 
   entity_sources = [
-    "entity/Color.cc",
-    "entity/Color.h",
-    "entity/Entity.cc",
-    "entity/Entity.h",
+    "entity/color.cc",
+    "entity/color.h",
+    "entity/entity.cc",
+    "entity/entity.h",
   ]
 
   image_sources = [
-    "image/Image.cc",
-    "image/Image.h",
-    "image/ImageResult.cc",
-    "image/ImageResult.h",
+    "image/image.cc",
+    "image/image.h",
+    "image/image_result.cc",
+    "image/image_result.h",
   ]
 
   sources = geometry_sources + entity_sources + image_sources

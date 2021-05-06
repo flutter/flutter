@@ -7,7 +7,7 @@
 #include <functional>
 #include <vector>
 
-#include "PathComponent.h"
+#include "path_component.h"
 
 namespace impeller {
 
