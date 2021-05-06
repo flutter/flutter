@@ -659,9 +659,9 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///         } else {
 ///           children = const <Widget>[
 ///             SizedBox(
-///               child: CircularProgressIndicator(),
 ///               width: 60,
 ///               height: 60,
+///               child: CircularProgressIndicator(),
 ///             ),
 ///             Padding(
 ///               padding: EdgeInsets.only(top: 16),

@@ -5849,12 +5849,12 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///         child: Text('Count: ${_count.value}'),
 ///       ),
 ///       floatingActionButton: FloatingActionButton(
-///         child: const Icon(Icons.add),
 ///         onPressed: () {
 ///           setState(() {
 ///             _count.value++;
 ///           });
 ///         },
+///         child: const Icon(Icons.add),
 ///       ),
 ///     );
 ///   }

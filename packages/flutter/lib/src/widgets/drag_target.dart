@@ -182,14 +182,6 @@ enum DragAnchor {
 ///       Draggable<int>(
 ///         // Data is the value this Draggable stores.
 ///         data: 10,
-///         child: Container(
-///           height: 100.0,
-///           width: 100.0,
-///           color: Colors.lightGreenAccent,
-///           child: const Center(
-///             child: Text('Draggable'),
-///           ),
-///         ),
 ///         feedback: Container(
 ///           color: Colors.deepOrange,
 ///           height: 100,
@@ -202,6 +194,14 @@ enum DragAnchor {
 ///           color: Colors.pinkAccent,
 ///           child: const Center(
 ///             child: Text('Child When Dragging'),
+///           ),
+///         ),
+///         child: Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.lightGreenAccent,
+///           child: const Center(
+///             child: Text('Draggable'),
 ///           ),
 ///         ),
 ///       ),

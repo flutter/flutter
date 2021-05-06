@@ -78,9 +78,9 @@ enum OverflowBarAlignment {
 ///                   spacing: 8,
 ///                   overflowAlignment: OverflowBarAlignment.end,
 ///                   children: <Widget>[
-///                     TextButton(child: const Text('Cancel'), onPressed: () { }),
-///                     TextButton(child: const Text('Really Really Cancel'), onPressed: () { }),
-///                     OutlinedButton(child: const Text('OK'), onPressed: () { }),
+///                     TextButton(onPressed: () { }, child: const Text('Cancel')),
+///                     TextButton(onPressed: () { }, child: const Text('Really Really Cancel')),
+///                     OutlinedButton(onPressed: () { }, child: const Text('OK')),
 ///                   ],
 ///                 ),
 ///               ),

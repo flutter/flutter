@@ -81,11 +81,6 @@ enum DismissDirection {
 ///     padding: const EdgeInsets.symmetric(vertical: 16),
 ///     itemBuilder: (BuildContext context, int index) {
 ///       return Dismissible(
-///         child: ListTile(
-///           title: Text(
-///             'Item ${items[index]}',
-///           ),
-///         ),
 ///         background: Container(
 ///           color: Colors.green,
 ///         ),
@@ -95,6 +90,11 @@ enum DismissDirection {
 ///             items.removeAt(index);
 ///           });
 ///         },
+///         child: ListTile(
+///           title: Text(
+///             'Item ${items[index]}',
+///           ),
+///         ),
 ///       );
 ///     },
 ///   );

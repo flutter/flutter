@@ -200,17 +200,17 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///                 content: const Text('Proceed with destructive action?'),
 ///                 actions: <CupertinoDialogAction>[
 ///                   CupertinoDialogAction(
-///                     child: const Text('No'),
 ///                     onPressed: () {
 ///                       Navigator.pop(context);
 ///                     },
+///                     child: const Text('No'),
 ///                   ),
 ///                   CupertinoDialogAction(
-///                     child: const Text('Yes'),
 ///                     isDestructiveAction: true,
 ///                     onPressed: () {
 ///                       // Do something destructive.
 ///                     },
+///                     child: const Text('Yes'),
 ///                   )
 ///                 ],
 ///               ),
@@ -512,16 +512,16 @@ class CupertinoPopupSurface extends StatelessWidget {
 ///                 message: const Text('Message'),
 ///                 actions: <CupertinoActionSheetAction>[
 ///                   CupertinoActionSheetAction(
-///                     child: const Text('Action One'),
 ///                     onPressed: () {
 ///                       Navigator.pop(context);
 ///                     },
+///                     child: const Text('Action One'),
 ///                   ),
 ///                   CupertinoActionSheetAction(
-///                     child: const Text('Action Two'),
 ///                     onPressed: () {
 ///                       Navigator.pop(context);
 ///                     },
+///                     child: const Text('Action Two'),
 ///                   )
 ///                 ],
 ///               ),

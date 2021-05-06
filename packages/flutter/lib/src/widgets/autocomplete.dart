@@ -455,10 +455,10 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                     ),
 ///                     actions: <Widget>[
 ///                       TextButton(
-///                         child: const Text('Ok'),
 ///                         onPressed: () {
 ///                           Navigator.of(context).pop();
 ///                         },
+///                         child: const Text('Ok'),
 ///                       ),
 ///                     ],
 ///                   );

@@ -47,7 +47,6 @@ import 'routes.dart';
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
 ///             OutlinedButton(
-///               child: const Text('Push'),
 ///               onPressed: () {
 ///                 Navigator.of(context).push<void>(
 ///                   MaterialPageRoute<void>(
@@ -57,9 +56,9 @@ import 'routes.dart';
 ///                   ),
 ///                 );
 ///               },
+///               child: const Text('Push'),
 ///             ),
 ///             OutlinedButton(
-///               child: Text('shouldPop: $shouldPop'),
 ///               onPressed: () {
 ///                 setState(
 ///                   () {
@@ -67,6 +66,7 @@ import 'routes.dart';
 ///                   },
 ///                 );
 ///               },
+///               child: Text('shouldPop: $shouldPop'),
 ///             ),
 ///             const Text('Push to a new screen, then tap on shouldPop '
 ///                 'button to toggle its value. Press the back '

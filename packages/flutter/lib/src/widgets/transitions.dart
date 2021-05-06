@@ -1410,6 +1410,12 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Widget build(BuildContext context) {
 ///   return AnimatedBuilder(
 ///     animation: _controller,
+///     builder: (BuildContext context, Widget? child) {
+///       return Transform.rotate(
+///         angle: _controller.value * 2.0 * math.pi,
+///         child: child,
+///       );
+///     },
 ///     child: Container(
 ///       width: 200.0,
 ///       height: 200.0,
@@ -1418,12 +1424,6 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///         child: Text('Whee!'),
 ///       ),
 ///     ),
-///     builder: (BuildContext context, Widget? child) {
-///       return Transform.rotate(
-///         angle: _controller.value * 2.0 * math.pi,
-///         child: child,
-///       );
-///     },
 ///   );
 /// }
 /// ```

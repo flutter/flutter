@@ -848,12 +848,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                 );
   ///               }),
   ///               OutlinedButton(
-  ///                 child: const Text('UNFOCUS'),
   ///                 onPressed: () {
   ///                   setState(() {
   ///                     primaryFocus!.unfocus(disposition: disposition);
   ///                   });
   ///                 },
+  ///                 child: const Text('UNFOCUS'),
   ///               ),
   ///             ],
   ///           ),

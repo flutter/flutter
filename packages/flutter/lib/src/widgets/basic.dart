@@ -1520,8 +1520,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///     width: 300,
 ///     color: Colors.red,
 ///     child: FittedBox(
-///       child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///       fit: BoxFit.fill,
+///       child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///     ),
 ///   );
 /// }
@@ -3052,16 +3052,15 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///       ),
 ///       Text('Flutter logo is offstage: $_offstage'),
 ///       ElevatedButton(
-///         child: const Text('Toggle Offstage Value'),
 ///         onPressed: () {
 ///           setState(() {
 ///             _offstage = !_offstage;
 ///           });
 ///         },
+///         child: const Text('Toggle Offstage Value'),
 ///       ),
 ///       if (_offstage)
 ///         ElevatedButton(
-///           child: const Text('Get Flutter Logo size'),
 ///           onPressed: () {
 ///             ScaffoldMessenger.of(context).showSnackBar(
 ///               SnackBar(
@@ -3069,6 +3068,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///               ),
 ///             );
 ///           }
+///           child: const Text('Get Flutter Logo size'),
 ///         ),
 ///     ],
 ///   );
