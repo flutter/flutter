@@ -380,10 +380,10 @@ void main() {
                     child: Text('Fade In'),
                   ),
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       );
 
       await tester.pumpWidget(widget);

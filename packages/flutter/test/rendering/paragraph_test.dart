@@ -112,13 +112,13 @@ void main() {
     layout(paragraph);
 
     List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 5, extentOffset: 25)
+      const TextSelection(baseOffset: 5, extentOffset: 25),
     );
 
     expect(boxes.length, equals(1));
 
     boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 25, extentOffset: 50)
+      const TextSelection(baseOffset: 25, extentOffset: 50),
     );
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
@@ -320,7 +320,7 @@ void main() {
     final List<ui.TextBox> boxes = <ui.TextBox>[
       for (int i = 0; i < text.length; ++i)
         ...paragraph.getBoxesForSelection(
-          TextSelection(baseOffset: i, extentOffset: i + 1)
+          TextSelection(baseOffset: i, extentOffset: i + 1),
         ),
     ];
     expect(boxes.length, equals(4));
@@ -362,7 +362,7 @@ void main() {
         '   ║ TextSpan:\n'
         '   ║   "I polished up that handle so carefullee\n'
         '   ║   That now I am the Ruler of the Queen\'s Navee!"\n'
-        '   ╚═══════════\n'
+        '   ╚═══════════\n',
       ),
     );
   });
@@ -408,7 +408,7 @@ void main() {
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 8)
+      const TextSelection(baseOffset: 0, extentOffset: 8),
     );
 
     expect(boxes.length, equals(5));
@@ -429,8 +429,8 @@ void main() {
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 1.0,
       children: renderBoxes,
@@ -447,8 +447,8 @@ void main() {
     paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 2.0,
       children: renderBoxes,
@@ -474,8 +474,8 @@ void main() {
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 1.0,
       children: renderBoxes,
@@ -492,8 +492,8 @@ void main() {
     paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 2.0,
       children: renderBoxes,
@@ -541,7 +541,7 @@ void main() {
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 12)
+      const TextSelection(baseOffset: 0, extentOffset: 12),
     );
 
     expect(boxes.length, equals(9));

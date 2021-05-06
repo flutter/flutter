@@ -185,8 +185,10 @@ void main() {
             ),
           ),
         );
-        fail('Should not be possible to create a toggle button with mismatching '
-            'children.length and isSelected.length.');
+        fail(
+          'Should not be possible to create a toggle button with mismatching '
+          'children.length and isSelected.length.',
+        );
       } on AssertionError catch (e) {
         expect(e.toString(), contains('children.length'));
         expect(e.toString(), contains('isSelected.length'));
@@ -1576,7 +1578,7 @@ void main() {
       'borderRadius: BorderRadius.circular(7.0)',
       'borderWidth: 3.0',
       'direction: Axis.vertical',
-      'verticalDirection: VerticalDirection.up'
+      'verticalDirection: VerticalDirection.up',
     ]);
   });
 

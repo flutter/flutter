@@ -1186,7 +1186,7 @@ class CompileTest {
 
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so'];
-    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES.Z'];
 
     return <String, dynamic>{
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
@@ -1445,7 +1445,7 @@ class DevToolsMemoryTest {
       'global',
       'activate',
       'devtools',
-      '2.0.0',
+      '2.1.1',
     ]);
     _devToolsProcess = await startProcess(
       pubBin,

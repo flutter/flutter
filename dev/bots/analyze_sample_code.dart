@@ -264,6 +264,7 @@ class SampleChecker {
   List<Line> get headers {
     return _headers ??= <String>[
       '// generated code',
+      '// ignore_for_file: directives_ordering',
       '// ignore_for_file: unused_import',
       '// ignore_for_file: unused_element',
       '// ignore_for_file: unused_local_variable',
@@ -354,7 +355,10 @@ class SampleChecker {
     } else {
       return Process.runSync(
         _dartExecutable,
-        <String>[path.canonicalize(_snippetsSnapshotPath!), ...args],
+        <String>[
+          path.canonicalize(_snippetsSnapshotPath!),
+          ...args,
+        ],
         workingDirectory: workingDirectory,
       );
     }
@@ -608,8 +612,17 @@ dependencies:
     sdk: flutter
 ''');
 
+
     // Copy in the analysis options from the Flutter root.
-    File(path.join(_flutterRoot,'analysis_options.yaml')).copySync(path.join(directory.path, 'analysis_options.yaml'));
+    final File rootAnalysisOptions = File(path.join(_flutterRoot,'analysis_options.yaml'));
+    final File analysisOptions = File(path.join(directory.path, 'analysis_options.yaml'));
+    analysisOptions.writeAsStringSync('''
+include: ${rootAnalysisOptions.absolute.path}
+
+analyzer:
+  errors:
+    directives_ordering: ignore
+''');
   }
 
   /// Writes out a sample section to the disk and returns the file.

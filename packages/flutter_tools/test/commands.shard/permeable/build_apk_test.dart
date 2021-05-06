@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
@@ -144,6 +143,11 @@ void main() {
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment')))
         .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'assembleRelease', '')));
+
+      when(mockProcessManager.runSync(<String>['mdfind', 'kMDItemCFBundleIdentifier="com.google.android.studio*"'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')))
+          .thenReturn(ProcessResult(0, 0, '', ''));
       // Fallback with error.
       final Process process = createMockProcess(exitCode: 1);
       when(mockProcessManager.start(any,

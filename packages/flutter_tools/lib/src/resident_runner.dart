@@ -26,6 +26,7 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/targets/dart_plugin_registrant.dart';
 import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -100,15 +101,15 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(jonahwilliams): consistently provide these flags across platforms.
-      Artifact platformDillArtifact;
+      HostArtifact platformDillArtifact;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillArtifact = Artifact.webPlatformKernelDill;
+        platformDillArtifact = HostArtifact.webPlatformKernelDill;
         if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
           extraFrontEndOptions.add('--no-sound-null-safety');
         }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+        platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
         if (!extraFrontEndOptions.contains('--sound-null-safety')) {
           extraFrontEndOptions.add('--sound-null-safety');
         }
@@ -117,7 +118,7 @@ class FlutterDevice {
       }
 
       generator = ResidentCompiler(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
+        globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         fileSystemRoots: fileSystemRoots ?? <String>[],
@@ -132,11 +133,11 @@ class FlutterDevice {
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
-          .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
+          .getHostArtifact(platformDillArtifact))
           .absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
+          .getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
         processManager: globals.processManager,
@@ -230,7 +231,7 @@ class FlutterDevice {
     int hostVmServicePort,
     int ddsPort,
     bool disableServiceAuthCodes = false,
-    bool disableDds = false,
+    bool enableDds = true,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) {
@@ -244,7 +245,7 @@ class FlutterDevice {
       isWaitingForVm = true;
       bool existingDds = false;
       FlutterVmService service;
-      if (!disableDds) {
+      if (enableDds) {
         void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
           if (!completer.isCompleted) {
@@ -299,7 +300,7 @@ class FlutterDevice {
         service = await Future.any<dynamic>(
           <Future<dynamic>>[
             connectToVmService(
-              disableDds ? observatoryUri : device.dds.uri,
+              enableDds ? device.dds.uri : observatoryUri,
               reloadSources: reloadSources,
               restart: restart,
               compileExpression: compileExpression,
@@ -869,7 +870,7 @@ abstract class ResidentHandlers {
     return true;
   }
 
-  /// Toggle the operating system brightness (light or dart).
+  /// Toggle the operating system brightness (light or dark).
   Future<bool> debugToggleBrightness() async {
     if (!supportsServiceProtocol) {
       return false;
@@ -1211,9 +1212,16 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
+      generateDartPluginRegistry: true,
     );
-    _lastBuild = await globals.buildSystem.buildIncremental(
+
+    final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       const GenerateLocalizationsTarget(),
+      const DartPluginRegistrantTarget(),
+    ]);
+
+    _lastBuild = await globals.buildSystem.buildIncremental(
+      compositeTarget,
       _environment,
       _lastBuild,
     );
@@ -1330,7 +1338,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
-        disableDds: debuggingOptions.disableDds,
+        enableDds: debuggingOptions.enableDds,
         ddsPort: debuggingOptions.ddsPort,
         allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
@@ -1415,9 +1423,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
     final DevToolsServerAddress devToolsServerAddress = residentDevtoolsHandler.activeDevToolsServer;
-    if (devToolsServerAddress == null) {
+    if (!residentDevtoolsHandler.readyToAnnounce) {
       includeDevtools = false;
     }
+    assert(!includeDevtools || devToolsServerAddress != null);
     for (final FlutterDevice device in flutterDevices) {
       if (device.vmService == null) {
         continue;
@@ -1449,7 +1458,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
-      commandHelp.b.print();
       commandHelp.w.print();
       commandHelp.t.print();
       if (isRunningDebug) {
@@ -1457,21 +1465,24 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.S.print();
         commandHelp.U.print();
         commandHelp.i.print();
-        commandHelp.I.print();
         commandHelp.p.print();
+        commandHelp.I.print();
         commandHelp.o.print();
+        commandHelp.b.print();
         commandHelp.z.print();
-        commandHelp.g.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
       }
+      // Performance related features: `P` should precede `a`, which should precede `M`.
+      commandHelp.P.print();
+      commandHelp.a.print();
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
-      // `P` should precede `a`
-      commandHelp.P.print();
-      commandHelp.a.print();
+      if (isRunningDebug) {
+        commandHelp.g.print();
+      }
     }
   }
 

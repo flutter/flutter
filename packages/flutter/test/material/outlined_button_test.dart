@@ -675,7 +675,7 @@ void main() {
 
     BorderSide getBorderSide() {
       final OutlinedBorder border = tester.widget<Material>(
-        find.descendant(of: outlinedButton, matching: find.byType(Material))
+        find.descendant(of: outlinedButton, matching: find.byType(Material)),
       ).shape! as OutlinedBorder;
       return border.side;
     }
@@ -1199,7 +1199,7 @@ void main() {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(22)),
                     onPressed: () {},
-                    child: const Text('OutlinedButton')
+                    child: const Text('OutlinedButton'),
                   ),
                 ),
               ),

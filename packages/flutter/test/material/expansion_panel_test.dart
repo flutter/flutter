@@ -728,8 +728,8 @@ void main() {
               home: Scaffold(
                 body: SingleChildScrollView(
                   child: isRadioList
-                  ? buildRadioExpansionPanelList()
-                  : buildExpansionPanelList(setState)
+                    ? buildRadioExpansionPanelList()
+                    : buildExpansionPanelList(setState),
                 ),
                 floatingActionButton: FloatingActionButton(
                   onPressed: () => setState(() { isRadioList = !isRadioList; }),
@@ -828,7 +828,7 @@ void main() {
                     ],
                   ),
                 );
-              }
+              },
             ),
           );
         },
@@ -891,7 +891,7 @@ void main() {
               ),
             ),
           );
-        }
+        },
       ),
     );
 
@@ -1453,7 +1453,7 @@ void main() {
     expect(exception, isAssertionError);
     expect((exception as AssertionError).toString(), contains(
       'Invalid value for elevation. See the kElevationToShadow constant for'
-      ' possible elevation values.'
+      ' possible elevation values.',
     ));
   });
 

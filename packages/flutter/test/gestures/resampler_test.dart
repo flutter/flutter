@@ -153,6 +153,8 @@ void main() {
     expect(result[4].position.dy, 15.0);
     expect(result[4].delta.dx, 10.0);
     expect(result[4].delta.dy, -10.0);
+    // buttons field needs to be a valid value
+    expect(result[4].buttons, kPrimaryButton);
     expect(result[5].timeStamp, const Duration(microseconds: 4500));
     expect(result[5] is PointerUpEvent, true);
     expect(result[5].position.dx, 35.0);

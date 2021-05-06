@@ -37,10 +37,8 @@ Matcher throwsExceptionWith(String messageSubString) {
 class TestStdio extends Stdio {
   TestStdio({
     this.verbose = false,
-    List<String> stdin,
-  }) {
-    _stdin = stdin ?? <String>[];
-  }
+    List<String>? stdin,
+  }) : _stdin = stdin ?? <String>[];
 
   String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
 
@@ -49,7 +47,7 @@ class TestStdio extends Stdio {
   }).join('\n');
 
   final bool verbose;
-  List<String> _stdin;
+  late final List<String> _stdin;
 
   @override
   String readLineSync() {
@@ -62,9 +60,9 @@ class TestStdio extends Stdio {
 
 class FakeArgResults implements ArgResults {
   FakeArgResults({
-    String level,
-    String commit,
-    String remote,
+    required String level,
+    required String commit,
+    String remote = 'upstream',
     bool justPrint = false,
     bool autoApprove = true, // so we don't have to mock stdin
     bool help = false,
@@ -82,22 +80,26 @@ class FakeArgResults implements ArgResults {
   };
 
   @override
-  String name;
+  String? name;
 
   @override
-  ArgResults command;
+  ArgResults? command;
 
   @override
   final List<String> rest = <String>[];
 
   @override
-  List<String> arguments;
+  List<String> get arguments {
+    assert(false, 'not yet implemented');
+    return <String>[];
+  }
 
   final Map<String, dynamic> _parsedArgs;
 
   @override
   Iterable<String> get options {
-    return null;
+    assert(false, 'not yet implemented');
+    return <String>[];
   }
 
   @override
@@ -107,6 +109,7 @@ class FakeArgResults implements ArgResults {
 
   @override
   bool wasParsed(String name) {
-    return null;
+    assert(false, 'not yet implemented');
+    return false;
   }
 }

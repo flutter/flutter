@@ -303,7 +303,7 @@ void main() {
                   child: const Text('Bottom'),
                   onPressed: () {},
                 ),
-              ]
+              ],
             ),
           ),
         ];
@@ -575,7 +575,7 @@ void main() {
                     child: const Text('Bottom'),
                     onPressed: () {},
                   ),
-                ]
+                ],
               ),
             ),
           ];

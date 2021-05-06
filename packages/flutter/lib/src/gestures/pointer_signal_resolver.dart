@@ -23,7 +23,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// these signal events were to handle them directly, it would cause issues
 /// such as multiple [Scrollable] widgets in the widget hierarchy responding
 /// to the same mouse wheel event. Using this class, these events will only
-/// be dispatched to the the first registered handler, which will in turn
+/// be dispatched to the first registered handler, which will in turn
 /// correspond to the widget that's deepest in the widget hierarchy.
 ///
 /// To use this class, objects should register their event handler like so:

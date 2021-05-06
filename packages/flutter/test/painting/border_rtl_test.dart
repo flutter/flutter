@@ -145,7 +145,7 @@ void main() {
       '   However, only Border and BorderDirectional classes are supported\n'
       '   by this method.\n'
       '   For a more general interpolation method, consider using\n'
-      '   ShapeBorder.lerp instead.\n'
+      '   ShapeBorder.lerp instead.\n',
     ));
   });
 

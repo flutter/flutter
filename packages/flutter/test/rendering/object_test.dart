@@ -65,7 +65,7 @@ void main() {
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞══════════════════════\n'
         'The following assertion was thrown during performLayout():\n'
-        'TestThrowingRenderObject does not support performLayout.\n'
+        'TestThrowingRenderObject does not support performLayout.\n',
       ),
     );
 
@@ -78,7 +78,7 @@ void main() {
         '  parentData: MISSING\n'
         '  constraints: BoxConstraints(unconstrained)\n'
         'This RenderObject has no descendants.\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
       ),
     );
   });
@@ -98,6 +98,15 @@ void main() {
     final TestParentData data3 = TestParentData()
       ..nextSibling = RenderOpacity();
     expect(() => data3.detach(), throwsAssertionError);
+  });
+
+  test('RenderObject.getTransformTo asserts is argument is not descendant', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject1 = TestRenderObject();
+    renderObject1.attach(owner);
+    final TestRenderObject renderObject2 = TestRenderObject();
+    renderObject2.attach(owner);
+    expect(() => renderObject1.getTransformTo(renderObject2), throwsAssertionError);
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
