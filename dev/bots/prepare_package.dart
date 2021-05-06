@@ -577,7 +577,8 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    for (final String releaseFolder in <String>[oldGsReleaseFolder, newGsReleaseFolder]) {
+    for (final bool isNew in <bool>[false, true]) {
+      final String releaseFolder = isNew ? newGsReleaseFolder : oldGsReleaseFolder;
       final String destGsPath = '$releaseFolder/$destinationArchivePath';
       if (!forceUpload) {
         if (await _cloudPathExists(destGsPath) && !dryRun) {
@@ -593,7 +594,7 @@ class ArchivePublisher {
       assert(tempDir.existsSync());
       await updateMetadata(
         '$releaseFolder/${getMetadataFilename(platform)}',
-        newBucket: false,
+        newBucket: isNew,
         baseUrl: releaseFolder,
       );
     }
@@ -664,16 +665,15 @@ class ArchivePublisher {
 
       const JsonEncoder encoder = JsonEncoder.withIndent('  ');
       metadataFile.writeAsStringSync(encoder.convert(jsonData));
-      print(metadataFile.path);
     }
-    //await _cloudCopy(
-    //  src: metadataFile.absolute.path,
-    //  dest: gsPath,
-    //  // This metadata file is used by the website, so we don't want a long
-    //  // latency between publishing a release and it being available on the
-    //  // site.
-    //  cacheSeconds: shortCacheSeconds,
-    //);
+    await _cloudCopy(
+      src: metadataFile.absolute.path,
+      dest: gsPath,
+      // This metadata file is used by the website, so we don't want a long
+      // latency between publishing a release and it being available on the
+      // site.
+      cacheSeconds: shortCacheSeconds,
+    );
   }
 
   Future<String> _runGsUtil(
