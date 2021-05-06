@@ -29,13 +29,13 @@ class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection].
   WebFlutterDriver.connectedTo(
-        this._connection, {
-          bool printCommunication = false,
-          bool logCommunicationToFile = true,
-        }) : _printCommunication = printCommunication,
-          _logCommunicationToFile = logCommunicationToFile,
-          _startTime = DateTime.now(),
-          _driverId = _nextDriverId++;
+    this._connection, {
+    bool printCommunication = false,
+    bool logCommunicationToFile = true,
+  })  : _printCommunication = printCommunication,
+        _logCommunicationToFile = logCommunicationToFile,
+        _startTime = DateTime.now(),
+        _driverId = _nextDriverId++;
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
