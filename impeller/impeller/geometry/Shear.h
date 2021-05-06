@@ -12,14 +12,14 @@ namespace geom {
 struct Shear {
   union {
     struct {
-      double xy;
-      double xz;
-      double yz;
+      double xy = 0.0;
+      double xz = 0.0;
+      double yz = 0.0;
     };
     double e[3];
   };
 
-  Shear() : xy(0.0), xz(0.0), yz(0.0) {}
+  Shear() {}
 
   Shear(double xy, double xz, double yz) : xy(xy), xz(xz), yz(yz) {}
 
