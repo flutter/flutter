@@ -441,13 +441,9 @@ void main() {
           'Try running:\n'
           r'  sudo chown -R $(whoami) /dir';
       expect(() => file.createSync(), throwsToolExit(message: createMessage));
-      try {
-        file.createSync(recursive: true);
-        expect(false, isTrue); // Shouldn't reach here.
-      } on ToolExit catch (error) {
-        // Recursive does not contain the "sudo chown" suggestion.
-        expect(error.message, isNot(contains('sudo chown')));
-      }
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => file.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String readMessage =
           'Flutter failed to read a file at "dir/file".\n'
@@ -485,13 +481,10 @@ void main() {
              throwsToolExit(message: createMessage));
       expect(() => directory.createSync(),
              throwsToolExit(message: createMessage));
-      try {
-        directory.createSync(recursive: true);
-        expect(false, isTrue); // Shouldn't reach here.
-      } on ToolExit catch (error) {
-        // Recursive does not contain the "sudo chown" suggestion.
-        expect(error.message, isNot(contains('sudo chown')));
-      }
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String deleteMessage =
           'Flutter failed to delete a directory at "parent/childDir".\n'
@@ -502,13 +495,10 @@ void main() {
              throwsToolExit(message: deleteMessage));
       expect(() async => directory.delete(),
           throwsToolExit(message: deleteMessage));
-      try {
-        directory.deleteSync(recursive: true);
-        expect(false, isTrue); // Shouldn't reach here.
-      } on ToolExit catch (error) {
-        // Recursive does not contain the "sudo chown" suggestion.
-        expect(error.message, isNot(contains('sudo chown')));
-      }
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.deleteSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -638,13 +628,10 @@ void main() {
           'Try running:\n'
           r'  sudo chown -R $(whoami) /dir';
       expect(() => file.createSync(), throwsToolExit(message: createMessage));
-      try {
-        file.createSync(recursive: true);
-        expect(false, isTrue); // Shouldn't reach here.
-      } on ToolExit catch (error) {
-        // Recursive does not contain the "sudo chown" suggestion.
-        expect(error.message, isNot(contains('sudo chown')));
-      }
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => file.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String readMessage =
           'Flutter failed to read a file at "dir/file".\n'
@@ -681,13 +668,10 @@ void main() {
       expect(() async => directory.create(),
           throwsToolExit(message: createMessage));
       expect(() => directory.createSync(), throwsToolExit(message: createMessage));
-      try {
-        directory.createSync(recursive: true);
-        expect(false, isTrue); // Shouldn't reach here.
-      } on ToolExit catch (error) {
-        // Recursive does not contain the "sudo chown" suggestion.
-        expect(error.message, isNot(contains('sudo chown')));
-      }
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String deleteMessage =
           'Flutter failed to delete a directory at "parent/childDir".\n'
@@ -698,13 +682,10 @@ void main() {
           throwsToolExit(message: deleteMessage));
       expect(() async => directory.delete(),
           throwsToolExit(message: deleteMessage));
-      try {
-        directory.deleteSync(recursive: true);
-        expect(false, isTrue); // Shouldn't reach here.
-      } on ToolExit catch (error) {
-        // Recursive does not contain the "sudo chown" suggestion.
-        expect(error.message, isNot(contains('sudo chown')));
-      }
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.deleteSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
