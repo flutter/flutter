@@ -254,11 +254,11 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
     Object? debugOwner,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          deadline: duration ?? kLongPressTimeout,
          postAcceptSlopTolerance: postAcceptSlopTolerance,
-         supportedDevices: kind == null ? supportedDevices : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
          debugOwner: debugOwner,
        );
 

@@ -132,12 +132,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
        assert(peakPressure != null),
        assert(interpolation != null),
        assert(peakPressure > startPressure),
-       assert(kind == null || supportedDevices == null),
        super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   /// A pointer is in contact with the screen and has just pressed with a force

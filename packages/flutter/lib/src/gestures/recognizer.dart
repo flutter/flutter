@@ -240,12 +240,10 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
@@ -435,12 +433,10 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
        ),
-       assert(kind == null || supportedDevices == null),
        super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this

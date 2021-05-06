@@ -102,39 +102,48 @@ void main() {
     }
   });
 
-  testWidgets('HorizontalMultiGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    try {
-      HorizontalMultiDragGestureRecognizer(
-        kind: PointerDeviceKind.touch,
-        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-      );
-    } catch(error) {
-      expect(error, isAssertionError);
-      expect(error.toString(), contains('kind == null || supportedDevices == null'));
-    }
+  testWidgets('HorizontalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        HorizontalMultiDragGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 
-  testWidgets('VerticalMultiGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    try {
-      VerticalMultiDragGestureRecognizer(
-        kind: PointerDeviceKind.touch,
-        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-      );
-    } catch(error) {
-      expect(error, isAssertionError);
-      expect(error.toString(), contains('kind == null || supportedDevices == null'));
-    }
+  testWidgets('VerticalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        VerticalMultiDragGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 
-  testWidgets('DelayedMultiGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    try {
-      DelayedMultiDragGestureRecognizer(
-        kind: PointerDeviceKind.touch,
-        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-      );
-    } catch(error) {
-      expect(error, isAssertionError);
-      expect(error.toString(), contains('kind == null || supportedDevices == null'));
-    }
+  testWidgets('DelayedMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        DelayedMultiDragGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 }

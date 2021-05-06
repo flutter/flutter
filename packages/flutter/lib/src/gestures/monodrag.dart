@@ -75,12 +75,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.velocityTrackerBuilder = _defaultBuilder,
     Set<PointerDeviceKind>? supportedDevices,
   }) : assert(dragStartBehavior != null),
-       assert(kind == null || supportedDevices == null),
        super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
@@ -524,12 +522,10 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   @override
@@ -576,12 +572,10 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   @override

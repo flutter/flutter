@@ -209,12 +209,10 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   /// Called when this class recognizes the start of a drag gesture.
@@ -371,12 +369,10 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   @override
@@ -433,12 +429,10 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   @override
@@ -495,12 +489,10 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   @override
@@ -612,12 +604,10 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
   }) : assert(delay != null),
-       assert(kind == null || supportedDevices == null),
        super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   /// The amount of time the pointer must remain in the same place for the drag

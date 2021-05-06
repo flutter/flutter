@@ -51,14 +51,17 @@ void main() {
   });
 
   testWidgets('EagerGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    try {
-      EagerGestureRecognizer(
-        kind: PointerDeviceKind.touch,
-        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-      );
-    } catch(error) {
-      expect(error, isAssertionError);
-      expect(error.toString(), contains('kind == null || supportedDevices == null'));
-    }
+    expect(
+      () {
+        EagerGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 }

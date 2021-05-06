@@ -23,12 +23,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
-       );
+  }) : super(kind: kind, supportedDevices: supportedDevices);
 
   @override
   void addAllowedPointer(PointerDownEvent event) {

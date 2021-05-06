@@ -122,12 +122,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   // Implementation notes:
@@ -478,12 +476,10 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(kind == null || supportedDevices == null),
-       super(
+  }) : super(
          debugOwner: debugOwner,
-         supportedDevices: kind == null
-           ? supportedDevices
-           : <PointerDeviceKind>{ kind },
+         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   /// A pointer that might cause a tap has contacted the screen at a particular
