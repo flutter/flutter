@@ -3067,7 +3067,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///                 content: Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
 ///               ),
 ///             );
-///           }
+///           },
 ///           child: const Text('Get Flutter Logo size'),
 ///         ),
 ///     ],
