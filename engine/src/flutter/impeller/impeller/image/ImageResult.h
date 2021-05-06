@@ -10,8 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
-namespace rl {
-namespace image {
+namespace impeller {
 
 class ImageResult {
  public:
@@ -25,13 +24,13 @@ class ImageResult {
 
   ImageResult();
 
-  ImageResult(geom::Size size,
+  ImageResult(Size size,
               Components components,
               std::shared_ptr<const fml::Mapping> allocation);
 
   ~ImageResult();
 
-  const geom::Size& GetSize() const;
+  const Size& GetSize() const;
 
   bool WasSuccessful() const;
 
@@ -41,12 +40,11 @@ class ImageResult {
 
  private:
   bool success_ = false;
-  geom::Size size_;
+  Size size_;
   Components components_ = Components::Invalid;
   std::shared_ptr<const fml::Mapping> allocation_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageResult);
 };
 
-}  // namespace image
-}  // namespace rl
+}  // namespace impeller

@@ -5,8 +5,7 @@
 #include "Rect.h"
 #include <sstream>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 Rect Rect::WithPoint(const Point& p) const {
   Rect copy = *this;
@@ -57,5 +56,4 @@ void Rect::FromString(const std::string& str) {
   stream >> size.height;
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

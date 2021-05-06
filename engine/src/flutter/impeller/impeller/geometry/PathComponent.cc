@@ -5,8 +5,7 @@
 #include "PathComponent.h"
 #include <cmath>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 static const size_t kRecursionLimit = 32;
 static const double kCurveCollinearityEpsilon = 1e-30;
@@ -416,5 +415,4 @@ std::vector<Point> CubicPathComponent::Extrema() const {
   return points;
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

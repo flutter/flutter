@@ -10,8 +10,7 @@
 #include "Path.h"
 #include "Rect.h"
 
-namespace rl {
-namespace entity {
+namespace impeller {
 
 class Entity {
  public:
@@ -26,14 +25,14 @@ class Entity {
    *
    *  @return the frame of the entity
    */
-  geom::Rect GetFrame() const;
+  Rect GetFrame() const;
 
   /**
    *  Set the frame of the entity
    *
    *  @param frame the new frame
    */
-  void SetFrame(const geom::Rect& frame);
+  void SetFrame(const Rect& frame);
 
   /**
    *  The bounds specifies the origin and size of the entity in its own
@@ -41,14 +40,14 @@ class Entity {
    *
    *  @return the bounds of the entity
    */
-  const geom::Rect& GetBounds() const;
+  const Rect& GetBounds() const;
 
   /**
    *  Set the bounds of the entity
    *
    *  @param bounds the new bounds
    */
-  void SetBounds(const geom::Rect& bounds);
+  void SetBounds(const Rect& bounds);
 
   /**
    *  The position specifies the coordinates of the anchor position of the
@@ -56,49 +55,49 @@ class Entity {
    *
    *  @return the position of the entity
    */
-  const geom::Point& GetPosition() const;
+  const Point& GetPosition() const;
 
   /**
    *  Sets the position of the entity
    *
    *  @param point the new position
    */
-  void SetPosition(const geom::Point& point);
+  void SetPosition(const Point& point);
 
   /**
    *  The position of the anchor point within this node in unit space
    *
    *  @return the anchor point
    */
-  const geom::Point& GetAnchorPoint() const;
+  const Point& GetAnchorPoint() const;
 
   /**
    *  Sets the new anchor point of this node
    *
    *  @param anchorPoint the new anchor point
    */
-  void SetAnchorPoint(const geom::Point& anchorPoint);
+  void SetAnchorPoint(const Point& anchorPoint);
 
   /**
    *  The transformation that is applied to the entity about its anchor point
    *
    *  @return the transformation applied to the node
    */
-  const geom::Matrix& GetTransformation() const;
+  const Matrix& GetTransformation() const;
 
   /**
    *  Sets the transformation of the entity
    *
    *  @param transformation the new transformation
    */
-  void SetTransformation(const geom::Matrix& transformation);
+  void SetTransformation(const Matrix& transformation);
 
   /**
    *  The model matrix of the entity
    *
    *  @return the view matrix
    */
-  geom::Matrix GetModelMatrix() const;
+  Matrix GetModelMatrix() const;
 
   /**
    *  The background color of the entity
@@ -137,18 +136,18 @@ class Entity {
 
   void SetStrokeSize(double strokeSize);
 
-  const geom::Path& GetPath() const;
+  const Path& GetPath() const;
 
-  void SetPath(geom::Path path);
+  void SetPath(Path path);
 
  private:
-  geom::Rect bounds_;
-  geom::Point position_;
-  geom::Point anchor_point_ = {0.5, 0.5};
-  geom::Matrix transformation_;
+  Rect bounds_;
+  Point position_;
+  Point anchor_point_ = {0.5, 0.5};
+  Matrix transformation_;
   Color background_color_;
 
-  geom::Path path_;
+  Path path_;
   double opacity_ = 1.0;
   Color stroke_color_ = Color::Black();
   double stroke_size_ = 1.0;
@@ -156,5 +155,4 @@ class Entity {
   FML_DISALLOW_COPY_AND_ASSIGN(Entity);
 };
 
-}  // namespace entity
-}  // namespace rl
+}  // namespace impeller

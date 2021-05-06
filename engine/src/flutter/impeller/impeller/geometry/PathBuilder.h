@@ -8,8 +8,7 @@
 #include "Rect.h"
 #include "flutter/fml/macros.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 class PathBuilder {
  public:
@@ -53,13 +52,12 @@ class PathBuilder {
   PathBuilder& AddEllipse(const Point& center, const Size& size);
 
   struct RoundingRadii {
-    double topLeft;
-    double bottomLeft;
-    double topRight;
-    double bottomRight;
+    double topLeft = 0.0;
+    double bottomLeft = 0.0;
+    double topRight = 0.0;
+    double bottomRight = 0.0;
 
-    RoundingRadii()
-        : topLeft(0.0), bottomLeft(0.0), topRight(0.0), bottomRight(0.0) {}
+    RoundingRadii() {}
 
     RoundingRadii(double pTopLeft,
                   double pBottomLeft,
@@ -85,5 +83,4 @@ class PathBuilder {
   FML_DISALLOW_COPY_AND_ASSIGN(PathBuilder);
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

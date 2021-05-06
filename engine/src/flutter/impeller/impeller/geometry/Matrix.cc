@@ -6,8 +6,7 @@
 #include <climits>
 #include <sstream>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 Matrix::Matrix(const Decomposition& d) : Matrix() {
   /*
@@ -480,5 +479,4 @@ std::string Matrix::Decomposition::ToString() const {
   return stream.str();
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

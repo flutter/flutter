@@ -5,8 +5,7 @@
 #include "Shear.h"
 #include <sstream>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 std::string Shear::ToString() const {
   std::stringstream stream;
@@ -14,5 +13,4 @@ std::string Shear::ToString() const {
   return stream.str();
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

@@ -4,12 +4,11 @@
 
 #include "ImageResult.h"
 
-namespace rl {
-namespace image {
+namespace impeller {
 
 ImageResult::ImageResult() = default;
 
-ImageResult::ImageResult(geom::Size size,
+ImageResult::ImageResult(Size size,
                          Components components,
                          std::shared_ptr<const fml::Mapping> allocation)
     : success_(true),
@@ -23,7 +22,7 @@ bool ImageResult::WasSuccessful() const {
   return success_;
 }
 
-const geom::Size& ImageResult::GetSize() const {
+const Size& ImageResult::GetSize() const {
   return size_;
 }
 
@@ -35,5 +34,4 @@ const std::shared_ptr<const fml::Mapping>& ImageResult::Allocation() const {
   return allocation_;
 }
 
-}  // namespace image
-}  // namespace rl
+}  // namespace impeller

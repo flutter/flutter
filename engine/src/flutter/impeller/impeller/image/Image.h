@@ -9,8 +9,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
-namespace rl {
-namespace image {
+namespace impeller {
 
 class ImageSource;
 
@@ -28,5 +27,4 @@ class Image {
   std::shared_ptr<const fml::Mapping> source_;
 };
 
-}  // namespace image
-}  // namespace rl
+}  // namespace impeller

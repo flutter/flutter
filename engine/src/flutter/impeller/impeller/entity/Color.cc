@@ -7,8 +7,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace rl {
-namespace entity {
+namespace impeller {
 
 ColorHSB ColorHSB::FromRGB(Color rgb) {
   double R = rgb.red;
@@ -37,7 +36,7 @@ ColorHSB ColorHSB::FromRGB(Color rgb) {
   return ColorHSB(((i - f / (v - x)) / 6.0), (v - x) / v, v, rgb.alpha);
 }
 
-Color ColorHSB::toRGBA() const {
+Color ColorHSB::ToRGBA() const {
   double h = hue * 6.0;
   double s = saturation;
   double v = brightness;
@@ -85,14 +84,14 @@ Color ColorHSB::toRGBA() const {
   return Color(0, 0, 0, alpha);
 }
 
-std::string ColorHSB::toString() const {
+std::string ColorHSB::ToString() const {
   std::stringstream stream;
   stream << "{" << hue << ", " << saturation << ", " << brightness << ", "
          << alpha << "}";
   return stream.str();
 }
 
-Color::Color(const ColorHSB& hsbColor) : Color(hsbColor.toRGBA()) {}
+Color::Color(const ColorHSB& hsbColor) : Color(hsbColor.ToRGBA()) {}
 
 std::string Color::ToString() const {
   std::stringstream stream;
@@ -111,5 +110,4 @@ void Color::FromString(const std::string& str) {
   stream >> alpha;
 }
 
-}  // namespace entity
-}  // namespace rl
+}  // namespace impeller

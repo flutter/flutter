@@ -5,8 +5,7 @@
 #include "Vector.h"
 #include <sstream>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 std::string Vector3::ToString() const {
   std::stringstream stream;
@@ -20,5 +19,4 @@ std::string Vector4::ToString() const {
   return stream.str();
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

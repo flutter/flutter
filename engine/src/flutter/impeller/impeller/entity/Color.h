@@ -7,8 +7,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace rl {
-namespace entity {
+namespace impeller {
 
 struct ColorHSB;
 
@@ -662,10 +661,9 @@ struct ColorHSB {
 
   static ColorHSB FromRGB(Color rgb);
 
-  Color toRGBA() const;
+  Color ToRGBA() const;
 
-  std::string toString() const;
+  std::string ToString() const;
 };
 
-}  // namespace entity
-}  // namespace rl
+}  // namespace impeller

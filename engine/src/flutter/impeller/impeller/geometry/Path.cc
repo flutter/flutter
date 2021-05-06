@@ -4,8 +4,7 @@
 
 #include "Path.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 Path::Path() = default;
 
@@ -191,5 +190,4 @@ Rect Path::GetBoundingBox() const {
   return box;
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller
