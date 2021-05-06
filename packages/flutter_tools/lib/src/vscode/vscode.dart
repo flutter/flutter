@@ -239,6 +239,7 @@ class VsCode {
 
   // Linux:
   //   /usr/share/code/bin/code
+  //   /snap/code/current
   //   /usr/share/code-insiders/bin/code-insiders
   // Linux Extensions:
   //   $HOME/.vscode/extensions
