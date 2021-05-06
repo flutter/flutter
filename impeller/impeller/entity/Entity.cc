@@ -4,65 +4,63 @@
 
 #include "Entity.h"
 
-namespace rl {
-namespace entity {
+namespace impeller {
 
 Entity::Entity() = default;
 
 Entity::~Entity() = default;
 
-geom::Rect Entity::GetFrame() const {
-  geom::Point origin(position_.x - (bounds_.size.width * anchor_point_.x),
-                     position_.y - (bounds_.size.height * anchor_point_.y));
+Rect Entity::GetFrame() const {
+  Point origin(position_.x - (bounds_.size.width * anchor_point_.x),
+               position_.y - (bounds_.size.height * anchor_point_.y));
 
-  return geom::Rect(origin, bounds_.size);
+  return Rect(origin, bounds_.size);
 }
 
-void Entity::SetFrame(const geom::Rect& frame) {
-  SetBounds(geom::Rect(bounds_.origin, frame.size));
-  SetPosition(
-      geom::Point(frame.origin.x + (anchor_point_.x * frame.size.width),
-                  frame.origin.y + (anchor_point_.y * frame.size.height)));
+void Entity::SetFrame(const Rect& frame) {
+  SetBounds(Rect(bounds_.origin, frame.size));
+  SetPosition(Point(frame.origin.x + (anchor_point_.x * frame.size.width),
+                    frame.origin.y + (anchor_point_.y * frame.size.height)));
 }
 
-const geom::Rect& Entity::GetBounds() const {
+const Rect& Entity::GetBounds() const {
   return bounds_;
 }
 
-void Entity::SetBounds(const geom::Rect& bounds) {
+void Entity::SetBounds(const Rect& bounds) {
   bounds_ = bounds;
 }
 
-const geom::Point& Entity::GetPosition() const {
+const Point& Entity::GetPosition() const {
   return position_;
 }
 
-void Entity::SetPosition(const geom::Point& position) {
+void Entity::SetPosition(const Point& position) {
   position_ = position;
 }
 
-const geom::Point& Entity::GetAnchorPoint() const {
+const Point& Entity::GetAnchorPoint() const {
   return anchor_point_;
 }
 
-void Entity::SetAnchorPoint(const geom::Point& anchorPoint) {
+void Entity::SetAnchorPoint(const Point& anchorPoint) {
   anchor_point_ = anchorPoint;
 }
 
-const geom::Matrix& Entity::GetTransformation() const {
+const Matrix& Entity::GetTransformation() const {
   return transformation_;
 }
 
-void Entity::SetTransformation(const geom::Matrix& transformation) {
+void Entity::SetTransformation(const Matrix& transformation) {
   transformation_ = transformation;
 }
 
-geom::Matrix Entity::GetModelMatrix() const {
+Matrix Entity::GetModelMatrix() const {
   /*
    *  The translation accounts for the offset in the origin of the bounds
    *  of the entity and its position about its anchor point.
    */
-  auto translation = geom::Matrix::MakeTranslation(
+  auto translation = Matrix::MakeTranslation(
       {-bounds_.origin.x + position_.x - (bounds_.size.width * anchor_point_.x),
        -bounds_.origin.y + position_.y -
            (bounds_.size.height * anchor_point_.y)});
@@ -78,8 +76,8 @@ geom::Matrix Entity::GetModelMatrix() const {
   }
 
   auto anchorAdjustment =
-      geom::Matrix::MakeTranslation({-anchor_point_.x * bounds_.size.width,
-                                     -anchor_point_.y * bounds_.size.height});
+      Matrix::MakeTranslation({-anchor_point_.x * bounds_.size.width,
+                               -anchor_point_.y * bounds_.size.height});
 
   return translation * anchorAdjustment.Invert() * transformation_ *
          anchorAdjustment;
@@ -117,13 +115,12 @@ void Entity::SetStrokeSize(double strokeSize) {
   stroke_size_ = strokeSize;
 }
 
-const geom::Path& Entity::GetPath() const {
+const Path& Entity::GetPath() const {
   return path_;
 }
 
-void Entity::SetPath(geom::Path path) {
+void Entity::SetPath(Path path) {
   path_ = std::move(path);
 }
 
-}  // namespace entity
-}  // namespace rl
+}  // namespace impeller

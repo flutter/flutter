@@ -8,8 +8,7 @@
 
 #include "Rect.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct SmoothingApproximation {
   const double scale;
@@ -106,5 +105,4 @@ struct CubicPathComponent {
   }
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

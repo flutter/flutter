@@ -8,8 +8,7 @@
 #include "Point.h"
 #include "Size.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct Rect {
   Point origin;
@@ -71,5 +70,4 @@ struct Rect {
   void FromString(const std::string& str);
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

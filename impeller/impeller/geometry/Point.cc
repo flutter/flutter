@@ -5,8 +5,7 @@
 #include "Point.h"
 #include <sstream>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 std::string Point::ToString() const {
   std::stringstream stream;
@@ -31,5 +30,4 @@ double Point::GetDistance(const Point& p) const {
   return sqrt(GetDistanceSquared(p));
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

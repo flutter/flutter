@@ -6,8 +6,7 @@
 
 #include <string>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct Size {
   double width = 0.0;
@@ -54,5 +53,4 @@ struct Size {
   void FromString(const std::string& str);
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

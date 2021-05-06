@@ -8,8 +8,7 @@
 #include <string>
 #include "Size.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct Point {
   double x = 0.0;
@@ -57,5 +56,4 @@ struct Point {
   void FromString(const std::string& str);
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller
