@@ -1210,7 +1210,7 @@
       "name": "Windows build_tests_2_3",
       "repo": "flutter",
       "task_name": "win_build_tests_2_3",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Windows build_tests_3_3",
