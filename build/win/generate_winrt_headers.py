@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import winreg
 
 def clean(output_dir):
   if os.path.exists(output_dir):
@@ -26,8 +27,18 @@ def generate_headers(output_dir):
   args = [cppwinrt_exe, '-in', 'sdk',
       '-out', '%s' % output_dir]
 
-  subprocess.check_output(args)
+  cppwinrt_sdk_result = subprocess.run(args)
+  if cppwinrt_sdk_result.returncode != 0:
+    print('Retrying with alternate location for References')
+    # Try to point to References folder under sdk directly. It was observed
+    # that in some cases that is where References folder is placed.
+    r = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+    k = winreg.OpenKey(r, r"SOFTWARE\WOW6432Node\Microsoft\Windows Kits\Installed Roots")
+    sdk_path = winreg.QueryValueEx(k, "KitsRoot10")[0]
+    subprocess.check_output([cppwinrt_exe,
+        '-in', os.path.join(sdk_path, "References"),  '-out', '%s' % output_dir])
 
+  print('All done')
   return 0
 
 
