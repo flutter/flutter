@@ -1000,9 +1000,7 @@ void main() {
       const String expectedMessage = 'Flutter failed to run "/path/to/dart".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
           'Try running:\n'
-          '  sudo chown -R \$(whoami) /path/to/dart\n'
-          'or\n'
-          '  sudo chmod u+rx /path/to/dart';
+          r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
 
       expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
@@ -1065,9 +1063,7 @@ void main() {
       const String expectedMessage = 'Flutter failed to run "/path/to/dart".\n'
       'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
       'Try running:\n'
-      '  sudo chown -R \$(whoami) /path/to/dart\n'
-      'or\n'
-      '  sudo chmod u+rx /path/to/dart';
+      r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
 
       expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
