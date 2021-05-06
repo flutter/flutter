@@ -82,20 +82,18 @@ Future<double> _runBasicStandardLarge(
   return watch.elapsedMicroseconds / _numMessages;
 }
 
-Future<double> _runBasicBinaryLarge(
-    BasicMessageChannel<ByteData> basicBinary, List<Object> largeBuffer) async {
+Future<double> _runBasicBinary(
+    BasicMessageChannel<ByteData> basicBinary, ByteData buffer) async {
   int size = 0;
   final Stopwatch watch = Stopwatch();
-  const StandardMessageCodec standardCodec = StandardMessageCodec();
-  final ByteData encodedLargeBuffer = standardCodec.encodeMessage(largeBuffer);
   watch.start();
   for (int i = 0; i < _numMessages; ++i) {
-    final ByteData result = await basicBinary.send(encodedLargeBuffer);
+    final ByteData result = await basicBinary.send(buffer);
     // This check should be tiny compared to the actual channel send/receive.
     size += (result == null) ? 0 : result.lengthInBytes;
   }
   watch.stop();
-  if (size != encodedLargeBuffer.lengthInBytes * _numMessages) {
+  if (size != buffer.lengthInBytes * _numMessages) {
     throw Exception(
         'There is an error with the echo channel, the results don\'t add up: $size');
   }
@@ -123,6 +121,8 @@ Future<void> _runTests() async {
   /// `Large` tests.  Instead make a different test.  The size of largeBuffer
   /// serialized is 14214 bytes.
   final List<Object> largeBuffer = _makeTestBuffer(1000);
+  final ByteData largeBufferBytes = const StandardMessageCodec().encodeMessage(largeBuffer);
+  final ByteData oneMB = ByteData(1024 * 1024);
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
@@ -139,9 +139,15 @@ Future<void> _runTests() async {
   );
   printer.addResult(
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/Large',
-    value: await _runBasicBinaryLarge(basicBinary, largeBuffer),
+    value: await _runBasicBinary(basicBinary, largeBufferBytes),
     unit: 'µs',
     name: 'platform_channel_basic_binary_2host_large',
+  );
+  printer.addResult(
+    description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/1MB',
+    value: await _runBasicBinary(basicBinary, oneMB),
+    unit: 'µs',
+    name: 'platform_channel_basic_binary_2host_1MB',
   );
   printer.printToStdout();
 }
