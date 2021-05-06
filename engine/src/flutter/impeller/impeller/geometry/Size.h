@@ -10,10 +10,10 @@ namespace rl {
 namespace geom {
 
 struct Size {
-  double width;
-  double height;
+  double width = 0.0;
+  double height = 0.0;
 
-  Size() : width(0.0), height(0.0) {}
+  Size() {}
 
   Size(double width, double height) : width(width), height(height) {}
 
