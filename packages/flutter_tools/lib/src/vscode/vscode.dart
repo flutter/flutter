@@ -246,6 +246,7 @@ class VsCode {
   static List<VsCode> _installedLinux(FileSystem fileSystem, Platform platform) {
     return _findInstalled(<VsCodeInstallLocation>[
       const VsCodeInstallLocation('/usr/share/code', '.vscode'),
+      const VsCodeInstallLocation('/snap/code/current', '.vscode'),
       const VsCodeInstallLocation(
         '/usr/share/code-insiders',
         '.vscode-insiders',
