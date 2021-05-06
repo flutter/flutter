@@ -180,9 +180,8 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = io.Directory.systemTemp.createTempSync(
-        'flutter_postsubmit_goldens.'
-    ) as Directory;
+    const FileSystem fs = LocalFileSystem();
+    final Directory baseDirectory = fs.systemTempDirectory.createTempSync('flutter_postsubmit_goldens.');
 
     baseDirectory.createSync(recursive: true);
 
@@ -258,9 +257,8 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = testBasedir ?? io.Directory.systemTemp.createTempSync(
-        'flutter_presubmit_goldens.'
-    ) as Directory;
+    const FileSystem fs = LocalFileSystem();
+    final Directory baseDirectory = fs.systemTempDirectory.createTempSync('flutter_presubmit_goldens.');
 
     if (!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
