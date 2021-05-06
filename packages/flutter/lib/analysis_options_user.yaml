@@ -1,24 +1,16 @@
-# Specify analysis options.
+# This file is deprecated and only included in the framework to maintain
+# backwards compatibility. DO NOT MAKE CHANGES TO THIS FILE.
 #
-# Until there are meta linter rules, each desired lint must be explicitly enabled.
-# See: https://github.com/dart-lang/linter/issues/288
+# The recommended analyzer options for Flutter code (apps, packages, and
+# plugins) outside the Flutter repositories are now defined by
+# package:flutter_lints located at
+# https://github.com/flutter/packages/tree/master/packages/flutter_lints
 #
-# For a list of lints, see: http://dart-lang.github.io/linter/lints/
-# See the configuration guide for more
-# https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
-#
-# There are four similar analysis options files in the flutter repos:
-#   - analysis_options.yaml
-#   - packages/flutter/lib/analysis_options_user.yaml (this file)
-#   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
-#   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
-#
+# Old documentation:
 # This file contains the analysis options used by "flutter analyze" and the
 # dartanalyzer when analyzing code outside the flutter repository. It isn't named
 # 'analysis_options.yaml' because otherwise editors would use it when analyzing
 # the flutter tool itself.
-#
-# When editing, make sure you keep this and /analysis_options.yaml consistent.
 
 analyzer:
   errors:
