@@ -325,13 +325,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  // ignore: MUST_CALL_SUPER
-  void initLicenses() {
-    // Do not include any licenses, because we're a test, and the LICENSE file
-    // doesn't get generated for tests.
-  }
-
-  @override
   BinaryMessenger createBinaryMessenger() {
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
@@ -925,6 +918,13 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void initInstances() {
     super.initInstances();
     binding.mockFlutterAssets();
+  }
+
+  @override
+  // ignore: MUST_CALL_SUPER
+  void initLicenses() {
+    // Do not include any licenses, because we're a test, and the LICENSE file
+    // doesn't get generated for tests.
   }
 
   FakeAsync? _currentFakeAsync; // set in runTest; cleared in postTest
