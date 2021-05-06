@@ -236,8 +236,8 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
-/// If a [MediaQuery] is available above this widget a new one will not be
-/// created by [WidgetsApp].
+/// If a [MediaQuery] is not available above [WidgetsApp] a [MediaQuery] is
+/// built using [MediaQueryFromWindow].
 ///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
@@ -250,8 +250,8 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
-///  * [MediaQueryFromWindow], which updates [MediaQuery] based on the `window`
-///    changes.
+///  * [MediaQueryFromWindow], which builds a [MediaQuery] with data derived
+///    from [WidgetBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
@@ -1676,8 +1676,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 }
 
-/// Provides a [MediaQuery] which is built and updated using the latest `window`
-/// values.
+/// Provides a [MediaQuery] which is built and updated using the latest
+/// [WidgetsBinding.window] values.
 ///
 /// Receives `window` updates by listening to [WidgetsBinding].
 ///
