@@ -251,7 +251,7 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
 ///  * [MediaQueryFromWindow], which builds a [MediaQuery] with data derived
-///    from [WidgetBinding.window].
+///    from [WidgetsBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
