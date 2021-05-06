@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "Image.h"
+#include "image.h"
 #include <stb_image.h>
 
 namespace impeller {

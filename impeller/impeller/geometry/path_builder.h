@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "Path.h"
-#include "Rect.h"
 #include "flutter/fml/macros.h"
+#include "path.h"
+#include "rect.h"
 
 namespace impeller {
 
