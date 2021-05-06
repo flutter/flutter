@@ -4,8 +4,7 @@
 
 #include "PathBuilder.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 static const double kArcApproximationMagic = 0.551915024494;
 
@@ -323,5 +322,4 @@ PathBuilder& PathBuilder::AddEllipse(const Point& center, const Size& radius) {
   return *this;
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

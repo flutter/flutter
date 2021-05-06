@@ -9,8 +9,7 @@
 #include "Point.h"
 #include "Size.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct Vector3 {
   union {
@@ -141,5 +140,4 @@ struct Vector4 {
   std::string ToString() const;
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

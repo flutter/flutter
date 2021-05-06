@@ -5,8 +5,7 @@
 #include "Quaternion.h"
 #include <sstream>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 Quaternion Quaternion::Slerp(const Quaternion& to, double time) const {
   double cosine = Dot(to);
@@ -35,5 +34,4 @@ std::string Quaternion::ToString() const {
   return stream.str();
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

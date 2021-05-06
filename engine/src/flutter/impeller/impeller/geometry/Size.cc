@@ -5,8 +5,7 @@
 #include "Size.h"
 #include <sstream>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 std::string Size::ToString() const {
   std::stringstream stream;
@@ -21,5 +20,4 @@ void Size::FromString(const std::string& str) {
   stream >> height;
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

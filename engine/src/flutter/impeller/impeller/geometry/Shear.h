@@ -6,8 +6,7 @@
 
 #include <string>
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct Shear {
   union {
@@ -32,5 +31,4 @@ struct Shear {
   std::string ToString() const;
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

@@ -6,8 +6,7 @@
 
 #include "Vector.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct Quaternion {
   union {
@@ -78,5 +77,4 @@ struct Quaternion {
   std::string ToString() const;
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

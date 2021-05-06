@@ -5,8 +5,7 @@
 #include "Image.h"
 #include <stb_image.h>
 
-namespace rl {
-namespace image {
+namespace impeller {
 
 Image::Image(std::shared_ptr<const fml::Mapping> sourceAllocation)
     : source_(std::move(sourceAllocation)) {}
@@ -72,10 +71,9 @@ ImageResult Image::Decode() const {
   }
 
   return ImageResult{
-      geom::Size{static_cast<double>(width),
-                 static_cast<double>(height)},  // size
-      components,                               // components
-      std::move(destinationAllocation)          // allocation
+      Size{static_cast<double>(width), static_cast<double>(height)},  // size
+      components,                       // components
+      std::move(destinationAllocation)  // allocation
   };
 }
 
@@ -83,5 +81,4 @@ bool Image::IsValid() const {
   return static_cast<bool>(source_);
 }
 
-}  // namespace image
-}  // namespace rl
+}  // namespace impeller

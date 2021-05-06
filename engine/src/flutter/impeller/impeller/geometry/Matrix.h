@@ -13,8 +13,7 @@
 #include "Size.h"
 #include "Vector.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 struct Matrix {
   union {
@@ -295,5 +294,4 @@ inline Vector4 operator*(const Vector4& v, const Matrix& m) {
                  v.x * m.m[3] + v.y * m.m[7] + v.z * m.m[11] + v.w * m.m[15]);
 }
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller

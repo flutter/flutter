@@ -6,10 +6,10 @@
 
 #include <functional>
 #include <vector>
+
 #include "PathComponent.h"
 
-namespace rl {
-namespace geom {
+namespace impeller {
 
 class Path {
  public:
@@ -76,5 +76,4 @@ class Path {
   std::vector<CubicPathComponent> cubics_;
 };
 
-}  // namespace geom
-}  // namespace rl
+}  // namespace impeller
