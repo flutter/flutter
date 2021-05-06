@@ -948,6 +948,18 @@ void main() {
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when cannot run executable', () {
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', kUserPermissionDenied));
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: throwingFakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      const String expectedMessage = r'Flutter failed to run "C:\path\to\dart". The flutter tool cannot access the file or directory.';
+      expect(() async => processManager.canRun(r'C:\path\to\dart'), throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('ProcessManager on linux throws tool exit', () {
@@ -995,6 +1007,24 @@ void main() {
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when cannot run executable', () {
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', eacces));
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: throwingFakeProcessManager,
+        platform: linuxPlatform,
+      );
+
+      const String expectedMessage = 'Flutter failed to run "/path/to/dart".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          '  sudo chown -R \$(whoami) /path/to/dart\n'
+          'or\n'
+          '  sudo chmod u+rx /path/to/dart';
+
+      expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('ProcessManager on macOS throws tool exit', () {
@@ -1030,7 +1060,7 @@ void main() {
       ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: fakeProcessManager,
-        platform: linuxPlatform,
+        platform: macOSPlatform,
       );
 
       const String expectedMessage = 'The flutter tool cannot access the file';
@@ -1041,6 +1071,24 @@ void main() {
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when cannot run executable', () {
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', eacces));
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: throwingFakeProcessManager,
+        platform: macOSPlatform,
+      );
+
+      const String expectedMessage = 'Flutter failed to run "/path/to/dart".\n'
+      'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+      'Try running:\n'
+      '  sudo chown -R \$(whoami) /path/to/dart\n'
+      'or\n'
+      '  sudo chmod u+rx /path/to/dart';
+
+      expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
   });
 
@@ -1229,5 +1277,16 @@ class FakeSignalProcessManager extends Fake implements ProcessManager {
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     killedProcesses[pid] = signal;
     return true;
+  }
+}
+
+class ThrowingFakeProcessManager extends Fake implements ProcessManager {
+  ThrowingFakeProcessManager(Exception exception) : _exception = exception;
+
+  final Exception _exception;
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) {
+    throw _exception;
   }
 }

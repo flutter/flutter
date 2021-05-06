@@ -641,6 +641,11 @@ class ErrorHandlingProcessManager extends ProcessManager {
     return _runSync(
       () => _delegate.canRun(executable, workingDirectory: workingDirectory),
       platform: _platform,
+      failureMessage: 'Flutter failed to run "$executable"',
+      posixPermissionSuggestion: 'Try running:\n'
+          '  sudo chown -R \$(whoami) $executable\n'
+          'or\n'
+          '  sudo chmod u+rx $executable\n'
     );
   }
 
