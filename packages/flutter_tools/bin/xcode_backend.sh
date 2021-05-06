@@ -204,6 +204,9 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   StreamOutput " └─Compiling, linking and signing..."
 
   RunCommand popd > /dev/null
+  
+  # Fix codesign error (resource fork, Finder information, or similar detritus not allowed)
+  xattr -cr ${BUILT_PRODUCTS_DIR}
 
   echo "Project ${project_path} built and packaged successfully."
   return 0
