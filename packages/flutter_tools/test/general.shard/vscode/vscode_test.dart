@@ -47,10 +47,10 @@ void main() {
     final Platform platform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{'HOME': home});
 
     fileSystem.directory(fileSystem.path.join('/snap/code/current/', '.vscode')).createSync(recursive: true);
+
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
-
+    
     final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
-
     expect(installed.length, 1);
   });
 
