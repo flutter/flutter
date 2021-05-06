@@ -222,7 +222,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: 'flutter_goldens_postsubmit',
+      suffix: 'flutter_goldens_postsubmit.',
     );
     baseDirectory.createSync(recursive: true);
 
@@ -301,7 +301,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: 'flutter_goldens_presubmit',
+      suffix: 'flutter_goldens_presubmit.',
     );
 
     if (!baseDirectory.existsSync())
