@@ -483,13 +483,14 @@ bool PlatformView::OnChildViewStateChanged(scenic::ResourceId view_holder_id,
     return false;
   }
 
+  const std::string is_rendering_str = is_rendering ? "true" : "false";
   std::ostringstream out;
   out << "{"
       << "\"method\":\"View.viewStateChanged\","
       << "\"args\":{"
       << "  \"viewId\":" << view_id_mapping->second << ","  // ViewHolderToken
-      << "  \"is_rendering\":" << is_rendering << ","       // IsViewRendering
-      << "  \"state\":" << is_rendering                     // IsViewRendering
+      << "  \"is_rendering\":" << is_rendering_str << ","   // IsViewRendering
+      << "  \"state\":" << is_rendering_str                 // IsViewRendering
       << "  }"
       << "}";
   auto call = out.str();
