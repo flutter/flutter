@@ -626,20 +626,7 @@ void _signFramework(Environment environment, String binaryPath, BuildMode buildM
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     return;
   }
-
-  // Extended attributes applied by Finder can cause code signing errors. Remove them.
-  // https://developer.apple.com/library/archive/qa/qa1940/_index.html
-  final ProcessResult xattrResult = environment.processManager.runSync(<String>[
-    'xattr',
-    '-r',
-    '-d',
-    'com.apple.FinderInfo',
-    binaryPath,
-  ]);
-  if (xattrResult.exitCode != 0) {
-    environment.logger.printTrace('Failed to remove FinderInfo extended attributes from $binaryPath.\n${xattrResult.stderr}');
-  }
-  final ProcessResult codesignResult = environment.processManager.runSync(<String>[
+  final ProcessResult result = environment.processManager.runSync(<String>[
     'codesign',
     '--force',
     '--sign',
@@ -650,7 +637,7 @@ void _signFramework(Environment environment, String binaryPath, BuildMode buildM
     ],
     binaryPath,
   ]);
-  if (codesignResult.exitCode != 0) {
-    throw Exception('Failed to codesign $binaryPath with identity $codesignIdentity.\n${codesignResult.stderr}');
+  if (result.exitCode != 0) {
+    throw Exception('Failed to codesign $binaryPath with identity $codesignIdentity.\n${result.stderr}');
   }
 }
