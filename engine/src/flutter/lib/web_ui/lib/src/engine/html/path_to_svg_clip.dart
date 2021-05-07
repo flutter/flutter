@@ -43,7 +43,7 @@ String pathToSvgClipPath(ui.Path path,
     sb.write('<path transform="scale($scaleX, $scaleY)" fill="#FFFFFF" d="');
   }
 
-  pathToSvg(path as SurfacePath, sb, offsetX: offsetX, offsetY: offsetY);
+  pathToSvg((path as SurfacePath).pathRef, sb, offsetX: offsetX, offsetY: offsetY);
   sb.write('"></path></clipPath></defs></svg');
   return sb.toString();
 }

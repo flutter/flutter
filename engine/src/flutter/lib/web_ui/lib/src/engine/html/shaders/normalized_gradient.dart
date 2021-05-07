@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart';
+
+import 'package:ui/ui.dart' as ui;
+import 'shader_builder.dart';
 
 /// Converts colors and stops to typed array of bias, scale and threshold to use
 /// in shaders.
@@ -95,7 +100,7 @@ class NormalizedGradient {
   }
 
   /// Sets uniforms for threshold, bias and scale for program.
-  void setupUniforms(_GlContext gl, _GlProgram glProgram) {
+  void setupUniforms(GlContext gl, GlProgram glProgram) {
     for (int i = 0; i < thresholdCount; i++) {
       Object biasId = gl.getUniformLocation(glProgram.program, 'bias_$i');
       gl.setUniform4f(biasId, _bias[i * 4], _bias[i * 4 + 1], _bias[i * 4 + 2], _bias[i * 4 + 3]);
@@ -125,7 +130,7 @@ class NormalizedGradient {
 /// uniforms.
 ///
 /// Bias and scale data are vec4 uniforms that hold color data.
-void _writeUnrolledBinarySearch(ShaderMethod method, int start, int end,
+void writeUnrolledBinarySearch(ShaderMethod method, int start, int end,
     {required String probe,
       required String sourcePrefix, required String biasName,
       required String scaleName}) {
@@ -141,13 +146,13 @@ void _writeUnrolledBinarySearch(ShaderMethod method, int start, int end,
     thresholdAtMid += '.${_vectorComponentIndexToName((mid + 1) % 4)}';
     method.addStatement('if ($probe < $thresholdAtMid) {');
     method.indent();
-    _writeUnrolledBinarySearch(method, start, mid,
+    writeUnrolledBinarySearch(method, start, mid,
         probe: probe, sourcePrefix: sourcePrefix, biasName: biasName,
         scaleName: scaleName);
     method.unindent();
     method.addStatement('} else {');
     method.indent();
-    _writeUnrolledBinarySearch(method, mid + 1, end,
+    writeUnrolledBinarySearch(method, mid + 1, end,
         probe: probe, sourcePrefix: sourcePrefix, biasName: biasName,
         scaleName: scaleName);
     method.unindent();

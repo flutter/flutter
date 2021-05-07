@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
+
+import 'conic.dart';
+import 'cubic.dart';
+import 'path_utils.dart';
 
 /// Computes tangent at point x,y on a line.
 void tangentLine(

@@ -2,13 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
+
+import 'conic.dart';
+import 'path_ref.dart';
+import 'path_utils.dart';
 
 /// Converts [path] to SVG path syntax to be used as "d" attribute in path
 /// element.
-void pathToSvg(SurfacePath path, StringBuffer sb,
+void pathToSvg(PathRef pathRef, StringBuffer sb,
     {double offsetX = 0, double offsetY = 0}) {
-  final PathRefIterator iter = PathRefIterator(path.pathRef);
+  final PathRefIterator iter = PathRefIterator(pathRef);
   int verb = 0;
   final Float32List outPts = Float32List(PathRefIterator.kMaxBufferSize);
   while ((verb = iter.next(outPts)) != SPath.kDoneVerb) {

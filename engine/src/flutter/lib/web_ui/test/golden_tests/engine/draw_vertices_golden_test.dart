@@ -366,7 +366,7 @@ void testMain() async {
     final HtmlImage img = await createTestImage();
     final SurfacePaint paint = SurfacePaint();
 
-    final ImageShader imgShader = ImageShader(img, tileMode, tileMode,
+    final EngineImageShader imgShader = EngineImageShader(img, tileMode, tileMode,
         Float64List.fromList(matrix4), FilterQuality.high);
 
     paint.shader = imgShader;

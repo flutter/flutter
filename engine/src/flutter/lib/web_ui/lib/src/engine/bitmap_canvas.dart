@@ -963,7 +963,7 @@ class BitmapCanvas extends EngineCanvas {
     // blendMode. https://github.com/flutter/flutter/issues/40096
     // Move rendering to OffscreenCanvas so that transform is preserved
     // as well.
-    assert(paint.shader == null || paint.shader is ImageShader,
+    assert(paint.shader == null || paint.shader is EngineImageShader,
         'Linear/Radial/SweepGradient not supported yet');
     final Int32List? colors = vertices._colors;
     final ui.VertexMode mode = vertices._mode;

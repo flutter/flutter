@@ -695,7 +695,7 @@ class ImageShader extends Shader {
     FilterQuality? filterQuality,
   }) => engine.useCanvasKit
       ? engine.CkImageShader(image, tmx, tmy, matrix4, filterQuality)
-      : engine.ImageShader(image, tmx, tmy, matrix4, filterQuality);
+      : engine.EngineImageShader(image, tmx, tmy, matrix4, filterQuality);
 }
 
 class ImmutableBuffer {
