@@ -32,7 +32,7 @@ std::unique_ptr<VsyncWaiter> PlatformView::CreateVSyncWaiter() {
 }
 
 void PlatformView::DispatchPlatformMessage(
-    fml::RefPtr<PlatformMessage> message) {
+    std::unique_ptr<PlatformMessage> message) {
   delegate_.OnPlatformViewDispatchPlatformMessage(std::move(message));
 }
 
@@ -115,7 +115,8 @@ fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
 void PlatformView::UpdateSemantics(SemanticsNodeUpdates update,
                                    CustomAccessibilityActionUpdates actions) {}
 
-void PlatformView::HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) {
+void PlatformView::HandlePlatformMessage(
+    std::unique_ptr<PlatformMessage> message) {
   if (auto response = message->response())
     response->CompleteEmpty();
 }

@@ -144,7 +144,7 @@ class PlatformViewIOS final : public PlatformView {
   std::vector<std::string> platform_resolved_locale_;
 
   // |PlatformView|
-  void HandlePlatformMessage(fml::RefPtr<flutter::PlatformMessage> message) override;
+  void HandlePlatformMessage(std::unique_ptr<flutter::PlatformMessage> message) override;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;

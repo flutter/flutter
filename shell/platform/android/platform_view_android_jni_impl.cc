@@ -1094,7 +1094,7 @@ PlatformViewAndroidJNIImpl::PlatformViewAndroidJNIImpl(
 PlatformViewAndroidJNIImpl::~PlatformViewAndroidJNIImpl() = default;
 
 void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
-    fml::RefPtr<flutter::PlatformMessage> message,
+    std::unique_ptr<flutter::PlatformMessage> message,
     int responseId) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 

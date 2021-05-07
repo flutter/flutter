@@ -190,7 +190,7 @@ void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
   }
 
   PlatformView::DispatchPlatformMessage(
-      fml::MakeRefCounted<flutter::PlatformMessage>(
+      std::make_unique<flutter::PlatformMessage>(
           std::move(name), std::move(message), std::move(response)));
 }
 
@@ -204,8 +204,8 @@ void PlatformViewAndroid::DispatchEmptyPlatformMessage(JNIEnv* env,
   }
 
   PlatformView::DispatchPlatformMessage(
-      fml::MakeRefCounted<flutter::PlatformMessage>(std::move(name),
-                                                    std::move(response)));
+      std::make_unique<flutter::PlatformMessage>(std::move(name),
+                                                 std::move(response)));
 }
 
 void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
@@ -243,14 +243,15 @@ void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
 
 // |PlatformView|
 void PlatformViewAndroid::HandlePlatformMessage(
-    fml::RefPtr<flutter::PlatformMessage> message) {
+    std::unique_ptr<flutter::PlatformMessage> message) {
   int response_id = 0;
   if (auto response = message->response()) {
     response_id = next_response_id_++;
     pending_responses_[response_id] = response;
   }
   // This call can re-enter in InvokePlatformMessageXxxResponseCallback.
-  jni_facade_->FlutterViewHandlePlatformMessage(message, response_id);
+  jni_facade_->FlutterViewHandlePlatformMessage(std::move(message),
+                                                response_id);
   message = nullptr;
 }
 

@@ -20,7 +20,7 @@ class PlatformMessageRouter {
   ~PlatformMessageRouter();
 
   void HandlePlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message) const;
+      std::unique_ptr<flutter::PlatformMessage> message) const;
 
   void SetMessageHandler(const std::string& channel,
                          FlutterBinaryMessageHandler handler);

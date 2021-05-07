@@ -114,7 +114,7 @@ class PlatformView {
     ///                      root isolate.
     ///
     virtual void OnPlatformViewDispatchPlatformMessage(
-        fml::RefPtr<PlatformMessage> message) = 0;
+        std::unique_ptr<PlatformMessage> message) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the platform view has encountered
@@ -379,7 +379,7 @@ class PlatformView {
   ///
   /// @param[in]  message  The platform message to deliver to the root isolate.
   ///
-  void DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message);
+  void DispatchPlatformMessage(std::unique_ptr<PlatformMessage> message);
 
   //----------------------------------------------------------------------------
   /// @brief      Overridden by embedders to perform actions in response to
@@ -395,7 +395,7 @@ class PlatformView {
   ///
   /// @param[in]  message  The message
   ///
-  virtual void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message);
+  virtual void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to dispatch an accessibility action to a

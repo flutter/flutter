@@ -29,7 +29,8 @@ class DummyPlatformConfigurationClient : public PlatformConfigurationClient {
   void ScheduleFrame() override {}
   void Render(Scene* scene) override {}
   void UpdateSemantics(SemanticsUpdate* update) override {}
-  void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override {}
+  void HandlePlatformMessage(
+      std::unique_ptr<PlatformMessage> message) override {}
   FontCollection& GetFontCollection() override { return font_collection_; }
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override {}
