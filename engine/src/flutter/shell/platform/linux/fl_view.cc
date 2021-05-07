@@ -137,6 +137,9 @@ static void fl_view_geometry_changed(FlView* self) {
   fl_engine_send_window_metrics_event(
       self->engine, allocation.width * scale_factor,
       allocation.height * scale_factor, scale_factor);
+
+  fl_renderer_wait_for_frame(self->renderer, allocation.width * scale_factor,
+                             allocation.height * scale_factor);
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.

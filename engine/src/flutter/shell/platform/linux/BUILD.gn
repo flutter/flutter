@@ -114,6 +114,8 @@ source_set("flutter_linux_sources") {
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
     "fl_string_codec.cc",
+    "fl_task_runner.cc",
+    "fl_task_runner.h",
     "fl_text_input_plugin.cc",
     "fl_value.cc",
     "fl_view.cc",
