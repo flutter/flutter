@@ -373,6 +373,12 @@
       "flaky": false
     },
     {
+      "name": "Linux platform channels benchmarks",
+      "repo": "flutter",
+      "task_name": "linux_platform_channels_benchmarks",
+      "flaky": true
+    },
+    {
       "name": "Linux platform_views_scroll_perf__timeline_summary",
       "repo": "flutter",
       "task_name": "linux_platform_views_scroll_perf__timeline_summary",
@@ -1151,6 +1157,12 @@
       "repo": "flutter",
       "task_name": "mac_ios_platform_channel_sample_test_swift",
       "flaky": false
+    },
+    {
+      "name": "Mac_ios platform channels benchmarks",
+      "repo": "flutter",
+      "task_name": "mac_ios_platform_channels_benchmarks",
+      "flaky": true
     },
     {
       "name": "Mac_ios platform_interaction_test_ios",
