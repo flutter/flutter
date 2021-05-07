@@ -32,4 +32,4 @@ gcloud --project flutter-infra firebase test android run \
   --timeout 2m \
   --results-bucket=gs://flutter_firebase_testlab \
   --results-dir="engine_scenario_test/$GIT_REVISION/$BUILD_ID" \
-  --device model=flame,version=29 
+  --device model=flame,version=29

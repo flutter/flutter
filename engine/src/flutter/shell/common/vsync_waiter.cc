@@ -4,6 +4,7 @@
 
 #include "flutter/shell/common/vsync_waiter.h"
 
+#include "flow/frame_timings.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/message_loop_task_queues.h"
@@ -132,7 +133,11 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
          pause_secondary_tasks]() {
           FML_TRACE_EVENT("flutter", kVsyncTraceName, "StartTime",
                           frame_start_time, "TargetTime", frame_target_time);
-          callback(frame_start_time, frame_target_time);
+          std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder =
+              std::make_unique<FrameTimingsRecorder>();
+          frame_timings_recorder->RecordVsync(frame_start_time,
+                                              frame_target_time);
+          callback(std::move(frame_timings_recorder));
           TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
           if (pause_secondary_tasks) {
             ResumeDartMicroTasks();

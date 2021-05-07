@@ -4,7 +4,9 @@
 
 #include "flutter/flow/layers/layer_tree.h"
 
+#include "flutter/flow/frame_timings.h"
 #include "flutter/flow/layers/layer.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
@@ -18,15 +20,6 @@ LayerTree::LayerTree(const SkISize& frame_size, float device_pixel_ratio)
       checkerboard_raster_cache_images_(false),
       checkerboard_offscreen_layers_(false) {
   FML_CHECK(device_pixel_ratio_ != 0.0f);
-}
-
-void LayerTree::RecordBuildTime(fml::TimePoint vsync_start,
-                                fml::TimePoint build_start,
-                                fml::TimePoint target_time) {
-  vsync_start_ = vsync_start;
-  build_start_ = build_start;
-  target_time_ = target_time;
-  build_finish_ = fml::TimePoint::Now();
 }
 
 bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,

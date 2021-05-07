@@ -18,13 +18,16 @@
 namespace flutter {
 
 VsyncWaiterIOS::VsyncWaiterIOS(flutter::TaskRunners task_runners)
-    : VsyncWaiter(std::move(task_runners)),
-      client_([[VSyncClient alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()
-                                             callback:std::bind(&VsyncWaiterIOS::FireCallback,
-                                                                this,
-                                                                std::placeholders::_1,
-                                                                std::placeholders::_2,
-                                                                true)]) {}
+    : VsyncWaiter(std::move(task_runners)) {
+  auto callback = [this](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+    const fml::TimePoint start_time = recorder->GetVsyncStartTime();
+    const fml::TimePoint target_time = recorder->GetVsyncTargetTime();
+    FireCallback(start_time, target_time, true);
+  };
+  client_ =
+      fml::scoped_nsobject{[[VSyncClient alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()
+                                                          callback:callback]};
+}
 
 VsyncWaiterIOS::~VsyncWaiterIOS() {
   // This way, we will get no more callbacks from the display link that holds a weak (non-nilling)
@@ -75,9 +78,12 @@ void VsyncWaiterIOS::AwaitVSync() {
   fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
 
+  std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
+      std::make_unique<flutter::FrameTimingsRecorder>();
+  recorder->RecordVsync(frame_start_time, frame_target_time);
   display_link_.get().paused = YES;
 
-  callback_(frame_start_time, frame_target_time);
+  callback_(std::move(recorder));
 }
 
 - (void)invalidate {

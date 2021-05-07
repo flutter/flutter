@@ -11,6 +11,7 @@
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/flow/frame_timings.h"
 #include "flutter/fml/time/time_point.h"
 
 namespace flutter {
@@ -19,8 +20,7 @@ namespace flutter {
 /// getting callbacks when a vsync event happens.
 class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  public:
-  using Callback = std::function<void(fml::TimePoint frame_start_time,
-                                      fml::TimePoint frame_target_time)>;
+  using Callback = std::function<void(std::unique_ptr<FrameTimingsRecorder>)>;
 
   virtual ~VsyncWaiter();
 
@@ -40,7 +40,7 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
 
   const TaskRunners task_runners_;
 
-  VsyncWaiter(TaskRunners task_runners);
+  explicit VsyncWaiter(TaskRunners task_runners);
 
   // Implementations are meant to override this method and arm their vsync
   // latches when in response to this invocation. On vsync, they are meant to
