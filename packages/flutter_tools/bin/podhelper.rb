@@ -115,6 +115,12 @@ def flutter_additional_macos_build_settings(target)
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'MACOSX_DEPLOYMENT_TARGET' if inherit_deployment_target
+
+    # Avoid error about Pods-Runner not supporting provisioning profiles.
+    # Framework signing is handled at the app layer, not per framework, so disallow individual signing.
+    build_configuration.build_settings.delete 'EXPANDED_CODE_SIGN_IDENTITY'
+    build_configuration.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+    build_configuration.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
   end
 end
 
