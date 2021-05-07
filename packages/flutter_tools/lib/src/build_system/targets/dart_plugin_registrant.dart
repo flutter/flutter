@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../base/file_system.dart';
+import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../project.dart';
@@ -63,7 +64,21 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   bool canSkip(Environment environment) {
-    return !environment.generateDartPluginRegistry;
+    if (!environment.generateDartPluginRegistry) {
+      return true;
+    }
+    final String platformName = environment.defines[kTargetPlatform];
+    if (platformName == null) {
+      return true;
+    }
+    final TargetPlatform targetPlatform = getTargetPlatformForName(platformName);
+    // TODO(egarciad): Support Android and iOS.
+    // https://github.com/flutter/flutter/issues/52267
+    return targetPlatform != TargetPlatform.darwin &&
+           targetPlatform != TargetPlatform.linux_x64 &&
+           targetPlatform != TargetPlatform.linux_arm64 &&
+           targetPlatform != TargetPlatform.windows_x64 &&
+           targetPlatform != TargetPlatform.windows_uwp_x64;
   }
 
   @override
