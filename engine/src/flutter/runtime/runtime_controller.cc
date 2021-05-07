@@ -239,7 +239,7 @@ bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
 }
 
 bool RuntimeController::DispatchPlatformMessage(
-    fml::RefPtr<PlatformMessage> message) {
+    std::unique_ptr<PlatformMessage> message) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     TRACE_EVENT1("flutter", "RuntimeController::DispatchPlatformMessage",
                  "mode", "basic");
@@ -320,7 +320,7 @@ void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
 
 // |PlatformConfigurationClient|
 void RuntimeController::HandlePlatformMessage(
-    fml::RefPtr<PlatformMessage> message) {
+    std::unique_ptr<PlatformMessage> message) {
   client_.HandlePlatformMessage(std::move(message));
 }
 

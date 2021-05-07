@@ -124,12 +124,12 @@ Dart_Handle SendPlatformMessage(Dart_Handle window,
   }
   if (Dart_IsNull(data_handle)) {
     dart_state->platform_configuration()->client()->HandlePlatformMessage(
-        fml::MakeRefCounted<PlatformMessage>(name, response));
+        std::make_unique<PlatformMessage>(name, response));
   } else {
     tonic::DartByteData data(data_handle);
     const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
     dart_state->platform_configuration()->client()->HandlePlatformMessage(
-        fml::MakeRefCounted<PlatformMessage>(
+        std::make_unique<PlatformMessage>(
             name, std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()),
             response));
   }
@@ -305,7 +305,7 @@ void PlatformConfiguration::UpdateAccessibilityFeatures(int32_t values) {
 }
 
 void PlatformConfiguration::DispatchPlatformMessage(
-    fml::RefPtr<PlatformMessage> message) {
+    std::unique_ptr<PlatformMessage> message) {
   std::shared_ptr<tonic::DartState> dart_state =
       dispatch_platform_message_.dart_state().lock();
   if (!dart_state) {

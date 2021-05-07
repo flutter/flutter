@@ -51,7 +51,7 @@ class ShellTest : public FixtureTest {
   fml::TimePoint GetLatestFrameTargetTime(Shell* shell) const;
 
   void SendEnginePlatformMessage(Shell* shell,
-                                 fml::RefPtr<PlatformMessage> message);
+                                 std::unique_ptr<PlatformMessage> message);
 
   static void PlatformViewNotifyCreated(
       Shell* shell);  // This creates the surface

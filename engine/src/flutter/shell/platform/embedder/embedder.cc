@@ -724,7 +724,7 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor) {
 }
 
 struct _FlutterPlatformMessageResponseHandle {
-  fml::RefPtr<flutter::PlatformMessage> message;
+  std::unique_ptr<flutter::PlatformMessage> message;
 };
 
 struct LoadedElfDeleter {
@@ -1099,7 +1099,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
     platform_message_response_callback =
         [ptr = args->platform_message_callback,
-         user_data](fml::RefPtr<flutter::PlatformMessage> message) {
+         user_data](std::unique_ptr<flutter::PlatformMessage> message) {
           auto handle = new FlutterPlatformMessageResponseHandle();
           const FlutterPlatformMessage incoming_message = {
               sizeof(FlutterPlatformMessage),  // struct_size
@@ -1630,12 +1630,12 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
     response = response_handle->message->response();
   }
 
-  fml::RefPtr<flutter::PlatformMessage> message;
+  std::unique_ptr<flutter::PlatformMessage> message;
   if (message_size == 0) {
-    message = fml::MakeRefCounted<flutter::PlatformMessage>(
+    message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel, response);
   } else {
-    message = fml::MakeRefCounted<flutter::PlatformMessage>(
+    message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel,
         std::vector<uint8_t>(message_data, message_data + message_size),
         response);
@@ -1674,7 +1674,7 @@ FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
 
   auto handle = new FlutterPlatformMessageResponseHandle();
 
-  handle->message = fml::MakeRefCounted<flutter::PlatformMessage>(
+  handle->message = std::make_unique<flutter::PlatformMessage>(
       "",  // The channel is empty and unused as the response handle is going
            // to referenced directly in the |FlutterEngineSendPlatformMessage|
            // with the container message discarded.
@@ -1952,7 +1952,7 @@ static bool DispatchJSONPlatformMessage(FLUTTER_API_SYMBOL(FlutterEngine)
     return false;
   }
 
-  auto platform_message = fml::MakeRefCounted<flutter::PlatformMessage>(
+  auto platform_message = std::make_unique<flutter::PlatformMessage>(
       channel_name.c_str(),                                       // channel
       std::vector<uint8_t>{message, message + buffer.GetSize()},  // message
       nullptr                                                     // response

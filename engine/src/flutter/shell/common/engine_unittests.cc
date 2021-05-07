@@ -26,7 +26,7 @@ class MockDelegate : public Engine::Delegate {
   MOCK_METHOD2(OnEngineUpdateSemantics,
                void(SemanticsNodeUpdates, CustomAccessibilityActionUpdates));
   MOCK_METHOD1(OnEngineHandlePlatformMessage,
-               void(fml::RefPtr<PlatformMessage>));
+               void(std::unique_ptr<PlatformMessage>));
   MOCK_METHOD0(OnPreEngineRestart, void());
   MOCK_METHOD0(OnRootIsolateCreated, void());
   MOCK_METHOD2(UpdateIsolateDescription, void(const std::string, int64_t));
@@ -51,7 +51,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
   MOCK_METHOD1(Render, void(std::unique_ptr<flutter::LayerTree>));
   MOCK_METHOD2(UpdateSemantics,
                void(SemanticsNodeUpdates, CustomAccessibilityActionUpdates));
-  MOCK_METHOD1(HandlePlatformMessage, void(fml::RefPtr<PlatformMessage>));
+  MOCK_METHOD1(HandlePlatformMessage, void(std::unique_ptr<PlatformMessage>));
   MOCK_METHOD0(GetFontCollection, FontCollection&());
   MOCK_METHOD0(OnRootIsolateCreated, void());
   MOCK_METHOD2(UpdateIsolateDescription, void(const std::string, int64_t));
@@ -67,14 +67,14 @@ class MockRuntimeController : public RuntimeController {
   MockRuntimeController(RuntimeDelegate& client, TaskRunners p_task_runners)
       : RuntimeController(client, p_task_runners) {}
   MOCK_METHOD0(IsRootIsolateRunning, bool());
-  MOCK_METHOD1(DispatchPlatformMessage, bool(fml::RefPtr<PlatformMessage>));
+  MOCK_METHOD1(DispatchPlatformMessage, bool(std::unique_ptr<PlatformMessage>));
   MOCK_METHOD3(LoadDartDeferredLibraryError,
                void(intptr_t, const std::string, bool));
   MOCK_CONST_METHOD0(GetDartVM, DartVM*());
   MOCK_METHOD2(NotifyIdle, bool(int64_t, size_t));
 };
 
-fml::RefPtr<PlatformMessage> MakePlatformMessage(
+std::unique_ptr<PlatformMessage> MakePlatformMessage(
     const std::string& channel,
     const std::map<std::string, std::string>& values,
     fml::RefPtr<PlatformMessageResponse> response) {
@@ -95,7 +95,7 @@ fml::RefPtr<PlatformMessage> MakePlatformMessage(
   document.Accept(writer);
   const uint8_t* data = reinterpret_cast<const uint8_t*>(buffer.GetString());
 
-  fml::RefPtr<PlatformMessage> message = fml::MakeRefCounted<PlatformMessage>(
+  std::unique_ptr<PlatformMessage> message = std::make_unique<PlatformMessage>(
       channel, std::vector<uint8_t>(data, data + buffer.GetSize()), response);
   return message;
 }
@@ -179,9 +179,9 @@ TEST_F(EngineTest, DispatchPlatformMessageUnknown) {
 
     fml::RefPtr<PlatformMessageResponse> response =
         fml::MakeRefCounted<MockResponse>();
-    fml::RefPtr<PlatformMessage> message =
-        fml::MakeRefCounted<PlatformMessage>("foo", response);
-    engine->DispatchPlatformMessage(message);
+    std::unique_ptr<PlatformMessage> message =
+        std::make_unique<PlatformMessage>("foo", response);
+    engine->DispatchPlatformMessage(std::move(message));
   });
 }
 
@@ -209,9 +209,9 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRoute) {
         {"method", "setInitialRoute"},
         {"args", "test_initial_route"},
     };
-    fml::RefPtr<PlatformMessage> message =
+    std::unique_ptr<PlatformMessage> message =
         MakePlatformMessage("flutter/navigation", values, response);
-    engine->DispatchPlatformMessage(message);
+    engine->DispatchPlatformMessage(std::move(message));
     EXPECT_EQ(engine->InitialRoute(), "test_initial_route");
   });
 }
@@ -242,9 +242,9 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRouteIgnored) {
         {"method", "setInitialRoute"},
         {"args", "test_initial_route"},
     };
-    fml::RefPtr<PlatformMessage> message =
+    std::unique_ptr<PlatformMessage> message =
         MakePlatformMessage("flutter/navigation", values, response);
-    engine->DispatchPlatformMessage(message);
+    engine->DispatchPlatformMessage(std::move(message));
     EXPECT_EQ(engine->InitialRoute(), "");
   });
 }

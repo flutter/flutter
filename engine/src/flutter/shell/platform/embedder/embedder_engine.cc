@@ -144,7 +144,7 @@ bool EmbedderEngine::DispatchKeyDataPacket(
 }
 
 bool EmbedderEngine::SendPlatformMessage(
-    fml::RefPtr<flutter::PlatformMessage> message) {
+    std::unique_ptr<PlatformMessage> message) {
   if (!IsValid() || !message) {
     return false;
   }
@@ -154,7 +154,7 @@ bool EmbedderEngine::SendPlatformMessage(
     return false;
   }
 
-  platform_view->DispatchPlatformMessage(message);
+  platform_view->DispatchPlatformMessage(std::move(message));
   return true;
 }
 

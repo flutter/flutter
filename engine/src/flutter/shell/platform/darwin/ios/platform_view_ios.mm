@@ -72,7 +72,7 @@ PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
 }
 
 // |PlatformView|
-void PlatformViewIOS::HandlePlatformMessage(fml::RefPtr<flutter::PlatformMessage> message) {
+void PlatformViewIOS::HandlePlatformMessage(std::unique_ptr<flutter::PlatformMessage> message) {
   platform_message_router_.HandlePlatformMessage(std::move(message));
 }
 

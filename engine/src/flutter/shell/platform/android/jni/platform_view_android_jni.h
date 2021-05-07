@@ -41,7 +41,7 @@ class PlatformViewAndroidJNI {
   /// @brief      Sends a platform message. The message may be empty.
   ///
   virtual void FlutterViewHandlePlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message,
+      std::unique_ptr<flutter::PlatformMessage> message,
       int responseId) = 0;
 
   //----------------------------------------------------------------------------

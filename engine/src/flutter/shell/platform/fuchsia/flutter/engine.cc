@@ -50,9 +50,9 @@ void UpdateNativeThreadLabelNames(const std::string& label,
   set_thread_name(runners.GetIOTaskRunner(), label, ".io");
 }
 
-fml::RefPtr<flutter::PlatformMessage> MakeLocalizationPlatformMessage(
+std::unique_ptr<flutter::PlatformMessage> MakeLocalizationPlatformMessage(
     const fuchsia::intl::Profile& intl_profile) {
-  return fml::MakeRefCounted<flutter::PlatformMessage>(
+  return std::make_unique<flutter::PlatformMessage>(
       "flutter/localization", MakeLocalizationPlatformMessageData(intl_profile),
       nullptr);
 }
@@ -402,7 +402,7 @@ Engine::Engine(Delegate& delegate,
       auto message = MakeLocalizationPlatformMessage(profile);
       FML_VLOG(-1) << "Sending LocalizationPlatformMessage";
       flutter_runner_engine->shell_->GetPlatformView()->DispatchPlatformMessage(
-          message);
+          std::move(message));
     };
 
     FML_VLOG(-1) << "Requesting intl Profile";

@@ -258,8 +258,8 @@ int RunTester(const flutter::Settings& settings,
                                     locale_json + std::strlen(locale_json));
   fml::RefPtr<flutter::PlatformMessageResponse> response;
   shell->GetPlatformView()->DispatchPlatformMessage(
-      fml::MakeRefCounted<flutter::PlatformMessage>("flutter/localization",
-                                                    locale_bytes, response));
+      std::make_unique<flutter::PlatformMessage>("flutter/localization",
+                                                 locale_bytes, response));
 
   std::initializer_list<fml::FileMapping::Protection> protection = {
       fml::FileMapping::Protection::kRead};

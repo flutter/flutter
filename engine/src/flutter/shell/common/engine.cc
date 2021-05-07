@@ -203,13 +203,13 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
 
   auto service_id = runtime_controller_->GetRootIsolateServiceID();
   if (service_id.has_value()) {
-    fml::RefPtr<PlatformMessage> service_id_message =
-        fml::MakeRefCounted<flutter::PlatformMessage>(
+    std::unique_ptr<PlatformMessage> service_id_message =
+        std::make_unique<flutter::PlatformMessage>(
             kIsolateChannel,
             std::vector<uint8_t>(service_id.value().begin(),
                                  service_id.value().end()),
             nullptr);
-    HandlePlatformMessage(service_id_message);
+    HandlePlatformMessage(std::move(service_id_message));
   }
 
   return Engine::RunStatus::Success;
@@ -296,7 +296,7 @@ void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
   }
 }
 
-void Engine::DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message) {
+void Engine::DispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) {
   std::string channel = message->channel();
   if (channel == kLifecycleChannel) {
     if (HandleLifecyclePlatformMessage(message.get())) {
@@ -349,7 +349,7 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
 }
 
 bool Engine::HandleNavigationPlatformMessage(
-    fml::RefPtr<PlatformMessage> message) {
+    std::unique_ptr<PlatformMessage> message) {
   const auto& data = message->data();
 
   rapidjson::Document document;
@@ -488,7 +488,7 @@ void Engine::UpdateSemantics(SemanticsNodeUpdates update,
   delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions));
 }
 
-void Engine::HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) {
+void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
   } else {
@@ -531,7 +531,8 @@ void Engine::ScheduleSecondaryVsyncCallback(uintptr_t id,
   animator_->ScheduleSecondaryVsyncCallback(id, callback);
 }
 
-void Engine::HandleAssetPlatformMessage(fml::RefPtr<PlatformMessage> message) {
+void Engine::HandleAssetPlatformMessage(
+    std::unique_ptr<PlatformMessage> message) {
   fml::RefPtr<PlatformMessageResponse> response = message->response();
   if (!response) {
     return;

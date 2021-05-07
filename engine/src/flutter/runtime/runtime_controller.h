@@ -411,7 +411,8 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @return     If the message was dispatched to the running root isolate.
   ///             This may fail is an isolate is not running.
   ///
-  virtual bool DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message);
+  virtual bool DispatchPlatformMessage(
+      std::unique_ptr<PlatformMessage> message);
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the specified pointer data message to the running
@@ -655,7 +656,7 @@ class RuntimeController : public PlatformConfigurationClient {
   void UpdateSemantics(SemanticsUpdate* update) override;
 
   // |PlatformConfigurationClient|
-  void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override;
+  void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 
   // |PlatformConfigurationClient|
   FontCollection& GetFontCollection() override;

@@ -26,16 +26,17 @@ ShellTest::ShellTest()
 
 void ShellTest::SendEnginePlatformMessage(
     Shell* shell,
-    fml::RefPtr<PlatformMessage> message) {
+    std::unique_ptr<PlatformMessage> message) {
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(),
-      [shell, &latch, message = std::move(message)]() {
-        if (auto engine = shell->weak_engine_) {
-          engine->HandlePlatformMessage(std::move(message));
-        }
-        latch.Signal();
-      });
+      fml::MakeCopyable(
+          [shell, &latch, message = std::move(message)]() mutable {
+            if (auto engine = shell->weak_engine_) {
+              engine->HandlePlatformMessage(std::move(message));
+            }
+            latch.Signal();
+          }));
   latch.Wait();
 }
 
