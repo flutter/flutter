@@ -2016,7 +2016,8 @@ class _RepositoryDartThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
 
   @override
   bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'drt_resources' // test materials
+    return entry.name != 'devtools' // not linked in
+        && entry.name != 'drt_resources' // test materials
         && entry.name != 'firefox_jsshell' // testing tool for dart2js
         && entry.name != 'd8' // testing tool for dart2js
         && entry.name != 'pkg'
