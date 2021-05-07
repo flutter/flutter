@@ -4,6 +4,8 @@
 
 #include "flutter/shell/common/animator.h"
 
+#include "flutter/flow/frame_timings.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
@@ -25,9 +27,6 @@ Animator::Animator(Delegate& delegate,
     : delegate_(delegate),
       task_runners_(std::move(task_runners)),
       waiter_(std::move(waiter)),
-      last_frame_begin_time_(),
-      last_vsync_start_time_(),
-      last_frame_target_time_(),
       dart_frame_deadline_(0),
 #if SHELL_ENABLE_METAL
       layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(2)),
@@ -96,9 +95,12 @@ static int64_t FxlToDartOrEarlier(fml::TimePoint time) {
   return (time - fxl_now).ToMicroseconds() + dart_now;
 }
 
-void Animator::BeginFrame(fml::TimePoint vsync_start_time,
-                          fml::TimePoint frame_target_time) {
+void Animator::BeginFrame(
+    std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
+
+  frame_timings_recorder_ = std::move(frame_timings_recorder);
+  frame_timings_recorder_->RecordBuildStart(fml::TimePoint::Now());
 
   TRACE_EVENT0("flutter", "Animator::BeginFrame");
   while (!trace_flow_ids_.empty()) {
@@ -130,13 +132,12 @@ void Animator::BeginFrame(fml::TimePoint vsync_start_time,
   // We have acquired a valid continuation from the pipeline and are ready
   // to service potential frame.
   FML_DCHECK(producer_continuation_);
-
-  last_frame_begin_time_ = fml::TimePoint::Now();
-  last_vsync_start_time_ = vsync_start_time;
-  fml::tracing::TraceEventAsyncComplete("flutter", "VsyncSchedulingOverhead",
-                                        last_vsync_start_time_,
-                                        last_frame_begin_time_);
-  last_frame_target_time_ = frame_target_time;
+  fml::tracing::TraceEventAsyncComplete(
+      "flutter", "VsyncSchedulingOverhead",
+      frame_timings_recorder_->GetVsyncStartTime(),
+      frame_timings_recorder_->GetBuildStartTime());
+  const fml::TimePoint frame_target_time =
+      frame_timings_recorder_->GetVsyncTargetTime();
   dart_frame_deadline_ = FxlToDartOrEarlier(frame_target_time);
   {
     TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
@@ -180,9 +181,15 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   }
   last_layer_tree_size_ = layer_tree->frame_size();
 
-  // Note the frame time for instrumentation.
-  layer_tree->RecordBuildTime(last_vsync_start_time_, last_frame_begin_time_,
-                              last_frame_target_time_);
+  if (!frame_timings_recorder_) {
+    // Framework can directly call render with a built scene.
+    frame_timings_recorder_ = std::make_unique<FrameTimingsRecorder>();
+    const fml::TimePoint placeholder_time = fml::TimePoint::Now();
+    frame_timings_recorder_->RecordVsync(placeholder_time, placeholder_time);
+    frame_timings_recorder_->RecordBuildStart(placeholder_time);
+  }
+
+  frame_timings_recorder_->RecordBuildEnd(fml::TimePoint::Now());
 
   // Commit the pending continuation.
   bool result = producer_continuation_.Complete(std::move(layer_tree));
@@ -190,16 +197,25 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
     FML_DLOG(INFO) << "No pending continuation to commit";
   }
 
-  delegate_.OnAnimatorDraw(layer_tree_pipeline_, last_frame_target_time_);
+  delegate_.OnAnimatorDraw(layer_tree_pipeline_,
+                           std::move(frame_timings_recorder_));
 }
 
 bool Animator::CanReuseLastLayerTree() {
   return !regenerate_layer_tree_;
 }
 
-void Animator::DrawLastLayerTree() {
+void Animator::DrawLastLayerTree(
+    std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
   pending_frame_semaphore_.Signal();
-  delegate_.OnAnimatorDrawLastLayerTree();
+  // In this case BeginFrame doesn't get called, we need to
+  // adjust frame timings to update build start and end times,
+  // given that the frame doesn't get built in this case, we
+  // will use Now() for both start and end times as an indication.
+  const auto now = fml::TimePoint::Now();
+  frame_timings_recorder->RecordBuildStart(now);
+  frame_timings_recorder->RecordBuildEnd(now);
+  delegate_.OnAnimatorDrawLastLayerTree(std::move(frame_timings_recorder));
 }
 
 void Animator::RequestFrame(bool regenerate_layer_tree) {
@@ -236,13 +252,13 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
 
 void Animator::AwaitVSync() {
   waiter_->AsyncWaitForVsync(
-      [self = weak_factory_.GetWeakPtr()](fml::TimePoint vsync_start_time,
-                                          fml::TimePoint frame_target_time) {
+      [self = weak_factory_.GetWeakPtr()](
+          std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
         if (self) {
           if (self->CanReuseLastLayerTree()) {
-            self->DrawLastLayerTree();
+            self->DrawLastLayerTree(std::move(frame_timings_recorder));
           } else {
-            self->BeginFrame(vsync_start_time, frame_target_time);
+            self->BeginFrame(std::move(frame_timings_recorder));
           }
         }
       });

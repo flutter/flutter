@@ -1143,7 +1143,7 @@ TEST_F(ShellTest,
 #if defined(OS_FUCHSIA)
        DISABLED_SkipAndSubmitFrame
 #else
-       SkipAndSubmitFrame
+       DISABLED_SkipAndSubmitFrame
 #endif
 ) {
   auto settings = CreateSettingsForFixture();

@@ -56,16 +56,6 @@ class LayerTree {
 
 #endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
-  void RecordBuildTime(fml::TimePoint vsync_start,
-                       fml::TimePoint build_start,
-                       fml::TimePoint target_time);
-  fml::TimePoint vsync_start() const { return vsync_start_; }
-  fml::TimeDelta vsync_overhead() const { return build_start_ - vsync_start_; }
-  fml::TimePoint build_start() const { return build_start_; }
-  fml::TimePoint build_finish() const { return build_finish_; }
-  fml::TimeDelta build_time() const { return build_finish_ - build_start_; }
-  fml::TimePoint target_time() const { return target_time_; }
-
   // The number of frame intervals missed after which the compositor must
   // trace the rasterized picture to a trace file. Specify 0 to disable all
   // tracing
@@ -87,10 +77,6 @@ class LayerTree {
 
  private:
   std::shared_ptr<Layer> root_layer_;
-  fml::TimePoint vsync_start_;
-  fml::TimePoint build_start_;
-  fml::TimePoint build_finish_;
-  fml::TimePoint target_time_;
   SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
   const float device_pixel_ratio_;  // Logical / Physical pixels ratio.
   uint32_t rasterizer_tracing_threshold_;
