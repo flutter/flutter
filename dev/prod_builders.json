@@ -118,7 +118,7 @@
       "name": "Linux docs_test",
       "repo": "flutter",
       "task_name": "linux_docs_test",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux docs_publish",
