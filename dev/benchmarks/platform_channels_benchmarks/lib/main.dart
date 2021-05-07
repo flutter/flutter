@@ -129,14 +129,14 @@ Future<void> _runTests() async {
   const int numMessages = 2500;
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
-  await _runBasicStandardSmall(basicStandard, 1);
+  await _runBasicStandardSmall(basicStandard, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Small',
     value: await _runBasicStandardSmall(basicStandard, numMessages),
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_small',
   );
-  await _runBasicStandardLarge(basicStandard, largeBuffer, 1);
+  await _runBasicStandardLarge(basicStandard, largeBuffer, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Large',
     value:
@@ -144,14 +144,14 @@ Future<void> _runTests() async {
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_large',
   );
-  await _runBasicBinary(basicBinary, largeBufferBytes, 1);
+  await _runBasicBinary(basicBinary, largeBufferBytes, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/Large',
     value: await _runBasicBinary(basicBinary, largeBufferBytes, numMessages),
     unit: 'µs',
     name: 'platform_channel_basic_binary_2host_large',
   );
-  await _runBasicBinary(basicBinary, oneMB, 1);
+  await _runBasicBinary(basicBinary, oneMB, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/1MB',
     value: await _runBasicBinary(basicBinary, oneMB, numMessages),
