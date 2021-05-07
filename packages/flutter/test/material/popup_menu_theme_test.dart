@@ -192,7 +192,7 @@ void main() {
     );
     const double elevation = 7.0;
     const TextStyle textStyle = TextStyle(color: Color(0x00000000), textBaseline: TextBaseline.alphabetic);
-    final EdgeInsets menuPadding = EdgeInsets.zero;
+    const EdgeInsets menuPadding = EdgeInsets.zero;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(popupMenuTheme: popupMenuTheme),
@@ -262,7 +262,7 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
 
-    final EdgeInsets themePadding = EdgeInsets.zero;
+    const EdgeInsets themePadding = EdgeInsets.zero;
 
     await tester.pumpWidget(MaterialApp(
       key: popupButtonApp,

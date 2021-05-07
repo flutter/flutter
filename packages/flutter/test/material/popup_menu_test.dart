@@ -1482,7 +1482,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Column(
-            children: [
+            children: <PopupMenuButton<String>>[
               PopupMenuButton<String>(
                 key: popupMenuButtonWithDefaultPaddingKey,
                 child: const Text('button'),

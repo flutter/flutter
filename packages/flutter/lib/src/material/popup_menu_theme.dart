@@ -58,8 +58,7 @@ class PopupMenuThemeData with Diagnosticable {
   /// If [PopupMenuButton.enableFeedback] is provided, [enableFeedback] is ignored.
   final bool? enableFeedback;
 
-  /// If specified, defines the padding for the popup menu ([_PopupMenu])
-  /// of [PopupMenuButton].
+  /// If specified, defines the padding for the popup menu of [PopupMenuButton].
   ///
   /// If [PopupMenuButton.menuPadding] is provided, [padding] is ignored.
   final EdgeInsetsGeometry? padding;
