@@ -75,9 +75,30 @@ class BasicMessageChannel<T> {
     }
   }
 
-  // Looking for setMockMessageHandler?
-  // See this shim package: packages/flutter_test/lib/src/deprecated.dart
+  /// Sets a mock callback for intercepting messages sent on this channel.
+  /// Messages may be null.
+  ///
+  /// The given callback will replace the currently registered mock callback for
+  /// this channel, if any. To remove the mock handler, pass null as the
+  /// `handler` argument.
+  ///
+  /// The handler's return value is used as a message reply. It may be null.
+  ///
+  /// This is intended for testing. Messages intercepted in this manner are not
+  /// sent to platform plugins.
+  void setMockMessageHandler(Future<T> Function(T? message)? handler) {
+    if (handler == null) {
+      binaryMessenger.setMockMessageHandler(name, null);
+    } else {
+      binaryMessenger.setMockMessageHandler(name, (ByteData? message) async {
+        return codec.encodeMessage(await handler(codec.decodeMessage(message)));
+      });
+    }
+  }
 }
+
+Expando<Object> _methodChannelHandlers = Expando<Object>();
+Expando<Object> _methodChannelMockHandlers = Expando<Object>();
 
 /// A named channel for communicating with platform plugins using asynchronous
 /// method calls.
@@ -353,6 +374,7 @@ class MethodChannel {
   /// similarly to what happens if no method call handler has been set.
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
+    _methodChannelHandlers[this] = handler;
     binaryMessenger.setMessageHandler(
       name,
       handler == null
@@ -361,7 +383,53 @@ class MethodChannel {
     );
   }
 
-  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic> Function(MethodCall call) handler) async {
+  /// Returns true if the `handler` argument matches the `handler` previously
+  /// passed to [setMethodCallHandler].
+  ///
+  /// This method is useful for tests or test harnesses that want to assert the
+  /// handler for the specified channel has not been altered by a previous test.
+  ///
+  /// Passing null for the `handler` returns true if the handler for the channel
+  /// is not set.
+  bool checkMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelHandlers[this] == handler;
+
+  /// Sets a mock callback for intercepting method invocations on this channel.
+  ///
+  /// The given callback will replace the currently registered mock callback for
+  /// this channel, if any. To remove the mock handler, pass null as the
+  /// `handler` argument.
+  ///
+  /// Later calls to [invokeMethod] will result in a successful result,
+  /// a [PlatformException] or a [MissingPluginException], determined by how
+  /// the future returned by the mock callback completes. The [codec] of this
+  /// channel is used to encode and decode values and errors.
+  ///
+  /// This is intended for testing. Method calls intercepted in this manner are
+  /// not sent to platform plugins.
+  ///
+  /// The provided `handler` must return a `Future` that completes with the
+  /// return value of the call. The value will be encoded using
+  /// [MethodCodec.encodeSuccessEnvelope], to act as if platform plugin had
+  /// returned that value.
+  void setMockMethodCallHandler(Future<dynamic>? Function(MethodCall call)? handler) {
+    _methodChannelMockHandlers[this] = handler;
+    binaryMessenger.setMockMessageHandler(
+      name,
+      handler == null ? null : (ByteData? message) => _handleAsMethodCall(message, handler),
+    );
+  }
+
+  /// Returns true if the `handler` argument matches the `handler` previously
+  /// passed to [setMockMethodCallHandler].
+  ///
+  /// This method is useful for tests or test harnesses that want to assert the
+  /// handler for the specified channel has not been altered by a previous test.
+  ///
+  /// Passing null for the `handler` returns true if the handler for the channel
+  /// is not set.
+  bool checkMockMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) => _methodChannelMockHandlers[this] == handler;
+
+  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic>? Function(MethodCall call) handler) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));
@@ -377,9 +445,6 @@ class MethodChannel {
       return codec.encodeErrorEnvelope(code: 'error', message: e.toString(), details: null);
     }
   }
-
-  // Looking for setMockMethodCallHandler or checkMethodCallHandler?
-  // See this shim package: packages/flutter_test/lib/src/deprecated.dart
 }
 
 /// A [MethodChannel] that ignores missing platform plugins.
@@ -407,6 +472,7 @@ class OptionalMethodChannel extends MethodChannel {
     final Map<dynamic, dynamic>? result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
     return result?.cast<K, V>();
   }
+
 }
 
 /// A named channel for communicating with platform plugins using event streams.

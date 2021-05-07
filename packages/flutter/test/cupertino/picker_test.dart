@@ -201,7 +201,7 @@ void main() {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+        SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
           systemCalls.add(methodCall);
         });
 
@@ -254,7 +254,7 @@ void main() {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+        SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
           systemCalls.add(methodCall);
         });
 

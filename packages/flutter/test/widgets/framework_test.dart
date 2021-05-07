@@ -1589,6 +1589,40 @@ void main() {
     expect(() => element.state, throwsA(isA<TypeError>()));
     expect(() => element.widget, throwsA(isA<TypeError>()));
   }, skip: kIsWeb);
+
+  testWidgets('Deactivate and activate are called correctly', (WidgetTester tester) async {
+    final List<String> states = <String>[];
+    Widget build([Key? key]) {
+      return StatefulWidgetSpy(
+        key: key,
+        onInitState: (BuildContext context) { states.add('initState'); },
+        onDidUpdateWidget: (BuildContext context) { states.add('didUpdateWidget'); },
+        onDeactivate: (BuildContext context) { states.add('deactivate'); },
+        onActivate: (BuildContext context) { states.add('activate'); },
+        onBuild: (BuildContext context) { states.add('build'); },
+        onDispose: (BuildContext context) { states.add('dispose'); },
+      );
+    }
+    Future<void> pumpWidget(Widget widget) {
+      states.clear();
+      return tester.pumpWidget(widget);
+    }
+
+    await pumpWidget(build());
+    expect(states, <String>['initState', 'build']);
+    await pumpWidget(Container(child: build()));
+    expect(states, <String>['deactivate', 'initState', 'build', 'dispose']);
+    await pumpWidget(Container());
+    expect(states, <String>['deactivate', 'dispose']);
+
+    final GlobalKey key = GlobalKey();
+    await pumpWidget(build(key));
+    expect(states, <String>['initState', 'build']);
+    await pumpWidget(Container(child: build(key)));
+    expect(states, <String>['deactivate', 'activate', 'didUpdateWidget', 'build']);
+    await pumpWidget(Container());
+    expect(states, <String>['deactivate', 'dispose']);
+  });
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
@@ -1827,6 +1861,7 @@ class StatefulWidgetSpy extends StatefulWidget {
     this.onDidChangeDependencies,
     this.onDispose,
     this.onDeactivate,
+    this.onActivate,
     this.onDidUpdateWidget,
   })  : super(key: key);
 
@@ -1835,6 +1870,7 @@ class StatefulWidgetSpy extends StatefulWidget {
   final void Function(BuildContext)? onDidChangeDependencies;
   final void Function(BuildContext)? onDispose;
   final void Function(BuildContext)? onDeactivate;
+  final void Function(BuildContext)? onActivate;
   final void Function(BuildContext)? onDidUpdateWidget;
 
   @override
@@ -1852,6 +1888,12 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
   void deactivate() {
     super.deactivate();
     widget.onDeactivate?.call(context);
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    widget.onActivate?.call(context);
   }
 
   @override
