@@ -96,7 +96,6 @@ import 'theme.dart';
 ///      ),
 ///      body: Center(
 ///        child: ElevatedButton(
-///          child: const Text('Show About Example'),
 ///          onPressed: () {
 ///            showAboutDialog(
 ///              context: context,
@@ -107,6 +106,7 @@ import 'theme.dart';
 ///              children: aboutBoxChildren,
 ///            );
 ///          },
+///          child: const Text('Show About Example'),
 ///        ),
 ///      ),
 ///    );

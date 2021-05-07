@@ -1159,16 +1159,16 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///         message: const Text('Message'),
 ///         actions: <CupertinoActionSheetAction>[
 ///           CupertinoActionSheetAction(
-///             child: const Text('Action One'),
 ///             onPressed: () {
 ///               Navigator.pop(context);
 ///             },
+///             child: const Text('Action One'),
 ///           ),
 ///           CupertinoActionSheetAction(
-///             child: const Text('Action Two'),
 ///             onPressed: () {
 ///               Navigator.pop(context);
 ///             },
+///             child: const Text('Action Two'),
 ///           ),
 ///         ],
 ///       );

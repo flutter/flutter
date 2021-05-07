@@ -90,9 +90,6 @@ enum _ContextMenuLocation {
 ///         width: 100,
 ///         height: 100,
 ///         child: CupertinoContextMenu(
-///           child: Container(
-///             color: Colors.red,
-///           ),
 ///           actions: <Widget>[
 ///             CupertinoContextMenuAction(
 ///               onPressed: () {
@@ -101,12 +98,15 @@ enum _ContextMenuLocation {
 ///               child: const Text('Action one'),
 ///             ),
 ///             CupertinoContextMenuAction(
-///               child: const Text('Action two'),
 ///               onPressed: () {
 ///                 Navigator.pop(context);
 ///               },
+///               child: const Text('Action two'),
 ///             ),
 ///           ],
+///           child: Container(
+///             color: Colors.red,
+///           ),
 ///         ),
 ///       ),
 ///     ),
