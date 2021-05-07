@@ -840,7 +840,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 ///       ElevatedButton(
 ///         onPressed: () {
 ///           _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
-///         }
+///         },
 ///         child: const Text('Change padding'),
 ///       ),
 ///     ],
