@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggle_buttons_theme.dart';
@@ -284,6 +285,13 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).fillColor is used. If
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
+  ///
+  /// If fillColor is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///
   final Color? fillColor;
 
   /// The color to use for filling the button when the button has input focus.
@@ -862,8 +870,10 @@ class _ToggleButton extends StatelessWidget {
     Color? currentSplashColor;
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
+    final Set<MaterialState> _states;
 
     if (onPressed != null && selected) {
+      _states = <MaterialState>{MaterialState.selected};
       currentColor = selectedColor
         ?? toggleButtonsTheme.selectedColor
         ?? theme.colorScheme.primary;
@@ -879,10 +889,15 @@ class _ToggleButton extends StatelessWidget {
         ?? toggleButtonsTheme.splashColor
         ?? theme.colorScheme.primary.withOpacity(0.16);
     } else if (onPressed != null && !selected) {
+      _states = <MaterialState>{};
+      if (fillColor !=  null && fillColor is MaterialStateColor) {
+        currentFillColor = fillColor!;
+      } else {
+        currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
+      }
       currentColor = color
         ?? toggleButtonsTheme.color
         ?? theme.colorScheme.onSurface.withOpacity(0.87);
-      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
       currentFocusColor = focusColor
         ?? toggleButtonsTheme.focusColor
         ?? theme.colorScheme.onSurface.withOpacity(0.12);
@@ -893,14 +908,20 @@ class _ToggleButton extends StatelessWidget {
         ?? toggleButtonsTheme.splashColor
         ?? theme.colorScheme.onSurface.withOpacity(0.16);
     } else {
+      _states = <MaterialState>{MaterialState.disabled};
+      if (fillColor !=  null && fillColor is MaterialStateColor) {
+        currentFillColor = fillColor!;
+      } else {
+        currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
+      }
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
         ?? theme.colorScheme.onSurface.withOpacity(0.38);
-      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
     final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2!;
     final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
+    final Color resolvedFillColor = MaterialStateProperty.resolveAs<Color>(currentFillColor, _states);
 
     final Widget result = ClipRRect(
       borderRadius: clipRadius,
@@ -910,7 +931,7 @@ class _ToggleButton extends StatelessWidget {
         ),
         constraints: currentConstraints,
         elevation: 0.0,
-        fillColor: currentFillColor,
+        fillColor: resolvedFillColor,
         focusColor: currentFocusColor,
         focusElevation: 0,
         highlightColor: highlightColor ?? theme.colorScheme.surface.withOpacity(0.0),
