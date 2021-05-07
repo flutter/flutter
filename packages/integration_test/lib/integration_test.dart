@@ -228,7 +228,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       _vmService = vmService;
     }
     if (_vmService == null) {
-      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+      final developer.ServiceProtocolInfo info =
+          await developer.Service.getInfo();
       assert(info.serverUri != null);
       _vmService = await vm_io.vmServiceConnectUri(
         'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
@@ -301,29 +302,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     reportData![reportKey] = timeline.toJson();
   }
 
-  Future<_GarbageCollectionInfo> _runAndGetGCInfo(Future<void> Function() action) async {
-    if (kIsWeb) {
-      await action();
-      return const _GarbageCollectionInfo();
-    }
-
-    final vm.Timeline timeline = await traceTimeline(
-      action,
-      streams: <String>['GC'],
-    );
-
-    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
-      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
-    }).length;
-    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
-      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
-    }).length;
-    return _GarbageCollectionInfo(
-      oldCount: oldGenGCCount,
-      newCount: newGenGCCount,
-    );
-  }
-
   /// Watches the [FrameTiming] during `action` and report it to the binding
   /// with key `reportKey`.
   ///
@@ -362,16 +340,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
-    final _GarbageCollectionInfo gcInfo = await _runAndGetGCInfo(action);
-
+    await action();
     await delayForFrameTimings(); // make sure all FrameTimings are reported
     removeTimingsCallback(watcher);
-
-    final FrameTimingSummarizer frameTimes = FrameTimingSummarizer(
-      frameTimings,
-      newGenGCCount: gcInfo.newCount,
-      oldGenGCCount: gcInfo.oldCount,
-    );
+    final FrameTimingSummarizer frameTimes =
+        FrameTimingSummarizer(frameTimings);
     reportData ??= <String, dynamic>{};
     reportData![reportKey] = frameTimes.summary;
   }
@@ -392,12 +365,4 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
     super.attachRootWidget(RepaintBoundary(child: rootWidget));
   }
-}
-
-@immutable
-class _GarbageCollectionInfo {
-  const _GarbageCollectionInfo({this.oldCount = -1, this.newCount = -1});
-
-  final int oldCount;
-  final int newCount;
 }
