@@ -39,6 +39,18 @@ class ViewConfiguration {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ViewConfiguration
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio;
+  }
+
+  @override
+  int get hashCode => hashValues(size, devicePixelRatio);
+
+  @override
   String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
 }
 
