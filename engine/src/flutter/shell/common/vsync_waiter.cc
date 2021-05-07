@@ -88,7 +88,7 @@ void VsyncWaiter::ScheduleSecondaryCallback(uintptr_t id,
       return;
     }
   }
-  AwaitVSync();
+  AwaitVSyncForSecondaryCallback();
 }
 
 void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
