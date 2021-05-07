@@ -1,4 +1,4 @@
-Signature: 83d08ef945314cbdf8a941e1190e4dce
+Signature: 0ecff892d7019419178536b5bcfb0b27
 
 UNUSED LICENSES:
 
@@ -535,7 +535,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
@@ -1260,7 +1259,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
@@ -1882,7 +1880,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
@@ -3194,12 +3191,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/brightness.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/color_adjustment.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/tokens.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/pointer_capture.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/events.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keyboard.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keys.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/layout.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/modifiers.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/semantic_keys.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/lifecycle_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/device_listener.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/types.fidl
@@ -3406,6 +3397,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/diagnostic_data.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/reader/reader.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/lib/src/scenic_context.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_views_service.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
@@ -3415,9 +3407,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyb
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.allocation/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/inotify.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/coding_unstable.h
+FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/algorithm.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/functional.h
+FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/algorithm.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/functional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/span.h
