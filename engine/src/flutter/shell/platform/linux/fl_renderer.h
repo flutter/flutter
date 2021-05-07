@@ -242,6 +242,20 @@ gboolean fl_renderer_present_layers(FlRenderer* renderer,
                                     const FlutterLayer** layers,
                                     size_t layers_count);
 
+/**
+ * fl_renderer_wait_for_frame:
+ * @renderer: an #FlRenderer.
+ * @target_width: width of frame being waited for
+ * @target_height: height of frame being waited for
+ *
+ * Holds the thread until frame with requested dimensions is presented.
+ * While waiting for frame Flutter platform and raster tasks are being
+ * processed.
+ */
+void fl_renderer_wait_for_frame(FlRenderer* renderer,
+                                int target_width,
+                                int target_height);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_RENDERER_H_
