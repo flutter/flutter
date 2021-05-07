@@ -48,7 +48,7 @@ class ViewConfiguration {
   }
 
   @override
-  int get hashCode => hashValues(size.hashCode, devicePixelRatio);
+  int get hashCode => hashValues(size, devicePixelRatio);
 
   @override
   String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
