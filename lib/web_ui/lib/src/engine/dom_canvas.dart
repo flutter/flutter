@@ -267,7 +267,7 @@ html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,
     sb.write('fill-rule="evenodd" ');
   }
   sb.write('d="');
-  pathToSvg(path, sb);
+  pathToSvg(path.pathRef, sb);
   sb.write('"></path>');
   sb.write('</svg>');
   return html.Element.html(sb.toString(), treeSanitizer: _NullTreeSanitizer());

@@ -42,17 +42,17 @@ class GradientSweep extends EngineGradient {
     // Render gradient into a bitmap and create a canvas pattern.
     _OffScreenCanvas offScreenCanvas =
         _OffScreenCanvas(widthInPixels, heightInPixels);
-    _GlContext gl = _OffScreenCanvas.supported
-        ? _GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
-        : _GlContext.fromCanvas(
+    GlContext gl = _OffScreenCanvas.supported
+        ? GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
+        : GlContext.fromCanvas(
             offScreenCanvas._glCanvas!, webGLVersion == WebGLVersion.webgl1);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    _GlProgram glProgram = gl.cacheProgram(
-        _WebGlRenderer.writeBaseVertexShader(),
+    GlProgram glProgram = gl.cacheProgram(
+        VertexShaders.writeBaseVertexShader(),
         _createSweepFragmentShader(normalizedGradient, tileMode));
     gl.useProgram(glProgram);
 
@@ -135,8 +135,8 @@ class GradientSweep extends EngineGradient {
   final Float32List? matrix4;
 }
 
-class ImageShader implements ui.ImageShader {
-  ImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
+class EngineImageShader implements ui.ImageShader {
+  EngineImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
       : _image = image as HtmlImage;
 
   final ui.TileMode tileModeX;
@@ -225,17 +225,17 @@ class GradientLinear extends EngineGradient {
     // Render gradient into a bitmap and create a canvas pattern.
     _OffScreenCanvas offScreenCanvas =
         _OffScreenCanvas(widthInPixels, heightInPixels);
-    _GlContext gl = _OffScreenCanvas.supported
-        ? _GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
-        : _GlContext.fromCanvas(
+    GlContext gl = _OffScreenCanvas.supported
+        ? GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
+        : GlContext.fromCanvas(
             offScreenCanvas._glCanvas!, webGLVersion == WebGLVersion.webgl1);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    _GlProgram glProgram = gl.cacheProgram(
-        _WebGlRenderer.writeBaseVertexShader(),
+    GlProgram glProgram = gl.cacheProgram(
+        VertexShaders.writeBaseVertexShader(),
         _createLinearFragmentShader(normalizedGradient, tileMode));
     gl.useProgram(glProgram);
 
@@ -438,7 +438,7 @@ String _writeSharedGradientShader(ShaderBuilder builder, ShaderMethod method,
       probeName = 'tiled_st';
       break;
   }
-  _writeUnrolledBinarySearch(method, 0, gradient.thresholdCount - 1,
+  writeUnrolledBinarySearch(method, 0, gradient.thresholdCount - 1,
       probe: probeName,
       sourcePrefix: 'threshold',
       biasName: 'bias',
@@ -496,17 +496,17 @@ class GradientRadial extends EngineGradient {
     // Render gradient into a bitmap and create a canvas pattern.
     _OffScreenCanvas offScreenCanvas =
         _OffScreenCanvas(widthInPixels, heightInPixels);
-    _GlContext gl = _OffScreenCanvas.supported
-        ? _GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
-        : _GlContext.fromCanvas(
+    GlContext gl = _OffScreenCanvas.supported
+        ? GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
+        : GlContext.fromCanvas(
             offScreenCanvas._glCanvas!, webGLVersion == WebGLVersion.webgl1);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    _GlProgram glProgram = gl.cacheProgram(
-        _WebGlRenderer.writeBaseVertexShader(),
+    GlProgram glProgram = gl.cacheProgram(
+        VertexShaders.writeBaseVertexShader(),
         _createRadialFragmentShader(
             normalizedGradient, shaderBounds, tileMode));
     gl.useProgram(glProgram);

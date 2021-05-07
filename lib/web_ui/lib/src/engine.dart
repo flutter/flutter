@@ -38,6 +38,12 @@ export 'engine/alarm_clock.dart';
 import 'engine/browser_detection.dart';
 export 'engine/browser_detection.dart';
 
+import 'engine/html_image_codec.dart';
+export 'engine/html_image_codec.dart';
+
+import 'engine/html/painting.dart';
+export 'engine/html/painting.dart';
+
 import 'engine/html/path_to_svg_clip.dart';
 export 'engine/html/path_to_svg_clip.dart';
 
@@ -56,8 +62,26 @@ export 'engine/html/path/path_metrics.dart';
 import 'engine/html/path/path_ref.dart';
 export 'engine/html/path/path_ref.dart';
 
+import 'engine/html/path/path_to_svg.dart';
+export 'engine/html/path/path_to_svg.dart';
+
 import 'engine/html/path/path_utils.dart';
 export 'engine/html/path/path_utils.dart';
+
+import 'engine/html/path/path_windings.dart';
+export 'engine/html/path/path_windings.dart';
+
+import 'engine/html/path/tangent.dart';
+export 'engine/html/path/tangent.dart';
+
+import 'engine/html/shaders/normalized_gradient.dart';
+export 'engine/html/shaders/normalized_gradient.dart';
+
+import 'engine/html/shaders/shader_builder.dart';
+export 'engine/html/shaders/shader_builder.dart';
+
+import 'engine/html/shaders/vertex_shaders.dart';
+export 'engine/html/shaders/vertex_shaders.dart';
 
 import 'engine/mouse_cursor.dart';
 export 'engine/mouse_cursor.dart';
@@ -155,6 +179,7 @@ part 'engine/color_filter.dart';
 part 'engine/dom_canvas.dart';
 part 'engine/dom_renderer.dart';
 part 'engine/engine_canvas.dart';
+part 'engine/font_change_util.dart';
 part 'engine/frame_reference.dart';
 part 'engine/html/backdrop_filter.dart';
 part 'engine/html/canvas.dart';
@@ -164,11 +189,7 @@ part 'engine/html/debug_canvas_reuse_overlay.dart';
 part 'engine/html/image_filter.dart';
 part 'engine/html/offset.dart';
 part 'engine/html/opacity.dart';
-part 'engine/html/painting.dart';
 part 'engine/html/path/path.dart';
-part 'engine/html/path/path_to_svg.dart';
-part 'engine/html/path/path_windings.dart';
-part 'engine/html/path/tangent.dart';
 part 'engine/html/picture.dart';
 part 'engine/html/platform_view.dart';
 part 'engine/html/recording_canvas.dart';
@@ -176,13 +197,10 @@ part 'engine/html/render_vertices.dart';
 part 'engine/html/scene.dart';
 part 'engine/html/scene_builder.dart';
 part 'engine/html/shader_mask.dart';
-part 'engine/html/shaders/normalized_gradient.dart';
 part 'engine/html/shaders/shader.dart';
-part 'engine/html/shaders/shader_builder.dart';
 part 'engine/html/surface.dart';
 part 'engine/html/surface_stats.dart';
 part 'engine/html/transform.dart';
-part 'engine/html_image_codec.dart';
 part 'engine/keyboard_binding.dart';
 part 'engine/keyboard.dart';
 part 'engine/key_map.dart';
@@ -219,7 +237,6 @@ part 'engine/text_editing/autofill_hint.dart';
 part 'engine/text_editing/input_type.dart';
 part 'engine/text_editing/text_capitalization.dart';
 part 'engine/text_editing/text_editing.dart';
-part 'engine/font_change_util.dart';
 part 'engine/window.dart';
 
 // The mode the app is running in.
