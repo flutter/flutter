@@ -573,7 +573,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // the _plainText when handling the pointer event.
       //
       // If this happens, we need to make sure the new selection is still valid.
-      final int textLength = textSelectionDelegate.textEditingValue.text.length;
+      final int textLength = _plainText.length;
       nextSelection = nextSelection.copyWith(
         baseOffset: math.min(nextSelection.baseOffset, textLength),
         extentOffset: math.min(nextSelection.extentOffset, textLength),
@@ -1012,16 +1012,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Deletes the current uncollapsed selection.
-  void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
+  void _deleteSelection(String currentText, TextSelection selection, SelectionChangedCause cause) {
     assert(selection.isCollapsed == false);
 
     if (_readOnly || !selection.isValid || selection.isCollapsed) {
       return;
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
-    final String textBefore = selection.textBefore(text);
-    final String textAfter = selection.textAfter(text);
+    final String textBefore = selection.textBefore(currentText);
+    final String textAfter = selection.textAfter(currentText);
     final int cursorPosition = math.min(selection.start, selection.end);
 
     final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
@@ -1045,7 +1044,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
+    final String text = _plainText;
     final String textBefore = selection.textBefore(text);
 
     if (textBefore.isEmpty) {
@@ -1074,7 +1073,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
+    final String text = _plainText;
     final String textAfter = selection.textAfter(text);
 
     if (textAfter.isEmpty) {
@@ -1105,18 +1104,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteForward], which is same but in the opposite direction.
   void delete(SelectionChangedCause cause) {
+    final TextSelection? selection = _selection;
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || selection == null || !selection.isValid) {
       return;
     }
+    final String text = _plainText;
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
+    if (!selection.isCollapsed) {
+      return _deleteSelection(text, selection, cause);
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
-    String textBefore = _selection!.textBefore(text);
+    String textBefore = selection.textBefore(text);
     if (textBefore.isEmpty) {
       return;
     }
@@ -1124,7 +1124,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int characterBoundary = previousCharacter(textBefore.length, textBefore);
     textBefore = textBefore.substring(0, characterBoundary);
 
-    final String textAfter = _selection!.textAfter(text);
+    final String textAfter = selection.textAfter(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
     _setTextEditingValue(
       TextEditingValue(text: textBefore + textAfter, selection: newSelection),
@@ -1153,23 +1153,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
   void deleteByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    final TextSelection? selection = _selection;
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || selection == null || !selection.isValid) {
       return;
     }
+    final String text = _plainText;
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
+    if (!selection.isCollapsed) {
+      return _deleteSelection(text, selection, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
     if (obscureText) {
-      return _deleteToStart(_selection!, cause);
+      return _deleteToStart(selection, cause);
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
-    String textBefore = _selection!.textBefore(text);
+    String textBefore = selection.textBefore(text);
     if (textBefore.isEmpty) {
       return;
     }
@@ -1200,22 +1201,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteForwardByLine], which is same but in the opposite direction.
   void deleteByLine(SelectionChangedCause cause) {
+    final TextSelection? selection = _selection;
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || selection == null || !selection.isValid) {
       return;
     }
+    final String text = _plainText;
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
+    if (!selection.isCollapsed) {
+      return _deleteSelection(text, selection, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
     if (obscureText) {
-      return _deleteToStart(_selection!, cause);
+      return _deleteToStart(selection, cause);
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
     String textBefore = _selection!.textBefore(text);
     if (textBefore.isEmpty) {
       return;
@@ -1230,7 +1232,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection line = _getLineAtOffset(TextPosition(offset: textBefore.length - 1));
     textBefore = textBefore.substring(0, line.start);
 
-    final String textAfter = _selection!.textAfter(text);
+    final String textAfter = selection.textAfter(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
     _setTextEditingValue(
       TextEditingValue(text: textBefore + textAfter, selection: newSelection),
@@ -1251,19 +1253,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [delete], which is same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
+    final TextSelection? selection = _selection;
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || selection == null || !selection.isValid) {
       return;
     }
+    final String text = _plainText;
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
+    if (!selection.isCollapsed) {
+      return _deleteSelection(text, selection, cause);
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
-    final String textBefore = _selection!.textBefore(text);
-    String textAfter = _selection!.textAfter(text);
+    final String textBefore = selection.textBefore(text);
+    String textAfter = selection.textAfter(text);
 
     if (textAfter.isEmpty) {
       return;
@@ -1295,14 +1298,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteByWord], which is same but in the opposite direction.
   void deleteForwardByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    final TextSelection? selection = _selection;
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || selection == null || !selection.isValid) {
       return;
     }
+    final String text = _plainText;
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
+    if (!selection.isCollapsed) {
+      return _deleteSelection(text, selection, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big word.
@@ -1310,7 +1315,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return _deleteToEnd(_selection!, cause);
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
     String textAfter = _selection!.textAfter(text);
 
     if (textAfter.isEmpty) {
@@ -1342,14 +1346,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteByLine], which is same but in the opposite direction.
   void deleteForwardByLine(SelectionChangedCause cause) {
+    final TextSelection? selection = _selection;
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || selection == null || !selection.isValid) {
       return;
     }
+    final String text = _plainText;
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
+    if (!selection.isCollapsed) {
+      return _deleteSelection(text, selection, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
@@ -1357,7 +1363,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return _deleteToEnd(_selection!, cause);
     }
 
-    final String text = textSelectionDelegate.textEditingValue.text;
     String textAfter = _selection!.textAfter(text);
     if (textAfter.isEmpty) {
       return;
@@ -2129,9 +2134,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control/command + (X, C, V, A).
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
-    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
-    assert(selection != null);
+    final TextSelection? selection = _selection;
+
+    if (selection == null) {
+      return;
+    }
+
+    final String text = _plainText;
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
     if (key == LogicalKeyboardKey.keyC) {
       if (!selection.isCollapsed) {
@@ -2165,7 +2174,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         text: text,
         selection: selection.copyWith(
           baseOffset: 0,
-          extentOffset: textSelectionDelegate.textEditingValue.text.length,
+          extentOffset: _plainText.length,
         ),
       );
     }

@@ -3463,6 +3463,75 @@ void main() {
       });
     });
   });
+
+  group('delete API implementations are not racy', () {
+    // Regression test for: https://github.com/flutter/flutter/issues/80226.
+    //
+    // This textSelectionDelegate has different text and selection from the
+    // render editable.
+    final FakeEditableTextState delegate = FakeEditableTextState();
+
+    late RenderEditable editable;
+
+    setUp(() {
+      editable = RenderEditable(
+        text: TextSpan(
+          text: 'A ' * 50,
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 50),
+      );
+
+      delegate.textEditingValue = const TextEditingValue(text: 'BBB', selection: TextSelection.collapsed(offset: 0));
+    });
+
+    void verifyDoesNotCrashWithInconsistentTextEditingValue(void Function(SelectionChangedCause) method) {
+      editable = RenderEditable(
+        text: TextSpan(
+          text: 'A ' * 50,
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 50),
+      );
+
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      dynamic error;
+      try {
+        method(SelectionChangedCause.tap);
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isNull);
+      expect(delegate.textEditingValue.text, isNot(contains('B')));
+    }
+
+    test('delete', () {
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.delete);
+    });
+    test('deleteForward', () {
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteForward);
+    });
+    test('deleteByWord', () {
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteByWord);
+    });
+    test('deleteForwardByWord', () {
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteForwardByWord);
+    });
+    test('deleteByLine', () {
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteByLine);
+    });
+    test('deleteForwardByLine', () {
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteForwardByLine);
+    });
+  });
 }
 
 class _TestRenderEditable extends RenderEditable {
