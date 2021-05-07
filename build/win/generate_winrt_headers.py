@@ -64,6 +64,7 @@ def write_options_file(options_path, input_files, output_dir):
   outfile.write('-verbose\n')
   outfile.close()
 
+
 def generate_headers(options_file):
   """Run cppwinrt.exe with the specified options file to generate WinRT headers
   in the output directory. Logs stderr to the console.
@@ -76,6 +77,14 @@ def generate_headers(options_file):
   process = subprocess.Popen(args, stderr=subprocess.PIPE)
   out, err = process.communicate()
   print(err)
+
+  # On failure, emit the options file contents. On success, cppwinrt does so
+  # itself.
+  if process.returncode != 0:
+    print('cppwinrt header generation failed. Options file was:')
+    infile = open(options_file, 'r')
+    print(infile.read())
+    infile.close()
   return process.returncode
 
 
