@@ -51,7 +51,8 @@ enum DragStartBehavior {
 ///
 /// See also:
 ///
-///  * [GestureDetector], the widget that is used to detect gestures.
+///  * [GestureDetector], the widget that is used to detect built-in gestures.
+///  * [RawGestureDetector], the widget that is used to detect custom gestures.
 ///  * [debugPrintRecognizerCallbacksTrace], a flag that can be set to help
 ///    debug issues with gesture recognizers.
 abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableTreeMixin {

@@ -9,6 +9,7 @@
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:dev_tools/candidates.dart';
 import 'package:dev_tools/clean.dart';
 import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/globals.dart';
@@ -65,6 +66,10 @@ Future<void> main(List<String> args) async {
     ),
     CleanCommand(
       checkouts: checkouts,
+    ),
+    CandidatesCommand(
+      checkouts: checkouts,
+      flutterRoot: localFlutterRoot,
     ),
   ].forEach(runner.addCommand);
 

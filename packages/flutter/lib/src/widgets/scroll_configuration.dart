@@ -14,6 +14,13 @@ import 'scrollbar.dart';
 
 const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 
+/// Device types that scrollables should accept drag gestures from by default.
+const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
+  PointerDeviceKind.touch,
+  PointerDeviceKind.stylus,
+  PointerDeviceKind.invertedStylus,
+};
+
 /// Describes how [Scrollable] widgets should behave.
 ///
 /// {@template flutter.widgets.scrollBehavior}
@@ -52,6 +59,7 @@ class ScrollBehavior {
   ScrollBehavior copyWith({
     bool scrollbars = true,
     bool overscroll = true,
+    Set<PointerDeviceKind>? dragDevices,
     ScrollPhysics? physics,
     TargetPlatform? platform,
   }) {
@@ -61,6 +69,7 @@ class ScrollBehavior {
       overscrollIndicator: overscroll,
       physics: physics,
       platform: platform,
+      dragDevices: dragDevices,
     );
   }
 
@@ -68,6 +77,14 @@ class ScrollBehavior {
   ///
   /// Defaults to the current platform.
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
+
+  /// The device kinds that the scrollable will accept drag gestures from.
+  ///
+  /// By default only [PointerDeviceKind.touch], [PointerDeviceKind.stylus], and
+  /// [PointerDeviceKind.invertedStylus] are configured to create drag gestures.
+  /// Enabling this for [PointerDeviceKind.mouse] will make it difficult or
+  /// impossible to select text in scrollable containers and is not recommended.
+  Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
@@ -200,13 +217,18 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.overscrollIndicator = true,
     this.physics,
     this.platform,
-  });
+    Set<PointerDeviceKind>? dragDevices,
+  }) : _dragDevices = dragDevices;
 
   final ScrollBehavior delegate;
   final bool scrollbar;
   final bool overscrollIndicator;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
+  final Set<PointerDeviceKind>? _dragDevices;
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
@@ -233,12 +255,14 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     bool overscroll = true,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    Set<PointerDeviceKind>? dragDevices,
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars,
       overscroll: overscroll,
       physics: physics,
       platform: platform,
+      dragDevices: dragDevices,
     );
   }
 
@@ -259,6 +283,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || oldDelegate.overscrollIndicator != overscrollIndicator
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
+        || setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 
