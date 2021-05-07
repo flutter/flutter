@@ -705,7 +705,6 @@ class PerfTest {
       final String deviceId = device.deviceId;
 
       await flutter('drive', options: <String>[
-        '--no-dds', // TODO(dnfield): consider removing when https://github.com/flutter/flutter/issues/81707 is fixed
         '--no-android-gradle-daemon',
         '-v',
         '--verbose-system-logs',
@@ -778,8 +777,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_frame_rasterizer_time_millis',
   '90th_percentile_frame_rasterizer_time_millis',
   '99th_percentile_frame_rasterizer_time_millis',
-  'new_gen_gc_count',
-  'old_gen_gc_count',
 ];
 
 class PerfTestWithSkSL extends PerfTest {
@@ -871,7 +868,6 @@ class PerfTestWithSkSL extends PerfTest {
       _flutterPath,
       <String>[
         'run',
-        '--no-dds',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[
             '--device-timeout', '5',
