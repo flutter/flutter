@@ -722,7 +722,7 @@ void main() {
     test('printCommunication = true', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: true);
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
-      expect(log, <String> [
+      expect(log, <String>[
         'WebFlutterDriver: >>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: printCommunication test}',
         'WebFlutterDriver: <<< {isError: false, response: {status: ok}, type: Response}',
       ]);
@@ -731,7 +731,7 @@ void main() {
     test('printCommunication = false', () async {
       driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: false);
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
-      expect(log, <String> []);
+      expect(log, <String>[]);
     });
   });
 
