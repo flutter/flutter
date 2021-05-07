@@ -56,14 +56,14 @@ void main() {
 
   setUp(() {
     _binding.postFrameCallbacks.clear();
-    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
+    SystemChannels.mouseCursor.setMockMethodCallHandler((MethodCall call) async {
       if (_methodCallHandler != null)
         return _methodCallHandler!(call);
     });
   });
 
   tearDown(() {
-    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, null);
+    SystemChannels.mouseCursor.setMockMethodCallHandler(null);
   });
 
   test('Should work on platforms that does not support mouse cursor', () async {
