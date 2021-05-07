@@ -44,7 +44,7 @@ def get_inputs(sdk_path, sdk_version):
     name = contract.getAttribute('name')
     version = contract.getAttribute('version')
     winmd_path = os.path.join(reference_dir, name, version, '%s.winmd' % name)
-    inputs.append(winmd_path)
+    inputs.append(os.path.realpath(winmd_path))
   return inputs
 
 
