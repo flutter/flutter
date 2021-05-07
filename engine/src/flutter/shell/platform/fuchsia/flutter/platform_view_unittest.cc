@@ -83,7 +83,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   }
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message) {
+      std::unique_ptr<flutter::PlatformMessage> message) {
     message_ = std::move(message);
   }
   // |flutter::PlatformView::Delegate|
@@ -139,7 +139,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
 
  private:
   std::unique_ptr<flutter::Surface> surface_;
-  fml::RefPtr<flutter::PlatformMessage> message_;
+  std::unique_ptr<flutter::PlatformMessage> message_;
   flutter::ViewportMetrics metrics_;
   int32_t semantics_features_ = 0;
   bool semantics_enabled_ = false;
@@ -568,12 +568,12 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
       "    }"
       "}";
 
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
           std::vector<uint8_t>(txt, txt + sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
-  base_view->HandlePlatformMessage(message);
+  base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
@@ -628,12 +628,12 @@ TEST_F(PlatformViewTests, CreateViewTest) {
       "    }"
       "}";
 
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
           std::vector<uint8_t>(txt, txt + sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
-  base_view->HandlePlatformMessage(message);
+  base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
@@ -679,12 +679,12 @@ TEST_F(PlatformViewTests, UpdateViewTest) {
       "    }"
       "}";
 
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
           std::vector<uint8_t>(txt, txt + sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
-  base_view->HandlePlatformMessage(message);
+  base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
@@ -736,12 +736,12 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
       "    }"
       "}";
 
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
           std::vector<uint8_t>(txt, txt + sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
-  base_view->HandlePlatformMessage(message);
+  base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
@@ -798,7 +798,7 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
                       << "}";
   std::string create_view_call = create_view_message.str();
   static_cast<flutter::PlatformView*>(&platform_view)
-      ->HandlePlatformMessage(fml::MakeRefCounted<flutter::PlatformMessage>(
+      ->HandlePlatformMessage(std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
           std::vector<uint8_t>(create_view_call.begin(),
                                create_view_call.end()),
@@ -936,11 +936,11 @@ TEST_F(PlatformViewTests, RequestFocusTest) {
   EXPECT_CALL(*response, Complete(::testing::_))
       .WillOnce(::testing::Invoke(&data_arg, &DataArg::Complete));
 
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
           std::vector<uint8_t>(buff, buff + sizeof(buff)), response);
-  base_view->HandlePlatformMessage(message);
+  base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
@@ -999,11 +999,11 @@ TEST_F(PlatformViewTests, RequestFocusFailTest) {
   EXPECT_CALL(*response, Complete(::testing::_))
       .WillOnce(::testing::Invoke(&data_arg, &DataArg::Complete));
 
-  fml::RefPtr<flutter::PlatformMessage> message =
-      fml::MakeRefCounted<flutter::PlatformMessage>(
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
           std::vector<uint8_t>(buff, buff + sizeof(buff)), response);
-  base_view->HandlePlatformMessage(message);
+  base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 

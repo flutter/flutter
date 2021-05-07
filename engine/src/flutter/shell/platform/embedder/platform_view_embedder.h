@@ -32,7 +32,7 @@ class PlatformViewEmbedder final : public PlatformView {
   using UpdateSemanticsCustomActionsCallback =
       std::function<void(flutter::CustomAccessibilityActionUpdates actions)>;
   using PlatformMessageResponseCallback =
-      std::function<void(fml::RefPtr<flutter::PlatformMessage>)>;
+      std::function<void(std::unique_ptr<PlatformMessage>)>;
   using ComputePlatformResolvedLocaleCallback =
       std::function<std::unique_ptr<std::vector<std::string>>(
           const std::vector<std::string>& supported_locale_data)>;
@@ -85,8 +85,7 @@ class PlatformViewEmbedder final : public PlatformView {
       flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
-  void HandlePlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message) override;
+  void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 
  private:
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;

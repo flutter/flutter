@@ -139,7 +139,7 @@ class PlatformView final : public flutter::PlatformView,
 
   // |flutter::PlatformView|
   void HandlePlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message) override;
+      std::unique_ptr<flutter::PlatformMessage> message) override;
 
   // |flutter::PlatformView|
   void UpdateSemantics(
@@ -150,19 +150,19 @@ class PlatformView final : public flutter::PlatformView,
   // being used, but it is necessary to handle accessibility messages
   // that are sent by Flutter when semantics is enabled.
   void HandleAccessibilityChannelPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message);
+      std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kFlutterPlatformChannel
   void HandleFlutterPlatformChannelPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message);
+      std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kTextInputChannel
   void HandleFlutterTextInputChannelPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message);
+      std::unique_ptr<flutter::PlatformMessage> message);
 
   // Channel handler for kPlatformViewsChannel.
   void HandleFlutterPlatformViewsChannelPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message);
+      std::unique_ptr<flutter::PlatformMessage> message);
 
   const std::string debug_label_;
   // TODO(MI4-2490): remove once ViewRefControl is passed to Scenic and kept
@@ -207,10 +207,10 @@ class PlatformView final : public flutter::PlatformView,
   std::unique_ptr<fuchsia::ui::input::TextInputState> last_text_state_;
 
   std::set<int> down_pointers_;
-  std::map<
-      std::string /* channel */,
-      fit::function<void(
-          fml::RefPtr<flutter::PlatformMessage> /* message */)> /* handler */>
+  std::map<std::string /* channel */,
+           fit::function<void(
+               std::unique_ptr<
+                   flutter::PlatformMessage> /* message */)> /* handler */>
       platform_message_handlers_;
   // These are the channels that aren't registered and have been notified as
   // such. Notifying via logs multiple times results in log-spam. See:

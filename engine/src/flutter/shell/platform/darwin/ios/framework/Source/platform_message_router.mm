@@ -15,7 +15,7 @@ PlatformMessageRouter::PlatformMessageRouter() = default;
 PlatformMessageRouter::~PlatformMessageRouter() = default;
 
 void PlatformMessageRouter::HandlePlatformMessage(
-    fml::RefPtr<flutter::PlatformMessage> message) const {
+    std::unique_ptr<flutter::PlatformMessage> message) const {
   fml::RefPtr<flutter::PlatformMessageResponse> completer = message->response();
   auto it = message_handlers_.find(message->channel());
   if (it != message_handlers_.end()) {

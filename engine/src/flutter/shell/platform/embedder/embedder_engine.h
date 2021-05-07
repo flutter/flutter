@@ -68,7 +68,7 @@ class EmbedderEngine {
   bool DispatchKeyDataPacket(std::unique_ptr<flutter::KeyDataPacket> packet,
                              KeyDataResponse callback);
 
-  bool SendPlatformMessage(fml::RefPtr<flutter::PlatformMessage> message);
+  bool SendPlatformMessage(std::unique_ptr<PlatformMessage> message);
 
   bool RegisterTexture(int64_t texture);
 

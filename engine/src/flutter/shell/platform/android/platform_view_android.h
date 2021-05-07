@@ -137,7 +137,7 @@ class PlatformViewAndroid final : public PlatformView {
 
   // |PlatformView|
   void HandlePlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message) override;
+      std::unique_ptr<flutter::PlatformMessage> message) override;
 
   // |PlatformView|
   void OnPreEngineRestart() const override;
