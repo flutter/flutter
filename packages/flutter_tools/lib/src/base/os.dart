@@ -309,18 +309,35 @@ class _LinuxUtils extends _PosixUtils {
   String get name {
     if (_name == null) {
       const String prettyNameKey = 'PRETTY_NAME';
+      // If "/etc/os-release" doesn't exist, fallback to "/usr/lib/os-release".
       final String osReleasePath = _fileSystem.file('/etc/os-release').existsSync()
         ? '/etc/os-release'
         : '/usr/lib/os-release';
+      String prettyName;
+      String kernelRelease;
       try {
         final String osRelease = _fileSystem.file(osReleasePath).readAsStringSync();
-        final String prettyName = _getOsReleaseValueForKey(osRelease, prettyNameKey);
-        final String kernelRelease = _platform.operatingSystemVersion.split(' ')[1];
-        _name = '$prettyName$kernelRelease';
+        prettyName = _getOsReleaseValueForKey(osRelease, prettyNameKey);
       } on Exception catch (e) {
-        _logger.printTrace('Failed obtaining name for Linux: $e');
+        _logger.printTrace('Failed obtaining PRETTY_NAME for Linux: $e');
+        prettyName = '';
       }
-      _name ??= super.name;
+      try {
+        // Split the operating system version which should be formatted as
+        // "Linux kernelRelease build", by spaces.
+        final List<String> osVersionSplitted = _platform.operatingSystemVersion.split(' ');
+        if (osVersionSplitted.length < 2) {
+          // The operating system version didn't have the expected format.
+          // Initialize as an empty string.
+          kernelRelease = '';
+        } else {
+          kernelRelease = ' ${osVersionSplitted[1]}';
+        }
+      } on Exception catch (e) {
+        _logger.printTrace('Failed obtaining kernel release for Linux: $e');
+        kernelRelease = '';
+      }
+      _name = '${prettyName.isEmpty ? super.name : prettyName}$kernelRelease';
     }
     return _name!;
   }
@@ -332,11 +349,12 @@ class _LinuxUtils extends _PosixUtils {
       final List<String> entryKeyValuePair = entry.split('=');
       if(entryKeyValuePair[0] == key) {
         final String value =  entryKeyValuePair[1];
+        // Remove quotes from either end of the value if they exist
         final String quote = value[0];
         if (quote == '\'' || quote == '"') {
-          return '${value.substring(0, value.length - 1).substring(1)} ';
+          return value.substring(0, value.length - 1).substring(1);
         } else {
-          return '$value ';
+          return value;
         }
       }
     }
