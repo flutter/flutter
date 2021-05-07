@@ -60,8 +60,11 @@ class AnimatedSize extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
-    // TODO(jsimmons): deprecate when customers tests are updated.
-    TickerProvider? vsync, // ignore: avoid_unused_constructor_parameters
+    @Deprecated(
+      'This field is now ignored. '
+      'This feature was deprecated after v2.2.0-10.1.pre.'
+    )
+    TickerProvider? vsync,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(clipBehavior != null),
        super(key: key);
