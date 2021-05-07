@@ -682,4 +682,7 @@ class TestTerminal extends AnsiTerminal {
   Stream<String> get keystrokes {
     return mockTerminalStdInStream;
   }
+
+  @override
+  int get preferredStyle => 0;
 }

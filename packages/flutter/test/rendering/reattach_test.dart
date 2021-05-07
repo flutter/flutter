@@ -66,7 +66,7 @@ class TestCompositingBitsTree {
                 onPaint: () { painted = true; },
               ),
               child: child = RenderConstrainedBox(
-                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0)
+                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
               ),
             ),
           ),
@@ -133,7 +133,7 @@ void main() {
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
-      }
+      },
     );
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);
@@ -154,9 +154,9 @@ void main() {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
-        listener: () {
-          ++semanticsUpdateCount;
-        }
+      listener: () {
+        ++semanticsUpdateCount;
+      },
     );
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);

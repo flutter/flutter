@@ -1103,6 +1103,13 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
 
+    // Set the isScrollingNotifier. Even if only one position actually receives
+    // the delta, the NestedScrollView's intention is to treat multiple
+    // ScrollPositions as one.
+    _outerPosition!.isScrollingNotifier.value = true;
+    for (final _NestedScrollPosition position in _innerPositions)
+      position.isScrollingNotifier.value = true;
+
     if (_innerPositions.isEmpty) {
       // Does not enter overscroll.
       _outerPosition!.applyClampedPointerSignalUpdate(delta);
@@ -1317,6 +1324,7 @@ class _NestedScrollController extends ScrollController {
   @override
   void detach(ScrollPosition position) {
     assert(position is _NestedScrollPosition);
+    (position as _NestedScrollPosition).setParent(null);
     position.removeListener(_scheduleUpdateShadow);
     super.detach(position);
     _scheduleUpdateShadow();
@@ -1620,12 +1628,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     return coordinator.drag(details, dragCancelCallback);
-  }
-
-  @override
-  void dispose() {
-    _parent?.detach(this);
-    super.dispose();
   }
 }
 

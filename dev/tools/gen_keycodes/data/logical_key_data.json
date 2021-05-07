@@ -1,0 +1,10984 @@
+{
+  "None": {
+    "name": "None",
+    "value": 0,
+    "names": {
+      "web": [
+        "None"
+      ],
+      "android": [
+        "UNKNOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        0
+      ],
+      "android": [
+        0
+      ],
+      "fuchsia": [
+        0
+      ]
+    }
+  },
+  "Space": {
+    "name": "Space",
+    "value": 32,
+    "keyLabel": " ",
+    "names": {
+      "web": [
+        "Space"
+      ],
+      "gtk": [
+        "KP_Space"
+      ],
+      "windows": [
+        "SPACE"
+      ],
+      "android": [
+        "SPACE"
+      ]
+    },
+    "values": {
+      "web": [
+        32
+      ],
+      "gtk": [
+        65408
+      ],
+      "windows": [
+        32
+      ],
+      "android": [
+        62
+      ],
+      "fuchsia": [
+        4295426092
+      ]
+    }
+  },
+  "Exclamation": {
+    "name": "Exclamation",
+    "value": 33,
+    "keyLabel": "!",
+    "names": {
+      "web": [
+        "Exclamation"
+      ]
+    },
+    "values": {
+      "web": [
+        33
+      ]
+    }
+  },
+  "Quote": {
+    "name": "Quote",
+    "value": 34,
+    "keyLabel": "\"",
+    "names": {
+      "web": [
+        "Quote"
+      ],
+      "windows": [
+        "OEM_7"
+      ],
+      "android": [
+        "APOSTROPHE"
+      ]
+    },
+    "values": {
+      "web": [
+        34
+      ],
+      "windows": [
+        222
+      ],
+      "android": [
+        75
+      ],
+      "fuchsia": [
+        4295426100
+      ]
+    }
+  },
+  "NumberSign": {
+    "name": "NumberSign",
+    "value": 35,
+    "keyLabel": "#",
+    "names": {
+      "web": [
+        "NumberSign"
+      ]
+    },
+    "values": {
+      "web": [
+        35
+      ]
+    }
+  },
+  "Dollar": {
+    "name": "Dollar",
+    "value": 36,
+    "keyLabel": "$",
+    "names": {
+      "web": [
+        "Dollar"
+      ]
+    },
+    "values": {
+      "web": [
+        36
+      ]
+    }
+  },
+  "Percent": {
+    "name": "Percent",
+    "value": 37,
+    "keyLabel": "%",
+    "names": {
+      "web": [
+        "Percent"
+      ]
+    },
+    "values": {
+      "web": [
+        37
+      ]
+    }
+  },
+  "Ampersand": {
+    "name": "Ampersand",
+    "value": 38,
+    "keyLabel": "&",
+    "names": {
+      "web": [
+        "Ampersand"
+      ]
+    },
+    "values": {
+      "web": [
+        38
+      ]
+    }
+  },
+  "QuoteSingle": {
+    "name": "QuoteSingle",
+    "value": 39,
+    "keyLabel": "'",
+    "names": {
+      "web": [
+        "QuoteSingle"
+      ]
+    },
+    "values": {
+      "web": [
+        39
+      ]
+    }
+  },
+  "ParenthesisLeft": {
+    "name": "ParenthesisLeft",
+    "value": 40,
+    "keyLabel": "(",
+    "names": {
+      "web": [
+        "ParenthesisLeft"
+      ]
+    },
+    "values": {
+      "web": [
+        40
+      ]
+    }
+  },
+  "ParenthesisRight": {
+    "name": "ParenthesisRight",
+    "value": 41,
+    "keyLabel": ")",
+    "names": {
+      "web": [
+        "ParenthesisRight"
+      ]
+    },
+    "values": {
+      "web": [
+        41
+      ]
+    }
+  },
+  "Asterisk": {
+    "name": "Asterisk",
+    "value": 42,
+    "keyLabel": "*",
+    "names": {
+      "web": [
+        "Asterisk"
+      ]
+    },
+    "values": {
+      "web": [
+        42
+      ]
+    }
+  },
+  "Add": {
+    "name": "Add",
+    "value": 43,
+    "keyLabel": "+",
+    "names": {
+      "web": [
+        "Add"
+      ]
+    },
+    "values": {
+      "web": [
+        43
+      ]
+    }
+  },
+  "Comma": {
+    "name": "Comma",
+    "value": 44,
+    "keyLabel": ",",
+    "names": {
+      "web": [
+        "Comma"
+      ],
+      "windows": [
+        "OEM_COMMA"
+      ],
+      "android": [
+        "COMMA"
+      ]
+    },
+    "values": {
+      "web": [
+        44
+      ],
+      "windows": [
+        188
+      ],
+      "android": [
+        55
+      ],
+      "fuchsia": [
+        4295426102
+      ]
+    }
+  },
+  "Minus": {
+    "name": "Minus",
+    "value": 45,
+    "keyLabel": "-",
+    "names": {
+      "web": [
+        "Minus"
+      ],
+      "windows": [
+        "OEM_MINUS"
+      ],
+      "android": [
+        "MINUS"
+      ]
+    },
+    "values": {
+      "web": [
+        45
+      ],
+      "windows": [
+        189
+      ],
+      "android": [
+        69
+      ],
+      "fuchsia": [
+        4295426093
+      ]
+    }
+  },
+  "Period": {
+    "name": "Period",
+    "value": 46,
+    "keyLabel": ".",
+    "names": {
+      "web": [
+        "Period"
+      ],
+      "gtk": [
+        "KP_Decimal"
+      ],
+      "windows": [
+        "OEM_PERIOD"
+      ],
+      "android": [
+        "PERIOD"
+      ]
+    },
+    "values": {
+      "web": [
+        46
+      ],
+      "gtk": [
+        65454
+      ],
+      "windows": [
+        190
+      ],
+      "android": [
+        56
+      ],
+      "fuchsia": [
+        4295426103
+      ]
+    }
+  },
+  "Slash": {
+    "name": "Slash",
+    "value": 47,
+    "keyLabel": "/",
+    "names": {
+      "web": [
+        "Slash"
+      ],
+      "windows": [
+        "OEM_2"
+      ],
+      "android": [
+        "SLASH"
+      ]
+    },
+    "values": {
+      "web": [
+        47
+      ],
+      "windows": [
+        191
+      ],
+      "android": [
+        76
+      ],
+      "fuchsia": [
+        4295426104
+      ]
+    }
+  },
+  "Digit0": {
+    "name": "Digit0",
+    "value": 48,
+    "keyLabel": "0",
+    "names": {
+      "web": [
+        "Digit0"
+      ],
+      "android": [
+        "0"
+      ]
+    },
+    "values": {
+      "web": [
+        48
+      ],
+      "android": [
+        7
+      ],
+      "fuchsia": [
+        4295426087
+      ]
+    }
+  },
+  "Digit1": {
+    "name": "Digit1",
+    "value": 49,
+    "keyLabel": "1",
+    "names": {
+      "web": [
+        "Digit1"
+      ],
+      "android": [
+        "1"
+      ]
+    },
+    "values": {
+      "web": [
+        49
+      ],
+      "android": [
+        8
+      ],
+      "fuchsia": [
+        4295426078
+      ]
+    }
+  },
+  "Digit2": {
+    "name": "Digit2",
+    "value": 50,
+    "keyLabel": "2",
+    "names": {
+      "web": [
+        "Digit2"
+      ],
+      "android": [
+        "2"
+      ]
+    },
+    "values": {
+      "web": [
+        50
+      ],
+      "android": [
+        9
+      ],
+      "fuchsia": [
+        4295426079
+      ]
+    }
+  },
+  "Digit3": {
+    "name": "Digit3",
+    "value": 51,
+    "keyLabel": "3",
+    "names": {
+      "web": [
+        "Digit3"
+      ],
+      "android": [
+        "3"
+      ]
+    },
+    "values": {
+      "web": [
+        51
+      ],
+      "android": [
+        10
+      ],
+      "fuchsia": [
+        4295426080
+      ]
+    }
+  },
+  "Digit4": {
+    "name": "Digit4",
+    "value": 52,
+    "keyLabel": "4",
+    "names": {
+      "web": [
+        "Digit4"
+      ],
+      "android": [
+        "4"
+      ]
+    },
+    "values": {
+      "web": [
+        52
+      ],
+      "android": [
+        11
+      ],
+      "fuchsia": [
+        4295426081
+      ]
+    }
+  },
+  "Digit5": {
+    "name": "Digit5",
+    "value": 53,
+    "keyLabel": "5",
+    "names": {
+      "web": [
+        "Digit5"
+      ],
+      "android": [
+        "5"
+      ]
+    },
+    "values": {
+      "web": [
+        53
+      ],
+      "android": [
+        12
+      ],
+      "fuchsia": [
+        4295426082
+      ]
+    }
+  },
+  "Digit6": {
+    "name": "Digit6",
+    "value": 54,
+    "keyLabel": "6",
+    "names": {
+      "web": [
+        "Digit6"
+      ],
+      "android": [
+        "6"
+      ]
+    },
+    "values": {
+      "web": [
+        54
+      ],
+      "android": [
+        13
+      ],
+      "fuchsia": [
+        4295426083
+      ]
+    }
+  },
+  "Digit7": {
+    "name": "Digit7",
+    "value": 55,
+    "keyLabel": "7",
+    "names": {
+      "web": [
+        "Digit7"
+      ],
+      "android": [
+        "7"
+      ]
+    },
+    "values": {
+      "web": [
+        55
+      ],
+      "android": [
+        14
+      ],
+      "fuchsia": [
+        4295426084
+      ]
+    }
+  },
+  "Digit8": {
+    "name": "Digit8",
+    "value": 56,
+    "keyLabel": "8",
+    "names": {
+      "web": [
+        "Digit8"
+      ],
+      "android": [
+        "8"
+      ]
+    },
+    "values": {
+      "web": [
+        56
+      ],
+      "android": [
+        15
+      ],
+      "fuchsia": [
+        4295426085
+      ]
+    }
+  },
+  "Digit9": {
+    "name": "Digit9",
+    "value": 57,
+    "keyLabel": "9",
+    "names": {
+      "web": [
+        "Digit9"
+      ],
+      "android": [
+        "9"
+      ]
+    },
+    "values": {
+      "web": [
+        57
+      ],
+      "android": [
+        16
+      ],
+      "fuchsia": [
+        4295426086
+      ]
+    }
+  },
+  "Colon": {
+    "name": "Colon",
+    "value": 58,
+    "keyLabel": ":",
+    "names": {
+      "web": [
+        "Colon"
+      ]
+    },
+    "values": {
+      "web": [
+        58
+      ]
+    }
+  },
+  "Semicolon": {
+    "name": "Semicolon",
+    "value": 59,
+    "keyLabel": ";",
+    "names": {
+      "web": [
+        "Semicolon"
+      ],
+      "windows": [
+        "OEM_1"
+      ],
+      "android": [
+        "SEMICOLON"
+      ]
+    },
+    "values": {
+      "web": [
+        59
+      ],
+      "windows": [
+        186
+      ],
+      "android": [
+        74
+      ],
+      "fuchsia": [
+        4295426099
+      ]
+    }
+  },
+  "Less": {
+    "name": "Less",
+    "value": 60,
+    "keyLabel": "<",
+    "names": {
+      "web": [
+        "Less"
+      ]
+    },
+    "values": {
+      "web": [
+        60
+      ]
+    }
+  },
+  "Equal": {
+    "name": "Equal",
+    "value": 61,
+    "keyLabel": "=",
+    "names": {
+      "web": [
+        "Equal"
+      ],
+      "windows": [
+        "OEM_PLUS"
+      ],
+      "android": [
+        "EQUALS"
+      ]
+    },
+    "values": {
+      "web": [
+        61
+      ],
+      "windows": [
+        187
+      ],
+      "android": [
+        70
+      ],
+      "fuchsia": [
+        4295426094
+      ]
+    }
+  },
+  "Greater": {
+    "name": "Greater",
+    "value": 62,
+    "keyLabel": ">",
+    "names": {
+      "web": [
+        "Greater"
+      ]
+    },
+    "values": {
+      "web": [
+        62
+      ]
+    }
+  },
+  "Question": {
+    "name": "Question",
+    "value": 63,
+    "keyLabel": "?",
+    "names": {
+      "web": [
+        "Question"
+      ]
+    },
+    "values": {
+      "web": [
+        63
+      ]
+    }
+  },
+  "At": {
+    "name": "At",
+    "value": 64,
+    "keyLabel": "@",
+    "names": {
+      "web": [
+        "At"
+      ]
+    },
+    "values": {
+      "web": [
+        64
+      ]
+    }
+  },
+  "BracketLeft": {
+    "name": "BracketLeft",
+    "value": 91,
+    "keyLabel": "[",
+    "names": {
+      "web": [
+        "BracketLeft"
+      ],
+      "windows": [
+        "OEM_4"
+      ],
+      "android": [
+        "LEFT_BRACKET"
+      ]
+    },
+    "values": {
+      "web": [
+        91
+      ],
+      "windows": [
+        219
+      ],
+      "android": [
+        71
+      ],
+      "fuchsia": [
+        4295426095
+      ]
+    }
+  },
+  "Backslash": {
+    "name": "Backslash",
+    "value": 92,
+    "keyLabel": "\\",
+    "names": {
+      "web": [
+        "Backslash"
+      ],
+      "windows": [
+        "OEM_5"
+      ],
+      "android": [
+        "BACKSLASH"
+      ]
+    },
+    "values": {
+      "web": [
+        92
+      ],
+      "windows": [
+        220
+      ],
+      "android": [
+        73
+      ],
+      "fuchsia": [
+        4295426097
+      ]
+    }
+  },
+  "BracketRight": {
+    "name": "BracketRight",
+    "value": 93,
+    "keyLabel": "]",
+    "names": {
+      "web": [
+        "BracketRight"
+      ],
+      "windows": [
+        "OEM_6"
+      ],
+      "android": [
+        "RIGHT_BRACKET"
+      ]
+    },
+    "values": {
+      "web": [
+        93
+      ],
+      "windows": [
+        221
+      ],
+      "android": [
+        72
+      ],
+      "fuchsia": [
+        4295426096
+      ]
+    }
+  },
+  "Caret": {
+    "name": "Caret",
+    "value": 94,
+    "keyLabel": "^",
+    "names": {
+      "web": [
+        "Caret"
+      ]
+    },
+    "values": {
+      "web": [
+        94
+      ]
+    }
+  },
+  "Underscore": {
+    "name": "Underscore",
+    "value": 95,
+    "keyLabel": "_",
+    "names": {
+      "web": [
+        "Underscore"
+      ]
+    },
+    "values": {
+      "web": [
+        95
+      ]
+    }
+  },
+  "Backquote": {
+    "name": "Backquote",
+    "value": 96,
+    "keyLabel": "`",
+    "names": {
+      "web": [
+        "Backquote"
+      ],
+      "windows": [
+        "OEM_3"
+      ],
+      "android": [
+        "GRAVE"
+      ]
+    },
+    "values": {
+      "web": [
+        96
+      ],
+      "windows": [
+        192
+      ],
+      "android": [
+        68
+      ],
+      "fuchsia": [
+        4295426101
+      ]
+    }
+  },
+  "KeyA": {
+    "name": "KeyA",
+    "value": 97,
+    "keyLabel": "a",
+    "names": {
+      "web": [
+        "KeyA"
+      ],
+      "android": [
+        "A"
+      ]
+    },
+    "values": {
+      "web": [
+        97
+      ],
+      "android": [
+        29
+      ],
+      "fuchsia": [
+        4295426052
+      ]
+    }
+  },
+  "KeyB": {
+    "name": "KeyB",
+    "value": 98,
+    "keyLabel": "b",
+    "names": {
+      "web": [
+        "KeyB"
+      ],
+      "android": [
+        "B"
+      ]
+    },
+    "values": {
+      "web": [
+        98
+      ],
+      "android": [
+        30
+      ],
+      "fuchsia": [
+        4295426053
+      ]
+    }
+  },
+  "KeyC": {
+    "name": "KeyC",
+    "value": 99,
+    "keyLabel": "c",
+    "names": {
+      "web": [
+        "KeyC"
+      ],
+      "android": [
+        "C"
+      ]
+    },
+    "values": {
+      "web": [
+        99
+      ],
+      "android": [
+        31
+      ],
+      "fuchsia": [
+        4295426054
+      ]
+    }
+  },
+  "KeyD": {
+    "name": "KeyD",
+    "value": 100,
+    "keyLabel": "d",
+    "names": {
+      "web": [
+        "KeyD"
+      ],
+      "android": [
+        "D"
+      ]
+    },
+    "values": {
+      "web": [
+        100
+      ],
+      "android": [
+        32
+      ],
+      "fuchsia": [
+        4295426055
+      ]
+    }
+  },
+  "KeyE": {
+    "name": "KeyE",
+    "value": 101,
+    "keyLabel": "e",
+    "names": {
+      "web": [
+        "KeyE"
+      ],
+      "android": [
+        "E"
+      ]
+    },
+    "values": {
+      "web": [
+        101
+      ],
+      "android": [
+        33
+      ],
+      "fuchsia": [
+        4295426056
+      ]
+    }
+  },
+  "KeyF": {
+    "name": "KeyF",
+    "value": 102,
+    "keyLabel": "f",
+    "names": {
+      "web": [
+        "KeyF"
+      ],
+      "android": [
+        "F"
+      ]
+    },
+    "values": {
+      "web": [
+        102
+      ],
+      "android": [
+        34
+      ],
+      "fuchsia": [
+        4295426057
+      ]
+    }
+  },
+  "KeyG": {
+    "name": "KeyG",
+    "value": 103,
+    "keyLabel": "g",
+    "names": {
+      "web": [
+        "KeyG"
+      ],
+      "android": [
+        "G"
+      ]
+    },
+    "values": {
+      "web": [
+        103
+      ],
+      "android": [
+        35
+      ],
+      "fuchsia": [
+        4295426058
+      ]
+    }
+  },
+  "KeyH": {
+    "name": "KeyH",
+    "value": 104,
+    "keyLabel": "h",
+    "names": {
+      "web": [
+        "KeyH"
+      ],
+      "android": [
+        "H"
+      ]
+    },
+    "values": {
+      "web": [
+        104
+      ],
+      "android": [
+        36
+      ],
+      "fuchsia": [
+        4295426059
+      ]
+    }
+  },
+  "KeyI": {
+    "name": "KeyI",
+    "value": 105,
+    "keyLabel": "i",
+    "names": {
+      "web": [
+        "KeyI"
+      ],
+      "android": [
+        "I"
+      ]
+    },
+    "values": {
+      "web": [
+        105
+      ],
+      "android": [
+        37
+      ],
+      "fuchsia": [
+        4295426060
+      ]
+    }
+  },
+  "KeyJ": {
+    "name": "KeyJ",
+    "value": 106,
+    "keyLabel": "j",
+    "names": {
+      "web": [
+        "KeyJ"
+      ],
+      "android": [
+        "J"
+      ]
+    },
+    "values": {
+      "web": [
+        106
+      ],
+      "android": [
+        38
+      ],
+      "fuchsia": [
+        4295426061
+      ]
+    }
+  },
+  "KeyK": {
+    "name": "KeyK",
+    "value": 107,
+    "keyLabel": "k",
+    "names": {
+      "web": [
+        "KeyK"
+      ],
+      "android": [
+        "K"
+      ]
+    },
+    "values": {
+      "web": [
+        107
+      ],
+      "android": [
+        39
+      ],
+      "fuchsia": [
+        4295426062
+      ]
+    }
+  },
+  "KeyL": {
+    "name": "KeyL",
+    "value": 108,
+    "keyLabel": "l",
+    "names": {
+      "web": [
+        "KeyL"
+      ],
+      "android": [
+        "L"
+      ]
+    },
+    "values": {
+      "web": [
+        108
+      ],
+      "android": [
+        40
+      ],
+      "fuchsia": [
+        4295426063
+      ]
+    }
+  },
+  "KeyM": {
+    "name": "KeyM",
+    "value": 109,
+    "keyLabel": "m",
+    "names": {
+      "web": [
+        "KeyM"
+      ],
+      "android": [
+        "M"
+      ]
+    },
+    "values": {
+      "web": [
+        109
+      ],
+      "android": [
+        41
+      ],
+      "fuchsia": [
+        4295426064
+      ]
+    }
+  },
+  "KeyN": {
+    "name": "KeyN",
+    "value": 110,
+    "keyLabel": "n",
+    "names": {
+      "web": [
+        "KeyN"
+      ],
+      "android": [
+        "N"
+      ]
+    },
+    "values": {
+      "web": [
+        110
+      ],
+      "android": [
+        42
+      ],
+      "fuchsia": [
+        4295426065
+      ]
+    }
+  },
+  "KeyO": {
+    "name": "KeyO",
+    "value": 111,
+    "keyLabel": "o",
+    "names": {
+      "web": [
+        "KeyO"
+      ],
+      "android": [
+        "O"
+      ]
+    },
+    "values": {
+      "web": [
+        111
+      ],
+      "android": [
+        43
+      ],
+      "fuchsia": [
+        4295426066
+      ]
+    }
+  },
+  "KeyP": {
+    "name": "KeyP",
+    "value": 112,
+    "keyLabel": "p",
+    "names": {
+      "web": [
+        "KeyP"
+      ],
+      "android": [
+        "P"
+      ]
+    },
+    "values": {
+      "web": [
+        112
+      ],
+      "android": [
+        44
+      ],
+      "fuchsia": [
+        4295426067
+      ]
+    }
+  },
+  "KeyQ": {
+    "name": "KeyQ",
+    "value": 113,
+    "keyLabel": "q",
+    "names": {
+      "web": [
+        "KeyQ"
+      ],
+      "android": [
+        "Q"
+      ]
+    },
+    "values": {
+      "web": [
+        113
+      ],
+      "android": [
+        45
+      ],
+      "fuchsia": [
+        4295426068
+      ]
+    }
+  },
+  "KeyR": {
+    "name": "KeyR",
+    "value": 114,
+    "keyLabel": "r",
+    "names": {
+      "web": [
+        "KeyR"
+      ],
+      "android": [
+        "R"
+      ]
+    },
+    "values": {
+      "web": [
+        114
+      ],
+      "android": [
+        46
+      ],
+      "fuchsia": [
+        4295426069
+      ]
+    }
+  },
+  "KeyS": {
+    "name": "KeyS",
+    "value": 115,
+    "keyLabel": "s",
+    "names": {
+      "web": [
+        "KeyS"
+      ],
+      "android": [
+        "S"
+      ]
+    },
+    "values": {
+      "web": [
+        115
+      ],
+      "android": [
+        47
+      ],
+      "fuchsia": [
+        4295426070
+      ]
+    }
+  },
+  "KeyT": {
+    "name": "KeyT",
+    "value": 116,
+    "keyLabel": "t",
+    "names": {
+      "web": [
+        "KeyT"
+      ],
+      "android": [
+        "T"
+      ]
+    },
+    "values": {
+      "web": [
+        116
+      ],
+      "android": [
+        48
+      ],
+      "fuchsia": [
+        4295426071
+      ]
+    }
+  },
+  "KeyU": {
+    "name": "KeyU",
+    "value": 117,
+    "keyLabel": "u",
+    "names": {
+      "web": [
+        "KeyU"
+      ],
+      "android": [
+        "U"
+      ]
+    },
+    "values": {
+      "web": [
+        117
+      ],
+      "android": [
+        49
+      ],
+      "fuchsia": [
+        4295426072
+      ]
+    }
+  },
+  "KeyV": {
+    "name": "KeyV",
+    "value": 118,
+    "keyLabel": "v",
+    "names": {
+      "web": [
+        "KeyV"
+      ],
+      "android": [
+        "V"
+      ]
+    },
+    "values": {
+      "web": [
+        118
+      ],
+      "android": [
+        50
+      ],
+      "fuchsia": [
+        4295426073
+      ]
+    }
+  },
+  "KeyW": {
+    "name": "KeyW",
+    "value": 119,
+    "keyLabel": "w",
+    "names": {
+      "web": [
+        "KeyW"
+      ],
+      "android": [
+        "W"
+      ]
+    },
+    "values": {
+      "web": [
+        119
+      ],
+      "android": [
+        51
+      ],
+      "fuchsia": [
+        4295426074
+      ]
+    }
+  },
+  "KeyX": {
+    "name": "KeyX",
+    "value": 120,
+    "keyLabel": "x",
+    "names": {
+      "web": [
+        "KeyX"
+      ],
+      "android": [
+        "X"
+      ]
+    },
+    "values": {
+      "web": [
+        120
+      ],
+      "android": [
+        52
+      ],
+      "fuchsia": [
+        4295426075
+      ]
+    }
+  },
+  "KeyY": {
+    "name": "KeyY",
+    "value": 121,
+    "keyLabel": "y",
+    "names": {
+      "web": [
+        "KeyY"
+      ],
+      "android": [
+        "Y"
+      ]
+    },
+    "values": {
+      "web": [
+        121
+      ],
+      "android": [
+        53
+      ],
+      "fuchsia": [
+        4295426076
+      ]
+    }
+  },
+  "KeyZ": {
+    "name": "KeyZ",
+    "value": 122,
+    "keyLabel": "z",
+    "names": {
+      "web": [
+        "KeyZ"
+      ],
+      "android": [
+        "Z"
+      ]
+    },
+    "values": {
+      "web": [
+        122
+      ],
+      "android": [
+        54
+      ],
+      "fuchsia": [
+        4295426077
+      ]
+    }
+  },
+  "BraceLeft": {
+    "name": "BraceLeft",
+    "value": 123,
+    "keyLabel": "{",
+    "names": {
+      "web": [
+        "BraceLeft"
+      ]
+    },
+    "values": {
+      "web": [
+        123
+      ]
+    }
+  },
+  "Bar": {
+    "name": "Bar",
+    "value": 124,
+    "keyLabel": "|",
+    "names": {
+      "web": [
+        "Bar"
+      ]
+    },
+    "values": {
+      "web": [
+        124
+      ]
+    }
+  },
+  "BraceRight": {
+    "name": "BraceRight",
+    "value": 125,
+    "keyLabel": "}",
+    "names": {
+      "web": [
+        "BraceRight"
+      ]
+    },
+    "values": {
+      "web": [
+        125
+      ]
+    }
+  },
+  "Tilde": {
+    "name": "Tilde",
+    "value": 126,
+    "keyLabel": "~",
+    "names": {
+      "web": [
+        "Tilde"
+      ]
+    },
+    "values": {
+      "web": [
+        126
+      ]
+    }
+  },
+  "Unidentified": {
+    "name": "Unidentified",
+    "value": 68719476737,
+    "names": {
+      "web": [
+        "Unidentified"
+      ]
+    },
+    "values": {
+      "web": [
+        1
+      ]
+    }
+  },
+  "Backspace": {
+    "name": "Backspace",
+    "value": 68719476744,
+    "keyLabel": "\b",
+    "names": {
+      "web": [
+        "Backspace"
+      ],
+      "macOs": [
+        "Backspace"
+      ],
+      "ios": [
+        "Backspace"
+      ],
+      "gtk": [
+        "BackSpace"
+      ],
+      "windows": [
+        "BACK"
+      ],
+      "android": [
+        "DEL"
+      ]
+    },
+    "values": {
+      "web": [
+        8
+      ],
+      "macOs": [
+        51
+      ],
+      "ios": [
+        42
+      ],
+      "gtk": [
+        65288
+      ],
+      "windows": [
+        8
+      ],
+      "android": [
+        67
+      ],
+      "fuchsia": [
+        4295426090
+      ]
+    }
+  },
+  "Tab": {
+    "name": "Tab",
+    "value": 68719476745,
+    "keyLabel": "\t",
+    "names": {
+      "web": [
+        "Tab"
+      ],
+      "gtk": [
+        "Tab",
+        "KP_Tab",
+        "ISO_Left_Tab"
+      ],
+      "windows": [
+        "TAB"
+      ],
+      "android": [
+        "TAB"
+      ]
+    },
+    "values": {
+      "web": [
+        9
+      ],
+      "gtk": [
+        65289,
+        65417,
+        65056
+      ],
+      "windows": [
+        9
+      ],
+      "android": [
+        61
+      ],
+      "fuchsia": [
+        4295426091
+      ]
+    }
+  },
+  "Enter": {
+    "name": "Enter",
+    "value": 68719476749,
+    "keyLabel": "\r",
+    "names": {
+      "web": [
+        "Enter"
+      ],
+      "gtk": [
+        "Return",
+        "ISO_Enter",
+        "3270_Enter"
+      ],
+      "windows": [
+        "RETURN"
+      ],
+      "android": [
+        "ENTER"
+      ]
+    },
+    "values": {
+      "web": [
+        13
+      ],
+      "gtk": [
+        65293,
+        65076,
+        64798
+      ],
+      "windows": [
+        13
+      ],
+      "android": [
+        66
+      ],
+      "fuchsia": [
+        4295426088
+      ]
+    }
+  },
+  "Escape": {
+    "name": "Escape",
+    "value": 68719476763,
+    "keyLabel": "\u001b",
+    "names": {
+      "web": [
+        "Escape"
+      ],
+      "macOs": [
+        "Escape"
+      ],
+      "ios": [
+        "Escape"
+      ],
+      "gtk": [
+        "Escape"
+      ],
+      "windows": [
+        "ESCAPE"
+      ],
+      "android": [
+        "ESCAPE"
+      ]
+    },
+    "values": {
+      "web": [
+        27
+      ],
+      "macOs": [
+        53
+      ],
+      "ios": [
+        41
+      ],
+      "gtk": [
+        65307
+      ],
+      "windows": [
+        27
+      ],
+      "android": [
+        111
+      ],
+      "fuchsia": [
+        4295426089
+      ]
+    }
+  },
+  "Delete": {
+    "name": "Delete",
+    "value": 68719476863,
+    "keyLabel": "",
+    "names": {
+      "web": [
+        "Delete"
+      ],
+      "macOs": [
+        "Delete"
+      ],
+      "ios": [
+        "Delete"
+      ],
+      "gtk": [
+        "Delete"
+      ],
+      "windows": [
+        "DELETE"
+      ],
+      "android": [
+        "FORWARD_DEL"
+      ]
+    },
+    "values": {
+      "web": [
+        127
+      ],
+      "macOs": [
+        117
+      ],
+      "ios": [
+        76
+      ],
+      "gtk": [
+        65535
+      ],
+      "windows": [
+        46
+      ],
+      "android": [
+        112
+      ],
+      "fuchsia": [
+        4295426124
+      ]
+    }
+  },
+  "Accel": {
+    "name": "Accel",
+    "value": 68719476993,
+    "names": {
+      "web": [
+        "Accel"
+      ]
+    },
+    "values": {
+      "web": [
+        257
+      ]
+    }
+  },
+  "AltGraph": {
+    "name": "AltGraph",
+    "value": 68719476995,
+    "names": {
+      "web": [
+        "AltGraph"
+      ]
+    },
+    "values": {
+      "web": [
+        259
+      ]
+    }
+  },
+  "CapsLock": {
+    "name": "CapsLock",
+    "value": 68719476996,
+    "names": {
+      "web": [
+        "CapsLock"
+      ],
+      "macOs": [
+        "CapsLock"
+      ],
+      "ios": [
+        "CapsLock"
+      ],
+      "gtk": [
+        "Caps_Lock"
+      ],
+      "windows": [
+        "CAPITAL"
+      ],
+      "android": [
+        "CAPS_LOCK"
+      ]
+    },
+    "values": {
+      "web": [
+        260
+      ],
+      "macOs": [
+        57
+      ],
+      "ios": [
+        57
+      ],
+      "gtk": [
+        65509
+      ],
+      "windows": [
+        20
+      ],
+      "android": [
+        115
+      ],
+      "fuchsia": [
+        4295426105
+      ]
+    }
+  },
+  "Fn": {
+    "name": "Fn",
+    "value": 68719476998,
+    "names": {
+      "web": [
+        "Fn"
+      ],
+      "macOs": [
+        "Fn"
+      ],
+      "android": [
+        "FUNCTION"
+      ]
+    },
+    "values": {
+      "web": [
+        262
+      ],
+      "macOs": [
+        63
+      ],
+      "android": [
+        119
+      ],
+      "fuchsia": [
+        4294967314
+      ]
+    }
+  },
+  "FnLock": {
+    "name": "FnLock",
+    "value": 68719476999,
+    "names": {
+      "web": [
+        "FnLock"
+      ]
+    },
+    "values": {
+      "web": [
+        263
+      ],
+      "fuchsia": [
+        4294967315
+      ]
+    }
+  },
+  "Hyper": {
+    "name": "Hyper",
+    "value": 68719477000,
+    "names": {
+      "web": [
+        "Hyper"
+      ],
+      "gtk": [
+        "Hyper_L",
+        "Hyper_R"
+      ]
+    },
+    "values": {
+      "web": [
+        264
+      ],
+      "gtk": [
+        65517,
+        65518
+      ],
+      "fuchsia": [
+        4294967312
+      ]
+    }
+  },
+  "NumLock": {
+    "name": "NumLock",
+    "value": 68719477002,
+    "names": {
+      "web": [
+        "NumLock"
+      ],
+      "macOs": [
+        "NumLock"
+      ],
+      "ios": [
+        "NumLock"
+      ],
+      "gtk": [
+        "Num_Lock"
+      ],
+      "windows": [
+        "NUMLOCK"
+      ],
+      "android": [
+        "NUM_LOCK"
+      ]
+    },
+    "values": {
+      "web": [
+        266
+      ],
+      "macOs": [
+        71
+      ],
+      "ios": [
+        83
+      ],
+      "gtk": [
+        65407
+      ],
+      "windows": [
+        144
+      ],
+      "android": [
+        143
+      ],
+      "fuchsia": [
+        4295426131
+      ]
+    }
+  },
+  "ScrollLock": {
+    "name": "ScrollLock",
+    "value": 68719477004,
+    "names": {
+      "web": [
+        "ScrollLock"
+      ],
+      "gtk": [
+        "Scroll_Lock"
+      ],
+      "windows": [
+        "SCROLL"
+      ],
+      "android": [
+        "SCROLL_LOCK"
+      ]
+    },
+    "values": {
+      "web": [
+        268
+      ],
+      "gtk": [
+        65300
+      ],
+      "windows": [
+        145
+      ],
+      "android": [
+        116
+      ],
+      "fuchsia": [
+        4295426119
+      ]
+    }
+  },
+  "Super": {
+    "name": "Super",
+    "value": 68719477006,
+    "names": {
+      "web": [
+        "Super"
+      ],
+      "gtk": [
+        "Super_L",
+        "Super_R"
+      ]
+    },
+    "values": {
+      "web": [
+        270
+      ],
+      "gtk": [
+        65515,
+        65516
+      ],
+      "fuchsia": [
+        4294967313
+      ]
+    }
+  },
+  "Symbol": {
+    "name": "Symbol",
+    "value": 68719477007,
+    "names": {
+      "web": [
+        "Symbol"
+      ],
+      "android": [
+        "SYM"
+      ]
+    },
+    "values": {
+      "web": [
+        271
+      ],
+      "android": [
+        63
+      ]
+    }
+  },
+  "SymbolLock": {
+    "name": "SymbolLock",
+    "value": 68719477008,
+    "names": {
+      "web": [
+        "SymbolLock"
+      ]
+    },
+    "values": {
+      "web": [
+        272
+      ]
+    }
+  },
+  "ShiftLevel5": {
+    "name": "ShiftLevel5",
+    "value": 68719477009,
+    "names": {
+      "web": [
+        "ShiftLevel5"
+      ]
+    },
+    "values": {
+      "web": [
+        273
+      ]
+    }
+  },
+  "ArrowDown": {
+    "name": "ArrowDown",
+    "value": 68719477505,
+    "names": {
+      "web": [
+        "ArrowDown"
+      ],
+      "macOs": [
+        "ArrowDown"
+      ],
+      "ios": [
+        "ArrowDown"
+      ],
+      "gtk": [
+        "Down"
+      ],
+      "windows": [
+        "DOWN"
+      ],
+      "android": [
+        "DPAD_DOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        769
+      ],
+      "macOs": [
+        125
+      ],
+      "ios": [
+        81
+      ],
+      "gtk": [
+        65364
+      ],
+      "windows": [
+        40
+      ],
+      "android": [
+        20
+      ],
+      "fuchsia": [
+        4295426129
+      ]
+    }
+  },
+  "ArrowLeft": {
+    "name": "ArrowLeft",
+    "value": 68719477506,
+    "names": {
+      "web": [
+        "ArrowLeft"
+      ],
+      "macOs": [
+        "ArrowLeft"
+      ],
+      "ios": [
+        "ArrowLeft"
+      ],
+      "gtk": [
+        "Left"
+      ],
+      "windows": [
+        "LEFT"
+      ],
+      "android": [
+        "DPAD_LEFT"
+      ]
+    },
+    "values": {
+      "web": [
+        770
+      ],
+      "macOs": [
+        123
+      ],
+      "ios": [
+        80
+      ],
+      "gtk": [
+        65361
+      ],
+      "windows": [
+        37
+      ],
+      "android": [
+        21
+      ],
+      "fuchsia": [
+        4295426128
+      ]
+    }
+  },
+  "ArrowRight": {
+    "name": "ArrowRight",
+    "value": 68719477507,
+    "names": {
+      "web": [
+        "ArrowRight"
+      ],
+      "macOs": [
+        "ArrowRight"
+      ],
+      "ios": [
+        "ArrowRight"
+      ],
+      "gtk": [
+        "Right"
+      ],
+      "windows": [
+        "RIGHT"
+      ],
+      "android": [
+        "DPAD_RIGHT"
+      ]
+    },
+    "values": {
+      "web": [
+        771
+      ],
+      "macOs": [
+        124
+      ],
+      "ios": [
+        79
+      ],
+      "gtk": [
+        65363
+      ],
+      "windows": [
+        39
+      ],
+      "android": [
+        22
+      ],
+      "fuchsia": [
+        4295426127
+      ]
+    }
+  },
+  "ArrowUp": {
+    "name": "ArrowUp",
+    "value": 68719477508,
+    "names": {
+      "web": [
+        "ArrowUp"
+      ],
+      "macOs": [
+        "ArrowUp"
+      ],
+      "ios": [
+        "ArrowUp"
+      ],
+      "gtk": [
+        "Up"
+      ],
+      "windows": [
+        "UP"
+      ],
+      "android": [
+        "DPAD_UP"
+      ]
+    },
+    "values": {
+      "web": [
+        772
+      ],
+      "macOs": [
+        126
+      ],
+      "ios": [
+        82
+      ],
+      "gtk": [
+        65362
+      ],
+      "windows": [
+        38
+      ],
+      "android": [
+        19
+      ],
+      "fuchsia": [
+        4295426130
+      ]
+    }
+  },
+  "End": {
+    "name": "End",
+    "value": 68719477509,
+    "names": {
+      "web": [
+        "End"
+      ],
+      "macOs": [
+        "End"
+      ],
+      "ios": [
+        "End"
+      ],
+      "gtk": [
+        "End"
+      ],
+      "windows": [
+        "END"
+      ],
+      "android": [
+        "MOVE_END"
+      ]
+    },
+    "values": {
+      "web": [
+        773
+      ],
+      "macOs": [
+        119
+      ],
+      "ios": [
+        77
+      ],
+      "gtk": [
+        65367
+      ],
+      "windows": [
+        35
+      ],
+      "android": [
+        123
+      ],
+      "fuchsia": [
+        4295426125
+      ]
+    }
+  },
+  "Home": {
+    "name": "Home",
+    "value": 68719477510,
+    "names": {
+      "web": [
+        "Home"
+      ],
+      "macOs": [
+        "Home"
+      ],
+      "ios": [
+        "Home"
+      ],
+      "gtk": [
+        "Home"
+      ],
+      "windows": [
+        "HOME"
+      ],
+      "android": [
+        "MOVE_HOME"
+      ]
+    },
+    "values": {
+      "web": [
+        774
+      ],
+      "macOs": [
+        115
+      ],
+      "ios": [
+        74
+      ],
+      "gtk": [
+        65360
+      ],
+      "windows": [
+        36
+      ],
+      "android": [
+        122
+      ],
+      "fuchsia": [
+        4295426122
+      ]
+    }
+  },
+  "PageDown": {
+    "name": "PageDown",
+    "value": 68719477511,
+    "names": {
+      "web": [
+        "PageDown"
+      ],
+      "macOs": [
+        "PageDown"
+      ],
+      "ios": [
+        "PageDown"
+      ],
+      "gtk": [
+        "Page_Down"
+      ],
+      "windows": [
+        "NEXT"
+      ],
+      "android": [
+        "PAGE_DOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        775
+      ],
+      "macOs": [
+        121
+      ],
+      "ios": [
+        78
+      ],
+      "gtk": [
+        65366
+      ],
+      "windows": [
+        34
+      ],
+      "android": [
+        93
+      ],
+      "fuchsia": [
+        4295426126
+      ]
+    }
+  },
+  "PageUp": {
+    "name": "PageUp",
+    "value": 68719477512,
+    "names": {
+      "web": [
+        "PageUp"
+      ],
+      "macOs": [
+        "PageUp"
+      ],
+      "ios": [
+        "PageUp"
+      ],
+      "gtk": [
+        "Page_Up"
+      ],
+      "windows": [
+        "PRIOR"
+      ],
+      "android": [
+        "PAGE_UP"
+      ]
+    },
+    "values": {
+      "web": [
+        776
+      ],
+      "macOs": [
+        116
+      ],
+      "ios": [
+        75
+      ],
+      "gtk": [
+        65365
+      ],
+      "windows": [
+        33
+      ],
+      "android": [
+        92
+      ],
+      "fuchsia": [
+        4295426123
+      ]
+    }
+  },
+  "Clear": {
+    "name": "Clear",
+    "value": 68719477761,
+    "names": {
+      "web": [
+        "Clear"
+      ],
+      "gtk": [
+        "Clear"
+      ],
+      "windows": [
+        "CLEAR"
+      ],
+      "android": [
+        "CLEAR"
+      ]
+    },
+    "values": {
+      "web": [
+        1025
+      ],
+      "gtk": [
+        65291
+      ],
+      "windows": [
+        12
+      ],
+      "android": [
+        28
+      ]
+    }
+  },
+  "Copy": {
+    "name": "Copy",
+    "value": 68719477762,
+    "names": {
+      "web": [
+        "Copy"
+      ],
+      "gtk": [
+        "3270_Copy",
+        "Copy"
+      ],
+      "android": [
+        "COPY"
+      ]
+    },
+    "values": {
+      "web": [
+        1026
+      ],
+      "gtk": [
+        64789,
+        269025111
+      ],
+      "android": [
+        278
+      ],
+      "fuchsia": [
+        4295426172
+      ]
+    }
+  },
+  "CrSel": {
+    "name": "CrSel",
+    "value": 68719477763,
+    "names": {
+      "web": [
+        "CrSel"
+      ]
+    },
+    "values": {
+      "web": [
+        1027
+      ]
+    }
+  },
+  "Cut": {
+    "name": "Cut",
+    "value": 68719477764,
+    "names": {
+      "web": [
+        "Cut"
+      ],
+      "gtk": [
+        "Cut"
+      ],
+      "android": [
+        "CUT"
+      ]
+    },
+    "values": {
+      "web": [
+        1028
+      ],
+      "gtk": [
+        269025112
+      ],
+      "android": [
+        277
+      ],
+      "fuchsia": [
+        4295426171
+      ]
+    }
+  },
+  "EraseEof": {
+    "name": "EraseEof",
+    "value": 68719477765,
+    "names": {
+      "web": [
+        "EraseEof"
+      ],
+      "gtk": [
+        "3270_EraseEOF"
+      ]
+    },
+    "values": {
+      "web": [
+        1029
+      ],
+      "gtk": [
+        64774
+      ]
+    }
+  },
+  "ExSel": {
+    "name": "ExSel",
+    "value": 68719477766,
+    "names": {
+      "web": [
+        "ExSel"
+      ],
+      "gtk": [
+        "3270_ExSelect"
+      ]
+    },
+    "values": {
+      "web": [
+        1030
+      ],
+      "gtk": [
+        64795
+      ]
+    }
+  },
+  "Insert": {
+    "name": "Insert",
+    "value": 68719477767,
+    "names": {
+      "web": [
+        "Insert"
+      ],
+      "macOs": [
+        "Insert"
+      ],
+      "ios": [
+        "Insert"
+      ],
+      "gtk": [
+        "Insert"
+      ],
+      "windows": [
+        "INSERT"
+      ],
+      "android": [
+        "INSERT"
+      ]
+    },
+    "values": {
+      "web": [
+        1031
+      ],
+      "macOs": [
+        114
+      ],
+      "ios": [
+        73
+      ],
+      "gtk": [
+        65379
+      ],
+      "windows": [
+        45
+      ],
+      "android": [
+        124
+      ],
+      "fuchsia": [
+        4295426121
+      ]
+    }
+  },
+  "Paste": {
+    "name": "Paste",
+    "value": 68719477768,
+    "names": {
+      "web": [
+        "Paste"
+      ],
+      "gtk": [
+        "Paste"
+      ],
+      "android": [
+        "PASTE"
+      ]
+    },
+    "values": {
+      "web": [
+        1032
+      ],
+      "gtk": [
+        269025133
+      ],
+      "android": [
+        279
+      ],
+      "fuchsia": [
+        4295426173
+      ]
+    }
+  },
+  "Redo": {
+    "name": "Redo",
+    "value": 68719477769,
+    "names": {
+      "web": [
+        "Redo"
+      ],
+      "gtk": [
+        "Redo"
+      ]
+    },
+    "values": {
+      "web": [
+        1033
+      ],
+      "gtk": [
+        65382
+      ],
+      "fuchsia": [
+        4295754361
+      ]
+    }
+  },
+  "Undo": {
+    "name": "Undo",
+    "value": 68719477770,
+    "names": {
+      "web": [
+        "Undo"
+      ],
+      "gtk": [
+        "Undo"
+      ]
+    },
+    "values": {
+      "web": [
+        1034
+      ],
+      "gtk": [
+        65381
+      ],
+      "fuchsia": [
+        4295426170
+      ]
+    }
+  },
+  "Accept": {
+    "name": "Accept",
+    "value": 68719478017,
+    "names": {
+      "web": [
+        "Accept"
+      ],
+      "windows": [
+        "ACCEPT"
+      ]
+    },
+    "values": {
+      "web": [
+        1281
+      ],
+      "windows": [
+        30
+      ]
+    }
+  },
+  "Again": {
+    "name": "Again",
+    "value": 68719478018,
+    "names": {
+      "web": [
+        "Again"
+      ]
+    },
+    "values": {
+      "web": [
+        1282
+      ],
+      "fuchsia": [
+        4295426169
+      ]
+    }
+  },
+  "Attn": {
+    "name": "Attn",
+    "value": 68719478019,
+    "names": {
+      "web": [
+        "Attn"
+      ],
+      "gtk": [
+        "3270_Attn"
+      ],
+      "windows": [
+        "ATTN"
+      ]
+    },
+    "values": {
+      "web": [
+        1283
+      ],
+      "gtk": [
+        64782
+      ],
+      "windows": [
+        246
+      ]
+    }
+  },
+  "Cancel": {
+    "name": "Cancel",
+    "value": 68719478020,
+    "names": {
+      "web": [
+        "Cancel"
+      ],
+      "gtk": [
+        "Cancel"
+      ],
+      "windows": [
+        "CANCEL"
+      ]
+    },
+    "values": {
+      "web": [
+        1284
+      ],
+      "gtk": [
+        65385
+      ],
+      "windows": [
+        3
+      ]
+    }
+  },
+  "ContextMenu": {
+    "name": "ContextMenu",
+    "value": 68719478021,
+    "names": {
+      "web": [
+        "ContextMenu"
+      ],
+      "macOs": [
+        "ContextMenu"
+      ],
+      "ios": [
+        "ContextMenu"
+      ],
+      "gtk": [
+        "Menu"
+      ],
+      "windows": [
+        "APPS"
+      ],
+      "android": [
+        "MENU"
+      ]
+    },
+    "values": {
+      "web": [
+        1285
+      ],
+      "macOs": [
+        110
+      ],
+      "ios": [
+        101
+      ],
+      "gtk": [
+        65383
+      ],
+      "windows": [
+        93
+      ],
+      "android": [
+        82
+      ],
+      "fuchsia": [
+        4295426149
+      ]
+    }
+  },
+  "Execute": {
+    "name": "Execute",
+    "value": 68719478022,
+    "names": {
+      "web": [
+        "Execute"
+      ],
+      "gtk": [
+        "Execute"
+      ],
+      "windows": [
+        "EXECUTE"
+      ]
+    },
+    "values": {
+      "web": [
+        1286
+      ],
+      "gtk": [
+        65378
+      ],
+      "windows": [
+        43
+      ]
+    }
+  },
+  "Find": {
+    "name": "Find",
+    "value": 68719478023,
+    "names": {
+      "web": [
+        "Find"
+      ],
+      "gtk": [
+        "Find"
+      ]
+    },
+    "values": {
+      "web": [
+        1287
+      ],
+      "gtk": [
+        65384
+      ],
+      "fuchsia": [
+        4295426174
+      ]
+    }
+  },
+  "Help": {
+    "name": "Help",
+    "value": 68719478024,
+    "names": {
+      "web": [
+        "Help"
+      ],
+      "gtk": [
+        "Help"
+      ],
+      "windows": [
+        "HELP"
+      ],
+      "android": [
+        "HELP"
+      ]
+    },
+    "values": {
+      "web": [
+        1288
+      ],
+      "gtk": [
+        65386
+      ],
+      "windows": [
+        47
+      ],
+      "android": [
+        259
+      ],
+      "fuchsia": [
+        4295426165
+      ]
+    }
+  },
+  "Pause": {
+    "name": "Pause",
+    "value": 68719478025,
+    "names": {
+      "web": [
+        "Pause"
+      ],
+      "gtk": [
+        "Pause"
+      ],
+      "windows": [
+        "PAUSE"
+      ],
+      "android": [
+        "BREAK"
+      ]
+    },
+    "values": {
+      "web": [
+        1289
+      ],
+      "gtk": [
+        65299
+      ],
+      "windows": [
+        19
+      ],
+      "android": [
+        121
+      ],
+      "fuchsia": [
+        4295426120
+      ]
+    }
+  },
+  "Play": {
+    "name": "Play",
+    "value": 68719478026,
+    "names": {
+      "web": [
+        "Play"
+      ],
+      "windows": [
+        "PLAY"
+      ]
+    },
+    "values": {
+      "web": [
+        1290
+      ],
+      "windows": [
+        250
+      ]
+    }
+  },
+  "Props": {
+    "name": "Props",
+    "value": 68719478027,
+    "names": {
+      "web": [
+        "Props"
+      ]
+    },
+    "values": {
+      "web": [
+        1291
+      ],
+      "fuchsia": [
+        4295426211
+      ]
+    }
+  },
+  "Select": {
+    "name": "Select",
+    "value": 68719478028,
+    "names": {
+      "web": [
+        "Select"
+      ],
+      "gtk": [
+        "Select"
+      ],
+      "windows": [
+        "SELECT"
+      ],
+      "android": [
+        "DPAD_CENTER"
+      ]
+    },
+    "values": {
+      "web": [
+        1292
+      ],
+      "gtk": [
+        65376
+      ],
+      "windows": [
+        41
+      ],
+      "android": [
+        23
+      ],
+      "fuchsia": [
+        4295426167
+      ]
+    }
+  },
+  "ZoomIn": {
+    "name": "ZoomIn",
+    "value": 68719478029,
+    "names": {
+      "web": [
+        "ZoomIn"
+      ],
+      "gtk": [
+        "ZoomIn"
+      ],
+      "android": [
+        "ZOOM_IN"
+      ]
+    },
+    "values": {
+      "web": [
+        1293
+      ],
+      "gtk": [
+        269025163
+      ],
+      "android": [
+        168
+      ],
+      "fuchsia": [
+        4295754285
+      ]
+    }
+  },
+  "ZoomOut": {
+    "name": "ZoomOut",
+    "value": 68719478030,
+    "names": {
+      "web": [
+        "ZoomOut"
+      ],
+      "gtk": [
+        "ZoomOut"
+      ],
+      "android": [
+        "ZOOM_OUT"
+      ]
+    },
+    "values": {
+      "web": [
+        1294
+      ],
+      "gtk": [
+        269025164
+      ],
+      "android": [
+        169
+      ],
+      "fuchsia": [
+        4295754286
+      ]
+    }
+  },
+  "BrightnessDown": {
+    "name": "BrightnessDown",
+    "value": 68719478273,
+    "names": {
+      "web": [
+        "BrightnessDown"
+      ],
+      "gtk": [
+        "MonBrightnessDown"
+      ],
+      "android": [
+        "BRIGHTNESS_DOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        1537
+      ],
+      "gtk": [
+        269025027
+      ],
+      "android": [
+        220
+      ],
+      "fuchsia": [
+        4295753840
+      ]
+    }
+  },
+  "BrightnessUp": {
+    "name": "BrightnessUp",
+    "value": 68719478274,
+    "names": {
+      "web": [
+        "BrightnessUp"
+      ],
+      "gtk": [
+        "MonBrightnessUp"
+      ],
+      "android": [
+        "BRIGHTNESS_UP"
+      ]
+    },
+    "values": {
+      "web": [
+        1538
+      ],
+      "gtk": [
+        269025026
+      ],
+      "android": [
+        221
+      ],
+      "fuchsia": [
+        4295753839
+      ]
+    }
+  },
+  "Camera": {
+    "name": "Camera",
+    "value": 68719478275,
+    "names": {
+      "web": [
+        "Camera"
+      ],
+      "android": [
+        "CAMERA"
+      ]
+    },
+    "values": {
+      "web": [
+        1539
+      ],
+      "android": [
+        27
+      ]
+    }
+  },
+  "Eject": {
+    "name": "Eject",
+    "value": 68719478276,
+    "names": {
+      "web": [
+        "Eject"
+      ],
+      "gtk": [
+        "Eject"
+      ],
+      "android": [
+        "MEDIA_EJECT"
+      ]
+    },
+    "values": {
+      "web": [
+        1540
+      ],
+      "gtk": [
+        269025068
+      ],
+      "android": [
+        129
+      ],
+      "fuchsia": [
+        4295753912
+      ]
+    }
+  },
+  "LogOff": {
+    "name": "LogOff",
+    "value": 68719478277,
+    "names": {
+      "web": [
+        "LogOff"
+      ],
+      "gtk": [
+        "LogOff"
+      ]
+    },
+    "values": {
+      "web": [
+        1541
+      ],
+      "gtk": [
+        269025121
+      ],
+      "fuchsia": [
+        4295754140
+      ]
+    }
+  },
+  "Power": {
+    "name": "Power",
+    "value": 68719478278,
+    "names": {
+      "web": [
+        "Power"
+      ],
+      "android": [
+        "POWER"
+      ]
+    },
+    "values": {
+      "web": [
+        1542
+      ],
+      "android": [
+        26
+      ],
+      "fuchsia": [
+        4295426150
+      ]
+    }
+  },
+  "PowerOff": {
+    "name": "PowerOff",
+    "value": 68719478279,
+    "names": {
+      "web": [
+        "PowerOff"
+      ],
+      "gtk": [
+        "PowerOff"
+      ]
+    },
+    "values": {
+      "web": [
+        1543
+      ],
+      "gtk": [
+        269025066
+      ]
+    }
+  },
+  "PrintScreen": {
+    "name": "PrintScreen",
+    "value": 68719478280,
+    "names": {
+      "web": [
+        "PrintScreen"
+      ],
+      "gtk": [
+        "3270_PrintScreen"
+      ],
+      "android": [
+        "SYSRQ"
+      ]
+    },
+    "values": {
+      "web": [
+        1544
+      ],
+      "gtk": [
+        64797
+      ],
+      "android": [
+        120
+      ],
+      "fuchsia": [
+        4295426118
+      ]
+    }
+  },
+  "Hibernate": {
+    "name": "Hibernate",
+    "value": 68719478281,
+    "names": {
+      "web": [
+        "Hibernate"
+      ]
+    },
+    "values": {
+      "web": [
+        1545
+      ]
+    }
+  },
+  "Standby": {
+    "name": "Standby",
+    "value": 68719478282,
+    "names": {
+      "web": [
+        "Standby"
+      ],
+      "gtk": [
+        "Standby"
+      ]
+    },
+    "values": {
+      "web": [
+        1546
+      ],
+      "gtk": [
+        269025040
+      ]
+    }
+  },
+  "WakeUp": {
+    "name": "WakeUp",
+    "value": 68719478283,
+    "names": {
+      "web": [
+        "WakeUp"
+      ],
+      "gtk": [
+        "WakeUp"
+      ],
+      "android": [
+        "WAKEUP"
+      ]
+    },
+    "values": {
+      "web": [
+        1547
+      ],
+      "gtk": [
+        269025067
+      ],
+      "android": [
+        224
+      ],
+      "fuchsia": [
+        4295032963
+      ]
+    }
+  },
+  "AllCandidates": {
+    "name": "AllCandidates",
+    "value": 68719478529,
+    "names": {
+      "web": [
+        "AllCandidates"
+      ]
+    },
+    "values": {
+      "web": [
+        1793
+      ]
+    }
+  },
+  "Alphanumeric": {
+    "name": "Alphanumeric",
+    "value": 68719478530,
+    "names": {
+      "web": [
+        "Alphanumeric"
+      ]
+    },
+    "values": {
+      "web": [
+        1794
+      ]
+    }
+  },
+  "CodeInput": {
+    "name": "CodeInput",
+    "value": 68719478531,
+    "names": {
+      "web": [
+        "CodeInput"
+      ],
+      "gtk": [
+        "Codeinput"
+      ]
+    },
+    "values": {
+      "web": [
+        1795
+      ],
+      "gtk": [
+        65335
+      ]
+    }
+  },
+  "Compose": {
+    "name": "Compose",
+    "value": 68719478532,
+    "names": {
+      "web": [
+        "Compose"
+      ]
+    },
+    "values": {
+      "web": [
+        1796
+      ]
+    }
+  },
+  "Convert": {
+    "name": "Convert",
+    "value": 68719478533,
+    "names": {
+      "web": [
+        "Convert"
+      ],
+      "windows": [
+        "CONVERT"
+      ],
+      "android": [
+        "HENKAN"
+      ]
+    },
+    "values": {
+      "web": [
+        1797
+      ],
+      "windows": [
+        28
+      ],
+      "android": [
+        214
+      ],
+      "fuchsia": [
+        4295426186
+      ]
+    }
+  },
+  "FinalMode": {
+    "name": "FinalMode",
+    "value": 68719478534,
+    "names": {
+      "web": [
+        "FinalMode"
+      ],
+      "windows": [
+        "FINAL"
+      ]
+    },
+    "values": {
+      "web": [
+        1798
+      ],
+      "windows": [
+        24
+      ]
+    }
+  },
+  "GroupFirst": {
+    "name": "GroupFirst",
+    "value": 68719478535,
+    "names": {
+      "web": [
+        "GroupFirst"
+      ],
+      "gtk": [
+        "ISO_First_Group"
+      ]
+    },
+    "values": {
+      "web": [
+        1799
+      ],
+      "gtk": [
+        65036
+      ]
+    }
+  },
+  "GroupLast": {
+    "name": "GroupLast",
+    "value": 68719478536,
+    "names": {
+      "web": [
+        "GroupLast"
+      ],
+      "gtk": [
+        "ISO_Last_Group"
+      ]
+    },
+    "values": {
+      "web": [
+        1800
+      ],
+      "gtk": [
+        65038
+      ]
+    }
+  },
+  "GroupNext": {
+    "name": "GroupNext",
+    "value": 68719478537,
+    "names": {
+      "web": [
+        "GroupNext"
+      ],
+      "gtk": [
+        "ISO_Next_Group"
+      ],
+      "android": [
+        "LANGUAGE_SWITCH"
+      ]
+    },
+    "values": {
+      "web": [
+        1801
+      ],
+      "gtk": [
+        65032
+      ],
+      "android": [
+        204
+      ]
+    }
+  },
+  "GroupPrevious": {
+    "name": "GroupPrevious",
+    "value": 68719478538,
+    "names": {
+      "web": [
+        "GroupPrevious"
+      ],
+      "gtk": [
+        "ISO_Prev_Group"
+      ]
+    },
+    "values": {
+      "web": [
+        1802
+      ],
+      "gtk": [
+        65034
+      ]
+    }
+  },
+  "ModeChange": {
+    "name": "ModeChange",
+    "value": 68719478539,
+    "names": {
+      "web": [
+        "ModeChange"
+      ],
+      "gtk": [
+        "Mode_switch"
+      ],
+      "windows": [
+        "MODECHANGE"
+      ],
+      "android": [
+        "SWITCH_CHARSET"
+      ]
+    },
+    "values": {
+      "web": [
+        1803
+      ],
+      "gtk": [
+        65406
+      ],
+      "windows": [
+        31
+      ],
+      "android": [
+        95
+      ]
+    }
+  },
+  "NextCandidate": {
+    "name": "NextCandidate",
+    "value": 68719478540,
+    "names": {
+      "web": [
+        "NextCandidate"
+      ]
+    },
+    "values": {
+      "web": [
+        1804
+      ]
+    }
+  },
+  "NonConvert": {
+    "name": "NonConvert",
+    "value": 68719478541,
+    "names": {
+      "web": [
+        "NonConvert"
+      ],
+      "android": [
+        "MUHENKAN"
+      ]
+    },
+    "values": {
+      "web": [
+        1805
+      ],
+      "android": [
+        213
+      ],
+      "fuchsia": [
+        4295426187
+      ]
+    }
+  },
+  "PreviousCandidate": {
+    "name": "PreviousCandidate",
+    "value": 68719478542,
+    "names": {
+      "web": [
+        "PreviousCandidate"
+      ],
+      "gtk": [
+        "PreviousCandidate"
+      ]
+    },
+    "values": {
+      "web": [
+        1806
+      ],
+      "gtk": [
+        65342
+      ]
+    }
+  },
+  "Process": {
+    "name": "Process",
+    "value": 68719478543,
+    "names": {
+      "web": [
+        "Process"
+      ]
+    },
+    "values": {
+      "web": [
+        1807
+      ]
+    }
+  },
+  "SingleCandidate": {
+    "name": "SingleCandidate",
+    "value": 68719478544,
+    "names": {
+      "web": [
+        "SingleCandidate"
+      ],
+      "gtk": [
+        "SingleCandidate"
+      ]
+    },
+    "values": {
+      "web": [
+        1808
+      ],
+      "gtk": [
+        65340
+      ]
+    }
+  },
+  "HangulMode": {
+    "name": "HangulMode",
+    "value": 68719478545,
+    "names": {
+      "web": [
+        "HangulMode"
+      ],
+      "gtk": [
+        "Hangul"
+      ]
+    },
+    "values": {
+      "web": [
+        1809
+      ],
+      "gtk": [
+        65329
+      ]
+    }
+  },
+  "HanjaMode": {
+    "name": "HanjaMode",
+    "value": 68719478546,
+    "names": {
+      "web": [
+        "HanjaMode"
+      ],
+      "gtk": [
+        "Hangul_Hanja"
+      ],
+      "windows": [
+        "HANJA"
+      ]
+    },
+    "values": {
+      "web": [
+        1810
+      ],
+      "gtk": [
+        65332
+      ],
+      "windows": [
+        25
+      ]
+    }
+  },
+  "JunjaMode": {
+    "name": "JunjaMode",
+    "value": 68719478547,
+    "names": {
+      "web": [
+        "JunjaMode"
+      ],
+      "windows": [
+        "JUNJA"
+      ]
+    },
+    "values": {
+      "web": [
+        1811
+      ],
+      "windows": [
+        23
+      ]
+    }
+  },
+  "Eisu": {
+    "name": "Eisu",
+    "value": 68719478548,
+    "names": {
+      "web": [
+        "Eisu"
+      ],
+      "gtk": [
+        "Eisu_Shift"
+      ],
+      "android": [
+        "EISU"
+      ]
+    },
+    "values": {
+      "web": [
+        1812
+      ],
+      "gtk": [
+        65327
+      ],
+      "android": [
+        212
+      ]
+    }
+  },
+  "Hankaku": {
+    "name": "Hankaku",
+    "value": 68719478549,
+    "names": {
+      "web": [
+        "Hankaku"
+      ],
+      "gtk": [
+        "Hankaku"
+      ]
+    },
+    "values": {
+      "web": [
+        1813
+      ],
+      "gtk": [
+        65321
+      ]
+    }
+  },
+  "Hiragana": {
+    "name": "Hiragana",
+    "value": 68719478550,
+    "names": {
+      "web": [
+        "Hiragana"
+      ],
+      "gtk": [
+        "Hiragana"
+      ]
+    },
+    "values": {
+      "web": [
+        1814
+      ],
+      "gtk": [
+        65317
+      ]
+    }
+  },
+  "HiraganaKatakana": {
+    "name": "HiraganaKatakana",
+    "value": 68719478551,
+    "names": {
+      "web": [
+        "HiraganaKatakana"
+      ],
+      "gtk": [
+        "Hiragana_Katakana"
+      ],
+      "android": [
+        "KATAKANA_HIRAGANA"
+      ]
+    },
+    "values": {
+      "web": [
+        1815
+      ],
+      "gtk": [
+        65319
+      ],
+      "android": [
+        215
+      ]
+    }
+  },
+  "KanaMode": {
+    "name": "KanaMode",
+    "value": 68719478552,
+    "names": {
+      "web": [
+        "KanaMode"
+      ]
+    },
+    "values": {
+      "web": [
+        1816
+      ],
+      "fuchsia": [
+        4295426184
+      ]
+    }
+  },
+  "KanjiMode": {
+    "name": "KanjiMode",
+    "value": 68719478553,
+    "names": {
+      "web": [
+        "KanjiMode"
+      ],
+      "gtk": [
+        "Kanji"
+      ],
+      "windows": [
+        "KANJI"
+      ],
+      "android": [
+        "KANA"
+      ]
+    },
+    "values": {
+      "web": [
+        1817
+      ],
+      "gtk": [
+        65313
+      ],
+      "windows": [
+        25
+      ],
+      "android": [
+        218
+      ]
+    }
+  },
+  "Katakana": {
+    "name": "Katakana",
+    "value": 68719478554,
+    "names": {
+      "web": [
+        "Katakana"
+      ],
+      "gtk": [
+        "Katakana"
+      ]
+    },
+    "values": {
+      "web": [
+        1818
+      ],
+      "gtk": [
+        65318
+      ]
+    }
+  },
+  "Romaji": {
+    "name": "Romaji",
+    "value": 68719478555,
+    "names": {
+      "web": [
+        "Romaji"
+      ],
+      "gtk": [
+        "Romaji"
+      ]
+    },
+    "values": {
+      "web": [
+        1819
+      ],
+      "gtk": [
+        65316
+      ]
+    }
+  },
+  "Zenkaku": {
+    "name": "Zenkaku",
+    "value": 68719478556,
+    "names": {
+      "web": [
+        "Zenkaku"
+      ],
+      "gtk": [
+        "Zenkaku"
+      ]
+    },
+    "values": {
+      "web": [
+        1820
+      ],
+      "gtk": [
+        65320
+      ]
+    }
+  },
+  "ZenkakuHankaku": {
+    "name": "ZenkakuHankaku",
+    "value": 68719478557,
+    "names": {
+      "web": [
+        "ZenkakuHankaku"
+      ],
+      "gtk": [
+        "Zenkaku_Hankaku"
+      ],
+      "android": [
+        "ZENKAKU_HANKAKU"
+      ]
+    },
+    "values": {
+      "web": [
+        1821
+      ],
+      "gtk": [
+        65322
+      ],
+      "android": [
+        211
+      ]
+    }
+  },
+  "F1": {
+    "name": "F1",
+    "value": 68719478785,
+    "names": {
+      "web": [
+        "F1"
+      ],
+      "macOs": [
+        "F1"
+      ],
+      "ios": [
+        "F1"
+      ],
+      "gtk": [
+        "KP_F1",
+        "F1"
+      ],
+      "windows": [
+        "F1"
+      ],
+      "android": [
+        "F1"
+      ]
+    },
+    "values": {
+      "web": [
+        2049
+      ],
+      "macOs": [
+        122
+      ],
+      "ios": [
+        58
+      ],
+      "gtk": [
+        65425,
+        65470
+      ],
+      "windows": [
+        112
+      ],
+      "android": [
+        131
+      ],
+      "fuchsia": [
+        4295426106
+      ]
+    }
+  },
+  "F2": {
+    "name": "F2",
+    "value": 68719478786,
+    "names": {
+      "web": [
+        "F2"
+      ],
+      "macOs": [
+        "F2"
+      ],
+      "ios": [
+        "F2"
+      ],
+      "gtk": [
+        "KP_F2",
+        "F2"
+      ],
+      "windows": [
+        "F2"
+      ],
+      "android": [
+        "F2"
+      ]
+    },
+    "values": {
+      "web": [
+        2050
+      ],
+      "macOs": [
+        120
+      ],
+      "ios": [
+        59
+      ],
+      "gtk": [
+        65426,
+        65471
+      ],
+      "windows": [
+        113
+      ],
+      "android": [
+        132
+      ],
+      "fuchsia": [
+        4295426107
+      ]
+    }
+  },
+  "F3": {
+    "name": "F3",
+    "value": 68719478787,
+    "names": {
+      "web": [
+        "F3"
+      ],
+      "macOs": [
+        "F3"
+      ],
+      "ios": [
+        "F3"
+      ],
+      "gtk": [
+        "KP_F3",
+        "F3"
+      ],
+      "windows": [
+        "F3"
+      ],
+      "android": [
+        "F3"
+      ]
+    },
+    "values": {
+      "web": [
+        2051
+      ],
+      "macOs": [
+        99
+      ],
+      "ios": [
+        60
+      ],
+      "gtk": [
+        65427,
+        65472
+      ],
+      "windows": [
+        114
+      ],
+      "android": [
+        133
+      ],
+      "fuchsia": [
+        4295426108
+      ]
+    }
+  },
+  "F4": {
+    "name": "F4",
+    "value": 68719478788,
+    "names": {
+      "web": [
+        "F4"
+      ],
+      "macOs": [
+        "F4"
+      ],
+      "ios": [
+        "F4"
+      ],
+      "gtk": [
+        "KP_F4",
+        "F4"
+      ],
+      "windows": [
+        "F4"
+      ],
+      "android": [
+        "F4"
+      ]
+    },
+    "values": {
+      "web": [
+        2052
+      ],
+      "macOs": [
+        118
+      ],
+      "ios": [
+        61
+      ],
+      "gtk": [
+        65428,
+        65473
+      ],
+      "windows": [
+        115
+      ],
+      "android": [
+        134
+      ],
+      "fuchsia": [
+        4295426109
+      ]
+    }
+  },
+  "F5": {
+    "name": "F5",
+    "value": 68719478789,
+    "names": {
+      "web": [
+        "F5"
+      ],
+      "macOs": [
+        "F5"
+      ],
+      "ios": [
+        "F5"
+      ],
+      "gtk": [
+        "F5"
+      ],
+      "windows": [
+        "F5"
+      ],
+      "android": [
+        "F5"
+      ]
+    },
+    "values": {
+      "web": [
+        2053
+      ],
+      "macOs": [
+        96
+      ],
+      "ios": [
+        62
+      ],
+      "gtk": [
+        65474
+      ],
+      "windows": [
+        116
+      ],
+      "android": [
+        135
+      ],
+      "fuchsia": [
+        4295426110
+      ]
+    }
+  },
+  "F6": {
+    "name": "F6",
+    "value": 68719478790,
+    "names": {
+      "web": [
+        "F6"
+      ],
+      "macOs": [
+        "F6"
+      ],
+      "ios": [
+        "F6"
+      ],
+      "gtk": [
+        "F6"
+      ],
+      "windows": [
+        "F6"
+      ],
+      "android": [
+        "F6"
+      ]
+    },
+    "values": {
+      "web": [
+        2054
+      ],
+      "macOs": [
+        97
+      ],
+      "ios": [
+        63
+      ],
+      "gtk": [
+        65475
+      ],
+      "windows": [
+        117
+      ],
+      "android": [
+        136
+      ],
+      "fuchsia": [
+        4295426111
+      ]
+    }
+  },
+  "F7": {
+    "name": "F7",
+    "value": 68719478791,
+    "names": {
+      "web": [
+        "F7"
+      ],
+      "macOs": [
+        "F7"
+      ],
+      "ios": [
+        "F7"
+      ],
+      "gtk": [
+        "F7"
+      ],
+      "windows": [
+        "F7"
+      ],
+      "android": [
+        "F7"
+      ]
+    },
+    "values": {
+      "web": [
+        2055
+      ],
+      "macOs": [
+        98
+      ],
+      "ios": [
+        64
+      ],
+      "gtk": [
+        65476
+      ],
+      "windows": [
+        118
+      ],
+      "android": [
+        137
+      ],
+      "fuchsia": [
+        4295426112
+      ]
+    }
+  },
+  "F8": {
+    "name": "F8",
+    "value": 68719478792,
+    "names": {
+      "web": [
+        "F8"
+      ],
+      "macOs": [
+        "F8"
+      ],
+      "ios": [
+        "F8"
+      ],
+      "gtk": [
+        "F8"
+      ],
+      "windows": [
+        "F8"
+      ],
+      "android": [
+        "F8"
+      ]
+    },
+    "values": {
+      "web": [
+        2056
+      ],
+      "macOs": [
+        100
+      ],
+      "ios": [
+        65
+      ],
+      "gtk": [
+        65477
+      ],
+      "windows": [
+        119
+      ],
+      "android": [
+        138
+      ],
+      "fuchsia": [
+        4295426113
+      ]
+    }
+  },
+  "F9": {
+    "name": "F9",
+    "value": 68719478793,
+    "names": {
+      "web": [
+        "F9"
+      ],
+      "macOs": [
+        "F9"
+      ],
+      "ios": [
+        "F9"
+      ],
+      "gtk": [
+        "F9"
+      ],
+      "windows": [
+        "F9"
+      ],
+      "android": [
+        "F9"
+      ]
+    },
+    "values": {
+      "web": [
+        2057
+      ],
+      "macOs": [
+        101
+      ],
+      "ios": [
+        66
+      ],
+      "gtk": [
+        65478
+      ],
+      "windows": [
+        120
+      ],
+      "android": [
+        139
+      ],
+      "fuchsia": [
+        4295426114
+      ]
+    }
+  },
+  "F10": {
+    "name": "F10",
+    "value": 68719478794,
+    "names": {
+      "web": [
+        "F10"
+      ],
+      "macOs": [
+        "F10"
+      ],
+      "ios": [
+        "F10"
+      ],
+      "gtk": [
+        "F10"
+      ],
+      "windows": [
+        "F10"
+      ],
+      "android": [
+        "F10"
+      ]
+    },
+    "values": {
+      "web": [
+        2058
+      ],
+      "macOs": [
+        109
+      ],
+      "ios": [
+        67
+      ],
+      "gtk": [
+        65479
+      ],
+      "windows": [
+        121
+      ],
+      "android": [
+        140
+      ],
+      "fuchsia": [
+        4295426115
+      ]
+    }
+  },
+  "F11": {
+    "name": "F11",
+    "value": 68719478795,
+    "names": {
+      "web": [
+        "F11"
+      ],
+      "macOs": [
+        "F11"
+      ],
+      "ios": [
+        "F11"
+      ],
+      "gtk": [
+        "F11"
+      ],
+      "windows": [
+        "F11"
+      ],
+      "android": [
+        "F11"
+      ]
+    },
+    "values": {
+      "web": [
+        2059
+      ],
+      "macOs": [
+        103
+      ],
+      "ios": [
+        68
+      ],
+      "gtk": [
+        65480
+      ],
+      "windows": [
+        122
+      ],
+      "android": [
+        141
+      ],
+      "fuchsia": [
+        4295426116
+      ]
+    }
+  },
+  "F12": {
+    "name": "F12",
+    "value": 68719478796,
+    "names": {
+      "web": [
+        "F12"
+      ],
+      "macOs": [
+        "F12"
+      ],
+      "ios": [
+        "F12"
+      ],
+      "gtk": [
+        "F12"
+      ],
+      "windows": [
+        "F12"
+      ],
+      "android": [
+        "F12"
+      ]
+    },
+    "values": {
+      "web": [
+        2060
+      ],
+      "macOs": [
+        111
+      ],
+      "ios": [
+        69
+      ],
+      "gtk": [
+        65481
+      ],
+      "windows": [
+        123
+      ],
+      "android": [
+        142
+      ],
+      "fuchsia": [
+        4295426117
+      ]
+    }
+  },
+  "F13": {
+    "name": "F13",
+    "value": 68719478797,
+    "names": {
+      "web": [
+        "F13"
+      ],
+      "macOs": [
+        "F13"
+      ],
+      "ios": [
+        "F13"
+      ],
+      "gtk": [
+        "F13"
+      ],
+      "windows": [
+        "F13"
+      ]
+    },
+    "values": {
+      "web": [
+        2061
+      ],
+      "macOs": [
+        105
+      ],
+      "ios": [
+        104
+      ],
+      "gtk": [
+        65482
+      ],
+      "windows": [
+        124
+      ],
+      "fuchsia": [
+        4295426152
+      ]
+    }
+  },
+  "F14": {
+    "name": "F14",
+    "value": 68719478798,
+    "names": {
+      "web": [
+        "F14"
+      ],
+      "macOs": [
+        "F14"
+      ],
+      "ios": [
+        "F14"
+      ],
+      "gtk": [
+        "F14"
+      ],
+      "windows": [
+        "F14"
+      ]
+    },
+    "values": {
+      "web": [
+        2062
+      ],
+      "macOs": [
+        107
+      ],
+      "ios": [
+        105
+      ],
+      "gtk": [
+        65483
+      ],
+      "windows": [
+        125
+      ],
+      "fuchsia": [
+        4295426153
+      ]
+    }
+  },
+  "F15": {
+    "name": "F15",
+    "value": 68719478799,
+    "names": {
+      "web": [
+        "F15"
+      ],
+      "macOs": [
+        "F15"
+      ],
+      "ios": [
+        "F15"
+      ],
+      "gtk": [
+        "F15"
+      ],
+      "windows": [
+        "F15"
+      ]
+    },
+    "values": {
+      "web": [
+        2063
+      ],
+      "macOs": [
+        113
+      ],
+      "ios": [
+        106
+      ],
+      "gtk": [
+        65484
+      ],
+      "windows": [
+        126
+      ],
+      "fuchsia": [
+        4295426154
+      ]
+    }
+  },
+  "F16": {
+    "name": "F16",
+    "value": 68719478800,
+    "names": {
+      "web": [
+        "F16"
+      ],
+      "macOs": [
+        "F16"
+      ],
+      "ios": [
+        "F16"
+      ],
+      "gtk": [
+        "F16"
+      ],
+      "windows": [
+        "F16"
+      ]
+    },
+    "values": {
+      "web": [
+        2064
+      ],
+      "macOs": [
+        106
+      ],
+      "ios": [
+        107
+      ],
+      "gtk": [
+        65485
+      ],
+      "windows": [
+        127
+      ],
+      "fuchsia": [
+        4295426155
+      ]
+    }
+  },
+  "F17": {
+    "name": "F17",
+    "value": 68719478801,
+    "names": {
+      "web": [
+        "F17"
+      ],
+      "macOs": [
+        "F17"
+      ],
+      "ios": [
+        "F17"
+      ],
+      "gtk": [
+        "F17"
+      ],
+      "windows": [
+        "F17"
+      ]
+    },
+    "values": {
+      "web": [
+        2065
+      ],
+      "macOs": [
+        64
+      ],
+      "ios": [
+        108
+      ],
+      "gtk": [
+        65486
+      ],
+      "windows": [
+        128
+      ],
+      "fuchsia": [
+        4295426156
+      ]
+    }
+  },
+  "F18": {
+    "name": "F18",
+    "value": 68719478802,
+    "names": {
+      "web": [
+        "F18"
+      ],
+      "macOs": [
+        "F18"
+      ],
+      "ios": [
+        "F18"
+      ],
+      "gtk": [
+        "F18"
+      ],
+      "windows": [
+        "F18"
+      ]
+    },
+    "values": {
+      "web": [
+        2066
+      ],
+      "macOs": [
+        79
+      ],
+      "ios": [
+        109
+      ],
+      "gtk": [
+        65487
+      ],
+      "windows": [
+        129
+      ],
+      "fuchsia": [
+        4295426157
+      ]
+    }
+  },
+  "F19": {
+    "name": "F19",
+    "value": 68719478803,
+    "names": {
+      "web": [
+        "F19"
+      ],
+      "macOs": [
+        "F19"
+      ],
+      "ios": [
+        "F19"
+      ],
+      "gtk": [
+        "F19"
+      ],
+      "windows": [
+        "F19"
+      ]
+    },
+    "values": {
+      "web": [
+        2067
+      ],
+      "macOs": [
+        80
+      ],
+      "ios": [
+        110
+      ],
+      "gtk": [
+        65488
+      ],
+      "windows": [
+        130
+      ],
+      "fuchsia": [
+        4295426158
+      ]
+    }
+  },
+  "F20": {
+    "name": "F20",
+    "value": 68719478804,
+    "names": {
+      "web": [
+        "F20"
+      ],
+      "macOs": [
+        "F20"
+      ],
+      "ios": [
+        "F20"
+      ],
+      "gtk": [
+        "F20"
+      ],
+      "windows": [
+        "F20"
+      ]
+    },
+    "values": {
+      "web": [
+        2068
+      ],
+      "macOs": [
+        90
+      ],
+      "ios": [
+        111
+      ],
+      "gtk": [
+        65489
+      ],
+      "windows": [
+        131
+      ],
+      "fuchsia": [
+        4295426159
+      ]
+    }
+  },
+  "F21": {
+    "name": "F21",
+    "value": 68719478805,
+    "names": {
+      "web": [
+        "F21"
+      ],
+      "gtk": [
+        "F21"
+      ],
+      "windows": [
+        "F21"
+      ]
+    },
+    "values": {
+      "web": [
+        2069
+      ],
+      "gtk": [
+        65490
+      ],
+      "windows": [
+        132
+      ],
+      "fuchsia": [
+        4295426160
+      ]
+    }
+  },
+  "F22": {
+    "name": "F22",
+    "value": 68719478806,
+    "names": {
+      "web": [
+        "F22"
+      ],
+      "gtk": [
+        "F22"
+      ],
+      "windows": [
+        "F22"
+      ]
+    },
+    "values": {
+      "web": [
+        2070
+      ],
+      "gtk": [
+        65491
+      ],
+      "windows": [
+        133
+      ],
+      "fuchsia": [
+        4295426161
+      ]
+    }
+  },
+  "F23": {
+    "name": "F23",
+    "value": 68719478807,
+    "names": {
+      "web": [
+        "F23"
+      ],
+      "gtk": [
+        "F23"
+      ],
+      "windows": [
+        "F23"
+      ]
+    },
+    "values": {
+      "web": [
+        2071
+      ],
+      "gtk": [
+        65492
+      ],
+      "windows": [
+        134
+      ],
+      "fuchsia": [
+        4295426162
+      ]
+    }
+  },
+  "F24": {
+    "name": "F24",
+    "value": 68719478808,
+    "names": {
+      "web": [
+        "F24"
+      ],
+      "gtk": [
+        "F24"
+      ],
+      "windows": [
+        "F24"
+      ]
+    },
+    "values": {
+      "web": [
+        2072
+      ],
+      "gtk": [
+        65493
+      ],
+      "windows": [
+        135
+      ],
+      "fuchsia": [
+        4295426163
+      ]
+    }
+  },
+  "Soft1": {
+    "name": "Soft1",
+    "value": 68719479041,
+    "names": {
+      "web": [
+        "Soft1"
+      ]
+    },
+    "values": {
+      "web": [
+        2305
+      ]
+    }
+  },
+  "Soft2": {
+    "name": "Soft2",
+    "value": 68719479042,
+    "names": {
+      "web": [
+        "Soft2"
+      ]
+    },
+    "values": {
+      "web": [
+        2306
+      ]
+    }
+  },
+  "Soft3": {
+    "name": "Soft3",
+    "value": 68719479043,
+    "names": {
+      "web": [
+        "Soft3"
+      ]
+    },
+    "values": {
+      "web": [
+        2307
+      ]
+    }
+  },
+  "Soft4": {
+    "name": "Soft4",
+    "value": 68719479044,
+    "names": {
+      "web": [
+        "Soft4"
+      ]
+    },
+    "values": {
+      "web": [
+        2308
+      ]
+    }
+  },
+  "Soft5": {
+    "name": "Soft5",
+    "value": 68719479045,
+    "names": {
+      "web": [
+        "Soft5"
+      ]
+    },
+    "values": {
+      "web": [
+        2309
+      ]
+    }
+  },
+  "Soft6": {
+    "name": "Soft6",
+    "value": 68719479046,
+    "names": {
+      "web": [
+        "Soft6"
+      ]
+    },
+    "values": {
+      "web": [
+        2310
+      ]
+    }
+  },
+  "Soft7": {
+    "name": "Soft7",
+    "value": 68719479047,
+    "names": {
+      "web": [
+        "Soft7"
+      ]
+    },
+    "values": {
+      "web": [
+        2311
+      ]
+    }
+  },
+  "Soft8": {
+    "name": "Soft8",
+    "value": 68719479048,
+    "names": {
+      "web": [
+        "Soft8"
+      ]
+    },
+    "values": {
+      "web": [
+        2312
+      ]
+    }
+  },
+  "Close": {
+    "name": "Close",
+    "value": 68719479297,
+    "names": {
+      "web": [
+        "Close"
+      ],
+      "gtk": [
+        "Close"
+      ],
+      "android": [
+        "MEDIA_CLOSE"
+      ]
+    },
+    "values": {
+      "web": [
+        2561
+      ],
+      "gtk": [
+        269025110
+      ],
+      "android": [
+        128
+      ],
+      "fuchsia": [
+        4295754243
+      ]
+    }
+  },
+  "MailForward": {
+    "name": "MailForward",
+    "value": 68719479298,
+    "names": {
+      "web": [
+        "MailForward"
+      ],
+      "gtk": [
+        "MailForward"
+      ]
+    },
+    "values": {
+      "web": [
+        2562
+      ],
+      "gtk": [
+        269025168
+      ],
+      "fuchsia": [
+        4295754379
+      ]
+    }
+  },
+  "MailReply": {
+    "name": "MailReply",
+    "value": 68719479299,
+    "names": {
+      "web": [
+        "MailReply"
+      ],
+      "gtk": [
+        "Reply"
+      ]
+    },
+    "values": {
+      "web": [
+        2563
+      ],
+      "gtk": [
+        269025138
+      ],
+      "fuchsia": [
+        4295754377
+      ]
+    }
+  },
+  "MailSend": {
+    "name": "MailSend",
+    "value": 68719479300,
+    "names": {
+      "web": [
+        "MailSend"
+      ],
+      "gtk": [
+        "Send"
+      ]
+    },
+    "values": {
+      "web": [
+        2564
+      ],
+      "gtk": [
+        269025147
+      ],
+      "fuchsia": [
+        4295754380
+      ]
+    }
+  },
+  "MediaPlayPause": {
+    "name": "MediaPlayPause",
+    "value": 68719479301,
+    "names": {
+      "web": [
+        "MediaPlayPause"
+      ],
+      "windows": [
+        "MEDIA_PLAY_PAUSE"
+      ],
+      "android": [
+        "MEDIA_PLAY_PAUSE"
+      ]
+    },
+    "values": {
+      "web": [
+        2565
+      ],
+      "windows": [
+        179
+      ],
+      "android": [
+        85
+      ],
+      "fuchsia": [
+        4295753933
+      ]
+    }
+  },
+  "MediaStop": {
+    "name": "MediaStop",
+    "value": 68719479303,
+    "names": {
+      "web": [
+        "MediaStop"
+      ],
+      "gtk": [
+        "AudioStop"
+      ],
+      "windows": [
+        "MEDIA_STOP"
+      ],
+      "android": [
+        "MEDIA_STOP"
+      ]
+    },
+    "values": {
+      "web": [
+        2567
+      ],
+      "gtk": [
+        269025045
+      ],
+      "windows": [
+        178
+      ],
+      "android": [
+        86
+      ],
+      "fuchsia": [
+        4295753911
+      ]
+    }
+  },
+  "MediaTrackNext": {
+    "name": "MediaTrackNext",
+    "value": 68719479304,
+    "names": {
+      "web": [
+        "MediaTrackNext"
+      ],
+      "gtk": [
+        "AudioNext"
+      ],
+      "android": [
+        "MEDIA_NEXT"
+      ]
+    },
+    "values": {
+      "web": [
+        2568
+      ],
+      "gtk": [
+        269025047
+      ],
+      "android": [
+        87
+      ],
+      "fuchsia": [
+        4295753909
+      ]
+    }
+  },
+  "MediaTrackPrevious": {
+    "name": "MediaTrackPrevious",
+    "value": 68719479305,
+    "names": {
+      "web": [
+        "MediaTrackPrevious"
+      ],
+      "gtk": [
+        "AudioPrev"
+      ],
+      "android": [
+        "MEDIA_PREVIOUS"
+      ]
+    },
+    "values": {
+      "web": [
+        2569
+      ],
+      "gtk": [
+        269025046
+      ],
+      "android": [
+        88
+      ],
+      "fuchsia": [
+        4295753910
+      ]
+    }
+  },
+  "New": {
+    "name": "New",
+    "value": 68719479306,
+    "names": {
+      "web": [
+        "New"
+      ],
+      "gtk": [
+        "New"
+      ]
+    },
+    "values": {
+      "web": [
+        2570
+      ],
+      "gtk": [
+        269025128
+      ],
+      "fuchsia": [
+        4295754241
+      ]
+    }
+  },
+  "Open": {
+    "name": "Open",
+    "value": 68719479307,
+    "names": {
+      "web": [
+        "Open"
+      ],
+      "gtk": [
+        "Open"
+      ]
+    },
+    "values": {
+      "web": [
+        2571
+      ],
+      "gtk": [
+        269025131
+      ],
+      "fuchsia": [
+        4295426164
+      ]
+    }
+  },
+  "Print": {
+    "name": "Print",
+    "value": 68719479308,
+    "names": {
+      "web": [
+        "Print"
+      ],
+      "gtk": [
+        "Print"
+      ],
+      "windows": [
+        "PRINT"
+      ]
+    },
+    "values": {
+      "web": [
+        2572
+      ],
+      "gtk": [
+        65377
+      ],
+      "windows": [
+        42
+      ],
+      "fuchsia": [
+        4295754248
+      ]
+    }
+  },
+  "Save": {
+    "name": "Save",
+    "value": 68719479309,
+    "names": {
+      "web": [
+        "Save"
+      ],
+      "gtk": [
+        "Save"
+      ]
+    },
+    "values": {
+      "web": [
+        2573
+      ],
+      "gtk": [
+        269025143
+      ],
+      "fuchsia": [
+        4295754247
+      ]
+    }
+  },
+  "SpellCheck": {
+    "name": "SpellCheck",
+    "value": 68719479310,
+    "names": {
+      "web": [
+        "SpellCheck"
+      ],
+      "gtk": [
+        "Spell"
+      ]
+    },
+    "values": {
+      "web": [
+        2574
+      ],
+      "gtk": [
+        269025148
+      ],
+      "fuchsia": [
+        4295754155
+      ]
+    }
+  },
+  "AudioVolumeDown": {
+    "name": "AudioVolumeDown",
+    "value": 68719479311,
+    "names": {
+      "web": [
+        "AudioVolumeDown"
+      ],
+      "macOs": [
+        "AudioVolumeDown"
+      ],
+      "ios": [
+        "AudioVolumeDown"
+      ],
+      "gtk": [
+        "AudioLowerVolume"
+      ],
+      "windows": [
+        "VOLUME_DOWN"
+      ],
+      "android": [
+        "VOLUME_DOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        2575
+      ],
+      "macOs": [
+        73
+      ],
+      "ios": [
+        129
+      ],
+      "gtk": [
+        269025041
+      ],
+      "windows": [
+        174
+      ],
+      "android": [
+        25
+      ],
+      "fuchsia": [
+        4295426177
+      ]
+    }
+  },
+  "AudioVolumeUp": {
+    "name": "AudioVolumeUp",
+    "value": 68719479312,
+    "names": {
+      "web": [
+        "AudioVolumeUp"
+      ],
+      "macOs": [
+        "AudioVolumeUp"
+      ],
+      "ios": [
+        "AudioVolumeUp"
+      ],
+      "gtk": [
+        "AudioRaiseVolume"
+      ],
+      "windows": [
+        "VOLUME_UP"
+      ],
+      "android": [
+        "VOLUME_UP"
+      ]
+    },
+    "values": {
+      "web": [
+        2576
+      ],
+      "macOs": [
+        72
+      ],
+      "ios": [
+        128
+      ],
+      "gtk": [
+        269025043
+      ],
+      "windows": [
+        175
+      ],
+      "android": [
+        24
+      ],
+      "fuchsia": [
+        4295426176
+      ]
+    }
+  },
+  "AudioVolumeMute": {
+    "name": "AudioVolumeMute",
+    "value": 68719479313,
+    "names": {
+      "web": [
+        "AudioVolumeMute"
+      ],
+      "macOs": [
+        "AudioVolumeMute"
+      ],
+      "ios": [
+        "AudioVolumeMute"
+      ],
+      "gtk": [
+        "AudioMute"
+      ],
+      "windows": [
+        "VOLUME_MUTE"
+      ],
+      "android": [
+        "VOLUME_MUTE"
+      ]
+    },
+    "values": {
+      "web": [
+        2577
+      ],
+      "macOs": [
+        74
+      ],
+      "ios": [
+        127
+      ],
+      "gtk": [
+        269025042
+      ],
+      "windows": [
+        173
+      ],
+      "android": [
+        164
+      ],
+      "fuchsia": [
+        4295426175
+      ]
+    }
+  },
+  "LaunchApplication2": {
+    "name": "LaunchApplication2",
+    "value": 68719479553,
+    "names": {
+      "web": [
+        "LaunchApplication2"
+      ]
+    },
+    "values": {
+      "web": [
+        2817
+      ]
+    }
+  },
+  "LaunchCalendar": {
+    "name": "LaunchCalendar",
+    "value": 68719479554,
+    "names": {
+      "web": [
+        "LaunchCalendar"
+      ],
+      "gtk": [
+        "Calendar"
+      ],
+      "android": [
+        "CALENDAR"
+      ]
+    },
+    "values": {
+      "web": [
+        2818
+      ],
+      "gtk": [
+        269025056
+      ],
+      "android": [
+        208
+      ],
+      "fuchsia": [
+        4295754126
+      ]
+    }
+  },
+  "LaunchMail": {
+    "name": "LaunchMail",
+    "value": 68719479555,
+    "names": {
+      "web": [
+        "LaunchMail"
+      ],
+      "gtk": [
+        "Mail"
+      ],
+      "windows": [
+        "LAUNCH_MAIL"
+      ],
+      "android": [
+        "ENVELOPE"
+      ]
+    },
+    "values": {
+      "web": [
+        2819
+      ],
+      "gtk": [
+        269025049
+      ],
+      "windows": [
+        180
+      ],
+      "android": [
+        65
+      ],
+      "fuchsia": [
+        4295754122
+      ]
+    }
+  },
+  "LaunchMediaPlayer": {
+    "name": "LaunchMediaPlayer",
+    "value": 68719479556,
+    "names": {
+      "web": [
+        "LaunchMediaPlayer"
+      ]
+    },
+    "values": {
+      "web": [
+        2820
+      ]
+    }
+  },
+  "LaunchMusicPlayer": {
+    "name": "LaunchMusicPlayer",
+    "value": 68719479557,
+    "names": {
+      "web": [
+        "LaunchMusicPlayer"
+      ],
+      "android": [
+        "MUSIC"
+      ]
+    },
+    "values": {
+      "web": [
+        2821
+      ],
+      "android": [
+        209
+      ]
+    }
+  },
+  "LaunchApplication1": {
+    "name": "LaunchApplication1",
+    "value": 68719479558,
+    "names": {
+      "web": [
+        "LaunchApplication1"
+      ]
+    },
+    "values": {
+      "web": [
+        2822
+      ]
+    }
+  },
+  "LaunchScreenSaver": {
+    "name": "LaunchScreenSaver",
+    "value": 68719479559,
+    "names": {
+      "web": [
+        "LaunchScreenSaver"
+      ],
+      "gtk": [
+        "ScreenSaver"
+      ]
+    },
+    "values": {
+      "web": [
+        2823
+      ],
+      "gtk": [
+        269025069
+      ],
+      "fuchsia": [
+        4295754161
+      ]
+    }
+  },
+  "LaunchSpreadsheet": {
+    "name": "LaunchSpreadsheet",
+    "value": 68719479560,
+    "names": {
+      "web": [
+        "LaunchSpreadsheet"
+      ]
+    },
+    "values": {
+      "web": [
+        2824
+      ],
+      "fuchsia": [
+        4295754118
+      ]
+    }
+  },
+  "LaunchWebBrowser": {
+    "name": "LaunchWebBrowser",
+    "value": 68719479561,
+    "names": {
+      "web": [
+        "LaunchWebBrowser"
+      ],
+      "android": [
+        "EXPLORER"
+      ]
+    },
+    "values": {
+      "web": [
+        2825
+      ],
+      "android": [
+        64
+      ]
+    }
+  },
+  "LaunchWebCam": {
+    "name": "LaunchWebCam",
+    "value": 68719479562,
+    "names": {
+      "web": [
+        "LaunchWebCam"
+      ]
+    },
+    "values": {
+      "web": [
+        2826
+      ]
+    }
+  },
+  "LaunchWordProcessor": {
+    "name": "LaunchWordProcessor",
+    "value": 68719479563,
+    "names": {
+      "web": [
+        "LaunchWordProcessor"
+      ]
+    },
+    "values": {
+      "web": [
+        2827
+      ],
+      "fuchsia": [
+        4295754116
+      ]
+    }
+  },
+  "LaunchContacts": {
+    "name": "LaunchContacts",
+    "value": 68719479564,
+    "names": {
+      "web": [
+        "LaunchContacts"
+      ],
+      "android": [
+        "CONTACTS"
+      ]
+    },
+    "values": {
+      "web": [
+        2828
+      ],
+      "android": [
+        207
+      ],
+      "fuchsia": [
+        4295754125
+      ]
+    }
+  },
+  "LaunchPhone": {
+    "name": "LaunchPhone",
+    "value": 68719479565,
+    "names": {
+      "web": [
+        "LaunchPhone"
+      ],
+      "gtk": [
+        "Phone"
+      ]
+    },
+    "values": {
+      "web": [
+        2829
+      ],
+      "gtk": [
+        269025134
+      ],
+      "fuchsia": [
+        4295753868
+      ]
+    }
+  },
+  "LaunchAssistant": {
+    "name": "LaunchAssistant",
+    "value": 68719479566,
+    "names": {
+      "web": [
+        "LaunchAssistant"
+      ],
+      "android": [
+        "ASSIST"
+      ]
+    },
+    "values": {
+      "web": [
+        2830
+      ],
+      "android": [
+        219
+      ],
+      "fuchsia": [
+        4295754187
+      ]
+    }
+  },
+  "LaunchControlPanel": {
+    "name": "LaunchControlPanel",
+    "value": 68719479567,
+    "names": {
+      "web": [
+        "LaunchControlPanel"
+      ]
+    },
+    "values": {
+      "web": [
+        2831
+      ],
+      "fuchsia": [
+        4295754143
+      ]
+    }
+  },
+  "BrowserBack": {
+    "name": "BrowserBack",
+    "value": 68719479809,
+    "names": {
+      "web": [
+        "BrowserBack"
+      ],
+      "gtk": [
+        "Back"
+      ],
+      "windows": [
+        "BROWSER_BACK"
+      ]
+    },
+    "values": {
+      "web": [
+        3073
+      ],
+      "gtk": [
+        269025062
+      ],
+      "windows": [
+        166
+      ],
+      "fuchsia": [
+        4295754276
+      ]
+    }
+  },
+  "BrowserFavorites": {
+    "name": "BrowserFavorites",
+    "value": 68719479810,
+    "names": {
+      "web": [
+        "BrowserFavorites"
+      ],
+      "gtk": [
+        "Favorites"
+      ],
+      "windows": [
+        "BROWSER_FAVORITES"
+      ],
+      "android": [
+        "BOOKMARK"
+      ]
+    },
+    "values": {
+      "web": [
+        3074
+      ],
+      "gtk": [
+        269025072
+      ],
+      "windows": [
+        171
+      ],
+      "android": [
+        174
+      ],
+      "fuchsia": [
+        4295754282
+      ]
+    }
+  },
+  "BrowserForward": {
+    "name": "BrowserForward",
+    "value": 68719479811,
+    "names": {
+      "web": [
+        "BrowserForward"
+      ],
+      "gtk": [
+        "Forward"
+      ],
+      "windows": [
+        "BROWSER_FORWARD"
+      ],
+      "android": [
+        "FORWARD"
+      ]
+    },
+    "values": {
+      "web": [
+        3075
+      ],
+      "gtk": [
+        269025063
+      ],
+      "windows": [
+        167
+      ],
+      "android": [
+        125
+      ],
+      "fuchsia": [
+        4295754277
+      ]
+    }
+  },
+  "BrowserHome": {
+    "name": "BrowserHome",
+    "value": 68719479812,
+    "names": {
+      "web": [
+        "BrowserHome"
+      ],
+      "gtk": [
+        "HomePage"
+      ],
+      "windows": [
+        "BROWSER_HOME"
+      ]
+    },
+    "values": {
+      "web": [
+        3076
+      ],
+      "gtk": [
+        269025048
+      ],
+      "windows": [
+        172
+      ],
+      "fuchsia": [
+        4295754275
+      ]
+    }
+  },
+  "BrowserRefresh": {
+    "name": "BrowserRefresh",
+    "value": 68719479813,
+    "names": {
+      "web": [
+        "BrowserRefresh"
+      ],
+      "gtk": [
+        "Refresh"
+      ],
+      "windows": [
+        "BROWSER_REFRESH"
+      ]
+    },
+    "values": {
+      "web": [
+        3077
+      ],
+      "gtk": [
+        269025065
+      ],
+      "windows": [
+        168
+      ],
+      "fuchsia": [
+        4295754279
+      ]
+    }
+  },
+  "BrowserSearch": {
+    "name": "BrowserSearch",
+    "value": 68719479814,
+    "names": {
+      "web": [
+        "BrowserSearch"
+      ],
+      "gtk": [
+        "Search"
+      ],
+      "windows": [
+        "BROWSER_SEARCH"
+      ],
+      "android": [
+        "SEARCH"
+      ]
+    },
+    "values": {
+      "web": [
+        3078
+      ],
+      "gtk": [
+        269025051
+      ],
+      "windows": [
+        170
+      ],
+      "android": [
+        84
+      ],
+      "fuchsia": [
+        4295754273
+      ]
+    }
+  },
+  "BrowserStop": {
+    "name": "BrowserStop",
+    "value": 68719479815,
+    "names": {
+      "web": [
+        "BrowserStop"
+      ],
+      "gtk": [
+        "Stop"
+      ],
+      "windows": [
+        "BROWSER_STOP"
+      ]
+    },
+    "values": {
+      "web": [
+        3079
+      ],
+      "gtk": [
+        269025064
+      ],
+      "windows": [
+        169
+      ],
+      "fuchsia": [
+        4295754278
+      ]
+    }
+  },
+  "AudioBalanceLeft": {
+    "name": "AudioBalanceLeft",
+    "value": 68719480065,
+    "names": {
+      "web": [
+        "AudioBalanceLeft"
+      ]
+    },
+    "values": {
+      "web": [
+        3329
+      ]
+    }
+  },
+  "AudioBalanceRight": {
+    "name": "AudioBalanceRight",
+    "value": 68719480066,
+    "names": {
+      "web": [
+        "AudioBalanceRight"
+      ]
+    },
+    "values": {
+      "web": [
+        3330
+      ]
+    }
+  },
+  "AudioBassBoostDown": {
+    "name": "AudioBassBoostDown",
+    "value": 68719480067,
+    "names": {
+      "web": [
+        "AudioBassBoostDown"
+      ]
+    },
+    "values": {
+      "web": [
+        3331
+      ]
+    }
+  },
+  "AudioBassBoostUp": {
+    "name": "AudioBassBoostUp",
+    "value": 68719480068,
+    "names": {
+      "web": [
+        "AudioBassBoostUp"
+      ]
+    },
+    "values": {
+      "web": [
+        3332
+      ]
+    }
+  },
+  "AudioFaderFront": {
+    "name": "AudioFaderFront",
+    "value": 68719480069,
+    "names": {
+      "web": [
+        "AudioFaderFront"
+      ]
+    },
+    "values": {
+      "web": [
+        3333
+      ]
+    }
+  },
+  "AudioFaderRear": {
+    "name": "AudioFaderRear",
+    "value": 68719480070,
+    "names": {
+      "web": [
+        "AudioFaderRear"
+      ]
+    },
+    "values": {
+      "web": [
+        3334
+      ]
+    }
+  },
+  "AudioSurroundModeNext": {
+    "name": "AudioSurroundModeNext",
+    "value": 68719480071,
+    "names": {
+      "web": [
+        "AudioSurroundModeNext"
+      ]
+    },
+    "values": {
+      "web": [
+        3335
+      ]
+    }
+  },
+  "AVRInput": {
+    "name": "AVRInput",
+    "value": 68719480072,
+    "names": {
+      "web": [
+        "AVRInput"
+      ],
+      "android": [
+        "AVR_INPUT"
+      ]
+    },
+    "values": {
+      "web": [
+        3336
+      ],
+      "android": [
+        182
+      ]
+    }
+  },
+  "AVRPower": {
+    "name": "AVRPower",
+    "value": 68719480073,
+    "names": {
+      "web": [
+        "AVRPower"
+      ],
+      "android": [
+        "AVR_POWER"
+      ]
+    },
+    "values": {
+      "web": [
+        3337
+      ],
+      "android": [
+        181
+      ]
+    }
+  },
+  "ChannelDown": {
+    "name": "ChannelDown",
+    "value": 68719480074,
+    "names": {
+      "web": [
+        "ChannelDown"
+      ],
+      "android": [
+        "CHANNEL_DOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        3338
+      ],
+      "android": [
+        167
+      ],
+      "fuchsia": [
+        4295753885
+      ]
+    }
+  },
+  "ChannelUp": {
+    "name": "ChannelUp",
+    "value": 68719480075,
+    "names": {
+      "web": [
+        "ChannelUp"
+      ],
+      "android": [
+        "CHANNEL_UP"
+      ]
+    },
+    "values": {
+      "web": [
+        3339
+      ],
+      "android": [
+        166
+      ],
+      "fuchsia": [
+        4295753884
+      ]
+    }
+  },
+  "ColorF0Red": {
+    "name": "ColorF0Red",
+    "value": 68719480076,
+    "names": {
+      "web": [
+        "ColorF0Red"
+      ],
+      "android": [
+        "PROG_RED"
+      ]
+    },
+    "values": {
+      "web": [
+        3340
+      ],
+      "android": [
+        183
+      ]
+    }
+  },
+  "ColorF1Green": {
+    "name": "ColorF1Green",
+    "value": 68719480077,
+    "names": {
+      "web": [
+        "ColorF1Green"
+      ],
+      "android": [
+        "PROG_GREEN"
+      ]
+    },
+    "values": {
+      "web": [
+        3341
+      ],
+      "android": [
+        184
+      ]
+    }
+  },
+  "ColorF2Yellow": {
+    "name": "ColorF2Yellow",
+    "value": 68719480078,
+    "names": {
+      "web": [
+        "ColorF2Yellow"
+      ],
+      "android": [
+        "PROG_YELLOW"
+      ]
+    },
+    "values": {
+      "web": [
+        3342
+      ],
+      "android": [
+        185
+      ]
+    }
+  },
+  "ColorF3Blue": {
+    "name": "ColorF3Blue",
+    "value": 68719480079,
+    "names": {
+      "web": [
+        "ColorF3Blue"
+      ],
+      "android": [
+        "PROG_BLUE"
+      ]
+    },
+    "values": {
+      "web": [
+        3343
+      ],
+      "android": [
+        186
+      ]
+    }
+  },
+  "ColorF4Grey": {
+    "name": "ColorF4Grey",
+    "value": 68719480080,
+    "names": {
+      "web": [
+        "ColorF4Grey"
+      ]
+    },
+    "values": {
+      "web": [
+        3344
+      ]
+    }
+  },
+  "ColorF5Brown": {
+    "name": "ColorF5Brown",
+    "value": 68719480081,
+    "names": {
+      "web": [
+        "ColorF5Brown"
+      ]
+    },
+    "values": {
+      "web": [
+        3345
+      ]
+    }
+  },
+  "ClosedCaptionToggle": {
+    "name": "ClosedCaptionToggle",
+    "value": 68719480082,
+    "names": {
+      "web": [
+        "ClosedCaptionToggle"
+      ],
+      "android": [
+        "CAPTIONS"
+      ]
+    },
+    "values": {
+      "web": [
+        3346
+      ],
+      "android": [
+        175
+      ],
+      "fuchsia": [
+        4295753825
+      ]
+    }
+  },
+  "Dimmer": {
+    "name": "Dimmer",
+    "value": 68719480083,
+    "names": {
+      "web": [
+        "Dimmer"
+      ]
+    },
+    "values": {
+      "web": [
+        3347
+      ]
+    }
+  },
+  "DisplaySwap": {
+    "name": "DisplaySwap",
+    "value": 68719480084,
+    "names": {
+      "web": [
+        "DisplaySwap"
+      ]
+    },
+    "values": {
+      "web": [
+        3348
+      ]
+    }
+  },
+  "Exit": {
+    "name": "Exit",
+    "value": 68719480085,
+    "names": {
+      "web": [
+        "Exit"
+      ]
+    },
+    "values": {
+      "web": [
+        3349
+      ],
+      "fuchsia": [
+        4295753876
+      ]
+    }
+  },
+  "FavoriteClear0": {
+    "name": "FavoriteClear0",
+    "value": 68719480086,
+    "names": {
+      "web": [
+        "FavoriteClear0"
+      ]
+    },
+    "values": {
+      "web": [
+        3350
+      ]
+    }
+  },
+  "FavoriteClear1": {
+    "name": "FavoriteClear1",
+    "value": 68719480087,
+    "names": {
+      "web": [
+        "FavoriteClear1"
+      ]
+    },
+    "values": {
+      "web": [
+        3351
+      ]
+    }
+  },
+  "FavoriteClear2": {
+    "name": "FavoriteClear2",
+    "value": 68719480088,
+    "names": {
+      "web": [
+        "FavoriteClear2"
+      ]
+    },
+    "values": {
+      "web": [
+        3352
+      ]
+    }
+  },
+  "FavoriteClear3": {
+    "name": "FavoriteClear3",
+    "value": 68719480089,
+    "names": {
+      "web": [
+        "FavoriteClear3"
+      ]
+    },
+    "values": {
+      "web": [
+        3353
+      ]
+    }
+  },
+  "FavoriteRecall0": {
+    "name": "FavoriteRecall0",
+    "value": 68719480090,
+    "names": {
+      "web": [
+        "FavoriteRecall0"
+      ]
+    },
+    "values": {
+      "web": [
+        3354
+      ]
+    }
+  },
+  "FavoriteRecall1": {
+    "name": "FavoriteRecall1",
+    "value": 68719480091,
+    "names": {
+      "web": [
+        "FavoriteRecall1"
+      ]
+    },
+    "values": {
+      "web": [
+        3355
+      ]
+    }
+  },
+  "FavoriteRecall2": {
+    "name": "FavoriteRecall2",
+    "value": 68719480092,
+    "names": {
+      "web": [
+        "FavoriteRecall2"
+      ]
+    },
+    "values": {
+      "web": [
+        3356
+      ]
+    }
+  },
+  "FavoriteRecall3": {
+    "name": "FavoriteRecall3",
+    "value": 68719480093,
+    "names": {
+      "web": [
+        "FavoriteRecall3"
+      ]
+    },
+    "values": {
+      "web": [
+        3357
+      ]
+    }
+  },
+  "FavoriteStore0": {
+    "name": "FavoriteStore0",
+    "value": 68719480094,
+    "names": {
+      "web": [
+        "FavoriteStore0"
+      ]
+    },
+    "values": {
+      "web": [
+        3358
+      ]
+    }
+  },
+  "FavoriteStore1": {
+    "name": "FavoriteStore1",
+    "value": 68719480095,
+    "names": {
+      "web": [
+        "FavoriteStore1"
+      ]
+    },
+    "values": {
+      "web": [
+        3359
+      ]
+    }
+  },
+  "FavoriteStore2": {
+    "name": "FavoriteStore2",
+    "value": 68719480096,
+    "names": {
+      "web": [
+        "FavoriteStore2"
+      ]
+    },
+    "values": {
+      "web": [
+        3360
+      ]
+    }
+  },
+  "FavoriteStore3": {
+    "name": "FavoriteStore3",
+    "value": 68719480097,
+    "names": {
+      "web": [
+        "FavoriteStore3"
+      ]
+    },
+    "values": {
+      "web": [
+        3361
+      ]
+    }
+  },
+  "Guide": {
+    "name": "Guide",
+    "value": 68719480098,
+    "names": {
+      "web": [
+        "Guide"
+      ],
+      "android": [
+        "GUIDE"
+      ]
+    },
+    "values": {
+      "web": [
+        3362
+      ],
+      "android": [
+        172
+      ]
+    }
+  },
+  "GuideNextDay": {
+    "name": "GuideNextDay",
+    "value": 68719480099,
+    "names": {
+      "web": [
+        "GuideNextDay"
+      ]
+    },
+    "values": {
+      "web": [
+        3363
+      ]
+    }
+  },
+  "GuidePreviousDay": {
+    "name": "GuidePreviousDay",
+    "value": 68719480100,
+    "names": {
+      "web": [
+        "GuidePreviousDay"
+      ]
+    },
+    "values": {
+      "web": [
+        3364
+      ]
+    }
+  },
+  "Info": {
+    "name": "Info",
+    "value": 68719480101,
+    "names": {
+      "web": [
+        "Info"
+      ],
+      "android": [
+        "INFO"
+      ]
+    },
+    "values": {
+      "web": [
+        3365
+      ],
+      "android": [
+        165
+      ],
+      "fuchsia": [
+        4295753824
+      ]
+    }
+  },
+  "InstantReplay": {
+    "name": "InstantReplay",
+    "value": 68719480102,
+    "names": {
+      "web": [
+        "InstantReplay"
+      ]
+    },
+    "values": {
+      "web": [
+        3366
+      ]
+    }
+  },
+  "Link": {
+    "name": "Link",
+    "value": 68719480103,
+    "names": {
+      "web": [
+        "Link"
+      ]
+    },
+    "values": {
+      "web": [
+        3367
+      ]
+    }
+  },
+  "ListProgram": {
+    "name": "ListProgram",
+    "value": 68719480104,
+    "names": {
+      "web": [
+        "ListProgram"
+      ]
+    },
+    "values": {
+      "web": [
+        3368
+      ]
+    }
+  },
+  "LiveContent": {
+    "name": "LiveContent",
+    "value": 68719480105,
+    "names": {
+      "web": [
+        "LiveContent"
+      ]
+    },
+    "values": {
+      "web": [
+        3369
+      ]
+    }
+  },
+  "Lock": {
+    "name": "Lock",
+    "value": 68719480106,
+    "names": {
+      "web": [
+        "Lock"
+      ]
+    },
+    "values": {
+      "web": [
+        3370
+      ]
+    }
+  },
+  "MediaApps": {
+    "name": "MediaApps",
+    "value": 68719480107,
+    "names": {
+      "web": [
+        "MediaApps"
+      ]
+    },
+    "values": {
+      "web": [
+        3371
+      ]
+    }
+  },
+  "MediaFastForward": {
+    "name": "MediaFastForward",
+    "value": 68719480108,
+    "names": {
+      "web": [
+        "MediaFastForward"
+      ],
+      "gtk": [
+        "AudioForward"
+      ],
+      "android": [
+        "MEDIA_FAST_FORWARD"
+      ]
+    },
+    "values": {
+      "web": [
+        3372
+      ],
+      "gtk": [
+        269025175
+      ],
+      "android": [
+        90
+      ],
+      "fuchsia": [
+        4295753907
+      ]
+    }
+  },
+  "MediaLast": {
+    "name": "MediaLast",
+    "value": 68719480109,
+    "names": {
+      "web": [
+        "MediaLast"
+      ],
+      "android": [
+        "LAST_CHANNEL"
+      ]
+    },
+    "values": {
+      "web": [
+        3373
+      ],
+      "android": [
+        229
+      ],
+      "fuchsia": [
+        4295753859
+      ]
+    }
+  },
+  "MediaPause": {
+    "name": "MediaPause",
+    "value": 68719480110,
+    "names": {
+      "web": [
+        "MediaPause"
+      ],
+      "gtk": [
+        "AudioPause"
+      ],
+      "android": [
+        "MEDIA_PAUSE"
+      ]
+    },
+    "values": {
+      "web": [
+        3374
+      ],
+      "gtk": [
+        269025073
+      ],
+      "android": [
+        127
+      ],
+      "fuchsia": [
+        4295753905
+      ]
+    }
+  },
+  "MediaPlay": {
+    "name": "MediaPlay",
+    "value": 68719480111,
+    "names": {
+      "web": [
+        "MediaPlay"
+      ],
+      "gtk": [
+        "3270_Play",
+        "AudioPlay"
+      ],
+      "android": [
+        "MEDIA_PLAY"
+      ]
+    },
+    "values": {
+      "web": [
+        3375
+      ],
+      "gtk": [
+        64790,
+        269025044
+      ],
+      "android": [
+        126
+      ],
+      "fuchsia": [
+        4295753904
+      ]
+    }
+  },
+  "MediaRecord": {
+    "name": "MediaRecord",
+    "value": 68719480112,
+    "names": {
+      "web": [
+        "MediaRecord"
+      ],
+      "gtk": [
+        "AudioRecord"
+      ],
+      "android": [
+        "MEDIA_RECORD"
+      ]
+    },
+    "values": {
+      "web": [
+        3376
+      ],
+      "gtk": [
+        269025052
+      ],
+      "android": [
+        130
+      ],
+      "fuchsia": [
+        4295753906
+      ]
+    }
+  },
+  "MediaRewind": {
+    "name": "MediaRewind",
+    "value": 68719480113,
+    "names": {
+      "web": [
+        "MediaRewind"
+      ],
+      "gtk": [
+        "AudioRewind"
+      ],
+      "android": [
+        "MEDIA_REWIND"
+      ]
+    },
+    "values": {
+      "web": [
+        3377
+      ],
+      "gtk": [
+        269025086
+      ],
+      "android": [
+        89
+      ],
+      "fuchsia": [
+        4295753908
+      ]
+    }
+  },
+  "MediaSkip": {
+    "name": "MediaSkip",
+    "value": 68719480114,
+    "names": {
+      "web": [
+        "MediaSkip"
+      ]
+    },
+    "values": {
+      "web": [
+        3378
+      ]
+    }
+  },
+  "NextFavoriteChannel": {
+    "name": "NextFavoriteChannel",
+    "value": 68719480115,
+    "names": {
+      "web": [
+        "NextFavoriteChannel"
+      ]
+    },
+    "values": {
+      "web": [
+        3379
+      ]
+    }
+  },
+  "NextUserProfile": {
+    "name": "NextUserProfile",
+    "value": 68719480116,
+    "names": {
+      "web": [
+        "NextUserProfile"
+      ]
+    },
+    "values": {
+      "web": [
+        3380
+      ]
+    }
+  },
+  "OnDemand": {
+    "name": "OnDemand",
+    "value": 68719480117,
+    "names": {
+      "web": [
+        "OnDemand"
+      ]
+    },
+    "values": {
+      "web": [
+        3381
+      ]
+    }
+  },
+  "PInPDown": {
+    "name": "PInPDown",
+    "value": 68719480118,
+    "names": {
+      "web": [
+        "PinPDown"
+      ]
+    },
+    "values": {
+      "web": [
+        3382
+      ]
+    }
+  },
+  "PInPMove": {
+    "name": "PInPMove",
+    "value": 68719480119,
+    "names": {
+      "web": [
+        "PinPMove"
+      ]
+    },
+    "values": {
+      "web": [
+        3383
+      ]
+    }
+  },
+  "PInPToggle": {
+    "name": "PInPToggle",
+    "value": 68719480120,
+    "names": {
+      "web": [
+        "PinPToggle"
+      ]
+    },
+    "values": {
+      "web": [
+        3384
+      ]
+    }
+  },
+  "PInPUp": {
+    "name": "PInPUp",
+    "value": 68719480121,
+    "names": {
+      "web": [
+        "PinPUp"
+      ]
+    },
+    "values": {
+      "web": [
+        3385
+      ]
+    }
+  },
+  "PlaySpeedDown": {
+    "name": "PlaySpeedDown",
+    "value": 68719480122,
+    "names": {
+      "web": [
+        "PlaySpeedDown"
+      ]
+    },
+    "values": {
+      "web": [
+        3386
+      ]
+    }
+  },
+  "PlaySpeedReset": {
+    "name": "PlaySpeedReset",
+    "value": 68719480123,
+    "names": {
+      "web": [
+        "PlaySpeedReset"
+      ]
+    },
+    "values": {
+      "web": [
+        3387
+      ]
+    }
+  },
+  "PlaySpeedUp": {
+    "name": "PlaySpeedUp",
+    "value": 68719480124,
+    "names": {
+      "web": [
+        "PlaySpeedUp"
+      ]
+    },
+    "values": {
+      "web": [
+        3388
+      ]
+    }
+  },
+  "RandomToggle": {
+    "name": "RandomToggle",
+    "value": 68719480125,
+    "names": {
+      "web": [
+        "RandomToggle"
+      ]
+    },
+    "values": {
+      "web": [
+        3389
+      ]
+    }
+  },
+  "RcLowBattery": {
+    "name": "RcLowBattery",
+    "value": 68719480126,
+    "names": {
+      "web": [
+        "RcLowBattery"
+      ]
+    },
+    "values": {
+      "web": [
+        3390
+      ]
+    }
+  },
+  "RecordSpeedNext": {
+    "name": "RecordSpeedNext",
+    "value": 68719480127,
+    "names": {
+      "web": [
+        "RecordSpeedNext"
+      ]
+    },
+    "values": {
+      "web": [
+        3391
+      ]
+    }
+  },
+  "RfBypass": {
+    "name": "RfBypass",
+    "value": 68719480128,
+    "names": {
+      "web": [
+        "RfBypass"
+      ]
+    },
+    "values": {
+      "web": [
+        3392
+      ]
+    }
+  },
+  "ScanChannelsToggle": {
+    "name": "ScanChannelsToggle",
+    "value": 68719480129,
+    "names": {
+      "web": [
+        "ScanChannelsToggle"
+      ]
+    },
+    "values": {
+      "web": [
+        3393
+      ]
+    }
+  },
+  "ScreenModeNext": {
+    "name": "ScreenModeNext",
+    "value": 68719480130,
+    "names": {
+      "web": [
+        "ScreenModeNext"
+      ]
+    },
+    "values": {
+      "web": [
+        3394
+      ]
+    }
+  },
+  "Settings": {
+    "name": "Settings",
+    "value": 68719480131,
+    "names": {
+      "web": [
+        "Settings"
+      ],
+      "android": [
+        "SETTINGS"
+      ]
+    },
+    "values": {
+      "web": [
+        3395
+      ],
+      "android": [
+        176
+      ]
+    }
+  },
+  "SplitScreenToggle": {
+    "name": "SplitScreenToggle",
+    "value": 68719480132,
+    "names": {
+      "web": [
+        "SplitScreenToggle"
+      ]
+    },
+    "values": {
+      "web": [
+        3396
+      ]
+    }
+  },
+  "STBInput": {
+    "name": "STBInput",
+    "value": 68719480133,
+    "names": {
+      "web": [
+        "STBInput"
+      ],
+      "android": [
+        "STB_INPUT"
+      ]
+    },
+    "values": {
+      "web": [
+        3397
+      ],
+      "android": [
+        180
+      ]
+    }
+  },
+  "STBPower": {
+    "name": "STBPower",
+    "value": 68719480134,
+    "names": {
+      "web": [
+        "STBPower"
+      ],
+      "android": [
+        "STB_POWER"
+      ]
+    },
+    "values": {
+      "web": [
+        3398
+      ],
+      "android": [
+        179
+      ]
+    }
+  },
+  "Subtitle": {
+    "name": "Subtitle",
+    "value": 68719480135,
+    "names": {
+      "web": [
+        "Subtitle"
+      ]
+    },
+    "values": {
+      "web": [
+        3399
+      ]
+    }
+  },
+  "Teletext": {
+    "name": "Teletext",
+    "value": 68719480136,
+    "names": {
+      "web": [
+        "Teletext"
+      ],
+      "android": [
+        "TV_TELETEXT"
+      ]
+    },
+    "values": {
+      "web": [
+        3400
+      ],
+      "android": [
+        233
+      ]
+    }
+  },
+  "TV": {
+    "name": "TV",
+    "value": 68719480137,
+    "names": {
+      "web": [
+        "TV"
+      ],
+      "android": [
+        "TV"
+      ]
+    },
+    "values": {
+      "web": [
+        3401
+      ],
+      "android": [
+        170
+      ]
+    }
+  },
+  "TVInput": {
+    "name": "TVInput",
+    "value": 68719480138,
+    "names": {
+      "web": [
+        "TVInput"
+      ],
+      "android": [
+        "TV_INPUT"
+      ]
+    },
+    "values": {
+      "web": [
+        3402
+      ],
+      "android": [
+        178
+      ]
+    }
+  },
+  "TVPower": {
+    "name": "TVPower",
+    "value": 68719480139,
+    "names": {
+      "web": [
+        "TVPower"
+      ],
+      "android": [
+        "TV_POWER"
+      ]
+    },
+    "values": {
+      "web": [
+        3403
+      ],
+      "android": [
+        177
+      ]
+    }
+  },
+  "VideoModeNext": {
+    "name": "VideoModeNext",
+    "value": 68719480140,
+    "names": {
+      "web": [
+        "VideoModeNext"
+      ]
+    },
+    "values": {
+      "web": [
+        3404
+      ]
+    }
+  },
+  "Wink": {
+    "name": "Wink",
+    "value": 68719480141,
+    "names": {
+      "web": [
+        "Wink"
+      ]
+    },
+    "values": {
+      "web": [
+        3405
+      ]
+    }
+  },
+  "ZoomToggle": {
+    "name": "ZoomToggle",
+    "value": 68719480142,
+    "names": {
+      "web": [
+        "ZoomToggle"
+      ],
+      "android": [
+        "TV_ZOOM_MODE"
+      ]
+    },
+    "values": {
+      "web": [
+        3406
+      ],
+      "android": [
+        255
+      ],
+      "fuchsia": [
+        4295754290
+      ]
+    }
+  },
+  "DVR": {
+    "name": "DVR",
+    "value": 68719480143,
+    "names": {
+      "web": [
+        "DVR"
+      ],
+      "android": [
+        "DVR"
+      ]
+    },
+    "values": {
+      "web": [
+        3407
+      ],
+      "android": [
+        173
+      ]
+    }
+  },
+  "MediaAudioTrack": {
+    "name": "MediaAudioTrack",
+    "value": 68719480144,
+    "names": {
+      "web": [
+        "MediaAudioTrack"
+      ],
+      "android": [
+        "MEDIA_AUDIO_TRACK"
+      ]
+    },
+    "values": {
+      "web": [
+        3408
+      ],
+      "android": [
+        222
+      ]
+    }
+  },
+  "MediaSkipBackward": {
+    "name": "MediaSkipBackward",
+    "value": 68719480145,
+    "names": {
+      "web": [
+        "MediaSkipBackward"
+      ],
+      "android": [
+        "MEDIA_SKIP_BACKWARD"
+      ]
+    },
+    "values": {
+      "web": [
+        3409
+      ],
+      "android": [
+        273
+      ]
+    }
+  },
+  "MediaSkipForward": {
+    "name": "MediaSkipForward",
+    "value": 68719480146,
+    "names": {
+      "web": [
+        "MediaSkipForward"
+      ],
+      "android": [
+        "MEDIA_SKIP_FORWARD"
+      ]
+    },
+    "values": {
+      "web": [
+        3410
+      ],
+      "android": [
+        272
+      ]
+    }
+  },
+  "MediaStepBackward": {
+    "name": "MediaStepBackward",
+    "value": 68719480147,
+    "names": {
+      "web": [
+        "MediaStepBackward"
+      ],
+      "android": [
+        "MEDIA_STEP_BACKWARD"
+      ]
+    },
+    "values": {
+      "web": [
+        3411
+      ],
+      "android": [
+        275
+      ]
+    }
+  },
+  "MediaStepForward": {
+    "name": "MediaStepForward",
+    "value": 68719480148,
+    "names": {
+      "web": [
+        "MediaStepForward"
+      ],
+      "android": [
+        "MEDIA_STEP_FORWARD"
+      ]
+    },
+    "values": {
+      "web": [
+        3412
+      ],
+      "android": [
+        274
+      ]
+    }
+  },
+  "MediaTopMenu": {
+    "name": "MediaTopMenu",
+    "value": 68719480149,
+    "names": {
+      "web": [
+        "MediaTopMenu"
+      ],
+      "android": [
+        "MEDIA_TOP_MENU"
+      ]
+    },
+    "values": {
+      "web": [
+        3413
+      ],
+      "android": [
+        226
+      ]
+    }
+  },
+  "NavigateIn": {
+    "name": "NavigateIn",
+    "value": 68719480150,
+    "names": {
+      "web": [
+        "NavigateIn"
+      ],
+      "android": [
+        "NAVIGATE_IN"
+      ]
+    },
+    "values": {
+      "web": [
+        3414
+      ],
+      "android": [
+        262
+      ]
+    }
+  },
+  "NavigateNext": {
+    "name": "NavigateNext",
+    "value": 68719480151,
+    "names": {
+      "web": [
+        "NavigateNext"
+      ],
+      "android": [
+        "NAVIGATE_NEXT"
+      ]
+    },
+    "values": {
+      "web": [
+        3415
+      ],
+      "android": [
+        261
+      ]
+    }
+  },
+  "NavigateOut": {
+    "name": "NavigateOut",
+    "value": 68719480152,
+    "names": {
+      "web": [
+        "NavigateOut"
+      ],
+      "android": [
+        "NAVIGATE_OUT"
+      ]
+    },
+    "values": {
+      "web": [
+        3416
+      ],
+      "android": [
+        263
+      ]
+    }
+  },
+  "NavigatePrevious": {
+    "name": "NavigatePrevious",
+    "value": 68719480153,
+    "names": {
+      "web": [
+        "NavigatePrevious"
+      ],
+      "android": [
+        "NAVIGATE_PREVIOUS"
+      ]
+    },
+    "values": {
+      "web": [
+        3417
+      ],
+      "android": [
+        260
+      ]
+    }
+  },
+  "Pairing": {
+    "name": "Pairing",
+    "value": 68719480154,
+    "names": {
+      "web": [
+        "Pairing"
+      ],
+      "android": [
+        "PAIRING"
+      ]
+    },
+    "values": {
+      "web": [
+        3418
+      ],
+      "android": [
+        225
+      ]
+    }
+  },
+  "MediaClose": {
+    "name": "MediaClose",
+    "value": 68719480155,
+    "names": {
+      "web": [
+        "MediaClose"
+      ]
+    },
+    "values": {
+      "web": [
+        3419
+      ]
+    }
+  },
+  "AudioBassBoostToggle": {
+    "name": "AudioBassBoostToggle",
+    "value": 68719480322,
+    "names": {
+      "web": [
+        "AudioBassBoostToggle"
+      ]
+    },
+    "values": {
+      "web": [
+        3586
+      ]
+    }
+  },
+  "AudioTrebleDown": {
+    "name": "AudioTrebleDown",
+    "value": 68719480324,
+    "names": {
+      "web": [
+        "AudioTrebleDown"
+      ]
+    },
+    "values": {
+      "web": [
+        3588
+      ]
+    }
+  },
+  "AudioTrebleUp": {
+    "name": "AudioTrebleUp",
+    "value": 68719480325,
+    "names": {
+      "web": [
+        "AudioTrebleUp"
+      ]
+    },
+    "values": {
+      "web": [
+        3589
+      ]
+    }
+  },
+  "MicrophoneToggle": {
+    "name": "MicrophoneToggle",
+    "value": 68719480326,
+    "names": {
+      "web": [
+        "MicrophoneToggle"
+      ]
+    },
+    "values": {
+      "web": [
+        3590
+      ]
+    }
+  },
+  "MicrophoneVolumeDown": {
+    "name": "MicrophoneVolumeDown",
+    "value": 68719480327,
+    "names": {
+      "web": [
+        "MicrophoneVolumeDown"
+      ]
+    },
+    "values": {
+      "web": [
+        3591
+      ]
+    }
+  },
+  "MicrophoneVolumeUp": {
+    "name": "MicrophoneVolumeUp",
+    "value": 68719480328,
+    "names": {
+      "web": [
+        "MicrophoneVolumeUp"
+      ]
+    },
+    "values": {
+      "web": [
+        3592
+      ]
+    }
+  },
+  "MicrophoneVolumeMute": {
+    "name": "MicrophoneVolumeMute",
+    "value": 68719480329,
+    "names": {
+      "web": [
+        "MicrophoneVolumeMute"
+      ],
+      "android": [
+        "MUTE"
+      ]
+    },
+    "values": {
+      "web": [
+        3593
+      ],
+      "android": [
+        91
+      ]
+    }
+  },
+  "SpeechCorrectionList": {
+    "name": "SpeechCorrectionList",
+    "value": 68719480577,
+    "names": {
+      "web": [
+        "SpeechCorrectionList"
+      ]
+    },
+    "values": {
+      "web": [
+        3841
+      ]
+    }
+  },
+  "SpeechInputToggle": {
+    "name": "SpeechInputToggle",
+    "value": 68719480578,
+    "names": {
+      "web": [
+        "SpeechInputToggle"
+      ]
+    },
+    "values": {
+      "web": [
+        3842
+      ],
+      "fuchsia": [
+        4295753935
+      ]
+    }
+  },
+  "AppSwitch": {
+    "name": "AppSwitch",
+    "value": 68719480833,
+    "names": {
+      "web": [
+        "AppSwitch"
+      ],
+      "android": [
+        "APP_SWITCH"
+      ]
+    },
+    "values": {
+      "web": [
+        4097
+      ],
+      "android": [
+        187
+      ]
+    }
+  },
+  "Call": {
+    "name": "Call",
+    "value": 68719480834,
+    "names": {
+      "web": [
+        "Call"
+      ],
+      "android": [
+        "CALL"
+      ]
+    },
+    "values": {
+      "web": [
+        4098
+      ],
+      "android": [
+        5
+      ]
+    }
+  },
+  "CameraFocus": {
+    "name": "CameraFocus",
+    "value": 68719480835,
+    "names": {
+      "web": [
+        "CameraFocus"
+      ],
+      "android": [
+        "FOCUS"
+      ]
+    },
+    "values": {
+      "web": [
+        4099
+      ],
+      "android": [
+        80
+      ]
+    }
+  },
+  "EndCall": {
+    "name": "EndCall",
+    "value": 68719480836,
+    "names": {
+      "web": [
+        "EndCall"
+      ],
+      "android": [
+        "ENDCALL"
+      ]
+    },
+    "values": {
+      "web": [
+        4100
+      ],
+      "android": [
+        6
+      ]
+    }
+  },
+  "GoBack": {
+    "name": "GoBack",
+    "value": 68719480837,
+    "names": {
+      "web": [
+        "GoBack"
+      ],
+      "android": [
+        "BACK"
+      ]
+    },
+    "values": {
+      "web": [
+        4101
+      ],
+      "android": [
+        4
+      ]
+    }
+  },
+  "GoHome": {
+    "name": "GoHome",
+    "value": 68719480838,
+    "names": {
+      "web": [
+        "GoHome"
+      ],
+      "android": [
+        "HOME"
+      ]
+    },
+    "values": {
+      "web": [
+        4102
+      ],
+      "android": [
+        3
+      ]
+    }
+  },
+  "HeadsetHook": {
+    "name": "HeadsetHook",
+    "value": 68719480839,
+    "names": {
+      "web": [
+        "HeadsetHook"
+      ],
+      "android": [
+        "HEADSETHOOK"
+      ]
+    },
+    "values": {
+      "web": [
+        4103
+      ],
+      "android": [
+        79
+      ]
+    }
+  },
+  "LastNumberRedial": {
+    "name": "LastNumberRedial",
+    "value": 68719480840,
+    "names": {
+      "web": [
+        "LastNumberRedial"
+      ]
+    },
+    "values": {
+      "web": [
+        4104
+      ]
+    }
+  },
+  "Notification": {
+    "name": "Notification",
+    "value": 68719480841,
+    "names": {
+      "web": [
+        "Notification"
+      ],
+      "android": [
+        "NOTIFICATION"
+      ]
+    },
+    "values": {
+      "web": [
+        4105
+      ],
+      "android": [
+        83
+      ]
+    }
+  },
+  "MannerMode": {
+    "name": "MannerMode",
+    "value": 68719480842,
+    "names": {
+      "web": [
+        "MannerMode"
+      ],
+      "android": [
+        "MANNER_MODE"
+      ]
+    },
+    "values": {
+      "web": [
+        4106
+      ],
+      "android": [
+        205
+      ]
+    }
+  },
+  "VoiceDial": {
+    "name": "VoiceDial",
+    "value": 68719480843,
+    "names": {
+      "web": [
+        "VoiceDial"
+      ]
+    },
+    "values": {
+      "web": [
+        4107
+      ]
+    }
+  },
+  "TV3DMode": {
+    "name": "TV3DMode",
+    "value": 68719481089,
+    "names": {
+      "web": [
+        "TV3DMode"
+      ],
+      "android": [
+        "3D_MODE"
+      ]
+    },
+    "values": {
+      "web": [
+        4353
+      ],
+      "android": [
+        206
+      ]
+    }
+  },
+  "TVAntennaCable": {
+    "name": "TVAntennaCable",
+    "value": 68719481090,
+    "names": {
+      "web": [
+        "TVAntennaCable"
+      ],
+      "android": [
+        "TV_ANTENNA_CABLE"
+      ]
+    },
+    "values": {
+      "web": [
+        4354
+      ],
+      "android": [
+        242
+      ]
+    }
+  },
+  "TVAudioDescription": {
+    "name": "TVAudioDescription",
+    "value": 68719481091,
+    "names": {
+      "web": [
+        "TVAudioDescription"
+      ],
+      "android": [
+        "TV_AUDIO_DESCRIPTION"
+      ]
+    },
+    "values": {
+      "web": [
+        4355
+      ],
+      "android": [
+        252
+      ]
+    }
+  },
+  "TVAudioDescriptionMixDown": {
+    "name": "TVAudioDescriptionMixDown",
+    "value": 68719481092,
+    "names": {
+      "web": [
+        "TVAudioDescriptionMixDown"
+      ],
+      "android": [
+        "TV_AUDIO_DESCRIPTION_MIX_DOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        4356
+      ],
+      "android": [
+        254
+      ]
+    }
+  },
+  "TVAudioDescriptionMixUp": {
+    "name": "TVAudioDescriptionMixUp",
+    "value": 68719481093,
+    "names": {
+      "web": [
+        "TVAudioDescriptionMixUp"
+      ],
+      "android": [
+        "TV_AUDIO_DESCRIPTION_MIX_UP"
+      ]
+    },
+    "values": {
+      "web": [
+        4357
+      ],
+      "android": [
+        253
+      ]
+    }
+  },
+  "TVContentsMenu": {
+    "name": "TVContentsMenu",
+    "value": 68719481094,
+    "names": {
+      "web": [
+        "TVContentsMenu"
+      ],
+      "android": [
+        "TV_CONTENTS_MENU"
+      ]
+    },
+    "values": {
+      "web": [
+        4358
+      ],
+      "android": [
+        256
+      ]
+    }
+  },
+  "TVDataService": {
+    "name": "TVDataService",
+    "value": 68719481095,
+    "names": {
+      "web": [
+        "TVDataService"
+      ],
+      "android": [
+        "TV_DATA_SERVICE"
+      ]
+    },
+    "values": {
+      "web": [
+        4359
+      ],
+      "android": [
+        230
+      ]
+    }
+  },
+  "TVInputComponent1": {
+    "name": "TVInputComponent1",
+    "value": 68719481096,
+    "names": {
+      "web": [
+        "TVInputComponent1"
+      ],
+      "android": [
+        "TV_INPUT_COMPONENT_1"
+      ]
+    },
+    "values": {
+      "web": [
+        4360
+      ],
+      "android": [
+        249
+      ]
+    }
+  },
+  "TVInputComponent2": {
+    "name": "TVInputComponent2",
+    "value": 68719481097,
+    "names": {
+      "web": [
+        "TVInputComponent2"
+      ],
+      "android": [
+        "TV_INPUT_COMPONENT_2"
+      ]
+    },
+    "values": {
+      "web": [
+        4361
+      ],
+      "android": [
+        250
+      ]
+    }
+  },
+  "TVInputComposite1": {
+    "name": "TVInputComposite1",
+    "value": 68719481098,
+    "names": {
+      "web": [
+        "TVInputComposite1"
+      ],
+      "android": [
+        "TV_INPUT_COMPOSITE_1"
+      ]
+    },
+    "values": {
+      "web": [
+        4362
+      ],
+      "android": [
+        247
+      ]
+    }
+  },
+  "TVInputComposite2": {
+    "name": "TVInputComposite2",
+    "value": 68719481099,
+    "names": {
+      "web": [
+        "TVInputComposite2"
+      ],
+      "android": [
+        "TV_INPUT_COMPOSITE_2"
+      ]
+    },
+    "values": {
+      "web": [
+        4363
+      ],
+      "android": [
+        248
+      ]
+    }
+  },
+  "TVInputHDMI1": {
+    "name": "TVInputHDMI1",
+    "value": 68719481100,
+    "names": {
+      "web": [
+        "TVInputHDMI1"
+      ],
+      "android": [
+        "TV_INPUT_HDMI_1"
+      ]
+    },
+    "values": {
+      "web": [
+        4364
+      ],
+      "android": [
+        243
+      ]
+    }
+  },
+  "TVInputHDMI2": {
+    "name": "TVInputHDMI2",
+    "value": 68719481101,
+    "names": {
+      "web": [
+        "TVInputHDMI2"
+      ],
+      "android": [
+        "TV_INPUT_HDMI_2"
+      ]
+    },
+    "values": {
+      "web": [
+        4365
+      ],
+      "android": [
+        244
+      ]
+    }
+  },
+  "TVInputHDMI3": {
+    "name": "TVInputHDMI3",
+    "value": 68719481102,
+    "names": {
+      "web": [
+        "TVInputHDMI3"
+      ],
+      "android": [
+        "TV_INPUT_HDMI_3"
+      ]
+    },
+    "values": {
+      "web": [
+        4366
+      ],
+      "android": [
+        245
+      ]
+    }
+  },
+  "TVInputHDMI4": {
+    "name": "TVInputHDMI4",
+    "value": 68719481103,
+    "names": {
+      "web": [
+        "TVInputHDMI4"
+      ],
+      "android": [
+        "TV_INPUT_HDMI_4"
+      ]
+    },
+    "values": {
+      "web": [
+        4367
+      ],
+      "android": [
+        246
+      ]
+    }
+  },
+  "TVInputVGA1": {
+    "name": "TVInputVGA1",
+    "value": 68719481104,
+    "names": {
+      "web": [
+        "TVInputVGA1"
+      ],
+      "android": [
+        "TV_INPUT_VGA_1"
+      ]
+    },
+    "values": {
+      "web": [
+        4368
+      ],
+      "android": [
+        251
+      ]
+    }
+  },
+  "TVMediaContext": {
+    "name": "TVMediaContext",
+    "value": 68719481105,
+    "names": {
+      "web": [
+        "TVMediaContext"
+      ]
+    },
+    "values": {
+      "web": [
+        4369
+      ]
+    }
+  },
+  "TVNetwork": {
+    "name": "TVNetwork",
+    "value": 68719481106,
+    "names": {
+      "web": [
+        "TVNetwork"
+      ],
+      "android": [
+        "TV_NETWORK"
+      ]
+    },
+    "values": {
+      "web": [
+        4370
+      ],
+      "android": [
+        241
+      ]
+    }
+  },
+  "TVNumberEntry": {
+    "name": "TVNumberEntry",
+    "value": 68719481107,
+    "names": {
+      "web": [
+        "TVNumberEntry"
+      ],
+      "android": [
+        "TV_NUMBER_ENTRY"
+      ]
+    },
+    "values": {
+      "web": [
+        4371
+      ],
+      "android": [
+        234
+      ]
+    }
+  },
+  "TVRadioService": {
+    "name": "TVRadioService",
+    "value": 68719481108,
+    "names": {
+      "web": [
+        "TVRadioService"
+      ],
+      "android": [
+        "TV_RADIO_SERVICE"
+      ]
+    },
+    "values": {
+      "web": [
+        4372
+      ],
+      "android": [
+        232
+      ]
+    }
+  },
+  "TVSatellite": {
+    "name": "TVSatellite",
+    "value": 68719481109,
+    "names": {
+      "web": [
+        "TVSatellite"
+      ],
+      "android": [
+        "TV_SATELLITE"
+      ]
+    },
+    "values": {
+      "web": [
+        4373
+      ],
+      "android": [
+        237
+      ]
+    }
+  },
+  "TVSatelliteBS": {
+    "name": "TVSatelliteBS",
+    "value": 68719481110,
+    "names": {
+      "web": [
+        "TVSatelliteBS"
+      ],
+      "android": [
+        "TV_SATELLITE_BS"
+      ]
+    },
+    "values": {
+      "web": [
+        4374
+      ],
+      "android": [
+        238
+      ]
+    }
+  },
+  "TVSatelliteCS": {
+    "name": "TVSatelliteCS",
+    "value": 68719481111,
+    "names": {
+      "web": [
+        "TVSatelliteCS"
+      ],
+      "android": [
+        "TV_SATELLITE_CS"
+      ]
+    },
+    "values": {
+      "web": [
+        4375
+      ],
+      "android": [
+        239
+      ]
+    }
+  },
+  "TVSatelliteToggle": {
+    "name": "TVSatelliteToggle",
+    "value": 68719481112,
+    "names": {
+      "web": [
+        "TVSatelliteToggle"
+      ],
+      "android": [
+        "TV_SATELLITE_SERVICE"
+      ]
+    },
+    "values": {
+      "web": [
+        4376
+      ],
+      "android": [
+        240
+      ]
+    }
+  },
+  "TVTerrestrialAnalog": {
+    "name": "TVTerrestrialAnalog",
+    "value": 68719481113,
+    "names": {
+      "web": [
+        "TVTerrestrialAnalog"
+      ],
+      "android": [
+        "TV_TERRESTRIAL_ANALOG"
+      ]
+    },
+    "values": {
+      "web": [
+        4377
+      ],
+      "android": [
+        235
+      ]
+    }
+  },
+  "TVTerrestrialDigital": {
+    "name": "TVTerrestrialDigital",
+    "value": 68719481114,
+    "names": {
+      "web": [
+        "TVTerrestrialDigital"
+      ],
+      "android": [
+        "TV_TERRESTRIAL_DIGITAL"
+      ]
+    },
+    "values": {
+      "web": [
+        4378
+      ],
+      "android": [
+        236
+      ]
+    }
+  },
+  "TVTimer": {
+    "name": "TVTimer",
+    "value": 68719481115,
+    "names": {
+      "web": [
+        "TVTimer"
+      ],
+      "android": [
+        "TV_TIMER_PROGRAMMING"
+      ]
+    },
+    "values": {
+      "web": [
+        4379
+      ],
+      "android": [
+        258
+      ]
+    }
+  },
+  "Key11": {
+    "name": "Key11",
+    "value": 68719481345,
+    "names": {
+      "web": [
+        "Key11"
+      ]
+    },
+    "values": {
+      "web": [
+        4609
+      ]
+    }
+  },
+  "Key12": {
+    "name": "Key12",
+    "value": 68719481346,
+    "names": {
+      "web": [
+        "Key12"
+      ]
+    },
+    "values": {
+      "web": [
+        4610
+      ]
+    }
+  },
+  "GameButton1": {
+    "name": "GameButton1",
+    "value": 68719869697,
+    "names": {
+      "web": [
+        "GameButton1"
+      ],
+      "android": [
+        "BUTTON_1"
+      ]
+    },
+    "values": {
+      "web": [
+        392961
+      ],
+      "android": [
+        188
+      ],
+      "fuchsia": [
+        4295360257
+      ]
+    }
+  },
+  "GameButton2": {
+    "name": "GameButton2",
+    "value": 68719869698,
+    "names": {
+      "web": [
+        "GameButton2"
+      ],
+      "android": [
+        "BUTTON_2"
+      ]
+    },
+    "values": {
+      "web": [
+        392962
+      ],
+      "android": [
+        189
+      ],
+      "fuchsia": [
+        4295360258
+      ]
+    }
+  },
+  "GameButton3": {
+    "name": "GameButton3",
+    "value": 68719869699,
+    "names": {
+      "web": [
+        "GameButton3"
+      ],
+      "android": [
+        "BUTTON_3"
+      ]
+    },
+    "values": {
+      "web": [
+        392963
+      ],
+      "android": [
+        190
+      ],
+      "fuchsia": [
+        4295360259
+      ]
+    }
+  },
+  "GameButton4": {
+    "name": "GameButton4",
+    "value": 68719869700,
+    "names": {
+      "web": [
+        "GameButton4"
+      ],
+      "android": [
+        "BUTTON_4"
+      ]
+    },
+    "values": {
+      "web": [
+        392964
+      ],
+      "android": [
+        191
+      ],
+      "fuchsia": [
+        4295360260
+      ]
+    }
+  },
+  "GameButton5": {
+    "name": "GameButton5",
+    "value": 68719869701,
+    "names": {
+      "web": [
+        "GameButton5"
+      ],
+      "android": [
+        "BUTTON_5"
+      ]
+    },
+    "values": {
+      "web": [
+        392965
+      ],
+      "android": [
+        192
+      ],
+      "fuchsia": [
+        4295360261
+      ]
+    }
+  },
+  "GameButton6": {
+    "name": "GameButton6",
+    "value": 68719869702,
+    "names": {
+      "web": [
+        "GameButton6"
+      ],
+      "android": [
+        "BUTTON_6"
+      ]
+    },
+    "values": {
+      "web": [
+        392966
+      ],
+      "android": [
+        193
+      ],
+      "fuchsia": [
+        4295360262
+      ]
+    }
+  },
+  "GameButton7": {
+    "name": "GameButton7",
+    "value": 68719869703,
+    "names": {
+      "web": [
+        "GameButton7"
+      ],
+      "android": [
+        "BUTTON_7"
+      ]
+    },
+    "values": {
+      "web": [
+        392967
+      ],
+      "android": [
+        194
+      ],
+      "fuchsia": [
+        4295360263
+      ]
+    }
+  },
+  "GameButton8": {
+    "name": "GameButton8",
+    "value": 68719869704,
+    "names": {
+      "web": [
+        "GameButton8"
+      ],
+      "windows": [
+        "GAMEPAD_A"
+      ],
+      "android": [
+        "BUTTON_8"
+      ]
+    },
+    "values": {
+      "web": [
+        392968
+      ],
+      "windows": [
+        195
+      ],
+      "android": [
+        195
+      ],
+      "fuchsia": [
+        4295360264
+      ]
+    }
+  },
+  "GameButton9": {
+    "name": "GameButton9",
+    "value": 68719869705,
+    "names": {
+      "web": [
+        "GameButton9"
+      ],
+      "windows": [
+        "GAMEPAD_B"
+      ],
+      "android": [
+        "BUTTON_9"
+      ]
+    },
+    "values": {
+      "web": [
+        392969
+      ],
+      "windows": [
+        196
+      ],
+      "android": [
+        196
+      ],
+      "fuchsia": [
+        4295360265
+      ]
+    }
+  },
+  "GameButton10": {
+    "name": "GameButton10",
+    "value": 68719869706,
+    "names": {
+      "web": [
+        "GameButton10"
+      ],
+      "windows": [
+        "GAMEPAD_X"
+      ],
+      "android": [
+        "BUTTON_10"
+      ]
+    },
+    "values": {
+      "web": [
+        392970
+      ],
+      "windows": [
+        197
+      ],
+      "android": [
+        197
+      ],
+      "fuchsia": [
+        4295360266
+      ]
+    }
+  },
+  "GameButton11": {
+    "name": "GameButton11",
+    "value": 68719869707,
+    "names": {
+      "web": [
+        "GameButton11"
+      ],
+      "windows": [
+        "GAMEPAD_Y"
+      ],
+      "android": [
+        "BUTTON_11"
+      ]
+    },
+    "values": {
+      "web": [
+        392971
+      ],
+      "windows": [
+        198
+      ],
+      "android": [
+        198
+      ],
+      "fuchsia": [
+        4295360267
+      ]
+    }
+  },
+  "GameButton12": {
+    "name": "GameButton12",
+    "value": 68719869708,
+    "names": {
+      "web": [
+        "GameButton12"
+      ],
+      "windows": [
+        "GAMEPAD_RIGHT_SHOULDER"
+      ],
+      "android": [
+        "BUTTON_12"
+      ]
+    },
+    "values": {
+      "web": [
+        392972
+      ],
+      "windows": [
+        199
+      ],
+      "android": [
+        199
+      ],
+      "fuchsia": [
+        4295360268
+      ]
+    }
+  },
+  "GameButton13": {
+    "name": "GameButton13",
+    "value": 68719869709,
+    "names": {
+      "web": [
+        "GameButton13"
+      ],
+      "windows": [
+        "GAMEPAD_LEFT_SHOULDER"
+      ],
+      "android": [
+        "BUTTON_13"
+      ]
+    },
+    "values": {
+      "web": [
+        392973
+      ],
+      "windows": [
+        200
+      ],
+      "android": [
+        200
+      ],
+      "fuchsia": [
+        4295360269
+      ]
+    }
+  },
+  "GameButton14": {
+    "name": "GameButton14",
+    "value": 68719869710,
+    "names": {
+      "web": [
+        "GameButton14"
+      ],
+      "windows": [
+        "GAMEPAD_LEFT_TRIGGER"
+      ],
+      "android": [
+        "BUTTON_14"
+      ]
+    },
+    "values": {
+      "web": [
+        392974
+      ],
+      "windows": [
+        201
+      ],
+      "android": [
+        201
+      ],
+      "fuchsia": [
+        4295360270
+      ]
+    }
+  },
+  "GameButton15": {
+    "name": "GameButton15",
+    "value": 68719869711,
+    "names": {
+      "web": [
+        "GameButton15"
+      ],
+      "windows": [
+        "GAMEPAD_RIGHT_TRIGGER"
+      ],
+      "android": [
+        "BUTTON_15"
+      ]
+    },
+    "values": {
+      "web": [
+        392975
+      ],
+      "windows": [
+        202
+      ],
+      "android": [
+        202
+      ],
+      "fuchsia": [
+        4295360271
+      ]
+    }
+  },
+  "GameButton16": {
+    "name": "GameButton16",
+    "value": 68719869712,
+    "names": {
+      "web": [
+        "GameButton16"
+      ],
+      "windows": [
+        "GAMEPAD_DPAD_UP"
+      ],
+      "android": [
+        "BUTTON_16"
+      ]
+    },
+    "values": {
+      "web": [
+        392976
+      ],
+      "windows": [
+        203
+      ],
+      "android": [
+        203
+      ],
+      "fuchsia": [
+        4295360272
+      ]
+    }
+  },
+  "GameButtonA": {
+    "name": "GameButtonA",
+    "value": 68719869713,
+    "names": {
+      "web": [
+        "GameButtonA"
+      ],
+      "android": [
+        "BUTTON_A"
+      ]
+    },
+    "values": {
+      "web": [
+        392977
+      ],
+      "android": [
+        96
+      ],
+      "fuchsia": [
+        4295360273
+      ]
+    }
+  },
+  "GameButtonB": {
+    "name": "GameButtonB",
+    "value": 68719869714,
+    "names": {
+      "web": [
+        "GameButtonB"
+      ],
+      "android": [
+        "BUTTON_B"
+      ]
+    },
+    "values": {
+      "web": [
+        392978
+      ],
+      "android": [
+        97
+      ],
+      "fuchsia": [
+        4295360274
+      ]
+    }
+  },
+  "GameButtonC": {
+    "name": "GameButtonC",
+    "value": 68719869715,
+    "names": {
+      "web": [
+        "GameButtonC"
+      ],
+      "android": [
+        "BUTTON_C"
+      ]
+    },
+    "values": {
+      "web": [
+        392979
+      ],
+      "android": [
+        98
+      ],
+      "fuchsia": [
+        4295360275
+      ]
+    }
+  },
+  "GameButtonLeft1": {
+    "name": "GameButtonLeft1",
+    "value": 68719869716,
+    "names": {
+      "web": [
+        "GameButtonLeft1"
+      ],
+      "android": [
+        "BUTTON_L1"
+      ]
+    },
+    "values": {
+      "web": [
+        392980
+      ],
+      "android": [
+        102
+      ],
+      "fuchsia": [
+        4295360276
+      ]
+    }
+  },
+  "GameButtonLeft2": {
+    "name": "GameButtonLeft2",
+    "value": 68719869717,
+    "names": {
+      "web": [
+        "GameButtonLeft2"
+      ],
+      "android": [
+        "BUTTON_L2"
+      ]
+    },
+    "values": {
+      "web": [
+        392981
+      ],
+      "android": [
+        104
+      ],
+      "fuchsia": [
+        4295360277
+      ]
+    }
+  },
+  "GameButtonMode": {
+    "name": "GameButtonMode",
+    "value": 68719869718,
+    "names": {
+      "web": [
+        "GameButtonMode"
+      ],
+      "android": [
+        "BUTTON_MODE"
+      ]
+    },
+    "values": {
+      "web": [
+        392982
+      ],
+      "android": [
+        110
+      ],
+      "fuchsia": [
+        4295360278
+      ]
+    }
+  },
+  "GameButtonRight1": {
+    "name": "GameButtonRight1",
+    "value": 68719869719,
+    "names": {
+      "web": [
+        "GameButtonRight1"
+      ],
+      "android": [
+        "BUTTON_R1"
+      ]
+    },
+    "values": {
+      "web": [
+        392983
+      ],
+      "android": [
+        103
+      ],
+      "fuchsia": [
+        4295360279
+      ]
+    }
+  },
+  "GameButtonRight2": {
+    "name": "GameButtonRight2",
+    "value": 68719869720,
+    "names": {
+      "web": [
+        "GameButtonRight2"
+      ],
+      "android": [
+        "BUTTON_R2"
+      ]
+    },
+    "values": {
+      "web": [
+        392984
+      ],
+      "android": [
+        105
+      ],
+      "fuchsia": [
+        4295360280
+      ]
+    }
+  },
+  "GameButtonSelect": {
+    "name": "GameButtonSelect",
+    "value": 68719869721,
+    "names": {
+      "web": [
+        "GameButtonSelect"
+      ],
+      "android": [
+        "BUTTON_SELECT"
+      ]
+    },
+    "values": {
+      "web": [
+        392985
+      ],
+      "android": [
+        109
+      ],
+      "fuchsia": [
+        4295360281
+      ]
+    }
+  },
+  "GameButtonStart": {
+    "name": "GameButtonStart",
+    "value": 68719869722,
+    "names": {
+      "web": [
+        "GameButtonStart"
+      ],
+      "android": [
+        "BUTTON_START"
+      ]
+    },
+    "values": {
+      "web": [
+        392986
+      ],
+      "android": [
+        108
+      ],
+      "fuchsia": [
+        4295360282
+      ]
+    }
+  },
+  "GameButtonThumbLeft": {
+    "name": "GameButtonThumbLeft",
+    "value": 68719869723,
+    "names": {
+      "web": [
+        "GameButtonThumbLeft"
+      ],
+      "android": [
+        "BUTTON_THUMBL"
+      ]
+    },
+    "values": {
+      "web": [
+        392987
+      ],
+      "android": [
+        106
+      ],
+      "fuchsia": [
+        4295360283
+      ]
+    }
+  },
+  "GameButtonThumbRight": {
+    "name": "GameButtonThumbRight",
+    "value": 68719869724,
+    "names": {
+      "web": [
+        "GameButtonThumbRight"
+      ],
+      "android": [
+        "BUTTON_THUMBR"
+      ]
+    },
+    "values": {
+      "web": [
+        392988
+      ],
+      "android": [
+        107
+      ],
+      "fuchsia": [
+        4295360284
+      ]
+    }
+  },
+  "GameButtonX": {
+    "name": "GameButtonX",
+    "value": 68719869725,
+    "names": {
+      "web": [
+        "GameButtonX"
+      ],
+      "android": [
+        "BUTTON_X"
+      ]
+    },
+    "values": {
+      "web": [
+        392989
+      ],
+      "android": [
+        99
+      ],
+      "fuchsia": [
+        4295360285
+      ]
+    }
+  },
+  "GameButtonY": {
+    "name": "GameButtonY",
+    "value": 68719869726,
+    "names": {
+      "web": [
+        "GameButtonY"
+      ],
+      "android": [
+        "BUTTON_Y"
+      ]
+    },
+    "values": {
+      "web": [
+        392990
+      ],
+      "android": [
+        100
+      ],
+      "fuchsia": [
+        4295360286
+      ]
+    }
+  },
+  "GameButtonZ": {
+    "name": "GameButtonZ",
+    "value": 68719869727,
+    "names": {
+      "web": [
+        "GameButtonZ"
+      ],
+      "android": [
+        "BUTTON_Z"
+      ]
+    },
+    "values": {
+      "web": [
+        392991
+      ],
+      "android": [
+        101
+      ],
+      "fuchsia": [
+        4295360287
+      ]
+    }
+  },
+  "Suspend": {
+    "name": "Suspend",
+    "value": 73014444052,
+    "names": {
+      "web": [
+        "Suspend"
+      ],
+      "gtk": [
+        "Suspend"
+      ]
+    },
+    "values": {
+      "web": [
+        4294967316
+      ],
+      "gtk": [
+        269025191
+      ],
+      "fuchsia": [
+        4294967316
+      ]
+    }
+  },
+  "Resume": {
+    "name": "Resume",
+    "value": 73014444053,
+    "names": {
+      "web": [
+        "Resume"
+      ]
+    },
+    "values": {
+      "web": [
+        4294967317
+      ],
+      "fuchsia": [
+        4294967317
+      ]
+    }
+  },
+  "Sleep": {
+    "name": "Sleep",
+    "value": 73014509698,
+    "names": {
+      "web": [
+        "Sleep"
+      ],
+      "gtk": [
+        "Sleep"
+      ],
+      "windows": [
+        "SLEEP"
+      ],
+      "android": [
+        "SLEEP"
+      ]
+    },
+    "values": {
+      "web": [
+        4295032962
+      ],
+      "gtk": [
+        269025071
+      ],
+      "windows": [
+        95
+      ],
+      "android": [
+        223
+      ],
+      "fuchsia": [
+        4295032962
+      ]
+    }
+  },
+  "IntlBackslash": {
+    "name": "IntlBackslash",
+    "value": 73014902884,
+    "names": {
+      "web": [
+        "IntlBackslash"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426148
+      ],
+      "fuchsia": [
+        4295426148
+      ]
+    }
+  },
+  "IntlRo": {
+    "name": "IntlRo",
+    "value": 73014902919,
+    "names": {
+      "web": [
+        "IntlRo"
+      ],
+      "macOs": [
+        "IntlRo"
+      ],
+      "ios": [
+        "IntlRo"
+      ],
+      "android": [
+        "RO"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426183
+      ],
+      "macOs": [
+        94
+      ],
+      "ios": [
+        135
+      ],
+      "android": [
+        217
+      ],
+      "fuchsia": [
+        4295426183
+      ]
+    }
+  },
+  "IntlYen": {
+    "name": "IntlYen",
+    "value": 73014902921,
+    "names": {
+      "web": [
+        "IntlYen"
+      ],
+      "macOs": [
+        "IntlYen"
+      ],
+      "ios": [
+        "IntlYen"
+      ],
+      "gtk": [
+        "yen"
+      ],
+      "android": [
+        "YEN"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426185
+      ],
+      "macOs": [
+        93
+      ],
+      "ios": [
+        137
+      ],
+      "gtk": [
+        165
+      ],
+      "android": [
+        216
+      ],
+      "fuchsia": [
+        4295426185
+      ]
+    }
+  },
+  "Lang1": {
+    "name": "Lang1",
+    "value": 73014902928,
+    "names": {
+      "web": [
+        "Lang1"
+      ],
+      "macOs": [
+        "Lang1"
+      ],
+      "ios": [
+        "Lang1"
+      ],
+      "windows": [
+        "KANA, HANGEUL, HANGUL"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426192
+      ],
+      "macOs": [
+        104
+      ],
+      "ios": [
+        144
+      ],
+      "windows": [
+        21
+      ],
+      "fuchsia": [
+        4295426192
+      ]
+    }
+  },
+  "Lang2": {
+    "name": "Lang2",
+    "value": 73014902929,
+    "names": {
+      "web": [
+        "Lang2"
+      ],
+      "macOs": [
+        "Lang2"
+      ],
+      "ios": [
+        "Lang2"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426193
+      ],
+      "macOs": [
+        102
+      ],
+      "ios": [
+        145
+      ],
+      "fuchsia": [
+        4295426193
+      ]
+    }
+  },
+  "Lang3": {
+    "name": "Lang3",
+    "value": 73014902930,
+    "names": {
+      "web": [
+        "Lang3"
+      ],
+      "ios": [
+        "Lang3"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426194
+      ],
+      "ios": [
+        146
+      ],
+      "fuchsia": [
+        4295426194
+      ]
+    }
+  },
+  "Lang4": {
+    "name": "Lang4",
+    "value": 73014902931,
+    "names": {
+      "web": [
+        "Lang4"
+      ],
+      "ios": [
+        "Lang4"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426195
+      ],
+      "ios": [
+        147
+      ],
+      "fuchsia": [
+        4295426195
+      ]
+    }
+  },
+  "Lang5": {
+    "name": "Lang5",
+    "value": 73014902932,
+    "names": {
+      "web": [
+        "Lang5"
+      ],
+      "ios": [
+        "Lang5"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426196
+      ],
+      "ios": [
+        148
+      ],
+      "fuchsia": [
+        4295426196
+      ]
+    }
+  },
+  "Abort": {
+    "name": "Abort",
+    "value": 73014902939,
+    "names": {
+      "web": [
+        "Abort"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426203
+      ],
+      "fuchsia": [
+        4295426203
+      ]
+    }
+  },
+  "AltLeft": {
+    "name": "AltLeft",
+    "value": 3298534883586,
+    "names": {
+      "web": [
+        "AltLeft"
+      ],
+      "macOs": [
+        "AltLeft"
+      ],
+      "ios": [
+        "AltLeft"
+      ],
+      "gtk": [
+        "Alt_L"
+      ],
+      "windows": [
+        "LMENU"
+      ],
+      "android": [
+        "ALT_LEFT"
+      ]
+    },
+    "values": {
+      "web": [
+        3298534883586
+      ],
+      "macOs": [
+        58
+      ],
+      "ios": [
+        226
+      ],
+      "gtk": [
+        65513
+      ],
+      "windows": [
+        164
+      ],
+      "android": [
+        57
+      ],
+      "fuchsia": [
+        4295426274
+      ]
+    }
+  },
+  "ControlLeft": {
+    "name": "ControlLeft",
+    "value": 3298534883589,
+    "names": {
+      "web": [
+        "ControlLeft"
+      ],
+      "macOs": [
+        "ControlLeft"
+      ],
+      "ios": [
+        "ControlLeft"
+      ],
+      "gtk": [
+        "Control_L"
+      ],
+      "windows": [
+        "CONTROL",
+        "LCONTROL"
+      ],
+      "android": [
+        "CTRL_LEFT"
+      ]
+    },
+    "values": {
+      "web": [
+        3298534883589
+      ],
+      "macOs": [
+        59
+      ],
+      "ios": [
+        224
+      ],
+      "gtk": [
+        65507
+      ],
+      "windows": [
+        17,
+        162
+      ],
+      "android": [
+        113
+      ],
+      "fuchsia": [
+        4295426272
+      ]
+    }
+  },
+  "MetaLeft": {
+    "name": "MetaLeft",
+    "value": 3298534883593,
+    "names": {
+      "web": [
+        "MetaLeft"
+      ],
+      "macOs": [
+        "MetaLeft"
+      ],
+      "ios": [
+        "MetaLeft"
+      ],
+      "gtk": [
+        "Meta_L"
+      ],
+      "windows": [
+        "LWIN"
+      ],
+      "android": [
+        "META_LEFT"
+      ]
+    },
+    "values": {
+      "web": [
+        3298534883593
+      ],
+      "macOs": [
+        55
+      ],
+      "ios": [
+        227
+      ],
+      "gtk": [
+        65511
+      ],
+      "windows": [
+        91
+      ],
+      "android": [
+        117
+      ],
+      "fuchsia": [
+        4295426275
+      ]
+    }
+  },
+  "ShiftLeft": {
+    "name": "ShiftLeft",
+    "value": 3298534883597,
+    "names": {
+      "web": [
+        "ShiftLeft"
+      ],
+      "macOs": [
+        "ShiftLeft"
+      ],
+      "ios": [
+        "ShiftLeft"
+      ],
+      "gtk": [
+        "Shift_L"
+      ],
+      "windows": [
+        "SHIFT",
+        "LSHIFT"
+      ],
+      "android": [
+        "SHIFT_LEFT"
+      ]
+    },
+    "values": {
+      "web": [
+        3298534883597
+      ],
+      "macOs": [
+        56
+      ],
+      "ios": [
+        225
+      ],
+      "gtk": [
+        65505
+      ],
+      "windows": [
+        16,
+        160
+      ],
+      "android": [
+        59
+      ],
+      "fuchsia": [
+        4295426273
+      ]
+    }
+  },
+  "AltRight": {
+    "name": "AltRight",
+    "value": 4398046511362,
+    "names": {
+      "web": [
+        "AltRight"
+      ],
+      "macOs": [
+        "AltRight"
+      ],
+      "ios": [
+        "AltRight"
+      ],
+      "gtk": [
+        "Alt_R",
+        "ISO_Level3_Shift"
+      ],
+      "windows": [
+        "RMENU"
+      ],
+      "android": [
+        "ALT_RIGHT"
+      ]
+    },
+    "values": {
+      "web": [
+        4398046511362
+      ],
+      "macOs": [
+        61
+      ],
+      "ios": [
+        230
+      ],
+      "gtk": [
+        65514,
+        65027
+      ],
+      "windows": [
+        165
+      ],
+      "android": [
+        58
+      ],
+      "fuchsia": [
+        4295426278
+      ]
+    }
+  },
+  "ControlRight": {
+    "name": "ControlRight",
+    "value": 4398046511365,
+    "names": {
+      "web": [
+        "ControlRight"
+      ],
+      "macOs": [
+        "ControlRight"
+      ],
+      "ios": [
+        "ControlRight"
+      ],
+      "gtk": [
+        "Control_R"
+      ],
+      "windows": [
+        "RCONTROL"
+      ],
+      "android": [
+        "CTRL_RIGHT"
+      ]
+    },
+    "values": {
+      "web": [
+        4398046511365
+      ],
+      "macOs": [
+        62
+      ],
+      "ios": [
+        228
+      ],
+      "gtk": [
+        65508
+      ],
+      "windows": [
+        163
+      ],
+      "android": [
+        114
+      ],
+      "fuchsia": [
+        4295426276
+      ]
+    }
+  },
+  "MetaRight": {
+    "name": "MetaRight",
+    "value": 4398046511369,
+    "names": {
+      "web": [
+        "MetaRight"
+      ],
+      "macOs": [
+        "MetaRight"
+      ],
+      "ios": [
+        "MetaRight"
+      ],
+      "gtk": [
+        "Meta_R"
+      ],
+      "windows": [
+        "RWIN"
+      ],
+      "android": [
+        "META_RIGHT"
+      ]
+    },
+    "values": {
+      "web": [
+        4398046511369
+      ],
+      "macOs": [
+        54
+      ],
+      "ios": [
+        231
+      ],
+      "gtk": [
+        65512
+      ],
+      "windows": [
+        92
+      ],
+      "android": [
+        118
+      ],
+      "fuchsia": [
+        4295426279
+      ]
+    }
+  },
+  "ShiftRight": {
+    "name": "ShiftRight",
+    "value": 4398046511373,
+    "names": {
+      "web": [
+        "ShiftRight"
+      ],
+      "macOs": [
+        "ShiftRight"
+      ],
+      "ios": [
+        "ShiftRight"
+      ],
+      "gtk": [
+        "Shift_R"
+      ],
+      "windows": [
+        "RSHIFT"
+      ],
+      "android": [
+        "SHIFT_RIGHT"
+      ]
+    },
+    "values": {
+      "web": [
+        4398046511373
+      ],
+      "macOs": [
+        60
+      ],
+      "ios": [
+        229
+      ],
+      "gtk": [
+        65506
+      ],
+      "windows": [
+        161
+      ],
+      "android": [
+        60
+      ],
+      "fuchsia": [
+        4295426277
+      ]
+    }
+  },
+  "NumpadEnter": {
+    "name": "NumpadEnter",
+    "value": 5497558138893,
+    "names": {
+      "web": [
+        "NumpadEnter"
+      ],
+      "macOs": [
+        "NumpadEnter"
+      ],
+      "ios": [
+        "NumpadEnter"
+      ],
+      "gtk": [
+        "KP_Enter"
+      ],
+      "android": [
+        "NUMPAD_ENTER"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138893
+      ],
+      "macOs": [
+        76
+      ],
+      "ios": [
+        88
+      ],
+      "gtk": [
+        65421
+      ],
+      "android": [
+        160
+      ],
+      "fuchsia": [
+        4295426136
+      ]
+    }
+  },
+  "NumpadParenLeft": {
+    "name": "NumpadParenLeft",
+    "value": 5497558138920,
+    "names": {
+      "web": [
+        "NumpadParenLeft"
+      ],
+      "android": [
+        "NUMPAD_LEFT_PAREN"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138920
+      ],
+      "android": [
+        162
+      ],
+      "fuchsia": [
+        4295426230
+      ]
+    }
+  },
+  "NumpadParenRight": {
+    "name": "NumpadParenRight",
+    "value": 5497558138921,
+    "names": {
+      "web": [
+        "NumpadParenRight"
+      ],
+      "android": [
+        "NUMPAD_RIGHT_PAREN"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138921
+      ],
+      "android": [
+        163
+      ],
+      "fuchsia": [
+        4295426231
+      ]
+    }
+  },
+  "NumpadMultiply": {
+    "name": "NumpadMultiply",
+    "value": 5497558138922,
+    "names": {
+      "web": [
+        "NumpadMultiply"
+      ],
+      "macOs": [
+        "NumpadMultiply"
+      ],
+      "ios": [
+        "NumpadMultiply"
+      ],
+      "gtk": [
+        "KP_Multiply"
+      ],
+      "windows": [
+        "MULTIPLY"
+      ],
+      "android": [
+        "NUMPAD_MULTIPLY"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138922
+      ],
+      "macOs": [
+        67
+      ],
+      "ios": [
+        85
+      ],
+      "gtk": [
+        65450
+      ],
+      "windows": [
+        106
+      ],
+      "android": [
+        155
+      ],
+      "fuchsia": [
+        4295426133
+      ]
+    }
+  },
+  "NumpadAdd": {
+    "name": "NumpadAdd",
+    "value": 5497558138923,
+    "names": {
+      "web": [
+        "NumpadAdd"
+      ],
+      "macOs": [
+        "NumpadAdd"
+      ],
+      "ios": [
+        "NumpadAdd"
+      ],
+      "gtk": [
+        "KP_Add"
+      ],
+      "windows": [
+        "ADD"
+      ],
+      "android": [
+        "NUMPAD_ADD"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138923
+      ],
+      "macOs": [
+        69
+      ],
+      "ios": [
+        87
+      ],
+      "gtk": [
+        65451
+      ],
+      "windows": [
+        107
+      ],
+      "android": [
+        157
+      ],
+      "fuchsia": [
+        4295426135
+      ]
+    }
+  },
+  "NumpadComma": {
+    "name": "NumpadComma",
+    "value": 5497558138924,
+    "names": {
+      "web": [
+        "NumpadComma"
+      ],
+      "macOs": [
+        "NumpadComma"
+      ],
+      "ios": [
+        "NumpadComma"
+      ],
+      "android": [
+        "NUMPAD_COMMA"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138924
+      ],
+      "macOs": [
+        95
+      ],
+      "ios": [
+        133
+      ],
+      "android": [
+        159
+      ],
+      "fuchsia": [
+        4295426181
+      ]
+    }
+  },
+  "NumpadSubtract": {
+    "name": "NumpadSubtract",
+    "value": 5497558138925,
+    "names": {
+      "web": [
+        "NumpadSubtract"
+      ],
+      "macOs": [
+        "NumpadSubtract"
+      ],
+      "ios": [
+        "NumpadSubtract"
+      ],
+      "gtk": [
+        "KP_Subtract"
+      ],
+      "windows": [
+        "SUBTRACT"
+      ],
+      "android": [
+        "NUMPAD_SUBTRACT"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138925
+      ],
+      "macOs": [
+        78
+      ],
+      "ios": [
+        86
+      ],
+      "gtk": [
+        65453
+      ],
+      "windows": [
+        109
+      ],
+      "android": [
+        156
+      ],
+      "fuchsia": [
+        4295426134
+      ]
+    }
+  },
+  "NumpadDecimal": {
+    "name": "NumpadDecimal",
+    "value": 5497558138926,
+    "names": {
+      "web": [
+        "NumpadDecimal"
+      ],
+      "macOs": [
+        "NumpadDecimal"
+      ],
+      "ios": [
+        "NumpadDecimal"
+      ],
+      "gtk": [
+        "KP_Delete"
+      ],
+      "windows": [
+        "DECIMAL"
+      ],
+      "android": [
+        "NUMPAD_DOT"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138926
+      ],
+      "macOs": [
+        65
+      ],
+      "ios": [
+        99
+      ],
+      "gtk": [
+        65439
+      ],
+      "windows": [
+        110
+      ],
+      "android": [
+        158
+      ],
+      "fuchsia": [
+        4295426147
+      ]
+    }
+  },
+  "NumpadDivide": {
+    "name": "NumpadDivide",
+    "value": 5497558138927,
+    "names": {
+      "web": [
+        "NumpadDivide"
+      ],
+      "macOs": [
+        "NumpadDivide"
+      ],
+      "ios": [
+        "NumpadDivide"
+      ],
+      "gtk": [
+        "KP_Divide"
+      ],
+      "windows": [
+        "DIVIDE"
+      ],
+      "android": [
+        "NUMPAD_DIVIDE"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138927
+      ],
+      "macOs": [
+        75
+      ],
+      "ios": [
+        84
+      ],
+      "gtk": [
+        65455
+      ],
+      "windows": [
+        111
+      ],
+      "android": [
+        154
+      ],
+      "fuchsia": [
+        4295426132
+      ]
+    }
+  },
+  "Numpad0": {
+    "name": "Numpad0",
+    "value": 5497558138928,
+    "names": {
+      "web": [
+        "Numpad0"
+      ],
+      "macOs": [
+        "Numpad0"
+      ],
+      "ios": [
+        "Numpad0"
+      ],
+      "gtk": [
+        "KP_Insert",
+        "KP_0"
+      ],
+      "windows": [
+        "NUMPAD0"
+      ],
+      "android": [
+        "NUMPAD_0"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138928
+      ],
+      "macOs": [
+        82
+      ],
+      "ios": [
+        98
+      ],
+      "gtk": [
+        65438,
+        65456
+      ],
+      "windows": [
+        96
+      ],
+      "android": [
+        144
+      ],
+      "fuchsia": [
+        4295426146
+      ]
+    }
+  },
+  "Numpad1": {
+    "name": "Numpad1",
+    "value": 5497558138929,
+    "names": {
+      "web": [
+        "Numpad1"
+      ],
+      "macOs": [
+        "Numpad1"
+      ],
+      "ios": [
+        "Numpad1"
+      ],
+      "gtk": [
+        "KP_End",
+        "KP_1"
+      ],
+      "windows": [
+        "NUMPAD1"
+      ],
+      "android": [
+        "NUMPAD_1"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138929
+      ],
+      "macOs": [
+        83
+      ],
+      "ios": [
+        89
+      ],
+      "gtk": [
+        65436,
+        65457
+      ],
+      "windows": [
+        97
+      ],
+      "android": [
+        145
+      ],
+      "fuchsia": [
+        4295426137
+      ]
+    }
+  },
+  "Numpad2": {
+    "name": "Numpad2",
+    "value": 5497558138930,
+    "names": {
+      "web": [
+        "Numpad2"
+      ],
+      "macOs": [
+        "Numpad2"
+      ],
+      "ios": [
+        "Numpad2"
+      ],
+      "gtk": [
+        "KP_Down",
+        "KP_2"
+      ],
+      "windows": [
+        "NUMPAD2"
+      ],
+      "android": [
+        "NUMPAD_2"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138930
+      ],
+      "macOs": [
+        84
+      ],
+      "ios": [
+        90
+      ],
+      "gtk": [
+        65433,
+        65458
+      ],
+      "windows": [
+        98
+      ],
+      "android": [
+        146
+      ],
+      "fuchsia": [
+        4295426138
+      ]
+    }
+  },
+  "Numpad3": {
+    "name": "Numpad3",
+    "value": 5497558138931,
+    "names": {
+      "web": [
+        "Numpad3"
+      ],
+      "macOs": [
+        "Numpad3"
+      ],
+      "ios": [
+        "Numpad3"
+      ],
+      "gtk": [
+        "KP_Page_Down",
+        "KP_3"
+      ],
+      "windows": [
+        "NUMPAD3"
+      ],
+      "android": [
+        "NUMPAD_3"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138931
+      ],
+      "macOs": [
+        85
+      ],
+      "ios": [
+        91
+      ],
+      "gtk": [
+        65435,
+        65459
+      ],
+      "windows": [
+        99
+      ],
+      "android": [
+        147
+      ],
+      "fuchsia": [
+        4295426139
+      ]
+    }
+  },
+  "Numpad4": {
+    "name": "Numpad4",
+    "value": 5497558138932,
+    "names": {
+      "web": [
+        "Numpad4"
+      ],
+      "macOs": [
+        "Numpad4"
+      ],
+      "ios": [
+        "Numpad4"
+      ],
+      "gtk": [
+        "KP_Left",
+        "KP_4"
+      ],
+      "windows": [
+        "NUMPAD4"
+      ],
+      "android": [
+        "NUMPAD_4"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138932
+      ],
+      "macOs": [
+        86
+      ],
+      "ios": [
+        92
+      ],
+      "gtk": [
+        65430,
+        65460
+      ],
+      "windows": [
+        100
+      ],
+      "android": [
+        148
+      ],
+      "fuchsia": [
+        4295426140
+      ]
+    }
+  },
+  "Numpad5": {
+    "name": "Numpad5",
+    "value": 5497558138933,
+    "names": {
+      "web": [
+        "Numpad5"
+      ],
+      "macOs": [
+        "Numpad5"
+      ],
+      "ios": [
+        "Numpad5"
+      ],
+      "gtk": [
+        "KP_5"
+      ],
+      "windows": [
+        "NUMPAD5"
+      ],
+      "android": [
+        "NUMPAD_5"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138933
+      ],
+      "macOs": [
+        87
+      ],
+      "ios": [
+        93
+      ],
+      "gtk": [
+        65461
+      ],
+      "windows": [
+        101
+      ],
+      "android": [
+        149
+      ],
+      "fuchsia": [
+        4295426141
+      ]
+    }
+  },
+  "Numpad6": {
+    "name": "Numpad6",
+    "value": 5497558138934,
+    "names": {
+      "web": [
+        "Numpad6"
+      ],
+      "macOs": [
+        "Numpad6"
+      ],
+      "ios": [
+        "Numpad6"
+      ],
+      "gtk": [
+        "KP_Right",
+        "KP_6"
+      ],
+      "windows": [
+        "NUMPAD6"
+      ],
+      "android": [
+        "NUMPAD_6"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138934
+      ],
+      "macOs": [
+        88
+      ],
+      "ios": [
+        94
+      ],
+      "gtk": [
+        65432,
+        65462
+      ],
+      "windows": [
+        102
+      ],
+      "android": [
+        150
+      ],
+      "fuchsia": [
+        4295426142
+      ]
+    }
+  },
+  "Numpad7": {
+    "name": "Numpad7",
+    "value": 5497558138935,
+    "names": {
+      "web": [
+        "Numpad7"
+      ],
+      "macOs": [
+        "Numpad7"
+      ],
+      "ios": [
+        "Numpad7"
+      ],
+      "gtk": [
+        "KP_Home",
+        "KP_7"
+      ],
+      "windows": [
+        "NUMPAD7"
+      ],
+      "android": [
+        "NUMPAD_7"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138935
+      ],
+      "macOs": [
+        89
+      ],
+      "ios": [
+        95
+      ],
+      "gtk": [
+        65429,
+        65463
+      ],
+      "windows": [
+        103
+      ],
+      "android": [
+        151
+      ],
+      "fuchsia": [
+        4295426143
+      ]
+    }
+  },
+  "Numpad8": {
+    "name": "Numpad8",
+    "value": 5497558138936,
+    "names": {
+      "web": [
+        "Numpad8"
+      ],
+      "macOs": [
+        "Numpad8"
+      ],
+      "ios": [
+        "Numpad8"
+      ],
+      "gtk": [
+        "KP_Up",
+        "KP_8"
+      ],
+      "windows": [
+        "NUMPAD8"
+      ],
+      "android": [
+        "NUMPAD_8"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138936
+      ],
+      "macOs": [
+        91
+      ],
+      "ios": [
+        96
+      ],
+      "gtk": [
+        65431,
+        65464
+      ],
+      "windows": [
+        104
+      ],
+      "android": [
+        152
+      ],
+      "fuchsia": [
+        4295426144
+      ]
+    }
+  },
+  "Numpad9": {
+    "name": "Numpad9",
+    "value": 5497558138937,
+    "names": {
+      "web": [
+        "Numpad9"
+      ],
+      "macOs": [
+        "Numpad9"
+      ],
+      "ios": [
+        "Numpad9"
+      ],
+      "gtk": [
+        "KP_Page_Up",
+        "KP_9"
+      ],
+      "windows": [
+        "NUMPAD9"
+      ],
+      "android": [
+        "NUMPAD_9"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138937
+      ],
+      "macOs": [
+        92
+      ],
+      "ios": [
+        97
+      ],
+      "gtk": [
+        65434,
+        65465
+      ],
+      "windows": [
+        105
+      ],
+      "android": [
+        153
+      ],
+      "fuchsia": [
+        4295426145
+      ]
+    }
+  },
+  "NumpadEqual": {
+    "name": "NumpadEqual",
+    "value": 5497558138941,
+    "names": {
+      "web": [
+        "NumpadEqual"
+      ],
+      "macOs": [
+        "NumpadEqual"
+      ],
+      "ios": [
+        "NumpadEqual"
+      ],
+      "gtk": [
+        "KP_Equal"
+      ],
+      "windows": [
+        "OEM_NEC_EQUAL"
+      ],
+      "android": [
+        "NUMPAD_EQUALS"
+      ]
+    },
+    "values": {
+      "web": [
+        5497558138941
+      ],
+      "macOs": [
+        81
+      ],
+      "ios": [
+        103
+      ],
+      "gtk": [
+        65469
+      ],
+      "windows": [
+        146
+      ],
+      "android": [
+        161
+      ],
+      "fuchsia": [
+        4295426151
+      ]
+    }
+  }
+}

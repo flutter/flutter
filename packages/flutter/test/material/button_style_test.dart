@@ -154,7 +154,7 @@ void main() {
 
     expect(
       style.copyWith(),
-      style.merge(const ButtonStyle())
+      style.merge(const ButtonStyle()),
     );
   });
 

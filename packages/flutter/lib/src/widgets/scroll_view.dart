@@ -1476,6 +1476,7 @@ class ListView extends BoxScrollView {
          clipBehavior: clipBehavior,
        );
 
+  /// {@template flutter.widgets.list_view.itemExtent}
   /// If non-null, forces the children to have the given extent in the scroll
   /// direction.
   ///
@@ -1491,8 +1492,10 @@ class ListView extends BoxScrollView {
   ///    extent along the main axis.
   ///  * The [prototypeItem] property, which allows forcing the children's
   ///    extent to be the same as the given widget.
+  /// {@endtemplate}
   final double? itemExtent;
 
+  /// {@template flutter.widgets.list_view.prototypeItem}
   /// If non-null, forces the children to have the same extent as the given
   /// widget in the scroll direction.
   ///
@@ -1508,6 +1511,7 @@ class ListView extends BoxScrollView {
   ///    extent as a prototype item along the main axis.
   ///  * The [itemExtent] property, which allows forcing the children's extent
   ///    to a given value.
+  /// {@endtemplate}
   final Widget? prototypeItem;
 
   /// A delegate that provides the children for the [ListView].

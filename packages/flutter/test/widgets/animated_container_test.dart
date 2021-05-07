@@ -340,7 +340,7 @@ void main() {
           color: Color(0xFFED1D7F),
         ),
         duration: const Duration(milliseconds: 200),
-      )
+      ),
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.none);
     await tester.pumpWidget(
@@ -350,7 +350,7 @@ void main() {
         ),
         duration: const Duration(milliseconds: 200),
         clipBehavior: Clip.antiAlias,
-      )
+      ),
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.antiAlias);
   });

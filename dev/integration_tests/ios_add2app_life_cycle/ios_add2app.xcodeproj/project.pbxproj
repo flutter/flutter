@@ -30,7 +30,6 @@
 
 /* Begin PBXFileReference section */
 		1622526A2A969A03715C04EF /* Pods-ios_add2appTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2appTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests.release.xcconfig"; sourceTree = "<group>"; };
-		16D27B9BE77DC8804292A9A9 /* Pods-ios_add2appUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2appUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2appUITests/Pods-ios_add2appUITests.release.xcconfig"; sourceTree = "<group>"; };
 		24E221B521A28A0B008ADF09 /* ios_add2app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ios_add2app.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		24E221B821A28A0B008ADF09 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		24E221B921A28A0B008ADF09 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -42,7 +41,6 @@
 		24E221D421A28B23008ADF09 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		24E221D721A28B23008ADF09 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		24E221E121A28B36008ADF09 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		36DA6BEAA5127D74EC6E3E13 /* Pods-ios_add2appUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2appUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2appUITests/Pods-ios_add2appUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		7A318514E0307AE0FF0EFC76 /* libPods-ios_add2app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		86B9DCFF5941A3BAC28862C3 /* libPods-ios_add2appTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2appTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A18D4CDABD6795975FD6B49F /* Pods-ios_add2app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2app.release.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2app/Pods-ios_add2app.release.xcconfig"; sourceTree = "<group>"; };
@@ -133,8 +131,6 @@
 			children = (
 				CCFA174387D083C931FB85D0 /* Pods-ios_add2app.debug.xcconfig */,
 				A18D4CDABD6795975FD6B49F /* Pods-ios_add2app.release.xcconfig */,
-				36DA6BEAA5127D74EC6E3E13 /* Pods-ios_add2appUITests.debug.xcconfig */,
-				16D27B9BE77DC8804292A9A9 /* Pods-ios_add2appUITests.release.xcconfig */,
 				F0AC448427DBFDC9CC64258E /* Pods-ios_add2appTests.debug.xcconfig */,
 				1622526A2A969A03715C04EF /* Pods-ios_add2appTests.release.xcconfig */,
 			);

@@ -1199,8 +1199,10 @@ class _RenderCupertinoDialog extends RenderBox {
 
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
-    assert((!isActionSheet && actionsSection!.parentData is BoxParentData)
-        || (isActionSheet && actionsSection!.parentData is MultiChildLayoutParentData));
+    assert(
+      (!isActionSheet && actionsSection!.parentData is BoxParentData) ||
+          (isActionSheet && actionsSection!.parentData is MultiChildLayoutParentData),
+    );
     if (isActionSheet) {
       final MultiChildLayoutParentData actionParentData = actionsSection!.parentData! as MultiChildLayoutParentData;
       actionParentData.offset = Offset(0.0, dialogSizes.contentHeight + dialogSizes.dividerThickness);
@@ -1880,8 +1882,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, _RenderCupertinoDialogActions renderObject) {
+  void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
     renderObject
       ..dialogWidth = _isActionSheet
           ? null
@@ -2226,7 +2227,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
 
         return constraints.constrain(
-          Size(dialogWidth!, childSize.height)
+          Size(dialogWidth!, childSize.height),
         );
       } else {
         // Each button gets half the available width, minus a single divider.
