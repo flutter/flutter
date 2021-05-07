@@ -17,11 +17,11 @@ AutoIsolateShutdown::~AutoIsolateShutdown() {
     Shutdown();
   }
   fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(runner_,
-                                    [isolate = std::move(isolate_), &latch]() {
-                                      // Delete isolate on thread.
-                                      latch.Signal();
-                                    });
+  fml::TaskRunner::RunNowOrPostTask(runner_, [this, &latch]() {
+    // Delete isolate on thread.
+    isolate_.reset();
+    latch.Signal();
+  });
   latch.Wait();
 }
 
