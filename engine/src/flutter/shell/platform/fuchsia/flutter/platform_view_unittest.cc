@@ -877,9 +877,9 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
       << "{"
       << "\"method\":\"View.viewStateChanged\","
       << "\"args\":{"
-      << "  \"viewId\":" << kViewId << ","     // ViewHolderToken
-      << "  \"is_rendering\":" << true << ","  // IsViewRendering
-      << "  \"state\":" << true                // IsViewRendering
+      << "  \"viewId\":" << kViewId << ","  // ViewHolderToken
+      << "  \"is_rendering\":true,"         // IsViewRendering
+      << "  \"state\":true"                 // IsViewRendering
       << "  }"
       << "}";
   EXPECT_EQ(view_state_changed_expected_out.str(),
