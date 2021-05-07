@@ -42,11 +42,28 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
 
   explicit VsyncWaiter(TaskRunners task_runners);
 
+  // There are two distinct situations where VsyncWaiter wishes to awaken at
+  // the next vsync. Although the functionality can be the same, the intent is
+  // different, therefore it makes sense to have a method for each intent.
+
+  // The intent of AwaitVSync() is that the Animator wishes to produce a frame.
+  // The underlying implementation can choose to be aware of this intent when
+  // it comes to implementing backpressure and other scheduling invariants.
+  //
   // Implementations are meant to override this method and arm their vsync
   // latches when in response to this invocation. On vsync, they are meant to
   // invoke the |FireCallback| method once (and only once) with the appropriate
   // arguments. This method should not block the current thread.
   virtual void AwaitVSync() = 0;
+
+  // The intent of AwaitVSyncForSecondaryCallback() is simply to wake up at the
+  // next vsync.
+  //
+  // Because there is no association with frame scheduling, underlying
+  // implementations do not need to worry about maintaining invariants or
+  // backpressure. The default implementation is to simply follow the same logic
+  // as AwaitVSync().
+  virtual void AwaitVSyncForSecondaryCallback() { AwaitVSync(); }
 
   void FireCallback(fml::TimePoint frame_start_time,
                     fml::TimePoint frame_target_time,
