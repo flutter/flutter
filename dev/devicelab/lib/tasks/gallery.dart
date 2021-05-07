@@ -87,6 +87,7 @@ class GalleryTransitionTest {
           : '${testFile}_test');
       section('DRIVE START');
       await flutter('drive', options: <String>[
+        '--no-dds',
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
