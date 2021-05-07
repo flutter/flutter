@@ -7,6 +7,7 @@
 
 #import "assets_location.h"
 #include "flutter/fml/logging.h"
+#import "impeller/compositor/renderer.h"
 #import "impeller_renderer.h"
 #import "shaders_location.h"
 
@@ -40,6 +41,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
   float _rotation;
 
   MTKMesh* _mesh;
+  impeller::Renderer renderer_;
 }
 
 - (nonnull instancetype)initWithMetalKitView:(nonnull MTKView*)view {
@@ -49,6 +51,10 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     _inFlightSemaphore = dispatch_semaphore_create(kMaxBuffersInFlight);
     [self _loadMetalWithView:view];
     [self _loadAssets];
+  }
+
+  if (!renderer_.IsValid()) {
+    FML_LOG(ERROR) << "Impeller Renderer is not valid.";
   }
 
   return self;
@@ -220,6 +226,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)drawInMTKView:(nonnull MTKView*)view {
+  renderer_.Render();
   /// Per frame updates here
   dispatch_semaphore_wait(_inFlightSemaphore, DISPATCH_TIME_FOREVER);
 
@@ -294,7 +301,8 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)mtkView:(nonnull MTKView*)view drawableSizeWillChange:(CGSize)size {
-  NSLog(@"Drawable sized did change: %@", NSStringFromSize(size));
+  renderer_.SurfaceSizeDidChange({size.width, size.height});
+
   float aspect = size.width / (float)size.height;
   _projectionMatrix = matrix_perspective_right_hand(65.0f * (M_PI / 180.0f),
                                                     aspect, 0.1f, 100.0f);
@@ -302,11 +310,13 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
 #pragma mark Matrix Math Utilities
 
+// NOLINTNEXTLINE
 matrix_float4x4 matrix4x4_translation(float tx, float ty, float tz) {
   return (matrix_float4x4){
       {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {tx, ty, tz, 1}}};
 }
 
+// NOLINTNEXTLINE
 static matrix_float4x4 matrix4x4_rotation(float radians, vector_float3 axis) {
   axis = vector_normalize(axis);
   float ct = cosf(radians);
@@ -321,6 +331,7 @@ static matrix_float4x4 matrix4x4_rotation(float radians, vector_float3 axis) {
        {0, 0, 0, 1}}};
 }
 
+// NOLINTNEXTLINE
 matrix_float4x4 matrix_perspective_right_hand(float fovyRadians,
                                               float aspect,
                                               float nearZ,
