@@ -198,7 +198,7 @@ class FlutterDriverService extends DriverService {
   ) async {
     Uri uri;
     if (vmServiceUri.scheme == 'ws') {
-      uri = vmServiceUri.replace(scheme: 'http', path: vmServiceUri.path.replaceFirst('ws/', ''));
+      uri = vmServiceUri.replace(scheme: 'http', path: vmServiceUri.path.replaceFirst('/ws', ''));
     } else {
       uri = vmServiceUri;
     }
