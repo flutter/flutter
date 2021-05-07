@@ -74,7 +74,7 @@ void ViewHolder::Destroy(zx_koid_t id, ViewIdCallback on_view_destroyed) {
   auto binding = bindings->find(id);
   FML_DCHECK(binding != bindings->end());
 
-  if (binding->second->view_holder_) {
+  if (binding->second->view_holder_ && on_view_destroyed) {
     on_view_destroyed(binding->second->view_holder_->id());
   }
   bindings->erase(id);
