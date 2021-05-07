@@ -69,10 +69,6 @@
          "repo":"engine"
       },
       {
-         "name":"Windows UWP Engine",
-         "repo":"engine"
-      },
-      {
          "name":"Windows Web Engine",
          "repo":"engine"
       }
