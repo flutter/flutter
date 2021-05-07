@@ -313,6 +313,7 @@ class _MaterialBannerState extends State<MaterialBanner> with TickerProviderStat
     Widget materialBanner = Container(
       color: backgroundColor,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Padding(
             padding: padding,
