@@ -2474,27 +2474,6 @@ void main() {
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
 
-  testWidgets('If thumbColor is null, Slider uses activeColor on Android',
-      (WidgetTester tester) async {
-    const Color color = Colors.amber;
-
-    final Widget sliderAdaptive = MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.android),
-      home: Material(
-        child: Slider.adaptive(
-          value: 0,
-          onChanged: (double newValue) {},
-          activeColor: color,
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(sliderAdaptive);
-    await tester.pumpAndSettle();
-    final Slider widget = tester.widget(find.byType(Slider));
-    expect(widget.thumbColor, equals(color));
-  });
-
   testWidgets('If thumbColor is null, it defaults to CupertinoColors.white',
       (WidgetTester tester) async {
     final Widget sliderAdaptive = MaterialApp(
