@@ -176,6 +176,27 @@ def BuildBucket(runtime_mode, arch, optimized, product):
   CopyVulkanDepsToBucket(out_dir, deps_dir, arch)
   CopyIcuDepsToBucket(out_dir, deps_dir)
 
+  # Copy the CIPD YAML template from the source directory to be next to the bucket
+  # we are about to package.
+  cipd_yaml = os.path.join(_script_dir, 'fuchsia.cipd.yaml')
+  CopyFiles(cipd_yaml, os.path.join(_bucket_directory, 'fuchsia.cipd.yaml'))
+
+  # Copy the license files from the source directory to be next to the bucket we
+  # are about to package.
+  bucket_root = os.path.join(_bucket_directory, 'flutter')
+  licenses_root = os.path.join(_src_root_dir, 'flutter/ci/licenses_golden')
+  license_files = [
+    'licenses_flutter',
+    'licenses_fuchsia',
+    'licenses_gpu',
+    'licenses_skia',
+    'licenses_third_party'
+  ]
+  for license in license_files:
+    src_path = os.path.join(licenses_root, license)
+    dst_path = os.path.join(bucket_root, license)
+    CopyPath(src_path, dst_path)
+
 def CheckCIPDPackageExists(package_name, tag):
   '''Check to see if the current package/tag combo has been published'''
   command = [
@@ -207,27 +228,6 @@ def RunCIPDCommandWithRetries(command):
         raise
 
 def ProcessCIPDPackage(upload, engine_version):
-  # Copy the CIPD YAML template from the source directory to be next to the bucket
-  # we are about to package.
-  cipd_yaml = os.path.join(_script_dir, 'fuchsia.cipd.yaml')
-  CopyFiles(cipd_yaml, os.path.join(_bucket_directory, 'fuchsia.cipd.yaml'))
-
-  # Copy the license files from the source directory to be next to the bucket we
-  # are about to package.
-  bucket_root = os.path.join(_bucket_directory, 'flutter')
-  licenses_root = os.path.join(_src_root_dir, 'flutter/ci/licenses_golden')
-  license_files = [
-    'licenses_flutter',
-    'licenses_fuchsia',
-    'licenses_gpu',
-    'licenses_skia',
-    'licenses_third_party'
-  ]
-  for license in license_files:
-    src_path = os.path.join(licenses_root, license)
-    dst_path = os.path.join(bucket_root, license)
-    CopyPath(src_path, dst_path)
-
   if not upload or not IsLinux():
     RunCIPDCommandWithRetries([
         'cipd', 'pkg-build', '-pkg-def', 'fuchsia.cipd.yaml', '-out',
