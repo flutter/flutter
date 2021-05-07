@@ -4,7 +4,6 @@
 
 import 'dart:async' show FutureOr;
 import 'dart:io' as io show OSError, SocketException;
-import 'dart:math' as math show Random;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
