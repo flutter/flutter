@@ -2566,7 +2566,7 @@ void main() {
 
     await tester.pumpWidget(sliderAdaptive);
     await tester.pumpAndSettle();
-    
+
     final MaterialInkController material =
         Material.of(tester.element(find.byType(CupertinoSlider)))!;
     expect(
