@@ -9,6 +9,7 @@
 
 #include <array>
 
+#include "flutter/flow/frame_timings.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
@@ -73,8 +74,9 @@ TEST_F(VsyncWaiterTest, AwaitVsync) {
 
   fml::AutoResetWaitableEvent latch;
   vsync_waiter->AsyncWaitForVsync(
-      [&latch](fml::TimePoint frame_start_time,
-               fml::TimePoint frame_target_time) { latch.Signal(); });
+      [&latch](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+        latch.Signal();
+      });
   SignalVsyncEvent();
 
   bool did_timeout =

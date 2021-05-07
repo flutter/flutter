@@ -42,6 +42,9 @@ FILE: ../../../flutter/flow/embedded_views.h
 FILE: ../../../flutter/flow/flow_run_all_unittests.cc
 FILE: ../../../flutter/flow/flow_test_utils.cc
 FILE: ../../../flutter/flow/flow_test_utils.h
+FILE: ../../../flutter/flow/frame_timings.cc
+FILE: ../../../flutter/flow/frame_timings.h
+FILE: ../../../flutter/flow/frame_timings_recorder_unittests.cc
 FILE: ../../../flutter/flow/gl_context_switch_unittests.cc
 FILE: ../../../flutter/flow/instrumentation.cc
 FILE: ../../../flutter/flow/instrumentation.h
