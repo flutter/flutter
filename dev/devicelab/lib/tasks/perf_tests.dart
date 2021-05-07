@@ -871,6 +871,7 @@ class PerfTestWithSkSL extends PerfTest {
       _flutterPath,
       <String>[
         'run',
+        '--no-dds',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[
             '--device-timeout', '5',
