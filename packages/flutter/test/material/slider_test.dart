@@ -2474,8 +2474,28 @@ void main() {
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
 
-  testWidgets(
-      'If cupertinoThumbColor is null, it defaults to CupertinoColors.white',
+  testWidgets('If thumbColor is null, Slider uses activeColor on Android',
+      (WidgetTester tester) async {
+    const Color color = Colors.amber;
+
+    final Widget sliderAdaptive = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.android),
+      home: Material(
+        child: Slider.adaptive(
+          value: 0,
+          onChanged: (double newValue) {},
+          activeColor: color,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(sliderAdaptive);
+    await tester.pumpAndSettle();
+    final Slider widget = tester.widget(find.byType(Slider));
+    expect(widget.thumbColor, equals(color));
+  });
+
+  testWidgets('If thumbColor is null, it defaults to CupertinoColors.white',
       (WidgetTester tester) async {
     final Widget sliderAdaptive = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2493,7 +2513,7 @@ void main() {
     expect(widget.thumbColor, equals(CupertinoColors.white));
   });
 
-  testWidgets('Slider.adaptive passes cupertinoThumbColor to CupertinoSlider',
+  testWidgets('Slider.adaptive passes thumbColor to CupertinoSlider',
       (WidgetTester tester) async {
     const Color color = Colors.amber;
 
@@ -2503,7 +2523,7 @@ void main() {
         child: Slider.adaptive(
           value: 0,
           onChanged: (double newValue) {},
-          cupertinoThumbColor: color,
+          thumbColor: color,
         ),
       ),
     );
