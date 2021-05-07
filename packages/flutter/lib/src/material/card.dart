@@ -41,13 +41,13 @@ import 'theme.dart';
 ///             mainAxisAlignment: MainAxisAlignment.end,
 ///             children: <Widget>[
 ///               TextButton(
-///                 child: const Text('BUY TICKETS'),
 ///                 onPressed: () { /* ... */ },
+///                 child: const Text('BUY TICKETS'),
 ///               ),
 ///               const SizedBox(width: 8),
 ///               TextButton(
-///                 child: const Text('LISTEN'),
 ///                 onPressed: () { /* ... */ },
+///                 child: const Text('LISTEN'),
 ///               ),
 ///               const SizedBox(width: 8),
 ///             ],

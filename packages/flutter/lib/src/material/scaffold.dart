@@ -121,7 +121,6 @@ class ScaffoldMessenger extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return ElevatedButton(
-  ///     child: const Text('SHOW A SNACKBAR'),
   ///     onPressed: () {
   ///       ScaffoldMessenger.of(context).showSnackBar(
   ///         const SnackBar(
@@ -129,6 +128,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///         ),
   ///       );
   ///     },
+  ///     child: const Text('SHOW A SNACKBAR'),
   ///   );
   /// }
   /// ```
@@ -1864,7 +1864,6 @@ class Scaffold extends StatefulWidget {
   ///   Widget build(BuildContext context) {
   ///     return Center(
   ///       child: ElevatedButton(
-  ///         child: const Text('SHOW BOTTOM SHEET'),
   ///         onPressed: () {
   ///           Scaffold.of(context).showBottomSheet<void>(
   ///             (BuildContext context) {
@@ -1878,11 +1877,11 @@ class Scaffold extends StatefulWidget {
   ///                     children: <Widget>[
   ///                       const Text('BottomSheet'),
   ///                       ElevatedButton(
-  ///                         child: const Text('Close BottomSheet'),
   ///                         onPressed: () {
   ///                           Navigator.pop(context);
   ///                         },
-  ///                       )
+  ///                         child: const Text('Close BottomSheet'),
+  ///                       ),
   ///                     ],
   ///                   ),
   ///                 ),
@@ -1890,6 +1889,7 @@ class Scaffold extends StatefulWidget {
   ///             },
   ///           );
   ///         },
+  ///         child: const Text('SHOW BOTTOM SHEET'),
   ///       ),
   ///     );
   ///   }
@@ -1915,7 +1915,6 @@ class Scaffold extends StatefulWidget {
   ///       builder: (BuildContext context) {
   ///         return Center(
   ///           child: ElevatedButton(
-  ///             child: const Text('SHOW BOTTOM SHEET'),
   ///             onPressed: () {
   ///               Scaffold.of(context).showBottomSheet<void>(
   ///                 (BuildContext context) {
@@ -1929,10 +1928,10 @@ class Scaffold extends StatefulWidget {
   ///                         children: <Widget>[
   ///                           const Text('BottomSheet'),
   ///                           ElevatedButton(
-  ///                             child: const Text('Close BottomSheet'),
   ///                             onPressed: () {
   ///                               Navigator.pop(context);
   ///                             },
+  ///                             child: const Text('Close BottomSheet'),
   ///                           )
   ///                         ],
   ///                       ),
@@ -1941,6 +1940,7 @@ class Scaffold extends StatefulWidget {
   ///                 },
   ///               );
   ///             },
+  ///             child: const Text('SHOW BOTTOM SHEET'),
   ///           ),
   ///         );
   ///       },
@@ -2615,7 +2615,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// Widget build(BuildContext context) {
   ///   return Center(
   ///     child: ElevatedButton(
-  ///       child: const Text('showBottomSheet'),
   ///       onPressed: () {
   ///         Scaffold.of(context).showBottomSheet<void>(
   ///           (BuildContext context) {
@@ -2629,11 +2628,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///                   children: <Widget>[
   ///                     const Text('BottomSheet'),
   ///                     ElevatedButton(
-  ///                       child: const Text('Close BottomSheet'),
   ///                       onPressed: () {
   ///                         Navigator.pop(context);
-  ///                       }
-  ///                     )
+  ///                       },
+  ///                       child: const Text('Close BottomSheet'),
+  ///                     ),
   ///                   ],
   ///                 ),
   ///               ),
@@ -2641,6 +2640,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///           },
   ///         );
   ///       },
+  ///       child: const Text('showBottomSheet'),
   ///     ),
   ///   );
   /// }

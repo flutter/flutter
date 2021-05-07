@@ -64,7 +64,6 @@ import 'tooltip_theme.dart';
 /// Widget build(BuildContext context) {
 ///   return Tooltip(
 ///     message: 'I am a Tooltip',
-///     child: const Text('Tap this text and hold down to show a tooltip.'),
 ///     decoration: BoxDecoration(
 ///       borderRadius: BorderRadius.circular(25),
 ///       gradient: const LinearGradient(colors: <Color>[Colors.amber, Colors.red]),
@@ -77,6 +76,7 @@ import 'tooltip_theme.dart';
 ///     ),
 ///     showDuration: const Duration(seconds: 2),
 ///     waitDuration: const Duration(seconds: 1),
+///     child: const Text('Tap this text and hold down to show a tooltip.'),
 ///   );
 /// }
 /// ```

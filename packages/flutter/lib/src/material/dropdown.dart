@@ -967,8 +967,8 @@ class DropdownButton<T> extends StatefulWidget {
   ///       },
   ///       items: items.map((String item) {
   ///         return DropdownMenuItem<String>(
-  ///           child: Text('Log $item'),
   ///           value: item,
+  ///           child: Text('Log $item'),
   ///         );
   ///       }).toList(),
   ///     ),

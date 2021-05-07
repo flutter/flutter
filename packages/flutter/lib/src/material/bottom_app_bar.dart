@@ -132,8 +132,8 @@ import 'theme.dart';
 ///         floatingActionButton: _showFab
 ///             ? FloatingActionButton(
 ///                 onPressed: () {},
-///                 child: const Icon(Icons.add),
 ///                 tooltip: 'Create',
+///                 child: const Icon(Icons.add),
 ///               )
 ///             : null,
 ///         floatingActionButtonLocation: _fabLocation,

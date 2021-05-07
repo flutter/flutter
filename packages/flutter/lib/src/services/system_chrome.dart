@@ -379,8 +379,8 @@ class SystemChrome {
   ///     value: _currentStyle,
   ///     child: Center(
   ///       child: ElevatedButton(
-  ///         child: const Text('Change Color'),
   ///         onPressed: _changeColor,
+  ///         child: const Text('Change Color'),
   ///        ),
   ///      ),
   ///    );

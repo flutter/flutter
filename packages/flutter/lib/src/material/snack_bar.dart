@@ -165,7 +165,6 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return ElevatedButton(
-///     child: const Text('Show Snackbar'),
 ///     onPressed: () {
 ///       ScaffoldMessenger.of(context).showSnackBar(
 ///         SnackBar(
@@ -179,6 +178,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///         ),
 ///       );
 ///     },
+///     child: const Text('Show Snackbar'),
 ///   );
 /// }
 /// ```
@@ -193,7 +193,6 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return ElevatedButton(
-///     child: const Text('Show Snackbar'),
 ///     onPressed: () {
 ///       ScaffoldMessenger.of(context).showSnackBar(
 ///         SnackBar(
@@ -216,6 +215,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///         ),
 ///       );
 ///     },
+///     child: const Text('Show Snackbar'),
 ///   );
 /// }
 /// ```

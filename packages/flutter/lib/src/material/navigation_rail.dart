@@ -356,8 +356,8 @@ class NavigationRail extends StatefulWidget {
   ///         ),
   ///         child: animation.value == 0
   ///           ? FloatingActionButton(
-  ///               child: const Icon(Icons.add),
   ///               onPressed: () {},
+  ///               child: const Icon(Icons.add),
   ///             )
   ///           : Align(
   ///               alignment: AlignmentDirectional.centerStart,

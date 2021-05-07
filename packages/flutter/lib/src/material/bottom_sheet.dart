@@ -645,7 +645,6 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: ElevatedButton(
-///       child: const Text('showModalBottomSheet'),
 ///       onPressed: () {
 ///         showModalBottomSheet<void>(
 ///           context: context,
@@ -660,8 +659,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///                   children: <Widget>[
 ///                     const Text('Modal BottomSheet'),
 ///                     ElevatedButton(
-///                       child: const Text('Close BottomSheet'),
 ///                       onPressed: () => Navigator.pop(context),
+///                       child: const Text('Close BottomSheet'),
 ///                     )
 ///                   ],
 ///                 ),
@@ -670,6 +669,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///           },
 ///         );
 ///       },
+///       child: const Text('showModalBottomSheet'),
 ///     ),
 ///   );
 /// }

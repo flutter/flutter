@@ -106,7 +106,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 ///         AnimatedSwitcher(
 ///           duration: const Duration(milliseconds: 500),
 ///           transitionBuilder: (Widget child, Animation<double> animation) {
-///             return ScaleTransition(child: child, scale: animation);
+///             return ScaleTransition(scale: animation, child: child);
 ///           },
 ///           child: Text(
 ///             '$_count',
@@ -118,12 +118,12 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 ///           ),
 ///         ),
 ///         ElevatedButton(
-///           child: const Text('Increment'),
 ///           onPressed: () {
 ///             setState(() {
 ///               _count += 1;
 ///             });
 ///           },
+///           child: const Text('Increment'),
 ///         ),
 ///       ],
 ///     ),

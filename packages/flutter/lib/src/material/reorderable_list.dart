@@ -42,14 +42,6 @@ import 'theme.dart';
 ///
 ///   return ReorderableListView(
 ///     padding: const EdgeInsets.symmetric(horizontal: 40),
-///     children: <Widget>[
-///       for (int index = 0; index < _items.length; index++)
-///         ListTile(
-///           key: Key('$index'),
-///           tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
-///           title: Text('Item ${_items[index]}'),
-///         ),
-///     ],
 ///     onReorder: (int oldIndex, int newIndex) {
 ///       setState(() {
 ///         if (oldIndex < newIndex) {
@@ -59,6 +51,14 @@ import 'theme.dart';
 ///         _items.insert(newIndex, item);
 ///       });
 ///     },
+///     children: <Widget>[
+///       for (int index = 0; index < _items.length; index++)
+///         ListTile(
+///           key: Key('$index'),
+///           tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+///           title: Text('Item ${_items[index]}'),
+///         ),
+///     ],
 ///   );
 /// }
 ///
@@ -245,6 +245,15 @@ class ReorderableListView extends StatefulWidget {
   ///
   ///   return ReorderableListView(
   ///     buildDefaultDragHandles: false,
+  ///     onReorder: (int oldIndex, int newIndex) {
+  ///       setState(() {
+  ///         if (oldIndex < newIndex) {
+  ///           newIndex -= 1;
+  ///         }
+  ///         final int item = _items.removeAt(oldIndex);
+  ///         _items.insert(newIndex, item);
+  ///       });
+  ///     },
   ///     children: <Widget>[
   ///       for (int index = 0; index < _items.length; index++)
   ///         Container(
@@ -269,15 +278,6 @@ class ReorderableListView extends StatefulWidget {
   ///           ),
   ///         ),
   ///     ],
-  ///     onReorder: (int oldIndex, int newIndex) {
-  ///       setState(() {
-  ///         if (oldIndex < newIndex) {
-  ///           newIndex -= 1;
-  ///         }
-  ///         final int item = _items.removeAt(oldIndex);
-  ///         _items.insert(newIndex, item);
-  ///       });
-  ///     },
   ///   );
   /// }
   /// ```

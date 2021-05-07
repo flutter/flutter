@@ -427,9 +427,9 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///               case ConnectionState.waiting:
 ///                 children = const <Widget>[
 ///                   SizedBox(
-///                     child: CircularProgressIndicator(),
 ///                     width: 60,
 ///                     height: 60,
+///                     child: CircularProgressIndicator(),
 ///                   ),
 ///                   Padding(
 ///                     padding: EdgeInsets.only(top: 16),
