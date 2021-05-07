@@ -9,8 +9,11 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(DevToolsMemoryTest(
+  await task(PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/animated_image.dart',
+    'animated_image',
+    measureCpuGpu: true,
+    measureMemory: true,
   ).run);
 }
