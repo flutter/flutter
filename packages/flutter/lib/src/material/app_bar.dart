@@ -402,7 +402,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? elevation;
 
   /// {@template flutter.material.appbar.shadowColor}
-  /// The of the shadow below the app bar.
+  /// The color of the shadow below the app bar.
   ///
   /// If this property is null, then [AppBarTheme.shadowColor] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default value
