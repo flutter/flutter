@@ -16,8 +16,11 @@ SDK_VERSION = '10.0.19041.0'
 SDK_PATH = r'third_party\windows_sdk\Windows Kits\10'
 
 def clean(output_dir):
+  """Cleans and creates the specified directory."""
+
   if os.path.exists(output_dir):
         shutil.rmtree(output_dir, ignore_errors=True)
+  os.mkdir(output_dir)
   return
 
 
@@ -44,21 +47,36 @@ def get_inputs(sdk_path, sdk_version):
     name = contract.getAttribute('name')
     version = contract.getAttribute('version')
     winmd_path = os.path.join(reference_dir, name, version, '%s.winmd' % name)
-    inputs.append(os.path.realpath(winmd_path))
+    inputs.append(winmd_path)
   return inputs
 
 
-def generate_headers(input_files, output_dir):
-  """Run cppwinrt.exe on the installed Windows SDK version and generate
-  cppwinrt headers in the output directory.
+def write_options_file(options_path, input_files, output_dir):
+  """Writes a cppwinrt options file to the specified path. This encodes
+  cppwinrt's command-line options into a file to be parsed, rather than passing
+  a long command-line.
   """
 
-  args = [to_abs_path(r'..\..\third_party\cppwinrt\bin\cppwinrt.exe')]
-  for winmd_path in input_files:
-    args += ['-in', winmd_path]
-  args += ['-out', output_dir]
-  subprocess.check_output(args)
-  return 0
+  outfile = open(options_path, 'w')
+  for input_file in input_files:
+    outfile.write('-in "%s"\n' % input_file)
+  outfile.write('-out "%s"\n' % output_dir)
+  outfile.write('-verbose\n')
+  outfile.close()
+
+def generate_headers(options_file):
+  """Run cppwinrt.exe with the specified options file to generate WinRT headers
+  in the output directory. Logs stderr to the console.
+  """
+
+  args = [
+      to_abs_path(r'..\..\third_party\cppwinrt\bin\cppwinrt.exe'),
+      '@%s' % options_file
+  ]
+  process = subprocess.Popen(args, stderr=subprocess.PIPE)
+  out, err = process.communicate()
+  print(err)
+  return process.returncode
 
 
 def main(argv):
@@ -67,7 +85,9 @@ def main(argv):
 
   abs_sdk_path = to_abs_path(r'..\..\%s' % SDK_PATH)
   input_files = get_inputs(abs_sdk_path, SDK_VERSION)
-  return generate_headers(input_files, generated_dir)
+  options_file = r'%s\cppwinrt_options.txt' % generated_dir
+  write_options_file(options_file, input_files, generated_dir)
+  return generate_headers(options_file)
 
 
 if __name__ == "__main__":
