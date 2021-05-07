@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'conic.dart';
+import 'cubic.dart';
+import 'path_iterator.dart';
+import 'path_ref.dart';
+import 'path_utils.dart';
 
 /// Computes winding number and onCurveCount for a path and point.
 class PathWinding {

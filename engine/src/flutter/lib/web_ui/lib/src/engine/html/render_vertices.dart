@@ -72,10 +72,10 @@ abstract class _GlRenderer {
       ui.BlendMode blendMode,
       SurfacePaintData paint);
 
-  Object? drawRect(ui.Rect targetRect, _GlContext gl, _GlProgram glProgram,
+  Object? drawRect(ui.Rect targetRect, GlContext gl, GlProgram glProgram,
       NormalizedGradient gradient, int widthInPixels, int heightInPixels);
 
-  String drawRectToImageUrl(ui.Rect targetRect, _GlContext gl, _GlProgram glProgram,
+  String drawRectToImageUrl(ui.Rect targetRect, GlContext gl, GlProgram glProgram,
       NormalizedGradient gradient, int widthInPixels, int heightInPixels);
 
   void drawHairline(html.CanvasRenderingContext2D? _ctx, Float32List positions);
@@ -88,10 +88,9 @@ abstract class _GlRenderer {
 class _WebGlRenderer implements _GlRenderer {
 
   /// Cached vertex shader reused by [drawVertices] and gradients.
-  static String? _baseVertexShader;
   static String? _textureVertexShader;
 
-  static void _setupVertexTransforms(_GlContext gl, _GlProgram glProgram,
+  static void _setupVertexTransforms(GlContext gl, GlProgram glProgram,
       double offsetX, double offsetY, double widthInPixels,
       double heightInPixels, Matrix4 transform) {
     Object transformUniform = gl.getUniformLocation(glProgram.program,
@@ -109,13 +108,13 @@ class _WebGlRenderer implements _GlRenderer {
     gl.setUniform4f(shift, -1, 1, 0, 0);
   }
 
-  static void _setupTextureScalar(_GlContext gl, _GlProgram glProgram,
+  static void _setupTextureScalar(GlContext gl, GlProgram glProgram,
       double sx, double sy) {
     Object scalar = gl.getUniformLocation(glProgram.program, 'u_texscale');
     gl.setUniform2f(scalar, sx, sy);
   }
 
-  static dynamic _tileModeToGlWrapping(_GlContext gl, ui.TileMode tileMode) {
+  static dynamic _tileModeToGlWrapping(GlContext gl, ui.TileMode tileMode) {
     switch(tileMode) {
       case ui.TileMode.clamp:
         return gl.kClampToEdge;
@@ -171,19 +170,19 @@ class _WebGlRenderer implements _GlRenderer {
 
     final bool isWebGl2 = webGLVersion == WebGLVersion.webgl2;
 
-    final ImageShader? imageShader = paint.shader == null ? null
-        : paint.shader as ImageShader;
+    final EngineImageShader? imageShader = paint.shader == null ? null
+        : paint.shader as EngineImageShader;
 
     final String vertexShader = imageShader == null
-        ? writeBaseVertexShader() : writeTextureVertexShader();
+        ? VertexShaders.writeBaseVertexShader() : writeTextureVertexShader();
     final String fragmentShader = imageShader == null
         ? _writeVerticesFragmentShader()
         : _writeVerticesTextureFragmentShader(isWebGl2,
         imageShader.tileModeX, imageShader.tileModeY);
 
-    _GlContext gl = _GlContextCache.createGlContext(widthInPixels, heightInPixels)!;
+    GlContext gl = _GlContextCache.createGlContext(widthInPixels, heightInPixels)!;
 
-    _GlProgram glProgram = gl.cacheProgram(vertexShader, fragmentShader);
+    GlProgram glProgram = gl.cacheProgram(vertexShader, fragmentShader);
     gl.useProgram(glProgram);
 
     Object? positionAttributeLocation =
@@ -332,7 +331,7 @@ class _WebGlRenderer implements _GlRenderer {
   ///
   /// Browsers that support OffscreenCanvas and the transferToImageBitmap api
   /// will return ImageBitmap, otherwise will return CanvasElement.
-  Object? drawRect(ui.Rect targetRect, _GlContext gl, _GlProgram glProgram,
+  Object? drawRect(ui.Rect targetRect, GlContext gl, GlProgram glProgram,
       NormalizedGradient gradient, int widthInPixels, int heightInPixels) {
     drawRectToGl(targetRect, gl, glProgram, gradient, widthInPixels, heightInPixels);
     Object? image = gl.readPatternData();
@@ -343,7 +342,7 @@ class _WebGlRenderer implements _GlRenderer {
 
   /// Renders a rectangle using given program into an image resource and returns
   /// url.
-  String drawRectToImageUrl(ui.Rect targetRect, _GlContext gl, _GlProgram glProgram,
+  String drawRectToImageUrl(ui.Rect targetRect, GlContext gl, GlProgram glProgram,
       NormalizedGradient gradient, int widthInPixels, int heightInPixels) {
     drawRectToGl(targetRect, gl, glProgram, gradient, widthInPixels, heightInPixels);
     final String imageUrl = gl.toImageUrl();
@@ -353,10 +352,10 @@ class _WebGlRenderer implements _GlRenderer {
     return imageUrl;
   }
 
-  /// Renders a rectangle using given program into [_GlContext].
+  /// Renders a rectangle using given program into [GlContext].
   ///
   /// Caller has to cleanup gl array and element array buffers.
-  void drawRectToGl(ui.Rect targetRect, _GlContext gl, _GlProgram glProgram,
+  void drawRectToGl(ui.Rect targetRect, GlContext gl, GlProgram glProgram,
       NormalizedGradient gradient, int widthInPixels, int heightInPixels) {
     // Setup rectangle coordinates.
     final double left = targetRect.left;
@@ -425,38 +424,7 @@ class _WebGlRenderer implements _GlRenderer {
     gl.drawElements(gl.kTriangles, _vertexIndicesForRect.length, gl.kUnsignedShort);
   }
 
-  /// Creates a vertex shader transforms pixel space [Vertices.positions] to
-  /// final clipSpace -1..1 coordinates with inverted Y Axis.
-  ///     #version 300 es
-  ///     layout (location=0) in vec4 position;
-  ///     layout (location=1) in vec4 color;
-  ///     uniform mat4 u_ctransform;
-  ///     uniform vec4 u_scale;
-  ///     uniform vec4 u_shift;
-  ///     out vec4 vColor;
-  ///     void main() {
-  ///       gl_Position = ((u_ctransform * position) * u_scale) + u_shift;
-  ///       v_color = color.zyxw;
-  ///     }
-  static String writeBaseVertexShader() {
-    if (_baseVertexShader == null) {
-      ShaderBuilder builder = ShaderBuilder(webGLVersion);
-      builder.addIn(ShaderType.kVec4, name: 'position');
-      builder.addIn(ShaderType.kVec4, name: 'color');
-      builder.addUniform(ShaderType.kMat4, name: 'u_ctransform');
-      builder.addUniform(ShaderType.kVec4, name: 'u_scale');
-      builder.addUniform(ShaderType.kVec4, name: 'u_shift');
-      builder.addOut(ShaderType.kVec4, name: 'v_color');
-      ShaderMethod method = builder.addMethod('main');
-      method.addStatement(
-          'gl_Position = ((u_ctransform * position) * u_scale) + u_shift;');
-      method.addStatement('v_color = color.zyxw;');
-      _baseVertexShader = builder.build();
-    }
-    return _baseVertexShader!;
-  }
-
-  static String writeTextureVertexShader() {
+   static String writeTextureVertexShader() {
     if (_textureVertexShader == null) {
       ShaderBuilder builder = ShaderBuilder(webGLVersion);
       builder.addIn(ShaderType.kVec4, name: 'position');
@@ -647,13 +615,13 @@ Float32List _convertVertexPositions(ui.VertexMode mode, Float32List positions) {
 }
 
 /// Compiled and cached gl program.
-class _GlProgram {
+class GlProgram {
   final Object program;
-  _GlProgram(this.program);
+  GlProgram(this.program);
 }
 
 /// JS Interop helper for webgl apis.
-class _GlContext {
+class GlContext {
   final Object glContext;
   final bool isOffscreen;
   dynamic _kCompileStatus;
@@ -680,20 +648,20 @@ class _GlContext {
   Object? _canvas;
   int? _widthInPixels;
   int? _heightInPixels;
-  static late Map<String, _GlProgram?> _programCache;
+  static late Map<String, GlProgram?> _programCache;
 
-  _GlContext.fromOffscreenCanvas(html.OffscreenCanvas canvas)
+  GlContext.fromOffscreenCanvas(html.OffscreenCanvas canvas)
       : glContext = canvas.getContext('webgl2', <String, dynamic>{'premultipliedAlpha': false})!,
         isOffscreen = true {
-    _programCache = <String, _GlProgram?>{};
+    _programCache = <String, GlProgram?>{};
     _canvas = canvas;
   }
 
-  _GlContext.fromCanvas(html.CanvasElement canvas, bool useWebGl1)
+  GlContext.fromCanvas(html.CanvasElement canvas, bool useWebGl1)
       : glContext = canvas.getContext(useWebGl1 ? 'webgl' : 'webgl2',
       <String, dynamic>{'premultipliedAlpha': false})!,
         isOffscreen = false {
-    _programCache = <String, _GlProgram?>{};
+    _programCache = <String, GlProgram?>{};
     _canvas = canvas;
   }
 
@@ -712,10 +680,10 @@ class _GlContext {
           left, top, _widthInPixels, _heightInPixels]);
   }
 
-  _GlProgram cacheProgram(
+  GlProgram cacheProgram(
       String vertexShaderSource, String fragmentShaderSource) {
     String cacheKey = '$vertexShaderSource||$fragmentShaderSource';
-    _GlProgram? cachedProgram = _programCache[cacheKey];
+    GlProgram? cachedProgram = _programCache[cacheKey];
     if (cachedProgram == null) {
       // Create and compile shaders.
       Object vertexShader = compileShader('VERTEX_SHADER', vertexShaderSource);
@@ -726,7 +694,7 @@ class _GlContext {
       attachShader(program, vertexShader);
       attachShader(program, fragmentShader);
       linkProgram(program);
-      cachedProgram = _GlProgram(program);
+      cachedProgram = GlProgram(program);
       _programCache[cacheKey] = cachedProgram;
     }
     return cachedProgram;
@@ -762,7 +730,7 @@ class _GlContext {
     }
   }
 
-  void useProgram(_GlProgram program) {
+  void useProgram(GlProgram program) {
     js_util.callMethod(glContext, 'useProgram', <dynamic>[program.program]);
   }
 
@@ -1124,7 +1092,7 @@ class _OffScreenCanvas {
 class _GlContextCache {
   static int _maxPixelWidth = 0;
   static int _maxPixelHeight = 0;
-  static _GlContext? _cachedContext;
+  static GlContext? _cachedContext;
   static _OffScreenCanvas? _offScreenCanvas;
 
   static void dispose() {
@@ -1134,7 +1102,7 @@ class _GlContextCache {
     _offScreenCanvas?.dispose();
   }
 
-  static _GlContext? createGlContext(int widthInPixels, int heightInPixels) {
+  static GlContext? createGlContext(int widthInPixels, int heightInPixels) {
     if (widthInPixels > _maxPixelWidth || heightInPixels > _maxPixelHeight) {
       _cachedContext?.dispose();
       _cachedContext = null;
@@ -1145,9 +1113,9 @@ class _GlContextCache {
     _offScreenCanvas ??= _OffScreenCanvas(widthInPixels, heightInPixels);
     if (_OffScreenCanvas.supported) {
       _cachedContext ??=
-          _GlContext.fromOffscreenCanvas(_offScreenCanvas!._canvas!);
+          GlContext.fromOffscreenCanvas(_offScreenCanvas!._canvas!);
     } else {
-      _cachedContext ??= _GlContext.fromCanvas(_offScreenCanvas!._glCanvas!,
+      _cachedContext ??= GlContext.fromCanvas(_offScreenCanvas!._glCanvas!,
           webGLVersion == WebGLVersion.webgl1);
     }
     _cachedContext!.setViewportSize(widthInPixels, heightInPixels);

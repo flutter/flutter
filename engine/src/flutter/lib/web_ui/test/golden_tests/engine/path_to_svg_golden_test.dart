@@ -205,7 +205,7 @@ html.Element pathToSvgElement(Path path, Paint paint,
     sb.write('fill="${colorToCssString(paint.color)}" ');
   }
   sb.write('d="');
-  pathToSvg(path, sb); // This is what we're testing!
+  pathToSvg((path as SurfacePath).pathRef, sb); // This is what we're testing!
   sb.write('"></path>');
   sb.write('</svg>');
   final html.Element svgElement =
