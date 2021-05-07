@@ -733,7 +733,7 @@ void main() {
 
     Color getFillColor(Set<MaterialState> states) {
       if(states.contains(MaterialState.selected)) {
-        return selectedFillColor; 
+        return selectedFillColor;
       }
       return defaultFillColor;
     }
