@@ -3560,6 +3560,42 @@ void main() {
       expect(observations[7].previous, isNull);
     });
   });
+
+  testWidgets('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
+    final NavigatorObserver observer = NavigatorObserver();
+    Widget build([Key? key]) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: key,
+          observers: <NavigatorObserver>[observer],
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
+                return Container();
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    // Test without reinsertion
+    await tester.pumpWidget(build());
+    await tester.pumpWidget(Container(child: build()));
+    expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
+
+    // Clear the tree
+    await tester.pumpWidget(Container());
+    expect(observer.navigator, isNull);
+
+    // Test with reinsertion
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(build(key));
+    await tester.pumpWidget(Container(child: build(key)));
+    expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
