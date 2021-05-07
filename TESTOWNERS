@@ -4,216 +4,179 @@
 # These owners are mainly team leaders and their sub-teams. Please feel
 # free to claim ownership by adding your handle to corresponding tests.
 #
-# These tests correspond to builder names defined in
-# https://github.com/flutter/infra/blob/master/config/framework_config.star
-# and https://github.com/flutter/infra/blob/master/config/devicelab_config.star
-#
 # This file will be used as a reference when new flaky bugs are filed and
 # the TL will be assigned and the sub-team will be labeled by default
 # for further triage.
 
 # Linux Android DeviceLab tests
-Linux analyzer_benchmark @zanderso @tool
-Linux android_defines_test @zanderso @tool
-Linux android_obfuscate_test @zanderso @tool
-Linux android_stack_size_test @zanderso @tool
-Linux android_view_scroll_perf__timeline_summary @zanderso @engine
-Linux animated_placeholder_perf__e2e_summary @zanderso @engine
-Linux backdrop_filter_perf__e2e_summary @zanderso @engine
-Linux basic_material_app_android__compile @zanderso @tool
-Linux color_filter_and_fade_perf__e2e_summary @zanderso @engine
-Linux complex_layout_android__compile @zanderso @tool
-Linux complex_layout_android__scroll_smoothness @zanderso @engine
-Linux complex_layout_scroll_perf__devtools_memory @zanderso @engine
-Linux complex_layout_semantics_perf @zanderso @engine
-Linux cubic_bezier_perf__e2e_summary @zanderso @engine
-Linux cubic_bezier_perf_sksl_warmup__e2e_summary @zanderso @engine
-Linux cull_opacity_perf__e2e_summary @zanderso @engine
-Linux fast_scroll_heavy_gridview__memory @zanderso @engine
-Linux flutter_engine_group_performance @zanderso @engine
-Linux flutter_gallery__back_button_memory @zanderso @engine
-Linux flutter_gallery__image_cache_memory @zanderso @engine
-Linux flutter_gallery__memory_nav @zanderso @engine
-Linux flutter_gallery__start_up @zanderso @engine
-Linux flutter_gallery__transition_perf_e2e @zanderso @engine
-Linux flutter_gallery__transition_perf_hybrid @zanderso @engine
-Linux flutter_gallery__transition_perf_with_semantics @zanderso @engine
-Linux flutter_gallery__transition_perf @zanderso @engine
-Linux flutter_gallery_android__compile @zanderso @tool
-Linux flutter_gallery_sksl_warmup__transition_perf_e2e @zanderso @engine
-Linux flutter_gallery_sksl_warmup__transition_perf @zanderso @engine
-Linux flutter_gallery_v2_chrome_run_test @ferhatb @platform-web
-Linux flutter_gallery_v2_web_compile_test @ferhatb @platform-web
-Linux flutter_test_performance @zanderso @engine
-Linux hot_mode_dev_cycle_linux__benchmark @zanderso @tool
-Linux image_list_jit_reported_duration @zanderso @engine
-Linux image_list_reported_duration @zanderso @engine
-Linux large_image_changer_perf_android @zanderso @engine
-Linux linux_chrome_dev_mode @zanderso @tool
-Linux multi_widget_construction_perf__e2e_summary @zanderso @engine
-Linux new_gallery__crane_perf @zanderso @engine
-Linux picture_cache_perf__e2e_summary @zanderso @engine
-Linux platform_views_scroll_perf__timeline_summary @zanderso @engine
-Linux textfield_perf__e2e_summary @zanderso @engine
-Linux web_size__compile_test @ferhatb @platform-web
+/dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_stack_size_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/animated_placeholder_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/backdrop_filter_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/basic_material_app_android__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/color_filter_and_fade_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_android__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf__devtools_memory.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_semantics_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cubic_bezier_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__back_button_memory.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__image_cache_memory.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__memory_nav.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__start_up.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__transition_perf_hybrid.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__transition_perf_with_semantics.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_android__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/flutter_gallery_sksl_warmup__transition_perf_e2e.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_sksl_warmup__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_v2_chrome_run_test.dart @ferhatb @flutter/web
+/dev/devicelab/bin/tasks/flutter_gallery_v2_web_compile_test.dart @ferhatb @flutter/web
+/dev/devicelab/bin/tasks/flutter_test_performance.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/image_list_reported_duration.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/large_image_changer_perf_android.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/linux_chrome_dev_mode.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/multi_widget_construction_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery__crane_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/web_size__compile_test.dart @ferhatb @flutter/web
 
 # Windows Android DeviceLab tests
-Windows_android basic_material_app_win__compile @zanderso @tool
-Windows_android channels_integration_test_win @zanderso @engine
-Windows_android complex_layout_win__compile @zanderso @tool
-Windows_android flutter_gallery_win__compile @zanderso @tool
-Windows_android hot_mode_dev_cycle_win__benchmark @zanderso @tool
-Windows_android windows_chrome_dev_mode @ferhatb @platform-web
+/dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/channels_integration_test_win.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_win__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/flutter_gallery_win__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_win__benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/windows_chrome_dev_mode.dart @ferhatb @flutter/web
 
 # Mac Android DeviceLab tests
-Mac_android android_semantics_integration_test @HansMuller @framework
-Mac_android backdrop_filter_perf__timeline_summary @zanderso @engine
-Mac_android channels_integration_test @zanderso @engine
-Mac_android color_filter_and_fade_perf__timeline_summary @zanderso @engine
-Mac_android complex_layout_scroll_perf__memory @zanderso @engine
-Mac_android complex_layout_scroll_perf__timeline_summary @zanderso @engine
-Mac_android complex_layout__start_up @zanderso @engine
-Mac_android cubic_bezier_perf_sksl_warmup__timeline_summary @zanderso @engine
-Mac_android cubic_bezier_perf__timeline_summary @zanderso @engine
-Mac_android cull_opacity_perf__timeline_summary @zanderso @engine
-Mac_android drive_perf_debug_warning @zanderso @engine
-Mac_android embedded_android_views_integration_test @stuartmorgan @plugin
-Mac_android fading_child_animation_perf__timeline_summary @zanderso @engine
-Mac_android fast_scroll_large_images__memory @zanderso @engine
-Mac_android fullscreen_textfield_perf__timeline_summary @zanderso @engine
-Mac_android hello_world_android__compile @zanderso @tool
-Mac_android hello_world__memory @zanderso @engine
-Mac_android home_scroll_perf__timeline_summary @zanderso @engine
-Mac_android hot_mode_dev_cycle__benchmark @zanderso @tool
-Mac_android hybrid_android_views_integration_test @stuartmorgan @plugin
-Mac_android imagefiltered_transform_animation_perf__timeline_summary @zanderso @engine
-Mac_android integration_test_test @zanderso @tool
-Mac_android integration_ui_driver @zanderso @tool
-Mac_android integration_ui_keyboard_resize @zanderso @tool
-Mac_android integration_ui_screenshot @zanderso @tool
-Mac_android integration_ui_textfield @zanderso @tool
-Mac_android microbenchmarks @zanderso @engine
-Mac_android new_gallery__transition_perf @zanderso @engine
-Mac_android picture_cache_perf__timeline_summary @zanderso @engine
-Mac_android platform_channel_sample_test @zanderso @engine
-Mac_android platform_interaction_test @stuartmorgan @plugin
-Mac_android run_release_test @zanderso @tool
-Mac_android service_extensions_test @zanderso @tool
-Mac_android smoke_catalina_start_up @zanderso @engine
-Mac_android textfield_perf__timeline_summary @zanderso @engine
-Mac_android tiles_scroll_perf__timeline_summary @zanderso @engine
+/dev/devicelab/bin/tasks/android_semantics_integration_test.dart @HansMuller @flutter/framework
+/dev/devicelab/bin/tasks/backdrop_filter_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/channels_integration_test.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/color_filter_and_fade_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf__memory.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout__start_up.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cubic_bezier_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/cull_opacity_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/drive_perf_debug_warning.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/embedded_android_views_integration_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/fading_child_animation_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/fast_scroll_large_images__memory.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/fullscreen_textfield_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hello_world_android__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/hello_world__memory.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/home_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle__benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/integration_test_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_driver.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_screenshot.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_textfield.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/microbenchmarks.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/picture_cache_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/platform_channel_sample_test.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/platform_interaction_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/run_release_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/service_extensions_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/smoke_catalina_start_up.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/textfield_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/tiles_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 
 # Mac iOS DeviceLab tests
-Mac_ios backdrop_filter_perf_ios__timeline_summary @zanderso @engine
-Mac_ios basic_material_app_ios__compile @zanderso @tool
-Mac_ios channels_integration_test_ios @zanderso @engine
-Mac_ios complex_layout_ios__compile @zanderso @engine
-Mac_ios complex_layout_ios__start_up @zanderso @engine
-Mac_ios complex_layout_scroll_perf_ios__timeline_summary @zanderso @engine
-Mac_ios flavors_test_ios @zanderso @tool
-Mac_ios flutter_gallery__transition_perf_e2e_ios @zanderso @engine
-Mac_ios flutter_gallery_ios__compile @zanderso @engine
-Mac_ios flutter_gallery_ios__start_up @zanderso @engine
-Mac_ios flutter_gallery_ios__transition_perf @zanderso @engine
-Mac_ios hello_world_ios__compile @zanderso @engine
-Mac_ios hot_mode_dev_cycle_macos_target__benchmark @zanderso @tool
-Mac_ios integration_ui_ios_driver @zanderso @tool
-Mac_ios integration_ui_ios_screenshot @zanderso @tool
-Mac_ios integration_ui_ios_textfield @zanderso @tool
-Mac_ios ios_app_with_extensions_test @zanderso @tool
-Mac_ios ios_content_validation_test @zanderso @tool
-Mac_ios ios_defines_test @zanderso @tool
-Mac_ios ios_platform_view_tests @stuartmorgan @plugin
-Mac_ios large_image_changer_perf_ios @zanderso @engine
-Mac_ios macos_chrome_dev_mode @zanderso @tool
-Mac_ios microbenchmarks_ios @zanderso @engine
-Mac_ios new_gallery_ios__transition_perf @zanderso @engine
-Mac_ios platform_view_ios__start_up @stuartmorgan @plugin
-Mac_ios platform_views_scroll_perf_ios__timeline_summary @zanderso @engine
-Mac_ios post_backdrop_filter_perf_ios__timeline_summary @zanderso @engine
-Mac_ios simple_animation_perf_ios @zanderso @engine
-Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark @zanderso @tool
-Mac_ios tiles_scroll_perf_ios__timeline_summary @zanderso @engine
+/dev/devicelab/bin/tasks/backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/basic_material_app_ios__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/channels_integration_test_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flavors_test_ios.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_ios__compile.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_ios__start_up.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery_ios__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hello_world_ios__compile.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_ios_driver.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/ios_content_validation_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/ios_defines_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/microbenchmarks_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/smoke_catalina_hot_mode_dev_cycle_ios__benchmark.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 
 # Host only DeviceLab tests
-Linux build_aar_module_test @zanderso @engine
-Linux gradle_desugar_classes_test @stuartmorgan @plugin
-Linux gradle_non_android_plugin_test @stuartmorgan @plugin
-Linux gradle_plugin_bundle_test @stuartmorgan @plugin
-Linux gradle_plugin_fat_apk_test @stuartmorgan @plugin
-Linux gradle_plugin_light_apk_test @stuartmorgan @plugin
-Linux plugin_test @stuartmorgan @plugin
-Linux technical_debt__cost @HansMuller @framework
-Linux web_benchmarks_canvaskit @ferhatb @platform-web
-Linux web_benchmarks_html @ferhatb @platform-web
-Mac dart_plugin_registry_test @stuartmorgan @plugin
-Mac gradle_non_android_plugin_test @stuartmorgan @plugin
-Mac gradle_plugin_bundle_test @stuartmorgan @plugin
-Mac gradle_plugin_fat_apk_test @stuartmorgan @plugin
-Mac gradle_plugin_light_apk_test @stuartmorgan @plugin
-Mac plugin_lint_mac @stuartmorgan @plugin
-Mac plugin_test @stuartmorgan @plugin
-Windows gradle_non_android_plugin_test @stuartmorgan @plugin
-Windows gradle_plugin_bundle_test @stuartmorgan @plugin
-Windows gradle_plugin_fat_apk_test @stuartmorgan @plugin
-Windows gradle_plugin_light_apk_test @stuartmorgan @plugin
-Windows plugin_test @stuartmorgan @plugin
+/dev/devicelab/bin/tasks/build_aar_module_test.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
+/dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @ferhatb @flutter/web
+/dev/devicelab/bin/tasks/web_benchmarks_html.dart @ferhatb @flutter/web
+/dev/devicelab/bin/tasks/dart_plugin_registry_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 
 # Host only framework tests
-Linux analyze @HansMuller @framework
-Linux build_tests_1_2 @zanderso @tool
-Linux build_tests_2_2 @zanderso @tool
-Linux customer_testing @HansMuller @framework
-Linux docs_test @HansMuller @framework
-Linux flutter_plugins @stuartmorgan @plugin
-Linux framework_tests_libraries @HansMuller @framework
-Linux framework_tests_misc @HansMuller @framework
-Linux framework_tests_widgets @HansMuller @framework
-Linux fuchsia_precache @zanderso @tool
-Linux tool_integration_tests_1_3 @zanderso @tool
-Linux tool_integration_tests_2_3 @zanderso @tool
-Linux tool_integration_tests_3_3 @zanderso @tool
-Linux tool_tests_general @zanderso @tool
-Linux tool_tests_commands @zanderso @tool
-Linux web_e2e_test @ferhatb @platform-web
-Linux web_integration_tests @ferhatb @platform-web
-Linux web_long_running_tests_1_3 @ferhatb @platform-web
-Linux web_long_running_tests_2_3 @ferhatb @platform-web
-Linux web_long_running_tests_3_3 @ferhatb @platform-web
-Linux web_smoke_test @ferhatb @platform-web
-Linux web_tests_0 @ferhatb @platform-web
-Linux web_tests_1 @ferhatb @platform-web
-Linux web_tests_2 @ferhatb @platform-web
-Linux web_tests_3 @ferhatb @platform-web
-Linux web_tests_4 @ferhatb @platform-web
-Linux web_tests_5 @ferhatb @platform-web
-Linux web_tests_6 @ferhatb @platform-web
-Linux web_tests_7_last @ferhatb @platform-web
-Linux web_tool_tests @zanderso @tool
-Mac build_tests_1_4 @zanderso @tool
-Mac build_tests_2_4 @zanderso @tool
-Mac build_tests_3_4 @zanderso @tool
-Mac build_tests_4_4 @zanderso @tool
-Mac customer_testing @HansMuller @framework
-Mac framework_tests_libraries @HansMuller @framework
-Mac framework_tests_misc @HansMuller @framework
-Mac framework_tests_widgets @HansMuller @framework
-Mac tool_tests_general @zanderso @tool
-Mac tool_tests_commands @zanderso @tool
-Mac tool_integration_tests_1_3 @zanderso @tool
-Mac tool_integration_tests_2_3 @zanderso @tool
-Mac tool_integration_tests_3_3 @zanderso @tool
-Mac web_tool_tests @zanderso @tool
-Windows build_tests_1_3 @zanderso @tool
-Windows build_tests_2_3 @zanderso @tool
-Windows build_tests_3_3 @zanderso @tool
-Windows customer_testing @HansMuller @framework
-Windows framework_tests_libraries @HansMuller @framework
-Windows framework_tests_misc @HansMuller @framework
-Windows framework_tests_widgets @HansMuller @framework
-Windows tool_tests_general @zanderso @tool
-Windows tool_tests_commands @zanderso @tool
-Windows tool_integration_tests_1_3 @zanderso @tool
-Windows tool_integration_tests_2_3 @zanderso @tool
-Windows tool_integration_tests_3_3 @zanderso @tool
-Windows web_tool_tests @zanderso @tool
+# Linux analyze
+/dev/bots/analyze.dart @HansMuller @flutter/framework
+# Linux/Mac/Windows customer_testing
+/dev/customer_testing/run_tests.dart @HansMuller @flutter/framework
+# Linux docs_test
+/dev/bots/docs.sh @HansMuller @flutter/framework
+# Linux web_e2e_test
+/dev/integration_tests/web_e2e_tests  @ferhatb @flutter/web
+# Linux web_smoke_test
+/examples/hello_world/test_driver/smoke_web_engine.dart @ferhatb @platform-web
+
+# TODO(keyonghan): add files/paths for below framework host only testss.
+# https://github.com/flutter/flutter/issues/82068
+#
+# build_tests @zanderso @flutter/tool
+# flutter_plugins @stuartmorgan @flutter/plugin
+# framework_tests @HansMuller @flutter/framework
+# tool_integration_tests @zanderso @flutter/tool
+# tool_tests @zanderso @flutter/tool
+# web_integration_tests @ferhatb @flutter/web
+# web_long_running_tests @ferhatb @flutter/web
+# web_tests @ferhatb @flutter/web
+# web_tool_tests @zanderso @flutter/tool
+# fuchsia_precache @zanderso @flutter/tool
