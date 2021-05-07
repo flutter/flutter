@@ -549,10 +549,12 @@ class _AndroidMotionEventConverter {
   }
 
   void handlePointerCancelEvent(PointerCancelEvent event) {
-    pointerPositions.clear();
-    pointerProperties.clear();
-    usedAndroidPointerIds.clear();
-    downTimeMillis = null;
+    pointerPositions.remove(event.pointer);
+    usedAndroidPointerIds.remove(pointerProperties[event.pointer]!.id);
+    pointerProperties.remove(event.pointer);
+    if (pointerProperties.isEmpty) {
+      downTimeMillis = null;
+    }
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
