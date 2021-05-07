@@ -74,7 +74,8 @@ Future<double> _runBasicStandardLarge(BasicMessageChannel<Object> basicStandard,
 
   if (size != largeBuffer.length * count) {
     throw Exception(
-        'There is an error with the echo channel, the results don\'t add up: $size');
+      'There is an error with the echo channel, the results don\'t add up: $size',
+    );
   }
 
   return watch.elapsedMicroseconds / count;
@@ -93,7 +94,8 @@ Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
   watch.stop();
   if (size != buffer.lengthInBytes * count) {
     throw Exception(
-        'There is an error with the echo channel, the results don\'t add up: $size');
+      'There is an error with the echo channel, the results don\'t add up: $size',
+    );
   }
 
   return watch.elapsedMicroseconds / count;
@@ -102,7 +104,8 @@ Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
 Future<void> _runTests() async {
   if (kDebugMode) {
     throw Exception(
-        "Must be run in profile mode! Use 'flutter run --profile'.");
+      "Must be run in profile mode! Use 'flutter run --profile'.",
+    );
   }
 
   const BasicMessageChannel<Object> basicStandard = BasicMessageChannel<Object>(
