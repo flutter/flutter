@@ -96,7 +96,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '45ce223bc8d8ca88e2eb2f38eb0cf799e39edd06',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7137efc8964bd91fa13e69af2cd3d1e13007d065',
 
    # Fuchsia compatibility
    #
@@ -662,7 +662,7 @@ hooks = [
     'pattern': '.',
     'condition': 'download_windows_deps',
     'action': [
-      'python',
+      'python3',
       'src/build/win/generate_winrt_headers.py',
     ]
   }
