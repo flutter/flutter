@@ -165,7 +165,7 @@
 # Linux web_e2e_test
 /dev/integration_tests/web_e2e_tests  @ferhatb @flutter/web
 # Linux web_smoke_test
-/examples/hello_world/test_driver/smoke_web_engine.dart @ferhatb @platform-web
+/examples/hello_world/test_driver/smoke_web_engine.dart @ferhatb @flutter/web
 
 # TODO(keyonghan): add files/paths for below framework host only testss.
 # https://github.com/flutter/flutter/issues/82068
