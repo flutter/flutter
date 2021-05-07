@@ -373,7 +373,7 @@
       "flaky": false
     },
     {
-      "name": "Linux platform channels benchmarks",
+      "name": "Linux platform_channels_benchmarks",
       "repo": "flutter",
       "task_name": "linux_platform_channels_benchmarks",
       "flaky": true
@@ -1159,7 +1159,7 @@
       "flaky": false
     },
     {
-      "name": "Mac_ios platform channels benchmarks",
+      "name": "Mac_ios platform_channels_benchmarks",
       "repo": "flutter",
       "task_name": "mac_ios_platform_channels_benchmarks",
       "flaky": true

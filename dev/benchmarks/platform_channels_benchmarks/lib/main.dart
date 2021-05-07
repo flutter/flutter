@@ -48,59 +48,115 @@ List<Object> _makeTestBuffer(int size) {
   return answer;
 }
 
-Future<void> _runTests() async {
-  if (kDebugMode) {
-    throw Exception(
-        "Must be run in profile mode! Use 'flutter run --profile'.");
-  }
-  const int numMessages = 2500;
-
-  const BasicMessageChannel<Object> channel = BasicMessageChannel<Object>(
-    'dev.flutter.echo.basic.standard',
-    StandardMessageCodec(),
-  );
+Future<double> _runBasicStandardSmall(
+    BasicMessageChannel<Object> basicStandard, int count) async {
   final Stopwatch watch = Stopwatch();
-
   watch.start();
-  for (int i = 0; i < numMessages; ++i) {
-    await channel.send(1234);
+  for (int i = 0; i < count; ++i) {
+    await basicStandard.send(1234);
   }
   watch.stop();
-  final double smallPayloadTime = watch.elapsedMicroseconds / numMessages;
+  return watch.elapsedMicroseconds / count;
+}
 
-  watch.reset();
-  /// WARNING: Don't change the following line of code, it will invalidate
-  /// `Large` tests.  Instead make a different test.  The size of largeBuffer
-  /// serialized is 14214 bytes.
-  final List<Object> largeBuffer = _makeTestBuffer(1000);
-
+Future<double> _runBasicStandardLarge(BasicMessageChannel<Object> basicStandard,
+    List<Object> largeBuffer, int count) async {
   int size = 0;
+  final Stopwatch watch = Stopwatch();
   watch.start();
-  for (int i = 0; i < numMessages; ++i) {
-    final List<Object> result = await channel.send(largeBuffer) as List<Object>;
+  for (int i = 0; i < count; ++i) {
+    final List<Object> result =
+        await basicStandard.send(largeBuffer) as List<Object>;
     // This check should be tiny compared to the actual channel send/receive.
     size += (result == null) ? 0 : result.length;
   }
   watch.stop();
-  final double largePayloadTime = watch.elapsedMicroseconds / numMessages;
 
-  if (size != largeBuffer.length * numMessages) {
+  if (size != largeBuffer.length * count) {
     throw Exception(
-        'There is an error with the echo channel, the results don\'t add up: $size');
+      'There is an error with the echo channel, the results don\'t add up: $size',
+    );
   }
 
+  return watch.elapsedMicroseconds / count;
+}
+
+Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
+    ByteData buffer, int count) async {
+  int size = 0;
+  final Stopwatch watch = Stopwatch();
+  watch.start();
+  for (int i = 0; i < count; ++i) {
+    final ByteData result = await basicBinary.send(buffer);
+    // This check should be tiny compared to the actual channel send/receive.
+    size += (result == null) ? 0 : result.lengthInBytes;
+  }
+  watch.stop();
+  if (size != buffer.lengthInBytes * count) {
+    throw Exception(
+      'There is an error with the echo channel, the results don\'t add up: $size',
+    );
+  }
+
+  return watch.elapsedMicroseconds / count;
+}
+
+Future<void> _runTests() async {
+  if (kDebugMode) {
+    throw Exception(
+      "Must be run in profile mode! Use 'flutter run --profile'.",
+    );
+  }
+
+  const BasicMessageChannel<Object> basicStandard = BasicMessageChannel<Object>(
+    'dev.flutter.echo.basic.standard',
+    StandardMessageCodec(),
+  );
+  const BasicMessageChannel<ByteData> basicBinary =
+      BasicMessageChannel<ByteData>(
+    'dev.flutter.echo.basic.binary',
+    BinaryCodec(),
+  );
+
+  /// WARNING: Don't change the following line of code, it will invalidate
+  /// `Large` tests.  Instead make a different test.  The size of largeBuffer
+  /// serialized is 14214 bytes.
+  final List<Object> largeBuffer = _makeTestBuffer(1000);
+  final ByteData largeBufferBytes =
+      const StandardMessageCodec().encodeMessage(largeBuffer);
+  final ByteData oneMB = ByteData(1024 * 1024);
+
+  const int numMessages = 2500;
+
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  await _runBasicStandardSmall(basicStandard, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Small',
-    value: smallPayloadTime,
+    value: await _runBasicStandardSmall(basicStandard, numMessages),
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_small',
   );
+  await _runBasicStandardLarge(basicStandard, largeBuffer, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Large',
-    value: largePayloadTime,
+    value:
+        await _runBasicStandardLarge(basicStandard, largeBuffer, numMessages),
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_large',
+  );
+  await _runBasicBinary(basicBinary, largeBufferBytes, 1); // Warmup.
+  printer.addResult(
+    description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/Large',
+    value: await _runBasicBinary(basicBinary, largeBufferBytes, numMessages),
+    unit: 'µs',
+    name: 'platform_channel_basic_binary_2host_large',
+  );
+  await _runBasicBinary(basicBinary, oneMB, 1); // Warmup.
+  printer.addResult(
+    description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/1MB',
+    value: await _runBasicBinary(basicBinary, oneMB, numMessages),
+    unit: 'µs',
+    name: 'platform_channel_basic_binary_2host_1MB',
   );
   printer.printToStdout();
 }

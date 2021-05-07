@@ -20,6 +20,12 @@ import UIKit
     basicStandard.setMessageHandler { (input, reply) in
       reply(input)
     }
+    let basicBinary = FlutterBasicMessageChannel(
+      name: "dev.flutter.echo.basic.binary", binaryMessenger: registrar.messenger(),
+      codec: FlutterBinaryCodec())
+    basicBinary.setMessageHandler { (input, reply) in
+      reply(input)
+    }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
