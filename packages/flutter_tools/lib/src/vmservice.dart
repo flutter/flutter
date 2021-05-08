@@ -860,8 +860,8 @@ class FlutterVmService {
           continue;
         }
 
-        final vm_service.Isolate isolate = await service.getIsolate(isolateRef.id);
-        if (isolate.extensionRPCs.contains(extensionName)) {
+        final vm_service.Isolate isolate = await getIsolateOrNull(isolateRef.id);
+        if (isolate != null && isolate.extensionRPCs.contains(extensionName)) {
           return isolateRef;
         }
       }
