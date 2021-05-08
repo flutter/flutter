@@ -110,7 +110,7 @@
       {
          "name":"Windows UWP Engine",
          "repo":"engine",
-         "enabled": false
+         "enabled": true
       },
       {
          "name":"Windows Web Engine",

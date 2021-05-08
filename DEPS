@@ -96,7 +96,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7137efc8964bd91fa13e69af2cd3d1e13007d065',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '3a3422d5f3b2c3ff237d855a6906d6d7533e4af4',
 
    # Fuchsia compatibility
    #
@@ -554,12 +554,23 @@ deps = {
      'dep_type': 'cipd',
    },
 
+  # Windows SDK
+  'src/third_party/windows_sdk': {
+    'packages': [
+      {
+        'package': 'flutter/windows/windows-sdk',
+        'version': 'build:10.0.19041.0'
+      }
+    ],
+    'condition': 'download_windows_deps',
+    'dep_type': 'cipd',
+  },
   # CppWinRT tooling for UWP builds
   'src/third_party/cppwinrt': {
     'packages': [
       {
         'package': 'flutter/cppwinrt/win-amd64',
-        'version': 'build:2.0.210304.5'
+        'version': 'build:2.0.210505.3'
       }
     ],
     'condition': 'download_windows_deps',
