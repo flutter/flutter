@@ -500,7 +500,10 @@ void main() {
       final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'undefinedOperatingSystemVersion',
+        ),
         processManager: fakeProcessManager,
       );
       expect(utils.name, 'Pretty Name');
