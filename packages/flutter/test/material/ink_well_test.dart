@@ -165,7 +165,7 @@ void main() {
         final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
         await gesture.addPointer();
         addTearDown(gesture.removePointer);
-        await gesture.moveTo(tester.getCenter(find.byType(Container)));
+        await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
         await tester.pumpAndSettle();
         expect(
           getInkFeatures(tester),
@@ -186,7 +186,7 @@ void main() {
         final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
         await gesture.addPointer();
         addTearDown(gesture.removePointer);
-        await gesture.moveTo(tester.getCenter(find.byType(Container)));
+        await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
         await tester.pumpAndSettle();
 
         expect(
