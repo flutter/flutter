@@ -39,56 +39,56 @@ abstract class SceneBuilder {
       return engine.SurfaceSceneBuilder();
     }
   }
-  OffsetEngineLayer? pushOffset(
+  OffsetEngineLayer pushOffset(
     double dx,
     double dy, {
     OffsetEngineLayer? oldLayer,
   });
-  TransformEngineLayer? pushTransform(
+  TransformEngineLayer pushTransform(
     Float64List matrix4, {
     TransformEngineLayer? oldLayer,
   });
-  ClipRectEngineLayer? pushClipRect(
+  ClipRectEngineLayer pushClipRect(
     Rect rect, {
     Clip clipBehavior = Clip.antiAlias,
     ClipRectEngineLayer? oldLayer,
   });
-  ClipRRectEngineLayer? pushClipRRect(
+  ClipRRectEngineLayer pushClipRRect(
     RRect rrect, {
     required Clip clipBehavior,
     ClipRRectEngineLayer? oldLayer,
   });
-  ClipPathEngineLayer? pushClipPath(
+  ClipPathEngineLayer pushClipPath(
     Path path, {
     Clip clipBehavior = Clip.antiAlias,
     ClipPathEngineLayer? oldLayer,
   });
-  OpacityEngineLayer? pushOpacity(
+  OpacityEngineLayer pushOpacity(
     int alpha, {
     Offset offset = Offset.zero,
     OpacityEngineLayer? oldLayer,
   });
-  ColorFilterEngineLayer? pushColorFilter(
+  ColorFilterEngineLayer pushColorFilter(
     ColorFilter filter, {
     ColorFilterEngineLayer? oldLayer,
   });
-  ImageFilterEngineLayer? pushImageFilter(
+  ImageFilterEngineLayer pushImageFilter(
     ImageFilter filter, {
     ImageFilterEngineLayer? oldLayer,
   });
-  BackdropFilterEngineLayer? pushBackdropFilter(
+  BackdropFilterEngineLayer pushBackdropFilter(
     ImageFilter filter, {
     BlendMode blendMode = BlendMode.srcOver,
     BackdropFilterEngineLayer? oldLayer,
   });
-  ShaderMaskEngineLayer? pushShaderMask(
+  ShaderMaskEngineLayer pushShaderMask(
     Shader shader,
     Rect maskRect,
     BlendMode blendMode, {
     ShaderMaskEngineLayer? oldLayer,
     FilterQuality filterQuality = FilterQuality.low,
   });
-  PhysicalShapeEngineLayer? pushPhysicalShape({
+  PhysicalShapeEngineLayer pushPhysicalShape({
     required Path path,
     required double elevation,
     required Color color,
