@@ -1037,21 +1037,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   //
   // See also:
   //   * _deleteToEnd
-  void _deleteToStart(TextSelection selection, SelectionChangedCause cause) {
+  void _deleteToStart(String currentText, TextSelection selection, SelectionChangedCause cause) {
     assert(selection.isCollapsed);
 
     if (_readOnly || !selection.isValid) {
       return;
     }
 
-    final String text = _plainText;
-    final String textBefore = selection.textBefore(text);
+    final String textBefore = selection.textBefore(currentText);
 
     if (textBefore.isEmpty) {
       return;
     }
 
-    final String textAfter = selection.textAfter(text);
+    final String textAfter = selection.textAfter(currentText);
     const TextSelection newSelection = TextSelection.collapsed(offset: 0);
     _setTextEditingValue(
       TextEditingValue(text: textAfter, selection: newSelection),
@@ -1066,21 +1065,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   //
   // See also:
   //   * _deleteToStart
-  void _deleteToEnd(TextSelection selection, SelectionChangedCause cause) {
+  void _deleteToEnd(String currentText, TextSelection selection, SelectionChangedCause cause) {
     assert(selection.isCollapsed);
 
     if (_readOnly || !selection.isValid) {
       return;
     }
 
-    final String text = _plainText;
-    final String textAfter = selection.textAfter(text);
+    final String textAfter = selection.textAfter(currentText);
 
     if (textAfter.isEmpty) {
       return;
     }
 
-    final String textBefore = selection.textBefore(text);
+    final String textBefore = selection.textBefore(currentText);
     final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
     _setTextEditingValue(
       TextEditingValue(text: textBefore, selection: newSelection),
@@ -1105,7 +1103,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteForward], which is same but in the opposite direction.
   void delete(SelectionChangedCause cause) {
     final TextSelection? selection = _selection;
-    assert(_selection != null);
 
     if (_readOnly || selection == null || !selection.isValid) {
       return;
@@ -1154,7 +1151,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteForwardByWord], which is same but in the opposite direction.
   void deleteByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     final TextSelection? selection = _selection;
-    assert(_selection != null);
 
     if (_readOnly || selection == null || !selection.isValid) {
       return;
@@ -1167,7 +1163,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // When the text is obscured, the whole thing is treated as one big line.
     if (obscureText) {
-      return _deleteToStart(selection, cause);
+      return _deleteToStart(text, selection, cause);
     }
 
     String textBefore = selection.textBefore(text);
@@ -1178,7 +1174,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int characterBoundary = _getLeftByWord(_textPainter, textBefore.length, includeWhitespace);
     textBefore = textBefore.trimRight().substring(0, characterBoundary);
 
-    final String textAfter = _selection!.textAfter(text);
+    final String textAfter = selection.textAfter(text);
     final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
     _setTextEditingValue(
       TextEditingValue(text: textBefore + textAfter, selection: newSelection),
@@ -1202,7 +1198,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteForwardByLine], which is same but in the opposite direction.
   void deleteByLine(SelectionChangedCause cause) {
     final TextSelection? selection = _selection;
-    assert(_selection != null);
 
     if (_readOnly || selection == null || !selection.isValid) {
       return;
@@ -1215,7 +1210,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // When the text is obscured, the whole thing is treated as one big line.
     if (obscureText) {
-      return _deleteToStart(selection, cause);
+      return _deleteToStart(text, selection, cause);
     }
 
     String textBefore = _selection!.textBefore(text);
@@ -1254,7 +1249,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [delete], which is same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
     final TextSelection? selection = _selection;
-    assert(_selection != null);
 
     if (_readOnly || selection == null || !selection.isValid) {
       return;
@@ -1299,7 +1293,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteByWord], which is same but in the opposite direction.
   void deleteForwardByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     final TextSelection? selection = _selection;
-    assert(_selection != null);
 
     if (_readOnly || selection == null || !selection.isValid) {
       return;
@@ -1312,7 +1305,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
-      return _deleteToEnd(_selection!, cause);
+      return _deleteToEnd(text, selection, cause);
     }
 
     String textAfter = _selection!.textAfter(text);
@@ -1347,7 +1340,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [deleteByLine], which is same but in the opposite direction.
   void deleteForwardByLine(SelectionChangedCause cause) {
     final TextSelection? selection = _selection;
-    assert(_selection != null);
 
     if (_readOnly || selection == null || !selection.isValid) {
       return;
@@ -1360,10 +1352,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // When the text is obscured, the whole thing is treated as one big line.
     if (obscureText) {
-      return _deleteToEnd(_selection!, cause);
+      return _deleteToEnd(text, selection, cause);
     }
 
-    String textAfter = _selection!.textAfter(text);
+    String textAfter = selection.textAfter(text);
     if (textAfter.isEmpty) {
       return;
     }
@@ -1374,7 +1366,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    final String textBefore = _selection!.textBefore(text);
+    final String textBefore = selection.textBefore(text);
     final TextSelection line = _getLineAtOffset(TextPosition(offset: textBefore.length));
     textAfter = textAfter.substring(line.end - textBefore.length, textAfter.length);
 
