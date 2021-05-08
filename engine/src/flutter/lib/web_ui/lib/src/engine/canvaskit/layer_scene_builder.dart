@@ -98,7 +98,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  BackdropFilterEngineLayer? pushBackdropFilter(
+  BackdropFilterEngineLayer pushBackdropFilter(
     ui.ImageFilter filter, {
     ui.BlendMode blendMode = ui.BlendMode.srcOver,
     ui.EngineLayer? oldLayer,
@@ -110,7 +110,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ClipPathEngineLayer? pushClipPath(
+  ClipPathEngineLayer pushClipPath(
     ui.Path path, {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
@@ -119,7 +119,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ClipRRectEngineLayer? pushClipRRect(
+  ClipRRectEngineLayer pushClipRRect(
     ui.RRect rrect, {
     ui.Clip? clipBehavior,
     ui.EngineLayer? oldLayer,
@@ -128,7 +128,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ClipRectEngineLayer? pushClipRect(
+  ClipRectEngineLayer pushClipRect(
     ui.Rect rect, {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
@@ -137,7 +137,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ColorFilterEngineLayer? pushColorFilter(
+  ColorFilterEngineLayer pushColorFilter(
     ui.ColorFilter filter, {
     ui.ColorFilterEngineLayer? oldLayer,
   }) {
@@ -145,7 +145,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     return pushLayer<ColorFilterEngineLayer>(ColorFilterEngineLayer(filter));
   }
 
-  ImageFilterEngineLayer? pushImageFilter(
+  ImageFilterEngineLayer pushImageFilter(
     ui.ImageFilter filter, {
     ui.ImageFilterEngineLayer? oldLayer,
   }) {
@@ -202,7 +202,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  TransformEngineLayer? pushTransform(
+  TransformEngineLayer pushTransform(
     Float64List matrix4, {
     ui.EngineLayer? oldLayer,
   }) {
