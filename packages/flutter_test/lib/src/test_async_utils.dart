@@ -307,10 +307,10 @@ class TestAsyncUtils {
     do { // skip past frames that are from this class
       index += 1;
       assert(index < stack.length);
-      lineMatch = getClassPattern.matchAsPrefix(stack[index])!;
+      lineMatch = getClassPattern.matchAsPrefix(stack[index]);
       assert(lineMatch != null);
-      assert(lineMatch.groupCount == 1);
-    } while (lineMatch.group(1) == _className);
+      assert(lineMatch?.groupCount == 1);
+    } while (lineMatch?.group(1) == _className);
     // try to parse the stack to find the interesting frame
     if (index < stack.length) {
       final RegExp guardPattern = RegExp(r'^#[0-9]+ +(?:([^. ]+)\.)?([^. ]+)');

@@ -4861,7 +4861,7 @@ void main() {
       );
 
       expect(
-        selection!,
+        selection,
         equals(
           const TextSelection(
             baseOffset: 0,
@@ -4884,7 +4884,7 @@ void main() {
       );
 
       expect(
-        selection!,
+        selection,
         equals(
           const TextSelection(
             baseOffset: 0,
@@ -4912,7 +4912,7 @@ void main() {
       );
 
       expect(
-        selection!,
+        selection,
         equals(
           const TextSelection(
             baseOffset: 0,
@@ -4938,7 +4938,7 @@ void main() {
         platform: platform,
       );
       expect(
-        selection!,
+        selection,
         equals(
           const TextSelection(
             baseOffset: 0,
@@ -4959,7 +4959,7 @@ void main() {
         platform: platform,
       );
       expect(
-        selection!,
+        selection,
         equals(
           const TextSelection(
             baseOffset: 0,
@@ -7715,7 +7715,7 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
 
   @override
   NoImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return NoImplicitScrollPhysics(parent: buildParent(ancestor)!);
+    return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
 }
 

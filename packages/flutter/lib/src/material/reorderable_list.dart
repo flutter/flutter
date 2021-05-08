@@ -557,7 +557,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         if (widget.header != null)
           SliverPadding(
             padding: headerPadding,
-            sliver: SliverToBoxAdapter(child: widget.header!),
+            sliver: SliverToBoxAdapter(child: widget.header),
           ),
         SliverPadding(
           padding: listPadding,
