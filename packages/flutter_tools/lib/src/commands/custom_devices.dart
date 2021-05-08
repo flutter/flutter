@@ -68,7 +68,7 @@ class CustomDevicesCommand extends FlutterCommand {
   String get description {
     String configFileLine;
     if (configPath != null) {
-      configFileLine = 'Makes changes to the config file at $configPath-';
+      configFileLine = 'Makes changes to the config file at `$configPath`.';
     } else {
       configFileLine = 'The config file doesn\'t exist right now.';
     }
