@@ -126,7 +126,7 @@ abstract class CustomDevicesSubCommand extends FlutterCommand {
   /// on how to enable it.
   @protected
   bool checkFeatureEnabled() {
-    if (featureFlags.areCustomDevicesEnabled) {
+    if (!featureFlags.areCustomDevicesEnabled) {
       logger.printError(
         'Custom devices feature must be enabled. '
         'Enable using `flutter config --enable-custom-devices`.'
