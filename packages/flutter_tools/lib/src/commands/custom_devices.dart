@@ -508,7 +508,7 @@ instead of entering each individual command.
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (checkFeatureEnabled()) {
+    if (!checkFeatureEnabled()) {
       return FlutterCommandResult.fail();
     }
 
