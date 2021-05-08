@@ -65,8 +65,18 @@ class CustomDevicesCommand extends FlutterCommand {
   final String configPath;
 
   @override
-  String get description => '''
-List, reset, add and delete custom devices${configPath != null? ' from the config at "$configPath"' : ''}.
+  String get description {
+    String configFileLine;
+    if (configPath != null) {
+      configFileLine = 'Makes changes to the config file at $configPath-';
+    } else {
+      configFileLine = 'The config file doesn\'t exist right now.';
+    }
+
+    return '''
+List, reset, add and delete custom devices.
+
+$configFileLine
 
 This is just a collection of commonly used shorthands for things like adding
 ssh devices, resetting (with backup) and checking the config file. For advanced
@@ -75,6 +85,7 @@ editor that supports JSON schemas like VS Code.
 
 Requires the custom devices feature to be enabled. You can enable it using `flutter config --enable-custom-devices`.
 ''';
+  }
 
   @override
   String get name => 'custom-devices';
