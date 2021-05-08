@@ -1580,6 +1580,9 @@ FILE: ../../../flutter/shell/platform/windows/platform_handler_win32.h
 FILE: ../../../flutter/shell/platform/windows/platform_handler_winuwp.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler_winuwp.h
 FILE: ../../../flutter/shell/platform/windows/public/flutter_windows.h
+FILE: ../../../flutter/shell/platform/windows/registry.cc
+FILE: ../../../flutter/shell/platform/windows/registry.h
+FILE: ../../../flutter/shell/platform/windows/registry_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/string_conversion.cc
 FILE: ../../../flutter/shell/platform/windows/string_conversion.h
 FILE: ../../../flutter/shell/platform/windows/string_conversion_unittests.cc
