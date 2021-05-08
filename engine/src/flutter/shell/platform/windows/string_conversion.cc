@@ -8,7 +8,7 @@
 
 namespace flutter {
 
-std::string Utf8FromUtf16(const std::wstring& utf16_string) {
+std::string Utf8FromUtf16(const std::wstring_view utf16_string) {
   if (utf16_string.empty()) {
     return std::string();
   }
@@ -30,7 +30,7 @@ std::string Utf8FromUtf16(const std::wstring& utf16_string) {
   return utf8_string;
 }
 
-std::wstring Utf16FromUtf8(const std::string& utf8_string) {
+std::wstring Utf16FromUtf8(const std::string_view utf8_string) {
   if (utf8_string.empty()) {
     return std::wstring();
   }
