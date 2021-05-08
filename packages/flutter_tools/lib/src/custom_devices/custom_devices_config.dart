@@ -26,16 +26,12 @@ class CustomDevicesConfig {
     required Platform platform
   }) : _fileSystem = fileSystem,
        _logger = logger,
-       _config = Config(
+       _configLoader = (() => Config.managed(
          _kCustomDevicesConfigName,
          fileSystem: fileSystem,
          logger: logger,
          platform: platform,
-         deleteFileOnFormatException: false
-       )
-  {
-    ensureFileExists();
-  }
+       ));
 
   @visibleForTesting
   CustomDevicesConfig.test({
@@ -44,15 +40,12 @@ class CustomDevicesConfig {
     required Logger logger
   }) : _fileSystem = fileSystem,
        _logger = logger,
-       _config = Config.test(
+       _configLoader = (() => Config.test(
          name: _kCustomDevicesConfigName,
          directory: directory,
          logger: logger,
-         deleteFileOnFormatException: false
-       )
-  {
-    ensureFileExists();
-  }
+         managed: true
+       ));
 
   static const String _kCustomDevicesConfigName = 'custom_devices.json';
   static const String _kCustomDevicesConfigKey = 'custom-devices';
@@ -61,7 +54,25 @@ class CustomDevicesConfig {
 
   final FileSystem _fileSystem;
   final Logger _logger;
-  final Config _config;
+  final Config Function() _configLoader;
+
+  // When the custom devices feature is disabled, CustomDevicesConfig is
+  // constructed anyway. So loading the config in the constructor isn't a good
+  // idea. (The Config ctor logs any errors)
+  //
+  // I also didn't want to introduce a FeatureFlags argument to the constructor
+  // and conditionally load the config when the feature is enabled, because
+  // sometimes we need that Config object even when the feature is disabled.
+  // For example inside ensureFileExists, which is used when enabling
+  // the feature.
+  //
+  // Instead, users of this config should handle the feature flags. So for
+  // example don't get [devices] when the feature is disabled.
+  Config? __config;
+  Config get _config {
+    __config ??= _configLoader();
+    return __config!;
+  }
 
   String get _defaultSchema {
     final Uri uri = _fileSystem
@@ -91,27 +102,40 @@ class CustomDevicesConfig {
     }
   }
 
-  /// Get the list of [CustomDeviceConfig]s that are listed in the config file
-  /// including disabled ones.
-  ///
-  /// Throws a JsonRevivalException when the config could not be parsed. Doesn't
-  /// log any errors.
-  List<CustomDeviceConfig> get devices {
+  List<dynamic>? _getDevicesJsonValue() {
     final dynamic json = _config.getValue(_kCustomDevicesConfigKey);
 
     if (json == null) {
-      return <CustomDeviceConfig>[];
+      return null;
     } else if (json is! List) {
-      throw const JsonRevivalException('Could not load custom devices config. config[\'$_kCustomDevicesConfigKey\'] is not a JSON array.');
+      const String msg = 'Could not load custom devices config. config[\'$_kCustomDevicesConfigKey\'] is not a JSON array.';
+      _logger.printError(msg);
+      throw const JsonRevivalException(msg);
     }
 
-    final List<dynamic> typedList = json;
+    return json;
+  }
+
+  /// Get the list of [CustomDeviceConfig]s that are listed in the config file
+  /// including disabled ones.
+  ///
+  /// Throws an Exception when the config could not be loaded. Doesn't
+  /// log any errors.
+  List<CustomDeviceConfig> get devices {
+    final List<dynamic>? typedListNullable = _getDevicesJsonValue();
+    if (typedListNullable == null) {
+      return <CustomDeviceConfig>[];
+    }
+
+    final List<dynamic> typedList = typedListNullable;
     final List<CustomDeviceConfig> revived = <CustomDeviceConfig>[];
     for (final MapEntry<int, dynamic> entry in typedList.asMap().entries) {
       try {
         revived.add(CustomDeviceConfig.fromJson(entry.value));
       } on JsonRevivalException catch (e) {
-        throw JsonRevivalException('Could not load custom device from config index ${entry.key}: $e');
+        final String msg = 'Could not load custom device from config index ${entry.key}: $e';
+        _logger.printError(msg);
+        throw JsonRevivalException(msg);
       }
     }
 
@@ -126,16 +150,16 @@ class CustomDevicesConfig {
   List<CustomDeviceConfig> tryGetDevices() {
     try {
       return devices;
-    } on JsonRevivalException catch (e) {
-      _logger.printError(e.toString());
+    } on Exception catch (_) {
+      // any Exceptions are logged by [devices] already.
       return <CustomDeviceConfig>[];
     }
   }
 
   /// Set the list of [CustomDeviceConfig]s in the config file.
   ///
-  /// It should generally be avoided to call this often, since in many cases
-  /// this means data loss. If you want to add or remove a device from the config,
+  /// It should generally be avoided to call this often, since this could mean
+  /// data loss. If you want to add or remove a device from the config,
   /// consider using [add] or [remove]
   set devices(List<CustomDeviceConfig> configs) {
     _config.setValue(
@@ -144,20 +168,32 @@ class CustomDevicesConfig {
     );
   }
 
+  /// Add a custom device to the config file.
+  ///
+  /// Works even when some of the custom devices in the config file are not
+  /// valid.
   void add(CustomDeviceConfig config) {
-    devices = <CustomDeviceConfig>[
-      ...devices,
-      config
-    ];
+    _config.setValue(
+      _kCustomDevicesConfigKey,
+      <dynamic>[
+        ...?_getDevicesJsonValue(),
+        config.toJson()
+      ]
+    );
   }
 
+  /// Removes the first device with this device id from the config file.
+  ///
+  /// Returns true if the device was successfully removed, false if a device
+  /// with this id could not be found.
   bool remove(String deviceId) {
     final List<CustomDeviceConfig> modifiedDevices = devices;
 
-    // we use this instead of filtering
+    // we use this instead of filtering so we can detect if we actually removed
+    // anything.
     final CustomDeviceConfig? device = modifiedDevices
       .cast<CustomDeviceConfig?>()
-      .singleWhere((CustomDeviceConfig? d) => d!.id == deviceId,
+      .firstWhere((CustomDeviceConfig? d) => d!.id == deviceId,
       orElse: () => null
     );
 

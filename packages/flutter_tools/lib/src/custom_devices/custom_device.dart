@@ -815,7 +815,7 @@ class CustomDevices extends PollingDeviceDiscovery {
 
   CustomDevicesConfig get _customDevicesConfig => _config;
 
-  List<CustomDevice> get enabledCustomDevices {
+  List<CustomDevice> get _enabledCustomDevices {
     return _customDevicesConfig.devices
       .where((CustomDeviceConfig element) => !element.disabled)
       .map(
@@ -833,7 +833,7 @@ class CustomDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
 
-    final List<CustomDevice> devices = enabledCustomDevices;
+    final List<CustomDevice> devices = _enabledCustomDevices;
 
     // maps any custom device to whether its reachable or not.
     final Map<CustomDevice, bool> pingedDevices = Map<CustomDevice, bool>.fromIterables(

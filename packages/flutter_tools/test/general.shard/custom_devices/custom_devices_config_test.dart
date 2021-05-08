@@ -141,9 +141,9 @@ void main() {
     );
 
     final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-        fileSystem: fileSystem,
-        directory: directory,
-        logger: logger
+      fileSystem: fileSystem,
+      directory: directory,
+      logger: logger
     );
 
     expect(customDevicesConfig.devices, hasLength(0));
@@ -168,9 +168,9 @@ void main() {
     );
 
     final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
-        fileSystem: fileSystem,
-        directory: directory,
-        logger: logger
+      fileSystem: fileSystem,
+      directory: directory,
+      logger: logger
     );
 
     expect(customDevicesConfig.devices, hasLength(0));

@@ -18,6 +18,7 @@ import '../base/terminal.dart';
 import '../convert.dart';
 import '../custom_devices/custom_device_config.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../features.dart';
 import '../runner/flutter_command.dart';
 
 class CustomDevicesCommand extends FlutterCommand {
@@ -27,13 +28,21 @@ class CustomDevicesCommand extends FlutterCommand {
     @required Platform platform,
     @required FileSystem fileSystem,
     @required Logger logger,
-  }) {
+    @required FeatureFlags featureFlags
+  }) : configPath = customDevicesConfig?.configPath,
+       assert(terminal != null),
+       assert(platform != null),
+       assert(fileSystem != null),
+       assert(logger != null),
+       assert(featureFlags != null) {
     addSubcommand(CustomDevicesListCommand(
       customDevicesConfig: customDevicesConfig,
-      logger: logger
+      featureFlags: featureFlags,
+      logger: logger,
     ));
     addSubcommand(CustomDevicesResetCommand(
       customDevicesConfig: customDevicesConfig,
+      featureFlags: featureFlags,
       fileSystem: fileSystem,
       logger: logger,
     ));
@@ -41,53 +50,94 @@ class CustomDevicesCommand extends FlutterCommand {
       customDevicesConfig: customDevicesConfig,
       terminal: terminal,
       platform: platform,
+      featureFlags: featureFlags,
+      fileSystem: fileSystem,
       logger: logger,
     ));
     addSubcommand(CustomDevicesDeleteCommand(
       customDevicesConfig: customDevicesConfig,
+      featureFlags: featureFlags,
+      fileSystem: fileSystem,
       logger: logger,
     ));
   }
 
+  final String configPath;
+
   @override
-  String get description => 'List, check, add & delete custom devices.';
+  String get description => '''
+List, reset, add and delete custom devices${configPath != null? ' from the config at "$configPath"' : ''}.
+
+This is just a collection of commonly used shorthands for things like adding
+ssh devices, resetting (with backup) and checking the config file. For advanced
+configuration or more complete documentation, edit the config file with an
+editor that supports JSON schemas like VS Code.
+
+Requires the custom devices feature to be enabled. You can enable it using `flutter config --enable-custom-devices`.
+''';
 
   @override
   String get name => 'custom-devices';
 
   @override
-  Future<FlutterCommandResult> runCommand() {
-    throw UnimplementedError();
-  }
+  Future<FlutterCommandResult> runCommand() async => null;
 }
 
+/// This class is meant to provide some commonly used utility functions
+/// to the subcommands, like backing up the config file & checking if the
+/// feature is enabled.
 abstract class CustomDevicesSubCommand extends FlutterCommand {
-  String getConfigBackupPath(String configPath) => '$configPath.bak';
+  CustomDevicesSubCommand({
+    @required this.customDevicesConfig,
+    @required this.featureFlags,
+    @required this.fileSystem,
+    @required this.logger,
+  }) : assert(featureFlags != null),
+       assert(logger != null);
 
-  Future<void> backup(
-    String configPath, {
-    @required FileSystem fileSystem
-  }) async {
-    final File configFile = fileSystem.file(configPath);
-    final String configPathBackup = getConfigBackupPath(configPath);
-    final File configFileBackup = fileSystem.file(configPathBackup);
+  @protected final CustomDevicesConfig customDevicesConfig;
+  @protected final FeatureFlags featureFlags;
+  @protected final FileSystem fileSystem;
+  @protected final Logger logger;
 
-    if (await configFileBackup.exists()) {
-      await configFileBackup.delete();
+  /// The path to the (potentially non-existing) backup of the config file.
+  @protected
+  String get configBackupPath => '${customDevicesConfig.configPath}.bak';
+
+  /// Copies the current config file to [configBackupPath], overwriting it
+  /// if necessary.
+  @protected
+  Future<void> backup() async
+    => fileSystem.file(customDevicesConfig.configPath).copy(configBackupPath);
+
+  /// Checks if the custom devices feature is enabled and returns true/false
+  /// accordingly. Additionally, logs an error if it's not enabled with a hint
+  /// on how to enable it.
+  @protected
+  bool checkFeatureEnabled() {
+    if (featureFlags.areCustomDevicesEnabled) {
+      logger.printError(
+        'Custom devices feature must be enabled. '
+        'Enable using `flutter config --enable-custom-devices`.'
+      );
+      return false;
     }
-    await configFile.rename(configPathBackup);
+
+    return true;
   }
 }
 
 class CustomDevicesListCommand extends CustomDevicesSubCommand {
   CustomDevicesListCommand({
     @required CustomDevicesConfig customDevicesConfig,
+    @required FeatureFlags featureFlags,
     @required Logger logger,
-  }) : _customDevicesConfig = customDevicesConfig,
-        _logger = logger;
-
-  final CustomDevicesConfig _customDevicesConfig;
-  final Logger _logger;
+  }) : super(
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: null,
+         logger: logger
+       );
 
   @override
   String get description => '''
@@ -99,14 +149,23 @@ List the currently configured custom devices, both enabled and disabled, reachab
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<CustomDeviceConfig> devices = _customDevicesConfig.devices;
+    if (!checkFeatureEnabled()) {
+      return FlutterCommandResult.fail();
+    }
+
+    List<CustomDeviceConfig> devices;
+    try {
+      devices = customDevicesConfig.devices;
+    } on Exception catch (_) {
+      return FlutterCommandResult.fail();
+    }
 
     if (devices.isEmpty) {
-      _logger.printStatus('No valid custom devices found in "${_customDevicesConfig.configPath}"');
+      logger.printStatus('No custom devices found in "${customDevicesConfig.configPath}"');
     } else {
-      _logger.printStatus('List of custom devices in "${_customDevicesConfig.configPath}":');
+      logger.printStatus('List of custom devices in "${customDevicesConfig.configPath}":');
       for (final CustomDeviceConfig device in devices) {
-        _logger.printStatus('id: ${device.id}, label: ${device.label}, enabled: ${!device.disabled}', indent: 2, hangingIndent: 2);
+        logger.printStatus('id: ${device.id}, label: ${device.label}, enabled: ${!device.disabled}', indent: 2, hangingIndent: 2);
       }
     }
 
@@ -117,19 +176,19 @@ List the currently configured custom devices, both enabled and disabled, reachab
 class CustomDevicesResetCommand extends CustomDevicesSubCommand {
   CustomDevicesResetCommand({
     @required CustomDevicesConfig customDevicesConfig,
+    @required FeatureFlags featureFlags,
     @required FileSystem fileSystem,
     @required Logger logger,
-  }) : _customDevicesConfig = customDevicesConfig,
-        _fileSystem = fileSystem,
-        _logger = logger;
-
-  final CustomDevicesConfig _customDevicesConfig;
-  final FileSystem _fileSystem;
-  final Logger _logger;
+  }) : super(
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: fileSystem,
+         logger: logger
+       );
 
   @override
   String get description => '''
-Reset the custom devices config file to it's default.
+Reset the custom devices config file to its default.
 
 The current config file will be backed up. A `.bak` will be appended to the
 file name of the current config file. If a file already exists with that `.bak`
@@ -141,14 +200,14 @@ file name, it will be deleted.
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String configPath = _customDevicesConfig.configPath;
+    await backup();
 
-    await backup(configPath, fileSystem: _fileSystem);
-    _customDevicesConfig.ensureFileExists();
+    await fileSystem.file(customDevicesConfig.configPath).delete();
+    customDevicesConfig.ensureFileExists();
 
-    _logger.printStatus(
+    logger.printStatus(
       'Successfully resetted the custom devices config file and created a '
-      'backup at "${getConfigBackupPath(configPath)}".'
+      'backup at "$configBackupPath".'
     );
     return FlutterCommandResult.success();
   }
@@ -159,11 +218,17 @@ class CustomDevicesAddCommand extends CustomDevicesSubCommand {
     @required CustomDevicesConfig customDevicesConfig,
     @required Terminal terminal,
     @required Platform platform,
+    @required FeatureFlags featureFlags,
+    @required FileSystem fileSystem,
     @required Logger logger,
-  }) : _customDevicesConfig = customDevicesConfig,
-       _terminal = terminal,
+  }) : _terminal = terminal,
        _platform = platform,
-       _logger = logger
+       super(
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: fileSystem,
+         logger: logger
+       )
   {
     argParser.addFlag(
         _kCheck,
@@ -210,10 +275,8 @@ Defaults to on.
   static const String _kCheck = 'check';
   static const String _kSsh = 'ssh';
 
-  final CustomDevicesConfig _customDevicesConfig;
   final Terminal _terminal;
   final Platform _platform;
-  final Logger _logger;
   StreamQueue<String> inputs;
 
   @override
@@ -236,7 +299,7 @@ Defaults to on.
     try {
       json = jsonDecode(jsonStr);
     } on FormatException catch (e) {
-      _logger.printError('Could not decode json: $e');
+      logger.printError('Could not decode json: $e');
       return FlutterCommandResult.fail();
     }
 
@@ -244,7 +307,7 @@ Defaults to on.
     try {
       config = CustomDeviceConfig.fromJson(json);
     } on JsonRevivalException catch (e) {
-      _logger.printError('Invalid custom device config: $e');
+      logger.printError('Invalid custom device config: $e');
       return FlutterCommandResult.fail();
     }
 
@@ -252,18 +315,14 @@ Defaults to on.
       return FlutterCommandResult.fail();
     }
 
-    _customDevicesConfig.devices = <CustomDeviceConfig>[
-      ..._customDevicesConfig.devices,
-      config
-    ];
-
+    customDevicesConfig.add(config);
     printSuccessfullyAdded();
 
     return FlutterCommandResult.success();
   }
 
   void printSuccessfullyAdded() {
-    _logger.printStatus('Successfully added custom device to config file at "${_customDevicesConfig.configPath}".');
+    logger.printStatus('Successfully added custom device to config file at "${customDevicesConfig.configPath}".');
   }
 
   Future<String> askForString(
@@ -286,12 +345,12 @@ Defaults to on.
 
     msg += ':';
 
-    _logger.printStatus(msg);
+    logger.printStatus(msg);
     while (true) {
       final String input = await inputs.next;
 
       if (validator != null && !await validator(input)) {
-        _logger.printStatus('Invalid $name. $name:');
+        logger.printStatus('Invalid $name. $name:');
       } else {
         return input;
       }
@@ -311,7 +370,7 @@ Defaults to on.
     }
 
     while (true) {
-      _logger.printStatus(msg);
+      logger.printStatus(msg);
       final String input = await inputs.next;
 
       if (input.isEmpty) {
@@ -321,7 +380,7 @@ Defaults to on.
       } else if (input.toLowerCase() == 'n') {
         return false;
       } else {
-        _logger.printStatus('Invalid $name. Expected is either y or n.');
+        logger.printStatus('Invalid $name. Expected is either y or n.');
       }
     }
   }
@@ -342,22 +401,6 @@ Defaults to on.
     // listen to the keystrokes stream as late as possible, since it's a
     // single-subscription stream apparently
     inputs = StreamQueue<String>(_terminal.keystrokes.map((String s) => s.trim()));
-
-    /*
-    final String id;
-    final String label;
-    final String sdkNameAndVersion;
-    final bool disabled;
-    final List<String> pingCommand;
-    final RegExp? pingSuccessRegex;
-    final List<String>? postBuildCommand;
-    final List<String> installCommand;
-    final List<String> uninstallCommand;
-    final List<String> runDebugCommand;
-    final List<String>? forwardPortCommand;
-    final RegExp? forwardPortSuccessRegex;
-    final List<String>? screenshotCommand;
-    */
 
     final String id = await askForString(
       'id',
@@ -442,17 +485,23 @@ Defaults to on.
       return FlutterCommandResult.fail();
     }
 
-    _customDevicesConfig.add(config);
+    customDevicesConfig.add(config);
     printSuccessfullyAdded();
     return FlutterCommandResult.success();
   }
 
   Future<FlutterCommandResult> runInteractively() async {
+    // ignore: flutter_style_todos
+    /// TODO: Implement
     return FlutterCommandResult.fail();
   }
 
   @override
-  Future<FlutterCommandResult> runCommand() {
+  Future<FlutterCommandResult> runCommand() async {
+    if (checkFeatureEnabled()) {
+      return FlutterCommandResult.fail();
+    }
+
     if (stringArg(_kJson) != null) {
       return runNonInteractively();
     } else if (boolArg(_kSsh) == true) {
@@ -466,9 +515,15 @@ Defaults to on.
 class CustomDevicesDeleteCommand extends CustomDevicesSubCommand {
   CustomDevicesDeleteCommand({
     @required CustomDevicesConfig customDevicesConfig,
+    @required FeatureFlags featureFlags,
+    @required FileSystem fileSystem,
     @required Logger logger,
-  }) : _customDevicesConfig = customDevicesConfig,
-        _logger = logger
+  }) : super(
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: fileSystem,
+         logger: logger
+       )
   {
     argParser.addOption(
       'id',
@@ -479,23 +534,28 @@ class CustomDevicesDeleteCommand extends CustomDevicesSubCommand {
     );
   }
 
-  final CustomDevicesConfig _customDevicesConfig;
-  final Logger _logger;
-
   @override
-  String get description => 'Delete a device from the custom devices config file.';
+  String get description => '''
+Delete a device from the custom devices config file.
+''';
 
   @override
   String get name => 'delete';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String id = stringArg('id');
-    if (!_customDevicesConfig.remove(id)) {
-      _logger.printError('Couldn\'t find device with id "$id" in device config at "${_customDevicesConfig.configPath}"');
-    } else {
-      _logger.printStatus('Successfully removed device with id "$id" from device config at "${_customDevicesConfig.configPath}"');
+    if (!checkFeatureEnabled()) {
+      return FlutterCommandResult.fail();
     }
+
+    final String id = stringArg('id');
+    await backup();
+    if (!customDevicesConfig.remove(id)) {
+      logger.printError('Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"');
+    } else {
+      logger.printStatus('Successfully removed device with id "$id" from config at "${customDevicesConfig.configPath}"');
+    }
+
     return FlutterCommandResult.success();
   }
 }

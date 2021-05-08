@@ -154,6 +154,7 @@ List<FlutterCommand> generateCommands({
     customDevicesConfig: globals.customDevicesConfig,
     terminal: globals.terminal,
     platform: globals.platform,
+    featureFlags: featureFlags,
     fileSystem: globals.fs,
     logger: globals.logger
   ),
