@@ -199,11 +199,10 @@ class CustomDevicesResetCommand extends CustomDevicesSubCommand {
 
   @override
   String get description => '''
-Reset the custom devices config file to its default.
+Reset the config file to the default.
 
-The current config file will be backed up. A `.bak` will be appended to the
-file name of the current config file. If a file already exists with that `.bak`
-file name, it will be deleted.
+The current config file will be backed up to the same path, but with a `.bak` appended.
+If a file already exists at the backup location, it will be overwritten.
 ''';
 
   @override
@@ -247,6 +246,7 @@ class CustomDevicesAddCommand extends CustomDevicesSubCommand {
 Make sure the config actually works. This will execute some of the commands in
 the config (if necessary with dummy arguments). This flag is enabled by default
 when `--json` is not specified. If `--json` is given, it is disabled by default.
+
 ''',
         defaultsTo: null
     );
@@ -261,6 +261,7 @@ script, or use it non-interactively for some other reason.
 
 By default, this won't check whether the passed in config actually works (only
 if it is valid). To make sure the config works use the `--check` option.
+
 ''',
       valueHelp: 'JSON config',
       aliases: _kJsonAliases
@@ -273,8 +274,6 @@ Add a ssh-device. This will automatically fill out some of the config options
 for you with good defaults, and in other cases save you some typing. So you'll
 only need to enter some things like hostname and username of the remote device
 instead of entering each individual command.
-
-Defaults to on.
 ''',
       defaultsTo: true,
       negatable: false
@@ -547,7 +546,7 @@ class CustomDevicesDeleteCommand extends CustomDevicesSubCommand {
 
   @override
   String get description => '''
-Delete a device from the custom devices config file.
+Delete a device from the config file.
 ''';
 
   @override
