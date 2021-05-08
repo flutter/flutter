@@ -2332,8 +2332,8 @@ abstract class BuildContext {
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to build an off-screen widget tree used to measure
-/// the size of the rendered tree. For some use cases, the simpler [Offstage]
-/// widget may be a better alternative to this approach.
+/// the layout size of the rendered tree. For some use cases, the simpler
+/// [Offstage] widget may be a better alternative to this approach.
 ///
 /// ```dart imports
 /// import 'package:flutter/rendering.dart';
@@ -6304,7 +6304,6 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
     _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);
     _forgottenChildren.clear();
   }

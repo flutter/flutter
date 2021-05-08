@@ -512,9 +512,11 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
+        '  SizedBox-[GlobalKey#00000 problematic]\n'
+        '  Placeholder-[GlobalKey#00000 problematic]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -539,9 +541,11 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
+        '  Container-[GlobalKey#00000 problematic]\n'
+        '  Placeholder-[GlobalKey#00000 problematic]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
