@@ -11,11 +11,11 @@ namespace flutter {
 
 // Converts a string from UTF-16 to UTF-8. Returns an empty string if the
 // input is not valid UTF-16.
-std::string Utf8FromUtf16(const std::wstring& utf16_string);
+std::string Utf8FromUtf16(const std::wstring_view utf16_string);
 
 // Converts a string from UTF-8 to UTF-16. Returns an empty string if the
 // input is not valid UTF-8.
-std::wstring Utf16FromUtf8(const std::string& utf8_string);
+std::wstring Utf16FromUtf8(const std::string_view utf8_string);
 
 }  // namespace flutter
 
