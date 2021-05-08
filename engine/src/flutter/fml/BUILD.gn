@@ -15,8 +15,6 @@ source_set("fml") {
     "base32.h",
     "build_config.h",
     "closure.h",
-    "command_line.cc",
-    "command_line.h",
     "compiler_specific.h",
     "concurrent_message_loop.cc",
     "concurrent_message_loop.h",
@@ -96,7 +94,7 @@ source_set("fml") {
     sources += [ "backtrace_stub.cc" ]
   }
 
-  public_deps = []
+  public_deps = [ ":command_line" ]
 
   deps = [
     "//third_party/dart/runtime:dart_api",
@@ -222,6 +220,18 @@ source_set("fml") {
       "platform/posix/posix_wrappers_posix.cc",
     ]
   }
+}
+
+source_set("command_line") {
+  sources = [
+    "command_line.cc",
+    "command_line.h",
+  ]
+
+  public_configs = [
+    "//flutter:config",
+    "//flutter/common:flutter_config",
+  ]
 }
 
 if (enable_unittests) {
