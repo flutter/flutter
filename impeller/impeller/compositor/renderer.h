@@ -4,8 +4,11 @@
 
 #pragma once
 
-#include "context.h"
+#include <memory>
+
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/context.h"
+#include "impeller/compositor/surface.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
@@ -23,7 +26,8 @@ class Renderer {
   bool Render();
 
  private:
-  Context context_;
+  std::shared_ptr<Context> context_;
+  std::unique_ptr<Surface> surface_;
   Size size_;
   bool is_valid_ = false;
 

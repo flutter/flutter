@@ -32,4 +32,12 @@ bool Context::IsValid() const {
   return is_valid_;
 }
 
+id<MTLCommandQueue> Context::GetRenderQueue() const {
+  return render_queue_;
+}
+
+id<MTLCommandQueue> Context::GetTransferQueue() const {
+  return transfer_queue_;
+}
+
 }  // namespace impeller

@@ -18,11 +18,14 @@ class Context {
 
   bool IsValid() const;
 
+  id<MTLCommandQueue> GetRenderQueue() const;
+
+  id<MTLCommandQueue> GetTransferQueue() const;
+
  private:
   id<MTLDevice> device_;
   id<MTLCommandQueue> render_queue_;
   id<MTLCommandQueue> transfer_queue_;
-
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Context);
