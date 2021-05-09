@@ -218,7 +218,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// Computes the distance pointer has to travel to be accepted.
   ///
-  /// The [pointerDeviceKind] can be used to specify different values dependent on
+  /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
   /// what kind of pointer is currently being checked.
   ///
   /// If none specified, [getGlobalDistanceToAccept] will be used.
@@ -251,7 +251,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// The distance pointer has to travel to be accepted.
   ///
-  /// The [pointerDeviceKind] can be used to specify different values dependent on
+  /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
   /// what kind of pointer is currently being checked.
   double getGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
 
