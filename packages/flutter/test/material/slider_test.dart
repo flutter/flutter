@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -946,6 +947,65 @@ void main() {
 
     expect(startFired, equals(1));
     expect(endFired, equals(1));
+  });
+
+  testWidgets('Slider has proper slops', (WidgetTester tester) async {
+    double value = 0.5;
+    late VoidCallback updateSlider;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: GestureDetector(
+                onHorizontalDragUpdate: (_) { },
+                child: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    updateSlider = () => setState(() { });
+                    return Slider(
+                      value: value,
+                      onChanged: (double newValue) {
+                        value = newValue;
+                      },
+                    );
+                  }
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test when slider drag is active
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture touchGesture = await tester.startGesture(center);
+
+    /// Wait before start fires
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await touchGesture.moveBy(const Offset(Slider.activeDragSlop + 1.0, 0.0));
+    expect(value, equals(0.5));
+
+    await touchGesture.moveBy(const Offset(1.0, 0.0));
+    expect(value, greaterThan(0.5));
+
+    await touchGesture.up();
+    value = 0.0;
+    updateSlider();
+
+    // Test when slider drag is not yet active
+
+    final TestGesture touchGestureNotActive = await tester.startGesture(center);
+
+    await touchGestureNotActive.moveBy(const Offset(kTouchSlop, 0.0));
+    expect(value, equals(0.0));
+
+    await touchGestureNotActive.moveBy(const Offset(1.0, 0.0));
+    expect(value, greaterThan(0.5));
   });
 
   testWidgets('Slider sizing', (WidgetTester tester) async {

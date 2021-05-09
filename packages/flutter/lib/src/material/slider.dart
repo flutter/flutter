@@ -434,7 +434,12 @@ class Slider extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  final _SliderType _sliderType ;
+  /// The distance pointer has to travel in global coordinate system after
+  /// drag was confirmed to be active, for framework to be confident that user wants to drag the slider.
+  @visibleForTesting
+  static const double activeDragSlop = 6.0;
+
+  final _SliderType _sliderType;
 
   @override
   _SliderState createState() => _SliderState();
@@ -899,7 +904,20 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _endInteraction;
+      ..onCancel = _endInteraction
+      ..computeSlop = (PointerDeviceKind kind) {
+        switch (kind) {
+          case PointerDeviceKind.mouse:
+            return kPrecisePointerHitSlop;
+          case PointerDeviceKind.stylus:
+          case PointerDeviceKind.invertedStylus:
+          case PointerDeviceKind.unknown:
+          case PointerDeviceKind.touch:
+            if (_active)
+              return Slider.activeDragSlop;
+            return kTouchSlop;
+        }
+      };
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
@@ -1251,7 +1269,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    if (_active && _state.mounted) {
+    if (_active) {
       onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
