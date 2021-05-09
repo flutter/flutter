@@ -90,16 +90,21 @@ abstract class MultiDragPointerState {
     } else {
       assert(pendingDelta != null);
       final Offset movedLocally = _getDeltaForDetails(event.localDelta);
-      final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
-      final Offset movedGlobaly = PointerEvent.transformDeltaViaPositions(
-        transform: localToGlobalTransform,
-        untransformedDelta: movedLocally,
-        untransformedEndPosition: event.localPosition,
-      );
-      _pendingDelta = _pendingDelta! + Offset(
-        movedGlobaly.dx.abs(),
-        movedGlobaly.dy.abs(),
-      ) * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
+      final double? primaryValue = _getPrimaryValueFromOffset(movedLocally);
+      if (primaryValue != null) {
+        final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+        final Offset movedGlobaly = PointerEvent.transformDeltaViaPositions(
+          transform: localToGlobalTransform,
+          untransformedDelta: movedLocally,
+          untransformedEndPosition: event.localPosition,
+        );
+        _pendingDelta = _pendingDelta! + Offset(
+          movedGlobaly.dx.abs(),
+          movedGlobaly.dy.abs(),
+        ) * primaryValue.sign;
+      } else {
+        _pendingDelta = _pendingDelta! + event.delta;
+      }
       _lastPendingEventTimestamp = event.timeStamp;
       checkForResolutionAfterMove();
     }
