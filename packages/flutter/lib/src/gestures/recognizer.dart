@@ -61,12 +61,21 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// The argument is optional and is only used for debug purposes (e.g. in the
   /// [toString] serialization).
   ///
-  /// {@template flutter.gestures.GestureRecognizer.kind}
-  /// It's possible to limit this recognizer to a specific [PointerDeviceKind]
-  /// by providing the optional [kind] argument. If [kind] is null,
+  /// {@template flutter.gestures.GestureRecognizer.supportedDevices}
+  /// It's possible to limit this recognizer to a specific set of [PointerDeviceKind]s
+  /// by providing the optional [supportedDevices] argument. If [supportedDevices] is null,
   /// the recognizer will accept pointer events from all device kinds.
   /// {@endtemplate}
-  GestureRecognizer({ this.debugOwner, PointerDeviceKind? kind }) : _kindFilter = kind;
+  GestureRecognizer({
+    this.debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
+    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : assert(kind == null || supportedDevices == null),
+       _supportedDevices = kind == null ? supportedDevices : <PointerDeviceKind>{ kind };
 
   /// The recognizer's owner.
   ///
@@ -74,9 +83,11 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// this gesture recognizer was created, to aid in debugging.
   final Object? debugOwner;
 
-  /// The kind of device that's allowed to be recognized. If null, events from
-  /// all device kinds will be tracked and recognized.
-  final PointerDeviceKind? _kindFilter;
+  /// The kind of devices that are allowed to be recognized as provided by
+  /// `supportedDevices` in the constructor, or the currently deprecated `kind`.
+  /// These cannot both be set. If both are null, events from all device kinds will be
+  /// tracked and recognized.
+  final Set<PointerDeviceKind>? _supportedDevices;
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
@@ -130,7 +141,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   bool isPointerAllowed(PointerDownEvent event) {
     // Currently, it only checks for device kind. But in the future we could check
     // for other things e.g. mouse button.
-    return _kindFilter == null || _kindFilter == event.kind;
+    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
   }
 
   /// For a given pointer ID, returns the device kind associated with it.
@@ -220,11 +231,20 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// Initialize the object.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   OneSequenceGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = HashSet<int>();
@@ -393,13 +413,18 @@ enum GestureRecognizerState {
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   PrimaryPointerGestureRecognizer({
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -408,7 +433,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
        ),
-       super(debugOwner: debugOwner, kind: kind);
+       super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.

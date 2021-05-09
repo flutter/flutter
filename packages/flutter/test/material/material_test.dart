@@ -64,6 +64,20 @@ class ElevationColor {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/81504
+  testWidgets('MaterialApp.home nullable and update test', (WidgetTester tester) async {
+    // _WidgetsAppState._usesNavigator == true
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+
+    // _WidgetsAppState._usesNavigator == false
+    await tester.pumpWidget(const MaterialApp()); // Do not crash!
+
+    // _WidgetsAppState._usesNavigator == true
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink())); // Do not crash!
+
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('default Material debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material().debugFillProperties(builder);

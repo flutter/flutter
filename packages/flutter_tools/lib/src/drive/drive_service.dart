@@ -220,7 +220,7 @@ class FlutterDriverService extends DriverService {
         // This can be ignored to continue to use the existing remote DDS instance.
       }
     }
-    _vmService = await _vmServiceConnector(uri, device: _device);
+    _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 

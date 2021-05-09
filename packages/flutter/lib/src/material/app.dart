@@ -815,7 +815,7 @@ class _MaterialAppState extends State<MaterialApp> {
                 return widget.builder!(context, child);
               },
             )
-          : child!,
+          : child ?? const SizedBox.shrink(),
       ),
     );
   }

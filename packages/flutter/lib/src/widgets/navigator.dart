@@ -3629,15 +3629,34 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   @override
+  void deactivate() {
+    for (final NavigatorObserver observer in _effectiveObservers)
+      observer._navigator = null;
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    for (final NavigatorObserver observer in _effectiveObservers) {
+      assert(observer.navigator == null);
+      observer._navigator = this;
+    }
+  }
+
+  @override
   void dispose() {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
       return true;
     }());
+    assert(() {
+      for (final NavigatorObserver observer in _effectiveObservers)
+        assert(observer._navigator != this);
+      return true;
+    }());
     _updateHeroController(null);
-    for (final NavigatorObserver observer in _effectiveObservers)
-      observer._navigator = null;
     focusScopeNode.dispose();
     for (final _RouteEntry entry in _history)
       entry.dispose();
