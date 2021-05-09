@@ -33,11 +33,11 @@ typedef GestureDragEndCallback = void Function(DragEndDetails details);
 /// Used by [DragGestureRecognizer.onCancel].
 typedef GestureDragCancelCallback = void Function();
 
-/// Signature for a function that computes the distance pointer has
-/// to travel to be accepted.
+/// Signature for a function that computes the distance pointer has to travel
+/// in global coordinate system for framework to be confident that this is a drag gesture.
 ///
-/// Used by [DragGestureRecognizer.computeGlobalDistanceToAccept].
-typedef GestureComputeGlobalDistanceToAcceptCallback = double Function(PointerDeviceKind event);
+/// Used by [DragGestureRecognizer.computeSlop].
+typedef GestureComputeSlopCallback = double Function(PointerDeviceKind event);
 
 /// Signature for a function that builds a [VelocityTracker].
 ///
@@ -216,13 +216,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
-  /// Computes the distance pointer has to travel to be accepted.
+  /// Computes the distance pointer has to travel in global coordinate system for framework to be confident
+  /// that this is a drag gesture. This value will be ignored when reconginzer is a single
+  /// member of gesture arena.
   ///
   /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
   /// what kind of pointer is currently being checked.
   ///
-  /// If none specified, [getGlobalDistanceToAccept] will be used.
-  GestureComputeGlobalDistanceToAcceptCallback? computeGlobalDistanceToAccept;
+  /// If none specified, [getSlop] will be used.
+  GestureComputeSlopCallback? computeSlop;
 
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
@@ -249,11 +251,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
 
-  /// The distance pointer has to travel to be accepted.
+  /// The distance pointer has to travel in global coordinate system for framework to be confident
+  /// that this is a drag gesture. This value will be ignored when reconginzer is a single
+  /// member of gesture arena.
   ///
   /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
   /// what kind of pointer is currently being checked.
-  double getGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
+  double getSlop(PointerDeviceKind pointerDeviceKind);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
@@ -333,7 +337,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-        final double distanceToAccept = computeGlobalDistanceToAccept?.call(event.kind) ?? getGlobalDistanceToAccept(event.kind);
+        final double distanceToAccept = computeSlop?.call(event.kind) ?? getSlop(event.kind);
         if (_globalDistanceMoved.abs() > distanceToAccept)
           resolve(GestureDisposition.accepted);
       }
@@ -563,7 +567,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  double getGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+  double getSlop(PointerDeviceKind pointerDeviceKind) {
     return computeHitSlop(pointerDeviceKind);
   }
 
@@ -613,7 +617,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  double getGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+  double getSlop(PointerDeviceKind pointerDeviceKind) {
     return computeHitSlop(pointerDeviceKind);
   }
 
@@ -649,7 +653,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  double getGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+  double getSlop(PointerDeviceKind pointerDeviceKind) {
     return computePanSlop(pointerDeviceKind);
   }
 

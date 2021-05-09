@@ -49,10 +49,10 @@ void main() {
     GestureBinding.instance!.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
-  testGesture('DragGestureRecognizer slops (getGlobalDistanceToAccept and computeGlobalDistanceToAccept)', (GestureTester tester) async {
+  testGesture('DragGestureRecognizer slops (computeSlop and default getSlop)', (GestureTester tester) async {
     final VerticalDragGestureRecognizer vert1 = VerticalDragGestureRecognizer();
     final VerticalDragGestureRecognizer vert2 = VerticalDragGestureRecognizer()
-      ..computeGlobalDistanceToAccept = (PointerDeviceKind kind) => 0.0;
+      ..computeSlop = (PointerDeviceKind kind) => 0.0;
 
     double? delta1;
     vert1.onUpdate = (DragUpdateDetails details) {
