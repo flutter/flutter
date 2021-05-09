@@ -49,6 +49,40 @@ void main() {
     GestureBinding.instance!.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
+  testGesture('DragGestureRecognizer slops (getGlobalDistanceToAccept and computeGlobalDistanceToAccept)', (GestureTester tester) async {
+    final VerticalDragGestureRecognizer vert1 = VerticalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer vert2 = VerticalDragGestureRecognizer()
+      ..computeGlobalDistanceToAccept = (PointerDeviceKind kind) => 0.0;
+
+    double? delta1;
+    vert1.onUpdate = (DragUpdateDetails details) {
+      delta1 = details.primaryDelta;
+    };
+
+    double? delta2;
+    vert2.onUpdate = (DragUpdateDetails details) {
+      delta2 = details.primaryDelta;
+    };
+
+    final TestPointer pointer = TestPointer();
+
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+
+    vert1.addPointer(down);
+    vert2.addPointer(down);
+
+    GestureBinding.instance!.gestureArena.close(pointer.pointer);
+
+    // Move by 1 pixel
+    final PointerMoveEvent move = pointer.move(const Offset(10.0, 11.0));
+
+    tester.route(move);
+    tester.route(move);
+
+    expect(delta1, isNull);
+    expect(delta2, isNotNull);
+  });
+
   testWidgets('VerticalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     expect(
       () {
