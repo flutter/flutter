@@ -33,6 +33,12 @@ typedef GestureDragEndCallback = void Function(DragEndDetails details);
 /// Used by [DragGestureRecognizer.onCancel].
 typedef GestureDragCancelCallback = void Function();
 
+/// Signature for a function that computes the distance pointer has to travel
+/// in global coordinate system for framework to be confident that this is a drag gesture.
+///
+/// Used by [DragGestureRecognizer.computeSlop].
+typedef GestureComputeSlopCallback = double Function(PointerDeviceKind event);
+
 /// Signature for a function that builds a [VelocityTracker].
 ///
 /// Used by [DragGestureRecognizer.velocityTrackerBuilder].
@@ -82,6 +88,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
        );
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
+
   /// Configure the behavior of offsets sent to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
@@ -209,6 +216,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
+  /// Computes the distance pointer has to travel in global coordinate system for framework to be confident
+  /// that this is a drag gesture. This value will be ignored when reconginzer is a single
+  /// member of gesture arena.
+  ///
+  /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
+  /// what kind of pointer is currently being checked.
+  ///
+  /// If none specified, [getSlop] will be used.
+  GestureComputeSlopCallback? computeSlop;
+
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -233,7 +250,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
+
+  /// The distance pointer has to travel in global coordinate system for framework to be confident
+  /// that this is a drag gesture. This value will be ignored when reconginzer is a single
+  /// member of gesture arena.
+  ///
+  /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
+  /// what kind of pointer is currently being checked.
+  double getSlop(PointerDeviceKind pointerDeviceKind);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
@@ -291,7 +315,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (event is PointerMoveEvent) {
       if (event.buttons != _initialButtons) {
-        _giveUpPointer(event.pointer);
+        stopTrackingPointer(event.pointer);
         return;
       }
       if (_state == _DragState.accepted) {
@@ -313,13 +337,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-        if (_hasSufficientGlobalDistanceToAccept(event.kind))
+        final double distanceToAccept = computeSlop?.call(event.kind) ?? getSlop(event.kind);
+        if (_globalDistanceMoved.abs() > distanceToAccept)
           resolve(GestureDisposition.accepted);
       }
     }
-    if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _giveUpPointer(event.pointer);
-    }
+    stopTrackingIfPointerNoLongerDown(event);
   }
 
   final Set<int> _acceptedActivePointers = <int>{};
@@ -370,7 +393,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    _giveUpPointer(pointer);
+    stopTrackingPointer(pointer);
+  }
+
+  @override
+  void stopTrackingPointer(int pointer) {
+    super.stopTrackingPointer(pointer);
+    // If we never accepted the pointer, we reject it since we are no longer
+    // interested in winning the gesture arena for it.
+    if (!_acceptedActivePointers.remove(pointer))
+      resolvePointer(pointer, GestureDisposition.rejected);
   }
 
   @override
@@ -392,14 +424,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _velocityTrackers.clear();
     _initialButtons = null;
     _state = _DragState.ready;
-  }
-
-  void _giveUpPointer(int pointer) {
-    stopTrackingPointer(pointer);
-    // If we never accepted the pointer, we reject it since we are no longer
-    // interested in winning the gesture arena for it.
-    if (!_acceptedActivePointers.remove(pointer))
-      resolvePointer(pointer, GestureDisposition.rejected);
   }
 
   void _checkDown() {
@@ -455,7 +479,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(tracker != null);
 
     final DragEndDetails details;
-    final String Function() debugReport;
+    String Function()? debugReport;
 
     final VelocityEstimate? estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate, tracker.kind)) {
@@ -465,19 +489,25 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         velocity: velocity,
         primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
       );
-      debugReport = () {
-        return '$estimate; fling at $velocity.';
-      };
+      assert(() {
+        debugReport = () {
+          return '$estimate; fling at $velocity.';
+        };
+        return true;
+      }());
     } else {
       details = DragEndDetails(
         velocity: Velocity.zero,
         primaryVelocity: 0.0,
       );
-      debugReport = () {
-        if (estimate == null)
-          return 'Could not estimate velocity.';
-        return '$estimate; judged to not be a fling.';
-      };
+      assert(() {
+        debugReport = () {
+          if (estimate == null)
+            return 'Could not estimate velocity.';
+          return '$estimate; judged to not be a fling.';
+        };
+        return true;
+      }());
     }
     invokeCallback<void>('onEnd', () => onEnd!(details), debugReport: debugReport);
   }
@@ -493,6 +523,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _velocityTrackers.clear();
     super.dispose();
   }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -536,8 +567,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+  double getSlop(PointerDeviceKind pointerDeviceKind) {
+    return computeHitSlop(pointerDeviceKind);
   }
 
   @override
@@ -586,8 +617,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+  double getSlop(PointerDeviceKind pointerDeviceKind) {
+    return computeHitSlop(pointerDeviceKind);
   }
 
   @override
@@ -622,8 +653,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind);
+  double getSlop(PointerDeviceKind pointerDeviceKind) {
+    return computePanSlop(pointerDeviceKind);
   }
 
   @override
