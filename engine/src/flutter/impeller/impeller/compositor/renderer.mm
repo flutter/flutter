@@ -2,14 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "renderer.h"
+#include "impeller/compositor/renderer.h"
 
 #include "flutter/fml/logging.h"
 
 namespace impeller {
 
-Renderer::Renderer() {
-  if (!context_.IsValid()) {
+Renderer::Renderer()
+    : context_(std::make_shared<Context>()),
+      surface_(std::make_unique<Surface>(context_)) {
+  if (!context_->IsValid()) {
+    return;
+  }
+
+  if (!surface_->IsValid()) {
     return;
   }
 
@@ -40,7 +46,7 @@ bool Renderer::Render() {
     return false;
   }
 
-  return true;
+  return surface_->Render();
 }
 
 }  // namespace impeller

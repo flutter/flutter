@@ -30,8 +30,8 @@ source_set("impeller") {
     "compositor/renderer.mm",
     "compositor/shader_library.h",
     "compositor/shader_library.mm",
-    "compositor/surface.cc",
     "compositor/surface.h",
+    "compositor/surface.mm",
   ]
 
   geometry_sources = [
