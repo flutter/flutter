@@ -448,7 +448,7 @@
       "name": "Linux validate_ci_config",
       "repo": "flutter",
       "task_name": "linux_validate_ci_config",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux web_tool_tests",
