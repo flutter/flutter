@@ -24,6 +24,10 @@ source_set("impeller") {
   compositor_sources = [
     "compositor/context.h",
     "compositor/context.mm",
+    "compositor/pipeline_builder.h",
+    "compositor/pipeline_builder.mm",
+    "compositor/pipeline_descriptor.h",
+    "compositor/pipeline_descriptor.mm",
     "compositor/pipeline_library.h",
     "compositor/pipeline_library.mm",
     "compositor/renderer.h",
