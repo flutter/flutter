@@ -245,7 +245,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// provider of the callback to respond by carrying the gesture forward with
   /// inertia, for example.
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind);
-  
+
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
 
