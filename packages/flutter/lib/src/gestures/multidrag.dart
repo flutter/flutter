@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
 import 'binding.dart';
@@ -32,7 +33,7 @@ abstract class MultiDragPointerState {
       _velocityTracker = VelocityTracker.withKind(kind);
 
   /// The global coordinates of the pointer when the pointer contacted the screen.
-  final Offset initialPosition;
+  final OffsetPair initialPosition;
 
   final VelocityTracker _velocityTracker;
 
@@ -54,6 +55,9 @@ abstract class MultiDragPointerState {
 
   Duration? _lastPendingEventTimestamp;
 
+  Offset _getDeltaForDetails(Offset delta);
+  double? _getPrimaryValueFromOffset(Offset value);
+
   GestureArenaEntry? _arenaEntry;
   void _setArenaEntry(GestureArenaEntry entry) {
     assert(_arenaEntry == null);
@@ -72,18 +76,30 @@ abstract class MultiDragPointerState {
   void _move(PointerMoveEvent event) {
     assert(_arenaEntry != null);
     if (!event.synthesized)
-      _velocityTracker.addPosition(event.timeStamp, event.position);
+      _velocityTracker.addPosition(event.timeStamp, event.localPosition);
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
       _client!.update(DragUpdateDetails(
         sourceTimeStamp: event.timeStamp,
-        delta: event.delta,
+        delta: _getDeltaForDetails(event.localDelta),
+        primaryDelta: _getPrimaryValueFromOffset(event.localDelta),
         globalPosition: event.position,
+        localPosition: event.localPosition,
       ));
     } else {
       assert(pendingDelta != null);
-      _pendingDelta = _pendingDelta! + event.delta;
+      final Offset movedLocally = _getDeltaForDetails(event.localDelta);
+      final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+      final Offset movedGlobaly = PointerEvent.transformDeltaViaPositions(
+        transform: localToGlobalTransform,
+        untransformedDelta: movedLocally,
+        untransformedEndPosition: event.localPosition,
+      );
+      _pendingDelta = _pendingDelta! + Offset(
+        movedGlobaly.dx.abs(),
+        movedGlobaly.dy.abs(),
+      ) * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
       _lastPendingEventTimestamp = event.timeStamp;
       checkForResolutionAfterMove();
     }
@@ -124,8 +140,10 @@ abstract class MultiDragPointerState {
     _client = client;
     final DragUpdateDetails details = DragUpdateDetails(
       sourceTimeStamp: _lastPendingEventTimestamp,
-      delta: pendingDelta!,
-      globalPosition: initialPosition,
+      delta: _getDeltaForDetails(pendingDelta!),
+      primaryDelta: _getPrimaryValueFromOffset(pendingDelta!),
+      globalPosition: initialPosition.global,
+      localPosition: initialPosition.global,
     );
     _pendingDelta = null;
     _lastPendingEventTimestamp = null;
@@ -137,7 +155,11 @@ abstract class MultiDragPointerState {
     assert(_arenaEntry != null);
     if (_client != null) {
       assert(pendingDelta == null);
-      final DragEndDetails details = DragEndDetails(velocity: _velocityTracker.getVelocity());
+      final Velocity velocity = _velocityTracker.getVelocity();
+      final DragEndDetails details = DragEndDetails(
+        velocity: velocity,
+        primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
+      );
       final Drag client = _client!;
       _client = null;
       // Call client last to avoid reentrancy.
@@ -231,7 +253,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(!_pointers!.containsKey(event.pointer));
     final T state = createNewPointerState(event);
     _pointers![event.pointer] = state;
-    GestureBinding.instance!.pointerRouter.addRoute(event.pointer, _handleEvent);
+    GestureBinding.instance!.pointerRouter.addRoute(event.pointer, _handleEvent, event.transform);
     state._setArenaEntry(GestureBinding.instance!.gestureArena.add(event.pointer, this));
   }
 
@@ -250,19 +272,16 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     final T state = _pointers![event.pointer]!;
     if (event is PointerMoveEvent) {
       state._move(event);
-      // We might be disposed here.
     } else if (event is PointerUpEvent) {
       assert(event.delta == Offset.zero);
       state._up();
-      // We might be disposed here.
       _removeState(event.pointer);
     } else if (event is PointerCancelEvent) {
       assert(event.delta == Offset.zero);
       state._cancel();
-      // We might be disposed here.
       _removeState(event.pointer);
     } else if (event is! PointerDownEvent) {
-      // we get the PointerDownEvent that resulted in our addPointer getting called since we
+      // We get the PointerDownEvent that resulted in our `addAllowedPointer` getting called since we
       // add ourselves to the pointer router then (before the pointer router has heard of
       // the event).
       assert(false);
@@ -326,7 +345,13 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 }
 
 class _ImmediatePointerState extends MultiDragPointerState {
-  _ImmediatePointerState(Offset initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+  _ImmediatePointerState(OffsetPair initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => null;
 
   @override
   void checkForResolutionAfterMove() {
@@ -337,7 +362,7 @@ class _ImmediatePointerState extends MultiDragPointerState {
 
   @override
   void accepted(GestureMultiDragStartCallback starter) {
-    starter(initialPosition);
+    starter(initialPosition.local);
   }
 }
 
@@ -377,7 +402,10 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
 
   @override
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
-    return _ImmediatePointerState(event.position, event.kind);
+    return _ImmediatePointerState(
+      OffsetPair(global: event.position, local: event.localPosition),
+      event.kind,
+    );
   }
 
   @override
@@ -386,7 +414,13 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
 
 
 class _HorizontalPointerState extends MultiDragPointerState {
-  _HorizontalPointerState(Offset initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+  _HorizontalPointerState(OffsetPair initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => value.dx;
 
   @override
   void checkForResolutionAfterMove() {
@@ -397,7 +431,7 @@ class _HorizontalPointerState extends MultiDragPointerState {
 
   @override
   void accepted(GestureMultiDragStartCallback starter) {
-    starter(initialPosition);
+    starter(initialPosition.local);
   }
 }
 
@@ -437,7 +471,10 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
 
   @override
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
-    return _HorizontalPointerState(event.position, event.kind);
+    return _HorizontalPointerState(
+      OffsetPair(global: event.position, local: event.localPosition),
+      event.kind,
+    );
   }
 
   @override
@@ -446,7 +483,13 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
 
 
 class _VerticalPointerState extends MultiDragPointerState {
-  _VerticalPointerState(Offset initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+  _VerticalPointerState(OffsetPair initialPosition, PointerDeviceKind kind) : super(initialPosition, kind);
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => value.dy;
 
   @override
   void checkForResolutionAfterMove() {
@@ -457,7 +500,7 @@ class _VerticalPointerState extends MultiDragPointerState {
 
   @override
   void accepted(GestureMultiDragStartCallback starter) {
-    starter(initialPosition);
+    starter(initialPosition.local);
   }
 }
 
@@ -497,7 +540,10 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
 
   @override
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
-    return _VerticalPointerState(event.position, event.kind);
+    return _VerticalPointerState(
+      OffsetPair(global: event.position, local: event.localPosition),
+      event.kind,
+    );
   }
 
   @override
@@ -505,7 +551,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(Offset initialPosition, Duration delay, PointerDeviceKind kind)
+  _DelayedPointerState(OffsetPair initialPosition, Duration delay, PointerDeviceKind kind)
       : assert(delay != null),
         super(initialPosition, kind) {
     _timer = Timer(delay, _delayPassed);
@@ -520,7 +566,7 @@ class _DelayedPointerState extends MultiDragPointerState {
     assert(pendingDelta!.distance <= computeHitSlop(kind));
     _timer = null;
     if (_starter != null) {
-      _starter!(initialPosition);
+      _starter!(initialPosition.local);
       _starter = null;
     } else {
       resolve(GestureDisposition.accepted);
@@ -534,10 +580,16 @@ class _DelayedPointerState extends MultiDragPointerState {
   }
 
   @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => null;
+
+  @override
   void accepted(GestureMultiDragStartCallback starter) {
     assert(_starter == null);
     if (_timer == null)
-      starter(initialPosition);
+      starter(initialPosition.local);
     else
       _starter = starter;
   }
@@ -616,7 +668,11 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
 
   @override
   _DelayedPointerState createNewPointerState(PointerDownEvent event) {
-    return _DelayedPointerState(event.position, delay, event.kind);
+    return _DelayedPointerState(
+      OffsetPair(global: event.position, local: event.localPosition),
+      delay,
+      event.kind,
+    );
   }
 
   @override
