@@ -916,7 +916,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: GestureDetector(
@@ -941,7 +941,7 @@ void main() {
     await tester.timedDrag(
       find.byType(Slider),
       const Offset(20.0, 0.0),
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: 100),
     );
 
     expect(startFired, equals(1));
