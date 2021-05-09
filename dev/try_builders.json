@@ -232,7 +232,7 @@
       "name": "Linux validate_ci_config",
       "repo": "flutter",
       "task_name": "linux_validate_ci_config",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "Linux web_tool_tests",
