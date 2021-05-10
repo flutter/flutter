@@ -99,24 +99,13 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
       selectable.clear();
   }
 
-  void _selectAll() {
+  void _selectAll(Intent intent) {
     _cancelSelection();
     _startSelection(Offset.zero);
     _updateSelection(Offset.infinite);
   }
 
-  void _onKeyEvent(RawKeyEvent event) {
-    if (event.isControlPressed && event.isKeyPressed(LogicalKeyboardKey.keyC)) {
-      _onCopy();
-      return;
-    }
-    if (event.isControlPressed && event.isKeyPressed(LogicalKeyboardKey.keyA)) {
-      _selectAll();
-      return;
-    }
-  }
-
-  Future<void> _onCopy() async {
+  Future<void> _copy(Intent intent) async {
     final List<Object> selections = <Object>[];
     for (final Selectable selectable in _selectables) {
       final Object? data = selectable.copy();
@@ -133,18 +122,16 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
   @override
   void initState() {
     super.initState();
-    RawKeyboard.instance.addListener(_onKeyEvent);
-    _gestureRecognizers[VerticalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-      () => VerticalDragGestureRecognizer(),
-      (VerticalDragGestureRecognizer instance) {
+    _gestureRecognizers[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+      () => PanGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse}),
+      (PanGestureRecognizer instance) {
         instance
           ..onDown = _handleDragDown
           ..onStart = _handleDragStart
           ..onUpdate = _handleDragUpdate
           ..onEnd = _handleDragEnd
           ..onCancel = _handleDragCancel
-          ..dragStartBehavior = DragStartBehavior.down
-          ..supportedDevices = <PointerDeviceKind>{PointerDeviceKind.mouse};
+          ..dragStartBehavior = DragStartBehavior.down;
       },
     );
     _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
@@ -158,7 +145,6 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
 
   @override
   void dispose() {
-    RawKeyboard.instance.removeListener(_onKeyEvent);
     for (final Selectable selectable in _selectables) {
       selectable.clear();
     }
@@ -166,14 +152,46 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
     super.dispose();
   }
 
+  static const Map<ShortcutActivator, Intent> _kShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): _CopyIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): _SelectAllIntent(),
+  };
+
   @override
   Widget build(BuildContext context) {
-    return RawGestureDetector(
-      key: _gestureDetectorKey,
-      gestures: _gestureRecognizers,
-      behavior: HitTestBehavior.translucent,
-      excludeFromSemantics: true,
-      child: widget.child,
+    return Shortcuts(
+      shortcuts: _kShortcuts,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+         _SelectAllIntent: CallbackAction<Intent>(
+           onInvoke: _selectAll,
+         ),
+         _CopyIntent: CallbackAction<Intent>(
+           onInvoke: _copy,
+        ),
+       },
+        child: Focus(
+          autofocus: true,
+          child: RawGestureDetector(
+            key: _gestureDetectorKey,
+            gestures: _gestureRecognizers,
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            child: widget.child,
+          ),
+        ),
+      ),
     );
   }
+}
+
+/// A marker object used to signify the intent to select all visible objects.
+class _SelectAllIntent extends Intent {
+  const _SelectAllIntent();
+}
+
+/// A marker object used to signify the intent to copy all selected objects into
+/// the system clipboard.
+class _CopyIntent extends Intent {
+  const _CopyIntent();
 }

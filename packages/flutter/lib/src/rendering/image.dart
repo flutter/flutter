@@ -451,20 +451,7 @@ class RenderImage extends RenderBox implements Selectable {
   }
 
   @override
-  Type get contentType => ByteData;
-
-  @override
   bool update(Rect rect) {
-    // final Rect localRect = Rect.fromPoints(globalToLocal(start), globalToLocal(end));
-    // final Rect intersection = _lastRect.intersect(localRect);
-    // if (intersection.width < 0 || intersection.height < 0) {
-    //   return false;
-    // }
-    // if (!_selected) {
-    //   _selected = true;
-    //   markNeedsPaint();
-    // }
-    // return true;
     return false;
   }
 
