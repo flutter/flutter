@@ -317,7 +317,7 @@ class Material extends StatefulWidget {
   }
 
   @override
-  _MaterialState createState() => _MaterialState();
+  State<Material> createState() => _MaterialState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

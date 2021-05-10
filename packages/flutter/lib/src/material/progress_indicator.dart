@@ -346,7 +346,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   final double? minHeight;
 
   @override
-  _LinearProgressIndicatorState createState() => _LinearProgressIndicatorState();
+  State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
 }
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
@@ -630,7 +630,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   final double strokeWidth;
 
   @override
-  _CircularProgressIndicatorState createState() => _CircularProgressIndicatorState();
+  State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
 }
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
@@ -857,7 +857,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   @override
   Color? get backgroundColor => super.backgroundColor;
   @override
-  _RefreshProgressIndicatorState createState() => _RefreshProgressIndicatorState();
+  State<CircularProgressIndicator> createState() => _RefreshProgressIndicatorState();
 }
 
 class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {

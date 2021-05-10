@@ -1682,7 +1682,7 @@ class Decorate extends StatefulWidget {
   final void Function(bool isInBuild) build;
 
   @override
-  _DecorateState createState() => _DecorateState();
+  State<Decorate> createState() => _DecorateState();
 
   @override
   DecorateElement createElement() => DecorateElement(this);
@@ -1874,7 +1874,7 @@ class StatefulWidgetSpy extends StatefulWidget {
   final void Function(BuildContext)? onDidUpdateWidget;
 
   @override
-  _StatefulWidgetSpyState createState() => _StatefulWidgetSpyState();
+  State<StatefulWidgetSpy> createState() => _StatefulWidgetSpyState();
 }
 
 class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {

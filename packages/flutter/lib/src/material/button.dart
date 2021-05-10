@@ -311,7 +311,7 @@ class RawMaterialButton extends StatefulWidget {
   final bool enableFeedback;
 
   @override
-  _RawMaterialButtonState createState() => _RawMaterialButtonState();
+  State<RawMaterialButton> createState() => _RawMaterialButtonState();
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {

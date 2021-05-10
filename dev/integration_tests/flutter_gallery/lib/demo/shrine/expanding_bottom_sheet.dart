@@ -30,10 +30,10 @@ class ExpandingBottomSheet extends StatefulWidget {
   final AnimationController hideController;
 
   @override
-  _ExpandingBottomSheetState createState() => _ExpandingBottomSheetState();
+  ExpandingBottomSheetState createState() => ExpandingBottomSheetState();
 
-  static _ExpandingBottomSheetState? of(BuildContext context, {bool isNullOk = false}) {
-    final _ExpandingBottomSheetState? result = context.findAncestorStateOfType<_ExpandingBottomSheetState>();
+  static ExpandingBottomSheetState? of(BuildContext context, {bool isNullOk = false}) {
+    final ExpandingBottomSheetState? result = context.findAncestorStateOfType<ExpandingBottomSheetState>();
     if (isNullOk || result != null) {
       return result;
     }
@@ -97,7 +97,7 @@ double _getPeakPoint({required double begin, required double end}) {
   return begin + (end - begin) * _kPeakVelocityProgress;
 }
 
-class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerProviderStateMixin {
+class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerProviderStateMixin {
   final GlobalKey _expandingBottomSheetKey = GlobalKey(debugLabel: 'Expanding bottom sheet');
 
   // The width of the Material, calculated by _widthFor() & based on the number
@@ -405,7 +405,7 @@ class ProductThumbnailRow extends StatefulWidget {
   const ProductThumbnailRow({Key? key}) : super(key: key);
 
   @override
-  _ProductThumbnailRowState createState() => _ProductThumbnailRowState();
+  State<ProductThumbnailRow> createState() => _ProductThumbnailRowState();
 }
 
 class _ProductThumbnailRowState extends State<ProductThumbnailRow> {

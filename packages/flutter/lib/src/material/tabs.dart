@@ -930,7 +930,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   }
 
   @override
-  _TabBarState createState() => _TabBarState();
+  State<TabBar> createState() => _TabBarState();
 }
 
 class _TabBarState extends State<TabBar> {
@@ -1358,7 +1358,7 @@ class TabBarView extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _TabBarViewState createState() => _TabBarViewState();
+  State<TabBarView> createState() => _TabBarViewState();
 }
 
 class _TabBarViewState extends State<TabBarView> {

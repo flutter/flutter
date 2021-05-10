@@ -115,7 +115,7 @@ class AnimatedSize extends StatefulWidget {
   final Clip clipBehavior;
 
   @override
-  _AnimatedSizeState createState() => _AnimatedSizeState();
+  State<AnimatedSize> createState() => _AnimatedSizeState();
 }
 
 class _AnimatedSizeState

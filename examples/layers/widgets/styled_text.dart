@@ -78,7 +78,7 @@ class StyledTextDemo extends StatefulWidget {
   const StyledTextDemo({Key? key}) : super(key: key);
 
   @override
-  _StyledTextDemoState createState() => _StyledTextDemoState();
+  State<StyledTextDemo> createState() => _StyledTextDemoState();
 }
 
 class _StyledTextDemoState extends State<StyledTextDemo> {
