@@ -279,7 +279,7 @@ void main() {
         'waiting for NoPendingPlatformMessages returns until a single method channel call returns', (WidgetTester tester) async {
       const MethodChannel channel = MethodChannel('helloChannel', JSONMethodCodec());
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
@@ -313,7 +313,7 @@ void main() {
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
       // Configures channel 1
       const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
@@ -322,7 +322,7 @@ void main() {
 
       // Configures channel 2
       const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
@@ -362,7 +362,7 @@ void main() {
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
       // Configures channel 1
       const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
@@ -371,7 +371,7 @@ void main() {
 
       // Configures channel 2
       const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
@@ -413,7 +413,7 @@ void main() {
       const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
       // Configures channel 1
       const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
@@ -422,7 +422,7 @@ void main() {
 
       // Configures channel 2
       const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),

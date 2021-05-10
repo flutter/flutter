@@ -12,7 +12,7 @@ void main() {
   test('System navigator control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 

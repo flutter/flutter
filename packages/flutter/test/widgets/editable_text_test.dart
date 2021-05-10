@@ -65,9 +65,9 @@ class MockClipboard {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  (TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding)
-    .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   setUp(() async {
     debugResetSemanticsIdCounter();
@@ -1982,7 +1982,7 @@ void main() {
     await tester.pump(); // An extra pump to allow focus request to go through.
 
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -3234,7 +3234,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/22212.
 
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -3265,7 +3265,7 @@ void main() {
 
   testWidgets('location of widget is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -3302,7 +3302,7 @@ void main() {
 
   testWidgets('transform and size is reset when text connection opens', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -3390,7 +3390,7 @@ void main() {
 
   testWidgets('size and transform are sent when they change', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -3432,7 +3432,7 @@ void main() {
 
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -3519,7 +3519,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
 
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
     setState(() {
@@ -3748,7 +3748,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/22212.
 
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -5720,7 +5720,7 @@ void main() {
   testWidgets('Synchronous test of local and remote editing values', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/65059
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
@@ -5848,7 +5848,7 @@ void main() {
   testWidgets('Send text input state to engine when the input formatter rejects user input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67828
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
@@ -5927,7 +5927,7 @@ void main() {
   testWidgets('Repeatedly receiving [TextEditingValue] will not trigger a keyboard request', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66036
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
     final TextEditingController controller = TextEditingController();
@@ -6048,7 +6048,7 @@ void main() {
     testWidgets('TextEditingController.clear() behavior test', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/66316
       final List<MethodCall> log = <MethodCall>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+      SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
         log.add(methodCall);
       });
       final TextEditingController controller = TextEditingController();
