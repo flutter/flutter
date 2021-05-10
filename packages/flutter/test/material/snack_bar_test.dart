@@ -706,7 +706,6 @@ void main() {
       disabledColor: Colors.black,
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
-      buttonColor: Colors.black,
       secondaryHeaderColor: Colors.black,
       textSelectionColor: Colors.black,
       cursorColor: Colors.black,
