@@ -67,7 +67,7 @@ bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
 }
 
 uint64_t FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine) {
-  return std::numeric_limits<uint64_t>::max();
+  return std::chrono::nanoseconds::max().count();
 }
 
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(
