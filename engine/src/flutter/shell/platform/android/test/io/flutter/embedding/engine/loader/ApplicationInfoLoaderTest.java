@@ -19,7 +19,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
-import android.security.NetworkSecurityPolicy;
 import java.io.StringReader;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,8 +26,6 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
@@ -46,23 +43,6 @@ public class ApplicationInfoLoaderTest {
     assertEquals("flutter_assets", info.flutterAssetsDir);
     assertEquals("", info.domainNetworkPolicy);
     assertNull(info.nativeLibraryDir);
-    assertEquals(true, info.clearTextPermitted);
-  }
-
-  @Config(shadows = {ApplicationInfoLoaderTest.ShadowNetworkSecurityPolicy.class})
-  @Test
-  public void itVotesAgainstClearTextIfSecurityPolicySaysSo() {
-    FlutterApplicationInfo info = ApplicationInfoLoader.load(RuntimeEnvironment.application);
-    assertNotNull(info);
-    assertEquals(false, info.clearTextPermitted);
-  }
-
-  @Implements(NetworkSecurityPolicy.class)
-  public static class ShadowNetworkSecurityPolicy {
-    @Implementation
-    public boolean isCleartextTrafficPermitted() {
-      return false;
-    }
   }
 
   private Context generateMockContext(Bundle metadata, String networkPolicyXml) throws Exception {
