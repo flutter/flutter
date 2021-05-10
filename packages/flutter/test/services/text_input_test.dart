@@ -185,6 +185,8 @@ void main() {
 
       expect(TextEditingValue.empty.toString(),
           'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
+      expect(const TextEditingValue(text: 'Sample Text').toString(),
+          'TextEditingValue(text: \u2524Sample Text\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
     });
 
     test('TextInputClient onConnectionClosed method is called', () async {
