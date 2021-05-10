@@ -611,7 +611,7 @@
       "name": "Windows build_tests_2_3",
       "repo": "flutter",
       "task_name": "win_build_tests_2_3",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "Windows build_tests_3_3",

@@ -242,17 +242,25 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// The [duration] argument can be used to overwrite the default duration
   /// after which the long press will be recognized.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
     Duration? duration,
     double? postAcceptSlopTolerance,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
     Object? debugOwner,
   }) : super(
-          deadline: duration ?? kLongPressTimeout,
-          postAcceptSlopTolerance: postAcceptSlopTolerance,
-          kind: kind,
-          debugOwner: debugOwner,
-        );
+         deadline: duration ?? kLongPressTimeout,
+         postAcceptSlopTolerance: postAcceptSlopTolerance,
+         kind: kind,
+         supportedDevices: supportedDevices,
+         debugOwner: debugOwner,
+       );
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
