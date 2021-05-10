@@ -1011,12 +1011,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
-  // Deletes the current uncollapsed selection.
-  void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
-    assert(selection.isCollapsed == false);
+  // Deletes the current non-empty selection.
+  //
+  // Operates on the text/selection contained in textSelectionDelegate, and does
+  // not depend on `RenderEditable.selection`.
+  //
+  // If the selection is currently non-empty, this method deletes the selected
+  // text and returns true. Otherwise this method does nothing and returns
+  // false.
+  bool _deleteNonEmptySelection(SelectionChangedCause cause) {
+    assert(!readOnly);
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    assert(selection.isValid);
 
-    if (_readOnly || !selection.isValid || selection.isCollapsed) {
-      return;
+    if (selection.isCollapsed) {
+      return false;
     }
 
     final String text = textSelectionDelegate.textEditingValue.text;
@@ -1029,6 +1038,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       TextEditingValue(text: textBefore + textAfter, selection: newSelection),
       cause,
     );
+    return true;
   }
 
   // Deletes the from the current collapsed selection to the start of the field.
@@ -1091,10 +1101,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Deletes backwards from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a single character before the
+  /// If the selection is collapsed, deletes a single character before the
   /// cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// {@template flutter.rendering.RenderEditable.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
@@ -1105,29 +1115,35 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [deleteForward], which is same but in the opposite direction.
   void delete(SelectionChangedCause cause) {
-    assert(_selection != null);
+    // `delete` does not depend on the text layout, and the boundary analysis is
+    // done using the `previousCharacter` method instead of ICU, we can keep
+    // deleting without having to layout the text. For this reason we can
+    // directly delete the character before the selection in the controller.
+    //
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
 
-    if (_readOnly || !_selection!.isValid) {
+    if (!selection.isValid || _readOnly || _deleteNonEmptySelection(cause)) {
       return;
     }
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
-    }
-
+    assert(selection.isCollapsed);
     final String text = textSelectionDelegate.textEditingValue.text;
-    String textBefore = _selection!.textBefore(text);
+    final String textBefore = selection.textBefore(text);
     if (textBefore.isEmpty) {
       return;
     }
 
-    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
-    textBefore = textBefore.substring(0, characterBoundary);
+    final String textAfter = selection.textAfter(text);
 
-    final String textAfter = _selection!.textAfter(text);
+    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
     final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
     _setTextEditingValue(
-      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      TextEditingValue(
+        text: textBefore.substring(0, characterBoundary) + textAfter,
+        selection: newSelection,
+        // TODO(LongCatIsLooong): take composing region into account.
+      ),
       cause,
     );
   }
@@ -1155,12 +1171,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
       return;
-    }
-
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
@@ -1202,12 +1214,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteByLine(SelectionChangedCause cause) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
       return;
-    }
-
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
@@ -1240,10 +1248,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Deletes in the foward direction from the current selection.
   ///
-  /// If the [selection] is collapsed, deletes a single character after the
+  /// If the selection is collapsed, deletes a single character after the
   /// cursor.
   ///
-  /// If the [selection] is not collapsed, deletes the selection.
+  /// If the selection is not collapsed, deletes the selection.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1251,29 +1259,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [delete], which is same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
-    assert(_selection != null);
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
 
-    if (_readOnly || !_selection!.isValid) {
+    if (!selection.isValid || _readOnly || _deleteNonEmptySelection(cause)) {
       return;
     }
 
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
-    }
-
+    assert(selection.isCollapsed);
     final String text = textSelectionDelegate.textEditingValue.text;
-    final String textBefore = _selection!.textBefore(text);
-    String textAfter = _selection!.textAfter(text);
-
+    final String textAfter = selection.textAfter(text);
     if (textAfter.isEmpty) {
       return;
     }
 
-    final int deleteCount = nextCharacter(0, textAfter);
-    textAfter = textAfter.substring(deleteCount);
+    final String textBefore = selection.textBefore(text);
 
     _setTextEditingValue(
-      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      TextEditingValue(
+        text: textBefore + textAfter.substring(nextCharacter(0, textAfter)),
+        selection: selection,
+        // TODO(LongCatIsLooong): take composing region into account.
+      ),
       cause,
     );
   }
@@ -1297,12 +1304,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteForwardByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
       return;
-    }
-
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big word.
@@ -1344,12 +1347,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteForwardByLine(SelectionChangedCause cause) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid) {
+    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
       return;
-    }
-
-    if (!_selection!.isCollapsed) {
-      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
