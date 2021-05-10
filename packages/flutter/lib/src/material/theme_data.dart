@@ -248,6 +248,10 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     Color? unselectedWidgetColor,
     Color? disabledColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.1.pre.',
+    )
     Color? buttonColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
