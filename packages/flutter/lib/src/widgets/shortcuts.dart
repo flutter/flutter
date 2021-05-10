@@ -184,8 +184,9 @@ abstract class ShortcutActivator {
   ///
   /// This method might also return null, which means this activator declares
   /// all keys as the trigger key. All activators whose [triggers] returns null
-  /// will use [accepts] to test against every event. This should only be used
-  /// when necessary.
+  /// will be tested with [accepts] on every event. Since this becomes an
+  /// linear search, and having too many might impact performance, it is
+  /// preferred to return non-null [triggers] whenever possible.
   Iterable<LogicalKeyboardKey>? get triggers;
 
   /// Whether the triggering `event` and the keyboard `state` at the time of the
