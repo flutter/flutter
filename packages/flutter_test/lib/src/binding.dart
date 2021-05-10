@@ -14,9 +14,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
-import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -322,13 +322,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (registerTestTextInput) {
       _testTextInput.register();
     }
-  }
-
-  @override
-  // ignore: MUST_CALL_SUPER
-  void initLicenses() {
-    // Do not include any licenses, because we're a test, and the LICENSE file
-    // doesn't get generated for tests.
   }
 
   @override
@@ -925,6 +918,13 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void initInstances() {
     super.initInstances();
     binding.mockFlutterAssets();
+  }
+
+  @override
+  // ignore: MUST_CALL_SUPER
+  void initLicenses() {
+    // Do not include any licenses, because we're a test, and the LICENSE file
+    // doesn't get generated for tests.
   }
 
   FakeAsync? _currentFakeAsync; // set in runTest; cleared in postTest

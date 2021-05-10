@@ -68,7 +68,7 @@ void main() {
   setUp(() async {
     Cache.flutterRoot = 'flutter';
     fileSystem = MemoryFileSystem.test();
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     usage = TestUsage();
     cocoaPodsUnderTest = CocoaPods(
@@ -794,7 +794,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    String scheme,
+    XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async => buildSettings;
 

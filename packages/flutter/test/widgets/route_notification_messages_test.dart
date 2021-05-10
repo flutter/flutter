@@ -4,9 +4,9 @@
 
 @TestOn('!chrome')
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class OnTapPage extends StatelessWidget {
   const OnTapPage({Key? key, required this.id, required this.onTap}) : super(key: key);
@@ -43,12 +43,14 @@ void main() {
           id: '/',
           onTap: () {
             Navigator.pushNamed(context, '/A');
-          }),
+          },
+        ),
       '/A': (BuildContext context) => OnTapPage(
           id: 'A',
           onTap: () {
             Navigator.pop(context);
-          }),
+          },
+        ),
     };
 
     final List<MethodCall> log = <MethodCall>[];
@@ -63,14 +65,15 @@ void main() {
 
     expect(log, hasLength(1));
     expect(
-        log.last,
-        isMethodCall(
-          'routeUpdated',
-          arguments: <String, dynamic>{
-            'previousRouteName': null,
-            'routeName': '/',
-          },
-        ));
+      log.last,
+      isMethodCall(
+        'routeUpdated',
+        arguments: <String, dynamic>{
+          'previousRouteName': null,
+          'routeName': '/',
+        },
+      ),
+    );
 
     await tester.tap(find.text('/'));
     await tester.pump();
@@ -78,14 +81,15 @@ void main() {
 
     expect(log, hasLength(2));
     expect(
-        log.last,
-        isMethodCall(
-          'routeUpdated',
-          arguments: <String, dynamic>{
-            'previousRouteName': '/',
-            'routeName': '/A',
-          },
-        ));
+      log.last,
+      isMethodCall(
+        'routeUpdated',
+        arguments: <String, dynamic>{
+          'previousRouteName': '/',
+          'routeName': '/A',
+        },
+      ),
+    );
 
     await tester.tap(find.text('A'));
     await tester.pump();
@@ -93,14 +97,15 @@ void main() {
 
     expect(log, hasLength(3));
     expect(
-        log.last,
-        isMethodCall(
-          'routeUpdated',
-          arguments: <String, dynamic>{
-            'previousRouteName': '/A',
-            'routeName': '/',
-          },
-        ));
+      log.last,
+      isMethodCall(
+        'routeUpdated',
+        arguments: <String, dynamic>{
+          'previousRouteName': '/A',
+          'routeName': '/',
+        },
+      ),
+    );
   });
 
   testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
@@ -116,7 +121,7 @@ void main() {
           TestPage(name: '/'),
         ],
         onPopPage: (Route<void> route, void result) => false,
-      )
+      ),
     ));
 
     expect(log, hasLength(0));
@@ -129,7 +134,7 @@ void main() {
           TestPage(name: '/abc'),
         ],
         onPopPage: (Route<void> route, void result) => false,
-      )
+      ),
     ));
 
     await tester.pumpAndSettle();
@@ -142,12 +147,14 @@ void main() {
           id: '/',
           onTap: () {
             Navigator.pushNamed(context, '/A');
-          }),
+          },
+        ),
       '/A': (BuildContext context) => OnTapPage(
           id: 'A',
           onTap: () {
             Navigator.pushReplacementNamed(context, '/B');
-          }),
+          },
+        ),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
@@ -163,14 +170,15 @@ void main() {
 
     expect(log, hasLength(1));
     expect(
-        log.last,
-        isMethodCall(
-          'routeUpdated',
-          arguments: <String, dynamic>{
-            'previousRouteName': null,
-            'routeName': '/',
-          },
-        ));
+      log.last,
+      isMethodCall(
+        'routeUpdated',
+        arguments: <String, dynamic>{
+          'previousRouteName': null,
+          'routeName': '/',
+        },
+      ),
+    );
 
     await tester.tap(find.text('/'));
     await tester.pump();
@@ -178,14 +186,15 @@ void main() {
 
     expect(log, hasLength(2));
     expect(
-        log.last,
-        isMethodCall(
-          'routeUpdated',
-          arguments: <String, dynamic>{
-            'previousRouteName': '/',
-            'routeName': '/A',
-          },
-        ));
+      log.last,
+      isMethodCall(
+        'routeUpdated',
+        arguments: <String, dynamic>{
+          'previousRouteName': '/',
+          'routeName': '/A',
+        },
+      ),
+    );
 
     await tester.tap(find.text('A'));
     await tester.pump();
@@ -193,14 +202,15 @@ void main() {
 
     expect(log, hasLength(3));
     expect(
-        log.last,
-        isMethodCall(
-          'routeUpdated',
-          arguments: <String, dynamic>{
-            'previousRouteName': '/A',
-            'routeName': '/B',
-          },
-        ));
+      log.last,
+      isMethodCall(
+        'routeUpdated',
+        arguments: <String, dynamic>{
+          'previousRouteName': '/A',
+          'routeName': '/B',
+        },
+      ),
+    );
   });
 
   testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
@@ -265,7 +275,7 @@ void main() {
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.location!);
-      }
+      },
     );
 
     await tester.pumpWidget(MaterialApp.router(

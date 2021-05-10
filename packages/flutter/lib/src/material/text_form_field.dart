@@ -81,9 +81,9 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///   return Material(
 ///     child: Center(
 ///       child: Shortcuts(
-///         shortcuts: <LogicalKeySet, Intent>{
+///         shortcuts: const <ShortcutActivator, Intent>{
 ///           // Pressing space in the field will now move to the next field.
-///           LogicalKeySet(LogicalKeyboardKey.space): const NextFocusIntent(),
+///           SingleActivator(LogicalKeyboardKey.space): NextFocusIntent(),
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(
@@ -228,7 +228,7 @@ class TextFormField extends FormField<String> {
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
-       assert(maxLength == null || maxLength > 0),
+       assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
          key: key,

@@ -34,7 +34,7 @@ void main() {
   Logger logger;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.posix);
@@ -80,7 +80,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -116,7 +116,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -152,7 +152,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -189,7 +189,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -228,7 +228,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -265,13 +265,13 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.darwin_x64,
+          platform: TargetPlatform.darwin,
           mode: BuildMode.debug,
         ) + '/',
         '--target=flutter',
@@ -288,7 +288,7 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(androidEnvironment
-      ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin_x64)
+      ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
       ..defines[kTrackWidgetCreation] = 'false'
     );
@@ -314,7 +314,7 @@ void main() {
     final String build = testEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',

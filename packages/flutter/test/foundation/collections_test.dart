@@ -82,7 +82,9 @@ void main() {
       // collisions are guaranteed. These should be sorted so that the 'order'
       // part of the objects are still in order.
       final List<OrderedComparable> list = List<OrderedComparable>.generate(
-          size, (int i) => OrderedComparable(random.nextInt(size >> 2), i));
+        size,
+        (int i) => OrderedComparable(random.nextInt(size >> 2), i),
+      );
       mergeSort(list);
       OrderedComparable prev = list[0];
       for (int i = 1; i < size; i++) {
@@ -121,8 +123,7 @@ void main() {
   test('MergeSortSpecialCases', () {
     for (final int size in <int>[511, 512, 513]) {
       // All equal.
-      final List<OrderedComparable> list = List<OrderedComparable>.generate(
-          size, (int i) => OrderedComparable(0, i));
+      final List<OrderedComparable> list = List<OrderedComparable>.generate(size, (int i) => OrderedComparable(0, i));
       mergeSort(list);
       for (int i = 0; i < size; i++) {
         expect(list[i].order, equals(i));

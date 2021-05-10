@@ -312,14 +312,15 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       }
     }
 
-    final EdgeInsetsGeometry padding = resolvedPadding!.add(
-      EdgeInsets.only(
-        left: densityAdjustment.dx,
-        top: densityAdjustment.dy,
-        right: densityAdjustment.dx,
-        bottom: densityAdjustment.dy,
-      ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    // Per the Material Design team: don't allow the VisualDensity
+    // adjustment to reduce the width of the left/right padding. If we
+    // did, VisualDensity.compact, the default for desktop/web, would
+    // reduce the horizontal padding to zero.
+    final double dy = densityAdjustment.dy;
+    final double dx = math.max(0, densityAdjustment.dx);
+    final EdgeInsetsGeometry padding = resolvedPadding!
+      .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly

@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
@@ -90,7 +90,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       flutterRoot: () => 'sdk/flutter',
     );
 
@@ -111,7 +111,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
       flutterRoot: () => 'sdk/flutter',
     );
 

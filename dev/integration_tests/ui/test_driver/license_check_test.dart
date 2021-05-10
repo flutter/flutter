@@ -20,7 +20,7 @@ void main() {
   final String license = licenseFile.readAsStringSync().split(newlineSplit).join(' ').trim();
 
   group('License file check', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -28,9 +28,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null) {
-        await driver.close();
-      }
+      await driver.close();
     });
 
     test('flutter license', () async {

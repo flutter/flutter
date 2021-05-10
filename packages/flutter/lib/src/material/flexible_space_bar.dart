@@ -210,7 +210,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// height of the resulting [FlexibleSpaceBar] when fully expanded.
   /// `currentExtent` sets the scale of the [FlexibleSpaceBar.background] and
   /// [FlexibleSpaceBar.title] widgets of [FlexibleSpaceBar] upon
-  /// initialization. `scrolledUnder` is true if the the [FlexibleSpaceBar]
+  /// initialization. `scrolledUnder` is true if the [FlexibleSpaceBar]
   /// overlaps the app's primary scrollable, false if it does not, and null
   /// if the caller has not determined as much.
   /// See also:

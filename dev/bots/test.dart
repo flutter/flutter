@@ -112,6 +112,7 @@ Future<void> main(List<String> args) async {
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPluginsTests,
+      'skp_generator': _runSkpGeneratorTests,
       kSmokeTestShardName: () async {}, // No-op, the smoke tests already ran. Used for testing this script.
     });
   } on ExitException catch (error) {
@@ -308,7 +309,7 @@ Future<void> _runToolTests() async {
 
 Future<void> runForbiddenFromReleaseTests() async {
   // Build a release APK to get the snapshot json.
-  final Directory tempDirectory = Directory.systemTemp.createTempSync('forbidden_imports');
+  final Directory tempDirectory = Directory.systemTemp.createTempSync('flutter_forbidden_imports.');
   final List<String> command = <String>[
     'build',
     'apk',
@@ -868,7 +869,7 @@ Future<String> getFlutterPluginsVersion({
 Future<void> _runFlutterPluginsTests() async {
   Future<void> runAnalyze() async {
     print('${green}Running analysis for flutter/plugins$reset');
-    final Directory checkout = Directory.systemTemp.createTempSync('plugins');
+    final Directory checkout = Directory.systemTemp.createTempSync('flutter_plugins.');
     await runCommand(
       'git',
       <String>[
@@ -905,6 +906,32 @@ Future<void> _runFlutterPluginsTests() async {
   await selectSubshard(<String, ShardRunner>{
     'analyze': runAnalyze,
   });
+}
+
+/// Runs the skp_generator from the flutter/tests repo.
+///
+/// See also the customer_tests shard.
+///
+/// Generated SKPs are ditched, this just verifies that it can run without failure.
+Future<void> _runSkpGeneratorTests() async {
+  print('${green}Running skp_generator from flutter/tests$reset');
+  final Directory checkout = Directory.systemTemp.createTempSync('flutter_skp_generator.');
+  await runCommand(
+    'git',
+    <String>[
+      '-c',
+      'core.longPaths=true',
+      'clone',
+      'https://github.com/flutter/tests.git',
+      '.'
+    ],
+    workingDirectory: checkout.path,
+  );
+  await runCommand(
+    './build.sh',
+    <String>[ ],
+    workingDirectory: path.join(checkout.path, 'skp_generator'),
+  );
 }
 
 // The `chromedriver` process created by this test.

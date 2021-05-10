@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -105,7 +105,7 @@ void main() {
                 onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
             );
-          }
+          },
         ),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
@@ -146,7 +146,7 @@ void main() {
           builder: (BuildContext context) {
             ++buildCounter;
             return const Text('A');
-          }
+          },
         ),
       ),
     );
@@ -158,7 +158,7 @@ void main() {
           builder: (BuildContext context) {
             ++buildCounter;
             return const Text('B');
-          }
+          },
         ),
       ),
     );
@@ -172,7 +172,7 @@ void main() {
       builder: (BuildContext context) {
         ++buildCounter;
         return const Placeholder();
-      }
+      },
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -255,16 +255,16 @@ void main() {
     await tester.pumpWidget(
         MaterialApp(
           home: Builder(
-              builder: (BuildContext context) {
-                return Material(
-                  child: ElevatedButton(
-                      child: const Text('X'),
-                      onPressed: () async {
-                        result = Navigator.of(context).pushNamed<Object?>('/a');
-                      },
-                  ),
-                );
-              }
+            builder: (BuildContext context) {
+              return Material(
+                child: ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () async {
+                      result = Navigator.of(context).pushNamed<Object?>('/a');
+                    },
+                ),
+              );
+            },
           ),
           routes: <String, WidgetBuilder>{
             '/a': (BuildContext context) {
@@ -525,7 +525,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -546,7 +546,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -571,7 +571,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -592,7 +592,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -619,7 +619,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -645,7 +645,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -672,7 +672,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         home: Builder(
           builder: (BuildContext context) {
@@ -741,7 +741,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -857,7 +857,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -927,17 +927,19 @@ void main() {
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page one');
-              }
+              },
             ),
             PageRouteBuilder<void>(
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page two');
-              }
+              },
             ),
           ];
         },
@@ -946,7 +948,7 @@ void main() {
           '/': (BuildContext context) => const Text('regular page one'),
           '/abc': (BuildContext context) => const Text('regular page two'),
         },
-      )
+      ),
     );
     expect(find.text('non-regular page two'), findsOneWidget);
     expect(find.text('non-regular page one'), findsNothing);
@@ -964,7 +966,7 @@ void main() {
     final HeroController controller = MaterialApp.createMaterialHeroController();
     final Tween<Rect?> tween = controller.createRectTween!(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)
+      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
     );
     expect(tween, isA<MaterialRectArcTween>());
   });
@@ -1000,7 +1002,7 @@ void main() {
           location: 'popped',
         );
         return route.didPop(result);
-      }
+      },
     );
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
@@ -1148,7 +1150,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
         MaterialPage<void>(
           key: ValueKey<String>(routeInformation.location!),
           child: builder(context, routeInformation),
-        )
+        ),
       ],
     );
   }

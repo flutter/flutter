@@ -1596,6 +1596,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusManager] notifies.
   void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.remove(listener);
 
+  @pragma('vm:notify-debugger-on-exception')
   void _notifyHighlightModeListeners() {
     if (_listeners.isEmpty) {
       return;

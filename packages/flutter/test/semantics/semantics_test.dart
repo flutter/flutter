@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../rendering/rendering_tester.dart';
 
@@ -82,9 +82,10 @@ void main() {
         childrenInInversePaintOrder: children,
       );
 
-      children.add(SemanticsNode()
-        ..isMergedIntoParent = true
-        ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
+      children.add(
+        SemanticsNode()
+          ..isMergedIntoParent = true
+          ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0),
       );
 
       {
@@ -101,7 +102,7 @@ void main() {
           'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
           'Error details:\n'
-          "The list's length has changed from 1 to 2."
+          "The list's length has changed from 1 to 2.",
         ));
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
@@ -150,7 +151,7 @@ void main() {
           '\n'
           '   Child node at position 1 was replaced:\n'
           '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n',
         ));
 
         expect(
@@ -489,16 +490,16 @@ void main() {
     expect(
       allProperties.toStringDeep(),
       equalsIgnoringHashCodes(
-          'SemanticsNode#2\n'
-          '   STALE\n'
-          '   owner: null\n'
-          '   merge boundary ⛔️\n'
-          '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
-          '   actions: longPress, scrollUp, showOnScreen\n'
-          '   flags: hasCheckedState, isSelected, isButton\n'
-          '   label: "Use all the properties"\n'
-          '   textDirection: rtl\n'
-          '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n'
+        'SemanticsNode#2\n'
+        '   STALE\n'
+        '   owner: null\n'
+        '   merge boundary ⛔️\n'
+        '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
+        '   actions: longPress, scrollUp, showOnScreen\n'
+        '   flags: hasCheckedState, isSelected, isButton\n'
+        '   label: "Use all the properties"\n'
+        '   textDirection: rtl\n'
+        '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n',
       ),
     );
     expect(

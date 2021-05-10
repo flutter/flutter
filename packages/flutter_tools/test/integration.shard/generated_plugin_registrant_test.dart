@@ -233,7 +233,7 @@ Future<void> _analyzeProject(Directory workingDir) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );

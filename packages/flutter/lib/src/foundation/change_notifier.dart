@@ -283,6 +283,7 @@ class ChangeNotifier implements Listenable {
   /// See the discussion at [removeListener].
   @protected
   @visibleForTesting
+  @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_count == 0)

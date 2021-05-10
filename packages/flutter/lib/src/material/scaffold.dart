@@ -8,8 +8,8 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
@@ -1820,6 +1820,8 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will cause an
   /// assert in debug mode, and throw an exception in release mode.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
@@ -1999,6 +2001,8 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will return null.
   /// To throw an exception instead, use [of] instead of this function.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// See also:
   ///
   ///  * [of], a similar function to this one that throws if no instance
@@ -2065,6 +2069,8 @@ class Scaffold extends StatefulWidget {
   /// true. This will then set up an [InheritedWidget] relationship with the
   /// [Scaffold] so that the client widget gets rebuilt whenever the [hasDrawer]
   /// value changes.
+  ///
+  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
@@ -2481,6 +2487,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -2554,6 +2561,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       elevation: elevation,
       shape: shape,
       clipBehavior: clipBehavior,
+      constraints: constraints,
     );
 
     if (!isPersistent)
@@ -2653,6 +2661,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
     AnimationController? transitionAnimationController,
   }) {
     assert(() {
@@ -2678,6 +2687,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         elevation: elevation,
         shape: shape,
         clipBehavior: clipBehavior,
+        constraints: constraints,
       );
     });
     return _currentBottomSheet! as PersistentBottomSheetController<T>;
@@ -3356,6 +3366,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -3368,6 +3379,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final double? elevation;
   final ShapeBorder? shape;
   final Clip? clipBehavior;
+  final BoxConstraints? constraints;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -3472,6 +3484,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           elevation: widget.elevation,
           shape: widget.shape,
           clipBehavior: widget.clipBehavior,
+          constraints: widget.constraints,
         ),
       ),
     );

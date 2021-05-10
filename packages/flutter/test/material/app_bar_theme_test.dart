@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -324,7 +324,7 @@ void main() {
                   backwardsCompatibility: false,
                   iconTheme: IconThemeData(color: appBarIconColor),
                   actions: <Widget>[
-                    IconButton(icon: const Icon(Icons.share), onPressed: () { })
+                    IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                   ],
                 ),
               );
@@ -385,7 +385,7 @@ void main() {
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(appBar: AppBar(
         backwardsCompatibility: false,
-        title: const Text('Title')
+        title: const Text('Title'),
       )),
     ));
 

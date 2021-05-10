@@ -43,7 +43,7 @@ void main() {
   FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   Cache createCache(Platform platform) {
@@ -884,6 +884,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           '/cache/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
@@ -907,7 +908,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.empty(),
       AndroidSdk: () => null // Android SDK was not located.
     });
   });

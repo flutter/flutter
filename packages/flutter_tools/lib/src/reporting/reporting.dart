@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 library reporting;
 
 import 'dart:async';
@@ -20,7 +18,7 @@ import '../build_info.dart';
 import '../dart/language_version.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../version.dart';
 import 'first_run.dart';
 

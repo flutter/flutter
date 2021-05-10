@@ -20,6 +20,47 @@ String generateBootstrapScript({
   return '''
 "use strict";
 
+var styles = `
+  .flutter-loader {
+    width: 100px;
+    height: 100px;
+    border: 10px solid #075b9a;
+    border-bottom-color: #60caf6;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    position: absolute;
+    left: calc(50% - 50px);
+    top: calc(50% - 50px);
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+var styleSheet = document.createElement("style")
+styleSheet.type = "text/css"
+styleSheet.innerText = styles
+document.head.appendChild(styleSheet)
+
+var loader = document.createElement('div');
+loader.className = "flutter-loader";
+document.body.append(loader);
+
+document.addEventListener('dart-app-ready', function (e) {
+   loader.parentNode.removeChild(loader);
+   styleSheet.parentNode.removeChild(styleSheet);
+});
+
 // Attach source mapping.
 var mapperEl = document.createElement("script");
 mapperEl.defer = true;

@@ -218,8 +218,10 @@ void main() {
           ),
         ),
       );
-      fail('Should not be possible to create segmented control in which '
-          'value is not the key of one of the children widgets');
+      fail(
+        'Should not be possible to create segmented control in which '
+        'value is not the key of one of the children widgets',
+      );
     } on AssertionError catch (e) {
       expect(e.toString(), contains('children'));
     }
@@ -605,8 +607,7 @@ void main() {
       ),
     );
 
-    final RenderBox buttonBox = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     expect(buttonBox.size.height, 400.0);
   });
@@ -637,8 +638,7 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     // Subtract the 16.0px from each side. Remaining width should be allocated
     // to each child equally.
@@ -646,12 +646,9 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[0].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[1].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[2].parentData.surroundingRect.width);
+    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[0].parentData.surroundingRect.width);
+    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[1].parentData.surroundingRect.width);
+    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[2].parentData.surroundingRect.width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -677,8 +674,7 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     expect(segmentedControl.size.width.isFinite, isTrue);
   });
@@ -700,8 +696,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopRight(find.text('Child 1')).dx >
-        tester.getTopRight(find.text('Child 2')).dx, isTrue);
+    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
@@ -814,37 +809,38 @@ void main() {
     await tester.pump();
 
     expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                label: 'Child 1',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-              TestSemantics.rootChild(
-                label: 'Child 2',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                  SemanticsFlag.isSelected,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-            ],
-          ),
-          ignoreId: true,
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              label: 'Child 1',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics.rootChild(
+              label: 'Child 2',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+                SemanticsFlag.isSelected,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -967,7 +963,8 @@ void main() {
       await tester.tapAt(centerOfTwo + const Offset(10, 0));
 
       expect(sharedValue, 1);
-  });
+    },
+  );
 
   testWidgets('Animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());

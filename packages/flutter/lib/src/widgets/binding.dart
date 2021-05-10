@@ -1187,6 +1187,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
     assert(_newWidget == null);
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
     try {
       _child = updateChild(_child, widget.child, _rootChildSlot);

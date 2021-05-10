@@ -125,7 +125,7 @@ class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
 /// [BorderRadius.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class BorderRadiusTween extends Tween<BorderRadius> {
+class BorderRadiusTween extends Tween<BorderRadius?> {
   /// Creates a [BorderRadius] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -134,7 +134,7 @@ class BorderRadiusTween extends Tween<BorderRadius> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t)!;
+  BorderRadius? lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Border]s.
