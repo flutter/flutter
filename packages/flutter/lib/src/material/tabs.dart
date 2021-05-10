@@ -69,7 +69,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     this.text,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
-    this.kTextAndIconTabHeight = 72,
+    this.TextAndIconTabHeight = 72,
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(text == null || child == null),
@@ -99,7 +99,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// The widget height when there is an icon and text
   ///
   /// Useful when the combination of both overflows the default height
-  final double kTextAndIconTabHeight;
+  final double TextAndIconTabHeight;
 
   Widget _buildLabelText() {
     return child ?? Text(text!, softWrap: false, overflow: TextOverflow.fade);
@@ -118,7 +118,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
       height = _kTabHeight;
       label = icon!;
     } else {
-      height = kTextAndIconTabHeight;
+      height = TextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -151,7 +151,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   @override
   Size get preferredSize {
     if ((text != null || child != null) && icon != null)
-    	return Size.fromHeight(kTextAndIconTabHeight);
+    	return Size.fromHeight(TextAndIconTabHeight);
     else
       return const Size.fromHeight(_kTabHeight);
   }
