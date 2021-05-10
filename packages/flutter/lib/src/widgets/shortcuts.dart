@@ -607,66 +607,60 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///
 /// The [CharacterActivator] is less reliable than [SingleActivator] since
 /// it depends on the platform to report event characters. Prefer
-/// [SingleActivator] when possible.
+/// [SingleActivator] if the key combination can be described with logical keys.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// In the following example, when a key combination results in a question mark,
+/// the counter is increased:
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart preamble
+/// class IncrementIntent extends Intent {
+///   const IncrementIntent();
+/// }
+/// ```
+///
+/// ```dart
+/// int count = 0;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Shortcuts(
+///     shortcuts: const <ShortcutActivator, Intent>{
+///       CharacterActivator('?'): IncrementIntent(),
+///     },
+///     child: Actions(
+///       actions: <Type, Action<Intent>>{
+///         IncrementIntent: CallbackAction<IncrementIntent>(
+///           onInvoke: (IncrementIntent intent) => setState(() {
+///             count = count + 1;
+///           }),
+///         ),
+///       },
+///       child: Focus(
+///         autofocus: true,
+///         child: Column(
+///           children: <Widget>[
+///             const Text('Add to the counter by pressing question mark'),
+///             Text('count: $count'),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [SingleActivator], an activator that represents a single key combined
 ///    with modifiers, such as `Ctrl+C`.
 class CharacterActivator with Diagnosticable implements ShortcutActivator {
-  /// Create an activator of a trigger key and modifiers.
-  ///
-  /// The `trigger` should be the non-modifier key that is pressed after all the
-  /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
-  /// a modifier key (sided or unsided).
-  ///
-  /// The `control`, `shift`, `alt`, and `meta` flags represent whether
-  /// the respect modifier keys should be held (true) or released (false)
-  ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
-  /// In the following example, the shortcut `Control + C` increases the counter:
-  ///
-  /// ```dart imports
-  /// import 'package:flutter/services.dart';
-  /// ```
-  ///
-  /// ```dart preamble
-  /// class IncrementIntent extends Intent {
-  ///   const IncrementIntent();
-  /// }
-  /// ```
-  ///
-  /// ```dart
-  /// int count = 0;
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Shortcuts(
-  ///     shortcuts: const <ShortcutActivator, Intent>{
-  ///       SingleActivator(LogicalKeyboardKey.keyC, control: true): IncrementIntent(),
-  ///     },
-  ///     child: Actions(
-  ///       actions: <Type, Action<Intent>>{
-  ///         IncrementIntent: CallbackAction<IncrementIntent>(
-  ///           onInvoke: (IncrementIntent intent) => setState(() {
-  ///             count = count + 1;
-  ///           }),
-  ///         ),
-  ///       },
-  ///       child: Focus(
-  ///         autofocus: true,
-  ///         child: Column(
-  ///           children: <Widget>[
-  ///             const Text('Add to the counter by pressing Ctrl+C'),
-  ///             Text('count: $count'),
-  ///           ],
-  ///         ),
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
+  /// Create a [CharacterActivator] from the triggering character.
   const CharacterActivator(this.character);
 
   /// The non-modifier key of the shortcut that is pressed after all modifiers
