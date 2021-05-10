@@ -250,7 +250,7 @@ class ThemeData with Diagnosticable {
     Color? disabledColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.3.0-0.1.pre.',
+      'This feature was deprecated after v2.3.0-0.2.pre.',
     )
     Color? buttonColor,
     ButtonThemeData? buttonTheme,
@@ -589,6 +589,10 @@ class ThemeData with Diagnosticable {
     required this.unselectedWidgetColor,
     required this.disabledColor,
     required this.buttonTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
@@ -995,6 +999,10 @@ class ThemeData with Diagnosticable {
   final ToggleButtonsThemeData toggleButtonsTheme;
 
   /// The default fill color of the [Material] used in [RaisedButton]s.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.3.0-0.2.pre.',
+  )
   final Color buttonColor;
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
@@ -1340,6 +1348,10 @@ class ThemeData with Diagnosticable {
     Color? disabledColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     Color? buttonColor,
     Color? secondaryHeaderColor,
     @Deprecated(
