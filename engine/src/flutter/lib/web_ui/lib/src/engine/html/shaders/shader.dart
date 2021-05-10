@@ -40,12 +40,9 @@ class GradientSweep extends EngineGradient {
 
     initWebGl();
     // Render gradient into a bitmap and create a canvas pattern.
-    _OffScreenCanvas offScreenCanvas =
-        _OffScreenCanvas(widthInPixels, heightInPixels);
-    GlContext gl = _OffScreenCanvas.supported
-        ? GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
-        : GlContext.fromCanvas(
-            offScreenCanvas._glCanvas!, webGLVersion == WebGLVersion.webgl1);
+    OffScreenCanvas offScreenCanvas =
+        OffScreenCanvas(widthInPixels, heightInPixels);
+    GlContext gl = GlContext(offScreenCanvas);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     NormalizedGradient normalizedGradient =
@@ -222,12 +219,9 @@ class GradientLinear extends EngineGradient {
     assert(widthInPixels > 0 && heightInPixels > 0);
     initWebGl();
     // Render gradient into a bitmap and create a canvas pattern.
-    _OffScreenCanvas offScreenCanvas =
-        _OffScreenCanvas(widthInPixels, heightInPixels);
-    GlContext gl = _OffScreenCanvas.supported
-        ? GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
-        : GlContext.fromCanvas(
-            offScreenCanvas._glCanvas!, webGLVersion == WebGLVersion.webgl1);
+    OffScreenCanvas offScreenCanvas =
+        OffScreenCanvas(widthInPixels, heightInPixels);
+    GlContext gl = GlContext(offScreenCanvas);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     NormalizedGradient normalizedGradient =
@@ -493,12 +487,9 @@ class GradientRadial extends EngineGradient {
 
     initWebGl();
     // Render gradient into a bitmap and create a canvas pattern.
-    _OffScreenCanvas offScreenCanvas =
-        _OffScreenCanvas(widthInPixels, heightInPixels);
-    GlContext gl = _OffScreenCanvas.supported
-        ? GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
-        : GlContext.fromCanvas(
-            offScreenCanvas._glCanvas!, webGLVersion == WebGLVersion.webgl1);
+    OffScreenCanvas offScreenCanvas =
+        OffScreenCanvas(widthInPixels, heightInPixels);
+    GlContext gl = GlContext(offScreenCanvas);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     NormalizedGradient normalizedGradient =
