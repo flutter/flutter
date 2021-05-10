@@ -1812,18 +1812,18 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     testUsingContext('check indentation on generated files', () {
       _standardFlutterDirectoryL10nSetup(fs);
 
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
-        generator.initialize(
+        LocalizationsGenerator(
+          fileSystem: fs,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           useDeferredLoading: false,
-        );
-        generator.loadResources();
-        generator.writeOutputFiles(BufferLogger.test());
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
       } on Exception catch (e) {
         fail('Generating output files should not fail: $e');
       }

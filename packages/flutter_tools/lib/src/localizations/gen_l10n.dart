@@ -357,12 +357,7 @@ String _addSpaces(String message, {int spaces = 0}) {
         isFirstLine = false;
         return value;
       }
-      final StringBuffer newValue = StringBuffer();
-      for (int i = 0; i < spaces; i += 1) {
-        newValue.write(' ');
-      }
-      newValue.write(value);
-      return newValue.toString();
+      return value.padLeft(spaces);
     })
     .join('\n');
 }
