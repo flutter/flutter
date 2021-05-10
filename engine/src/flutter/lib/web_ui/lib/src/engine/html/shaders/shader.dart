@@ -205,7 +205,6 @@ class GradientLinear extends EngineGradient {
           matrix4.transformedX + centerX - offsetX,
           matrix4.transformedY + centerY - offsetY);
     } else {
-      print('matrix is null');
       gradient = ctx!.createLinearGradient(from.dx - offsetX, from.dy - offsetY,
           to.dx - offsetX, to.dy - offsetY);
     }
