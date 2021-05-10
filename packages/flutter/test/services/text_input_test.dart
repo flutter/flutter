@@ -179,10 +179,6 @@ void main() {
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
 
-      for(int i=0; i<TextInputType.values.length; i++) {
-        expect(TextInputType.values[i].index, i);
-      }
-
       expect(TextEditingValue.empty.toString(),
           'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
       expect(const TextEditingValue(text: 'Sample Text').toString(),
