@@ -110,16 +110,16 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    final double height;
+    final double tabHeight;
     final Widget label;
     if (icon == null) {
-      height = _kTabHeight;
+      tabHeight = _kTabHeight;
       label = _buildLabelText();
     } else if (text == null && child == null) {
-      height = _kTabHeight;
+      tabHeight = _kTabHeight;
       label = icon!;
     } else {
-      height = TextAndIconTabHeight;
+      tabHeight = height;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -134,7 +134,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     }
 
     return SizedBox(
-      height: height,
+      height: tabHeight,
       child: Center(
         child: label,
         widthFactor: 1.0,
