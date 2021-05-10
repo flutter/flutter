@@ -2095,6 +2095,22 @@ class _FifoCache<K, V> {
 /// the list. For chips, it only affects the vertical size, not the horizontal
 /// size.
 ///
+/// Here are some examples of widgets that respond to density changes:
+///
+///  * [Checkbox]
+///  * [Chip]
+///  * [ElevatedButton]
+///  * [FlatButton]
+///  * [IconButton]
+///  * [InputDecorator] (which gives density support to [TextField], etc.)
+///  * [ListTile]
+///  * [MaterialButton]
+///  * [OutlineButton]
+///  * [OutlinedButton]
+///  * [Radio]
+///  * [RawMaterialButton]
+///  * [TextButton]
+///
 /// See also:
 ///
 ///  * [ThemeData.visualDensity], where this property is used to specify the base

@@ -21,13 +21,13 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<String> lines = OutputLines<String>('Web logical map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      zipStrict(entry.webValues, entry.webNames, (int value, String name) {
-        result.writeln("  '$name': ${toHex(value, digits: 10)},");
-      });
+      for (final String name in entry.webNames) {
+        lines.add(name, "  '$name': ${toHex(entry.value, digits: 11)},");
+      }
     }
-    return result.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
