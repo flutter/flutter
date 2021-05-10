@@ -62,7 +62,7 @@ class SnippetGenerator {
   /// [SnippetType.sample] snippets.
   String interpolateTemplate(List<_ComponentTuple> injections, String template, Map<String, Object?> metadata) {
     final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
-    return template.replaceAllMapped(moustacheRegExp, (Match match) {
+    final String interpolated = template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
         // Place the description into a comment.
         final List<String> description = injections
@@ -93,6 +93,62 @@ class SnippetGenerator {
         return injections[componentIndex].mergedContent;
       }
     }).trim();
+    return _sortImports(interpolated);
+  }
+
+  String _sortImports(String code) {
+    final List<String> result = <String>[];
+    final List<String> lines = code.split('\n');
+    final List<String> imports = <String>[];
+    int firstImport = -1;
+    int lineNumber =0;
+    for (final String line in lines) {
+      if (RegExp(r'^\s*import').matchAsPrefix(line) != null) {
+        if (firstImport < 0) {
+          firstImport = lineNumber;
+        }
+        imports.add(line);
+      } else {
+        result.add(line);
+      }
+      lineNumber++;
+    }
+    if (firstImport > 0) {
+      final List<String> dartImports = <String>[];
+      final List<String> packageImports = <String>[];
+      final List<String> otherImports = <String>[];
+      final RegExp typeRegExp = RegExp(r'''import\s+['"](?<type>\w+)''');
+      imports.sort();
+      for (final String importLine in imports) {
+        final RegExpMatch? match = typeRegExp.firstMatch(importLine);
+        if (match != null) {
+          switch (match.namedGroup('type')) {
+            case 'dart':
+              dartImports.add(importLine);
+              break;
+            case 'package':
+              packageImports.add(importLine);
+              break;
+            default:
+              otherImports.add(importLine);
+              break;
+          }
+        } else {
+          otherImports.add(importLine);
+        }
+      }
+
+      // Insert the sorted sections in the proper order, with a blank line in between
+      // sections.
+      result.insertAll(firstImport, <String>[
+        ...dartImports,
+        if (dartImports.isNotEmpty) '',
+        ...packageImports,
+        if (packageImports.isNotEmpty) '',
+        ...otherImports,
+      ]);
+    }
+    return result.join('\n');
   }
 
   /// Interpolates the [injections] into an HTML skeleton file.
