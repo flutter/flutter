@@ -252,7 +252,7 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// Sets a prefix widget.
   ///
-  /// Cannot be null. Defaults to [Icon] with [IconData] [CupertinoIcons.search].
+  /// Cannot be null. Defaults to an [Icon] widget with the [CupertinoIcons.search] icon.
   final Widget prefixIcon;
 
   /// Sets the padding insets for the prefix.
