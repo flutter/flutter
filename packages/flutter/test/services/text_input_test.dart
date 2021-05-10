@@ -161,7 +161,7 @@ void main() {
       expect(url.toString(), 'TextInputType(name: TextInputType.url, signed: null, decimal: null)');
       expect(visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
       expect(name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
-      expect(streetAddress.toString(), 'TextInputType(name: TextInputType.streetAddress, signed: null, decimal: null)');
+      expect(streetAddress.toString(), 'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
 
       expect(text == number, false);
       expect(number == number2, true);
