@@ -223,7 +223,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
   /// what kind of pointer is currently being checked.
   ///
-  /// If none specified, [getSlop] will be used.
+  /// If none specified, [computeDefaultSlop] will be used.
   GestureComputeSlopCallback? computeSlop;
 
   _DragState _state = _DragState.ready;
@@ -251,13 +251,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
 
-  /// The distance pointer has to travel in global coordinate system for framework to be confident
+  /// The default distance pointer has to travel in global coordinate system for framework to be confident
   /// that this is a drag gesture. This value will be ignored when reconginzer is a single
   /// member of gesture arena.
   ///
+  /// To specify custom slop, [computeSlop] can be provided.
+  ///
   /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
   /// what kind of pointer is currently being checked.
-  double getSlop(PointerDeviceKind pointerDeviceKind);
+  double computeDefaultSlop(PointerDeviceKind pointerDeviceKind);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
@@ -337,7 +339,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-        final double distanceToAccept = computeSlop?.call(event.kind) ?? getSlop(event.kind);
+        final double distanceToAccept = computeSlop?.call(event.kind) ?? computeDefaultSlop(event.kind);
         if (_globalDistanceMoved.abs() > distanceToAccept)
           resolve(GestureDisposition.accepted);
       }
@@ -567,7 +569,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  double getSlop(PointerDeviceKind pointerDeviceKind) {
+  double computeDefaultSlop(PointerDeviceKind pointerDeviceKind) {
     return computeHitSlop(pointerDeviceKind);
   }
 
@@ -617,7 +619,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  double getSlop(PointerDeviceKind pointerDeviceKind) {
+  double computeDefaultSlop(PointerDeviceKind pointerDeviceKind) {
     return computeHitSlop(pointerDeviceKind);
   }
 
@@ -653,7 +655,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
-  double getSlop(PointerDeviceKind pointerDeviceKind) {
+  double computeDefaultSlop(PointerDeviceKind pointerDeviceKind) {
     return computePanSlop(pointerDeviceKind);
   }
 
