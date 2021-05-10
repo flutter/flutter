@@ -3533,7 +3533,7 @@ void main() {
     expect(tabBar.preferredSize, const Size.fromHeight(48.0));
   });
 
-	testWidgets('Correct size for tab bar with child', (WidgetTester tester) async {
+  testWidgets('Correct size for tab bar with child', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MaterialApp(
       home: DefaultTabController(
