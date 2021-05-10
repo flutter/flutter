@@ -43,6 +43,7 @@ Widget buildFormFrame({
   List<String>? items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
+  AlignmentGeometry buttonAlignment = AlignmentDirectional.centerStart,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -72,6 +73,7 @@ Widget buildFormFrame({
                 child: Text(item, key: ValueKey<String>(item + 'Text')),
               );
             }).toList(),
+            alignment: buttonAlignment,
           ),
         ),
       ),
@@ -815,4 +817,20 @@ void main() {
     expect(() => builder(), throwsAssertionError);
   });
 
+  testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFormFrame(
+      buttonAlignment: AlignmentDirectional.center,
+      items: <String>['one'],
+      value: 'one',
+    ));
+
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byType(IndexedStack));
+    final RenderBox selectedItemBox = tester.renderObject(find.text('one'));
+
+    // Should be center-center aligned.
+    expect(
+      buttonBox.localToGlobal(Offset(buttonBox.size.width / 2.0, buttonBox.size.height / 2.0)),
+      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
+    );
+  });
 }

@@ -3253,6 +3253,77 @@ void main() {
     expect(Focus.maybeOf(disabledItem), null, reason: 'Disabled menu item should not be able to request focus');
   });
 
+  testWidgets('alignment test', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    Widget buildFrame({AlignmentGeometry? buttonAlignment, AlignmentGeometry? menuAlignment}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              key: buttonKey,
+              alignment: buttonAlignment ?? AlignmentDirectional.centerStart,
+              value: 'enabled',
+              onChanged: onChanged,
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  alignment: buttonAlignment ?? AlignmentDirectional.centerStart,
+                  enabled: false,
+                  child: const Text('disabled'),
+                ),
+                DropdownMenuItem<String>(
+                  alignment: buttonAlignment ?? AlignmentDirectional.centerStart,
+                  value: 'enabled',
+                  child: const Text('enabled'),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    RenderBox selectedItemBox = tester.renderObject(find.text('enabled'));
+    // Default to center-start aligned.
+    expect(
+      buttonBox.localToGlobal(Offset(0.0, buttonBox.size.height / 2.0)),
+      selectedItemBox.localToGlobal(Offset(0.0, selectedItemBox.size.height / 2.0)),
+    );
+
+    await tester.pumpWidget(buildFrame(
+      buttonAlignment: AlignmentDirectional.center,
+      menuAlignment: AlignmentDirectional.center,
+    ));
+
+    selectedItemBox = tester.renderObject(find.text('enabled'));
+    // Should be center-center aligned, the icon size is 24.0 pixels.
+    expect(
+      buttonBox.localToGlobal(Offset((buttonBox.size.width -24.0) / 2.0, buttonBox.size.height / 2.0)),
+      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('enabled').hitTestable());
+    await tester.pumpAndSettle();
+
+    final RenderBox selectedItemBoxInMenu = tester.renderObjectList<RenderBox>(find.text('enabled')).toList()[1];
+    final Finder menu = find.byWidgetPredicate((Widget widget) {
+      return widget.runtimeType.toString().startsWith('_DropdownMenu<');
+    });
+    final Rect menuRect = tester.getRect(menu);
+    final Offset center = selectedItemBoxInMenu.localToGlobal(
+      Offset(selectedItemBoxInMenu.size.width / 2.0, selectedItemBoxInMenu.size.height / 2.0)
+    );
+
+    expect(center.dx, menuRect.topCenter.dx,);
+    expect(
+      center.dy,
+      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)).dy,
+    );
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
