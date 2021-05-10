@@ -6,7 +6,9 @@
 import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -140,12 +142,28 @@ void main() {
       const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
       const TextInputType signedDecimal =
         TextInputType.numberWithOptions(signed: true, decimal: true);
+      const TextInputType multiline = TextInputType.multiline;
+      const TextInputType phone = TextInputType.phone;
+      const TextInputType datetime = TextInputType.datetime;
+      const TextInputType emailAddress = TextInputType.emailAddress;
+      const TextInputType url = TextInputType.url;
+      const TextInputType visiblePassword = TextInputType.visiblePassword;
+      const TextInputType name = TextInputType.name;
+      const TextInputType streetAddress = TextInputType.streetAddress;
 
       expect(text.toString(), 'TextInputType(name: TextInputType.text, signed: null, decimal: null)');
       expect(number.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: false)');
       expect(signed.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: false)');
       expect(decimal.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: true)');
       expect(signedDecimal.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: true)');
+      expect(multiline.toString(), 'TextInputType(name: TextInputType.multiline, signed: null, decimal: null)');
+      expect(phone.toString(), 'TextInputType(name: TextInputType.phone, signed: null, decimal: null)');
+      expect(datetime.toString(), 'TextInputType(name: TextInputType.datetime, signed: null, decimal: null)');
+      expect(emailAddress.toString(), 'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null)');
+      expect(url.toString(), 'TextInputType(name: TextInputType.url, signed: null, decimal: null)');
+      expect(visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
+      expect(name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
+      expect(streetAddress.toString(), 'TextInputType(name: TextInputType.streetAddress, signed: null, decimal: null)');
 
       expect(text == number, false);
       expect(number == number2, true);
@@ -162,6 +180,13 @@ void main() {
       expect(signed.hashCode == decimal.hashCode, false);
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
+
+      for(int i=0; i<TextInputType.values.length; i++) {
+        expect(TextInputType.values[i].index, i);
+      }
+
+      expect(TextEditingValue.empty.toString(),
+          'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
     });
 
     test('TextInputClient onConnectionClosed method is called', () async {
