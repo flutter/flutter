@@ -6,8 +6,10 @@
 
 import 'dart:async';
 
+import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';
@@ -33,7 +35,12 @@ abstract class ResidentDevtoolsHandler {
 
   Future<void> hotRestart(List<FlutterDevice> flutterDevices);
 
-  Future<void> serveAndAnnounceDevTools({Uri devToolsServerAddress, List<FlutterDevice> flutterDevices});
+  Future<void> serveAndAnnounceDevTools({
+    Uri devToolsServerAddress,
+    @required List<FlutterDevice> flutterDevices,
+  });
+
+  Future<bool> launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices});
 
   Future<void> shutdown();
 }
@@ -66,8 +73,8 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     if (devToolsServerAddress != null) {
       _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
-      _served = true;
       await _devToolsLauncher.serve();
+      _served = true;
     }
     await _devToolsLauncher.ready;
     final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
@@ -79,6 +86,36 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       // report their URLs yet. Do so now.
       _residentRunner.printDebuggerList(includeObservatory: false);
     }
+  }
+
+  // This must be guaranteed not to return a Future that fails.
+  @override
+  Future<bool> launchDevToolsInBrowser({
+    @required List<FlutterDevice> flutterDevices,
+  }) async {
+    if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
+      return false;
+    }
+    if (!_served) {
+      _logger.startProgress('Waiting for Flutter DevTools to be served...');
+      bool timedOut = false;
+      await _devToolsLauncher.ready.timeout(const Duration(seconds: 15), onTimeout: () {
+        timedOut = true;
+      });
+      if (timedOut) {
+        _logger.printStatus('Timed out waiting for Flutter DevTools to be served.');
+        return false;
+      }
+    }
+    assert(activeDevToolsServer != null);
+    for (final FlutterDevice device in flutterDevices) {
+      final String devToolsUrl = activeDevToolsServer.uri?.replace(
+        queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
+      ).toString();
+      _logger.printStatus('Launching Flutter DevTools for ${device.device.name} at $devToolsUrl');
+      unawaited(Chrome.start(<String>[devToolsUrl]));
+    }
+    return true;
   }
 
   Future<void> _maybeCallDevToolsUriServiceExtension(
@@ -231,6 +268,11 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   @override
   Future<void> serveAndAnnounceDevTools({Uri devToolsServerAddress, List<FlutterDevice> flutterDevices}) async {
     return;
+  }
+
+  @override
+  Future<bool> launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) async {
+    return false;
   }
 
   @override
