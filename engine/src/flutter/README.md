@@ -3,9 +3,10 @@ Flutter Engine
 
 [![Build Status - Cirrus][]][Build status]
 
-Flutter is Google's mobile app SDK for crafting high-quality native interfaces
-in record time. Flutter works with existing code, is used by developers and
-organizations around the world, and is free and open source.
+Flutter is Google's SDK for crafting beautiful, fast user experiences for
+mobile, web, and desktop from a single codebase. Flutter works with existing
+code, is used by developers and organizations around the world, and is free
+and open source.
 
 The Flutter Engine is a portable runtime for hosting
 [Flutter](https://flutter.dev) applications.  It implements Flutter's core
