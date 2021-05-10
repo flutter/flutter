@@ -2477,10 +2477,11 @@ void main() {
     );
     final File toAnalyze = await globals.fs.file(globals.fs.path.join(dataPath, 'to_analyze.dart.test'))
         .copy(globals.fs.path.join(projectDir.path, 'lib', 'to_analyze.dart'));
+    final String relativePath = globals.fs.path.join('lib', 'to_analyze.dart');
     final List<String> expectedFailures = <String>[
-      'lib/to_analyze.dart:11:7: use_key_in_widget_constructors',
-      'lib/to_analyze.dart:20:3: prefer_const_constructors_in_immutables',
-      'lib/to_analyze.dart:31:26: use_full_hex_values_for_flutter_colors',
+      '$relativePath:11:7: use_key_in_widget_constructors',
+      '$relativePath:20:3: prefer_const_constructors_in_immutables',
+      '$relativePath:31:26: use_full_hex_values_for_flutter_colors',
     ];
     expect(expectedFailures.length, '// LINT:'.allMatches(toAnalyze.readAsStringSync()).length);
     await _analyzeProject(
@@ -2624,6 +2625,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   }
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
+    print('#$line#');
     final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
     final List<String> lineComponents = line.trim().split(analyzerSeparator);
     final String lintName = lineComponents.removeLast();
