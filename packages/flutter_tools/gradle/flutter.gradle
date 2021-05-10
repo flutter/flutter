@@ -1075,7 +1075,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--DartDefines=${dartDefines}"
             }
             if (bundleSkSLPath != null) {
-                args "-iBundleSkSLPath=${bundleSkSLPath}"
+                args "-dBundleSkSLPath=${bundleSkSLPath}"
             }
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"

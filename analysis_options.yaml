@@ -106,9 +106,7 @@ linter:
     # - curly_braces_in_flow_control_structures # not required by flutter style
     - deprecated_consistency
     # - diagnostic_describe_all_properties # not yet tested
-    # Temporarily disabled to unblock auto-roll of a new more aggressive lint in the latest SDK
-    # TODO(pq): re-enable (https://github.com/flutter/flutter/issues/81219)
-    # - directives_ordering
+    - directives_ordering
     # - do_not_use_environment # we do this commonly
     - empty_catches
     - empty_constructor_bodies

@@ -2397,8 +2397,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
     final List<RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
-      assert(renderer != null); // Failed to find ancestor in parent chain.
       renderers.add(renderer);
+      assert(renderer.parent != null); // Failed to find ancestor in parent chain.
     }
     if (ancestorSpecified)
       renderers.add(ancestor!);

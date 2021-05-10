@@ -219,6 +219,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   const PopupMenuItem({
     Key? key,
     this.value,
+    this.onTap,
     this.enabled = true,
     this.height = kMinInteractiveDimension,
     this.padding,
@@ -231,6 +232,9 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The value that will be returned by [showMenu] if this entry is selected.
   final T? value;
+
+  /// Called when the menu item is tapped.
+  final VoidCallback? onTap;
 
   /// Whether the user is permitted to select this item.
   ///
@@ -319,6 +323,8 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   /// the menu route.
   @protected
   void handleTap() {
+    widget.onTap?.call();
+
     Navigator.pop<T>(context, widget.value);
   }
 

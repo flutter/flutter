@@ -380,6 +380,134 @@ void main() {
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.name, 'product version build darwin-x64');
     });
+
+    testWithoutContext('Windows name', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'ver',
+          ],
+          stdout: 'version',
+        ),
+      ]);
+
+      final OperatingSystemUtils utils =
+          createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      expect(utils.name, 'version');
+    });
+
+    testWithoutContext('Linux name', () async {
+      const String fakeOsRelease = '''
+      NAME="Name"
+      ID=id
+      ID_LIKE=id_like
+      BUILD_ID=build_id
+      PRETTY_NAME="Pretty Name"
+      ANSI_COLOR="ansi color"
+      HOME_URL="https://home.url/"
+      DOCUMENTATION_URL="https://documentation.url/"
+      SUPPORT_URL="https://support.url/"
+      BUG_REPORT_URL="https://bug.report.url/"
+      LOGO=logo
+      ''';
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/etc').createSync();
+      fileSystem.file('/etc/os-release').writeAsStringSync(fakeOsRelease);
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Pretty Name 1.2.3-abcd');
+    });
+
+    testWithoutContext('Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing', () async {
+      const String fakeOsRelease = '''
+      NAME="Name"
+      ID=id
+      ID_LIKE=id_like
+      BUILD_ID=build_id
+      PRETTY_NAME="Pretty Name"
+      ANSI_COLOR="ansi color"
+      HOME_URL="https://home.url/"
+      DOCUMENTATION_URL="https://documentation.url/"
+      SUPPORT_URL="https://support.url/"
+      BUG_REPORT_URL="https://bug.report.url/"
+      LOGO=logo
+      ''';
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/usr/lib').createSync(recursive: true);
+      fileSystem.file('/usr/lib/os-release').writeAsStringSync(fakeOsRelease);
+
+      expect(fileSystem.file('/etc/os-release').existsSync(), false);
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Pretty Name 1.2.3-abcd');
+    });
+
+    testWithoutContext('Linux name when reading "/etc/os-release" fails', () async {
+      final FileExceptionHandler handler = FileExceptionHandler();
+      final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+
+      fileSystem.directory('/etc').createSync();
+      final File osRelease = fileSystem.file('/etc/os-release');
+
+      handler.addError(osRelease, FileSystemOp.read, const FileSystemException());
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Linux 1.2.3-abcd');
+    });
+
+    testWithoutContext('Linux name omits kernel release if undefined', () async {
+      const String fakeOsRelease = '''
+      NAME="Name"
+      ID=id
+      ID_LIKE=id_like
+      BUILD_ID=build_id
+      PRETTY_NAME="Pretty Name"
+      ANSI_COLOR="ansi color"
+      HOME_URL="https://home.url/"
+      DOCUMENTATION_URL="https://documentation.url/"
+      SUPPORT_URL="https://support.url/"
+      BUG_REPORT_URL="https://bug.report.url/"
+      LOGO=logo
+      ''';
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/etc').createSync();
+      fileSystem.file('/etc/os-release').writeAsStringSync(fakeOsRelease);
+
+      final OperatingSystemUtils utils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'linux',
+          operatingSystemVersion: 'undefinedOperatingSystemVersion',
+        ),
+        processManager: fakeProcessManager,
+      );
+      expect(utils.name, 'Pretty Name');
+    });
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {

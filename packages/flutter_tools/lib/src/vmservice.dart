@@ -168,7 +168,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device device,
-  Logger logger,
+  @required Logger logger,
 });
 
 /// Set up the VM Service client by attaching services for each of the provided
@@ -328,9 +328,9 @@ Future<FlutterVmService> connectToVmService(
 
 Future<vm_service.VmService> createVmServiceDelegate(
   Uri wsUri, {
-    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-    @required Logger logger,
-  }) async {
+  io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+  @required Logger logger,
+}) async {
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression, logger: logger);
   return vm_service.VmService(
     channel,

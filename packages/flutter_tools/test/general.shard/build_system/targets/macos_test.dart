@@ -11,8 +11,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/assets.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/convert.dart';
 
@@ -205,7 +203,7 @@ void main() {
         mode: BuildMode.debug,
       ))
       .createSync();
-    environment.inputs[kBundleSkSLPath] = 'bundle.sksl';
+    environment.defines[kBundleSkSLPath] = 'bundle.sksl';
     fileSystem.file(
       artifacts.getArtifactPath(
         Artifact.vmSnapshotData,

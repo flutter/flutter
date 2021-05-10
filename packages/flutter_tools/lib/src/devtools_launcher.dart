@@ -67,9 +67,16 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         final io.HttpClientResponse response = await request.close();
         await response.drain<void>();
         if (response.statusCode != io.HttpStatus.ok) {
+          _logger.printTrace(
+            'Skipping devtools launch because pub.dev responded with HTTP '
+            'status code ${response.statusCode} instead of ${io.HttpStatus.ok}.',
+          );
           offline = true;
         }
-      } on Exception {
+      } on Exception catch (e) {
+        _logger.printTrace(
+          'Skipping devtools launch because connecting to pub.dev failed with $e',
+        );
         offline = true;
       } on ArgumentError {
         if (!useOverrideUrl) {
