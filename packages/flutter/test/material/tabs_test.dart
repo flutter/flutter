@@ -3545,7 +3545,7 @@ void main() {
                 Tab(
                   icon: Icon(Icons.check,size: 40),
                   child: Text('1 - OK',style: TextStyle(fontSize: 25),),
-                  kTextAndIconTabHeight: 85,
+                  TextAndIconTabHeight: 85,
                 ),
               ],
             ),
