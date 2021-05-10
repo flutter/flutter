@@ -41,6 +41,9 @@ export 'engine/browser_detection.dart';
 import 'engine/html_image_codec.dart';
 export 'engine/html_image_codec.dart';
 
+import 'engine/html/offscreen_canvas.dart';
+export 'engine/html/offscreen_canvas.dart';
+
 import 'engine/html/painting.dart';
 export 'engine/html/painting.dart';
 
@@ -82,6 +85,9 @@ export 'engine/html/shaders/shader_builder.dart';
 
 import 'engine/html/shaders/vertex_shaders.dart';
 export 'engine/html/shaders/vertex_shaders.dart';
+
+import 'engine/html/shaders/webgl_context.dart';
+export 'engine/html/shaders/webgl_context.dart';
 
 import 'engine/mouse_cursor.dart';
 export 'engine/mouse_cursor.dart';
