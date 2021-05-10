@@ -1011,6 +1011,25 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
+  // Deletes the text within `selection` if it's non-empty.
+  void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
+    assert(!selection.isCollapsed);
+
+    if (_readOnly || !selection.isValid || selection.isCollapsed) {
+      return;
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textBefore = selection.textBefore(text);
+    final String textAfter = selection.textAfter(text);
+    final int cursorPosition = math.min(selection.start, selection.end);
+    final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
   // Deletes the current non-empty selection.
   //
   // Operates on the text/selection contained in textSelectionDelegate, and does
@@ -1171,8 +1190,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
+    if (_readOnly || !_selection!.isValid) {
       return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
@@ -1214,8 +1237,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteByLine(SelectionChangedCause cause) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
+    if (_readOnly || !_selection!.isValid) {
       return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
@@ -1304,8 +1331,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteForwardByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
+    if (_readOnly || !_selection!.isValid) {
       return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big word.
@@ -1347,8 +1378,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void deleteForwardByLine(SelectionChangedCause cause) {
     assert(_selection != null);
 
-    if (_readOnly || !_selection!.isValid || _deleteNonEmptySelection(cause)) {
+    if (_readOnly || !_selection!.isValid) {
       return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
     }
 
     // When the text is obscured, the whole thing is treated as one big line.
