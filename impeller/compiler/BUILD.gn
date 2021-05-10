@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+executable("compiler") {
+  output_name = "impellerc"
+
+  sources = [ "impellerc_main.cc" ]
+
+  deps = [
+    "//flutter/fml",
+    "//flutter/runtime:libdart",
+    "//third_party/shaderc_flutter",
+  ]
+}
