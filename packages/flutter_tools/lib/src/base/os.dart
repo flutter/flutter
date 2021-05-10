@@ -326,7 +326,7 @@ class _LinuxUtils extends _PosixUtils {
         // Split the operating system version which should be formatted as
         // "Linux kernelRelease build", by spaces.
         final List<String> osVersionSplitted = _platform.operatingSystemVersion.split(' ');
-        if (osVersionSplitted.length < 2) {
+        if (osVersionSplitted.length < 3) {
           // The operating system version didn't have the expected format.
           // Initialize as an empty string.
           kernelRelease = '';
