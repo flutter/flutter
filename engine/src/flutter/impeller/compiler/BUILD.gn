@@ -5,7 +5,11 @@
 executable("compiler") {
   output_name = "impellerc"
 
-  sources = [ "impellerc_main.cc" ]
+  sources = [
+    "compiler.cc",
+    "compiler.h",
+    "impellerc_main.cc",
+  ]
 
   deps = [
     "//flutter/fml",
