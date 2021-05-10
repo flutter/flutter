@@ -51,7 +51,7 @@ void main() {
     await flutter.hotReload();
 
     await evaluateHotReloadedExpresison(flutter, 24);
-  });
+  }, skip: 'Adding one more test puts this shard over the limit');
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
