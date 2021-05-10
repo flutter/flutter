@@ -158,7 +158,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///   const MyApp({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///  _MyAppState createState() => _MyAppState();
+  ///  State<MyApp> createState() => _MyAppState();
   /// }
   ///
   /// class _MyAppState extends State<MyApp> {

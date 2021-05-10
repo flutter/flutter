@@ -1117,7 +1117,7 @@ class WidgetsApp extends StatefulWidget {
   };
 
   @override
-  _WidgetsAppState createState() => _WidgetsAppState();
+  State<WidgetsApp> createState() => _WidgetsAppState();
 }
 
 class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {

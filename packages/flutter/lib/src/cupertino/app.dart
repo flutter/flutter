@@ -408,7 +408,7 @@ class CupertinoApp extends StatefulWidget {
   final ScrollBehavior? scrollBehavior;
 
   @override
-  _CupertinoAppState createState() => _CupertinoAppState();
+  State<CupertinoApp> createState() => _CupertinoAppState();
 
   /// The [HeroController] used for Cupertino page transitions.
   ///
