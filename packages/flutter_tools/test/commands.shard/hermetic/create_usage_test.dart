@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';

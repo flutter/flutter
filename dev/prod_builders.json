@@ -82,7 +82,7 @@
       "name": "Linux complex_layout_scroll_perf__devtools_memory",
       "repo": "flutter",
       "task_name": "linux_complex_layout_scroll_perf__devtools_memory",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux complex_layout_semantics_perf",
@@ -371,6 +371,12 @@
       "repo": "flutter",
       "task_name": "linux_picture_cache_perf__e2e_summary",
       "flaky": false
+    },
+    {
+      "name": "Linux platform_channels_benchmarks",
+      "repo": "flutter",
+      "task_name": "linux_platform_channels_benchmarks",
+      "flaky": true
     },
     {
       "name": "Linux platform_views_scroll_perf__timeline_summary",
@@ -1153,6 +1159,12 @@
       "flaky": false
     },
     {
+      "name": "Mac_ios platform_channels_benchmarks",
+      "repo": "flutter",
+      "task_name": "mac_ios_platform_channels_benchmarks",
+      "flaky": true
+    },
+    {
       "name": "Mac_ios platform_interaction_test_ios",
       "repo": "flutter",
       "task_name": "mac_ios_platform_interaction_test_ios",
@@ -1210,7 +1222,7 @@
       "name": "Windows build_tests_2_3",
       "repo": "flutter",
       "task_name": "win_build_tests_2_3",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Windows build_tests_3_3",

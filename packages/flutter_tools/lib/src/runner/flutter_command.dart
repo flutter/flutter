@@ -18,7 +18,6 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for deprecated option name aliases only
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';

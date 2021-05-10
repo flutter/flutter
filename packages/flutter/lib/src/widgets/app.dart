@@ -1170,7 +1170,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       assert(!_usesRouter);
       _defaultRouteInformationProvider?.dispose();
       _defaultRouteInformationProvider = null;
-      if (oldWidget == null || widget.navigatorKey != oldWidget.navigatorKey) {
+      if (_navigator == null || widget.navigatorKey != oldWidget!.navigatorKey) {
         _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
       }
       assert(_navigator != null);
