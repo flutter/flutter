@@ -16,7 +16,7 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({Key key}) : super(key: key);
+  const TestApp({Key? key}) : super(key: key);
 
   @override
   _TestAppState createState() => _TestAppState();
@@ -26,7 +26,7 @@ class _TestAppState extends State<TestApp> {
   static final List<TestStep> steps = <TestStep>[
     () => systemNavigatorPop(),
   ];
-  Future<TestStepResult> _result;
+  Future<TestStepResult>? _result;
   int _step = 0;
 
   void _executeNextStep() {

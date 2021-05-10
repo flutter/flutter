@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, ActionDispatcher dispatcher});
@@ -415,8 +414,8 @@ void main() {
               child: FocusableActionDetector(
                 enabled: enabled,
                 focusNode: focusNode,
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                shortcuts: const <ShortcutActivator, Intent>{
+                  SingleActivator(LogicalKeyboardKey.enter): intent,
                 },
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
@@ -790,8 +789,8 @@ void main() {
               child: FocusableActionDetector(
                 enabled: enabled,
                 focusNode: focusNode,
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                shortcuts: const <ShortcutActivator, Intent>{
+                  SingleActivator(LogicalKeyboardKey.enter): intent,
                 },
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
@@ -921,48 +920,49 @@ void main() {
     });
 
     testWidgets(
-        'FocusableActionDetector can prevent its descendants from being focusable',
-        (WidgetTester tester) async {
-      final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
+      'FocusableActionDetector can prevent its descendants from being focusable',
+      (WidgetTester tester) async {
+        final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: FocusableActionDetector(
-            descendantsAreFocusable: true,
-            child: MaterialButton(
-              focusNode: buttonNode,
-              child: const Text('Test'),
-              onPressed: () {},
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FocusableActionDetector(
+              descendantsAreFocusable: true,
+              child: MaterialButton(
+                focusNode: buttonNode,
+                child: const Text('Test'),
+                onPressed: () {},
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Button is focusable
-      expect(buttonNode.hasFocus, isFalse);
-      buttonNode.requestFocus();
-      await tester.pump();
-      expect(buttonNode.hasFocus, isTrue);
+        // Button is focusable
+        expect(buttonNode.hasFocus, isFalse);
+        buttonNode.requestFocus();
+        await tester.pump();
+        expect(buttonNode.hasFocus, isTrue);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: FocusableActionDetector(
-            descendantsAreFocusable: false,
-            child: MaterialButton(
-              focusNode: buttonNode,
-              child: const Text('Test'),
-              onPressed: () {},
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FocusableActionDetector(
+              descendantsAreFocusable: false,
+              child: MaterialButton(
+                focusNode: buttonNode,
+                child: const Text('Test'),
+                onPressed: () {},
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Button is NOT focusable
-      expect(buttonNode.hasFocus, isFalse);
-      buttonNode.requestFocus();
-      await tester.pump();
-      expect(buttonNode.hasFocus, isFalse);
-    });
+        // Button is NOT focusable
+        expect(buttonNode.hasFocus, isFalse);
+        buttonNode.requestFocus();
+        await tester.pump();
+        expect(buttonNode.hasFocus, isFalse);
+      },
+    );
   });
 
   group('Diagnostics', () {

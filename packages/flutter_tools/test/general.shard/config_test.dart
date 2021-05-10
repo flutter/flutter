@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
@@ -16,9 +14,9 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 
 void main() {
-  Config config;
-  MemoryFileSystem memoryFileSystem;
-  FakePlatform fakePlatform;
+  late Config config;
+  late MemoryFileSystem memoryFileSystem;
+  late FakePlatform fakePlatform;
 
   setUp(() {
     memoryFileSystem = MemoryFileSystem.test();
@@ -35,6 +33,7 @@ void main() {
       platform: fakePlatform,
     );
   });
+
   testWithoutContext('Config get set value', () async {
     expect(config.getValue('foo'), null);
     config.setValue('foo', 'bar');

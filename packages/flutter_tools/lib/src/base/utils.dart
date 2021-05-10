@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:intl/intl.dart';
 import 'package:file/file.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';

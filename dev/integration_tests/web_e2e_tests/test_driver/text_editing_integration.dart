@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:html';
 import 'dart:js_util' as js_util;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:web_e2e_tests/text_editing_main.dart' as app;
-import 'package:flutter/material.dart';
-
 import 'package:integration_test/integration_test.dart';
+import 'package:web_e2e_tests/text_editing_main.dart' as app;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +19,9 @@ void main() {
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -38,7 +38,7 @@ void main() {
 
     // Change the value of the TextFormField.
     final TextFormField textFormField = tester.widget(finder);
-    textFormField.controller.text = 'New Value';
+    textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
   });
@@ -47,6 +47,9 @@ void main() {
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('empty-input'));
@@ -63,7 +66,7 @@ void main() {
 
     // Change the value of the TextFormField.
     final TextFormField textFormField = tester.widget(finder);
-    textFormField.controller.text = 'New Value';
+    textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
   });
@@ -72,6 +75,9 @@ void main() {
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // This text will show no-enter initially. It will have 'enter-pressed'
     // after `onFieldSubmitted` of TextField is triggered.
@@ -106,6 +112,9 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
+
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -137,6 +146,9 @@ void main() {
   testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -185,6 +197,9 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
+
     // Select something from the selectable text.
     final Finder finder = find.byKey(const Key('selectable'));
     expect(finder, findsOneWidget);
@@ -209,8 +224,8 @@ void main() {
     expect(input.hasAttribute('readonly'), isTrue);
 
     // Make sure the entire text is selected.
-    TextRange range =
-        TextRange(start: input.selectionStart, end: input.selectionEnd);
+    TextRange? range =
+        TextRange(start: input.selectionStart!, end: input.selectionEnd!);
     expect(range.textInside(text), text);
 
     // Double tap to select the first word.
@@ -223,7 +238,7 @@ void main() {
     await gesture.up();
     await gesture.down(firstWordOffset);
     await gesture.up();
-    range = TextRange(start: input.selectionStart, end: input.selectionEnd);
+    range = TextRange(start: input.selectionStart!, end: input.selectionEnd!);
     expect(range.textInside(text), 'Lorem');
 
     // Double tap to select the last word.
@@ -236,14 +251,14 @@ void main() {
     await gesture.up();
     await gesture.down(lastWordOffset);
     await gesture.up();
-    range = TextRange(start: input.selectionStart, end: input.selectionEnd);
+    range = TextRange(start: input.selectionStart!, end: input.selectionEnd!);
     expect(range.textInside(text), 'amet');
   });
 }
 
 KeyboardEvent dispatchKeyboardEvent(
     EventTarget target, String type, Map<String, dynamic> args) {
-  final dynamic jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent');
+  final Object jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Object;
   final List<dynamic> eventArgs = <dynamic>[
     type,
     args,

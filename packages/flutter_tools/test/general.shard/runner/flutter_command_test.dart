@@ -15,16 +15,17 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 void main() {
@@ -86,7 +87,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
       await runner.run(<String>['deprecated']);
 
-      expect(testLogger.statusText,
+      expect(testLogger.errorText,
         contains('The "deprecated" command is deprecated and will be removed in '
             'a future version of Flutter.'));
       expect(flutterCommand.usage,
@@ -539,6 +540,55 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('use packagesPath to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.packagesPath, 'foo');
+    });
+
+    testUsingContext('dds options', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds-port=1']);
+      expect(ddsCommand.enableDds, isTrue);
+      expect(ddsCommand.ddsPort, 1);
+    });
+
+    testUsingContext('dds options --dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds']);
+      expect(ddsCommand.enableDds, isTrue);
+    });
+
+    testUsingContext('dds options --no-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--no-dds']);
+      expect(ddsCommand.enableDds, isFalse);
+    });
+
+    testUsingContext('dds options --disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--disable-dds']);
+      expect(ddsCommand.enableDds, isFalse);
+    });
+
+    testUsingContext('dds options --no-disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--no-disable-dds']);
+      expect(ddsCommand.enableDds, isTrue);
+    });
+
+    testUsingContext('dds options --dds --disable-dds', () async {
+      final FakeDdsCommand ddsCommand = FakeDdsCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
+      await runner.run(<String>['test', '--dds', '--disable-dds']);
+      expect(() => ddsCommand.enableDds, throwsToolExit());
+    });
   });
 }
 
@@ -551,23 +601,6 @@ class FakeDeprecatedCommand extends FlutterCommand {
 
   @override
   bool get deprecated => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
-}
-
-class FakeNullSafeCommand extends FlutterCommand {
-  FakeNullSafeCommand() {
-    addEnableExperimentation(hide: false);
-  }
-
-  @override
-  String get description => 'test null safety';
-
-  @override
-  String get name => 'safety';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -621,6 +654,23 @@ class FakeReportingNullSafetyCommand extends FlutterCommand {
   }
 }
 
+class FakeDdsCommand extends FlutterCommand {
+  FakeDdsCommand() {
+    addDdsOptions(verboseHelp: false);
+  }
+
+  @override
+  String get description => 'test';
+
+  @override
+  String get name => 'test';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
 class MockProcessInfo extends Mock implements ProcessInfo {}
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
 
@@ -659,3 +709,17 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class MockCache extends Mock implements Cache {}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+  }) async { }
+}

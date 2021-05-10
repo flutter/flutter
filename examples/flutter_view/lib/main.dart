@@ -68,7 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Center(
               child: Text(
                 'Platform button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-                style: const TextStyle(fontSize: 17.0)),
+                style: const TextStyle(fontSize: 17.0),
+              ),
             ),
           ),
           Container(

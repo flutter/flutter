@@ -2,38 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/roll_dev.dart' show rollDev;
+import 'package:dev_tools/version.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/roll_dev.dart' show rollDev;
-import 'package:dev_tools/repository.dart';
-import 'package:dev_tools/version.dart';
-
 import './common.dart';
 
 void main() {
   group('roll-dev', () {
-    TestStdio stdio;
-    Platform platform;
-    ProcessManager processManager;
-    FileSystem fileSystem;
+    late TestStdio stdio;
+    late Platform platform;
+    late ProcessManager processManager;
+    late FileSystem fileSystem;
     const String usageString = 'Usage: flutter conductor.';
 
-    Checkouts checkouts;
-    FrameworkRepository frameworkUpstream;
-    FrameworkRepository framework;
+    late Checkouts checkouts;
+    late FrameworkRepository frameworkUpstream;
+    late FrameworkRepository framework;
+    late Directory tempDir;
 
     setUp(() {
       platform = const LocalPlatform();
       fileSystem = const LocalFileSystem();
       processManager = const LocalProcessManager();
       stdio = TestStdio(verbose: true);
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_checkouts.');
       checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: localFlutterRoot.parent,
+        parentDirectory: tempDir,
         platform: platform,
         processManager: processManager,
         stdio: stdio,
@@ -45,7 +45,7 @@ void main() {
       framework = FrameworkRepository(
         checkouts,
         name: 'test-framework',
-        upstream: 'file://${frameworkUpstream.checkoutDirectory.path}/',
+        fetchRemote: Remote(name: RemoteName.upstream, url: 'file://${frameworkUpstream.checkoutDirectory.path}/'),
       );
     });
 
@@ -59,7 +59,7 @@ void main() {
         commit: latestCommit,
         // Ensure this test passes after a dev release with hotfixes
         force: true,
-        remote: 'origin',
+        remote: 'upstream',
       );
 
       expect(
@@ -96,7 +96,7 @@ void main() {
         commit: latestCommit,
         // Ensure this test passes after a dev release with hotfixes
         force: true,
-        remote: 'origin',
+        remote: 'upstream',
       );
 
       expect(
@@ -124,7 +124,7 @@ void main() {
       expect(finalVersion.m, 0);
       expect(finalVersion.n, 0);
       expect(finalVersion.commits, null);
-    });
+    }, skip: true);
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });

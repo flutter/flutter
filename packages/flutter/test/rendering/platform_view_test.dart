@@ -47,7 +47,7 @@ void main() {
       final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
           listener: () {
             ++semanticsUpdateCount;
-          }
+          },
       );
       layout(tree, phase: EnginePhase.flushSemantics);
       // Initial semantics update

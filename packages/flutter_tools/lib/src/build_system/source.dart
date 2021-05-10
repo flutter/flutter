@@ -193,6 +193,34 @@ class SourceVisitor implements ResolvedFiles {
     }
     sources.add(environment.fileSystem.file(path));
   }
+
+  /// Visit a [Source] which is defined by an [HostArtifact] from the flutter cache.
+  ///
+  /// If the [Artifact] points to a directory then all child files are included.
+  /// To increase the performance of builds that use a known revision of Flutter,
+  /// these are updated to point towards the engine.version file instead of
+  /// the artifact itself.
+  void visitHostArtifact(HostArtifact artifact) {
+    // This is not a local engine.
+    if (environment.engineVersion != null) {
+      sources.add(environment.flutterRootDir
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version'),
+      );
+      return;
+    }
+    final FileSystemEntity entity = environment.artifacts.getHostArtifact(artifact);
+    if (entity is Directory) {
+      sources.addAll(<File>[
+        for (FileSystemEntity entity in entity.listSync(recursive: true))
+          if (entity is File)
+            entity,
+      ]);
+      return;
+    }
+    sources.add(entity as File);
+  }
 }
 
 /// A description of an input or output of a [Target].
@@ -200,10 +228,16 @@ abstract class Source {
   /// This source is a file URL which contains some references to magic
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
+
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
   const factory Source.artifact(Artifact artifact, {TargetPlatform platform, BuildMode mode}) = _ArtifactSource;
+
+  /// The source is provided by an [HostArtifact].
+  ///
+  /// If [artifact] points to a directory then all child files are included.
+  const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -240,6 +274,18 @@ class _ArtifactSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
+
+  @override
+  bool get implicit => false;
+}
+
+class _HostArtifactSource implements Source {
+  const _HostArtifactSource(this.artifact);
+
+  final HostArtifact artifact;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
 
   @override
   bool get implicit => false;

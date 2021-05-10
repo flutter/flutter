@@ -47,7 +47,7 @@ void main() {
   AndroidSdk androidSdk;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     fileSystem = MemoryFileSystem.test();
     androidSdk = FakeAndroidSdk();
   });

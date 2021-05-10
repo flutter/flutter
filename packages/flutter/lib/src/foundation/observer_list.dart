@@ -48,6 +48,13 @@ class ObserverList<T> extends Iterable<T> {
     return _list.remove(item);
   }
 
+  /// Removes all items from the list.
+  void clear() {
+    _isDirty = false;
+    _list.clear();
+    _set.clear();
+  }
+
   @override
   bool contains(Object? element) {
     if (_list.length < 3)

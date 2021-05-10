@@ -11,8 +11,8 @@ import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -38,6 +38,7 @@ void main() {
       processManager: globals.processManager,
       platform: FakePlatform(),
       engineVersion: 'invalidEngineVersion',
+      generateDartPluginRegistry: false,
     );
     return result;
   }

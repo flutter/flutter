@@ -10,7 +10,7 @@ import 'rendering_tester.dart';
 void main() {
   test('Stack can layout with top, right, bottom, left 0.0', () {
     final RenderBox size = RenderConstrainedBox(
-      additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+      additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
     );
 
     final RenderBox red = RenderDecoratedBox(
@@ -91,18 +91,18 @@ void main() {
   group('RenderIndexedStack', () {
     test('visitChildrenForSemantics only visits displayed child', () {
       final RenderBox child1 = RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
       );
       final RenderBox child2 = RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
       );
       final RenderBox child3 = RenderConstrainedBox(
-          additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0))
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
       );
       final RenderBox stack = RenderIndexedStack(
-          index: 1,
-          textDirection: TextDirection.ltr,
-          children: <RenderBox>[child1, child2, child3],
+        index: 1,
+        textDirection: TextDirection.ltr,
+        children: <RenderBox>[child1, child2, child3],
       );
 
       final List<RenderObject> visitedChildren = <RenderObject>[];

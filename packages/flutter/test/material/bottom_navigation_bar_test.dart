@@ -1141,23 +1141,23 @@ void main() {
             child: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(
-                    builder: (BuildContext context) {
-                      return Scaffold(
-                        bottomNavigationBar: BottomNavigationBar(
-                          items: const <BottomNavigationBarItem>[
-                            BottomNavigationBarItem(
-                              label: label,
-                              icon: Icon(Icons.ac_unit),
-                              tooltip: label,
-                            ),
-                            BottomNavigationBarItem(
-                              label: 'B',
-                              icon: Icon(Icons.battery_alert),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      bottomNavigationBar: BottomNavigationBar(
+                        items: const <BottomNavigationBarItem>[
+                          BottomNavigationBarItem(
+                            label: label,
+                            icon: Icon(Icons.ac_unit),
+                            tooltip: label,
+                          ),
+                          BottomNavigationBarItem(
+                            label: 'B',
+                            icon: Icon(Icons.battery_alert),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -1684,7 +1684,8 @@ void main() {
       expect(find.text('Green'), findsOneWidget);
       expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
       expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-    });
+    },
+  );
 
   testWidgets(
     'BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
@@ -1721,7 +1722,8 @@ void main() {
       expect(find.text('Green'), findsOneWidget);
       expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
       expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-    });
+    },
+  );
 
   testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1933,7 +1935,7 @@ void main() {
 
       await tester.pumpWidget(feedbackBoilerplate(
         enableFeedbackTheme: enableFeedbackTheme,
-        enableFeedback: enableFeedback
+        enableFeedback: enableFeedback,
       ));
 
       await tester.tap(find.byType(InkResponse).first);
@@ -1943,8 +1945,7 @@ void main() {
     });
   });
 
-  testWidgets('BottomNavigationBar excludes semantics',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar excludes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1984,7 +1985,7 @@ void main() {
                             TestSemantics(
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isSelected,
-                                SemanticsFlag.isFocusable
+                                SemanticsFlag.isFocusable,
                               ],
                               actions: <SemanticsAction>[SemanticsAction.tap],
                               label: 'A\nTab 1 of 2',

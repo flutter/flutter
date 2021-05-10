@@ -43,7 +43,7 @@ void main() {
   FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   Cache createCache(Platform platform) {
@@ -589,6 +589,20 @@ void main() {
     ]));
   });
 
+  testWithoutContext('Windows UWP desktop artifacts include profile, debug, and release artifacts', () {
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
+    final WindowsUwpEngineArtifacts artifacts = WindowsUwpEngineArtifacts(
+      cache,
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+      contains(contains('debug')),
+    ]));
+  });
+
   testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
@@ -870,6 +884,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           '/cache/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
@@ -893,7 +908,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.empty(),
       AndroidSdk: () => null // Android SDK was not located.
     });
   });

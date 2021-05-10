@@ -11,7 +11,7 @@ void main() {
 }
 
 class DriverTestApp extends StatefulWidget {
-  const DriverTestApp({Key key}) : super(key: key);
+  const DriverTestApp({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -59,9 +59,9 @@ class DriverTestAppState extends State<DriverTestApp> {
                 DropdownButton<Letter>(
                   key: const ValueKey<String>('dropdown'),
                   value: _selectedValue,
-                  onChanged: (Letter newValue) {
+                  onChanged: (Letter? newValue) {
                     setState(() {
-                      _selectedValue = newValue;
+                      _selectedValue = newValue!;
                     });
                   },
                   items: const <DropdownMenuItem<Letter>>[

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -223,7 +222,7 @@ Future<String?> _chooseSigningIdentity(
   }
 
   if (validCodeSigningIdentities.length > 1) {
-    final String savedCertChoice = config.getValue('ios-signing-cert') as String;
+    final String? savedCertChoice = config.getValue('ios-signing-cert') as String?;
 
     if (savedCertChoice != null) {
       if (validCodeSigningIdentities.contains(savedCertChoice)) {

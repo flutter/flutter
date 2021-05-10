@@ -493,6 +493,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.focusNode,
     this.onSelected,
     this.textEditingController,
+    this.initialValue,
   }) : assert(displayStringForOption != null),
        assert(
          fieldViewBuilder != null
@@ -502,6 +503,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert(optionsBuilder != null),
        assert(optionsViewBuilder != null),
        assert((focusNode == null) == (textEditingController == null)),
+       assert(
+         !(textEditingController != null && initialValue != null),
+         'textEditingController and initialValue cannot be simultaneously defined.',
+       ),
        super(key: key);
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
@@ -661,6 +666,16 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// If this parameter is not null, then [focusNode] must also be not null.
   final TextEditingController? textEditingController;
 
+  /// {@template flutter.widgets.RawAutocomplete.initialValue}
+  /// The initial value to use for the text field.
+  /// {@endtemplate}
+  ///
+  /// Setting the initial value does not notify [textEditingController]'s
+  /// listeners, and thus will not cause the options UI to appear.
+  ///
+  /// This parameter is ignored if [textEditingController] is defined.
+  final TextEditingValue? initialValue;
+
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
   ///
@@ -811,7 +826,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   void initState() {
     super.initState();
-    _textEditingController = widget.textEditingController ?? TextEditingController();
+    _textEditingController = widget.textEditingController ?? TextEditingController.fromValue(widget.initialValue);
     _textEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);

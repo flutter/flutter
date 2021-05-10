@@ -695,7 +695,7 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// The `position` argument may be null, which will be forwarded to the
   /// `hitTest` callback as-is. Using null as the position can be useful if
-  /// the child speaks a different hit test protocol then the parent and the
+  /// the child speaks a different hit test protocol than the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
   /// The function returns the return value of the `hitTest` callback.
@@ -706,7 +706,6 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// ```dart
   /// abstract class RenderFoo extends RenderBox {
-  ///
   ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
   ///
   ///   @override

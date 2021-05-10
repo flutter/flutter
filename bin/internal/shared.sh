@@ -143,6 +143,12 @@ function upgrade_flutter () (
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
       VERBOSITY="--verbosity=normal"
     fi
+    # Increase verbosity for Flutter's LUCI CI infra.
+    if [[ -n "$LUCI_CI" ]]; then
+      PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
+      VERBOSITY="--verbosity=all"
+    fi
+
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
 
     if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then

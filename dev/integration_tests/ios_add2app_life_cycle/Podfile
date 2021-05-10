@@ -6,10 +6,10 @@ load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'ios_add2app' do
   install_all_flutter_pods(flutter_application_path)
+  pod 'EarlGreyApp'
 end
 
 target 'ios_add2appTests' do
-  inherit! :search_paths
   install_flutter_engine_pod
-  pod 'EarlGrey'
+  pod 'EarlGreyTest'
 end

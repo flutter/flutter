@@ -17,19 +17,20 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-          drawer: Container(
-            color: Colors.blue,
-          ),
-          onDrawerChanged: (bool isOpen) {
-            isDrawerOpen = isOpen;
-          },
-          endDrawer: Container(
-            color: Colors.green,
-          ),
-          onEndDrawerChanged: (bool isOpen) {
-            isEndDrawerOpen = isOpen;
-          },
-          body: Container()),
+        drawer: Container(
+          color: Colors.blue,
+        ),
+        onDrawerChanged: (bool isOpen) {
+          isDrawerOpen = isOpen;
+        },
+        endDrawer: Container(
+          color: Colors.green,
+        ),
+        onEndDrawerChanged: (bool isOpen) {
+          isEndDrawerOpen = isOpen;
+        },
+        body: Container(),
+      ),
     ));
 
     final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
@@ -783,7 +784,7 @@ void main() {
                     builder: (BuildContext context) {
                       mediaQueryTop = MediaQuery.of(context).padding.top;
                       return Container(key: bodyKey);
-                    }
+                    },
                   ),
                 );
               },
@@ -1716,7 +1717,7 @@ void main() {
                 title: const Text('Title'),
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -1841,7 +1842,7 @@ void main() {
             final ThemeData themeData = Theme.of(context);
             return Container(
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: themeData.disabledColor))
+                border: Border(top: BorderSide(color: themeData.disabledColor)),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(32.0),
@@ -1867,11 +1868,12 @@ void main() {
             '   showBottomSheet().\n',
           ));
         }
-      }
+      },
     );
 
-    testWidgets('didUpdate bottomSheet while a previous bottom sheet is still displayed',
-        (WidgetTester tester) async {
+    testWidgets(
+      'didUpdate bottomSheet while a previous bottom sheet is still displayed',
+      (WidgetTester tester) async {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
         const Key buttonKey = Key('button');
         final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
@@ -1889,11 +1891,11 @@ void main() {
                     onPressed: () {
                       state += 1;
                       setState(() {});
-                    }
+                    },
                   ),
                   bottomSheet: state == 0 ? null : const SizedBox(),
                 );
-              }
+              },
             ),
           ),
         );
@@ -1918,9 +1920,10 @@ void main() {
           '   displayed with showBottomSheet() is still visible.\n'
           '   Use the PersistentBottomSheetController returned by\n'
           '   showBottomSheet() to close the old bottom sheet before creating a\n'
-          '   Scaffold with a (non null) bottomSheet.\n'
+          '   Scaffold with a (non null) bottomSheet.\n',
         );
-    });
+      },
+    );
 
     testWidgets('Call to Scaffold.of() without context', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1966,7 +1969,8 @@ void main() {
         ),
       );
       expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
-      expect(error.toStringDeep(),
+      expect(
+        error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.of() called with a context that does not contain a\n'
         '   Scaffold.\n'
@@ -1989,7 +1993,7 @@ void main() {
         '   to the Scaffold, then use the key.currentState property to obtain\n'
         '   the ScaffoldState rather than using the Scaffold.of() function.\n'
         '   The context used was:\n'
-        '     Builder\n'
+        '     Builder\n',
       );
       await tester.pumpAndSettle();
     });
@@ -2035,7 +2039,8 @@ void main() {
         ),
       );
       expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
-      expect(error.toStringDeep(),
+      expect(
+        error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.geometryOf() called with a context that does not contain\n'
         '   a Scaffold.\n'
@@ -2054,7 +2059,7 @@ void main() {
         '   new inner widgets, and then in these inner widgets you would use\n'
         '   Scaffold.geometryOf().\n'
         '   The context used was:\n'
-        '     Builder\n'
+        '     Builder\n',
       );
       await tester.pumpAndSettle();
     });
@@ -2111,7 +2116,7 @@ void main() {
                   width: 100.0,
                 ),
               );
-            }
+            },
           ),
         ),
       ),
@@ -2148,7 +2153,7 @@ void main() {
                   width: 100.0,
                 ),
               );
-            }
+            },
           ),
         ),
       ),
@@ -2190,13 +2195,16 @@ void main() {
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
+      '     _ScrollNotificationObserverScope\n'
+      '     NotificationListener<ScrollNotification>\n'
+      '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
       '     MediaQuery\n'
       '     Directionality\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-      '   MaterialApp at the top of your application widget tree.\n'
+      '   MaterialApp at the top of your application widget tree.\n',
     ));
   });
 
@@ -2231,7 +2239,7 @@ void main() {
                                 Navigator.pop(context, null);
                               },
                               child: const Text('Pop route'),
-                            )
+                            ),
                           ],
                         ),
                       );
@@ -2243,7 +2251,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     ));
 
     expect(find.text(snackBarContent), findsNothing);
@@ -2281,7 +2289,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: cache
+      painter: cache,
     );
   }
 

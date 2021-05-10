@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Sliver with keep alive without key - should dispose after reordering', (WidgetTester tester) async {
@@ -278,7 +278,7 @@ void main() {
       const WidgetTest2(text: 'child 2', keepAlive: true),
     ];
     await tester.pumpWidget(
-        SwitchingChildListTest(children: childList, viewportFraction: 0.1)
+        SwitchingChildListTest(children: childList, viewportFraction: 0.1),
     );
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
     final _WidgetTest1State state1 = tester.state(find.byType(WidgetTest1));
@@ -289,22 +289,22 @@ void main() {
 
     childList = createSwitchedChildList(childList, 0, 2);
     await tester.pumpWidget(
-        SwitchingChildListTest(children: childList, viewportFraction: 0.1)
+        SwitchingChildListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 0, 1);
     await tester.pumpWidget(
-        SwitchingChildListTest(children: childList, viewportFraction: 0.1)
+        SwitchingChildListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 1, 2);
     await tester.pumpWidget(
-        SwitchingChildListTest(children: childList, viewportFraction: 0.1)
+        SwitchingChildListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 0, 1);
     await tester.pumpWidget(
-        SwitchingChildListTest(children: childList, viewportFraction: 0.1)
+        SwitchingChildListTest(children: childList, viewportFraction: 0.1),
     );
 
     expect(state0.hasBeenDisposed, false);
@@ -319,7 +319,7 @@ void main() {
       WidgetTest2(text: 'child 2', key: UniqueKey()),
     ];
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
     final _WidgetTest1State state1 = tester.state(find.byType(WidgetTest1));
@@ -330,32 +330,32 @@ void main() {
 
     childList = createSwitchedChildList(childList, 0, 2);
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 1, 2);
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 1, 2);
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 0, 1);
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 0, 2);
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
 
     childList = createSwitchedChildList(childList, 0, 1);
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
     expect(state0.hasBeenDisposed, false);
     expect(state1.hasBeenDisposed, true);
@@ -369,7 +369,7 @@ void main() {
       WidgetTest2(text: 'child 2', key: UniqueKey()),
     ];
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
     final _WidgetTest1State state1 = tester.state(find.byType(WidgetTest1));
@@ -381,7 +381,7 @@ void main() {
     childList = createSwitchedChildList(childList, 0, 1);
     childList.removeAt(2);
     await tester.pumpWidget(
-        SwitchingSliverListTest(children: childList, viewportFraction: 0.1)
+        SwitchingSliverListTest(children: childList, viewportFraction: 0.1),
     );
     expect(find.text('child 0'), findsOneWidget);
     expect(find.text('child 1'), findsOneWidget);

@@ -4,6 +4,8 @@
 
 import 'framework.dart';
 import 'navigator.dart';
+import 'restoration.dart';
+import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
 
 /// An optional container for grouping together multiple form field widgets
@@ -170,7 +172,7 @@ class FormState extends State<Form> {
     widget.onChanged?.call();
 
     _hasInteractedByUser = _fields
-        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser);
+        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
     _forceRebuild();
   }
 
@@ -331,14 +333,15 @@ class FormField<T> extends StatefulWidget {
     this.autovalidate = false,
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
+    this.restorationId,
   }) : assert(builder != null),
        assert(
          autovalidate == false ||
          autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.',
        ),
-        autovalidateMode = autovalidateMode ??
-          (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
+       autovalidateMode = autovalidateMode ??
+         (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
@@ -399,16 +402,30 @@ class FormField<T> extends StatefulWidget {
   )
   final bool autovalidate;
 
+  /// Restoration ID to save and restore the state of the form field.
+  ///
+  /// Setting the restoration ID to a non-null value results in whether or not
+  /// the form field validation persists.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
+
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
 }
 
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
 /// for use in constructing the form field's widget.
-class FormFieldState<T> extends State<FormField<T>> {
-  T? _value;
-  String? _errorText;
-  bool _hasInteractedByUser = false;
+class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
+  late T? _value = widget.initialValue;
+  final RestorableStringN _errorText = RestorableStringN(null);
+  final RestorableBool _hasInteractedByUser = RestorableBool(false);
 
   /// The current value of the form field.
   T? get value => _value;
@@ -416,10 +433,10 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// The current validation error returned by the [FormField.validator]
   /// callback, or null if no errors have been triggered. This only updates when
   /// [validate] is called.
-  String? get errorText => _errorText;
+  String? get errorText => _errorText.value;
 
   /// True if this field has any validation errors.
-  bool get hasError => _errorText != null;
+  bool get hasError => _errorText.value != null;
 
   /// True if the current value is valid.
   ///
@@ -440,8 +457,8 @@ class FormFieldState<T> extends State<FormField<T>> {
   void reset() {
     setState(() {
       _value = widget.initialValue;
-      _hasInteractedByUser = false;
-      _errorText = null;
+      _hasInteractedByUser.value = false;
+      _errorText.value = null;
     });
     Form.of(context)?._fieldDidChange();
   }
@@ -462,7 +479,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   void _validate() {
     if (widget.validator != null)
-      _errorText = widget.validator!(_value);
+      _errorText.value = widget.validator!(_value);
   }
 
   /// Updates this field's state to the new value. Useful for responding to
@@ -474,7 +491,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   void didChange(T? value) {
     setState(() {
       _value = value;
-      _hasInteractedByUser = true;
+      _hasInteractedByUser.value = true;
     });
     Form.of(context)?._fieldDidChange();
   }
@@ -492,9 +509,12 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _value = widget.initialValue;
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_errorText, 'error_text');
+    registerForRestoration(_hasInteractedByUser, 'has_interacted_by_user');
   }
 
   @override
@@ -511,7 +531,7 @@ class FormFieldState<T> extends State<FormField<T>> {
           _validate();
           break;
         case AutovalidateMode.onUserInteraction:
-          if (_hasInteractedByUser) {
+          if (_hasInteractedByUser.value) {
             _validate();
           }
           break;

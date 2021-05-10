@@ -69,6 +69,9 @@ class DevelopmentArtifact {
   /// Artifacts required for the Flutter Runner.
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', feature: flutterFuchsiaFeature);
 
+  /// Artifacts required for desktop Windows UWP.
+  static const DevelopmentArtifact windowsUwp = DevelopmentArtifact._('winuwp', feature: windowsUwpEmbedding);
+
   /// Artifacts required for any development platform.
   ///
   /// This does not need to be explicitly returned from requiredArtifacts as
@@ -88,6 +91,7 @@ class DevelopmentArtifact {
     fuchsia,
     universal,
     flutterRunner,
+    windowsUwp,
   ];
 
   @override

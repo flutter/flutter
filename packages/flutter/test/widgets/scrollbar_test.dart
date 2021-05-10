@@ -558,7 +558,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-        )
+        ),
     );
 
     // Tap on the track area below the thumb.
@@ -573,7 +573,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 240.0, 800.0, 600.0),
           color: const Color(0x66BCBCBC),
-      )
+      ),
     );
 
     // Tap on the track area above the thumb.
@@ -588,7 +588,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-      )
+      ),
     );
   });
 
@@ -600,7 +600,7 @@ void main() {
           data: MediaQueryData(),
           child: RawScrollbar(
             child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -658,7 +658,7 @@ void main() {
           data: MediaQueryData(),
           child: RawScrollbar(
             child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -710,7 +710,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -765,7 +765,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -880,7 +880,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -922,6 +922,7 @@ void main() {
     // Move back to reset.
     await dragScrollbarGesture.moveBy(const Offset(0.0, -scrollAmount));
     await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(RawScrollbar),
@@ -999,7 +1000,7 @@ void main() {
               isAlwaysShown: true,
               controller: scrollController,
               child: const SingleChildScrollView(
-                  child: SizedBox(width: 4000.0, height: 4000.0)
+                child: SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
@@ -1151,36 +1152,5 @@ void main() {
           color: const Color(0x66bcbcbc),
         ),
     );
-  });
-
-  testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    Widget buildFrame(double height) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: RawScrollbar(
-            controller: scrollController,
-            isAlwaysShown: true,
-            child: SingleChildScrollView(
-                controller: scrollController,
-                child: SizedBox(width: double.infinity, height: height)
-            ),
-          ),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildFrame(600.0));
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
-
-    await tester.pumpWidget(buildFrame(600.1));
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
-
-    await tester.pumpWidget(buildFrame(600.0));
-    await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
   });
 }

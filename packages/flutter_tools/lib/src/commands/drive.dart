@@ -214,7 +214,7 @@ class DriveCommand extends RunCommandBase {
       applicationPackageFactory: ApplicationPackageFactory.instance,
       logger: _logger,
       processUtils: globals.processUtils,
-      dartSdkPath: globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      dartSdkPath: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file('.packages'),

@@ -32,6 +32,7 @@ import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';
@@ -1068,7 +1069,7 @@ void main() {
 
         final Process process = await Process.start(
           globals.fs.path.join(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
             'bin',
             globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
           ),
@@ -1170,7 +1171,7 @@ void main() {
 
         final Process process = await Process.start(
           globals.fs.path.join(
-            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
             'bin',
             globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
           ),
@@ -2562,7 +2563,7 @@ Future<void> _analyzeProject(String workingDir) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir,
   );
@@ -2585,7 +2586,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   // While flutter test does get packages, it doesn't write version
   // files anymore.
   await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     <String>[
       flutterToolsSnapshotPath,
       'packages',
@@ -2602,7 +2603,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );

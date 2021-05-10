@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -27,6 +27,7 @@ import 'package:usage/usage_io.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import '../src/test_flutter_command_runner.dart';
 
 void main() {
   setUpAll(() {
@@ -285,9 +286,7 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync(
-        'flutter_tools_analytics_bots_test.',
-      );
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
     });
 
     tearDown(() {

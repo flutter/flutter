@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
 void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   final MultiChildRenderObjectElement element = tester.element(find.byElementPredicate(
-    (Element element) => element is MultiChildRenderObjectElement
+    (Element element) => element is MultiChildRenderObjectElement,
   ));
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
@@ -120,7 +120,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <BoxDecoration>[]);
@@ -247,7 +247,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <BoxDecoration>[]);

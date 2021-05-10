@@ -7,14 +7,12 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/macos/migrations/remove_macos_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -22,31 +20,22 @@ void main() {
   TestUsage testUsage;
   MemoryFileSystem memoryFileSystem;
   BufferLogger testLogger;
-  MockMacOSProject mockMacOSProject;
+  FakeMacOSProject macOSProject;
   File xcodeProjectInfoFile;
 
   setUp(() {
     testUsage = TestUsage();
     memoryFileSystem = MemoryFileSystem.test();
     xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
-
-    testLogger = BufferLogger(
-      terminal: AnsiTerminal(
-        stdio: null,
-        platform: const LocalPlatform(),
-      ),
-      outputPreferences: OutputPreferences.test(),
-    );
-
-    mockMacOSProject = MockMacOSProject();
-    when(mockMacOSProject.xcodeProjectInfoFile)
-        .thenReturn(xcodeProjectInfoFile);
+    testLogger = BufferLogger.test();
+    macOSProject = FakeMacOSProject();
+    macOSProject.xcodeProjectInfoFile = xcodeProjectInfoFile;
   });
 
   testWithoutContext('skipped if files are missing', () {
     final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-      mockMacOSProject,
+      macOSProject,
       testLogger,
       testUsage,
     );
@@ -70,7 +59,7 @@ void main() {
 
     final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-      mockMacOSProject,
+      macOSProject,
       testLogger,
       testUsage,
     );
@@ -91,7 +80,7 @@ shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.
 
     final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-      mockMacOSProject,
+      macOSProject,
       testLogger,
       testUsage,
     );
@@ -114,7 +103,7 @@ keep this 2
 
     final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-      mockMacOSProject,
+      macOSProject,
       testLogger,
       testUsage,
     );
@@ -137,7 +126,7 @@ keep this 2
 
     final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-      mockMacOSProject,
+      macOSProject,
       testLogger,
       testUsage,
     );
@@ -157,7 +146,7 @@ keep this 2
 
     final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-      mockMacOSProject,
+      macOSProject,
       testLogger,
       testUsage,
     );
@@ -169,7 +158,10 @@ keep this 2
   });
 }
 
-class MockMacOSProject extends Mock implements MacOSProject {}
+class FakeMacOSProject extends Fake implements MacOSProject {
+  @override
+  File xcodeProjectInfoFile;
+}
 
 class FakeMacOSMigrator extends ProjectMigrator {
   FakeMacOSMigrator({@required this.succeeds}) : super(null);

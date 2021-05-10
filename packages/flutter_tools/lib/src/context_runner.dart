@@ -27,7 +27,6 @@ import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
-import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
@@ -53,9 +52,11 @@ import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
+import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/crash_reporting.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -208,7 +209,7 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,
@@ -353,10 +354,9 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         xcode: globals.xcode,
         iproxy: IProxy(
-          iproxyPath: globals.artifacts.getArtifactPath(
-            Artifact.iproxy,
-            platform: TargetPlatform.ios,
-          ),
+          iproxyPath: globals.artifacts.getHostArtifact(
+            HostArtifact.iproxy,
+          ).path,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,

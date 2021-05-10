@@ -146,6 +146,9 @@ abstract class InheritedTheme extends InheritedWidget {
   /// this method is called again to re-capture the updated themes.
   ///
   /// To wrap a [Widget] in the captured themes, call [CapturedThemes.wrap].
+  ///
+  /// This method can be expensive if there are many widgets between `from` and
+  /// `to` (it walks the element tree between those nodes).
   static CapturedThemes capture({ required BuildContext from, required BuildContext? to }) {
     assert(from != null);
 
