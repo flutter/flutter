@@ -3464,7 +3464,7 @@ void main() {
     });
   });
 
-  group('delete API implementations are not racy', () {
+  group('delete API implementations', () {
     // Regression test for: https://github.com/flutter/flutter/issues/80226.
     //
     // This textSelectionDelegate has different text and selection from the
@@ -3486,7 +3486,10 @@ void main() {
         selection: const TextSelection(baseOffset: 0, extentOffset: 50),
       );
 
-      delegate.textEditingValue = const TextEditingValue(text: 'BBB', selection: TextSelection.collapsed(offset: 0));
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'BBB',
+        selection: TextSelection.collapsed(offset: 0),
+      );
     });
 
     void verifyDoesNotCrashWithInconsistentTextEditingValue(void Function(SelectionChangedCause) method) {
@@ -3512,11 +3515,32 @@ void main() {
       expect(error, isNull);
     }
 
-    test('delete', () {
+    test('delete is not racy and handles composing region correctly', () {
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'ABCDEF',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 1, end: 6),
+      );
       verifyDoesNotCrashWithInconsistentTextEditingValue(editable.delete);
+      final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
+      expect(textEditingValue.text, 'ACDEF');
+      expect(textEditingValue.selection.isCollapsed, isTrue);
+      expect(textEditingValue.selection.baseOffset, 1);
+      expect(textEditingValue.composing, const TextRange(start: 1, end: 5));
     });
-    test('deleteForward', () {
+
+    test('deleteForward is not racy and handles composing region correctly', () {
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'ABCDEF',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 2, end: 6),
+      );
       verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteForward);
+      final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
+      expect(textEditingValue.text, 'ABDEF');
+      expect(textEditingValue.selection.isCollapsed, isTrue);
+      expect(textEditingValue.selection.baseOffset, 2);
+      expect(textEditingValue.composing, const TextRange(start: 2, end: 5));
     });
   });
 }
