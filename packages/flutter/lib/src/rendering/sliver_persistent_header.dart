@@ -550,6 +550,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   late Animation<double> _animation;
   double? _lastActualScrollOffset;
   double? _effectiveScrollOffset;
+  // Important for pointer scrolling, which does not have the same concept of
+  // a hold and release scroll movement, like dragging.
+  // This keeps track of the last ScrollDirection when scrolling started.
+  ScrollDirection? _lastStartedScrollDirection;
 
   // Distance from our leading edge to the child's leading edge, in the axis
   // direction. Negative if we're scrolled off the top.
@@ -647,6 +651,11 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
   }
 
+  /// Update the last known ScrollDirection when scrolling began.
+  void updateScrollStartDirection(ScrollDirection direction) {
+    _lastStartedScrollDirection = direction;
+  }
+
   /// If the header isn't already fully exposed, then scroll it into view.
   void maybeStartSnapAnimation(ScrollDirection direction) {
     final FloatingHeaderSnapConfiguration? snap = snapConfiguration;
@@ -680,7 +689,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
          (_effectiveScrollOffset! < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
       double delta = _lastActualScrollOffset! - constraints.scrollOffset;
 
-      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward;
+      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward
+        || (_lastStartedScrollDirection != null && _lastStartedScrollDirection == ScrollDirection.forward);
       if (allowFloatingExpansion) {
         if (_effectiveScrollOffset! > maxExtent) // We're scrolled off-screen, but should reveal, so
           _effectiveScrollOffset = maxExtent; // pretend we're just at the limit.

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/host_agent.dart';
@@ -214,6 +216,8 @@ Future<void> main() async {
 
       final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
+
+      section('Build iOS Objective-C host app');
       await inDirectory(objectiveCHostApp, () async {
         await exec(
           'pod',
@@ -282,6 +286,28 @@ Future<void> main() async {
         'isolate_snapshot_data',
       ));
 
+      section('Check the NOTICE file is correct');
+
+      final String licenseFilePath = path.join(
+        objectiveCBuildDirectory.path,
+        'Host.app',
+        'Frameworks',
+        'App.framework',
+        'flutter_assets',
+        'NOTICES.Z',
+      );
+      checkFileExists(licenseFilePath);
+
+      await inDirectory(objectiveCBuildDirectory, () async {
+        final Uint8List licenseData = File(licenseFilePath).readAsBytesSync();
+        final String licenseString = utf8.decode(gzip.decode(licenseData));
+        if (!licenseString.contains('skia') || !licenseString.contains('Flutter Authors')) {
+          return TaskResult.failure('License content missing');
+        }
+      });
+
+      section('Check that the host build sends the correct analytics');
+
       final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
       if (!objectiveCAnalyticsOutput.contains('cd24: ios')
           || !objectiveCAnalyticsOutput.contains('cd25: true')
@@ -294,7 +320,7 @@ Future<void> main() async {
 
       section('Run platform unit tests');
 
-      final String resultBundleTemp = Directory.systemTemp.createTempSync('module_test_ios_xcresult.').path;
+      final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_module_test_ios_xcresult.').path;
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
         final String resultBundlePath = path.join(resultBundleTemp, 'result');

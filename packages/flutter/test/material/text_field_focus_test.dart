@@ -217,7 +217,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextField(
-              decoration: null
+              decoration: null,
             ),
           ),
         ),
@@ -248,7 +248,7 @@ void main() {
                 FocusScope(
                   node: focusScopeNode0,
                   child: Builder(
-                    builder: (BuildContext context) => TextField(key: textField0)
+                    builder: (BuildContext context) => TextField(key: textField0),
                   ),
                 ),
                 FocusScope(

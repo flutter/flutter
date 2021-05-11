@@ -1423,9 +1423,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
     final DevToolsServerAddress devToolsServerAddress = residentDevtoolsHandler.activeDevToolsServer;
-    if (devToolsServerAddress == null) {
+    if (!residentDevtoolsHandler.readyToAnnounce) {
       includeDevtools = false;
     }
+    assert(!includeDevtools || devToolsServerAddress != null);
     for (final FlutterDevice device in flutterDevices) {
       if (device.vmService == null) {
         continue;

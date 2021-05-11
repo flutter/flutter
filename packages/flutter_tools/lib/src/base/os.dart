@@ -35,6 +35,13 @@ abstract class OperatingSystemUtils {
         platform: platform,
         processManager: processManager,
       );
+    } else if (platform.isLinux) {
+      return _LinuxUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
     } else {
       return _PosixUtils(
         fileSystem: fileSystem,
@@ -280,6 +287,78 @@ class _PosixUtils extends OperatingSystemUtils {
       }
     }
     return _hostPlatform!;
+  }
+}
+
+class _LinuxUtils extends _PosixUtils {
+  _LinuxUtils({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+  }) : super(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
+
+  String? _name;
+
+  @override
+  String get name {
+    if (_name == null) {
+      const String prettyNameKey = 'PRETTY_NAME';
+      // If "/etc/os-release" doesn't exist, fallback to "/usr/lib/os-release".
+      final String osReleasePath = _fileSystem.file('/etc/os-release').existsSync()
+        ? '/etc/os-release'
+        : '/usr/lib/os-release';
+      String prettyName;
+      String kernelRelease;
+      try {
+        final String osRelease = _fileSystem.file(osReleasePath).readAsStringSync();
+        prettyName = _getOsReleaseValueForKey(osRelease, prettyNameKey);
+      } on Exception catch (e) {
+        _logger.printTrace('Failed obtaining PRETTY_NAME for Linux: $e');
+        prettyName = '';
+      }
+      try {
+        // Split the operating system version which should be formatted as
+        // "Linux kernelRelease build", by spaces.
+        final List<String> osVersionSplitted = _platform.operatingSystemVersion.split(' ');
+        if (osVersionSplitted.length < 3) {
+          // The operating system version didn't have the expected format.
+          // Initialize as an empty string.
+          kernelRelease = '';
+        } else {
+          kernelRelease = ' ${osVersionSplitted[1]}';
+        }
+      } on Exception catch (e) {
+        _logger.printTrace('Failed obtaining kernel release for Linux: $e');
+        kernelRelease = '';
+      }
+      _name = '${prettyName.isEmpty ? super.name : prettyName}$kernelRelease';
+    }
+    return _name!;
+  }
+
+  String _getOsReleaseValueForKey(String osRelease, String key) {
+    final List<String> osReleaseSplitted = osRelease.split('\n');
+    for (String entry in osReleaseSplitted) {
+      entry = entry.trim();
+      final List<String> entryKeyValuePair = entry.split('=');
+      if(entryKeyValuePair[0] == key) {
+        final String value =  entryKeyValuePair[1];
+        // Remove quotes from either end of the value if they exist
+        final String quote = value[0];
+        if (quote == '\'' || quote == '"') {
+          return value.substring(0, value.length - 1).substring(1);
+        } else {
+          return value;
+        }
+      }
+    }
+    return '';
   }
 }
 

@@ -38,7 +38,7 @@ class NewGalleryChromeRunTest {
   /// Runs the test.
   Future<TaskResult> run() async {
     final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('temp');
+        Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
     final Directory galleryDir =
         Directory(path.join(galleryParentDir.path, 'gallery'));
 

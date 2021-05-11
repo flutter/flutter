@@ -13,7 +13,7 @@ final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
 
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
-  'assets/flutter_assets/NOTICES',
+  'assets/flutter_assets/NOTICES.Z',
   'assets/flutter_assets/fonts/MaterialIcons-Regular.otf',
   'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
 ];

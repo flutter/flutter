@@ -727,7 +727,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int? lastNonWhitespace;
     for (final String currentString in string.characters) {
       if (!includeWhitespace &&
-          !_isWhitespace(currentString.characters.first.toString().codeUnitAt(0))) {
+          !_isWhitespace(currentString.characters.first.codeUnitAt(0))) {
         lastNonWhitespace = count;
       }
       if (count + currentString.length >= index) {
@@ -3188,7 +3188,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final Offset effectivePosition = position - _paintOffset;
+    final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));

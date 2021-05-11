@@ -17,9 +17,13 @@ Future<void> pumpTest(
   bool scrollable = true,
   bool reverse = false,
   ScrollController? controller,
+  bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    scrollBehavior: const NoScrollbarBehavior(),
+    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
+      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+      : null,
+    ),
     theme: ThemeData(
       platform: platform,
     ),
@@ -1039,13 +1043,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1126,13 +1130,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1189,7 +1193,7 @@ void main() {
                 children: <Widget>[
                   for (int i = 0; i < 100; i++)
                     Text('SingleChildScrollView $i'),
-                ]
+                ],
               ),
               SizedBox(
                 height: 3000,
@@ -1201,11 +1205,11 @@ void main() {
                   itemBuilder: (BuildContext context, int index) {
                     return Text('Nested NeverScrollable ListView $index');
                   },
-                )
+                ),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       ),
     ));
     expect(outerController.position.pixels, 0.0);
@@ -1235,17 +1239,17 @@ void main() {
     Widget build(double height) {
       return MaterialApp(
         home: Scaffold(
-            body: SizedBox(
-              width: double.infinity,
-              height: height,
-              child: SingleChildScrollView(
-                controller: controller,
-                child: const SizedBox(
-                  width: double.infinity,
-                  height: 300.0,
-                ),
+          body: SizedBox(
+            width: double.infinity,
+            height: height,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(
+                width: double.infinity,
+                height: 300.0,
               ),
-            )
+            ),
+          ),
         ),
       );
     }
@@ -1269,6 +1273,46 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('Does not scroll with mouse pointer drag when behavior is configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: false);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
+
+  testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: true);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 200.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 }
 
 // ignore: must_be_immutable

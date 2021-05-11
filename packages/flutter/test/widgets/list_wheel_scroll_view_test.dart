@@ -784,8 +784,7 @@ void main() {
     });
 
     testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController(
-          initialScrollOffset: 200.0);
+      final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
 
       await tester.pumpWidget(
         Directionality(
@@ -807,27 +806,30 @@ void main() {
       );
 
       final RenderListWheelViewport viewport = tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
-      expect(viewport, paints
-        ..transform(
-          matrix4: equals(<dynamic>[
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            moreOrLessEquals(0.6318744917928063),
-            moreOrLessEquals(0.3420201433256688),
-            moreOrLessEquals(-0.0010260604299770066),
-            0.0,
-            moreOrLessEquals(-1.1877435020329863),
-            moreOrLessEquals(0.9396926207859083),
-            moreOrLessEquals(-0.002819077862357725),
-            0.0,
-            moreOrLessEquals(-62.20844875763376),
-            moreOrLessEquals(-138.79047052615562),
-            moreOrLessEquals(1.4163714115784667),
-          ]),
-        ));
+      expect(
+        viewport,
+        paints
+          ..transform(
+            matrix4: equals(<dynamic>[
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              moreOrLessEquals(0.6318744917928063),
+              moreOrLessEquals(0.3420201433256688),
+              moreOrLessEquals(-0.0010260604299770066),
+              0.0,
+              moreOrLessEquals(-1.1877435020329863),
+              moreOrLessEquals(0.9396926207859083),
+              moreOrLessEquals(-0.002819077862357725),
+              0.0,
+              moreOrLessEquals(-62.20844875763376),
+              moreOrLessEquals(-138.79047052615562),
+              moreOrLessEquals(1.4163714115784667),
+            ]),
+          ),
+      );
 
       controller.jumpTo(0.0);
 
@@ -852,28 +854,30 @@ void main() {
         ),
       );
 
-      expect(viewport, paints
-        ..transform(
-          matrix4: equals(<dynamic>[
-            1.5,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.5,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.5,
-            0.0,
-            0.0,
-            -150.0,
-            0.0,
-            1.0,
-          ]),
-        ));
-
+      expect(
+        viewport,
+        paints
+          ..transform(
+            matrix4: equals(<dynamic>[
+              1.5,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.5,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.5,
+              0.0,
+              0.0,
+              -150.0,
+              0.0,
+              1.0,
+            ]),
+          ),
+      );
     });
   });
 

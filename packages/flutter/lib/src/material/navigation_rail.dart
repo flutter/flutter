@@ -383,7 +383,7 @@ class NavigationRail extends StatefulWidget {
   }
 
   @override
-  _NavigationRailState createState() => _NavigationRailState();
+  State<NavigationRail> createState() => _NavigationRailState();
 }
 
 class _NavigationRailState extends State<NavigationRail> with TickerProviderStateMixin {

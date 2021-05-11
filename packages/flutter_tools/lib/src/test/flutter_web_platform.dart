@@ -12,6 +12,7 @@ import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
@@ -51,6 +52,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     @required ChromiumLauncher chromiumLauncher,
     @required Logger logger,
     @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
@@ -75,6 +77,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
       () => TestCompiler(buildInfo, flutterProject),
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: processManager,
     );
   }
 
@@ -111,6 +116,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     @required Logger logger,
     @required ChromiumLauncher chromiumLauncher,
     @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -138,6 +144,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       artifacts: artifacts,
       logger: logger,
       nullAssertions: nullAssertions,
+      processManager: processManager,
     );
   }
 
