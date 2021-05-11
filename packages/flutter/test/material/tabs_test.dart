@@ -3630,7 +3630,6 @@ void main() {
   });
 
   testWidgets('Change height for tab bar with child', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
     await tester.pumpWidget(MaterialApp(
       home: DefaultTabController(
         length: 1,
@@ -3643,12 +3642,12 @@ void main() {
                   child: Text('1 - OK',style: TextStyle(fontSize: 25),),
                   height: 85,
                 ),
-	            ],
+              ],
             ),
           ),
         ),
       ),
-    );
+    ));
     final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.check));
     expect(firstTab.preferredSize.height, 85);
   });
