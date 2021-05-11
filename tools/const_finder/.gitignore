@@ -1,6 +1,5 @@
 *.dill
 
-!.dart_tool
-!.dart_tool/package_config.json
-!.packages
+!test/fixtures/.dart_tool
+!test/fixtures/.dart_tool/package_config.json
 !test/fixtures/.packages

@@ -135,7 +135,7 @@ deps = {
 
   'src/third_party/khronos':
    Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '7122230e90547962e0f0c627f62eeed3c701f275',
-  
+
   'src/third_party/googletest':
    Var('github_git') + '/google/googletest' + '@' + 'f5e592d8ee5ffb1d9af5be7f715ce3576b8bf9c4',
 
@@ -599,12 +599,6 @@ hooks = [
     'action': ['python', 'src/build/vs_toolchain.py', 'update'],
   },
   {
-    'name': 'generate_package_files',
-    'pattern': '.',
-    'cwd': 'src/',
-    'action': ['python', 'flutter/tools/generate_package_files.py'],
-  },
-  {
     # Ensure that we don't accidentally reference any .pyc files whose
     # corresponding .py files have already been deleted.
     'name': 'remove_stale_pyc_files',
@@ -659,11 +653,11 @@ hooks = [
       '--arch=arm64'],
   },
   {
-    'name': 'dart package config',
+    'name': 'pub get --offline',
     'pattern': '.',
     'action': [
       'python',
-      'src/flutter/tools/run_third_party_dart.py',
+      'src/flutter/tools/pub_get_offline.py',
     ]
   },
   {
