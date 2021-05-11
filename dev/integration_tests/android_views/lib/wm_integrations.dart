@@ -33,7 +33,7 @@ enum _LastTestStatus {
 class WindowManagerBodyState extends State<WindowManagerBody> {
 
   MethodChannel? viewChannel;
-  _LastTestStatus lastTestStatus = _LastTestStatus.pending;
+  _LastTestStatus _lastTestStatus = _LastTestStatus.pending;
   String? lastError;
   int? id;
   int windowClickCount = 0;
@@ -53,7 +53,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
               onPlatformViewCreated: onPlatformViewCreated,
             ),
           ),
-          if (lastTestStatus != _LastTestStatus.pending) _statusWidget(),
+          if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
@@ -86,34 +86,34 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
   }
 
   Widget _statusWidget() {
-    assert(lastTestStatus != _LastTestStatus.pending);
-    final String? message = lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
+    assert(_lastTestStatus != _LastTestStatus.pending);
+    final String? message = _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
     return Container(
-      color: lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
+      color: _lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
       child: Text(
         message!,
         key: const ValueKey<String>('Status'),
         style: TextStyle(
-          color: lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
+          color: _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
         ),
       ),
     );
   }
 
   Future<void> onShowAlertDialogPressed() async {
-    if (lastTestStatus != _LastTestStatus.pending) {
+    if (_lastTestStatus != _LastTestStatus.pending) {
       setState(() {
-        lastTestStatus = _LastTestStatus.pending;
+        _lastTestStatus = _LastTestStatus.pending;
       });
     }
     try {
       await viewChannel?.invokeMethod<void>('showAndHideAlertDialog');
       setState(() {
-        lastTestStatus = _LastTestStatus.success;
+        _lastTestStatus = _LastTestStatus.success;
       });
     } catch(e) {
       setState(() {
-        lastTestStatus = _LastTestStatus.error;
+        _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }
@@ -127,7 +127,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       });
     } catch(e) {
       setState(() {
-        lastTestStatus = _LastTestStatus.error;
+        _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }

@@ -23,7 +23,7 @@ class RawKeyboardDemo extends StatefulWidget {
   const RawKeyboardDemo({Key key}) : super(key: key);
 
   @override
-  _HardwareKeyDemoState createState() => _HardwareKeyDemoState();
+  State<RawKeyboardDemo> createState() => _HardwareKeyDemoState();
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {

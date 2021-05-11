@@ -140,7 +140,7 @@ class ChipDemo extends StatefulWidget {
   static const String routeName = '/material/chip';
 
   @override
-  _ChipDemoState createState() => _ChipDemoState();
+  State<ChipDemo> createState() => _ChipDemoState();
 }
 
 class _ChipDemoState extends State<ChipDemo> {

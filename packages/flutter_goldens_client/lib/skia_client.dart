@@ -376,7 +376,7 @@ class SkiaGoldClient {
   /// Removes the file extension from the [fileName] to represent the test name
   /// properly.
   String cleanTestName(String fileName) {
-    return fileName.split(path.extension(fileName.toString()))[0];
+    return fileName.split(path.extension(fileName))[0];
   }
 
   /// Returns a boolean value to prevent the client from re-authorizing itself

@@ -23,7 +23,7 @@ class FilteredChildAnimationPage extends StatefulWidget {
   final bool initialUseRepaintBoundary;
 
   @override
-  _FilteredChildAnimationPageState createState() => _FilteredChildAnimationPageState();
+  State<FilteredChildAnimationPage> createState() => _FilteredChildAnimationPageState();
 }
 
 class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage> with SingleTickerProviderStateMixin {

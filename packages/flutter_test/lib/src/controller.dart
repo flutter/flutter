@@ -530,6 +530,7 @@ abstract class WidgetController {
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
     bool warnIfMissed = true,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
     return dragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'drag'),
@@ -538,6 +539,7 @@ abstract class WidgetController {
       buttons: buttons,
       touchSlopX: touchSlopX,
       touchSlopY: touchSlopY,
+      kind: kind,
     );
   }
 
@@ -559,10 +561,11 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
+      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons, kind: kind);
       assert(gesture != null);
 
       final double xSign = offset.dx.sign;
