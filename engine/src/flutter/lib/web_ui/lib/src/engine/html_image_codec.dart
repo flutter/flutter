@@ -86,6 +86,7 @@ class HtmlCodec implements ui.Codec {
       loadSubscription?.cancel();
       errorSubscription.cancel();
       completer.completeError(event);
+      throw ArgumentError('Unable to load image asset: $src');
     });
     loadSubscription = imgElement.onLoad.listen((html.Event event) {
       if (chunkCallback != null) {
