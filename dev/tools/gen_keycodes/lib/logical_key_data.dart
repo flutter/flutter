@@ -193,7 +193,7 @@ class LogicalKeyData {
 
     // Make sure every Numpad key that we care about has been defined.
     unusedNumpad.forEach((String key, String value) {
-      print('Unuadded numpad key $value');
+      print('Undefined numpad key $value');
     });
   }
 

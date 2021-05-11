@@ -211,13 +211,14 @@ void main() {
         exitCode: 1,
         stderr: stderr,
       ));
-      try {
-        processUtils.runSync(<String>['kaboom'], throwOnError: true);
-        fail('ProcessException expected.');
-      } on ProcessException catch (e) {
-        expect(e, isA<ProcessException>());
-        expect(e.message.contains(stderr), false);
-      }
+      expect(
+        () => processUtils.runSync(<String>['kaboom'], throwOnError: true),
+        throwsA(isA<ProcessException>().having(
+          (ProcessException error) => error.message,
+          'message',
+          isNot(contains(stderr)),
+        )),
+      );
     });
 
     testWithoutContext('throws with stderr in exception on failure with verboseExceptions', () async {

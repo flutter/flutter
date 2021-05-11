@@ -833,6 +833,16 @@ Future<void> _runWebUnitTests() async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
+    () => _runFlutterDriverWebTest(
+      testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
+      target: 'test_driver/text_editing_integration.dart',
+      buildMode: 'profile',
+    ),
+    () => _runFlutterDriverWebTest(
+      testAppDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
+      target: 'test_driver/smoke_web_engine.dart',
+      buildMode: 'profile',
+    ),
     () => _runGalleryE2eWebTest('debug'),
     () => _runGalleryE2eWebTest('debug', canvasKit: true),
     () => _runGalleryE2eWebTest('profile'),
@@ -844,6 +854,36 @@ Future<void> _runWebLongRunningTests() async {
   await _ensureChromeDriverIsRunning();
   await _runShardRunnerIndexOfTotalSubshard(tests);
   await _stopChromeDriver();
+}
+
+Future<void> _runFlutterDriverWebTest({
+  @required String target,
+  @required String buildMode,
+  @required String testAppDirectory,
+}) async {
+  print('${green}Running web_e2e_test $target in $buildMode mode.$reset');
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'drive',
+      '--target=$target',
+      '--browser-name=chrome',
+      '--no-sound-null-safety',
+      '-d',
+      'web-server',
+      '--$buildMode',
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+  print('${green}Integration test passed.$reset');
 }
 
 /// Returns the commit hash of the flutter/plugins repository that's rolled in.
@@ -1029,6 +1069,17 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
   print('${green}Integration test passed.$reset');
 }
 
+/// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/// !!! WARNING WARNING WARNING WARNING WARNING WARNING!!!
+/// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+///
+/// Do not put any more tests here. This shard is not properly subsharded.
+/// Adding more tests here will linearly increase the runtime of the shard
+/// making the overall Flutter CI build longer. Consider adding tests to
+/// [_runWebLongRunningTests] instead (increasing subshard count if necessary).
+///
+// TODO(yjbanov): increase subshard count in _runWebLongRunningTests and retire
+//                this shard.
 Future<void> _runWebIntegrationTests() async {
   await _runWebStackTraceTest('profile', 'lib/stack_trace.dart');
   await _runWebStackTraceTest('release', 'lib/stack_trace.dart');

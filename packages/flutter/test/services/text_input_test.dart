@@ -146,6 +146,14 @@ void main() {
       expect(signed.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: false)');
       expect(decimal.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: true)');
       expect(signedDecimal.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: true)');
+      expect(TextInputType.multiline.toString(), 'TextInputType(name: TextInputType.multiline, signed: null, decimal: null)');
+      expect(TextInputType.phone.toString(), 'TextInputType(name: TextInputType.phone, signed: null, decimal: null)');
+      expect(TextInputType.datetime.toString(), 'TextInputType(name: TextInputType.datetime, signed: null, decimal: null)');
+      expect(TextInputType.emailAddress.toString(), 'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null)');
+      expect(TextInputType.url.toString(), 'TextInputType(name: TextInputType.url, signed: null, decimal: null)');
+      expect(TextInputType.visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
+      expect(TextInputType.name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
+      expect(TextInputType.streetAddress.toString(), 'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
 
       expect(text == number, false);
       expect(number == number2, true);
@@ -162,6 +170,22 @@ void main() {
       expect(signed.hashCode == decimal.hashCode, false);
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
+
+      expect(TextInputType.text.index, 0);
+      expect(TextInputType.multiline.index, 1);
+      expect(TextInputType.number.index, 2);
+      expect(TextInputType.phone.index, 3);
+      expect(TextInputType.datetime.index, 4);
+      expect(TextInputType.emailAddress.index, 5);
+      expect(TextInputType.url.index, 6);
+      expect(TextInputType.visiblePassword.index, 7);
+      expect(TextInputType.name.index, 8);
+      expect(TextInputType.streetAddress.index, 9);
+
+      expect(TextEditingValue.empty.toString(),
+          'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
+      expect(const TextEditingValue(text: 'Sample Text').toString(),
+          'TextEditingValue(text: \u2524Sample Text\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
     });
 
     test('TextInputClient onConnectionClosed method is called', () async {
