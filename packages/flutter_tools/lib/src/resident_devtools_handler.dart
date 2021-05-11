@@ -48,6 +48,8 @@ abstract class ResidentDevtoolsHandler {
 class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   FlutterResidentDevtoolsHandler(this._devToolsLauncher, this._residentRunner, this._logger);
 
+  static const Duration launchInBrowserTimeout = Duration(seconds: 15);
+
   final DevtoolsLauncher _devToolsLauncher;
   final ResidentRunner _residentRunner;
   final Logger _logger;
@@ -90,16 +92,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   // This must be guaranteed not to return a Future that fails.
   @override
-  Future<bool> launchDevToolsInBrowser({
-    @required List<FlutterDevice> flutterDevices,
-  }) async {
+  Future<bool> launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices}) async {
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return false;
     }
-    if (!_served) {
+    if (_devToolsLauncher.devToolsUrl == null) {
       _logger.startProgress('Waiting for Flutter DevTools to be served...');
       bool timedOut = false;
-      await _devToolsLauncher.ready.timeout(const Duration(seconds: 15), onTimeout: () {
+      await _devToolsLauncher.ready.timeout(launchInBrowserTimeout, onTimeout: () {
         timedOut = true;
       });
       if (timedOut) {

@@ -353,6 +353,56 @@ void main() {
       ],
     );
   });
+
+  testWithoutContext('Does not launch devtools in browser if launcher is null', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      null,
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    await handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
+
+    expect(handler.activeDevToolsServer, null);
+  });
+
+  testWithoutContext('Does not launch devtools in browser if ResidentRunner does not support the service protocol', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher(),
+      FakeResidentRunner()..supportsServiceProtocol = false,
+      BufferLogger.test(),
+    );
+
+    await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[]);
+
+    expect(handler.activeDevToolsServer, null);
+  });
+
+  testWithoutContext('launchDevToolsInBrowser times out for null devToolsUrl', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()
+        ..devToolsUrl = null
+        ..readyFuture = Future<void>.delayed(
+          Duration(seconds: FlutterResidentDevtoolsHandler.launchInBrowserTimeout.inSeconds + 1),
+        ),
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    expect(await handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isFalse);
+  });
+
+  testWithoutContext('launchDevToolsInBrowser launches successfully', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()
+        ..devToolsUrl = Uri(host: 'localhost', port: 8080)
+        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    expect(await handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+  });
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -360,12 +410,17 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   DevToolsServerAddress activeDevToolsServer;
 
   @override
+  Uri devToolsUrl;
+
+  @override
   Future<DevToolsServerAddress> serve() {
     return null;
   }
 
   @override
-  Future<void> get ready => Future<void>.value();
+  Future<void> get ready => readyFuture;
+
+  Future<void> readyFuture = Future<void>.value();
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
