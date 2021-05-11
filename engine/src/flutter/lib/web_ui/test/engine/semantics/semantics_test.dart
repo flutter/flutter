@@ -17,7 +17,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../matchers.dart';
+import 'semantics_tester.dart';
 
 DateTime _testTime = DateTime(2018, 12, 17);
 
@@ -27,13 +27,8 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-String rootSemanticStyle = '';
-
 void testMain() {
   setUp(() {
-    rootSemanticStyle = browserEngine != BrowserEngine.edge
-        ? 'filter: opacity(0%); color: rgba(0, 0, 0, 0)' :
-        'color: rgba(0, 0, 0, 0); filter: opacity(0%)';
     EngineSemanticsOwner.debugResetSemantics();
   });
 
@@ -1198,23 +1193,22 @@ void _testTappable() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
+    final SemanticsTester tester = SemanticsTester(semantics());
+    tester.updateNode(
       id: 0,
-      actions: 0 | ui.SemanticsAction.tap.index,
-      flags: 0 |
-          ui.SemanticsFlag.hasEnabledState.index |
-          ui.SemanticsFlag.isEnabled.index |
-          ui.SemanticsFlag.isButton.index,
-      transform: Matrix4.identity().toFloat64(),
+      hasTap: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isButton: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
+    tester.apply();
 
-    semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem role="button" style="$rootSemanticStyle"></sem>
 ''');
+
+    expect(tester.getSemanticsObject(0).element.tabIndex, 0);
 
     semantics().semanticsEnabled = false;
   },
@@ -1417,53 +1411,9 @@ void _testLiveRegion() {
   });
 }
 
-void expectSemanticsTree(String semanticsHtml) {
-  expect(
-    canonicalizeHtml(html.document.querySelector('flt-semantics').outerHtml),
-    canonicalizeHtml(semanticsHtml),
-  );
-}
-
-html.Element findScrollable() {
-  return html.document.querySelectorAll('flt-semantics').firstWhere(
-        (html.Element element) =>
-            element.style.overflow == 'hidden' ||
-            element.style.overflowY == 'scroll' ||
-            element.style.overflowX == 'scroll',
-        orElse: () => null,
-      );
-}
-
-class SemanticsActionLogger {
-  StreamController<int> idLogController;
-  StreamController<ui.SemanticsAction> actionLogController;
-  Stream<int> idLog;
-  Stream<ui.SemanticsAction> actionLog;
-
-  SemanticsActionLogger() {
-    idLogController = StreamController<int>();
-    actionLogController = StreamController<ui.SemanticsAction>();
-    idLog = idLogController.stream.asBroadcastStream();
-    actionLog = actionLogController.stream.asBroadcastStream();
-
-    // The browser kicks us out of the test zone when the browser event happens.
-    // We memorize the test zone so we can call expect when the callback is
-    // fired.
-    final Zone testZone = Zone.current;
-
-    ui.window.onSemanticsAction =
-        (int id, ui.SemanticsAction action, ByteData args) {
-      idLogController.add(id);
-      actionLogController.add(action);
-      testZone.run(() {
-        expect(args, null);
-      });
-    };
-  }
-}
-
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
+// TODO(yjbanov): move this to TestSemanticsBuilder
 void updateNode(
   ui.SemanticsUpdateBuilder builder, {
   int id = 0,

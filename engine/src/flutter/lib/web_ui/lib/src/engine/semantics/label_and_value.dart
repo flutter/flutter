@@ -49,12 +49,9 @@ class LabelAndValue extends RoleManager {
     final bool hasValue = semanticsObject.hasValue;
     final bool hasLabel = semanticsObject.hasLabel;
 
-    // If the node is incrementable or a text field the value is reported to the
-    // browser via the respective role managers. We do not need to also render
-    // it again here.
-    final bool shouldDisplayValue = hasValue &&
-        !semanticsObject.isIncrementable &&
-        !semanticsObject.isTextField;
+    // If the node is incrementable the value is reported to the browser via
+    // the respective role manager. We do not need to also render it again here.
+    final bool shouldDisplayValue = hasValue && !semanticsObject.isIncrementable;
 
     if (!hasLabel && !shouldDisplayValue) {
       _cleanUpDom();
