@@ -260,7 +260,7 @@ class KeyEventSimulator {
         break;
       case 'web':
         result['code'] = _getWebKeyCode(key);
-        result['key'] = _keyLabel(key);
+        result['key'] = resultCharacter;
         result['metaState'] = _getWebModifierFlags(key, isDown);
         break;
       case 'windows':
