@@ -4,14 +4,17 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
+import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' as vms;
 
 import '../../common.dart';
@@ -24,9 +27,86 @@ const String _kWebScriptSuffix = "')";
 
 void main() {
   final List<String> log = <String>[];
+
   driverLog = (String source, String message) {
     log.add('$source: $message');
   };
+
+  group('VMServiceFlutterDriver with logCommunicationToFile', () {
+    late FakeVmService fakeClient;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
+    late VMServiceFlutterDriver driver;
+    int driverId = -1;
+
+    setUp(() {
+      fakeIsolate = FakeIsolate();
+      fakeVM = FakeVM(fakeIsolate);
+      fakeClient = FakeVmService(fakeVM);
+      fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
+      driverId += 1;
+    });
+
+
+    group('logCommunicationToFile', () {
+      test('logCommunicationToFile = true', () async {
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
+
+        await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+
+        final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+        final bool exists = file.existsSync();
+        expect(exists, true, reason: 'Not found ${file.path}');
+
+        final String commandLog = await file.readAsString();
+        const String waitForCommandLog = '>>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}';
+        const String responseLog = '<<< {isError: false, response: {status: ok}}';
+
+        expect(commandLog.contains(waitForCommandLog), true, reason: '$commandLog not contains $waitForCommandLog');
+        expect(commandLog.contains(responseLog), true, reason: '$commandLog not contains $responseLog');
+      });
+
+      test('logCommunicationToFile = false', () async {
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: false);
+
+        await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+
+        final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+        final bool exists = file.existsSync();
+        expect(exists, false, reason: 'because ${file.path} exists');
+      });
+    });
+  });
+
+  group('VMServiceFlutterDriver with printCommunication', () {
+    late FakeVmService fakeClient;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
+    late VMServiceFlutterDriver driver;
+
+    setUp(() async {
+      log.clear();
+      fakeIsolate = FakeIsolate();
+      fakeVM = FakeVM(fakeIsolate);
+      fakeClient = FakeVmService(fakeVM);
+      fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
+    });
+
+    test('printCommunication = true', () async {
+      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, printCommunication: true);
+      await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+      expect(log, <String>[
+        'VMServiceFlutterDriver: >>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
+        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}'
+      ]);
+    });
+
+    test('printCommunication = false', () async {
+      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, printCommunication: false);
+      await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+      expect(log, <String>[]);
+    });
+  });
 
   group('VMServiceFlutterDriver.connect', () {
     late FakeVmService fakeClient;
@@ -188,8 +268,8 @@ void main() {
 
   group('VMServiceFlutterDriver', () {
     late FakeVmService fakeClient;
-    FakeVM fakeVM;
-    FakeIsolate fakeIsolate;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
@@ -563,8 +643,8 @@ void main() {
 
   group('VMServiceFlutterDriver with custom timeout', () {
     late FakeVmService fakeClient;
-    FakeVM fakeVM;
-    FakeIsolate fakeIsolate;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
@@ -589,6 +669,70 @@ void main() {
         fakeClient.commandLog,
         <String>['ext.flutter.driver {command: get_health, timeout: $_kSerializedTestTimeout}'],
       );
+    });
+  });
+
+  group('WebFlutterDriver with logCommunicationToFile', () {
+    late FakeFlutterWebConnection fakeConnection;
+    late WebFlutterDriver driver;
+    int driverId = -1;
+
+    setUp(() {
+      fakeConnection = FakeFlutterWebConnection();
+      fakeConnection.supportsTimelineAction = true;
+      fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
+      driverId += 1;
+    });
+
+    test('logCommunicationToFile = true', () async {
+      driver = WebFlutterDriver.connectedTo(fakeConnection);
+      await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
+
+      final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+      final bool exists = file.existsSync();
+      expect(exists, true, reason: 'Not found ${file.path}');
+
+      final String commandLog = await file.readAsString();
+      const String waitForCommandLog = '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
+      const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
+
+      expect(commandLog.contains(waitForCommandLog), true, reason: '$commandLog not contains $waitForCommandLog');
+      expect(commandLog.contains(responseLog), true, reason: '$commandLog not contains $responseLog');
+    });
+
+    test('logCommunicationToFile = false', () async {
+      driver = WebFlutterDriver.connectedTo(fakeConnection, logCommunicationToFile: false);
+      await driver.waitFor(find.byTooltip('logCommunicationToFile test'), timeout: _kTestTimeout);
+      final File file = File(path.join(testOutputsDirectory, 'flutter_driver_commands_$driverId.log'));
+      final bool exists = file.existsSync();
+      expect(exists, false, reason: 'because ${file.path} exists');
+    });
+  });
+
+  group('WebFlutterDriver with printCommunication', () {
+    late FakeFlutterWebConnection fakeConnection;
+    late WebFlutterDriver driver;
+
+    setUp(() {
+      log.clear();
+      fakeConnection = FakeFlutterWebConnection();
+      fakeConnection.supportsTimelineAction = true;
+      fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'status': 'ok'}));
+    });
+
+    test('printCommunication = true', () async {
+      driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: true);
+      await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
+      expect(log, <String>[
+        'WebFlutterDriver: >>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: printCommunication test}',
+        'WebFlutterDriver: <<< {isError: false, response: {status: ok}, type: Response}',
+      ]);
+    });
+
+    test('printCommunication = false', () async {
+      driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: false);
+      await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
+      expect(log, <String>[]);
     });
   });
 
