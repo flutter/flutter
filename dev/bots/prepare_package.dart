@@ -577,7 +577,8 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    for (final String releaseFolder in <String>[oldGsReleaseFolder, newGsReleaseFolder]) {
+    for (final bool isNew in <bool>[false, true]) {
+      final String releaseFolder = isNew ? newGsReleaseFolder : oldGsReleaseFolder;
       final String destGsPath = '$releaseFolder/$destinationArchivePath';
       if (!forceUpload) {
         if (await _cloudPathExists(destGsPath) && !dryRun) {
@@ -591,7 +592,7 @@ class ArchivePublisher {
         dest: destGsPath,
       );
       assert(tempDir.existsSync());
-      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: false);
+      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: isNew);
     }
   }
 
