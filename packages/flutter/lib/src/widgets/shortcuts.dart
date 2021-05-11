@@ -623,10 +623,6 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// In the following example, when a key combination results in a question mark,
 /// the counter is increased:
 ///
-/// ```dart imports
-/// import 'package:flutter/services.dart';
-/// ```
-///
 /// ```dart preamble
 /// class HelpMenuIntent extends Intent {
 ///   const HelpMenuIntent();
