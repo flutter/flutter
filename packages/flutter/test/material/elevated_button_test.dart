@@ -951,7 +951,7 @@ void main() {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(22)),
                     onPressed: () {},
-                    child: const Text('ElevatedButton')
+                    child: const Text('ElevatedButton'),
                   ),
                 ),
               ),

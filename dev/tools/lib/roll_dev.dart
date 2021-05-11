@@ -23,10 +23,10 @@ const String kSkipTagging = 'skip-tagging';
 /// Create a new dev release without cherry picks.
 class RollDevCommand extends Command<void> {
   RollDevCommand({
-    @required this.checkouts,
-    @required this.fileSystem,
-    @required this.platform,
-    @required this.stdio,
+    required this.checkouts,
+    required this.fileSystem,
+    required this.platform,
+    required this.stdio,
   }) {
     argParser.addOption(
       kIncrement,
@@ -92,7 +92,7 @@ class RollDevCommand extends Command<void> {
   @override
   void run() {
     rollDev(
-      argResults: argResults,
+      argResults: argResults!,
       repository: FrameworkRepository(checkouts),
       stdio: stdio,
       usage: argParser.usage,
@@ -105,10 +105,10 @@ class RollDevCommand extends Command<void> {
 /// Returns true if publishing was successful, else false.
 @visibleForTesting
 bool rollDev({
-  @required String usage,
-  @required ArgResults argResults,
-  @required Stdio stdio,
-  @required FrameworkRepository repository,
+  required String usage,
+  required ArgResults argResults,
+  required Stdio stdio,
+  required FrameworkRepository repository,
 }) {
   final String remoteName = argResults[kRemoteName] as String;
   final String level = argResults[kIncrement] as String;

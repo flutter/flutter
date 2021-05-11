@@ -593,11 +593,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo) async {
+  Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo, { EnvironmentType environmentType = EnvironmentType.physical }) async {
     if (!existsSync()) {
       return null;
     }
-    _buildSettingsByScheme ??= <String, Map<String, String>>{};
     final XcodeProjectInfo info = await projectInfo();
     if (info == null) {
       return null;
@@ -608,9 +607,15 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       info.reportFlavorNotFoundAndExit();
     }
 
-    return _buildSettingsByScheme[scheme] ??= await _xcodeProjectBuildSettings(scheme);
+    final String configuration = (await projectInfo()).buildConfigurationFor(
+      buildInfo,
+      scheme,
+    );
+    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(environmentType: environmentType, scheme: scheme, configuration: configuration);
+    return _buildSettingsByBuildContext[buildContext] ??= await _xcodeProjectBuildSettings(buildContext);
   }
-  Map<String, Map<String, String>> _buildSettingsByScheme;
+
+  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<XcodeProjectInfo> projectInfo() async {
     if (!xcodeProject.existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
@@ -620,13 +625,14 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
   XcodeProjectInfo _projectInfo;
 
-  Future<Map<String, String>> _xcodeProjectBuildSettings(String scheme) async {
+  Future<Map<String, String>> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
     if (!globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
+
     final Map<String, String> buildSettings = await globals.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
-      scheme: scheme,
+      buildContext: buildContext,
     );
     if (buildSettings != null && buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.

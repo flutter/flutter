@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';

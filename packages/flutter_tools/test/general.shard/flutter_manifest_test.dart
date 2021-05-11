@@ -767,6 +767,44 @@ flutter:
       contains('Expected "fonts" to either be null or a list.'));
   });
 
+  testWithoutContext('FlutterManifest ignores empty list of fonts', () {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  fonts: []
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.fonts.length, 0);
+  });
+
+  testWithoutContext('FlutterManifest ignores empty list of assets', () {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets: []
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.assets.length, 0);
+  });
+
   testWithoutContext('FlutterManifest returns proper error when font detail is '
     'not a list of maps', () {
     const String manifest = '''
@@ -1084,6 +1122,25 @@ flutter:
     expect(flutterManifest, null);
     expect(logger.errorText,
       contains('Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '));
+  });
+
+  testWithoutContext('FlutterManifest handles empty licenses list', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  licenses: []
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.additionalLicenses.length, 0);
   });
 
   testWithoutContext('FlutterManifest can specify additional LICENSE files', () async {

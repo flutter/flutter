@@ -19,7 +19,7 @@ Future<void> main() async {
     String watchDeviceID;
     String phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
-        .createTempSync('ios_app_with_extensions_test');
+        .createTempSync('flutter_ios_app_with_extensions_test.');
     final Directory projectDir =
         Directory(path.join(tempDir.path, 'app_with_extensions'));
     try {

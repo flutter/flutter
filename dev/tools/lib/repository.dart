@@ -23,8 +23,8 @@ enum RemoteName {
 
 class Remote {
   const Remote({
-    @required RemoteName name,
-    @required this.url,
+    required RemoteName name,
+    required this.url,
   }) : _name = name;
 
   final RemoteName _name;
@@ -37,7 +37,6 @@ class Remote {
       case RemoteName.mirror:
         return 'mirror';
     }
-    throw ConductorException('Invalid value of _name: $_name'); // For analyzer
   }
 
   /// The URL of the remote.
@@ -47,13 +46,13 @@ class Remote {
 /// A source code repository.
 abstract class Repository {
   Repository({
-    @required this.name,
-    @required this.fetchRemote,
-    @required this.processManager,
-    @required this.stdio,
-    @required this.platform,
-    @required this.fileSystem,
-    @required this.parentDirectory,
+    required this.name,
+    required this.fetchRemote,
+    required this.processManager,
+    required this.stdio,
+    required this.platform,
+    required this.fileSystem,
+    required this.parentDirectory,
     this.initialRef,
     this.localUpstream = false,
     this.useExistingCheckout = false,
@@ -69,10 +68,10 @@ abstract class Repository {
   ///
   /// This value can be null, in which case attempting to publish will lead to
   /// a [ConductorException].
-  final Remote pushRemote;
+  final Remote? pushRemote;
 
   /// The initial ref (branch or commit name) to check out.
-  final String initialRef;
+  final String? initialRef;
   final Git git;
   final ProcessManager processManager;
   final Stdio stdio;
@@ -84,7 +83,7 @@ abstract class Repository {
   /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
 
-  Directory _checkoutDirectory;
+  Directory? _checkoutDirectory;
 
   /// Directory for the repository checkout.
   ///
@@ -92,23 +91,23 @@ abstract class Repository {
   /// cloned on the filesystem until this getter is accessed.
   Directory get checkoutDirectory {
     if (_checkoutDirectory != null) {
-      return _checkoutDirectory;
+      return _checkoutDirectory!;
     }
     _checkoutDirectory = parentDirectory.childDirectory(name);
-    lazilyInitialize();
-    return _checkoutDirectory;
+    lazilyInitialize(_checkoutDirectory!);
+    return _checkoutDirectory!;
   }
 
   /// Ensure the repository is cloned to disk and initialized with proper state.
-  void lazilyInitialize() {
-    if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
-      stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
-      _checkoutDirectory.deleteSync(recursive: true);
+  void lazilyInitialize(Directory checkoutDirectory) {
+    if (!useExistingCheckout && checkoutDirectory.existsSync()) {
+      stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
+      checkoutDirectory.deleteSync(recursive: true);
     }
 
-    if (!_checkoutDirectory.existsSync()) {
+    if (!checkoutDirectory.existsSync()) {
       stdio.printTrace(
-        'Cloning $name from ${fetchRemote.url} to ${_checkoutDirectory.path}...',
+        'Cloning $name from ${fetchRemote.url} to ${checkoutDirectory.path}...',
       );
       git.run(
         <String>[
@@ -117,21 +116,21 @@ abstract class Repository {
           fetchRemote.name,
           '--',
           fetchRemote.url,
-          _checkoutDirectory.path
+          checkoutDirectory.path
         ],
         'Cloning $name repo',
         workingDirectory: parentDirectory.path,
       );
       if (pushRemote != null) {
         git.run(
-          <String>['remote', 'add', pushRemote.name, pushRemote.url],
-          'Adding remote ${pushRemote.url} as ${pushRemote.name}',
-          workingDirectory: _checkoutDirectory.path,
+          <String>['remote', 'add', pushRemote!.name, pushRemote!.url],
+          'Adding remote ${pushRemote!.url} as ${pushRemote!.name}',
+          workingDirectory: checkoutDirectory.path,
         );
         git.run(
-          <String>['fetch', pushRemote.name],
-          'Fetching git remote ${pushRemote.name}',
-          workingDirectory: _checkoutDirectory.path,
+          <String>['fetch', pushRemote!.name],
+          'Fetching git remote ${pushRemote!.name}',
+          workingDirectory: checkoutDirectory.path,
         );
       }
       if (localUpstream) {
@@ -141,7 +140,7 @@ abstract class Repository {
           git.run(
             <String>['checkout', channel, '--'],
             'check out branch $channel locally',
-            workingDirectory: _checkoutDirectory.path,
+            workingDirectory: checkoutDirectory.path,
           );
         }
       }
@@ -151,7 +150,7 @@ abstract class Repository {
       git.run(
         <String>['checkout', '${fetchRemote.name}/$initialRef'],
         'Checking out initialRef $initialRef',
-        workingDirectory: _checkoutDirectory.path,
+        workingDirectory: checkoutDirectory.path,
       );
     }
     final String revision = reverseParse('HEAD');
@@ -404,8 +403,8 @@ class FrameworkRepository extends Repository {
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
-    String initialRef,
-    Remote pushRemote,
+    String? initialRef,
+    Remote? pushRemote,
   }) : super(
           name: name,
           fetchRemote: fetchRemote,
@@ -428,7 +427,7 @@ class FrameworkRepository extends Repository {
     Checkouts checkouts, {
     String name = 'framework',
     bool useExistingCheckout = false,
-    @required String upstreamPath,
+    required String upstreamPath,
   }) {
     return FrameworkRepository(
       checkouts,
@@ -455,7 +454,7 @@ class FrameworkRepository extends Repository {
       );
 
   @override
-  Repository cloneRepository(String cloneName) {
+  Repository cloneRepository(String? cloneName) {
     assert(localUpstream);
     cloneName ??= 'clone-of-$name';
     return FrameworkRepository(
@@ -520,6 +519,75 @@ class FrameworkRepository extends Repository {
   }
 }
 
+/// A wrapper around the host repository that is executing the conductor.
+///
+/// [Repository] methods that mutate the underlying repository will throw a
+/// [ConductorException].
+class HostFrameworkRepository extends FrameworkRepository {
+  HostFrameworkRepository({
+    required Checkouts checkouts,
+    String name = 'host-framework',
+    bool useExistingCheckout = false,
+    required String upstreamPath,
+  }) : super(
+    checkouts,
+    name: name,
+    fetchRemote: Remote(
+      name: RemoteName.upstream,
+      url: 'file://$upstreamPath/',
+    ),
+    localUpstream: false,
+    useExistingCheckout: useExistingCheckout,
+  ) {
+    _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
+  }
+
+  @override
+  Directory get checkoutDirectory => _checkoutDirectory!;
+
+  @override
+  void newBranch(String branchName) {
+    throw ConductorException('newBranch not implemented for the host repository');
+  }
+
+  @override
+  void checkout(String ref) {
+    throw ConductorException('checkout not implemented for the host repository');
+  }
+
+  @override
+  String cherryPick(String commit) {
+    throw ConductorException('cherryPick not implemented for the host repository');
+  }
+
+  @override
+  String reset(String ref) {
+    throw ConductorException('reset not implemented for the host repository');
+  }
+
+  @override
+  void tag(String commit, String tagName, String remote) {
+    throw ConductorException('tag not implemented for the host repository');
+  }
+
+  @override
+  void updateChannel(
+    String commit,
+    String remote,
+    String branch, {
+    bool force = false,
+  }) {
+    throw ConductorException('updateChannel not implemented for the host repository');
+  }
+
+  @override
+  String authorEmptyCommit([String message = 'An empty commit']) {
+    throw ConductorException(
+      'authorEmptyCommit not implemented for the host repository',
+    );
+  }
+}
+
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
@@ -529,7 +597,7 @@ class EngineRepository extends Repository {
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
-    Remote pushRemote,
+    Remote? pushRemote,
   }) : super(
           name: name,
           fetchRemote: fetchRemote,
@@ -550,7 +618,7 @@ class EngineRepository extends Repository {
   static const String defaultBranch = 'master';
 
   @override
-  Repository cloneRepository(String cloneName) {
+  Repository cloneRepository(String? cloneName) {
     assert(localUpstream);
     cloneName ??= 'clone-of-$name';
     return EngineRepository(
@@ -571,14 +639,13 @@ enum RepositoryType {
 
 class Checkouts {
   Checkouts({
-    @required this.fileSystem,
-    @required this.platform,
-    @required this.processManager,
-    @required this.stdio,
-    @required Directory parentDirectory,
+    required this.fileSystem,
+    required this.platform,
+    required this.processManager,
+    required this.stdio,
+    required Directory parentDirectory,
     String directoryName = 'flutter_conductor_checkouts',
-  })  : assert(parentDirectory != null),
-        directory = parentDirectory.childDirectory(directoryName) {
+  })  : directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }

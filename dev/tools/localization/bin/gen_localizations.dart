@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This program generates a getMaterialTranslation() and a
 // getCupertinoTranslation() function that look up the translations provided by
 // the arb files. The returned value is a generated instance of a

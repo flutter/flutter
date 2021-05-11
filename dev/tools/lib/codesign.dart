@@ -6,7 +6,7 @@ import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
+import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -31,11 +31,10 @@ const String kUpstream = 'upstream';
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
   CodesignCommand({
-    @required this.checkouts,
-    @required this.flutterRoot,
-    FrameworkRepository framework,
-  })  : assert(flutterRoot != null),
-        fileSystem = checkouts.fileSystem,
+    required this.checkouts,
+    required this.flutterRoot,
+    FrameworkRepository? framework,
+  })  : fileSystem = checkouts.fileSystem,
         platform = checkouts.platform,
         stdio = checkouts.stdio,
         processManager = checkouts.processManager {
@@ -74,7 +73,7 @@ class CodesignCommand extends Command<void> {
   /// Root directory of the Flutter repository.
   final Directory flutterRoot;
 
-  FrameworkRepository _framework;
+  FrameworkRepository? _framework;
   FrameworkRepository get framework {
     return _framework ??= FrameworkRepository.localRepoAsUpstream(
       checkouts,
@@ -97,21 +96,21 @@ class CodesignCommand extends Command<void> {
           '"${platform.operatingSystem}"');
     }
 
-    if (argResults['verify'] as bool != true) {
+    if (argResults!['verify'] as bool != true) {
       throw ConductorException(
           'Sorry, but codesigning is not implemented yet. Please pass the '
           '--$kVerify flag to verify signatures.');
     }
 
     String revision;
-    if (argResults.wasParsed(kRevision)) {
+    if (argResults!.wasParsed(kRevision)) {
       stdio.printError(
           'Warning! When providing an arbitrary revision, the contents of the cache may not');
       stdio.printError(
           'match the expected binaries in the conductor tool. It is preferred to check out');
       stdio.printError(
           'the desired revision and run that version of the conductor.\n');
-      revision = argResults[kRevision] as String;
+      revision = argResults![kRevision] as String;
     } else {
       revision = (processManager.runSync(
         <String>['git', 'rev-parse', 'HEAD'],
@@ -127,7 +126,7 @@ class CodesignCommand extends Command<void> {
     framework.runFlutter(<String>['precache', '--android', '--ios', '--macos']);
 
     verifyExist();
-    if (argResults[kSignatures] as bool) {
+    if (argResults![kSignatures] as bool) {
       verifySignatures();
     }
   }
@@ -319,16 +318,16 @@ class CodesignCommand extends Command<void> {
     }
 
     stdio.printStatus(
-        'Verified that binaries for commit ${argResults[kRevision] as String} are codesigned and have '
+        'Verified that binaries for commit ${argResults![kRevision] as String} are codesigned and have '
         'expected entitlements.');
   }
 
-  List<String> _allBinaryPaths;
+  List<String>? _allBinaryPaths;
 
   /// Find every binary file in the given [rootDirectory].
   List<String> findBinaryPaths(String rootDirectory) {
     if (_allBinaryPaths != null) {
-      return _allBinaryPaths;
+      return _allBinaryPaths!;
     }
     final io.ProcessResult result = processManager.runSync(
       <String>[
@@ -343,7 +342,7 @@ class CodesignCommand extends Command<void> {
         .where((String s) => s.isNotEmpty)
         .toList();
     _allBinaryPaths = allFiles.where(isBinary).toList();
-    return _allBinaryPaths;
+    return _allBinaryPaths!;
   }
 
   /// Check mime-type of file at [filePath] to determine if it is binary.

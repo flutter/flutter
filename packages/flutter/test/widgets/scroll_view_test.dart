@@ -113,7 +113,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -147,7 +147,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -181,7 +181,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -218,7 +218,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -252,7 +252,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -321,7 +321,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -355,7 +355,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -390,7 +390,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -413,22 +413,24 @@ void main() {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
-        child: ListView(
-      padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-      children: focusNodes.map((FocusNode focusNode) {
-        return Container(
-          height: 50,
-          color: Colors.green,
-          child: TextField(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+        children: focusNodes.map((FocusNode focusNode) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
               focusNode: focusNode,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )),
-        );
-      }).toList(),
-    )));
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    ));
 
     final Finder finder = find.byType(TextField).first;
     final TextField textField = tester.widget(finder);
@@ -457,7 +459,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -491,7 +493,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -528,7 +530,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         },
@@ -562,7 +564,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -631,7 +633,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -665,7 +667,7 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           );
         }).toList(),
@@ -700,7 +702,7 @@ void main() {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                )
+                ),
               ),
             );
           },
@@ -816,7 +818,7 @@ void main() {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                    )
+                    ),
                   ),
                 );
               }).toList(),
@@ -1231,7 +1233,7 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
-    testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+   testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     expect(() => ListView(
       itemExtent: 100,
       prototypeItem: const SizedBox(),
@@ -1309,7 +1311,7 @@ void main() {
       ),
     );
     final ScrollController controller = PrimaryScrollController.of(
-      tester.element(find.byType(CustomScrollView))
+      tester.element(find.byType(CustomScrollView)),
     )!;
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
@@ -1331,5 +1333,84 @@ void main() {
       tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
+  });
+
+  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListView.builder(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  itemExtent: 30,
+                );
+              },
+            ),
+          ),
+        )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
+  });
+
+  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListView.builder(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  prototypeItem: const SizedBox(
+                      height: 30,
+                      child: Text('3'),
+                  ),
+                );
+              },
+            ),
+          ),
+        )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
   });
 }

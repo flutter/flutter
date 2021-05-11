@@ -28,7 +28,7 @@ import 'text_field.dart';
 ///   const MyPrefilledSearch({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
+///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
@@ -59,7 +59,7 @@ import 'text_field.dart';
 ///   const MyPrefilledSearch({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyPrefilledSearchState createState() => _MyPrefilledSearchState();
+///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {

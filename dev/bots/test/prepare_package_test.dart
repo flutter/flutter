@@ -132,6 +132,7 @@ void main() {
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
+          if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
           else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
@@ -160,6 +161,7 @@ void main() {
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
+          if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}': null,
           if (platform.isWindows) 'attrib -h .git': null,
           if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
           else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
@@ -229,6 +231,57 @@ void main() {
         await creator.initializeRepo();
         await creator.createArchive();
       });
+
+      test('fails if binary is not codesigned', () async {
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
+        final String archiveName = path.join(tempDir.absolute.path,
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
+        final ProcessResult codesignFailure = ProcessResult(1, 1, '', 'code object is not signed at all');
+        final String binPath = path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git reset --hard $testRef': null,
+          'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
+          '$flutter doctor': null,
+          '$flutter update-packages': null,
+          '$flutter precache': null,
+          '$flutter ide-config': null,
+          '$flutter create --template=app ${createBase}app': null,
+          '$flutter create --template=package ${createBase}package': null,
+          '$flutter create --template=plugin ${createBase}plugin': null,
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
+          if (platform.isMacOS) 'codesign -vvvv --check-notarization $binPath': <ProcessResult>[codesignFailure],
+          if (platform.isWindows) 'attrib -h .git': null,
+          if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 --symlinks $archiveName flutter': null
+          else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
+        };
+        processManager.addCommands(convertResults(calls));
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.dev,
+          strict: true,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+        );
+        await creator.initializeRepo();
+
+        try {
+          await creator.createArchive();
+          fail('failed to throw');
+        } on Exception catch (e) {
+          expect(e is PreparePackageException, true);
+          final PreparePackageException exception = e as PreparePackageException;
+          expect(exception.message, contains('The binary $binPath was not codesigned!'));
+        }
+      }, skip: !platform.isMacOS);
     });
 
     group('ArchivePublisher for $platformName', () {

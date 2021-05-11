@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 
@@ -165,20 +164,14 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      mockClipboard.handleMethodCall,
-    );
+    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      null,
-    );
+    SystemChannels.platform.setMockMethodCallHandler(null);
   });
 
   final Key textFieldKey = UniqueKey();
@@ -299,8 +292,10 @@ void main() {
                       TestSemantics(
                         id: 4,
                         flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-                        actions: <SemanticsAction>[SemanticsAction.tap,
-                          SemanticsAction.didGainAccessibilityFocus],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          SemanticsAction.didGainAccessibilityFocus,
+                        ],
                         textDirection: TextDirection.ltr,
                       ),
                     ],
@@ -344,7 +339,7 @@ void main() {
 
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
-    String? textFieldValue;
+    late String textFieldValue;
 
     await tester.pumpWidget(
       overlay(
@@ -367,16 +362,15 @@ void main() {
 
     Future<void> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
-        expect(textFieldValue, isNull);
         await tester.enterText(find.byType(TextField), testValue);
         // Check that the onChanged event handler fired.
         expect(textFieldValue, equals(testValue));
-        textFieldValue = null;
         await skipPastScrollingAnimation(tester);
       });
     }
 
     await checkText(' ');
+
     expect(findTextFieldBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
@@ -422,8 +416,6 @@ void main() {
       text: 'X',
       selection: TextSelection.collapsed(offset: 1),
     ));
-    await tester.idle();
-    expect(tester.state(find.byType(EditableText)), editableText);
     await checkCursorToggle();
   });
 
@@ -652,9 +644,9 @@ void main() {
 
     const String testValue = 'A B C';
     tester.testTextInput.updateEditingValue(
-        const TextEditingValue(
-          text: testValue
-        )
+      const TextEditingValue(
+        text: testValue,
+      ),
     );
     await tester.pump();
 
@@ -709,8 +701,7 @@ void main() {
     // First tap moved the cursor.
     expect(
       controller.selection,
-      const TextSelection.collapsed(
-          offset: 8, affinity: TextAffinity.downstream),
+      const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
     );
     await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
     await tester.pump();
@@ -827,38 +818,39 @@ void main() {
     );
   });
 
-  testWidgets('text field toolbar options correctly changes options',
-      (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextField(
-              controller: controller,
-              toolbarOptions: const ToolbarOptions(copy: true),
+  testWidgets(
+    'text field toolbar options correctly changes options',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                toolbarOptions: const ToolbarOptions(copy: true),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
-    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-    await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-    await tester.pump();
+      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
 
-    // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select all'.
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Select all'), findsNothing);
-  },
+      // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select all'.
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.fuchsia,
@@ -875,15 +867,15 @@ void main() {
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
-        overlay(
-          child: RepaintBoundary(
-            child: TextField(
-              cursorWidth: 15.0,
-              controller: controller,
-              focusNode: focusNode,
-            ),
+      overlay(
+        child: RepaintBoundary(
+          child: TextField(
+            cursorWidth: 15.0,
+            controller: controller,
+            focusNode: focusNode,
           ),
-        )
+        ),
+      ),
     );
     focusNode.requestFocus();
     await tester.pump();
@@ -902,16 +894,16 @@ void main() {
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
-        overlay(
-          child: RepaintBoundary(
-            child: TextField(
-              cursorWidth: 15.0,
-              cursorRadius: const Radius.circular(3.0),
-              controller: controller,
-              focusNode: focusNode,
-            ),
+      overlay(
+        child: RepaintBoundary(
+          child: TextField(
+            cursorWidth: 15.0,
+            cursorRadius: const Radius.circular(3.0),
+            controller: controller,
+            focusNode: focusNode,
           ),
-        )
+        ),
+      ),
     );
     focusNode.requestFocus();
     await tester.pump();
@@ -930,16 +922,16 @@ void main() {
     final FocusNode focusNode = FocusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
-        overlay(
-          child: RepaintBoundary(
-            child: TextField(
-              cursorWidth: 15.0,
-              cursorHeight: 30.0,
-              controller: controller,
-              focusNode: focusNode,
-            ),
+      overlay(
+        child: RepaintBoundary(
+          child: TextField(
+            cursorWidth: 15.0,
+            cursorHeight: 30.0,
+            controller: controller,
+            focusNode: focusNode,
           ),
-        )
+        ),
+      ),
     );
     focusNode.requestFocus();
     await tester.pump();
@@ -1317,9 +1309,14 @@ void main() {
           TestSemantics(
             id: 1,
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
-            actions: <SemanticsAction>[SemanticsAction.tap,
-              SemanticsAction.moveCursorBackwardByCharacter, SemanticsAction.setSelection, SemanticsAction.paste,
-              SemanticsAction.setText, SemanticsAction.moveCursorBackwardByWord],
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.setSelection,
+              SemanticsAction.paste,
+              SemanticsAction.setText,
+              SemanticsAction.moveCursorBackwardByWord,
+            ],
             value: 'abcdefghi',
             textDirection: TextDirection.ltr,
             textSelection: const TextSelection.collapsed(offset: 9),
@@ -3385,7 +3382,7 @@ void main() {
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
             return TextField(controller: currentController);
-          }
+          },
         ),
       ),
     );
@@ -4697,8 +4694,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4770,8 +4767,8 @@ void main() {
       );
 
     String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4843,8 +4840,8 @@ void main() {
     );
 
     const String clipboardContent = 'I love Flutter!';
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -4893,8 +4890,8 @@ void main() {
         maxLines: 3,
       );
     String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -4967,8 +4964,8 @@ void main() {
       obscureText: true,
     );
     String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
           clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
@@ -6744,7 +6741,9 @@ void main() {
 
       // But don't trigger the toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'tap with a mouse does not move cursor to the edge of the word',
@@ -6779,7 +6778,9 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
       );
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets('tap moves cursor to the position tapped', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
@@ -6845,7 +6846,9 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor',
@@ -6890,7 +6893,9 @@ void main() {
 
       // Selected text shows 3 toolbar buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar',
@@ -6935,9 +6940,13 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
+  );
 
-  testWidgets('Custom toolbar test - Android text selection controls', (WidgetTester tester) async {
+  testWidgets(
+    'Custom toolbar test - Android text selection controls',
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
@@ -6947,7 +6956,7 @@ void main() {
             child: Center(
               child: TextField(
                 controller: controller,
-                selectionControls: materialTextSelectionControls
+                selectionControls: materialTextSelectionControls,
               ),
             ),
           ),
@@ -6964,7 +6973,10 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(TextButton), findsNWidgets(4));
-  }, variant: TargetPlatformVariant.all(), skip: isContextMenuProvidedByPlatform);
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: isContextMenuProvidedByPlatform,
+  );
 
   testWidgets(
     'Custom toolbar test - Cupertino text selection controls',
@@ -6995,10 +7007,12 @@ void main() {
 
       // Selected text shows 3 toolbar buttons: cut, copy, paste
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-  }, variant: TargetPlatformVariant.all(), skip: isContextMenuProvidedByPlatform);
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: isContextMenuProvidedByPlatform,
+  );
 
-  testWidgets('selectionControls is passed to EditableText',
-      (WidgetTester tester) async {
+  testWidgets('selectionControls is passed to EditableText', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -7062,7 +7076,9 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
+  );
 
   testWidgets(
     'double double tap just shows the selection menu',
@@ -7237,7 +7253,9 @@ void main() {
       );
       // The toolbar is still showing.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'tap after a double tap select is not affected',
@@ -7283,7 +7301,9 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar',
@@ -7316,7 +7336,9 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'long press selects word and shows toolbar',
@@ -7348,7 +7370,9 @@ void main() {
 
       // Collapsed toolbar shows 4 buttons: cut, copy, paste, select all
       expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
+  );
 
   testWidgets(
     'long press tap cannot initiate a double tap',
@@ -7385,7 +7409,9 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'long press drag moves the cursor under the drag and shows toolbar on lift',
@@ -7451,7 +7477,9 @@ void main() {
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -7583,7 +7611,9 @@ void main() {
 
       // Long press toolbar.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'double tap after a long tap is not affected',
@@ -7628,7 +7658,9 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
 
   testWidgets(
     'double click after a click on Mac',
@@ -7686,9 +7718,13 @@ void main() {
       );
       // The text selection toolbar isn't shown on Mac without a right click.
       expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }),
+  );
 
-  testWidgets('double tap chains work', (WidgetTester tester) async {
+  testWidgets(
+    'double tap chains work',
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
@@ -7750,9 +7786,13 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
 
-  testWidgets('double click chains work', (WidgetTester tester) async {
+  testWidgets(
+    'double click chains work',
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
@@ -7835,7 +7875,9 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }),
+  );
 
   testWidgets('double tapping a space selects the previous word on iOS', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -9087,17 +9129,17 @@ void main() {
                       TextField(
                         decoration: InputDecoration(
                           isDense: isDense,
-                        )
+                        ),
                       ),
                       Container(
                         height: 1000,
                       ),
                     ],
-                  )
-                )
+                  ),
+                ),
               ],
-            )
-          )
+            ),
+          ),
         );
       }
 
@@ -9145,32 +9187,32 @@ void main() {
                 ),
               ),
               Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    SizedBox(
-                      width: 100.0,
-                      child: TextField(
-                        controller: controller2,
-                        focusNode: focusNode2,
-                      ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SizedBox(
+                    width: 100.0,
+                    child: TextField(
+                      controller: controller2,
+                      focusNode: focusNode2,
                     ),
-                    SizedBox(
-                      width: 100.0,
-                      child: TextField(
-                        controller: controller3,
-                        focusNode: focusNode3,
-                      ),
+                  ),
+                  SizedBox(
+                    width: 100.0,
+                    child: TextField(
+                      controller: controller3,
+                      focusNode: focusNode3,
                     ),
-                    SizedBox(
-                      width: 100.0,
-                      child: TextField(
-                        controller: controller4,
-                        focusNode: focusNode4,
-                      ),
+                  ),
+                  SizedBox(
+                    width: 100.0,
+                    child: TextField(
+                      controller: controller4,
+                      focusNode: focusNode4,
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
               SizedBox(
                 width: 100.0,
                 child: TextField(
@@ -9296,7 +9338,7 @@ void main() {
                           controller: controller,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -9328,8 +9370,8 @@ void main() {
     );
 
     bool triedToReadClipboard = false;
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.getData') {
           triedToReadClipboard = true;
         }
@@ -9449,7 +9491,7 @@ void main() {
                 textDirection: TextDirection.rtl,
               ),
             );
-          }
+          },
         ),
       ),
     );
