@@ -241,6 +241,7 @@ executable("flutter_windows_unittests") {
 
   # Target-specific sources.
   if (target_os == "winuwp") {
+    sources += [ "uwptool_utils_unittests.cc" ]
     # TODO(clarkezone) add UWP tests
     # https://github.com/flutter/flutter/issues/70197
   } else {
@@ -279,6 +280,10 @@ executable("flutter_windows_unittests") {
     "//flutter/testing",
     "//third_party/rapidjson",
   ]
+
+  if (target_os == "winuwp") {
+    deps += [ ":uwptool_utils" ]
+  }
 }
 
 shared_library("flutter_windows_glfw") {
@@ -301,6 +306,7 @@ group("windows") {
     deps = [
       ":flutter_windows_winuwp",
       ":publish_headers_windows",
+      ":uwptool",
       "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
     ]
   } else {
@@ -314,4 +320,40 @@ group("windows") {
   if (build_glfw_shell) {
     deps += [ ":windows_glfw" ]
   }
+}
+
+# uwptool utilities.
+source_set("uwptool_utils") {
+  if (target_os == "winuwp") {
+    configs += [ ":cppwinrt_defs" ]
+    cflags = [ "/EHsc" ]
+  }
+
+  sources = [
+    "uwptool_utils.cc",
+    "uwptool_utils.h",
+  ]
+
+  deps = [ ":registry" ]
+}
+
+# Command-line tool used by the flutter tool that serves a similar purpose to
+# adb for Android or libimobiledevice for iOS apps. Supports installing,
+# uninstalling, launching apps.
+executable("uwptool") {
+  if (target_os == "winuwp") {
+    configs += [ ":cppwinrt_defs" ]
+    cflags = [ "/EHsc" ]
+    libs = [
+      "windowsapp.lib",
+      "user32.lib",
+    ]
+  }
+
+  sources = [ "uwptool_main.cc" ]
+  deps = [
+    ":string_conversion",
+    ":uwptool_utils",
+    "//flutter/fml:command_line",
+  ]
 }
