@@ -116,6 +116,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// default fields were determined using the comparison tool in
   /// https://github.com/flutter/platform_tests/.
   ///
+  /// To customize the prefix icon, pass a [Widget] to [prefixIcon]. This
+  /// defaults to the search icon.
+  ///
   /// To customize the suffix icon, pass an [Icon] to [suffixIcon]. This
   /// defaults to the X-Mark.
   ///
@@ -141,6 +144,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
     this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 4),
+    this.prefixIcon = const Icon(CupertinoIcons.search),
     this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),
     this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
     this.suffixMode = OverlayVisibilityMode.editing,
@@ -246,6 +250,11 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// the comparison tool in https://github.com/flutter/platform_tests/.
   final EdgeInsetsGeometry prefixInsets;
 
+  /// Sets a prefix widget.
+  ///
+  /// Cannot be null. Defaults to an [Icon] widget with the [CupertinoIcons.search] icon.
+  final Widget prefixIcon;
+
   /// Sets the padding insets for the prefix.
   ///
   /// Cannot be null. Defaults to padding that replicates the
@@ -287,7 +296,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
-  /// respond to touch events including the [suffixIcon] and the search button.
+  /// respond to touch events including the [prefixIcon] and [suffixIcon] button.
   final bool? enabled;
 
   @override
@@ -387,7 +396,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     final Widget prefix = Padding(
       child: IconTheme(
         data: iconThemeData,
-        child: const Icon(CupertinoIcons.search),
+        child: widget.prefixIcon,
       ),
       padding: widget.prefixInsets,
     );
