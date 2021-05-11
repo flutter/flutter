@@ -136,7 +136,7 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  Iterable<T> map<T>(T Function(E e) f) {
+  Iterable<T> map<T>(T Function(E e) toElement) {
     return CachingIterable<T>(super.map<T>(f).iterator);
   }
 
@@ -146,7 +146,7 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  Iterable<T> expand<T>(Iterable<T> Function(E element) f) {
+  Iterable<T> expand<T>(Iterable<T> Function(E element) toElements) {
     return CachingIterable<T>(super.expand<T>(f).iterator);
   }
 
