@@ -1029,7 +1029,7 @@ class BackButtonListener extends StatefulWidget {
   final ValueGetter<Future<bool>> onBackButtonPressed;
 
   @override
-  _BackButtonListenerState createState() => _BackButtonListenerState();
+  State<BackButtonListener> createState() => _BackButtonListenerState();
 }
 
 class _BackButtonListenerState extends State<BackButtonListener> {

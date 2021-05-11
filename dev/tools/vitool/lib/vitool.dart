@@ -206,7 +206,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
     final XmlElement element = node as XmlElement;
 
     if (element.name.local == 'path') {
-      paths.add(SvgPath.fromElement(element).applyTransform(transform));
+      paths.add(SvgPath.fromElement(element)._applyTransform(transform));
     }
 
     if (element.name.local == 'g') {
@@ -313,9 +313,9 @@ class SvgPath {
     return SvgPath(id, commands);
   }
 
-  SvgPath applyTransform(_Transform transform) {
+  SvgPath _applyTransform(_Transform transform) {
     final List<SvgPathCommand> transformedCommands =
-      commands.map<SvgPathCommand>((SvgPathCommand c) => c.applyTransform(transform)).toList();
+      commands.map<SvgPathCommand>((SvgPathCommand c) => c._applyTransform(transform)).toList();
     return SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
   }
 
@@ -359,7 +359,7 @@ class SvgPathCommand {
   /// List of points used by this command.
   final List<Point<double>> points;
 
-  SvgPathCommand applyTransform(_Transform transform) {
+  SvgPathCommand _applyTransform(_Transform transform) {
     final List<Point<double>> transformedPoints =
     _vector3ArrayToPoints(
         transform.transformMatrix.applyToVector3Array(
