@@ -18,7 +18,6 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/common.dart';
-import 'build_system/targets/icon_tree_shaker.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'devfs.dart';
@@ -110,27 +109,11 @@ class BundleBuilder {
           ? null
           : globals.flutterVersion.engineRevision,
       defines: <String, String>{
-        // used by by the CopyFlutterBundle target
-        kBuildMode: getNameForBuildMode(buildInfo.mode),
-
         // used by the KernelSnapshot target
         kTargetPlatform: getNameForTargetPlatform(platform),
         kTargetFile: mainPath,
-        kTrackWidgetCreation: buildInfo.trackWidgetCreation.toString(),
-        if (buildInfo.extraFrontEndOptions.isNotEmpty)
-          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
-        if (buildInfo.extraGenSnapshotOptions.isNotEmpty)
-          kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
-        if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
-          kFileSystemRoots: buildInfo.fileSystemRoots?.join(','),
-        kFileSystemScheme: buildInfo.fileSystemScheme,
-        if (buildInfo.dartDefines.isNotEmpty)
-          kDartDefines: encodeDartDefines(buildInfo.dartDefines),
-
-        // used by the CopyFlutterBundle target too, inside the copyAssets
-        // call after the snapshot was built
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-        kDeferredComponents: 'false'
+        kDeferredComponents: 'false',
+        ...buildInfo.toBuildSystemEnvironment(),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,

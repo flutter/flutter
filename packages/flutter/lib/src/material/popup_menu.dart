@@ -112,7 +112,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   bool represents(void value) => false;
 
   @override
-  _PopupMenuDividerState createState() => _PopupMenuDividerState();
+  State<PopupMenuDivider> createState() => _PopupMenuDividerState();
 }
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
@@ -485,7 +485,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   Widget? get child => super.child;
 
   @override
-  _CheckedPopupMenuItemState<T> createState() => _CheckedPopupMenuItemState<T>();
+  PopupMenuItemState<T, CheckedPopupMenuItem<T>> createState() => _CheckedPopupMenuItemState<T>();
 }
 
 class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {

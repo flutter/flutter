@@ -117,7 +117,8 @@ class GestureTransformable extends StatefulWidget {
   final double? initialScale;
   final double? initialRotation;
 
-  @override _GestureTransformableState createState() => _GestureTransformableState();
+  @override
+  State<GestureTransformable> createState() => _GestureTransformableState();
 }
 
 // A single user event can only represent one of these gestures. The user can't

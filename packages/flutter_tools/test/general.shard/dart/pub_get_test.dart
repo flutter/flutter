@@ -406,12 +406,10 @@ void main() {
       botDetector: const BotDetectorAlwaysNo(),
       processManager: processManager,
     );
-    try {
-      await pub.get(context: PubContext.flutterTests);
-      throw AssertionError('pubGet did not fail');
-    } on ToolExit catch (error) {
-      expect(error.message, 'pub get failed (66; err3)');
-    }
+    await expectLater(
+      () => pub.get(context: PubContext.flutterTests),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+    );
     expect(logger.statusText,
       'Running "flutter pub get" in /...\n'
       'out1\n'

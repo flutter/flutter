@@ -819,12 +819,10 @@ class LoggerInterrupted implements Exception {
 
 Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logger) async {
   logger.interrupt(); // an exception during the task should cause it to fail...
-  try {
-    await task;
-    expect(false, isTrue); // (shouldn't reach here)
-  } on ToolExit catch (error) {
-    expect(error.exitCode, 2); // ...with exit code 2.
-  }
+  await expectLater(
+    () => task,
+    throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', 2)),
+  );
 }
 
 VMServiceConnector getFakeVmServiceFactory({
