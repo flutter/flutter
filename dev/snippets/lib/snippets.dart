@@ -227,6 +227,7 @@ class SnippetGenerator {
       if (match != null) { // If we saw the start or end of a code block
         inCodeBlock = !inCodeBlock;
         if (match.namedGroup('language') != null) {
+          // ignore: unnecessary_null_checks
           language = match[1]!;
           if (match.namedGroup('section') != null) {
             components.add(_ComponentTuple('code-${match.namedGroup('section')}', <String>[], language: language));

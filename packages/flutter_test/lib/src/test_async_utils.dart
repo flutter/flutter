@@ -307,6 +307,7 @@ class TestAsyncUtils {
     do { // skip past frames that are from this class
       index += 1;
       assert(index < stack.length);
+      // ignore: unnecessary_null_checks
       lineMatch = getClassPattern.matchAsPrefix(stack[index])!;
       assert(lineMatch != null);
       assert(lineMatch.groupCount == 1);
