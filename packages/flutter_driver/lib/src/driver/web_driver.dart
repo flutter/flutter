@@ -4,14 +4,14 @@
 
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:file/file.dart';
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
+
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/support/async.dart';
-import 'package:file/file.dart';
-import 'package:path/path.dart' as path;
 
 import '../common/error.dart';
 import '../common/message.dart';
