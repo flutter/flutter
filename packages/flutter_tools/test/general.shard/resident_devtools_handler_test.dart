@@ -355,45 +355,51 @@ void main() {
   });
 
   testWithoutContext('Does not launch devtools in browser if launcher is null', () async {
-    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
       FakeResidentRunner(),
       BufferLogger.test(),
     );
 
-    await handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
-
+    handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
+    expect(handler.launchedInBrowser, isFalse);
     expect(handler.activeDevToolsServer, null);
   });
 
   testWithoutContext('Does not launch devtools in browser if ResidentRunner does not support the service protocol', () async {
-    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher(),
       FakeResidentRunner()..supportsServiceProtocol = false,
       BufferLogger.test(),
     );
 
-    await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[]);
-
+    handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
+    expect(handler.launchedInBrowser, isFalse);
     expect(handler.activeDevToolsServer, null);
   });
 
-  testWithoutContext('launchDevToolsInBrowser times out for null devToolsUrl', () async {
-    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+  testWithoutContext('launchDevToolsInBrowser launches successfully with null devToolsUrl', () async {
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = null
+        // We need to set [activeDevToolsServer] to simulate the state we would
+        // be in after serving devtools completes.
+        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080)
         ..readyFuture = Future<void>.delayed(
-          Duration(seconds: FlutterResidentDevtoolsHandler.launchInBrowserTimeout.inSeconds + 1),
+          const Duration(seconds: 1),
         ),
       FakeResidentRunner(),
       BufferLogger.test(),
     );
 
-    expect(await handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isFalse);
+    expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+    // Wait longer than the [readyFuture] will take to complete.
+    await Future<void>.delayed(const Duration(seconds: 2));
+    expect(handler.launchedInBrowser, isTrue);
   });
 
   testWithoutContext('launchDevToolsInBrowser launches successfully', () async {
-    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = Uri(host: 'localhost', port: 8080)
         ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
@@ -401,7 +407,8 @@ void main() {
       BufferLogger.test(),
     );
 
-    expect(await handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+    expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+    expect(handler.launchedInBrowser, isTrue);
   });
 }
 

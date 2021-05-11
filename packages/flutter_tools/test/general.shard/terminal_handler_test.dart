@@ -795,7 +795,7 @@ void main() {
       expect(terminalHandler.logger.statusText, contains('WIDGET DATA 2'));
     });
 
-    testWithoutContext('v - launchDevTools', () async {
+    testWithoutContext('v - launchDevToolsInBrowser', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(
           <FakeVmServiceRequest>[],
           supportsServiceProtocol: true);
@@ -1372,7 +1372,7 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
   bool calledLaunchDevToolsInBrowser = false;
 
   @override
-  Future<bool> launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) async {
+  bool launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) {
     return calledLaunchDevToolsInBrowser = true;
   }
 }

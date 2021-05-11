@@ -40,7 +40,7 @@ abstract class ResidentDevtoolsHandler {
     @required List<FlutterDevice> flutterDevices,
   });
 
-  Future<bool> launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices});
+  bool launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices});
 
   Future<void> shutdown();
 }
@@ -55,6 +55,9 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   final Logger _logger;
   bool _shutdown = false;
   bool _served = false;
+
+  @visibleForTesting
+  bool launchedInBrowser = false;
 
   @override
   DevToolsServerAddress get activeDevToolsServer => _devToolsLauncher?.activeDevToolsServer;
@@ -92,21 +95,22 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   // This must be guaranteed not to return a Future that fails.
   @override
-  Future<bool> launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices}) async {
+  bool launchDevToolsInBrowser({@required List<FlutterDevice> flutterDevices}) {
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return false;
     }
     if (_devToolsLauncher.devToolsUrl == null) {
       _logger.startProgress('Waiting for Flutter DevTools to be served...');
-      bool timedOut = false;
-      await _devToolsLauncher.ready.timeout(launchInBrowserTimeout, onTimeout: () {
-        timedOut = true;
-      });
-      if (timedOut) {
-        _logger.printStatus('Timed out waiting for Flutter DevTools to be served.');
-        return false;
-      }
+      unawaited(_devToolsLauncher.ready.then((_) {
+        _launchDevToolsForDevices(flutterDevices);
+      }));
+    } else {
+      _launchDevToolsForDevices(flutterDevices);
     }
+    return true;
+  }
+
+  void _launchDevToolsForDevices(List<FlutterDevice> flutterDevices) {
     assert(activeDevToolsServer != null);
     for (final FlutterDevice device in flutterDevices) {
       final String devToolsUrl = activeDevToolsServer.uri?.replace(
@@ -115,7 +119,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       _logger.printStatus('Launching Flutter DevTools for ${device.device.name} at $devToolsUrl');
       unawaited(Chrome.start(<String>[devToolsUrl]));
     }
-    return true;
+    launchedInBrowser = true;
   }
 
   Future<void> _maybeCallDevToolsUriServiceExtension(
@@ -271,7 +275,7 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
-  Future<bool> launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) async {
+  bool launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) {
     return false;
   }
 

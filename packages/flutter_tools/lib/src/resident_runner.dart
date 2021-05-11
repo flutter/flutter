@@ -1457,6 +1457,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   void printHelpDetails() {
+    commandHelp.v.print();
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       commandHelp.s.print();
     }
