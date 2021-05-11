@@ -1226,6 +1226,8 @@ const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardK
 /// have a character representation will be derived from their key codes using
 /// this map.
 const Map<int, LogicalKeyboardKey> kMacOsToLogicalKey = <int, LogicalKeyboardKey>{
+  36: LogicalKeyboardKey.enter,
+  48: LogicalKeyboardKey.tab,
   51: LogicalKeyboardKey.backspace,
   53: LogicalKeyboardKey.escape,
   54: LogicalKeyboardKey.metaRight,
@@ -1494,8 +1496,10 @@ const Map<int, LogicalKeyboardKey> kIosNumPadMap = <int, LogicalKeyboardKey>{
 /// have a character representation will be derived from their key codes using
 /// this map.
 const Map<int, LogicalKeyboardKey> kIosToLogicalKey = <int, LogicalKeyboardKey>{
+  40: LogicalKeyboardKey.enter,
   41: LogicalKeyboardKey.escape,
   42: LogicalKeyboardKey.backspace,
+  43: LogicalKeyboardKey.tab,
   57: LogicalKeyboardKey.capsLock,
   58: LogicalKeyboardKey.f1,
   59: LogicalKeyboardKey.f2,

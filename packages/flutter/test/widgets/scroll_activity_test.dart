@@ -119,7 +119,7 @@ class PageView62209 extends StatefulWidget {
   const PageView62209({Key? key}) : super(key: key);
 
   @override
-  _PageView62209State createState() => _PageView62209State();
+  State<PageView62209> createState() => _PageView62209State();
 }
 
 class _PageView62209State extends State<PageView62209> {
@@ -181,7 +181,7 @@ class Carousel62209 extends StatefulWidget {
   final List<Carousel62209Page> pages;
 
   @override
-  _Carousel62209State createState() => _Carousel62209State();
+  State<Carousel62209> createState() => _Carousel62209State();
 }
 
 class _Carousel62209State extends State<Carousel62209> {

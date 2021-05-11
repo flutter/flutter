@@ -32,7 +32,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   }
 
   @override
-  _SimpleExpansionPanelListTestWidgetState createState() => _SimpleExpansionPanelListTestWidgetState();
+  State<SimpleExpansionPanelListTestWidget> createState() => _SimpleExpansionPanelListTestWidgetState();
 }
 
 class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPanelListTestWidget> {
