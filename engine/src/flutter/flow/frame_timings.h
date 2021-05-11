@@ -79,9 +79,18 @@ class FrameTimingsRecorder {
   /// the events. This summary is sent to the framework.
   FrameTiming RecordRasterEnd(fml::TimePoint raster_end);
 
+  /// Returns the frame number. Frame number is unique per frame and a frame
+  /// built earlier will have a frame number less than a frame that has been
+  /// built at a later point of time.
+  uint64_t GetFrameNumber() const;
+
  private:
+  static std::atomic_int frame_number_gen_;
+
   mutable std::mutex state_mutex_;
   State state_ = State::kUninitialized;
+
+  const uint64_t frame_number_;
 
   fml::TimePoint vsync_start_;
   fml::TimePoint vsync_target_;

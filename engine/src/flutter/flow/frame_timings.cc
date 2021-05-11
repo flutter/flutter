@@ -11,7 +11,10 @@
 
 namespace flutter {
 
-FrameTimingsRecorder::FrameTimingsRecorder() = default;
+std::atomic_int FrameTimingsRecorder::frame_number_gen_ = {1};
+
+FrameTimingsRecorder::FrameTimingsRecorder()
+    : frame_number_(frame_number_gen_++) {}
 
 FrameTimingsRecorder::~FrameTimingsRecorder() = default;
 
@@ -130,6 +133,10 @@ std::unique_ptr<FrameTimingsRecorder> FrameTimingsRecorder::CloneUntil(
   }
 
   return recorder;
+}
+
+uint64_t FrameTimingsRecorder::GetFrameNumber() const {
+  return frame_number_;
 }
 
 }  // namespace flutter

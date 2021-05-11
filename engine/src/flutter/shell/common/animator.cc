@@ -41,7 +41,6 @@ Animator::Animator(Delegate& delegate,
               : 2)),
 #endif  // SHELL_ENABLE_METAL
       pending_frame_semaphore_(1),
-      frame_number_(1),
       paused_(false),
       regenerate_layer_tree_(false),
       frame_scheduled_(false),
@@ -86,7 +85,11 @@ void Animator::EnqueueTraceFlowId(uint64_t trace_flow_id) {
 // This Parity is used by the timeline component to correctly align
 // GPU Workloads events with their respective Framework Workload.
 const char* Animator::FrameParity() {
-  return (frame_number_ % 2) ? "even" : "odd";
+  if (!frame_timings_recorder_) {
+    return "even";
+  }
+  uint64_t frame_number = frame_timings_recorder_->GetFrameNumber();
+  return (frame_number % 2) ? "even" : "odd";
 }
 
 static int64_t FxlToDartOrEarlier(fml::TimePoint time) {
@@ -97,7 +100,8 @@ static int64_t FxlToDartOrEarlier(fml::TimePoint time) {
 
 void Animator::BeginFrame(
     std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
-  TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
+  TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending",
+                         frame_timings_recorder->GetFrameNumber());
 
   frame_timings_recorder_ = std::move(frame_timings_recorder);
   frame_timings_recorder_->RecordBuildStart(fml::TimePoint::Now());
@@ -239,8 +243,13 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
+  uint64_t frame_number = 0;
+  if (frame_timings_recorder_) {
+    frame_number = frame_timings_recorder_->GetFrameNumber();
+  }
+
   task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
-                                             frame_number = frame_number_]() {
+                                             frame_number = frame_number]() {
     if (!self) {
       return;
     }
