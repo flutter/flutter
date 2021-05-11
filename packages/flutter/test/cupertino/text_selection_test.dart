@@ -61,7 +61,7 @@ class _LongCupertinoLocalizations extends DefaultCupertinoLocalizations {
   static const LocalizationsDelegate<CupertinoLocalizations> delegate = _LongCupertinoLocalizationsDelegate();
 }
 
-const _LongCupertinoLocalizations longLocalizations = _LongCupertinoLocalizations();
+const _LongCupertinoLocalizations _longLocalizations = _LongCupertinoLocalizations();
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -492,10 +492,10 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsNothing);
 
@@ -503,10 +503,10 @@ void main() {
       // paste button visible.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
       await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
@@ -514,24 +514,24 @@ void main() {
       // Tap next to go to the second and final page.
       await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsOneWidget);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsOneWidget);
       expect(find.text('◀'), findsOneWidget);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '◀'), true);
       expect(appearsEnabled(tester, '▶'), false);
 
       // Tap select all to show the full selection menu.
-      await tester.tap(find.text(longLocalizations.selectAllButtonLabel));
+      await tester.tap(find.text(_longLocalizations.selectAllButtonLabel));
       await tester.pumpAndSettle();
 
       // Only one button fits on each page.
-      expect(find.text(longLocalizations.cutButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsOneWidget);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);
@@ -539,10 +539,10 @@ void main() {
       // Tap next to go to the second page.
       await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsOneWidget);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(find.text('◀'), findsOneWidget);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '◀'), true);
@@ -551,10 +551,10 @@ void main() {
       // Tap next to go to the third and final page.
       await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(find.text('◀'), findsOneWidget);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '◀'), true);
@@ -563,10 +563,10 @@ void main() {
       // Tap back to go to the second page again.
       await tester.tap(find.text('◀'));
       await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.copyButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsOneWidget);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(find.text('◀'), findsOneWidget);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '◀'), true);
@@ -575,10 +575,10 @@ void main() {
       // Tap back to go to the first page again.
       await tester.tap(find.text('◀'));
       await tester.pumpAndSettle();
-      expect(find.text(longLocalizations.cutButtonLabel), findsOneWidget);
-      expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.pasteButtonLabel), findsNothing);
-      expect(find.text(longLocalizations.selectAllButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.cutButtonLabel), findsOneWidget);
+      expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
+      expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(find.text('◀'), findsNothing);
       expect(find.text('▶'), findsOneWidget);
       expect(appearsEnabled(tester, '▶'), true);

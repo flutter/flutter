@@ -423,7 +423,7 @@ class BottomNavigationBar extends StatefulWidget {
   final bool? enableFeedback;
 
   @override
-  _BottomNavigationBarState createState() => _BottomNavigationBarState();
+  State<BottomNavigationBar> createState() => _BottomNavigationBarState();
 }
 
 // This represents a single tile in the bottom navigation bar. It is intended
