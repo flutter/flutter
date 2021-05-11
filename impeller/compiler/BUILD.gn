@@ -2,18 +2,45 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-executable("compiler") {
-  output_name = "impellerc"
+import("//flutter/testing/testing.gni")
 
+source_set("compiler_lib") {
   sources = [
     "compiler.cc",
     "compiler.h",
-    "impellerc_main.cc",
+    "logger.h",
   ]
 
-  deps = [
+  public_deps = [
     "//flutter/fml",
     "//flutter/runtime:libdart",
     "//third_party/shaderc_flutter",
+    "//third_party/spirv_cross_flutter",
+  ]
+}
+
+executable("compiler") {
+  output_name = "impellerc"
+
+  sources = [ "impellerc_main.cc" ]
+
+  deps = [ ":compiler_lib" ]
+}
+
+test_fixtures("compiler_test_fixtures") {
+  fixtures = [ "fixtures/sample.frag" ]
+}
+
+executable("compiler_unittests") {
+  testonly = true
+
+  output_name = "impellerc_unittests"
+
+  sources = [ "compiler_unittests.cc" ]
+
+  deps = [
+    ":compiler_lib",
+    ":compiler_test_fixtures",
+    "//flutter/testing",
   ]
 }
