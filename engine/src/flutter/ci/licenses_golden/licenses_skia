@@ -1,4 +1,4 @@
-Signature: 408140db376b57c1062aac9d22703ef7
+Signature: c7c91830ea78a7d8f3dbad2526de8a65
 
 UNUSED LICENSES:
 
@@ -965,6 +965,8 @@ FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/main.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/shared.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/path_performance/worker.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/sampling_types/index.html
+FILE: ../../../third_party/skia/demos.skia.org/demos/textedit/index.html
+FILE: ../../../third_party/skia/demos.skia.org/demos/textedit/textapi_utils.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/up_scaling/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/main.js
