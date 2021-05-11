@@ -30,7 +30,7 @@ void main() {
       fileSystem = const LocalFileSystem();
       processManager = const LocalProcessManager();
       stdio = TestStdio(verbose: true);
-      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_checkouts');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_checkouts.');
       checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: tempDir,

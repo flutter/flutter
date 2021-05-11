@@ -35,8 +35,7 @@ class MockClipboard {
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type,
-      double textLineHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
     throw UnimplementedError();
   }
 
@@ -107,7 +106,7 @@ class PathBoundsMatcher extends Matcher {
     final Map<Matcher, dynamic> map = matchState['failedMatcher'] as Map<Matcher, dynamic>;
     final Iterable<String> descriptions = map.entries
       .map<String>(
-        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
+        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString(),
       );
 
     // description is guaranteed to be non-null.
@@ -292,7 +291,7 @@ void main() {
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       CupertinoApp(
-        home: CupertinoTextField(focusNode: focusNode)
+        home: CupertinoTextField(focusNode: focusNode),
       ),
     );
     expect(semantics, hasSemantics(
@@ -312,9 +311,9 @@ void main() {
                       TestSemantics(
                         id: 4,
                         flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
                         actions: <SemanticsAction>[SemanticsAction.tap,
-                          SemanticsAction.didGainAccessibilityFocus],
+                          SemanticsAction.didGainAccessibilityFocus,],
                         textDirection: TextDirection.ltr,
                       ),
                     ],
@@ -1442,7 +1441,7 @@ void main() {
     );
 
     await tester.longPressAt(
-      tester.getTopRight(find.text("j'aime la poutine"))
+      tester.getTopRight(find.text("j'aime la poutine")),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
@@ -1473,7 +1472,7 @@ void main() {
     );
 
     await tester.longPressAt(
-      tester.getTopRight(find.text("j'aime la poutine"))
+      tester.getTopRight(find.text("j'aime la poutine")),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
@@ -1549,7 +1548,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
 
     await tester.longPressAt(
-        tester.getTopRight(find.text('readonly'))
+      tester.getTopRight(find.text('readonly')),
     );
 
     await tester.pump();
@@ -1590,7 +1589,7 @@ void main() {
 
     // Tap an area inside the EditableText but with no text.
     await tester.longPressAt(
-      tester.getTopRight(find.text("j'aime la poutine"))
+      tester.getTopRight(find.text("j'aime la poutine")),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
@@ -2348,7 +2347,7 @@ void main() {
     );
 
     final RenderEditable renderEditable = tester.renderObject<RenderEditable>(
-      find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
+      find.byElementPredicate((Element element) => element.renderObject is RenderEditable),
     );
 
     List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
@@ -3024,7 +3023,8 @@ void main() {
     expect(tapCount, 2);
   });
 
-  testWidgets('onTap does not work when the text field is disabled',
+  testWidgets(
+    'onTap does not work when the text field is disabled',
     (WidgetTester tester) async {
       int tapCount = 0;
       await tester.pumpWidget(
@@ -3077,7 +3077,8 @@ void main() {
       await tester.tap(find.byType(CupertinoTextField), warnIfMissed: false); // disabled
       await tester.pump();
       expect(tapCount, 1);
-  });
+    },
+  );
 
   testWidgets('Focus test when the text field is disabled', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -3147,7 +3148,7 @@ void main() {
 
       expect(
         tester.renderObject<RenderEditable>(
-          find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
+          find.byElementPredicate((Element element) => element.renderObject is RenderEditable),
         ).text!.style!.color,
         isSameColorAs(CupertinoColors.white),
       );
@@ -4533,7 +4534,7 @@ void main() {
        CupertinoApp(
         home: Center(
           child: CupertinoTextField(
-              selectionControls: selectionControl
+              selectionControls: selectionControl,
             ),
           ),
         ),
@@ -4549,7 +4550,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTextField(maxLength: 5, inputFormatters: formatters),
-      )
+      ),
     );
 
     expect(formatters.isEmpty, isTrue);
@@ -4677,8 +4678,7 @@ void main() {
     });
   });
 
-  testWidgets('disabled widget changes background color',
-      (WidgetTester tester) async {
+  testWidgets('disabled widget changes background color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -4777,5 +4777,6 @@ void main() {
         ),
       ).color;
       expect(disabledColor, isSameColorAs(const Color(0xFFFAFAFA)));
-  });
+    },
+  );
 }

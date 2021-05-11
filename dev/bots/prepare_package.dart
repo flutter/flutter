@@ -292,8 +292,45 @@ class ArchiveCreator {
     _outputFile = File(path.join(outputDir.absolute.path, _archiveName));
     await _installMinGitIfNeeded();
     await _populateCaches();
+    await _validate();
     await _archiveFiles(_outputFile);
     return _outputFile;
+  }
+
+  /// Validates the integrity of the release package.
+  ///
+  /// Currently only checks that macOS binaries are codesigned. Will throw a
+  /// [PreparePackageException] if the test failes.
+  Future<void> _validate() async {
+    // Only validate in strict mode, which means `--publish`
+    if (!strict || !platform.isMacOS) {
+      return;
+    }
+    // Validate that the dart binary is codesigned
+    final String dartPath = path.join(
+      flutterRoot.absolute.path,
+      'bin',
+      'cache',
+      'dart-sdk',
+      'bin',
+      'dart',
+    );
+    try {
+      // TODO(fujino): Use the conductor https://github.com/flutter/flutter/issues/81701
+      await _processRunner.runProcess(
+        <String>[
+          'codesign',
+          '-vvvv',
+          '--check-notarization',
+          dartPath,
+        ],
+        workingDirectory: flutterRoot,
+      );
+    } on PreparePackageException catch (e) {
+      throw PreparePackageException(
+        'The binary $dartPath was not codesigned!\n${e.message}',
+      );
+    }
   }
 
   /// Returns the version number of this release, according the to tags in the

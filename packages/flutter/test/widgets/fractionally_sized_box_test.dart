@@ -19,7 +19,7 @@ void main() {
           widthFactor: 0.5,
           heightFactor: 0.25,
           child: Container(
-            key: inner
+            key: inner,
           ),
         ),
       ),
@@ -76,7 +76,7 @@ void main() {
             widthFactor: 0.5,
             heightFactor: 0.25,
             child: Container(
-              key: inner
+              key: inner,
             ),
           ),
         ),

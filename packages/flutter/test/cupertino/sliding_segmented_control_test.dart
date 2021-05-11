@@ -573,8 +573,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopRight(find.text('Child 1')).dx >
-        tester.getTopRight(find.text('Child 2')).dx, isTrue);
+    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
@@ -701,7 +700,8 @@ void main() {
         ignoreId: true,
         ignoreRect: true,
         ignoreTransform: true,
-    ));
+      ),
+    );
 
     semantics.dispose();
   });
@@ -901,7 +901,8 @@ void main() {
       // are to account for the thumb's vertical EdgeInsets.
       expect(segmentedControlOrigin.dx - 1, lessThanOrEqualTo(thumbRect.left));
       expect(segmentedControlOrigin.dx + renderSegmentedControl.size.width + 1, greaterThanOrEqualTo(thumbRect.right));
-  });
+    },
+  );
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{

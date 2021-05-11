@@ -315,7 +315,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
+    if (buildTestAssets) {
       await _buildTestAsset();
     }
 

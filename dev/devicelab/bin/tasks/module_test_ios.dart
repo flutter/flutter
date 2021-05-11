@@ -320,7 +320,7 @@ Future<void> main() async {
 
       section('Run platform unit tests');
 
-      final String resultBundleTemp = Directory.systemTemp.createTempSync('module_test_ios_xcresult.').path;
+      final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_module_test_ios_xcresult.').path;
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
         final String resultBundlePath = path.join(resultBundleTemp, 'result');

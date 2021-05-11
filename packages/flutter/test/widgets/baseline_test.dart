@@ -38,8 +38,10 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-    expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
-           within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
+    expect(
+      tester.renderObject<RenderBox>(find.byType(Baseline)).size,
+      within<Size>(from: const Size(100.0, 200.0), distance: 0.001),
+    );
   });
 
   testWidgets('Chip caches baseline', (WidgetTester tester) async {

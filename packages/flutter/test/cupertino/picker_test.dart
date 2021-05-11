@@ -161,8 +161,7 @@ void main() {
               itemExtent: 15.0,
               children: const <Widget>[Text('1'), Text('1')],
               onSelectedItemChanged: (int i) {},
-              selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
-                  background: Color(0x12345678)),
+              selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
             ),
           ),
         ),
@@ -245,7 +244,9 @@ void main() {
             arguments: 'HapticFeedbackType.selectionClick',
           ),
         );
-    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
 
     testWidgets(
       'do not trigger haptic effects on non-iOS devices',
@@ -279,7 +280,9 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, -100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
-    }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()));
+      },
+      variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()),
+    );
 
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       final FixedExtentScrollController controller =

@@ -374,8 +374,8 @@ void main() {
     final List<Layer> layers1 = tester.layers;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
-    );
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)]),
+    ));
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
   });
@@ -475,7 +475,7 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: blue));
     final Material backgroundMaterial = tester.widget(find.descendant(
       of: find.byType(RefreshProgressIndicator),
-      matching: find.byType(Material)
+      matching: find.byType(Material),
     ));
     expect(backgroundMaterial.type, MaterialType.circle);
     expect(backgroundMaterial.color, green);
@@ -491,8 +491,8 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: green));
     final Material themeBackgroundMaterial = tester.widget(find.descendant(
-        of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Material)
+      of: find.byType(RefreshProgressIndicator),
+      matching: find.byType(Material),
     ));
     expect(themeBackgroundMaterial.type, MaterialType.circle);
     expect(themeBackgroundMaterial.color, blue);
@@ -535,7 +535,7 @@ void main() {
             builder: (BuildContext context, StateSetter setter) {
               setState = setter;
               return CircularProgressIndicator(value: progressValue);
-            }
+            },
           ),
         ),
       ),
@@ -756,7 +756,6 @@ void main() {
       value: value,
     ));
 
-
     handle.dispose();
   });
 
@@ -798,10 +797,11 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-    }, variant: const TargetPlatformVariant(<TargetPlatform> {
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
-    })
+    }),
   );
 
   testWidgets(
@@ -818,11 +818,43 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsNothing);
-    }, variant: const TargetPlatformVariant(<TargetPlatform> {
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.android,
       TargetPlatform.fuchsia,
       TargetPlatform.windows,
       TargetPlatform.linux,
     }),
   );
+
+  testWidgets('ProgressIndicatorTheme.wrap() always creates a new ProgressIndicatorTheme', (WidgetTester tester) async {
+
+    late BuildContext builderContext;
+
+    const ProgressIndicatorThemeData themeData = ProgressIndicatorThemeData(
+      color: Color(0xFFFF0000),
+      linearTrackColor: Color(0xFF00FF00),
+    );
+
+    final ProgressIndicatorTheme progressTheme = ProgressIndicatorTheme(
+      data: themeData,
+      child: Builder(
+        builder: (BuildContext context) {
+          builderContext = context;
+          return const LinearProgressIndicator(value: 0.5);
+        }
+      ),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: progressTheme,
+    ));
+    final Widget wrappedTheme = progressTheme.wrap(builderContext, Container());
+
+    // Make sure the returned widget is a new ProgressIndicatorTheme instance
+    // with the same theme data as the original.
+    expect(wrappedTheme, isNot(equals(progressTheme)));
+    expect(wrappedTheme, isInstanceOf<ProgressIndicatorTheme>());
+    expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
+  });
 }

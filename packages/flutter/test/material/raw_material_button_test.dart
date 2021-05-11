@@ -239,24 +239,25 @@ void main() {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             RawMaterialButton(
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
-            child: SizedBox(
-              width: 400.0,
-              height: 400.0,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: const <Widget>[
-                  SizedBox(
-                    height: 50.0,
-                    width: 400.0,
-                    child: Text('Material'),
-                  ),
-                ],
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () { },
+              child: SizedBox(
+                width: 400.0,
+                height: 400.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const <Widget>[
+                    SizedBox(
+                      height: 50.0,
+                      width: 400.0,
+                      child: Text('Material'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
     expect(find.text('Material').hitTestable(), findsOneWidget);
@@ -280,7 +281,8 @@ void main() {
                 ),
               ),
             ),
-        ]),
+          ],
+        ),
       ),
     );
     expect(find.byKey(key).hitTestable(), findsOneWidget);

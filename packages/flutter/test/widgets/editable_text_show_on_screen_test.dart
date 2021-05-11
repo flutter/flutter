@@ -427,7 +427,8 @@ void main() {
       await tester.pumpAndSettle();
       // The scroll offset should remain the same.
       expect(controller.offset, 100.0 * 15);
-  });
+    },
+  );
 
   testWidgets(
     'A pinned persistent header should not scroll when its descendant EditableText gains focus (no animation)',
@@ -490,7 +491,8 @@ void main() {
       await tester.pumpAndSettle();
       // The scroll offset should remain the same.
       expect(controller.offset, 100.0 * 15);
-  });
+    },
+  );
 
   void testShowCaretOnScreen({ required bool readOnly }) {
     group('EditableText._showCaretOnScreen, readOnly=$readOnly', () {

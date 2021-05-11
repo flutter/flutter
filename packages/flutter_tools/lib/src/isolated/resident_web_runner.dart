@@ -256,7 +256,7 @@ class ResidentWebRunner extends ResidentRunner {
       return await asyncGuard(() async {
         final ExpressionCompiler expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
-              ? WebExpressionCompiler(device.generator)
+              ? WebExpressionCompiler(device.generator, fileSystem: _fileSystem)
               : null;
         device.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',

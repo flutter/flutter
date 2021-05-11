@@ -119,7 +119,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
               List<int> bytes = licenseBytes.buffer.asUint8List();
               bytes = gzip.decode(bytes);
               return utf8.decode(bytes);
-            }()
+            }(),
       );
     }, Priority.animation);
     await rawLicenses.future;

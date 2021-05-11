@@ -177,8 +177,7 @@ class ProgressIndicatorTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ProgressIndicatorTheme? ancestorTheme = context.findAncestorWidgetOfExactType<ProgressIndicatorTheme>();
-    return identical(this, ancestorTheme) ? child : ProgressIndicatorTheme(data: data, child: child);
+    return ProgressIndicatorTheme(data: data, child: child);
   }
 
   @override

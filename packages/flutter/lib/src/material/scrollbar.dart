@@ -166,7 +166,7 @@ class Scrollbar extends StatefulWidget {
   final ScrollNotificationPredicate? notificationPredicate;
 
   @override
-  _ScrollbarState createState() => _ScrollbarState();
+  State<Scrollbar> createState() => _ScrollbarState();
 }
 
 class _ScrollbarState extends State<Scrollbar> {

@@ -82,7 +82,7 @@
       "name": "Linux complex_layout_scroll_perf__devtools_memory",
       "repo": "flutter",
       "task_name": "linux_complex_layout_scroll_perf__devtools_memory",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux complex_layout_semantics_perf",
@@ -325,6 +325,12 @@
       "flaky": false
     },
     {
+      "name": "Linux animated_image_gc_perf",
+      "repo": "flutter",
+      "task_name": "animated_image_gc_perf",
+      "flaky": true
+    },
+    {
       "name": "Linux linux_chrome_dev_mode",
       "repo": "flutter",
       "task_name": "linux_linux_chrome_dev_mode",
@@ -365,6 +371,12 @@
       "repo": "flutter",
       "task_name": "linux_picture_cache_perf__e2e_summary",
       "flaky": false
+    },
+    {
+      "name": "Linux platform_channels_benchmarks",
+      "repo": "flutter",
+      "task_name": "linux_platform_channels_benchmarks",
+      "flaky": true
     },
     {
       "name": "Linux platform_views_scroll_perf__timeline_summary",
@@ -556,7 +568,7 @@
       "name": "Linux skp_generator",
       "repo": "flutter",
       "task_name": "linux_skp_generator",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Mac build_aar_module_test",
@@ -916,7 +928,7 @@
       "name": "Mac dart_plugin_registry_test",
       "repo": "flutter",
       "task_name": "dart_plugin_registry_test",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Mac tool_tests_general",
@@ -1147,6 +1159,12 @@
       "flaky": false
     },
     {
+      "name": "Mac_ios platform_channels_benchmarks",
+      "repo": "flutter",
+      "task_name": "mac_ios_platform_channels_benchmarks",
+      "flaky": true
+    },
+    {
       "name": "Mac_ios platform_interaction_test_ios",
       "repo": "flutter",
       "task_name": "mac_ios_platform_interaction_test_ios",
@@ -1204,7 +1222,7 @@
       "name": "Windows build_tests_2_3",
       "repo": "flutter",
       "task_name": "win_build_tests_2_3",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Windows build_tests_3_3",
@@ -1291,27 +1309,33 @@
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_1_4",
+      "name": "Windows tool_integration_tests_1_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_1_4",
+      "task_name": "win_tool_integration_tests_1_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_2_4",
+      "name": "Windows tool_integration_tests_2_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_2_4",
+      "task_name": "win_tool_integration_tests_2_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_3_4",
+      "name": "Windows tool_integration_tests_3_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_3_4",
+      "task_name": "win_tool_integration_tests_3_5",
       "flaky": false
     },
     {
-      "name": "Windows tool_integration_tests_4_4",
+      "name": "Windows tool_integration_tests_4_5",
       "repo": "flutter",
-      "task_name": "win_tool_integration_tests_4_4",
+      "task_name": "win_tool_integration_tests_4_5",
+      "flaky": false
+    },
+    {
+      "name": "Windows tool_integration_tests_5_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_5_5",
       "flaky": false
     },
     {

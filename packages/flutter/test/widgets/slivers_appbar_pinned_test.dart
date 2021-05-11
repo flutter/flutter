@@ -116,7 +116,7 @@ void main() {
         '         parentData: <none> (can use size)\n'
         '         constraints: BoxConstraints(w=800.0, 100.0<=h<=200.0)\n'
         '         size: Size(800.0, 200.0)\n'
-        '         additionalConstraints: BoxConstraints(biggest)\n'
+        '         additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
   });

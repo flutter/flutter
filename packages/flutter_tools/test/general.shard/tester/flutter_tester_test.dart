@@ -151,8 +151,8 @@ void main() {
           '--non-interactive',
           '--enable-dart-profiling',
           '--packages=.packages',
-          '--flutter-assets-dir=/.tmp_rand0/flutter-testerrand0',
-          '/.tmp_rand0/flutter-testerrand0/flutter-tester-app.dill',
+          '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
+          '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill',
         ],
         completer: completer,
         stdout:
