@@ -645,7 +645,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///     child: Actions(
 ///       actions: <Type, Action<Intent>>{
 ///         HelpMenuIntent: CallbackAction<HelpMenuIntent>(
-///           onInvoke: (IncrementIntent intent) => setState(() {
+///           onInvoke: (HelpMenuIntent intent) => setState(() {
 ///             count = count + 1;
 ///           }),
 ///         ),
