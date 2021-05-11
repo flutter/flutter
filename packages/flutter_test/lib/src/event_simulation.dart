@@ -220,6 +220,7 @@ class KeyEventSimulator {
     }
     if (kIsWeb) {
       assignWeb();
+      return result;
     }
 
     switch (platform) {
