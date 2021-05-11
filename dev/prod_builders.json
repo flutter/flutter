@@ -82,7 +82,7 @@
       "name": "Linux complex_layout_scroll_perf__devtools_memory",
       "repo": "flutter",
       "task_name": "linux_complex_layout_scroll_perf__devtools_memory",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux complex_layout_semantics_perf",
@@ -544,18 +544,6 @@
       "name": "Linux web_long_running_tests_3_3",
       "repo": "flutter",
       "task_name": "linux_web_long_running_tests_3_3",
-      "flaky": false
-    },
-    {
-      "name": "Linux web_e2e_test",
-      "repo": "flutter",
-      "task_name": "linux_web_e2e_test",
-      "flaky": false
-    },
-    {
-      "name": "Linux web_smoke_test",
-      "repo": "flutter",
-      "task_name": "linux_web_smoke_test",
       "flaky": false
     },
     {
