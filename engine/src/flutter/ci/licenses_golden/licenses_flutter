@@ -1605,6 +1605,10 @@ FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin_delegate.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin_unittest.cc
+FILE: ../../../flutter/shell/platform/windows/uwptool_main.cc
+FILE: ../../../flutter/shell/platform/windows/uwptool_utils.cc
+FILE: ../../../flutter/shell/platform/windows/uwptool_utils.h
+FILE: ../../../flutter/shell/platform/windows/uwptool_utils_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/window_binding_handler.h
 FILE: ../../../flutter/shell/platform/windows/window_binding_handler_delegate.h
 FILE: ../../../flutter/shell/platform/windows/window_proc_delegate_manager_win32.cc
