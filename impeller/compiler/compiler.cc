@@ -16,9 +16,18 @@ namespace compiler {
 
 #define COMPILER_ERROR_NO_PREFIX ::impeller::compiler::AutoLogger(error_stream_)
 
+struct IncluderData {
+  std::string file_name;
+  std::unique_ptr<fml::Mapping> mapping;
+
+  IncluderData(std::string p_file_name, std::unique_ptr<fml::Mapping> p_mapping)
+      : file_name(std::move(p_file_name)), mapping(std::move(p_mapping)) {}
+};
+
 class Includer final : public shaderc::CompileOptions::IncluderInterface {
  public:
-  Includer() = default;
+  Includer(std::shared_ptr<fml::UniqueFD> working_directory)
+      : working_directory_(std::move(working_directory)) {}
 
   // |shaderc::CompileOptions::IncluderInterface|
   ~Includer() override = default;
@@ -28,16 +37,54 @@ class Includer final : public shaderc::CompileOptions::IncluderInterface {
                                      shaderc_include_type type,
                                      const char* requesting_source,
                                      size_t include_depth) override {
-    FML_CHECK(false);
-    return nullptr;
+    auto result = std::make_unique<shaderc_include_result>();
+
+    // Default initialize to failed inclusion.
+    result->source_name = "";
+    result->source_name_length = 0;
+
+    constexpr const char* kFileNotFoundMessage = "Included file not found.";
+    result->content = kFileNotFoundMessage;
+    result->content_length = ::strlen(kFileNotFoundMessage);
+    result->user_data = nullptr;
+
+    if (!working_directory_ || !working_directory_->is_valid()) {
+      return result.release();
+    }
+
+    if (requested_source == nullptr) {
+      return result.release();
+    }
+
+    auto file =
+        fml::FileMapping::CreateReadOnly(*working_directory_, requested_source);
+
+    if (!file || file->GetMapping() == nullptr) {
+      return result.release();
+    }
+
+    auto includer_data =
+        std::make_unique<IncluderData>(requested_source, std::move(file));
+
+    result->source_name = includer_data->file_name.c_str();
+    result->source_name_length = includer_data->file_name.length();
+    result->content = reinterpret_cast<decltype(result->content)>(
+        includer_data->mapping->GetMapping());
+    result->content_length = includer_data->mapping->GetSize();
+    result->user_data = includer_data.release();
+
+    return result.release();
   }
 
   // |shaderc::CompileOptions::IncluderInterface|
   void ReleaseInclude(shaderc_include_result* data) override {
-    FML_CHECK(false);
+    delete reinterpret_cast<IncluderData*>(data->user_data);
+    delete data;
   }
 
  private:
+  std::shared_ptr<fml::UniqueFD> working_directory_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Includer);
 };
 
@@ -104,13 +151,14 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
       shaderc_optimization_level::shaderc_optimization_level_size);
   options.SetSourceLanguage(
       shaderc_source_language::shaderc_source_language_glsl);
+  options.SetForcedVersionProfile(450, shaderc_profile::shaderc_profile_core);
   options.SetTargetEnvironment(
       shaderc_target_env::shaderc_target_env_vulkan,
       shaderc_env_version::shaderc_env_version_vulkan_1_1);
   options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_3);
   options.SetAutoBindUniforms(true);
   options.SetAutoMapLocations(true);
-  options.SetIncluder(std::make_unique<Includer>());
+  options.SetIncluder(std::make_unique<Includer>(options_.working_directory));
 
   shaderc::Compiler spv_compiler;
   if (!spv_compiler.IsValid()) {
@@ -118,6 +166,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
+  // SPIRV Generation.
   spv_result_ = std::make_shared<shaderc::SpvCompilationResult>(
       spv_compiler.CompileGlslToSpv(
           reinterpret_cast<const char*>(
@@ -141,13 +190,36 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
+  // MSL Generation.
   spirv_cross::CompilerMSL msl_compiler(
       spv_result_->cbegin(), spv_result_->cend() - spv_result_->cbegin());
+
+  {
+    spirv_cross::CompilerMSL::Options msl_options;
+    msl_options.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
+    msl_compiler.set_msl_options(msl_options);
+  }
+
   msl_string_ = std::make_shared<std::string>(msl_compiler.compile());
 
   if (!msl_string_) {
     COMPILER_ERROR << "Could not generate MSL from SPIRV";
     return;
+  }
+
+  const auto resources = msl_compiler.get_shader_resources();
+
+  for (const auto& stage_input : resources.stage_inputs) {
+    FML_LOG(ERROR) << stage_input.name;
+  }
+
+  for (const auto& stage_output : resources.stage_outputs) {
+    FML_LOG(ERROR) << stage_output.name;
+  }
+
+  for (const auto& uniform_buffer : resources.uniform_buffers) {
+    FML_LOG(ERROR) << uniform_buffer.name;
+    auto type = msl_compiler.get_type(uniform_buffer.base_type_id);
   }
 
   is_valid_ = true;

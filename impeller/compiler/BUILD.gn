@@ -28,7 +28,10 @@ executable("compiler") {
 }
 
 test_fixtures("compiler_test_fixtures") {
-  fixtures = [ "fixtures/sample.frag" ]
+  fixtures = [
+    "fixtures/sample.frag",
+    "fixtures/types.h",
+  ]
 }
 
 executable("compiler_unittests") {
