@@ -183,7 +183,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 /// }
 ///
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
@@ -495,7 +495,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 /// }
 ///
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> {

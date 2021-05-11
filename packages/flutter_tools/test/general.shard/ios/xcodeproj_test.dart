@@ -16,55 +16,17 @@ import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' as mocks;
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
   group('MockProcessManager', () {
-    mocks.MockProcessManager processManager;
-    XcodeProjectInterpreter xcodeProjectInterpreter;
-    FakePlatform platform;
-    BufferLogger logger;
-
     setUp(() {
-      processManager = mocks.MockProcessManager();
-      platform = FakePlatform(operatingSystem: 'macos');
       final FileSystem fileSystem = MemoryFileSystem.test();
       fileSystem.file(xcodebuild).createSync(recursive: true);
-      logger = BufferLogger.test();
-      xcodeProjectInterpreter = XcodeProjectInterpreter(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        usage: null,
-      );
-    });
-
-    testUsingContext('xcodebuild build settings flakes', () async {
-      const Duration delay = Duration(seconds: 1);
-      processManager.processFactory = mocks.flakyProcessFactory(
-        flakes: 1,
-        delay: delay + const Duration(seconds: 1),
-      );
-      platform.environment = const <String, String>{};
-
-      when(processManager.runSync(<String>['which', 'sysctl']))
-          .thenReturn(ProcessResult(0, 0, '', ''));
-      when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
-          .thenReturn(ProcessResult(0, 1, '', ''));
-
-      expect(await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Runner'), timeout: delay),
-        const <String, String>{});
-      // build settings times out and is killed once, then succeeds.
-      verify(processManager.killPid(any)).called(1);
-      // The verbose logs should tell us something timed out.
-      expect(logger.traceText, contains('timed out'));
     });
   });
 

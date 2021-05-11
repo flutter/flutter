@@ -15,8 +15,15 @@ import 'recognizer.dart';
 class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create an eager gesture recognizer.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
-  EagerGestureRecognizer({ PointerDeviceKind? kind }) : super(kind: kind);
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
+  EagerGestureRecognizer({
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
+    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(kind: kind, supportedDevices: supportedDevices);
 
   @override
   void addAllowedPointer(PointerDownEvent event) {

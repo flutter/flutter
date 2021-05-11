@@ -794,7 +794,8 @@ class InteractiveViewer extends StatefulWidget {
     return closestOverall;
   }
 
-  @override _InteractiveViewerState createState() => _InteractiveViewerState();
+  @override
+  State<InteractiveViewer> createState() => _InteractiveViewerState();
 }
 
 class _InteractiveViewerState extends State<InteractiveViewer> with TickerProviderStateMixin {

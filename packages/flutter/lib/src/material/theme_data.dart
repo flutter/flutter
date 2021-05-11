@@ -248,6 +248,10 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     Color? unselectedWidgetColor,
     Color? disabledColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     Color? buttonColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
@@ -585,6 +589,10 @@ class ThemeData with Diagnosticable {
     required this.unselectedWidgetColor,
     required this.disabledColor,
     required this.buttonTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
@@ -991,6 +999,10 @@ class ThemeData with Diagnosticable {
   final ToggleButtonsThemeData toggleButtonsTheme;
 
   /// The default fill color of the [Material] used in [RaisedButton]s.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.3.0-0.2.pre.',
+  )
   final Color buttonColor;
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
@@ -1336,6 +1348,10 @@ class ThemeData with Diagnosticable {
     Color? disabledColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     Color? buttonColor,
     Color? secondaryHeaderColor,
     @Deprecated(
@@ -2094,6 +2110,22 @@ class _FifoCache<K, V> {
 /// button. For lists, it affects the distance between baselines of entries in
 /// the list. For chips, it only affects the vertical size, not the horizontal
 /// size.
+///
+/// Here are some examples of widgets that respond to density changes:
+///
+///  * [Checkbox]
+///  * [Chip]
+///  * [ElevatedButton]
+///  * [FlatButton]
+///  * [IconButton]
+///  * [InputDecorator] (which gives density support to [TextField], etc.)
+///  * [ListTile]
+///  * [MaterialButton]
+///  * [OutlineButton]
+///  * [OutlinedButton]
+///  * [Radio]
+///  * [RawMaterialButton]
+///  * [TextButton]
 ///
 /// See also:
 ///

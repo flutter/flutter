@@ -411,7 +411,7 @@ class TestList extends StatefulWidget {
   final ReorderItemProxyDecorator? proxyDecorator;
 
   @override
-  _TestListState createState() => _TestListState();
+  State<TestList> createState() => _TestListState();
 }
 
 class _TestListState extends State<TestList> {

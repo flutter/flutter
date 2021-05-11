@@ -534,7 +534,7 @@
     {
       "name": "Mac plugin_test",
       "repo": "flutter",
-      "task_name": "mac_plugin_lint_mac",
+      "task_name": "mac_plugin_test",
       "enabled": true,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },

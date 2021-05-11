@@ -2420,7 +2420,7 @@ class TestApp extends StatefulWidget {
   final Widget? child;
 
   @override
-  _TestAppState createState() => _TestAppState();
+  State<TestApp> createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {
