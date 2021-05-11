@@ -16,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'cmake.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
@@ -1221,8 +1222,38 @@ class WindowsUwpProject extends WindowsProject {
   @override
   String get _childDirectory => 'winuwp';
 
+  File get runnerCmakeFile => _editableDirectory.childDirectory('runner_uwp').childFile('CMakeLists.txt');
+
   /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
   int get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
+
+  /// Retrieve the GUID of the UWP package.
+  String get packageGuid => _packageGuid ??= getCmakePackageGuid(runnerCmakeFile);
+  String _packageGuid;
+
+  File get appManifest => _editableDirectory.childDirectory('runner_uwp').childFile('appxmanifest.in');
+
+  String get packageVersion => _packageVersion ??= parseAppVersion(this);
+  String _packageVersion;
+}
+
+@visibleForTesting
+String parseAppVersion(WindowsUwpProject project) {
+  final File appManifestFile = project.appManifest;
+  if (!appManifestFile.existsSync()) {
+    return null;
+  }
+
+  XmlDocument document;
+  try {
+    document = XmlDocument.parse(appManifestFile.readAsStringSync());
+  } on XmlParserException {
+    throwToolExit('Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
+  }
+  for (final XmlElement metaData in document.findAllElements('Identity')) {
+    return metaData.getAttribute('Version');
+  }
+  return null;
 }
 
 /// The Linux sub project.

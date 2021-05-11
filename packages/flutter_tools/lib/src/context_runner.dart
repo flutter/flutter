@@ -206,6 +206,7 @@ Future<T> runInContext<T>(
           logger: globals.logger,
           platform: globals.platform
         ),
+        nativeApi: globals.nativeApi,
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
