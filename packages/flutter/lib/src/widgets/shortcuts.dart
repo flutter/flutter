@@ -603,13 +603,13 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// example, it might be helpful for the user to bring up a help menu by
 /// pressing the question mark ('?'). However, there is no logical key that
 /// directly represents a question mark. Althouh 'Shift+Slash' produces a '?'
-/// character on a US keyboard, its logical key is still considered a '/' key,
+/// character on a US keyboard, its logical key is still considered a Slash key,
 /// and hard-coding 'Shift+Slash' in this situation is unfriendly to other
 /// keyboard layouts.
 ///
-/// The [CharacterActivator] is useful when it is desired that the key
-/// combination should result in a character that can not be represented by a
-/// logical key.  For example, `CharacterActivator('?')` is triggered when a key
+/// The [CharacterActivator] is useful when the shortcut intent should be
+/// activated upon an event that produces a character undefined by a logical
+/// key. For example, `CharacterActivator('?')` is triggered when a key
 /// combination results in a question mark, which is 'Shift+Slash' on a US
 /// keyboard, but 'Shift+Comma' on a French keyboard.
 ///
