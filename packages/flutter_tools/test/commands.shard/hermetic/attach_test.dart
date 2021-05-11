@@ -8,11 +8,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -31,7 +33,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fake_vm_services.dart';
-import '../../src/mocks.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
@@ -254,7 +255,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
           throwsToolExit(
-            message: 'When the --debug-port or --debug-uri is unknown, this command determines '
+            message: 'When the --debug-port or --debug-url is unknown, this command determines '
                      'the value of --ipv6 on its own.',
           ),
         );
@@ -277,7 +278,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
-            message: 'When the --debug-port or --debug-uri is unknown, this command does not use '
+            message: 'When the --debug-port or --debug-url is unknown, this command does not use '
                      'the value of --observatory-port.',
           ),
         );
@@ -818,12 +819,10 @@ class LoggerInterrupted implements Exception {
 
 Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logger) async {
   logger.interrupt(); // an exception during the task should cause it to fail...
-  try {
-    await task;
-    expect(false, isTrue); // (shouldn't reach here)
-  } on ToolExit catch (error) {
-    expect(error.exitCode, 2); // ...with exit code 2.
-  }
+  await expectLater(
+    () => task,
+    throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', 2)),
+  );
 }
 
 VMServiceConnector getFakeVmServiceFactory({
@@ -929,3 +928,20 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 }
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
+
+class MockAndroidDevice extends Mock implements AndroidDevice {
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsFlutterExit => false;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
+}

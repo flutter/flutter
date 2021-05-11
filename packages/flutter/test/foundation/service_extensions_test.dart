@@ -245,7 +245,7 @@ void main() {
         r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
-        r'$'
+        r'$',
       ),
     });
   });
@@ -267,7 +267,7 @@ void main() {
         r'     \[1] 0\.0,3\.0,0\.0,0\.0\n'
         r'     \[2] 0\.0,0\.0,1\.0,0\.0\n'
         r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
-        r'$'
+        r'$',
       ),
     });
   });
@@ -277,7 +277,7 @@ void main() {
     final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
 
     expect(result, <String, String>{
-      'data': 'Semantics not collected.'
+      'data': 'Semantics not collected.',
     });
   });
 
@@ -286,7 +286,7 @@ void main() {
     final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
 
     expect(result, <String, String>{
-      'data': 'Semantics not collected.'
+      'data': 'Semantics not collected.',
     });
   });
 

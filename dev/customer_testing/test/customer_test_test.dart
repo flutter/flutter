@@ -4,10 +4,9 @@
 
 import 'dart:io';
 
+import 'package:customer_testing/customer_test.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
-import 'package:customer_testing/customer_test.dart';
 
 import 'common.dart';
 

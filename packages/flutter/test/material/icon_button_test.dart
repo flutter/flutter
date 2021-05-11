@@ -337,8 +337,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton with explicit splash radius',
-      (WidgetTester tester) async {
+  testWidgets('IconButton with explicit splash radius', (WidgetTester tester) async {
     const double splashRadius = 30.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -362,7 +361,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(IconButton))),
       paints
-        ..circle(radius: splashRadius)
+        ..circle(radius: splashRadius),
     );
 
     await gesture.up();

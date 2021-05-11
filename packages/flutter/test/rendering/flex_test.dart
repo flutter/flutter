@@ -13,8 +13,11 @@ void main() {
     final RenderDecoratedBox box = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 200.0, maxWidth: 200.0, minHeight: 200.0, maxHeight: 200.0),
-    );
+      minWidth: 200.0,
+      maxWidth: 200.0,
+      minHeight: 200.0,
+      maxHeight: 200.0,
+    ));
 
     expect(flex.size.width, equals(200.0), reason: 'flex width');
     expect(flex.size.height, equals(200.0), reason: 'flex height');
@@ -72,7 +75,7 @@ void main() {
 
   test('Vertical Overflow', () {
     final RenderConstrainedBox flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand()
+      additionalConstraints: const BoxConstraints.expand(),
     );
     final RenderFlex flex = RenderFlex(
       direction: Axis.vertical,
@@ -95,7 +98,7 @@ void main() {
 
   test('Horizontal Overflow', () {
     final RenderConstrainedBox flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand()
+      additionalConstraints: const BoxConstraints.expand(),
     );
     final RenderFlex flex = RenderFlex(
       direction: Axis.horizontal,
@@ -148,7 +151,7 @@ void main() {
         '   mainAxisAlignment: start\n'
         '   mainAxisSize: max\n'
         '   crossAxisAlignment: center\n'
-        '   verticalDirection: down\n'
+        '   verticalDirection: down\n',
       ),
     );
   });
@@ -158,8 +161,11 @@ void main() {
     final RenderDecoratedBox box2 = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 100.0,
+      minHeight: 0.0,
+      maxHeight: 100.0,
+    ));
     expect(box1.size.width, equals(0.0));
     expect(box1.size.height, equals(0.0));
     expect(box2.size.width, equals(0.0));
@@ -184,8 +190,11 @@ void main() {
     box2ParentData.flex = 2;
     flex.addAll(<RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 100.0, minHeight: 0.0, maxHeight: 100.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 100.0,
+      minHeight: 0.0,
+      maxHeight: 100.0,
+    ));
     expect(box1.size.width, equals(0.0));
     expect(box1.size.height, equals(0.0));
     expect(box2.size.width, equals(100.0));
@@ -213,8 +222,11 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceEvenly);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 500.0,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+    ));
     Offset getOffset(RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
@@ -243,8 +255,11 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceBetween);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 500.0,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+    ));
     Offset getOffset(RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
@@ -295,8 +310,11 @@ void main() {
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
-    );
+      minWidth: 0.0,
+      maxWidth: 500.0,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+    ));
     Offset getOffset(RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;

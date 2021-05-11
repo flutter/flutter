@@ -4,9 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:flutter_gallery/demo_lists.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// The demos we don't run as part of the integraiton test.
 ///

@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui';
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart' as vm_io;
 
@@ -364,5 +364,20 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     // bounds.
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
     super.attachRootWidget(RepaintBoundary(child: rootWidget));
+  }
+
+  @override
+  void reportExceptionNoticed(FlutterErrorDetails exception) {
+    // This method is called to log errors as they happen, and they will also
+    // be eventually logged again at the end of the tests. The superclass
+    // behavior is specific to the "live" execution semantics of
+    // [LiveTestWidgetsFlutterBinding] so users don't have to wait until tests
+    // finish to see the stack traces.
+    //
+    // Disable this because Integration Tests follow the semantics of
+    // [AutomatedTestWidgetsFlutterBinding] that does not log the stack traces
+    // live, and avoids the doubly logged stack trace.
+    // TODO(jiahaog): Integration test binding should not inherit from
+    // `LiveTestWidgetsFlutterBinding` https://github.com/flutter/flutter/issues/81534
   }
 }

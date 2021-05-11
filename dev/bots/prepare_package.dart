@@ -292,8 +292,45 @@ class ArchiveCreator {
     _outputFile = File(path.join(outputDir.absolute.path, _archiveName));
     await _installMinGitIfNeeded();
     await _populateCaches();
+    await _validate();
     await _archiveFiles(_outputFile);
     return _outputFile;
+  }
+
+  /// Validates the integrity of the release package.
+  ///
+  /// Currently only checks that macOS binaries are codesigned. Will throw a
+  /// [PreparePackageException] if the test failes.
+  Future<void> _validate() async {
+    // Only validate in strict mode, which means `--publish`
+    if (!strict || !platform.isMacOS) {
+      return;
+    }
+    // Validate that the dart binary is codesigned
+    final String dartPath = path.join(
+      flutterRoot.absolute.path,
+      'bin',
+      'cache',
+      'dart-sdk',
+      'bin',
+      'dart',
+    );
+    try {
+      // TODO(fujino): Use the conductor https://github.com/flutter/flutter/issues/81701
+      await _processRunner.runProcess(
+        <String>[
+          'codesign',
+          '-vvvv',
+          '--check-notarization',
+          dartPath,
+        ],
+        workingDirectory: flutterRoot,
+      );
+    } on PreparePackageException catch (e) {
+      throw PreparePackageException(
+        'The binary $dartPath was not codesigned!\n${e.message}',
+      );
+    }
   }
 
   /// Returns the version number of this release, according the to tags in the
@@ -540,7 +577,8 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    for (final String releaseFolder in <String>[oldGsReleaseFolder, newGsReleaseFolder]) {
+    for (final bool isNew in <bool>[false, true]) {
+      final String releaseFolder = isNew ? newGsReleaseFolder : oldGsReleaseFolder;
       final String destGsPath = '$releaseFolder/$destinationArchivePath';
       if (!forceUpload) {
         if (await _cloudPathExists(destGsPath) && !dryRun) {
@@ -554,7 +592,7 @@ class ArchivePublisher {
         dest: destGsPath,
       );
       assert(tempDir.existsSync());
-      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: false);
+      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: isNew);
     }
   }
 

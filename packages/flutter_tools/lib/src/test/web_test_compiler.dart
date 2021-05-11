@@ -53,17 +53,17 @@ class WebTestCompiler {
     @required BuildInfo buildInfo,
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
-    Artifact platformDillArtifact;
+    HostArtifact platformDillArtifact;
     // TODO(jonahwilliams): to support autodetect this would need to partition the source code into a
     // a sound and unsound set and perform separate compilations.
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
     if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillArtifact = Artifact.webPlatformKernelDill;
+      platformDillArtifact = HostArtifact.webPlatformKernelDill;
       if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
         extraFrontEndOptions.add('--no-sound-null-safety');
       }
     } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+      platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
       languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot);
       if (!extraFrontEndOptions.contains('--sound-null-safety')) {
         extraFrontEndOptions.add('--sound-null-safety');
@@ -107,7 +107,7 @@ class WebTestCompiler {
       config: _config,
     );
     final ResidentCompiler residentCompiler = ResidentCompiler(
-      _artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
+      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       fileSystemRoots: <String>[
@@ -120,12 +120,11 @@ class WebTestCompiler {
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
-      platformDill: _fileSystem.file(_artifacts
-        .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
+      platformDill: _artifacts
+        .getHostArtifact(platformDillArtifact)
         .absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
-      librariesSpec: _fileSystem.file(_artifacts
-        .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
+      librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,
       artifacts: _artifacts,
       processManager: _processManager,
@@ -139,6 +138,8 @@ class WebTestCompiler {
       <Uri>[],
       outputPath: outputDirectory.childFile('out').path,
       packageConfig: buildInfo.packageConfig,
+      fs: _fileSystem,
+      projectRootPath: projectDirectory.absolute.path,
     );
     if (output.errorCount > 0) {
       throwToolExit('Failed to compile');

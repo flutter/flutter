@@ -15,9 +15,9 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
-import '../plugins.dart';
 import '../project.dart';
 
 // Matches the following error and warning patterns:

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 int globalGeneration = 0;
 
@@ -12,7 +12,7 @@ class GenerationText extends StatefulWidget {
   const GenerationText(this.value, { Key? key }) : super(key: key);
   final int value;
   @override
-  _GenerationTextState createState() => _GenerationTextState();
+  State<GenerationText> createState() => _GenerationTextState();
 }
 
 class _GenerationTextState extends State<GenerationText> {
@@ -48,7 +48,7 @@ Future<void> test(WidgetTester tester, double offset, List<int> keys) {
 // `text`: A space-separated list of expected `key:generation` pairs for the visible SliverList children.
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero)
+    (RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =

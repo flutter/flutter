@@ -113,13 +113,14 @@ void main() {
         if (platform != 'linux' && platform != 'windows' && platform != 'ios') {
           await simulateKeyDownEvent(LogicalKeyboardKey.fn, platform: platform);
           expect(
-              RawKeyboard.instance.keysPressed,
-              equals(
-                <LogicalKeyboardKey>{
-                  if (platform != 'macos') LogicalKeyboardKey.fn,
-                },
-              ),
-              reason: 'on $platform');
+            RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{
+                if (platform != 'macos') LogicalKeyboardKey.fn,
+              },
+            ),
+            reason: 'on $platform',
+          );
           await simulateKeyDownEvent(LogicalKeyboardKey.f12, platform: platform);
           expect(
             RawKeyboard.instance.keysPressed,
@@ -354,16 +355,15 @@ void main() {
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-      // Generate the data for a regular key down event.
+      // Generate the data for a regular key down event. Change the modifiers so
+      // that they show the shift key as already down when this event is
+      // received, but it's not in keysPressed yet.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'web',
         isDown: true,
-      );
-      // Change the modifiers so that they show the shift key as already down
-      // when this event is received, but it's not in keysPressed yet.
-      data['metaState'] |= RawKeyEventDataWeb.modifierShift;
-      // dispatch the modified data.
+      )..['metaState'] |= RawKeyEventDataWeb.modifierShift;
+      // Dispatch the modified data.
       await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
@@ -374,11 +374,69 @@ void main() {
         equals(
           <LogicalKeyboardKey>{
             LogicalKeyboardKey.shiftLeft,
-            // Web doesn't distinguish between left and right keys, so they're
-            // all shown as down when either is pressed.
-            LogicalKeyboardKey.shiftRight,
             LogicalKeyboardKey.keyA,
           },
+        ),
+      );
+
+      // Generate the data for a regular key up event. Don't set the modifiers
+      // for shift so that they show the shift key as already up when this event
+      // is received, and it's in keysPressed.
+      final Map<String, dynamic> data2 = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'web',
+        isDown: false,
+      )..['metaState'] = 0;
+      // Dispatch the modified data.
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data2),
+        (ByteData? data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{},
+        ),
+      );
+
+      // Press right modifier key
+      final Map<String, dynamic> data3 = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.shiftRight,
+        platform: 'web',
+        isDown: true,
+      )..['metaState'] |= RawKeyEventDataWeb.modifierShift;
+      // Dispatch the modified data.
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data3),
+        (ByteData? data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftRight,
+          },
+        ),
+      );
+
+      // Release the key
+      final Map<String, dynamic> data4 = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.shiftRight,
+        platform: 'web',
+        isDown: false,
+      )..['metaState'] = 0;
+      // Dispatch the modified data.
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data4),
+        (ByteData? data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{},
         ),
       );
     });
@@ -572,7 +630,7 @@ void main() {
       );
     }, skip: isBrowser); // This is a GLFW-specific test.
 
-    testWidgets('sided modifiers without a side set return all sides on web', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return left sides on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -597,13 +655,9 @@ void main() {
         equals(
           <LogicalKeyboardKey>{
             LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.shiftRight,
             LogicalKeyboardKey.altLeft,
-            LogicalKeyboardKey.altRight,
             LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.controlRight,
             LogicalKeyboardKey.metaLeft,
-            LogicalKeyboardKey.metaRight,
             LogicalKeyboardKey.keyA,
           },
         ),
@@ -1486,7 +1540,7 @@ void main() {
           (ByteData? data) {
             final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
             lastHandled = decoded['handled'] as bool;
-          }
+          },
         );
       }
       RawKeyboard.instance.addListener(events.add);

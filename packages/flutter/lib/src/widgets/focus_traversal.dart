@@ -1508,7 +1508,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///   final T order;
 ///
 ///   @override
-///   _OrderedButtonState<T> createState() => _OrderedButtonState<T>();
+///   State<OrderedButton<T>> createState() => _OrderedButtonState<T>();
 /// }
 ///
 /// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
@@ -1754,7 +1754,7 @@ class FocusTraversalGroup extends StatefulWidget {
   }
 
   @override
-  _FocusTraversalGroupState createState() => _FocusTraversalGroupState();
+  State<FocusTraversalGroup> createState() => _FocusTraversalGroupState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
