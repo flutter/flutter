@@ -248,7 +248,7 @@ class AnimatedSwitcher extends StatefulWidget {
   final AnimatedSwitcherLayoutBuilder layoutBuilder;
 
   @override
-  _AnimatedSwitcherState createState() => _AnimatedSwitcherState();
+  State<AnimatedSwitcher> createState() => _AnimatedSwitcherState();
 
   /// The transition builder used as the default value of [transitionBuilder].
   ///

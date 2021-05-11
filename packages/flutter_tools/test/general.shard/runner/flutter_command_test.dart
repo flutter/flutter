@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -30,19 +30,18 @@ import 'utils.dart';
 
 void main() {
   group('Flutter Command', () {
-    MockCache cache;
+    FakeCache cache;
     TestUsage usage;
     FakeClock clock;
-    MockProcessInfo mockProcessInfo;
+    FakeProcessInfo processInfo;
 
     setUp(() {
       Cache.disableLocking();
-      cache = MockCache();
+      cache = FakeCache();
       usage = TestUsage();
       clock = FakeClock();
-      mockProcessInfo = MockProcessInfo();
-
-      when(mockProcessInfo.maxRss).thenReturn(10);
+      processInfo = FakeProcessInfo();
+      processInfo.maxRss = 10;
     });
 
     tearDown(() {
@@ -58,7 +57,8 @@ void main() {
     testUsingContext('honors shouldUpdateCache false', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
-      verifyNever(cache.updateAll(any));
+
+      expect(cache.artifacts, isEmpty);
       expect(flutterCommand.deprecated, isFalse);
       expect(flutterCommand.hidden, isFalse);
     },
@@ -71,7 +71,7 @@ void main() {
       await flutterCommand.run();
       // First call for universal, second for the rest
       expect(
-        verify(cache.updateAll(captureAny)).captured,
+        cache.artifacts,
         <Set<DevelopmentArtifact>>[
           <DevelopmentArtifact>{DevelopmentArtifact.universal},
           <DevelopmentArtifact>{},
@@ -143,7 +143,7 @@ void main() {
 
     void testUsingCommandContext(String testName, dynamic Function() testBody) {
       testUsingContext(testName, testBody, overrides: <Type, Generator>{
-        ProcessInfo: () => mockProcessInfo,
+        ProcessInfo: () => processInfo,
         SystemClock: () => clock,
         Usage: () => usage,
       });
@@ -199,40 +199,6 @@ void main() {
           value: 10,
         ),
       ]);
-    });
-
-    testUsingCommandContext('reports command that results in failure', () async {
-      // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
-
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.fail);
-        }
-      );
-
-      try {
-        await flutterCommand.run();
-      } on ToolExit {
-        verify(usage.sendCommand(
-          'dummy',
-          parameters: anyNamed('parameters'),
-        ));
-        verify(usage.sendEvent(
-          'tool-command-result',
-          'dummy',
-          label: 'fail',
-          parameters: anyNamed('parameters'),
-        ));
-        expect(verify(usage.sendEvent(
-            'tool-command-max-rss',
-            'dummy',
-            label: 'fail',
-            value: captureAnyNamed('value'),
-          )).captured[0],
-          10,
-        );
-      }
     });
 
     testUsingCommandContext('reports command that results in error', () async {
@@ -315,15 +281,15 @@ void main() {
     });
 
     group('signals tests', () {
-      MockIoProcessSignal mockSignal;
+      FakeIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
       StreamController<io.ProcessSignal> signalController;
 
       setUp(() {
-        mockSignal = MockIoProcessSignal();
+        mockSignal = FakeIoProcessSignal();
         signalUnderTest = ProcessSignal(mockSignal);
         signalController = StreamController<io.ProcessSignal>();
-        when(mockSignal.watch()).thenAnswer((Invocation invocation) => signalController.stream);
+        mockSignal.stream = signalController.stream;
       });
 
       testUsingContext('reports command that is killed', () async {
@@ -363,7 +329,7 @@ void main() {
           ),
         ]);
       }, overrides: <Type, Generator>{
-        ProcessInfo: () => mockProcessInfo,
+        ProcessInfo: () => processInfo,
         Signals: () => FakeSignals(
           subForSigTerm: signalUnderTest,
           exitSignals: <ProcessSignal>[signalUnderTest],
@@ -397,11 +363,8 @@ void main() {
 
         signalController.add(mockSignal);
         await completer.future;
-
-        await globals.cache.lock();
-        globals.cache.releaseLock();
       }, overrides: <Type, Generator>{
-        ProcessInfo: () => mockProcessInfo,
+        ProcessInfo: () => processInfo,
         Signals: () => FakeSignals(
               subForSigTerm: signalUnderTest,
               exitSignals: <ProcessSignal>[signalUnderTest],
@@ -671,8 +634,29 @@ class FakeDdsCommand extends FlutterCommand {
   }
 }
 
-class MockProcessInfo extends Mock implements ProcessInfo {}
-class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+class FakeProcessInfo extends Fake implements ProcessInfo {
+  @override
+  int maxRss = 0;
+}
+
+class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
+  Stream<io.ProcessSignal> stream;
+
+  @override
+  Stream<io.ProcessSignal> watch() => stream;
+}
+
+class FakeCache extends Fake implements Cache {
+  List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
+
+  @override
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+    artifacts.add(requiredArtifacts.toSet());
+  }
+
+  @override
+  void releaseLock() { }
+}
 
 class FakeSignals implements Signals {
   FakeSignals({
@@ -707,8 +691,6 @@ class FakeClock extends Fake implements SystemClock {
     return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
   }
 }
-
-class MockCache extends Mock implements Cache {}
 
 class FakePub extends Fake implements Pub {
   @override

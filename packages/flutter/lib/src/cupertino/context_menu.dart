@@ -219,7 +219,7 @@ class CupertinoContextMenu extends StatefulWidget {
   final ContextMenuPreviewBuilder? previewBuilder;
 
   @override
-  _CupertinoContextMenuState createState() => _CupertinoContextMenuState();
+  State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
 
 class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {

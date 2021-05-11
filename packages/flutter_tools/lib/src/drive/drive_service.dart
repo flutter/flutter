@@ -198,7 +198,9 @@ class FlutterDriverService extends DriverService {
   ) async {
     Uri uri;
     if (vmServiceUri.scheme == 'ws') {
-      uri = vmServiceUri.replace(scheme: 'http', path: vmServiceUri.path.replaceFirst('ws/', ''));
+      final List<String> segments = vmServiceUri.pathSegments.toList();
+      segments.remove('ws');
+      uri = vmServiceUri.replace(scheme: 'http', path: segments.join('/'));
     } else {
       uri = vmServiceUri;
     }
@@ -220,7 +222,7 @@ class FlutterDriverService extends DriverService {
         // This can be ignored to continue to use the existing remote DDS instance.
       }
     }
-    _vmService = await _vmServiceConnector(uri, device: _device);
+    _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 

@@ -122,6 +122,7 @@ linter:
     - leading_newlines_in_multiline_strings
     - library_names
     - library_prefixes
+    - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
     - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
