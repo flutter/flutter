@@ -14,28 +14,94 @@ part of engine;
 /// This class is still responsible for hooking up the DOM element with the
 /// [HybridTextEditing] instance so that changes are communicated to Flutter.
 class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
-  /// The semantics object which this text editing element belongs to.
-  final SemanticsObject semanticsObject;
+  /// Initializes the [SemanticsTextEditingStrategy] singleton.
+  ///
+  /// This method must be called prior to accessing [instance].
+  static SemanticsTextEditingStrategy ensureInitialized(HybridTextEditing owner) {
+    if (_instance != null && instance.owner == owner) {
+      return instance;
+    }
+    return _instance = SemanticsTextEditingStrategy(owner);
+  }
+
+  /// The [SemanticsTextEditingStrategy] singleton.
+  static SemanticsTextEditingStrategy get instance => _instance!;
+  static SemanticsTextEditingStrategy? _instance;
 
   /// Creates a [SemanticsTextEditingStrategy] that eagerly instantiates
   /// [domElement] so the caller can insert it before calling
   /// [SemanticsTextEditingStrategy.enable].
-  SemanticsTextEditingStrategy(SemanticsObject semanticsObject,
-      HybridTextEditing owner, html.HtmlElement domElement)
-      : this.semanticsObject = semanticsObject,
-        super(owner) {
-    // Make sure the DOM element is of a type that we support for text editing.
-    // TODO(yjbanov): move into initializer list when https://github.com/dart-lang/sdk/issues/37881 is fixed.
-    assert((domElement is html.InputElement) ||
-        (domElement is html.TextAreaElement));
-    super.domElement = domElement;
+  SemanticsTextEditingStrategy(HybridTextEditing owner)
+      : super(owner);
+
+  /// The text field whose DOM element is currently used for editing.
+  ///
+  /// If this field is null, no editing takes place.
+  TextField? activeTextField;
+
+  /// Current input configuration supplied by the "flutter/textinput" channel.
+  InputConfiguration? inputConfig;
+
+  _OnChangeCallback? onChange;
+  _OnActionCallback? onAction;
+
+  /// The semantics implementation does not operate on DOM nodes, but only
+  /// remembers the config and callbacks. This is because the DOM nodes are
+  /// supplied in the semantics update and enabled by [activate].
+  @override
+  void enable(
+    InputConfiguration inputConfig, {
+    required _OnChangeCallback onChange,
+    required _OnActionCallback onAction,
+  }) {
+    this.inputConfig = inputConfig;
+    this.onChange = onChange;
+    this.onAction = onAction;
+  }
+
+  /// Attaches the DOM element owned by [textField] to the text editing
+  /// strategy.
+  ///
+  /// This method must be called after [enable] to name sure that [inputConfig],
+  /// [onChange], and [onAction] are not null.
+  void activate(TextField textField) {
+    assert(
+      inputConfig != null && onChange != null && onAction != null,
+      '"enable" should be called before "enableFromSemantics" and initialize input configuration',
+    );
+
+    if (activeTextField == textField) {
+      // The specified field is already active. Skip.
+      return;
+    } else if (activeTextField != null) {
+      // Another text field is currently active. Deactivate it before switching.
+      disable();
+    }
+
+    activeTextField = textField;
+    domElement = textField.editableElement;
+    _syncStyle();
+    super.enable(inputConfig!, onChange: onChange!, onAction: onAction!);
+  }
+
+  /// Detaches the DOM element owned by [textField] from this text editing
+  /// strategy.
+  ///
+  /// Typically at this point the element loses focus (blurs) and stops being
+  /// used for editing.
+  void deactivate(TextField textField) {
+    if (activeTextField == textField) {
+      disable();
+    }
   }
 
   @override
   void disable() {
     // We don't want to remove the DOM element because the caller is responsible
     // for that. However we still want to stop editing, cleanup the handlers.
-    assert(isEnabled);
+    if (!isEnabled) {
+      return;
+    }
 
     isEnabled = false;
     _style = null;
@@ -47,28 +113,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     _subscriptions.clear();
     _lastEditingState = null;
 
-    // If focused element is a part of a form, it needs to stay on the DOM
-    // until the autofill context of the form is finalized.
-    // More details on `TextInput.finishAutofillContext` call.
-    if (_appendedToForm &&
-        _inputConfiguration.autofillGroup?.formElement != null) {
-      // We want to save the domElement with the form. However we still
-      // need to keep the text editing domElement attached to the semantics
-      // tree. In order to simplify the logic we will create a clone of the
-      // element.
-      final html.Node textFieldClone = domElement.clone(false);
-      domElement = textFieldClone as html.HtmlElement;
-      _inputConfiguration.autofillGroup?.storeForm();
-    }
-
     // If the text element still has focus, remove focus from the editable
-    // element to cause the keyboard to hide.
+    // element to cause the on-screen keyboard, if any, to hide (e.g. on iOS,
+    // Android).
     // Otherwise, the keyboard stays on screen even when the user navigates to
     // a different screen (e.g. by hitting the "back" button).
-    if (operatingSystem == OperatingSystem.android ||
-        operatingSystem == OperatingSystem.iOs) {
-      domElement.blur();
-    }
+    domElement?.blur();
+    domElement = null;
+    activeTextField = null;
+    _queuedStyle = null;
   }
 
   @override
@@ -79,27 +132,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    _subscriptions.add(domElement.onInput.listen(_handleChange));
-
-    _subscriptions.add(domElement.onKeyDown.listen(_maybeSendAction));
-
+    _subscriptions.add(activeDomElement.onInput.listen(_handleChange));
+    _subscriptions.add(activeDomElement.onKeyDown.listen(_maybeSendAction));
     _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
-
     preventDefaultForMouseEvents();
-  }
-
-  @override
-  void initializeElementPlacement() {
-    // Element placement is done by [TextField].
   }
 
   @override
   void initializeTextEditing(InputConfiguration inputConfig,
       {_OnChangeCallback? onChange, _OnActionCallback? onAction}) {
-    // In accesibilty mode, the user of this class is supposed to insert the
-    // [domElement] on their own. Let's make sure they did.
-    assert(html.document.body!.contains(domElement));
-
     isEnabled = true;
     _inputConfiguration = inputConfig;
     _onChange = onChange;
@@ -108,30 +149,46 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   }
 
   @override
-  void setEditingState(EditingState? editingState) {
-    super.setEditingState(editingState);
-
-    // Refocus after setting editing state.
-    domElement.focus();
-  }
-
-  @override
   void placeElement() {
     // If this text editing element is a part of an autofill group.
     if (hasAutofillGroup) {
       placeForm();
     }
-    domElement.focus();
+    activeDomElement.focus();
+  }
+
+  @override
+  void initializeElementPlacement() {
+    // Element placement is done by [TextField].
   }
 
   @override
   void placeForm() {
-    // Switch domElement's parent from semantics object to form.
-    domElement.remove();
-    _inputConfiguration.autofillGroup!.formElement.append(domElement);
-    semanticsObject.element
-        .append(_inputConfiguration.autofillGroup!.formElement);
-    _appendedToForm = true;
+  }
+
+  @override
+  void updateElementPlacement(EditableTextGeometry geometry) {
+    // Element placement is done by [TextField].
+  }
+
+  EditableTextStyle? _queuedStyle;
+
+  @override
+  void updateElementStyle(EditableTextStyle style) {
+    _queuedStyle = style;
+    _syncStyle();
+  }
+
+  /// Apply style to the element, if both style and element are available.
+  ///
+  /// Because style is supplied by the "flutter/textinput" channel and the DOM
+  /// element is supplied by the semantics tree, the existence of both at the
+  /// same time is not guaranteed.
+  void _syncStyle() {
+    if (_queuedStyle == null || domElement == null) {
+      return;
+    }
+    super.updateElementStyle(_queuedStyle!);
   }
 }
 
@@ -146,20 +203,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 class TextField extends RoleManager {
   TextField(SemanticsObject semanticsObject)
       : super(Role.textField, semanticsObject) {
-    final html.HtmlElement editableDomElement =
+    editableElement =
         semanticsObject.hasFlag(ui.SemanticsFlag.isMultiline)
             ? html.TextAreaElement()
             : html.InputElement();
-    textEditingElement = SemanticsTextEditingStrategy(
-      semanticsObject,
-      textEditing,
-      editableDomElement,
-    );
     _setupDomElement();
   }
 
-  SemanticsTextEditingStrategy? textEditingElement;
-  html.HtmlElement get _textFieldElement => textEditingElement!.domElement;
+  /// The element used for editing, e.g. `<input>`, `<textarea>`.
+  late final html.HtmlElement editableElement;
 
   void _setupDomElement() {
     // On iOS, even though the semantic text field is transparent, the cursor
@@ -167,13 +219,13 @@ class TextField extends RoleManager {
     // are made invisible by CSS in [DomRenderer.reset].
     // But there's one more case where iOS highlights text. That's when there's
     // and autocorrect suggestion. To disable that, we have to do the following:
-    _textFieldElement
+    editableElement
       ..spellcheck = false
       ..setAttribute('autocorrect', 'off')
       ..setAttribute('autocomplete', 'off')
       ..setAttribute('data-semantics-role', 'text-field');
 
-    _textFieldElement.style
+    editableElement.style
       ..position = 'absolute'
       // `top` and `left` are intentionally set to zero here.
       //
@@ -188,7 +240,7 @@ class TextField extends RoleManager {
       ..left = '0'
       ..width = '${semanticsObject.rect!.width}px'
       ..height = '${semanticsObject.rect!.height}px';
-    semanticsObject.element.append(_textFieldElement);
+    semanticsObject.element.append(editableElement);
 
     switch (browserEngine) {
       case BrowserEngine.blink:
@@ -211,12 +263,11 @@ class TextField extends RoleManager {
   /// When in browser gesture mode, the focus is forwarded to the framework as
   /// a tap to initialize editing.
   void _initializeForBlink() {
-    _textFieldElement.addEventListener('focus', (html.Event event) {
+    editableElement.addEventListener('focus', (html.Event event) {
       if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
         return;
       }
 
-      textEditing.useCustomEditableElement(textEditingElement);
       EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
           semanticsObject.id, ui.SemanticsAction.tap, null);
     });
@@ -236,14 +287,13 @@ class TextField extends RoleManager {
     num? lastTouchStartOffsetX;
     num? lastTouchStartOffsetY;
 
-    _textFieldElement.addEventListener('touchstart', (html.Event event) {
-      textEditing.useCustomEditableElement(textEditingElement);
+    editableElement.addEventListener('touchstart', (html.Event event) {
       final html.TouchEvent touchEvent = event as html.TouchEvent;
       lastTouchStartOffsetX = touchEvent.changedTouches!.last.client.x;
       lastTouchStartOffsetY = touchEvent.changedTouches!.last.client.y;
     }, true);
 
-    _textFieldElement.addEventListener('touchend', (html.Event event) {
+    editableElement.addEventListener('touchend', (html.Event event) {
       final html.TouchEvent touchEvent = event as html.TouchEvent;
 
       if (lastTouchStartOffsetX != null) {
@@ -251,7 +301,7 @@ class TextField extends RoleManager {
         final num offsetX = touchEvent.changedTouches!.last.client.x;
         final num offsetY = touchEvent.changedTouches!.last.client.y;
 
-        // This should match the similar constant define in:
+        // This should match the similar constant defined in:
         //
         // lib/src/gestures/constants.dart
         //
@@ -272,15 +322,75 @@ class TextField extends RoleManager {
     }, true);
   }
 
+  bool _hasFocused = false;
+
   @override
   void update() {
     // The user is editing the semantic text field directly, so there's no need
     // to do any update here.
+    if (semanticsObject.hasLabel) {
+      editableElement.setAttribute(
+        'aria-label',
+        semanticsObject.label!,
+      );
+    } else {
+      editableElement.removeAttribute('aria-label');
+    }
+
+    editableElement.style
+      ..width = '${semanticsObject.rect!.width}px'
+      ..height = '${semanticsObject.rect!.height}px';
+
+    // Whether we should request that the browser shift focus to the editable
+    // element, so that both the framework and the browser agree on what's
+    // currently focused.
+    bool needsDomFocusRequest = false;
+    final EditingState editingState = EditingState(
+      text: semanticsObject.value,
+      baseOffset: semanticsObject.textSelectionBase,
+      extentOffset: semanticsObject.textSelectionExtent,
+    );
+    if (semanticsObject.hasFocus) {
+      if (!_hasFocused) {
+        _hasFocused = true;
+        SemanticsTextEditingStrategy.instance.activate(this);
+        needsDomFocusRequest = true;
+      }
+      if (html.document.activeElement != editableElement) {
+        needsDomFocusRequest = true;
+      }
+      // Focused elements should have full text editing state applied.
+      SemanticsTextEditingStrategy.instance.setEditingState(editingState);
+    } else if (_hasFocused) {
+      SemanticsTextEditingStrategy.instance.deactivate(this);
+
+      // Only apply text, because this node is not focused.
+      editingState.applyTextToDomElement(editableElement);
+
+      if (_hasFocused && html.document.activeElement == editableElement) {
+        // Unlike `editableElement.focus()` we don't need to schedule `blur`
+        // post-update because `document.activeElement` implies that the
+        // element is already attached to the DOM. If it's not, it can't
+        // possibly be focused and therefore there's no need to blur.
+        editableElement.blur();
+      }
+      _hasFocused = false;
+    }
+
+    if (needsDomFocusRequest) {
+      // Schedule focus post-update to make sure the element is attached to
+      // the document. Otherwise focus() has no effect.
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        if (html.document.activeElement != editableElement) {
+          editableElement.focus();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
-    _textFieldElement.remove();
-    textEditing.stopUsingCustomEditableElement();
+    editableElement.remove();
+    SemanticsTextEditingStrategy.instance.deactivate(this);
   }
 }
