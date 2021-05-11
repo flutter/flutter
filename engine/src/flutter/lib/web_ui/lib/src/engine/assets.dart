@@ -48,34 +48,14 @@ class AssetManager {
     return Uri.encodeFull((_baseUrl ?? '') + '$assetsDir/$asset');
   }
 
-  /// Returns true if buffer contains html document.
-  static bool _responseIsHtmlPage(ByteData data) {
-    const String htmlDocTypeResponse = '<!DOCTYPE html>';
-    final int testLength = htmlDocTypeResponse.length;
-    if (data.lengthInBytes < testLength) {
-      return false;
-    }
-    for (int i = 0; i < testLength; i++) {
-      if (data.getInt8(i) != htmlDocTypeResponse.codeUnitAt(i))
-        return false;
-    }
-    return true;
-  }
-
   Future<ByteData> load(String asset) async {
     final String url = getAssetUrl(asset);
     try {
       final html.HttpRequest request =
           await html.HttpRequest.request(url, responseType: 'arraybuffer');
-      // Development server will return index.html for invalid urls.
-      // The check below makes sure when it is returned for non html assets
-      // we report an error instead of silent failure.
+
       final ByteBuffer response = request.response;
-      final ByteData data = response.asByteData();
-      if (!url.endsWith('html') && _responseIsHtmlPage(data)) {
-        throw AssetManagerException(url, 404);
-      }
-      return data;
+      return response.asByteData();
     } on html.ProgressEvent catch (e) {
       final html.EventTarget? target = e.target;
       if (target is html.HttpRequest) {

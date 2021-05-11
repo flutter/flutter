@@ -314,20 +314,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     };
   }
 
-  void _reportAssetLoadError(String url,
-      ui.PlatformMessageResponseCallback? callback, String error) {
-    const MethodCodec codec = JSONMethodCodec();
-    final String message = 'Error while trying to load an asset $url';
-    if (!assertionsEnabled) {
-      /// For web/release mode log the load failure on console.
-      printWarning(message);
-    }
-    _replyToPlatformMessage(
-        callback, codec.encodeErrorEnvelope(code: 'errorCode',
-        message: message,
-        details: error));
-  }
-
   void _sendPlatformMessage(
     String name,
     ByteData? data,
@@ -349,6 +335,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
 
     switch (name) {
+
       /// This should be in sync with shell/common/shell.cc
       case 'flutter/skia':
         const MethodCodec codec = JSONMethodCodec();
@@ -376,15 +363,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       case 'flutter/assets':
         final String url = utf8.decode(data!.buffer.asUint8List());
-        ui.webOnlyAssetManager.load(url)
-            .then((ByteData assetData) {
-              _replyToPlatformMessage(callback, assetData);
-            }, onError: (dynamic error) {
-              _reportAssetLoadError(url, callback, error);
-            }
-          ).catchError((dynamic e) {
-            _reportAssetLoadError(url, callback, e);
-          });
+        ui.webOnlyAssetManager.load(url).then((ByteData assetData) {
+          _replyToPlatformMessage(callback, assetData);
+        }, onError: (dynamic error) {
+          printWarning('Error while trying to load an asset: $error');
+          _replyToPlatformMessage(callback, null);
+        });
         return;
 
       case 'flutter/platform':
