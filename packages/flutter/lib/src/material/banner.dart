@@ -218,7 +218,7 @@ class MaterialBanner extends StatefulWidget {
   }
 
   @override
-  _MaterialBannerState createState() => _MaterialBannerState();
+  State<MaterialBanner> createState() => _MaterialBannerState();
 }
 
 class _MaterialBannerState extends State<MaterialBanner> with TickerProviderStateMixin {
