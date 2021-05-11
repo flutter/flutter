@@ -599,15 +599,24 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 
 /// A shortcut combination that is triggered by a key event of a character.
 ///
+/// Keys often produce different characters when combined with modifiers. For
+/// example, it might be helpful for the user to bring up a help menu by
+/// pressing the question mark ('?'). However, there is no logical key that
+/// directly represents a question mark. Althouh 'Shift+Slash' produces a '?'
+/// character on a US keyboard, its logical key is still considered a '/' key,
+/// and hard-coding 'Shift+Slash' in this situation is unfriendly to other
+/// keyboard layouts.
+///
 /// The [CharacterActivator] is useful when it is desired that the key
-/// combination should result in certain character regardless of keyboard
-/// layouts. For example, `CharacterActivator('?')` is triggered when a key
-/// combination results in a question mark, which is Shift+Slash on a US
-/// keyboard, but Shift+Comma on a French keyboard.
+/// combination should result in a character that can not be represented by a
+/// logical key.  For example, `CharacterActivator('?')` is triggered when a key
+/// combination results in a question mark, which is 'Shift+Slash' on a US
+/// keyboard, but 'Shift+Comma' on a French keyboard.
 ///
 /// The [CharacterActivator] is less reliable than [SingleActivator] since
 /// it depends on the platform to report event characters. Prefer
-/// [SingleActivator] if the key combination can be described with logical keys.
+/// [SingleActivator] if the desired key combination can be described with
+/// logical keys.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// In the following example, when a key combination results in a question mark,
@@ -618,8 +627,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// ```
 ///
 /// ```dart preamble
-/// class IncrementIntent extends Intent {
-///   const IncrementIntent();
+/// class HelpMenuIntent extends Intent {
+///   const HelpMenuIntent();
 /// }
 /// ```
 ///
@@ -630,11 +639,11 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
 ///     shortcuts: const <ShortcutActivator, Intent>{
-///       CharacterActivator('?'): IncrementIntent(),
+///       CharacterActivator('?'): HelpMenuIntent(),
 ///     },
 ///     child: Actions(
 ///       actions: <Type, Action<Intent>>{
-///         IncrementIntent: CallbackAction<IncrementIntent>(
+///         HelpMenuIntent: CallbackAction<HelpMenuIntent>(
 ///           onInvoke: (IncrementIntent intent) => setState(() {
 ///             count = count + 1;
 ///           }),
@@ -663,11 +672,17 @@ class CharacterActivator with Diagnosticable implements ShortcutActivator {
   /// Create a [CharacterActivator] from the triggering character.
   const CharacterActivator(this.character);
 
-  /// The non-modifier key of the shortcut that is pressed after all modifiers
-  /// to activate the shortcut.
+  /// The character of the triggering event.
   ///
-  /// For example, for `Control + C`, [trigger] should be
-  /// [LogicalKeyboardKey.keyC].
+  /// This is typically a single-character string, such as '?' or 'œ', although
+  /// [CharacterActivator] doesn't check the length of [character] or whether it
+  /// can be matched by any key combination at all. It is case-sensitive, since
+  /// the [character] is directly compared by `==` to the character reported by
+  /// the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [RawKeyEvent.character], the character of a key event.
   final String character;
 
   @override
