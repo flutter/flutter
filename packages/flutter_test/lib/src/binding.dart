@@ -1490,8 +1490,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView.prepareInitialFrame();
   }
 
-  @override
-  _LiveTestRenderView get renderView => super.renderView as _LiveTestRenderView;
+  _LiveTestRenderView get _liveTestRenderView => super.renderView as _LiveTestRenderView;
 
   void _handleViewNeedsPaint() {
     _viewNeedsPaint = true;
@@ -1519,14 +1518,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     switch (source) {
       case TestBindingEventSource.test:
-        final _LiveTestPointerRecord? record = renderView._pointers[event.pointer];
+        final _LiveTestPointerRecord? record = _liveTestRenderView._pointers[event.pointer];
         if (record != null) {
           record.position = event.position;
           if (!event.down)
             record.decay = _kPointerDecay;
           _handleViewNeedsPaint();
         } else if (event.down) {
-          renderView._pointers[event.pointer] = _LiveTestPointerRecord(
+          _liveTestRenderView._pointers[event.pointer] = _LiveTestPointerRecord(
             event.pointer,
             event.position,
           );
@@ -1619,7 +1618,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
-    renderView._setDescription(description);
+    _liveTestRenderView._setDescription(description);
     // We drop the timeout on the floor in `flutter run` mode.
     // We could support it, but we'd have to automatically add the entire duration of pumps
     // and timers and so on, since those operate in real time when using this binding, but
@@ -1660,7 +1659,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Offset globalToLocal(Offset point) {
-    final Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    final Matrix4 transform = _liveTestRenderView.configuration.toHitTestMatrix();
     final double det = transform.invert();
     assert(det != 0.0);
     final Offset result = MatrixUtils.transformPoint(transform, point);
@@ -1669,7 +1668,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Offset localToGlobal(Offset point) {
-    final Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    final Matrix4 transform = _liveTestRenderView.configuration.toHitTestMatrix();
     return MatrixUtils.transformPoint(transform, point);
   }
 }

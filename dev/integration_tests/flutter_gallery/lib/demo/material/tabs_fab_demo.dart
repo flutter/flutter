@@ -40,7 +40,7 @@ class TabsFabDemo extends StatefulWidget {
   static const String routeName = '/material/tabs-fab';
 
   @override
-  _TabsFabDemoState createState() => _TabsFabDemoState();
+  State<TabsFabDemo> createState() => _TabsFabDemoState();
 }
 
 class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {

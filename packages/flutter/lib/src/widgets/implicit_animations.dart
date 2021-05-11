@@ -729,7 +729,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   final Clip clipBehavior;
 
   @override
-  _AnimatedContainerState createState() => _AnimatedContainerState();
+  AnimatedWidgetBaseState<AnimatedContainer> createState() => _AnimatedContainerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -880,7 +880,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   final Widget? child;
 
   @override
-  _AnimatedPaddingState createState() => _AnimatedPaddingState();
+  AnimatedWidgetBaseState<AnimatedPadding> createState() => _AnimatedPaddingState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1024,7 +1024,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   final double? widthFactor;
 
   @override
-  _AnimatedAlignState createState() => _AnimatedAlignState();
+  AnimatedWidgetBaseState<AnimatedAlign> createState() => _AnimatedAlignState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1213,7 +1213,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  _AnimatedPositionedState createState() => _AnimatedPositionedState();
+  AnimatedWidgetBaseState<AnimatedPositioned> createState() => _AnimatedPositionedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1348,7 +1348,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  _AnimatedPositionedDirectionalState createState() => _AnimatedPositionedDirectionalState();
+  AnimatedWidgetBaseState<AnimatedPositionedDirectional> createState() => _AnimatedPositionedDirectionalState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1505,7 +1505,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  _AnimatedOpacityState createState() => _AnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<AnimatedOpacity> createState() => _AnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1639,7 +1639,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  _SliverAnimatedOpacityState createState() => _SliverAnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> createState() => _SliverAnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1763,7 +1763,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override
-  _AnimatedDefaultTextStyleState createState() => _AnimatedDefaultTextStyleState();
+  AnimatedWidgetBaseState<AnimatedDefaultTextStyle> createState() => _AnimatedDefaultTextStyleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1887,7 +1887,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final bool animateShadowColor;
 
   @override
-  _AnimatedPhysicalModelState createState() => _AnimatedPhysicalModelState();
+  AnimatedWidgetBaseState<AnimatedPhysicalModel> createState() => _AnimatedPhysicalModelState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -354,6 +354,53 @@ void main() {
     await driverService.stop();
   });
 
+  testWithoutContext('Can connect to existing application using ws URI (no trailing slash)', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+      getVM,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': '1',
+        }
+      )
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed());
+
+    await driverService.reuseApplication(
+      Uri.parse('ws://127.0.0.1:63426/1UasC_ihpXY=/ws'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug),
+      false,
+    );
+    await driverService.stop();
+  });
+
+  testWithoutContext('Can connect to existing application using ws URI (no trailing slash, ws in auth code)', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      getVM,
+      getVM,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': '1',
+        }
+      )
+    ]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final FakeDevice device = FakeDevice(LaunchResult.failed());
+
+    await driverService.reuseApplication(
+      Uri.parse('ws://127.0.0.1:63426/wsasC_ihpXY=/ws'),
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug),
+      false,
+    );
+    await driverService.stop();
+  });
 
   testWithoutContext('Does not call flutterExit on device types that do not support it', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
@@ -400,6 +447,9 @@ FlutterDriverService setUpDriverService({
       assert(logger != null);
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');
+      }
+      if (httpUri.path.endsWith('/ws')) {
+        fail('Expected HTTP uri to not contain `/ws`, found $httpUri');
       }
       return vmService;
     }

@@ -152,7 +152,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   final ScrollableWidgetBuilder builder;
 
   @override
-  _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
+  State<DraggableScrollableSheet> createState() => _DraggableScrollableSheetState();
 }
 
 /// A [Notification] related to the extent, which is the size, and scroll
