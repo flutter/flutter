@@ -306,10 +306,27 @@ void main() {
     expect(androidPointerProperties.toString(), 'AndroidPointerProperties(id: 0, toolType: 0)');
 
     const double zero = 0.0;
-    const AndroidPointerCoords androidPointerCoords =
-      AndroidPointerCoords(orientation: zero, pressure: zero, size: zero, toolMajor: zero, toolMinor: zero, touchMajor: zero, touchMinor: zero, x: zero, y: zero);
-    expect(androidPointerCoords.toString(),
-      'AndroidPointerCoords(orientation: $zero, pressure: $zero, size: $zero, toolMajor: $zero, toolMinor: $zero, touchMajor: $zero, touchMinor: $zero, x: $zero, y: $zero)');
+    const AndroidPointerCoords androidPointerCoords = AndroidPointerCoords(
+      orientation: zero,
+      pressure: zero,
+      size: zero,
+      toolMajor: zero,
+      toolMinor: zero,
+      touchMajor: zero,
+      touchMinor: zero,
+      x: zero,
+      y: zero
+    );
+    expect(androidPointerCoords.toString(), 'AndroidPointerCoords(orientation: $zero, '
+      'pressure: $zero, '
+      'size: $zero, '
+      'toolMajor: $zero, '
+      'toolMinor: $zero, '
+      'touchMajor: $zero, '
+      'touchMinor: $zero, '
+      'x: $zero, '
+      'y: $zero)',
+    );
 
     final AndroidMotionEvent androidMotionEvent = AndroidMotionEvent(
       downTime: 0,
@@ -342,6 +359,7 @@ void main() {
       'edgeFlags: 0, '
       'source: 0, '
       'flags: 0, '
-      'motionEventId: 0)');
+      'motionEventId: 0)',
+    );
   });
 }

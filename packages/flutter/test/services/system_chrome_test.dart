@@ -91,11 +91,12 @@ void main() {
     const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
 
     expect(systemUiOverlayStyle.toString(), 'SystemUiOverlayStyle({'
-        'systemNavigationBarColor: null, '
-        'systemNavigationBarDividerColor: null, '
-        'statusBarColor: null, '
-        'statusBarBrightness: null, '
-        'statusBarIconBrightness: null, '
-        'systemNavigationBarIconBrightness: null})');
+      'systemNavigationBarColor: null, '
+      'systemNavigationBarDividerColor: null, '
+      'statusBarColor: null, '
+      'statusBarBrightness: null, '
+      'statusBarIconBrightness: null, '
+      'systemNavigationBarIconBrightness: null})',
+    );
   });
 }
