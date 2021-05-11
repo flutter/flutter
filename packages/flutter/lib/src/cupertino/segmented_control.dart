@@ -187,7 +187,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
 
   @override
-  _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
+  State<CupertinoSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
 class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedControl<T>>

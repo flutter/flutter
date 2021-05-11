@@ -381,7 +381,7 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   @protected
-  _SystemMouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
+  MouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
 
   @override
   bool operator ==(Object other) {

@@ -181,19 +181,20 @@ void main() {
     expect(child2.read<int>('foo'), isNull); // Value does not exist in this child.
 
     // child1 is not given up before running finalizers.
-    try {
-      manager.doSerialization();
-      fail('expected error');
-    } on FlutterError catch (e) {
-      expect(
-        e.message,
-        'Multiple owners claimed child RestorationBuckets with the same IDs.\n'
-        'The following IDs were claimed multiple times from the parent RestorationBucket(restorationId: root, owner: MockManager):\n'
-        ' * "child1" was claimed by:\n'
-        '   * SecondClaim\n'
-        '   * FirstClaim (current owner)',
-      );
-    }
+    expect(
+      () => manager.doSerialization(),
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        equals(
+          'Multiple owners claimed child RestorationBuckets with the same IDs.\n'
+          'The following IDs were claimed multiple times from the parent RestorationBucket(restorationId: root, owner: MockManager):\n'
+          ' * "child1" was claimed by:\n'
+          '   * SecondClaim\n'
+          '   * FirstClaim (current owner)',
+        ),
+      )),
+    );
   });
 
   test('claim child that is already claimed does not throw if given up', () {

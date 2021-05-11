@@ -24,14 +24,15 @@ void main() {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
         throwsA(isA<PreparePackageException>()));
-    try {
-      await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
-    } on PreparePackageException catch (e) {
-      expect(
-        e.message,
+
+    await expectLater(
+      () => processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']),
+      throwsA(isA<PreparePackageException>().having(
+        (PreparePackageException error) => error.message,
+        'message',
         contains('ProcessException: Failed to find "this_executable_better_not_exist_2857632534321" in the search path'),
-      );
-    }
+      )),
+    );
   });
   for (final String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = FakePlatform(

@@ -150,7 +150,7 @@ class SelectableTravelDestinationItem extends StatefulWidget {
   final ShapeBorder? shape;
 
   @override
-  _SelectableTravelDestinationItemState createState() => _SelectableTravelDestinationItemState();
+  State<SelectableTravelDestinationItem> createState() => _SelectableTravelDestinationItemState();
 }
 
 class _SelectableTravelDestinationItemState extends State<SelectableTravelDestinationItem> {
@@ -340,7 +340,7 @@ class CardsDemo extends StatefulWidget {
   static const String routeName = '/material/cards';
 
   @override
-  _CardsDemoState createState() => _CardsDemoState();
+  State<CardsDemo> createState() => _CardsDemoState();
 }
 
 class _CardsDemoState extends State<CardsDemo> {

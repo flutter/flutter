@@ -129,7 +129,7 @@ class CupertinoSwitch extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _CupertinoSwitchState createState() => _CupertinoSwitchState();
+  State<CupertinoSwitch> createState() => _CupertinoSwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
