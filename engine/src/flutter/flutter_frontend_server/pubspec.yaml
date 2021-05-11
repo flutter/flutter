@@ -1,8 +1,17 @@
-name: frontend_server
+name: flutter_frontend_server
+publish_to: none
 version: 0.1.1-dev
 description: Communication pipe to Dart Frontend
-homepage: http://flutter.io
+homepage: https://flutter.dev
 author: Flutter Authors <flutter-dev@googlegroups.com>
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
+# In particular, package:test is not usable here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -15,13 +24,75 @@ dependencies:
   convert: any
   crypto: any
   front_end: any
+  frontend_server: any
   kernel: any
   logging: any
   meta: any
-  quiver: any
   package_config: any
   path: any
   source_span: any
   typed_data: any
   usage: any
   vm: any
+
+dependency_overrides:
+  _fe_analyzer_shared:
+    path: ../../third_party/dart/pkg/_fe_analyzer_shared
+  _js_interop_checks:
+    path: ../../third_party/dart/pkg/_js_interop_checks
+  args:
+    path: ../../third_party/dart/third_party/pkg/args
+  async:
+    path: ../../third_party/dart/third_party/pkg/async
+  bazel_worker:
+    path: ../../third_party/dart/third_party/pkg/bazel_worker
+  build_integration:
+    path: ../../third_party/dart/pkg/build_integration
+  charcode:
+    path: ../../third_party/dart/third_party/pkg/charcode
+  cli_util:
+    path: ../../third_party/dart/third_party/pkg/cli_util
+  collection:
+    path: ../../third_party/dart/third_party/pkg/collection
+  convert:
+    path: ../../third_party/dart/third_party/pkg/convert
+  crypto:
+    path: ../../third_party/dart/third_party/pkg/crypto
+  dev_compiler:
+    path: ../../third_party/dart/pkg/dev_compiler
+  fixnum:
+    path: ../../third_party/dart/third_party/pkg/fixnum
+  front_end:
+    path: ../../third_party/dart/pkg/front_end
+  frontend_server:
+    path: ../../third_party/dart/pkg/frontend_server
+  kernel:
+    path: ../../third_party/dart/pkg/kernel
+  logging:
+    path: ../../third_party/dart/third_party/pkg/logging
+  matcher:
+    path: ../../third_party/dart/third_party/pkg/matcher
+  meta:
+    path: ../../third_party/dart/pkg/meta
+  package_config:
+    path: ../../third_party/dart/third_party/pkg_tested/package_config
+  path:
+    path: ../../third_party/dart/third_party/pkg/path
+  pedantic:
+    path: ../../third_party/dart/third_party/pkg/pedantic
+  protobuf:
+    path: ../../third_party/dart/third_party/pkg/protobuf/protobuf
+  source_maps:
+    path: ../../third_party/dart/third_party/pkg/source_maps
+  source_span:
+    path: ../../third_party/dart/third_party/pkg/source_span
+  stack_trace:
+    path: ../../third_party/dart/third_party/pkg/stack_trace
+  term_glyph:
+    path: ../../third_party/dart/third_party/pkg/term_glyph
+  typed_data:
+    path: ../../third_party/dart/third_party/pkg/typed_data
+  usage:
+    path: ../../third_party/dart/third_party/pkg/usage
+  vm:
+    path: ../../third_party/dart/pkg/vm
