@@ -456,7 +456,7 @@ void main() {
     expect(error, isNotNull);
     expect(error, isFlutterError);
     expect(
-      error?.toStringDeep(),
+      error!.toStringDeep(),
       equalsIgnoringHashCodes(
         'FlutterError\n'
         '   A TestNotifier was used after being disposed.\n'

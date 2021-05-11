@@ -227,11 +227,11 @@ class SnippetGenerator {
       if (match != null) { // If we saw the start or end of a code block
         inCodeBlock = !inCodeBlock;
         if (match.namedGroup('language') != null) {
-          language = match[1];
+          language = match[1]!;
           if (match.namedGroup('section') != null) {
-            components.add(_ComponentTuple('code-${match.namedGroup('section')}', <String>[], language: language!));
+            components.add(_ComponentTuple('code-${match.namedGroup('section')}', <String>[], language: language));
           } else {
-            components.add(_ComponentTuple('code', <String>[], language: language!));
+            components.add(_ComponentTuple('code', <String>[], language: language));
           }
         } else {
           language = null;
