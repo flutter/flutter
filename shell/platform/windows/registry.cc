@@ -54,8 +54,8 @@ std::vector<std::wstring> RegistryKey::GetSubKeyNames() const {
   for (int i = 0; i < subkey_count; ++i) {
     DWORD key_buf_size = max_key_buf_size;
     auto key_buf = std::make_unique<wchar_t[]>(max_key_buf_size);
-    result = ::RegEnumKeyEx(key_, i, key_buf.get(), &key_buf_size, nullptr,
-                            nullptr, nullptr, nullptr);
+    result = ::RegEnumKeyExW(key_, i, key_buf.get(), &key_buf_size, nullptr,
+                             nullptr, nullptr, nullptr);
     if (result == ERROR_SUCCESS) {
       subkey_names.emplace_back(key_buf.get());
     }
