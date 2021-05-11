@@ -147,7 +147,7 @@
 
 # Host only DeviceLab tests
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @stuartmorgan @flutter/plugin
