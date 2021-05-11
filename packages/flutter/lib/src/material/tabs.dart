@@ -736,6 +736,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isScrollable;
 
   /// The amount of space by which to inset the tab bar.
+  ///
+  /// When [isScrollable] is false, this will yield the same result as if you had wrapped your
+  /// [TabBar] in a [Padding] widget. When [isScrollable] is true, the scrollable itself is inset,
+  /// allowing the padding to scroll with the tab bar, rather than enclosing it.
   final EdgeInsetsGeometry? padding;
 
   /// The color of the line that appears below the selected tab.
