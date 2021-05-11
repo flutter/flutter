@@ -222,33 +222,26 @@ class MaterialBanner extends StatefulWidget {
 }
 
 class _MaterialBannerState extends State<MaterialBanner> with TickerProviderStateMixin {
-  // TODO(Calamity210): Remove the private animation once MaterialBanners have migrated to the new API.
-  // A mutable animation is need to allow us to create a fallback animation for backwards compatibility
-  // during the opt-in phase of MaterialBanner's migration to the ScaffoldMessenger API.
-  Animation<double>? _animation;
-
   bool _wasVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _animation = widget.animation ?? (MaterialBanner.createAnimationController(vsync: this)..forward());
-    _animation!.addStatusListener(_onAnimationStatusChanged);
+    widget.animation?.addStatusListener(_onAnimationStatusChanged);
   }
 
   @override
   void didUpdateWidget(MaterialBanner oldWidget) {
-    if (_animation != oldWidget.animation && oldWidget.animation != null) {
-      _animation!.removeStatusListener(_onAnimationStatusChanged);
-      _animation = widget.animation;
-      _animation!.addStatusListener(_onAnimationStatusChanged);
+    if (widget.animation != oldWidget.animation) {
+      oldWidget.animation?.removeStatusListener(_onAnimationStatusChanged);
+      widget.animation?.addStatusListener(_onAnimationStatusChanged);
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
-    _animation!.removeStatusListener(_onAnimationStatusChanged);
+    widget.animation?.removeStatusListener(_onAnimationStatusChanged);
     super.dispose();
   }
 
@@ -272,7 +265,9 @@ class _MaterialBannerState extends State<MaterialBanner> with TickerProviderStat
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
 
     assert(widget.actions.isNotEmpty);
-    assert(_animation != null);
+
+    // TODO(Calamity210): Enable this assert once the opt-in phase of the new MaterialBanner API ends.
+    // assert(widget.animation != null);
 
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
@@ -302,13 +297,6 @@ class _MaterialBannerState extends State<MaterialBanner> with TickerProviderStat
     final TextStyle? textStyle = widget.contentTextStyle
         ?? bannerTheme.contentTextStyle
         ?? theme.textTheme.bodyText2;
-
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: _animation!, curve: _materialBannerHeightCurve);
-    final CurvedAnimation fadeOutAnimation = CurvedAnimation(
-      parent: _animation!,
-      curve: _materialBannerFadeOutCurve,
-      reverseCurve: const Threshold(0.0),
-    );
 
     Widget materialBanner = Container(
       color: backgroundColor,
@@ -341,6 +329,18 @@ class _MaterialBannerState extends State<MaterialBanner> with TickerProviderStat
         ],
       ),
     );
+
+    // This provides a static banner during the opt-in phase of the transition to MaterialBanner's new API
+    if (widget.animation == null)
+      return materialBanner;
+
+    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
+    final CurvedAnimation fadeOutAnimation = CurvedAnimation(
+      parent: widget.animation!,
+      curve: _materialBannerFadeOutCurve,
+      reverseCurve: const Threshold(0.0),
+    );
+
     materialBanner = Semantics(
       container: true,
       liveRegion: true,
