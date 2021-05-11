@@ -378,7 +378,7 @@ void main() {
     expect(handler.activeDevToolsServer, null);
   });
 
-  testWithoutContext('launchDevToolsInBrowser launches successfully with null devToolsUrl', () async {
+  testWithoutContext('launchDevToolsInBrowser launches after _devToolsLauncher.ready completes', () async {
     final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = null
