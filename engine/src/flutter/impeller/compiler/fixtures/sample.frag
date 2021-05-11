@@ -1,10 +1,5 @@
-#version 450
 
-struct Hello {
-  vec4 stuff;
-  vec2 more_stuff;
-  float dunno;
-};
+#include "types.h"
 
 uniform Uniforms {
   Hello myHello;

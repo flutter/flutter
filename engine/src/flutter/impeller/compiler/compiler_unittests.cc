@@ -25,8 +25,17 @@ TEST(CompilerTest, CanCompileSample) {
   auto fixture = flutter::testing::OpenFixtureAsMapping("sample.frag");
   ASSERT_NE(fixture->GetMapping(), nullptr);
   Compiler::SourceOptions options("sample.frag");
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
   Compiler compiler(*fixture.get(), options);
   ASSERT_TRUE(compiler.IsValid());
+
+  auto desktop = fml::OpenDirectory("/Users/chinmaygarde/Desktop", false,
+                                    fml::FilePermission::kRead);
+  fml::WriteAtomically(desktop, "sample.frag.spirv",
+                       *compiler.GetSPIRVAssembly());
+  fml::WriteAtomically(desktop, "sample.frag.metal",
+                       *compiler.GetMSLShaderSource());
 }
 
 }  // namespace testing
