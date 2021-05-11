@@ -87,5 +87,22 @@ TEST(FrameTimingsRecorderTest, ThrowWhenRecordRasterBeforeBuildEnd) {
 
 #endif
 
+TEST(FrameTimingsRecorderTest, RecordersHaveUniqueFrameNumbers) {
+  auto recorder1 = std::make_unique<FrameTimingsRecorder>();
+  auto recorder2 = std::make_unique<FrameTimingsRecorder>();
+
+  ASSERT_TRUE(recorder2->GetFrameNumber() > recorder1->GetFrameNumber());
+}
+
+TEST(FrameTimingsRecorderTest, ClonedHasUniqueFrameNumber) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  const auto now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now);
+
+  auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kVsync);
+  ASSERT_NE(recorder->GetFrameNumber(), cloned->GetFrameNumber());
+}
+
 }  // namespace testing
 }  // namespace flutter

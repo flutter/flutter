@@ -108,7 +108,6 @@ class Animator final {
   fml::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   fml::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
-  int64_t frame_number_;
   bool paused_;
   bool regenerate_layer_tree_;
   bool frame_scheduled_;
