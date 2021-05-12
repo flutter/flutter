@@ -33,12 +33,7 @@ void PrintInstalledApps() {
 // returned.
 int LaunchApp(const std::wstring_view app_id, const std::wstring_view args) {
   flutter::Application app(app_id);
-  DWORD process_id = app.Launch(args);
-  if (process_id == -1) {
-    std::wcerr << L"Failed to launch app " << app.GetPackageId() << std::endl;
-    return 1;
-  }
-  return 0;
+  return app.Launch(args);
 }
 
 // Prints the command usage to stderr.
@@ -82,8 +77,20 @@ int main(int argc, char** argv) {
         app_args << " ";
       }
     }
-    return LaunchApp(flutter::Utf16FromUtf8(package_id),
-                     flutter::Utf16FromUtf8(app_args.str()));
+    int process_id = LaunchApp(flutter::Utf16FromUtf8(package_id),
+                               flutter::Utf16FromUtf8(app_args.str()));
+    if (process_id == -1) {
+      std::cerr << "error: Failed to launch app with package ID " << package_id
+                << std::endl;
+      return 1;
+    }
+
+    // Write an informative message for the user to stderr.
+    std::cerr << "Launched app with package_id " << package_id
+              << ". PID: " << std::endl;
+    // Write the PID to stdout. The flutter tool reads this value in.
+    std::cout << process_id << std::endl;
+    return 0;
   }
 
   std::cerr << "Unknown command: " << command << std::endl;
