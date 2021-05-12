@@ -86,8 +86,8 @@ Future<bool> _isPortAvailable(int port) async {
     final RawSocket socket = await RawSocket.connect('localhost', port);
     socket.shutdown(SocketDirection.both);
     await socket.close();
-    return true;
-  } on SocketException {
     return false;
+  } on SocketException {
+    return true;
   }
 }
