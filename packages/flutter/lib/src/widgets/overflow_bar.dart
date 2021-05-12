@@ -510,17 +510,20 @@ class _RenderOverflowBar extends RenderBox
       }
       size = constraints.constrain(Size(constraints.maxWidth, y - overflowSpacing));
     } else {
-      // Default horizontal layout
-      child = rtl ? lastChild : firstChild;
-      RenderBox? nextChild() => rtl ? childBefore(child!) : childAfter(child!);
-      double x  = 0;
+      size = constraints.constrain(Size(actualWidth, maxChildHeight));
+      child = firstChild;
+      double x = rtl ? size.width - child!.size.width : 0;
       while (child != null) {
         final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
         childParentData.offset = Offset(x, (maxChildHeight - child.size.height) / 2);
-        x += child.size.width + spacing;
-        child = nextChild();
+        if (!rtl) {
+          x += child.size.width + spacing;
+        }
+        child = childAfter(child);
+        if (rtl && child != null) {
+          x -= child.size.width + spacing;
+        }
       }
-      size = constraints.constrain(Size(actualWidth, maxChildHeight));
     }
   }
 
