@@ -272,14 +272,20 @@ void SceneBuilder::pop() {
   PopLayer();
 }
 
-void SceneBuilder::addPicture(double dx,
+void SceneBuilder::addPicture(Dart_Handle layer_handle,
+                              double dx,
                               double dy,
                               Picture* picture,
-                              int hints) {
-  auto layer = std::make_unique<flutter::PictureLayer>(
+                              int hints,
+                              fml::RefPtr<EngineLayer> oldLayer) {
+  auto layer = std::make_shared<flutter::PictureLayer>(
       SkPoint::Make(dx, dy), UIDartState::CreateGPUObject(picture->picture()),
       !!(hints & 1), !!(hints & 2));
-  AddLayer(std::move(layer));
+  AddLayer(layer);
+  EngineLayer::MakeRetained(layer_handle, layer);
+  if (oldLayer && oldLayer->Layer()) {
+    layer->AssignOldLayer(oldLayer->Layer().get());
+  }
 }
 
 void SceneBuilder::addTexture(double dx,
