@@ -1155,7 +1155,7 @@
     {
       "name": "Mac_ios platform_channels_benchmarks",
       "repo": "flutter",
-      "task_name": "mac_ios_platform_channels_benchmarks",
+      "task_name": "mac_ios_platform_channels_benchmarks_ios",
       "flaky": true
     },
     {
