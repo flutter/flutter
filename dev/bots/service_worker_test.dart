@@ -90,8 +90,9 @@ Future<void> runWebServiceWorkerTest({
         cacheControl: cacheControl,
         // TODO(yjbanov): use a better port disambiguation strategy than trying
         //                to guess what ports other tests use.
-        appUrl: 'http://localhost:8081/index.html',
-        serverPort: 8081,
+        appUrl: 'http://localhost:9090/index.html',
+        serverPort: 9090,
+        browserDebugPort: 9091,
         appDirectory: _appBuildDirectory,
         additionalRequestHandlers: <Handler>[
           (Request request) {
