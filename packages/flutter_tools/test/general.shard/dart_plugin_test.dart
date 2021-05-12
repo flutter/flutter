@@ -731,8 +731,7 @@ void main() {
           '  } else {\n'
           '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
-          '}\n'
-          '',
+          '}\n',
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

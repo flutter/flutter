@@ -1809,6 +1809,42 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(intlImportDartCode));
     });
 
+    testUsingContext('check indentation on generated files', () {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      try {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          useDeferredLoading: false,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart'),
+      ).readAsStringSync();
+      // Tests a few of the lines in the generated code.
+      // Localizations lookup code
+      expect(localizationsFile.contains('  switch (locale.languageCode) {'), true);
+      expect(localizationsFile.contains("    case 'en': return AppLocalizationsEn();"), true);
+      expect(localizationsFile.contains("    case 'es': return AppLocalizationsEs();"), true);
+      expect(localizationsFile.contains('  }'), true);
+
+      // Supported locales list
+      expect(localizationsFile.contains('  static const List<Locale> supportedLocales = <Locale>['), true);
+      expect(localizationsFile.contains("    Locale('en'),"), true);
+      expect(localizationsFile.contains("    Locale('es')"), true);
+      expect(localizationsFile.contains('  ];'), true);
+    });
+
     testUsingContext('foundation package import should be omitted from file template when deferred loading = true', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
