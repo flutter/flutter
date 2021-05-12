@@ -441,8 +441,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   }
   if (Platform.isWindows) {
     if (Directory(path.join(examplePath, 'windows')).existsSync()) {
-      await _flutterBuildWin32(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-      await _flutterBuildWin32(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      // TODO(jmagman): Re-add Windows build tests when Visual Studio is available https://github.com/flutter/flutter/issues/81956.
     } else {
       print('Example project ${path.basename(examplePath)} has no windows directory, skipping Win32');
     }
