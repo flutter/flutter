@@ -212,7 +212,7 @@ void main() {
       );
       await expectLater(
         () => flutterCommand.run(),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
       expect(usage.events, <TestUsageEvent>[
         const TestUsageEvent(
@@ -436,7 +436,7 @@ void main() {
 
       await expectLater(
         () => flutterCommand.run(),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
       expect(usage.timings, contains(
         const TestTimingEvent(

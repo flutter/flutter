@@ -75,7 +75,7 @@ void main() {
           '--no-pub',
           '--show-test-device',
         ]),
-        throwsA(isA<Exception>().having(
+        throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'toString',
           isNot(contains('--fast-start is not supported with --use-application-binary')),
@@ -102,7 +102,7 @@ void main() {
           'run',
           '--no-pub',
         ]),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
       expect(
@@ -127,11 +127,7 @@ void main() {
           'run',
           '--no-pub',
         ]),
-        throwsA(isA<ToolExit>().having(
-          (ToolExit error) => error.toString(),
-          'toString()',
-          contains('No pubspec.yaml file found'),
-        )),
+        throwsToolExit(message: 'No pubspec.yaml file found'),
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -510,7 +506,7 @@ void main() {
       'run',
       '--no-pub',
       '--bundle-sksl-path=foo.json',
-    ]), throwsA(isA<ToolExit>().having((ToolExit exit) => exit.message, 'message', contains('No SkSL shader bundle found at foo.json'))));
+    ]), throwsToolExit(message: 'No SkSL shader bundle found at foo.json'));
   });
 }
 

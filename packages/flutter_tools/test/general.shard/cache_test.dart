@@ -290,7 +290,7 @@ void main() {
       );
       await expectLater(
         () => cache.updateAll(<DevelopmentArtifact>{null}),
-        throwsA(isA<Exception>()),
+        throwsException,
       );
       verify(artifact1.update(any, any, any, any));
       // Don't continue when retrieval fails.

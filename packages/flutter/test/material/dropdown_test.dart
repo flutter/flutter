@@ -457,7 +457,7 @@ void main() {
           ),
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
@@ -486,7 +486,7 @@ void main() {
           ),
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains("There should be exactly one item with [DropdownButton]'s value"),
