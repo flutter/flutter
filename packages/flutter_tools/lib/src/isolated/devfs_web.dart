@@ -490,7 +490,7 @@ class WebAssetServer implements AssetReader {
 
     if (indexFile.existsSync()) {
       String indexFileContent =  indexFile.readAsStringSync();
-      if(indexFileContent.contains(kBaseHrefPlaceholder) )
+      if (indexFileContent.contains(kBaseHrefPlaceholder)) {
         {
           indexFileContent =  indexFileContent.replaceAll(kBaseHrefPlaceholder, '/');
           headers[HttpHeaders.contentLengthHeader] = indexFileContent.length.toString();
