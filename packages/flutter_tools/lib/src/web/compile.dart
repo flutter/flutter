@@ -51,7 +51,6 @@ Future<void> buildWeb(
         kHasWebPlugins: hasWebPlugins.toString(),
         kCspMode: csp.toString(),
         kBaseHref : baseHref,
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
