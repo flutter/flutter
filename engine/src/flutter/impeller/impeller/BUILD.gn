@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/common/config.gni")
+import("//flutter/impeller/compiler/tools/compiler.gni")
 
 config("impeller_config") {
   include_dirs = [ ".." ]
@@ -86,6 +87,7 @@ source_set("impeller") {
       compositor_sources + geometry_sources + entity_sources + image_sources
 
   deps = [
+    ":shaders",
     "//flutter/fml",
     "//flutter/impeller/third_party/stb",
     "//flutter/runtime:libdart",  # For tracing, seems to be pulled in by FML.
