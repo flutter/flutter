@@ -157,6 +157,9 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
+  /// Please set [backwardsCompatibility] true if you want to override
+  /// this method.
+  ///
   /// See also:
   ///
   ///  * [titleTextStyle], which overrides the default of [AppBar.titleTextStyle]
@@ -165,6 +168,9 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.titleTextStyle]
   /// property in all descendant [AppBar] widgets.
+  ///
+  /// Please set [backwardsCompatibility] true if you want to override
+  /// this method.
   ///
   /// See also:
   ///
