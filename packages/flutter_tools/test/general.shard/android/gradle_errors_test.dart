@@ -649,16 +649,18 @@ assembleProfile
   });
 
   group('higher minSdkVersion', () {
+    const String stdoutLine = 'uses-sdk:minSdkVersion 16 cannot be smaller than version 19 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 16';
+
     testWithoutContext('pattern', () {
       expect(
-        minSdkVersion.test('uses-sdk:minSdkVersion 16 cannot be smaller than version 19 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 16'),
+        minSdkVersion.test(stdoutLine),
         isTrue,
       );
     });
 
     testUsingContext('suggestion', () async {
       await minSdkVersion.handler(
-        line: 'uses-sdk:minSdkVersion 16 cannot be smaller than version 19 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 16',
+        line: stdoutLine,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
