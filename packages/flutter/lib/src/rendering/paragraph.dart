@@ -16,6 +16,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
+import 'selectable.dart';
 
 const String _kEllipsis = '\u2026';
 
@@ -59,20 +60,6 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 
   @override
   int get hashCode => hashValues(PlaceholderSpanIndexSemanticsTag, index);
-}
-
-abstract class SelectionService {
-  void add(Selectable selectable);
-
-  void remove(Selectable selectable);
-}
-
-abstract class Selectable {
-  void update(Rect rect);
-
-  Object? copy();
-
-  void clear();
 }
 
 /// A render object that displays a paragraph of text.

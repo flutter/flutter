@@ -4,7 +4,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import '../../widgets.dart';
+import 'actions.dart';
+import 'focus_scope.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
+import 'shortcuts.dart';
 
 /// A widget that introduces an area that allows for arbitrary text selection.
 class SelectionArea extends StatefulWidget {

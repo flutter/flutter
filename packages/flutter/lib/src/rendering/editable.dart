@@ -11,11 +11,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'custom_paint.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'selectable.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
@@ -136,7 +138,7 @@ bool _isWhitespace(int codeUnit) {
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin implements Selectable {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -199,6 +201,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required this.textSelectionDelegate,
     RenderEditablePainter? painter,
     RenderEditablePainter? foregroundPainter,
+    SelectionService? selectionService,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -258,6 +261,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior,
+       _selectionService = selectionService,
        _hasFocus = hasFocus ?? false {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -463,6 +467,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     _obscureText = value;
     markNeedsSemanticsUpdate();
+  }
+
+  SelectionService? _selectionService;
+  SelectionService? get selectionService => _selectionService;
+  set selectionService(SelectionService? value) {
+    if (value == selectionService)
+      return;
+    selectionService?.remove(this);
+    _selectionService = value;
+    selectionService?.add(this);
   }
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -2944,6 +2958,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
     }
+    selectionService?.add(this);
   }
 
   @override
@@ -2961,6 +2976,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     super.detach();
     _foregroundRenderObject?.detach();
     _backgroundRenderObject?.detach();
+    selectionService?.remove(this);
   }
 
   @override
@@ -3736,6 +3752,71 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         ),
     ];
   }
+
+  @override
+  void clear() {
+    _setSelection(const TextSelection(baseOffset: -1, extentOffset: -1), SelectionChangedCause.drag);
+  }
+
+  /// This is copied almost verbatim from paragraph.dart
+  @override
+  void update(Rect rect) {
+    if (!hasSize) {
+      return;
+    }
+    final Rect boundingRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    // This RO has not been laid out yet, it can't be selected.
+    if (boundingRect == null) {
+      _setSelection(const TextSelection(baseOffset: -1, extentOffset: -1), SelectionChangedCause.drag);
+      return;
+    }
+    if (rect.isInfinite) {
+      _setSelection(TextSelection(baseOffset: 0, extentOffset: _textPainter.getPositionForOffset(Offset.infinite).offset), SelectionChangedCause.drag);
+      return;
+    }
+    final Matrix4 transform = getTransformTo(null);
+    transform.invert();
+    Rect selectionRect = MatrixUtils.transformRect(transform, rect);
+    final Rect intersection = boundingRect.intersect(selectionRect);
+    // If width or height are negative, there is no overlap between
+    // the selection rect and the estimated bounds of this RO.
+    if (intersection.width < 0 || intersection.height < 0) {
+      _setSelection(const TextSelection(baseOffset: -1, extentOffset: -1), SelectionChangedCause.drag);
+      return;
+    }
+    // If the selection entirely clears the bounding box, expand it to the maximum width.
+    if (selectionRect.top < boundingRect.top && selectionRect.bottom > boundingRect.bottom)
+      selectionRect = Rect.fromLTRB(
+        math.min(selectionRect.left, boundingRect.left),
+        selectionRect.top,
+        math.max(selectionRect.right, boundingRect.right),
+        selectionRect.bottom,
+      );
+    TextPosition startText;
+    TextPosition endText;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        startText = _textPainter.getPositionForOffset(selectionRect.topRight);
+        endText = _textPainter.getPositionForOffset(selectionRect.bottomLeft);
+        break;
+      case TextDirection.ltr:
+        startText = _textPainter.getPositionForOffset(selectionRect.topLeft);
+        endText = _textPainter.getPositionForOffset(selectionRect.bottomRight);
+        break;
+    }
+    if (startText == endText) {
+      return;
+    }
+    _setSelection(TextSelection(baseOffset: startText.offset, extentOffset: endText.offset), SelectionChangedCause.drag);
+    return;
+  }
+
+  @override
+  String? copy() {
+    final TextSelection textSelection = textSelectionDelegate.textEditingValue.selection;
+    final String plainText = textSelectionDelegate.textEditingValue.text;
+    return plainText.substring(textSelection.start, textSelection.end);
+  }
 }
 
 class _RenderEditableCustomPaint extends RenderBox {
@@ -3779,18 +3860,6 @@ class _RenderEditableCustomPaint extends RenderBox {
     if (painter != null && parent != null) {
       painter.paint(context.canvas, size, parent);
     }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _painter?.addListener(markNeedsPaint);
-  }
-
-  @override
-  void detach() {
-    _painter?.removeListener(markNeedsPaint);
-    super.detach();
   }
 
   @override
