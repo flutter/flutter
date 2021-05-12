@@ -106,8 +106,9 @@ class BuildWebCommand extends BuildSubCommand {
         .contains(kBaseHrefPlaceholder) &&
         stringArg('base-href') != null) {
       throwToolExit(
-          "Couldn't find the placeholder for base href. "
-          r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html');
+        "Couldn't find the placeholder for base href. "
+        r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html'
+      );
     }
     displayNullSafetyMode(buildInfo);
     await buildWeb(

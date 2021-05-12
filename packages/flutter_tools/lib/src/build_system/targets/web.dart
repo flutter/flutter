@@ -41,7 +41,6 @@ const String kBaseHref = 'baseHref';
 /// Placeholder for base href
 const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
-
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
@@ -379,8 +378,7 @@ class WebReleaseBundle extends Target {
           resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
         } else if (resultString.contains(kBaseHrefPlaceholder) &&
             environment.defines[kBaseHref] != null) {
-          resultString = resultString.replaceAll(
-              kBaseHrefPlaceholder, environment.defines[kBaseHref]);
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, environment.defines[kBaseHref]);
         }
         outputFile.writeAsStringSync(resultString);
         continue;

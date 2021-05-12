@@ -212,13 +212,12 @@ void main() {
 
   test('serves index.html at / if href attribute is $kBaseHrefPlaceholder', () => testbed.run(() async {
     const String htmlContent = '<html><head><base href ="$kBaseHrefPlaceholder"></head><body id="test"></body></html>';
-    final Directory webDir = globals.fs.currentDirectory
-        .childDirectory('web')
+    final Directory webDir = globals.fs.currentDirectory.childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
     final Response response = await webAssetServer
-        .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), htmlContent.replaceAll(kBaseHrefPlaceholder, '/'));
