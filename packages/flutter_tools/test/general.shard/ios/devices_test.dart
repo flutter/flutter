@@ -361,7 +361,7 @@ void main() {
       xcdevice.isInstalled = false;
 
       await iosDevices.startPolling();
-      expect(xcdevice.gotAvailableIOSDevices, 0);
+      expect(xcdevice.getAvailableIOSDevicesCount, 0);
     });
 
     testWithoutContext('start polling', () async {
@@ -394,7 +394,7 @@ void main() {
       });
 
       await iosDevices.startPolling();
-      expect(xcdevice.gotAvailableIOSDevices, 1);
+      expect(xcdevice.getAvailableIOSDevicesCount, 1);
 
       expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
@@ -445,7 +445,7 @@ void main() {
 
       await iosDevices.startPolling();
       expect(xcdevice.deviceEventController.hasListener, isTrue);
-      expect(xcdevice.gotAvailableIOSDevices, 1);
+      expect(xcdevice.getAvailableIOSDevicesCount, 1);
 
       // Pretend xcdevice crashed.
       await xcdevice.deviceEventController.close();
@@ -564,7 +564,7 @@ class FakeIOSApp extends Fake implements IOSApp {
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
 class FakeXcdevice extends Fake implements XCDevice {
-  int gotAvailableIOSDevices = 0;
+  int getAvailableIOSDevicesCount = 0;
   final List<List<IOSDevice>> devices = <List<IOSDevice>>[];
   final List<String> diagnostics = <String>[];
   StreamController<Map<XCDeviceEvent, String>> deviceEventController = StreamController<Map<XCDeviceEvent, String>>();
@@ -584,7 +584,7 @@ class FakeXcdevice extends Fake implements XCDevice {
 
   @override
   Future<List<IOSDevice>> getAvailableIOSDevices({Duration timeout}) async {
-    return devices[gotAvailableIOSDevices++];
+    return devices[getAvailableIOSDevicesCount++];
   }
 }
 
