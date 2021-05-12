@@ -220,6 +220,7 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
     return;
   uint8_t* response_data =
       static_cast<uint8_t*>(env->GetDirectBufferAddress(java_response_data));
+  FML_DCHECK(response_data != nullptr);
   std::vector<uint8_t> response = std::vector<uint8_t>(
       response_data, response_data + java_response_position);
   auto message_response = std::move(it->second);

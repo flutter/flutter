@@ -17,6 +17,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import java.nio.ByteBuffer;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
@@ -236,5 +237,12 @@ public class FlutterJNITest {
 
     // --- Verify Results ---
     verify(platformViewsController, times(1)).createOverlaySurface();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void invokePlatformMessageResponseCallback__wantsDirectBuffer() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    ByteBuffer buffer = ByteBuffer.allocate(4);
+    flutterJNI.invokePlatformMessageResponseCallback(0, buffer, buffer.position());
   }
 }
