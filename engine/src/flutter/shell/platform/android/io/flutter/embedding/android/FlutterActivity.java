@@ -186,8 +186,8 @@ import io.flutter.plugin.platform.PlatformPlugin;
  * windowBackground} as the launch theme discussed previously. To use that splash screen, include
  * the following metadata in AndroidManifest.xml for this {@code FlutterActivity}:
  *
- * <p>{@code <meta-data android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
- * android:value="true" /> }
+ * <p>{@code <meta-data android:name="io.flutter.embedding.android.SplashScreenDrawable"
+ * android:resource="@drawable/launch_background" /> }
  *
  * <p><strong>Alternative Activity</strong> {@link FlutterFragmentActivity} is also available, which
  * is similar to {@code FlutterActivity} but it extends {@code FragmentActivity}. You should use
