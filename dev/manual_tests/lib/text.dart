@@ -29,7 +29,7 @@ class Home extends StatefulWidget {
   const Home({ Key key }) : super(key: key);
 
   @override
-  _HomeState createState() => _HomeState();
+  State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
@@ -99,7 +99,7 @@ class _HomeState extends State<Home> {
               min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
-              label: '${seed.round()}',
+              label: '$seed',
               divisions: 1025,
               onChanged: (double value) {
                 setState(() {
@@ -124,7 +124,7 @@ class Fuzzer extends StatefulWidget {
   final int seed;
 
   @override
-  _FuzzerState createState() => _FuzzerState();
+  State<Fuzzer> createState() => _FuzzerState();
 }
 
 class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
@@ -539,7 +539,7 @@ class Underlines extends StatefulWidget {
   const Underlines({ Key key }) : super(key: key);
 
   @override
-  _UnderlinesState createState() => _UnderlinesState();
+  State<Underlines> createState() => _UnderlinesState();
 }
 
 class _UnderlinesState extends State<Underlines> {
@@ -644,7 +644,7 @@ class Fallback extends StatefulWidget {
   const Fallback({ Key key }) : super(key: key);
 
   @override
-  _FallbackState createState() => _FallbackState();
+  State<Fallback> createState() => _FallbackState();
 }
 
 class _FallbackState extends State<Fallback> {
@@ -739,7 +739,7 @@ class Bidi extends StatefulWidget {
   const Bidi({ Key key }) : super(key: key);
 
   @override
-  _BidiState createState() => _BidiState();
+  State<Bidi> createState() => _BidiState();
 }
 
 class _BidiState extends State<Bidi> {
@@ -816,7 +816,7 @@ class Zalgo extends StatefulWidget {
   final int seed;
 
   @override
-  _ZalgoState createState() => _ZalgoState();
+  State<Zalgo> createState() => _ZalgoState();
 }
 
 class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
@@ -923,7 +923,7 @@ class Painting extends StatefulWidget {
   final int seed;
 
   @override
-  _PaintingState createState() => _PaintingState();
+  State<Painting> createState() => _PaintingState();
 }
 
 class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin {

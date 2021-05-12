@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestLeftIntent extends Intent {}
-class TestRightIntent extends Intent {}
+class TestLeftIntent extends Intent {
+  const TestLeftIntent();
+}
+class TestRightIntent extends Intent {
+  const TestRightIntent();
+}
 
 void main() {
   testWidgets('DoNothingAndStopPropagationTextIntent', (WidgetTester tester) async {
@@ -25,13 +29,13 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return Shortcuts(
-              shortcuts: <LogicalKeySet, Intent>{
-                LogicalKeySet(LogicalKeyboardKey.arrowLeft): TestLeftIntent(),
-                LogicalKeySet(LogicalKeyboardKey.arrowRight): TestRightIntent(),
+              shortcuts: const <ShortcutActivator, Intent>{
+                SingleActivator(LogicalKeyboardKey.arrowLeft): TestLeftIntent(),
+                SingleActivator(LogicalKeyboardKey.arrowRight): TestRightIntent(),
               },
               child: Shortcuts(
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
+                shortcuts: const <ShortcutActivator, Intent>{
+                  SingleActivator(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationTextIntent(),
                 },
                 child: Actions(
                   // These Actions intercept default Intents, set a flag that they

@@ -45,9 +45,9 @@ void main() {
       // equality check on the error to be true.
       final Error error = Error();
       expect(
-          AsyncSnapshot<int>.withError(ConnectionState.done, error),
-          AsyncSnapshot<int>.withError(
-              ConnectionState.done, error, StackTrace.empty));
+        AsyncSnapshot<int>.withError(ConnectionState.done, error),
+        AsyncSnapshot<int>.withError(ConnectionState.done, error, StackTrace.empty),
+      );
     });
   });
   group('Async smoke tests', () {
@@ -67,7 +67,7 @@ void main() {
     });
     testWidgets('StreamFold', (WidgetTester tester) async {
       await tester.pumpWidget(StringCollector(
-        stream: Stream<String>.fromIterable(<String>['hello', 'world'])
+        stream: Stream<String>.fromIterable(<String>['hello', 'world']),
       ));
       await eventFiring(tester);
     });

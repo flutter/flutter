@@ -126,7 +126,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
         ),
       ]);
     }());
-    _ticker = Ticker(onTick, debugLabel: kDebugMode ? 'created by $this' : null);
+    _ticker = Ticker(onTick, debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null);
     // We assume that this is called from initState, build, or some sort of
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're
@@ -199,7 +199,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= <_WidgetTicker>{};
-    final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: 'created by $this');
+    final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null);
     _tickers!.add(result);
     return result;
   }

@@ -44,7 +44,7 @@ void verify(WidgetTester tester, List<Rect> answerKey) {
       final Offset topLeft = target.localToGlobal(Offset.zero);
       final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
       return Rect.fromPoints(topLeft, bottomRight);
-    }
+    },
   ).toList();
   expect(testAnswers, equals(answerKey));
 }
@@ -451,9 +451,9 @@ void main() {
                 key: key,
                 color: Colors.red,
               ),
-            )
+            ),
           ),
-        ]
+        ],
       ),
     ));
     await tester.pump();

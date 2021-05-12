@@ -22,7 +22,6 @@ import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
-import 'common.dart';
 import 'localizations.dart';
 
 /// Whether the application has web plugins.

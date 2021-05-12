@@ -323,7 +323,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final Status status = _logger.startProgress(
       "Running Gradle task '$assembleTask'...",
-      multilineOutput: true,
     );
 
     final List<String> command = <String>[
@@ -636,7 +635,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final String aarTask = getAarTaskFor(buildInfo);
     final Status status = _logger.startProgress(
       "Running Gradle task '$aarTask'...",
-      multilineOutput: true,
     );
 
     final String flutterRoot = _fileSystem.path.absolute(Cache.flutterRoot);

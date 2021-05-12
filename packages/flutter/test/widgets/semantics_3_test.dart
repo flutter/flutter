@@ -20,7 +20,7 @@ void main() {
           label: 'test',
           textDirection: TextDirection.ltr,
           child: Semantics(
-            checked: true
+            checked: true,
           ),
         ),
       ),

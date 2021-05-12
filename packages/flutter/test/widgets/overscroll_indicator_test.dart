@@ -245,8 +245,14 @@ void main() {
     expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(-5.0, 0.0));
-    expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()
-                          ..rotate(angle: math.pi / 2.0)..circle());
+    expect(
+      painter,
+      paints
+        ..rotate(angle: math.pi / 2.0)
+        ..circle()
+        ..rotate(angle: math.pi / 2.0)
+        ..circle(),
+    );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);

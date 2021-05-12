@@ -111,6 +111,16 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
+  testWithoutContext('DevFSStringCompressingBytesContent', () {
+    final DevFSStringCompressingBytesContent content =
+        DevFSStringCompressingBytesContent('uncompressed string');
+
+    expect(content.equals('uncompressed string'), isTrue);
+    expect(content.bytes, isNotNull);
+    expect(content.isModified, isTrue);
+    expect(content.isModified, isFalse);
+  });
+
   testWithoutContext('DevFS create throws a DevFSException when vmservice disconnects unexpectedly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final OperatingSystemUtils osUtils = MockOperatingSystemUtils();
