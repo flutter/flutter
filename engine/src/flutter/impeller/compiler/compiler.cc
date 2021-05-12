@@ -214,7 +214,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  reflector_ = std::make_unique<Reflector>(msl_compiler);
+  reflector_ = std::make_unique<Reflector>(*GetSPIRVAssembly());
 
   if (!reflector_->IsValid()) {
     COMPILER_ERROR << "Could not complete reflection on generated shader.";

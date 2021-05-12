@@ -8,6 +8,13 @@ config("impeller_config") {
   include_dirs = [ ".." ]
 }
 
+impeller_shaders("shaders") {
+  shaders = [
+    "compositor/shaders/box/box.frag",
+    "compositor/shaders/box/box.vert",
+  ]
+}
+
 source_set("impeller") {
   public_configs = [ ":impeller_config" ]
 
