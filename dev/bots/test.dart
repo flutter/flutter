@@ -933,7 +933,7 @@ Future<void> _runFlutterPluginsTests() async {
       workingDirectory: checkout.path,
     );
     await runCommand(
-      './script/incremental_build.sh',
+      './script/tool_runner.sh',
       <String>[
         'analyze',
       ],

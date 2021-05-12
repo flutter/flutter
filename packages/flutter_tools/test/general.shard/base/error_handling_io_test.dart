@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -23,7 +22,6 @@ import '../../src/fake_process_manager.dart';
 
 class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
-class MockPathContext extends Mock implements path.Context {}
 class MockDirectory extends Mock implements Directory {}
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 
@@ -48,7 +46,11 @@ void setupWriteMocks({
   int errorCode,
 }) {
   final MockFile mockFile = MockFile();
+  final MockDirectory mockParentDirectory = MockDirectory();
   when(mockFileSystem.file(any)).thenReturn(mockFile);
+  when(mockFile.path).thenReturn('parent/file');
+  when(mockFile.parent).thenReturn(mockParentDirectory);
+  when(mockParentDirectory.path).thenReturn('parent');
   when(mockFile.writeAsBytes(
     any,
     mode: anyNamed('mode'),
@@ -88,7 +90,11 @@ void setupReadMocks({
   int errorCode,
 }) {
   final MockFile mockFile = MockFile();
+  final MockDirectory mockParentDirectory = MockDirectory();
   when(mockFileSystem.file(any)).thenReturn(mockFile);
+  when(mockFile.path).thenReturn('parent/file');
+  when(mockFile.parent).thenReturn(mockParentDirectory);
+  when(mockParentDirectory.path).thenReturn('parent');
   when(mockFileSystem.currentDirectory).thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockFile.readAsStringSync(
     encoding: anyNamed('encoding'),
@@ -101,7 +107,12 @@ void setupDirectoryMocks({
   int errorCode,
 }) {
   final MockDirectory mockDirectory = MockDirectory();
+  final MockDirectory mockParentDirectory = MockDirectory();
+  when(mockDirectory.parent).thenReturn(mockParentDirectory);
   when(mockFileSystem.directory(any)).thenReturn(mockDirectory);
+  when(mockDirectory.path).thenReturn('parent/directory');
+  when(mockDirectory.parent).thenReturn(mockParentDirectory);
+  when(mockParentDirectory.path).thenReturn('parent');
   when(mockDirectory.createTemp(any)).thenAnswer((_) async {
     throw FileSystemException('', '', OSError('', errorCode));
   });
@@ -157,7 +168,7 @@ void main() {
     when(file.deleteSync(recursive: false))
       .thenThrow(const FileSystemException('', '', OSError('', 2)));
 
-    expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsA(isA<ToolExit>()));
+    expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
   });
 
   testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
@@ -171,7 +182,7 @@ void main() {
       ErrorHandlingFileSystem.noExitOnFailure(() {
         ErrorHandlingFileSystem.deleteIfExists(file);
       });
-    }, throwsA(isA<FileSystemException>()));
+    }, throwsFileSystemException());
   });
 
   group('throws ToolExit on Windows', () {
@@ -188,7 +199,8 @@ void main() {
         delegate: mockFileSystem,
         platform: windowsPlatform,
       );
-      when(mockFileSystem.path).thenReturn(MockPathContext());
+      // For fs.path.absolute usage.
+      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
     });
 
     testWithoutContext('bypasses error handling when withAllowedFailure is used', () {
@@ -201,7 +213,7 @@ void main() {
       final File file = fs.file('file');
 
       expect(() => ErrorHandlingFileSystem.noExitOnFailure(
-        () => file.writeAsStringSync('')), throwsA(isA<Exception>()));
+        () => file.writeAsStringSync('')), throwsException);
 
       // nesting does not unconditionally re-enable errors.
       expect(() {
@@ -209,10 +221,10 @@ void main() {
           ErrorHandlingFileSystem.noExitOnFailure(() { });
           file.writeAsStringSync('');
         });
-      }, throwsA(isA<Exception>()));
+      }, throwsException);
 
       // Check that state does not leak.
-      expect(() => file.writeAsStringSync(''), throwsA(isA<ToolExit>()));
+      expect(() => file.writeAsStringSync(''), throwsToolExit());
     });
 
     testWithoutContext('when access is denied', () async {
@@ -372,6 +384,7 @@ void main() {
 
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
+    FileExceptionHandler exceptionHandler;
 
     setUp(() {
       mockFileSystem = MockFileSystem();
@@ -379,51 +392,113 @@ void main() {
         delegate: mockFileSystem,
         platform: linuxPlatform,
       );
-      when(mockFileSystem.path).thenReturn(MockPathContext());
+      // For fs.path.absolute usage.
+      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
+      exceptionHandler = FileExceptionHandler();
     });
 
     testWithoutContext('when access is denied', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: eacces,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
       );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.delete,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      const String writeMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /dir/file';
+      expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: writeMessage));
 
-      const String expectedMessage = 'The flutter tool cannot access the file or directory';
-      expect(() async => file.writeAsBytes(<int>[0]),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => file.writeAsString(''),
-             throwsToolExit(message: expectedMessage));
-      expect(() => file.writeAsBytesSync(<int>[0]),
-             throwsToolExit(message: expectedMessage));
-      expect(() => file.writeAsStringSync(''),
-             throwsToolExit(message: expectedMessage));
-      expect(() => file.openSync(),
-             throwsToolExit(message: expectedMessage));
-      expect(() => file.createSync(),
-             throwsToolExit(message: expectedMessage));
+      const String createMessage =
+          'Flutter failed to create file at "dir/file".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /dir';
+      expect(() => file.createSync(), throwsToolExit(message: createMessage));
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => file.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+
+      const String readMessage =
+          'Flutter failed to read a file at "dir/file".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /dir/file';
+      expect(() => file.readAsStringSync(), throwsToolExit(message: readMessage));
     });
 
     testWithoutContext('when access is denied for directories', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: eperm,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final Directory parent = fileSystem.directory('parent')..createSync();
+      final Directory directory = parent.childDirectory('childDir');
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.create,
+        FileSystemException('', directory.path, const OSError('', eperm)),
+      );
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.delete,
+        FileSystemException('', directory.path, const OSError('', eperm)),
       );
 
-      final Directory directory = fs.directory('file');
-
-      const String expectedMessage = 'The flutter tool cannot access the file or directory';
+      const String createMessage =
+          'Flutter failed to create a directory at "parent/childDir".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /parent';
       expect(() async => directory.create(),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => directory.delete(),
-             throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: createMessage));
       expect(() => directory.createSync(),
-             throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: createMessage));
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+
+      const String deleteMessage =
+          'Flutter failed to delete a directory at "parent/childDir".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /parent';
       expect(() => directory.deleteSync(),
-             throwsToolExit(message: expectedMessage));
+             throwsToolExit(message: deleteMessage));
+      expect(() async => directory.delete(),
+          throwsToolExit(message: deleteMessage));
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.deleteSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -496,6 +571,7 @@ void main() {
     const int eacces = 13;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
+    FileExceptionHandler exceptionHandler;
 
     setUp(() {
       mockFileSystem = MockFileSystem();
@@ -503,49 +579,113 @@ void main() {
         delegate: mockFileSystem,
         platform: macOSPlatform,
       );
-      when(mockFileSystem.path).thenReturn(MockPathContext());
+      // For fs.path.absolute usage.
+      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
+      exceptionHandler = FileExceptionHandler();
     });
 
     testWithoutContext('when access is denied', () async {
-      setupWriteMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: eacces,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
       );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file');
 
-      final File file = fs.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.delete,
+        FileSystemException('', file.path, const OSError('', eacces)),
+      );
+      const String writeMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /dir/file';
+      expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: writeMessage));
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
-      expect(() async => file.writeAsBytes(<int>[0]),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => file.writeAsString(''),
-             throwsToolExit(message: expectedMessage));
-      expect(() => file.writeAsBytesSync(<int>[0]),
-             throwsToolExit(message: expectedMessage));
-      expect(() => file.writeAsStringSync(''),
-             throwsToolExit(message: expectedMessage));
-      expect(() => file.openSync(),
-             throwsToolExit(message: expectedMessage));
+      const String createMessage =
+          'Flutter failed to create file at "dir/file".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /dir';
+      expect(() => file.createSync(), throwsToolExit(message: createMessage));
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => file.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+
+      const String readMessage =
+          'Flutter failed to read a file at "dir/file".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /dir/file';
+      expect(() => file.readAsStringSync(), throwsToolExit(message: readMessage));
     });
 
     testWithoutContext('when access is denied for directories', () async {
-      setupDirectoryMocks(
-        mockFileSystem: mockFileSystem,
-        fs: fs,
-        errorCode: eperm,
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final Directory parent = fileSystem.directory('parent')..createSync();
+      final Directory directory = parent.childDirectory('childDir');
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.create,
+        FileSystemException('', directory.path, const OSError('', eperm)),
+      );
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.delete,
+        FileSystemException('', directory.path, const OSError('', eperm)),
       );
 
-      final Directory directory = fs.directory('file');
-
-      const String expectedMessage = 'The flutter tool cannot access the file or directory';
+      const String createMessage =
+          'Flutter failed to create a directory at "parent/childDir".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /parent';
       expect(() async => directory.create(),
-             throwsToolExit(message: expectedMessage));
-      expect(() async => directory.delete(),
-             throwsToolExit(message: expectedMessage));
-      expect(() => directory.createSync(),
-             throwsToolExit(message: expectedMessage));
+          throwsToolExit(message: createMessage));
+      expect(() => directory.createSync(), throwsToolExit(message: createMessage));
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.createSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+
+      const String deleteMessage =
+          'Flutter failed to delete a directory at "parent/childDir".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /parent';
       expect(() => directory.deleteSync(),
-             throwsToolExit(message: expectedMessage));
+          throwsToolExit(message: deleteMessage));
+      expect(() async => directory.delete(),
+          throwsToolExit(message: deleteMessage));
+
+      // Recursive does not contain the "sudo chown" suggestion.
+      expect(() async => directory.deleteSync(recursive: true),
+          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -635,7 +775,8 @@ void main() {
     final Object firstPath = fs.path;
 
     fs.currentDirectory = null;
-    when(mockFileSystem.path).thenReturn(MockPathContext());
+    // For fs.path.absolute usage.
+    when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
 
     expect(identical(firstPath, fs.path), false);
   });
@@ -689,7 +830,7 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
 
-    test('when PackageProcess throws an exception containg non-executable bits', () {
+    testWithoutContext('when PackageProcess throws an exception containg non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
@@ -708,7 +849,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    test('when PackageProcess throws an exception without containing non-executable bits', () {
+    testWithoutContext('when PackageProcess throws an exception without containing non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
@@ -725,7 +866,7 @@ void main() {
       expect(() async => processManager.runSync(<String>['foo']), throwsProcessException());
     });
 
-    test('when the device is full', () {
+    testWithoutContext('when the device is full', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kDeviceFull)),
@@ -747,7 +888,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    test('when the file is being used by another program', () {
+    testWithoutContext('when the file is being used by another program', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserMappedSectionOpened)),
@@ -768,7 +909,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    test('when permissions are denied', () {
+    testWithoutContext('when permissions are denied', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', kUserPermissionDenied)),
@@ -788,13 +929,25 @@ void main() {
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when cannot run executable', () {
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', kUserPermissionDenied));
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: throwingFakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      const String expectedMessage = r'Flutter failed to run "C:\path\to\dart". The flutter tool cannot access the file or directory.';
+      expect(() async => processManager.canRun(r'C:\path\to\dart'), throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('ProcessManager on linux throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
 
-    test('when writing to a full device', () {
+    testWithoutContext('when writing to a full device', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
@@ -815,7 +968,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    test('when permissions are denied', () {
+    testWithoutContext('when permissions are denied', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
@@ -835,13 +988,29 @@ void main() {
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when cannot run executable', () {
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', eacces));
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: throwingFakeProcessManager,
+        platform: linuxPlatform,
+      );
+
+      const String expectedMessage = 'Flutter failed to run "/path/to/dart".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
+
+      expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('ProcessManager on macOS throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
 
-    test('when writing to a full device', () {
+    testWithoutContext('when writing to a full device', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', enospc)),
@@ -862,7 +1031,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    test('when permissions are denied', () {
+    testWithoutContext('when permissions are denied', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
         const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', eacces)),
@@ -870,7 +1039,7 @@ void main() {
       ]);
       final ProcessManager processManager = ErrorHandlingProcessManager(
         delegate: fakeProcessManager,
-        platform: linuxPlatform,
+        platform: macOSPlatform,
       );
 
       const String expectedMessage = 'The flutter tool cannot access the file';
@@ -881,6 +1050,22 @@ void main() {
              throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo']),
              throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when cannot run executable', () {
+      final ThrowingFakeProcessManager throwingFakeProcessManager = ThrowingFakeProcessManager(const ProcessException('', <String>[], '', eacces));
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: throwingFakeProcessManager,
+        platform: macOSPlatform,
+      );
+
+      const String expectedMessage = 'Flutter failed to run "/path/to/dart".\n'
+      'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+      'Try running:\n'
+      r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
+
+      expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
   });
 
@@ -910,21 +1095,32 @@ void main() {
         delegate: mockFileSystem,
         platform: linuxPlatform,
       );
-      when(mockFileSystem.path).thenReturn(MockPathContext());
+      // For fs.path.absolute usage.
+      when(mockFileSystem.path).thenReturn(MemoryFileSystem.test().path);
     });
 
     testWithoutContext('copySync handles error if openSync on source file fails', () {
       final MockFile source = MockFile();
+      when(source.path).thenReturn('source');
       when(source.openSync(mode: anyNamed('mode')))
         .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
       when(mockFileSystem.file('source')).thenReturn(source);
 
-      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+      const String expectedMessage =
+          'Flutter failed to copy source to dest due to source location error.\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /source';
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('copySync handles error if createSync on destination file fails', () {
       final MockFile source = MockFile();
+      when(source.path).thenReturn('source');
+      final MockDirectory parent = MockDirectory();
+      when(parent.path).thenReturn('destParent');
       final MockFile dest = MockFile();
+      when(dest.parent).thenReturn(parent);
       when(source.openSync(mode: anyNamed('mode')))
         .thenReturn(MockRandomAccessFile());
       when(dest.createSync(recursive: anyNamed('recursive')))
@@ -932,13 +1128,20 @@ void main() {
       when(mockFileSystem.file('source')).thenReturn(source);
       when(mockFileSystem.file('dest')).thenReturn(dest);
 
-      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+      const String expectedMessage =
+          'Flutter failed to copy source to dest due to destination location error.\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });
 
     // dart:io is able to clobber read-only files.
     testWithoutContext('copySync will copySync even if the destination is not writable', () {
       final MockFile source = MockFile();
+      when(source.path).thenReturn('source');
+      final MockDirectory parent = MockDirectory();
+      when(parent.path).thenReturn('destParent');
       final MockFile dest = MockFile();
+      when(dest.parent).thenReturn(parent);
 
       when(source.copySync(any)).thenReturn(dest);
       when(mockFileSystem.file('source')).thenReturn(source);
@@ -955,7 +1158,11 @@ void main() {
 
     testWithoutContext('copySync will copySync if there are no exceptions', () {
       final MockFile source = MockFile();
+      when(source.path).thenReturn('source');
+      final MockDirectory parent = MockDirectory();
+      when(parent.path).thenReturn('destParent');
       final MockFile dest = MockFile();
+      when(dest.parent).thenReturn(parent);
 
       when(source.copySync(any)).thenReturn(dest);
       when(mockFileSystem.file('source')).thenReturn(source);
@@ -973,7 +1180,11 @@ void main() {
     testWithoutContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
+      when(source.path).thenReturn('source');
+      final MockDirectory parent = MockDirectory();
+      when(parent.path).thenReturn('destParent');
       final MockFile dest = MockFile();
+      when(dest.parent).thenReturn(parent);
       final List<int> expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
       final File memorySource = memoryFileSystem.file('source')
         ..writeAsBytesSync(expectedBytes);
@@ -997,7 +1208,11 @@ void main() {
     testWithoutContext('copySync deletes the result file if the fallback fails', () {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
       final MockFile source = MockFile();
+      when(source.path).thenReturn('source');
+      final MockDirectory parent = MockDirectory();
+      when(parent.path).thenReturn('destParent');
       final MockFile dest = MockFile();
+      when(dest.parent).thenReturn(parent);
       final File memorySource = memoryFileSystem.file('source')
         ..createSync();
       final File memoryDest = memoryFileSystem.file('dest')
@@ -1020,7 +1235,12 @@ void main() {
       when(mockFileSystem.file('source')).thenReturn(source);
       when(mockFileSystem.file('dest')).thenReturn(dest);
 
-      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+      const String expectedMessage =
+          'Flutter failed to copy source to dest due to unknown error.\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /source /destParent';
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
 
       verify(dest.deleteSync(recursive: true)).called(1);
     });
@@ -1034,5 +1254,16 @@ class FakeSignalProcessManager extends Fake implements ProcessManager {
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     killedProcesses[pid] = signal;
     return true;
+  }
+}
+
+class ThrowingFakeProcessManager extends Fake implements ProcessManager {
+  ThrowingFakeProcessManager(Exception exception) : _exception = exception;
+
+  final Exception _exception;
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) {
+    throw _exception;
   }
 }

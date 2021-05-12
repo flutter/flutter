@@ -185,7 +185,7 @@ void main() {
             ),
           ),
         ),
-        throwsA(isA<AssertionError>().having(
+        throwsA(isAssertionError.having(
           (AssertionError error) => error.toString(),
           '.toString()',
           allOf(

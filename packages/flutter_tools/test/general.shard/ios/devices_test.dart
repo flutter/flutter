@@ -516,8 +516,8 @@ void main() {
         );
         when(mockXcdevice.isInstalled).thenReturn(false);
         expect(
-            () async { await iosDevices.pollingGetDevices(); },
-            throwsA(isA<UnsupportedError>()),
+          () async { await iosDevices.pollingGetDevices(); },
+          throwsUnsupportedError,
         );
       });
     }

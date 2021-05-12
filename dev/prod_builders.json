@@ -547,18 +547,6 @@
       "flaky": false
     },
     {
-      "name": "Linux web_e2e_test",
-      "repo": "flutter",
-      "task_name": "linux_web_e2e_test",
-      "flaky": false
-    },
-    {
-      "name": "Linux web_smoke_test",
-      "repo": "flutter",
-      "task_name": "linux_web_smoke_test",
-      "flaky": false
-    },
-    {
       "name": "Linux flutter_plugins",
       "repo": "flutter",
       "task_name": "flutter_plugins",
