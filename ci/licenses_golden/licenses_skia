@@ -1,4 +1,4 @@
-Signature: eafbba4e51f1f10199bb89ccf5bab3a3
+Signature: bb5cf192c259b9386724587a924758d9
 
 UNUSED LICENSES:
 
@@ -5210,6 +5210,7 @@ FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
+FILE: ../../../third_party/skia/src/gpu/SkBaseGpuDevice.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_nga.cpp
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice_nga.h
 FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
