@@ -2486,7 +2486,6 @@ void main() {
 
     // Fling up for AppBar to show
     await tester.drag(find.text('Item 29'), const Offset(0.0, 250 - 133.7981622869321));
-    await tester.pumpAndSettle();
 
     // Fling down to trigger ballistic activity
     await tester.fling(find.text('Item 25'), const Offset(0.0, -50.0), 4000.0);
