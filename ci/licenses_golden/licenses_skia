@@ -1,4 +1,4 @@
-Signature: 08cc43d2e97f4b52e1b1ce46ad820eff
+Signature: eafbba4e51f1f10199bb89ccf5bab3a3
 
 UNUSED LICENSES:
 
@@ -3883,6 +3883,7 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.h
+FILE: ../../../third_party/skia/src/gpu/geometry/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockOpTarget.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
@@ -3898,7 +3899,6 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIndirectTessellator.c
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIndirectTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
