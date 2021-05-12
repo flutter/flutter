@@ -12,7 +12,7 @@ class CupertinoAlertDemo extends StatefulWidget {
   static const String routeName = '/cupertino/alert';
 
   @override
-  _CupertinoAlertDemoState createState() => _CupertinoAlertDemoState();
+  State<CupertinoAlertDemo> createState() => _CupertinoAlertDemoState();
 }
 
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {

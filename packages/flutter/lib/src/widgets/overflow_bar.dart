@@ -218,7 +218,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  _RenderOverflowBar createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return _RenderOverflowBar(
       spacing: spacing,
       overflowSpacing: overflowSpacing,
@@ -230,8 +230,8 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderOverflowBar renderObject) {
-    renderObject
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderOverflowBar)
       ..spacing = spacing
       ..overflowSpacing = overflowSpacing
       ..overflowAlignment = overflowAlignment

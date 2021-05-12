@@ -299,7 +299,7 @@ class DemoButton extends StatefulWidget {
   final String name;
 
   @override
-  _DemoButtonState createState() => _DemoButtonState();
+  State<DemoButton> createState() => _DemoButtonState();
 }
 
 class _DemoButtonState extends State<DemoButton> {
@@ -351,7 +351,7 @@ class FocusDemo extends StatefulWidget {
   static GlobalKey appKey = GlobalKey();
 
   @override
-  _FocusDemoState createState() => _FocusDemoState();
+  State<FocusDemo> createState() => _FocusDemoState();
 }
 
 class _FocusDemoState extends State<FocusDemo> {

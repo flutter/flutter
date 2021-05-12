@@ -12,7 +12,7 @@ class ProgressIndicatorDemo extends StatefulWidget {
   static const String routeName = '/material/progress-indicator';
 
   @override
-  _ProgressIndicatorDemoState createState() => _ProgressIndicatorDemoState();
+  State<ProgressIndicatorDemo> createState() => _ProgressIndicatorDemoState();
 }
 
 class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {

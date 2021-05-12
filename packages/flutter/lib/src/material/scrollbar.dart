@@ -166,7 +166,7 @@ class Scrollbar extends StatefulWidget {
   final ScrollNotificationPredicate? notificationPredicate;
 
   @override
-  _ScrollbarState createState() => _ScrollbarState();
+  State<Scrollbar> createState() => _ScrollbarState();
 }
 
 class _ScrollbarState extends State<Scrollbar> {
@@ -399,7 +399,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   void handleHover(PointerHoverEvent event) {
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
-    if (isPointerOverScrollbar(event.position, event.kind)) {
+    if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
       // Pointer is hovering over the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();

@@ -11,29 +11,29 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Basic floating action button locations', () {
     testWidgets('still animates motion when the floating action button is null', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(fab: null, location: null));
+      await tester.pumpWidget(_buildFrame(fab: null, location: null));
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(buildFrame(fab: null, location: FloatingActionButtonLocation.endFloat));
+      await tester.pumpWidget(_buildFrame(fab: null, location: FloatingActionButtonLocation.endFloat));
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
-      await tester.pumpWidget(buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat));
+      await tester.pumpWidget(_buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat));
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.binding.transientCallbackCount, greaterThan(0));
     });
 
     testWidgets('moves fab from center to end and back', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat));
+      await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat));
+      await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat));
 
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
@@ -42,7 +42,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat));
+      await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat));
 
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
@@ -53,11 +53,11 @@ void main() {
     });
 
     testWidgets('moves to and from custom-defined positions', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation()));
+      await tester.pumpWidget(_buildFrame(location: const _StartTopFloatingActionButtonLocation()));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
 
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat));
+      await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat));
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
       await tester.pumpAndSettle();
@@ -65,7 +65,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation()));
+      await tester.pumpWidget(_buildFrame(location: const _StartTopFloatingActionButtonLocation()));
 
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
@@ -176,38 +176,38 @@ void main() {
 
       testWidgets('moving the fab to centerFloat', (WidgetTester tester) async {
         // Create a scaffold with the fab at endFloat
-        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         setupListener(tester);
 
         // Move the fab to centerFloat'
-        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
 
       testWidgets('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
-        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
         // Move the fab to the top start after creating the fab.
-        await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Interrupt motion to move to the end float
-        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
 
       testWidgets('interrupting entrance to remove the fab.', (WidgetTester tester) async {
-        await tester.pumpWidget(buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
         // Animate the fab in.
-        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Remove the fab.
         await tester.pumpWidget(
-          buildFrame(
+          _buildFrame(
             fab: null,
             location: FloatingActionButtonLocation.endFloat,
             listener: geometryListener,
@@ -218,7 +218,7 @@ void main() {
 
       testWidgets('interrupting entrance of a new fab.', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildFrame(
+          _buildFrame(
             fab: null,
             location: FloatingActionButtonLocation.endFloat,
             listener: geometryListener,
@@ -227,12 +227,12 @@ void main() {
         setupListener(tester);
 
         // Bring in a new fab.
-        await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Interrupt motion to move the fab.
         await tester.pumpWidget(
-          buildFrame(
+          _buildFrame(
             location: FloatingActionButtonLocation.endFloat,
             listener: geometryListener,
           ),
@@ -244,7 +244,7 @@ void main() {
 
   testWidgets('Docked floating action button locations', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildFrame(
+      _buildFrame(
         location: FloatingActionButtonLocation.endDocked,
         bab: const SizedBox(height: 100.0),
         viewInsets: EdgeInsets.zero,
@@ -256,7 +256,7 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 500.0));
 
     await tester.pumpWidget(
-      buildFrame(
+      _buildFrame(
         location: FloatingActionButtonLocation.centerDocked,
         bab: const SizedBox(height: 100.0),
         viewInsets: EdgeInsets.zero,
@@ -267,7 +267,7 @@ void main() {
 
 
     await tester.pumpWidget(
-      buildFrame(
+      _buildFrame(
         location: FloatingActionButtonLocation.endDocked,
         bab: const SizedBox(height: 100.0),
         viewInsets: EdgeInsets.zero,
@@ -279,7 +279,7 @@ void main() {
 
   testWidgets('Docked floating action button locations: no BAB, small BAB', (WidgetTester tester) async {
     await tester.pumpWidget(
-      buildFrame(
+      _buildFrame(
         location: FloatingActionButtonLocation.endDocked,
         viewInsets: EdgeInsets.zero,
       ),
@@ -287,7 +287,7 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 572.0));
 
     await tester.pumpWidget(
-      buildFrame(
+      _buildFrame(
         location: FloatingActionButtonLocation.endDocked,
         bab: const SizedBox(height: 16.0),
         viewInsets: EdgeInsets.zero,
@@ -1623,7 +1623,7 @@ class _GeometryCachePainter extends CustomPainter {
   }
 }
 
-Widget buildFrame({
+Widget _buildFrame({
   FloatingActionButton? fab = const FloatingActionButton(
     onPressed: null,
     child: Text('1'),

@@ -232,7 +232,7 @@ class Dismissible extends StatefulWidget {
   final HitTestBehavior behavior;
 
   @override
-  _DismissibleState createState() => _DismissibleState();
+  State<Dismissible> createState() => _DismissibleState();
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {

@@ -663,7 +663,7 @@ class MaterialApp extends StatefulWidget {
   final bool debugShowMaterialGrid;
 
   @override
-  _MaterialAppState createState() => _MaterialAppState();
+  State<MaterialApp> createState() => _MaterialAppState();
 
   /// The [HeroController] used for Material page transitions.
   ///

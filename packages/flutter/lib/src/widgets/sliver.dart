@@ -1670,7 +1670,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _SliverOffstageElement createElement() => _SliverOffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _SliverOffstageElement(this);
 }
 
 class _SliverOffstageElement extends SingleChildRenderObjectElement {

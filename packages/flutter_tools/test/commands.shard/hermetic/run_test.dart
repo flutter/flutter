@@ -51,12 +51,10 @@ void main() {
 
     testUsingContext('fails when target not found', () async {
       final RunCommand command = RunCommand();
-      try {
-        await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']);
-        fail('Expect exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode ?? 1, 1);
-      }
+      expect(
+        () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
+        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -69,18 +67,20 @@ void main() {
       fileSystem.file('.packages').createSync();
 
       final RunCommand command = RunCommand();
-      try {
-        await createTestCommandRunner(command).run(<String>[
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
           'run',
           '--use-application-binary=app/bar/faz',
           '--fast-start',
           '--no-pub',
           '--show-test-device',
-        ]);
-        fail('Expect exception');
-      } on Exception catch (e) {
-        expect(e.toString(), isNot(contains('--fast-start is not supported with --use-application-binary')));
-      }
+        ]),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'toString',
+          isNot(contains('--fast-start is not supported with --use-application-binary')),
+        )),
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -97,15 +97,13 @@ void main() {
         ..createSync(recursive: true);
 
       final RunCommand command = RunCommand();
-      try {
-        await createTestCommandRunner(command).run(<String>[
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
           'run',
           '--no-pub',
-        ]);
-        fail('Expect exception');
-      } on Exception catch (e) {
-        expect(e, isA<ToolExit>());
-      }
+        ]),
+        throwsA(isA<ToolExit>()),
+      );
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
       expect(
         bufferLogger.statusText,
@@ -124,16 +122,17 @@ void main() {
         .createSync(recursive: true);
 
       final RunCommand command = RunCommand();
-      try {
-        await createTestCommandRunner(command).run(<String>[
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
           'run',
           '--no-pub',
-        ]);
-        fail('Expect exception');
-      } on Exception catch (e) {
-        expect(e, isA<ToolExit>());
-        expect(e.toString(), contains('No pubspec.yaml file found'));
-      }
+        ]),
+        throwsA(isA<ToolExit>().having(
+          (ToolExit error) => error.toString(),
+          'toString()',
+          contains('No pubspec.yaml file found'),
+        )),
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -180,16 +179,14 @@ void main() {
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
 
-        try {
-          await createTestCommandRunner(command).run(<String>[
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
             '--no-hot',
-          ]);
-          fail('Expect exception');
-        } on ToolExit catch (e) {
-          expect(e.message, null);
-        }
+          ]),
+          throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
+        );
 
         expect(
           testLogger.statusText,
@@ -256,16 +253,14 @@ void main() {
             (Invocation invocation) => Future<List<Device>>.value(<Device>[]),
         );
 
-        try {
-          await createTestCommandRunner(command).run(<String>[
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
             '--no-hot',
-          ]);
-          fail('Expect exception');
-        } on ToolExit catch (e) {
-          expect(e.message, null);
-        }
+          ]),
+          throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
+        );
 
         expect(
           testLogger.statusText,

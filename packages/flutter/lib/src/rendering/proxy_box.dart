@@ -3078,7 +3078,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   const PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _PngHomeState createState() => _PngHomeState();
+  ///   State<PngHome> createState() => _PngHomeState();
   /// }
   ///
   /// class _PngHomeState extends State<PngHome> {

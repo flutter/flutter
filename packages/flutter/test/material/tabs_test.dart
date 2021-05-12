@@ -3532,6 +3532,102 @@ void main() {
 
     expect(tabBar.preferredSize, const Size.fromHeight(48.0));
   });
+
+  testWidgets('Tabs are given uniform padding in case of few tabs having both text and icon', (WidgetTester tester) async {
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0);
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding tabOne = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 1').first);
+    final Padding tabTwo = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 2').first);
+    final Padding tabThree = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 3').first);
+
+    expect(tabOne.padding, expectedPaddingDefault);
+    expect(tabTwo.padding, expectedPaddingAdjusted);
+    expect(tabThree.padding, expectedPaddingAdjusted);
+  });
+
+  testWidgets('Tabs are given uniform padding when labelPadding is given', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 23.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              labelPadding: labelPadding,
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding tabOne = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 1').first);
+    final Padding tabTwo = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 2').first);
+    final Padding tabThree = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 3').first);
+
+    expect(tabOne.padding, expectedPaddingDefault);
+    expect(tabTwo.padding, expectedPaddingAdjusted);
+    expect(tabThree.padding, expectedPaddingAdjusted);
+  });
+
+  testWidgets('Tabs are given uniform padding TabBarTheme.labelPadding is given', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 15.0, horizontal: 20);
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 28.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          tabBarTheme: const TabBarTheme(labelPadding: labelPadding),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding tabOne = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 1').first);
+    final Padding tabTwo = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 2').first);
+    final Padding tabThree = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 3').first);
+
+    expect(tabOne.padding, expectedPaddingDefault);
+    expect(tabTwo.padding, expectedPaddingAdjusted);
+    expect(tabThree.padding, expectedPaddingAdjusted);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {

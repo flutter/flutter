@@ -248,6 +248,10 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     Color? unselectedWidgetColor,
     Color? disabledColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     Color? buttonColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
@@ -585,6 +589,10 @@ class ThemeData with Diagnosticable {
     required this.unselectedWidgetColor,
     required this.disabledColor,
     required this.buttonTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
@@ -991,6 +999,10 @@ class ThemeData with Diagnosticable {
   final ToggleButtonsThemeData toggleButtonsTheme;
 
   /// The default fill color of the [Material] used in [RaisedButton]s.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.3.0-0.2.pre.',
+  )
   final Color buttonColor;
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
@@ -1336,6 +1348,10 @@ class ThemeData with Diagnosticable {
     Color? disabledColor,
     ButtonThemeData? buttonTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.3.0-0.2.pre.',
+    )
     Color? buttonColor,
     Color? secondaryHeaderColor,
     @Deprecated(
@@ -2257,8 +2273,8 @@ class VisualDensity with Diagnosticable {
   BoxConstraints effectiveConstraints(BoxConstraints constraints){
     assert(constraints != null && constraints.debugAssertIsValid());
     return constraints.copyWith(
-      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity).toDouble(),
-      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity).toDouble(),
+      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity),
+      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity),
     );
   }
 

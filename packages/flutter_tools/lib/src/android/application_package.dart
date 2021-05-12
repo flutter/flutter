@@ -271,7 +271,7 @@ class _Attribute extends _Entry {
 class ApkManifestData {
   ApkManifestData._(this._data);
 
-  static bool isAttributeWithValuePresent(_Element baseElement,
+  static bool _isAttributeWithValuePresent(_Element baseElement,
       String childElement, String attributeName, String attributeValue) {
     final Iterable<_Element> allElements = baseElement.allElements(childElement);
     for (final _Element oneElement in allElements) {
@@ -339,12 +339,12 @@ class ApkManifestData {
       }
 
       for (final _Element element in intentFilters) {
-        final bool isMainAction = isAttributeWithValuePresent(
+        final bool isMainAction = _isAttributeWithValuePresent(
             element, 'action', 'android:name', '"android.intent.action.MAIN"');
         if (!isMainAction) {
           continue;
         }
-        final bool isLauncherCategory = isAttributeWithValuePresent(
+        final bool isLauncherCategory = _isAttributeWithValuePresent(
             element, 'category', 'android:name',
             '"android.intent.category.LAUNCHER"');
         if (!isLauncherCategory) {

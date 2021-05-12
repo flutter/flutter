@@ -12,8 +12,7 @@ class MultiWidgetConstructTable extends StatefulWidget {
   final int rowCount;
 
   @override
-  _MultiWidgetConstructTableState createState() =>
-      _MultiWidgetConstructTableState();
+  State<MultiWidgetConstructTable> createState() => _MultiWidgetConstructTableState();
 }
 
 class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>

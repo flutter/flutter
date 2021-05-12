@@ -10,7 +10,7 @@ class CupertinoTextFieldDemo extends StatefulWidget {
   static const String routeName = '/cupertino/text_fields';
 
   @override
-  _CupertinoTextFieldDemoState createState() {
+  State<CupertinoTextFieldDemo> createState() {
     return _CupertinoTextFieldDemoState();
   }
 }

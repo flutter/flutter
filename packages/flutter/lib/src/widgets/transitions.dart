@@ -133,7 +133,7 @@ abstract class AnimatedWidget extends StatefulWidget {
 
   /// Subclasses typically do not override this method.
   @override
-  _AnimatedState createState() => _AnimatedState();
+  State<AnimatedWidget> createState() => _AnimatedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

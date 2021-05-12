@@ -23,7 +23,7 @@ import 'theme.dart';
 ///   const MyCupertinoTabScaffoldPage({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _CupertinoTabScaffoldPageState createState() => _CupertinoTabScaffoldPageState();
+///   State<MyCupertinoTabScaffoldPage> createState() => _CupertinoTabScaffoldPageState();
 /// }
 ///
 /// class _CupertinoTabScaffoldPageState extends State<MyCupertinoTabScaffoldPage> {
@@ -312,7 +312,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
+  State<CupertinoTabScaffold> createState() => _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with RestorationMixin {

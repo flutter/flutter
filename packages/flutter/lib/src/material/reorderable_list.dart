@@ -342,7 +342,7 @@ class ReorderableListView extends StatefulWidget {
   final Widget? prototypeItem;
 
   @override
-  _ReorderableListViewState createState() => _ReorderableListViewState();
+  State<ReorderableListView> createState() => _ReorderableListViewState();
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {

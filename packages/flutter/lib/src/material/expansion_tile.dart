@@ -181,7 +181,7 @@ class ExpansionTile extends StatefulWidget {
   final Color? collapsedTextColor;
 
   @override
-  _ExpansionTileState createState() => _ExpansionTileState();
+  State<ExpansionTile> createState() => _ExpansionTileState();
 }
 
 class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {

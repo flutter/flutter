@@ -181,7 +181,7 @@ class BottomSheet extends StatefulWidget {
   final BoxConstraints? constraints;
 
   @override
-  _BottomSheetState createState() => _BottomSheetState();
+  State<BottomSheet> createState() => _BottomSheetState();
 
   /// Creates an [AnimationController] suitable for a
   /// [BottomSheet.animationController].

@@ -237,7 +237,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   }
 
   @override
-  _FlexibleSpaceBarState createState() => _FlexibleSpaceBarState();
+  State<FlexibleSpaceBar> createState() => _FlexibleSpaceBarState();
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {

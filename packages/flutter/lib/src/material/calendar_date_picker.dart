@@ -146,7 +146,7 @@ class CalendarDatePicker extends StatefulWidget {
   final SelectableDayPredicate? selectableDayPredicate;
 
   @override
-  _CalendarDatePickerState createState() => _CalendarDatePickerState();
+  State<CalendarDatePicker> createState() => _CalendarDatePickerState();
 }
 
 class _CalendarDatePickerState extends State<CalendarDatePicker> {
@@ -1146,7 +1146,7 @@ class YearPicker extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _YearPickerState createState() => _YearPickerState();
+  State<YearPicker> createState() => _YearPickerState();
 }
 
 class _YearPickerState extends State<YearPicker> {

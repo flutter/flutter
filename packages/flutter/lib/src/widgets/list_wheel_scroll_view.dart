@@ -737,7 +737,7 @@ class ListWheelScrollView extends StatefulWidget {
   final ScrollBehavior? scrollBehavior;
 
   @override
-  _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
+  State<ListWheelScrollView> createState() => _ListWheelScrollViewState();
 }
 
 class _ListWheelScrollViewState extends State<ListWheelScrollView> {

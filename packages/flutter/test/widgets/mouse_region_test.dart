@@ -55,7 +55,7 @@ class HoverFeedback extends StatefulWidget {
   final VoidCallback? onExit;
 
   @override
-  _HoverFeedbackState createState() => _HoverFeedbackState();
+  State<HoverFeedback> createState() => _HoverFeedbackState();
 }
 
 class _HoverFeedbackState extends State<HoverFeedback> {

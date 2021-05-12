@@ -278,7 +278,7 @@ class GalleryHome extends StatefulWidget {
   static bool showPreviewBanner = true;
 
   @override
-  _GalleryHomeState createState() => _GalleryHomeState();
+  State<GalleryHome> createState() => _GalleryHomeState();
 }
 
 class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {

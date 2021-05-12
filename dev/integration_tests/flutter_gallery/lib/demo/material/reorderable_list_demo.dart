@@ -23,7 +23,7 @@ class ReorderableListDemo extends StatefulWidget {
   static const String routeName = '/material/reorderable-list';
 
   @override
-  _ListDemoState createState() => _ListDemoState();
+  State<ReorderableListDemo> createState() => _ListDemoState();
 }
 
 class _ListItem {

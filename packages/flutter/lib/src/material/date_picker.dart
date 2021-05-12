@@ -412,7 +412,7 @@ class DatePickerDialog extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _DatePickerDialogState createState() => _DatePickerDialogState();
+  State<DatePickerDialog> createState() => _DatePickerDialogState();
 }
 
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
@@ -1312,7 +1312,7 @@ class DateRangePickerDialog extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _DateRangePickerDialogState createState() => _DateRangePickerDialogState();
+  State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
 }
 
 class _DateRangePickerDialogState extends State<DateRangePickerDialog> with RestorationMixin {

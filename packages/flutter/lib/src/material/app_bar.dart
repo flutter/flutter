@@ -722,7 +722,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }
 
   @override
-  _AppBarState createState() => _AppBarState();
+  State<AppBar> createState() => _AppBarState();
 }
 
 class _AppBarState extends State<AppBar> {
@@ -1747,7 +1747,7 @@ class SliverAppBar extends StatefulWidget {
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   @override
-  _SliverAppBarState createState() => _SliverAppBarState();
+  State<SliverAppBar> createState() => _SliverAppBarState();
 }
 
 // This class is only Stateful because it owns the TickerProvider used
