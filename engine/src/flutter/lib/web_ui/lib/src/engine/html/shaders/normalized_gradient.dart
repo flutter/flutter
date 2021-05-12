@@ -4,9 +4,10 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart';
-
 import 'package:ui/ui.dart' as ui;
+
+import 'shader_builder.dart';
+import 'webgl_context.dart';
 
 /// Converts colors and stops to typed array of bias, scale and threshold to use
 /// in shaders.
@@ -21,8 +22,8 @@ import 'package:ui/ui.dart' as ui;
 ///              scale = (c2 - c1) / (t2 - t1)
 ///              bias = c1 - t1 / (t2 - t1) * (c2 - c1)
 class NormalizedGradient {
-  NormalizedGradient._(this.thresholdCount, this._thresholds, this._scale,
-      this._bias);
+  NormalizedGradient._(
+      this.thresholdCount, this._thresholds, this._scale, this._bias);
 
   final Float32List _thresholds;
   final Float32List _bias;
@@ -46,7 +47,8 @@ class NormalizedGradient {
     }
     final Float32List bias = Float32List(normalizedCount * 4);
     final Float32List scale = Float32List(normalizedCount * 4);
-    final Float32List thresholds = Float32List(4 * ((normalizedCount - 1)~/4 + 1));
+    final Float32List thresholds =
+        Float32List(4 * ((normalizedCount - 1) ~/ 4 + 1));
     int targetIndex = 0;
     int thresholdIndex = 0;
     if (addFirst) {
@@ -102,13 +104,17 @@ class NormalizedGradient {
   void setupUniforms(GlContext gl, GlProgram glProgram) {
     for (int i = 0; i < thresholdCount; i++) {
       Object biasId = gl.getUniformLocation(glProgram.program, 'bias_$i');
-      gl.setUniform4f(biasId, _bias[i * 4], _bias[i * 4 + 1], _bias[i * 4 + 2], _bias[i * 4 + 3]);
+      gl.setUniform4f(biasId, _bias[i * 4], _bias[i * 4 + 1], _bias[i * 4 + 2],
+          _bias[i * 4 + 3]);
       Object scaleId = gl.getUniformLocation(glProgram.program, 'scale_$i');
-      gl.setUniform4f(scaleId, _scale[i * 4], _scale[i * 4 + 1], _scale[i * 4 + 2], _scale[i * 4 + 3]);
+      gl.setUniform4f(scaleId, _scale[i * 4], _scale[i * 4 + 1],
+          _scale[i * 4 + 2], _scale[i * 4 + 3]);
     }
     for (int i = 0; i < _thresholds.length; i += 4) {
-      Object thresId = gl.getUniformLocation(glProgram.program, 'threshold_${i ~/ 4}');
-      gl.setUniform4f(thresId, _thresholds[i], _thresholds[i + 1], _thresholds[i + 2], _thresholds[i + 3]);
+      Object thresId =
+          gl.getUniformLocation(glProgram.program, 'threshold_${i ~/ 4}');
+      gl.setUniform4f(thresId, _thresholds[i], _thresholds[i + 1],
+          _thresholds[i + 2], _thresholds[i + 3]);
     }
   }
 
@@ -131,8 +137,9 @@ class NormalizedGradient {
 /// Bias and scale data are vec4 uniforms that hold color data.
 void writeUnrolledBinarySearch(ShaderMethod method, int start, int end,
     {required String probe,
-      required String sourcePrefix, required String biasName,
-      required String scaleName}) {
+    required String sourcePrefix,
+    required String biasName,
+    required String scaleName}) {
   if (start == end) {
     String biasSource = '${biasName}_${start}';
     method.addStatement('${biasName} = ${biasSource};');
@@ -141,25 +148,29 @@ void writeUnrolledBinarySearch(ShaderMethod method, int start, int end,
   } else {
     // Add probe check.
     int mid = (start + end) ~/ 2;
-    String thresholdAtMid = '${sourcePrefix}_${(mid + 1)~/4}';
-    thresholdAtMid += '.${_vectorComponentIndexToName((mid + 1) % 4)}';
+    String thresholdAtMid = '${sourcePrefix}_${(mid + 1) ~/ 4}';
+    thresholdAtMid += '.${vectorComponentIndexToName((mid + 1) % 4)}';
     method.addStatement('if ($probe < $thresholdAtMid) {');
     method.indent();
     writeUnrolledBinarySearch(method, start, mid,
-        probe: probe, sourcePrefix: sourcePrefix, biasName: biasName,
+        probe: probe,
+        sourcePrefix: sourcePrefix,
+        biasName: biasName,
         scaleName: scaleName);
     method.unindent();
     method.addStatement('} else {');
     method.indent();
     writeUnrolledBinarySearch(method, mid + 1, end,
-        probe: probe, sourcePrefix: sourcePrefix, biasName: biasName,
+        probe: probe,
+        sourcePrefix: sourcePrefix,
+        biasName: biasName,
         scaleName: scaleName);
     method.unindent();
     method.addStatement('}');
   }
 }
 
-String _vectorComponentIndexToName(int index) {
-  assert(index >=0 && index <= 4);
+String vectorComponentIndexToName(int index) {
+  assert(index >= 0 && index <= 4);
   return 'xyzw'[index];
 }

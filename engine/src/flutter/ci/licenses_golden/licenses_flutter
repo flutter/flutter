@@ -446,7 +446,6 @@ FILE: ../../../flutter/lib/ui/window/window.h
 FILE: ../../../flutter/lib/web_ui/lib/src/engine.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/alarm_clock.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/assets.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/bitmap_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/browser_detection.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvas_pool.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/canvas.dart
@@ -482,16 +481,17 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/vertices.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/viewport_metrics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/clipboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/color_filter.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom_renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/engine_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_change_util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/backdrop_filter.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/bitmap_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/clip.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/debug_canvas_reuse_overlay.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/dom_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/image_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/offscreen_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/offset.dart
@@ -515,6 +515,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/render_vertices.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/scene.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shader_mask.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/image_shader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/normalized_gradient.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/shader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/shader_builder.dart

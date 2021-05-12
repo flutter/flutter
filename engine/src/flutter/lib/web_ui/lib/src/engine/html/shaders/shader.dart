@@ -2,7 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:html' as html;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
+
+import 'normalized_gradient.dart';
+import 'shader_builder.dart';
+import 'vertex_shaders.dart';
+import 'webgl_context.dart';
+import '../offscreen_canvas.dart';
+import '../path/path_utils.dart';
+import '../render_vertices.dart';
+import '../../browser_detection.dart';
+import '../../validators.dart';
+import '../../vector_math.dart';
+import '../../util.dart';
+
+const double kFltEpsilon = 1.19209290E-07; // == 1 / (2 ^ 23)
+const double kFltEpsilonSquared = 1.19209290E-07 * 1.19209290E-07;
 
 abstract class EngineGradient implements ui.Gradient {
   /// Hidden constructor to prevent subclassing.
@@ -48,8 +67,7 @@ class GradientSweep extends EngineGradient {
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    GlProgram glProgram = gl.cacheProgram(
-        VertexShaders.writeBaseVertexShader(),
+    GlProgram glProgram = gl.cacheProgram(VertexShaders.writeBaseVertexShader(),
         _createSweepFragmentShader(normalizedGradient, tileMode));
     gl.useProgram(glProgram);
 
@@ -68,7 +86,7 @@ class GradientSweep extends EngineGradient {
       gl.setUniformMatrix4fv(gradientMatrix, false, matrix4!);
     }
     if (createDataUrl) {
-      return _glRenderer!.drawRectToImageUrl(
+      return glRenderer!.drawRectToImageUrl(
           ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
           gl,
           glProgram,
@@ -76,7 +94,7 @@ class GradientSweep extends EngineGradient {
           widthInPixels,
           heightInPixels);
     } else {
-      return _glRenderer!.drawRect(
+      return glRenderer!.drawRect(
           ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
           gl,
           glProgram,
@@ -131,18 +149,6 @@ class GradientSweep extends EngineGradient {
   final double endAngle;
   final Float32List? matrix4;
 }
-
-class EngineImageShader implements ui.ImageShader {
-  EngineImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
-      : _image = image as HtmlImage;
-
-  final ui.TileMode tileModeX;
-  final ui.TileMode tileModeY;
-  final Float64List matrix4;
-  final ui.FilterQuality? filterQuality;
-  final HtmlImage _image;
-}
-
 
 class GradientLinear extends EngineGradient {
   GradientLinear(
@@ -227,8 +233,7 @@ class GradientLinear extends EngineGradient {
     NormalizedGradient normalizedGradient =
         NormalizedGradient(colors, stops: colorStops);
 
-    GlProgram glProgram = gl.cacheProgram(
-        VertexShaders.writeBaseVertexShader(),
+    GlProgram glProgram = gl.cacheProgram(VertexShaders.writeBaseVertexShader(),
         _createLinearFragmentShader(normalizedGradient, tileMode));
     gl.useProgram(glProgram);
 
@@ -313,7 +318,7 @@ class GradientLinear extends EngineGradient {
     gl.setUniform2f(uRes, widthInPixels.toDouble(), heightInPixels.toDouble());
 
     if (createDataUrl) {
-      return _glRenderer!.drawRectToImageUrl(
+      return glRenderer!.drawRectToImageUrl(
         ui.Rect.fromLTWH(0, 0, shaderBounds.width,
             shaderBounds.height) /* !! shaderBounds */,
         gl,
@@ -323,7 +328,7 @@ class GradientLinear extends EngineGradient {
         heightInPixels,
       );
     } else {
-      return _glRenderer!.drawRect(
+      return glRenderer!.drawRect(
         ui.Rect.fromLTWH(0, 0, shaderBounds.width,
             shaderBounds.height) /* !! shaderBounds */,
         gl,
@@ -517,7 +522,7 @@ class GradientRadial extends EngineGradient {
         matrix4 == null ? Matrix4.identity().storage : matrix4!);
 
     if (createDataUrl) {
-      return _glRenderer!.drawRectToImageUrl(
+      return glRenderer!.drawRectToImageUrl(
           ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
           gl,
           glProgram,
@@ -525,7 +530,7 @@ class GradientRadial extends EngineGradient {
           widthInPixels,
           heightInPixels);
     } else {
-      return _glRenderer!.drawRect(
+      return glRenderer!.drawRect(
           ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
           gl,
           glProgram,
