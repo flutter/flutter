@@ -373,6 +373,12 @@
       "flaky": false
     },
     {
+      "name": "Linux platform_channels_benchmarks",
+      "repo": "flutter",
+      "task_name": "linux_platform_channels_benchmarks",
+      "flaky": true
+    },
+    {
       "name": "Linux platform_views_scroll_perf__timeline_summary",
       "repo": "flutter",
       "task_name": "linux_platform_views_scroll_perf__timeline_summary",
@@ -538,18 +544,6 @@
       "name": "Linux web_long_running_tests_3_3",
       "repo": "flutter",
       "task_name": "linux_web_long_running_tests_3_3",
-      "flaky": false
-    },
-    {
-      "name": "Linux web_e2e_test",
-      "repo": "flutter",
-      "task_name": "linux_web_e2e_test",
-      "flaky": false
-    },
-    {
-      "name": "Linux web_smoke_test",
-      "repo": "flutter",
-      "task_name": "linux_web_smoke_test",
       "flaky": false
     },
     {
@@ -1153,6 +1147,12 @@
       "flaky": false
     },
     {
+      "name": "Mac_ios platform_channels_benchmarks",
+      "repo": "flutter",
+      "task_name": "mac_ios_platform_channels_benchmarks",
+      "flaky": true
+    },
+    {
       "name": "Mac_ios platform_interaction_test_ios",
       "repo": "flutter",
       "task_name": "mac_ios_platform_interaction_test_ios",
@@ -1210,7 +1210,7 @@
       "name": "Windows build_tests_2_3",
       "repo": "flutter",
       "task_name": "win_build_tests_2_3",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Windows build_tests_3_3",

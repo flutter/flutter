@@ -768,7 +768,7 @@ void main() {
       child: GridView.extent(
         maxCrossAxisExtent: maxCrossAxisExtent,
       ),
-    ), throwsA(isA<AssertionError>()));
+    ), throwsAssertionError);
 
   });
 }

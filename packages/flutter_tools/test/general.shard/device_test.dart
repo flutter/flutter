@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -336,7 +335,7 @@ void main() {
       );
       await expectLater(
         () async => deviceManager.findTargetDevices(FakeFlutterProject()),
-        throwsA(isA<ToolExit>())
+        throwsToolExit(),
       );
     });
 

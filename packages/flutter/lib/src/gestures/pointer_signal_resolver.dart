@@ -68,7 +68,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///   final Widget? child;
 ///
 ///   @override
-///   _ColorChangerState createState() => _ColorChangerState();
+///   State<ColorChanger> createState() => _ColorChangerState();
 /// }
 ///
 /// class _ColorChangerState extends State<ColorChanger> {

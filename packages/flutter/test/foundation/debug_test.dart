@@ -37,16 +37,14 @@ void main() {
     });
 
     test('returns failing future if action throws', () async {
-      try {
-        await debugInstrumentAction<void>('throws', () async {
+      await expectLater(
+        () => debugInstrumentAction<void>('throws', () async {
           await Future<void>.delayed(Duration.zero);
           throw 'Error';
-        });
-        fail('Error expected but not thrown');
-      } on String catch (error) {
-        expect(error, 'Error');
-        expect(printBuffer.toString(), matches(r'^Action "throws" took .+'));
-      }
+        }),
+        throwsA('Error'),
+      );
+      expect(printBuffer.toString(), matches(r'^Action "throws" took .+'));
     });
   });
 }

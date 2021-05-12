@@ -201,6 +201,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///  * [Listener], a widget for listening to lower-level raw pointer events.
 ///  * [MouseRegion], a widget that tracks the movement of mice, even when no
 ///    button is pressed.
+///  * [RawGestureDetector], a widget that is used to detect custom gestures.
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///

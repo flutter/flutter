@@ -9,7 +9,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('Configuration', () {
-    Configuration config;
+    late Configuration config;
 
     setUp(() {
       config = Configuration(flutterRoot: Directory('/flutter sdk'));

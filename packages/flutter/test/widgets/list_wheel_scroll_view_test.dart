@@ -50,16 +50,18 @@ void main() {
 
   group('construction check', () {
     testWidgets('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
-      try {
-        ListWheelScrollView(
+      expect(
+        () => ListWheelScrollView(
           diameterRatio: nonconst(-2.0),
           itemExtent: 20.0,
           children: const <Widget>[],
-        );
-        fail('Expected failure with negative diameterRatio');
-      } on AssertionError catch (exception) {
-        expect(exception.message, contains("You can't set a diameterRatio of 0"));
-      }
+        ),
+        throwsA(isAssertionError.having(
+          (AssertionError error) => error.message,
+          'message',
+          contains("You can't set a diameterRatio of 0"),
+        )),
+      );
     });
 
     testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {

@@ -209,7 +209,7 @@ Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, Str
         '-dTreeShakeIcons="${buildInfo.treeShakeIcons}"',
         '-dDartObfuscation=${buildInfo.dartObfuscation}',
         if (buildInfo.bundleSkSLPath != null)
-          '-iBundleSkSLPath=${buildInfo.bundleSkSLPath}',
+          '-dBundleSkSLPath=${buildInfo.bundleSkSLPath}',
         if (buildInfo.codeSizeDirectory != null)
           '-dCodeSizeDirectory=${buildInfo.codeSizeDirectory}',
         if (buildInfo.splitDebugInfoPath != null)

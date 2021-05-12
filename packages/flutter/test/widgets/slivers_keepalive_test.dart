@@ -408,7 +408,7 @@ class SwitchingChildBuilderTest extends StatefulWidget {
   final List<Widget> children;
 
   @override
-  _SwitchingChildBuilderTest createState() => _SwitchingChildBuilderTest();
+  State<SwitchingChildBuilderTest> createState() => _SwitchingChildBuilderTest();
 }
 
 class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
@@ -481,7 +481,7 @@ class SwitchingChildListTest extends StatefulWidget {
   final double viewportFraction;
 
   @override
-  _SwitchingChildListTest createState() => _SwitchingChildListTest();
+  State<SwitchingChildListTest> createState() => _SwitchingChildListTest();
 }
 
 class _SwitchingChildListTest extends State<SwitchingChildListTest> {
@@ -518,7 +518,7 @@ class SwitchingSliverListTest extends StatefulWidget {
   final double viewportFraction;
 
   @override
-  _SwitchingSliverListTest createState() => _SwitchingSliverListTest();
+  State<SwitchingSliverListTest> createState() => _SwitchingSliverListTest();
 }
 
 class _SwitchingSliverListTest extends State<SwitchingSliverListTest> {
@@ -554,7 +554,7 @@ class WidgetTest0 extends StatefulWidget {
   final bool keepAlive;
 
   @override
-  _WidgetTest0State createState() => _WidgetTest0State();
+  State<WidgetTest0> createState() => _WidgetTest0State();
 }
 
 class _WidgetTest0State extends State<WidgetTest0> with AutomaticKeepAliveClientMixin{
@@ -587,7 +587,7 @@ class WidgetTest1 extends StatefulWidget {
   final bool keepAlive;
 
   @override
-  _WidgetTest1State createState() => _WidgetTest1State();
+  State<WidgetTest1> createState() => _WidgetTest1State();
 }
 
 class _WidgetTest1State extends State<WidgetTest1> with AutomaticKeepAliveClientMixin{
@@ -620,7 +620,7 @@ class WidgetTest2 extends StatefulWidget {
   final bool keepAlive;
 
   @override
-  _WidgetTest2State createState() => _WidgetTest2State();
+  State<WidgetTest2> createState() => _WidgetTest2State();
 }
 
 class _WidgetTest2State extends State<WidgetTest2> with AutomaticKeepAliveClientMixin{

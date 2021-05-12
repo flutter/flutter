@@ -267,6 +267,324 @@ void main() {
     await tester.pumpAndSettle();
     expect(getItemFadeTransition(), findsNothing);
   });
+
+  testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+    expect(() => ReorderableList(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+            key: ValueKey<int>(numbers[index]),
+            height: 20 + numbers[index] * 10,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Text(numbers[index].toString()),
+            )
+        );
+      },
+      itemCount: numbers.length,
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
+  });
+
+  testWidgets('SliverReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+    expect(() => SliverReorderableList(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+            key: ValueKey<int>(numbers[index]),
+            height: 20 + numbers[index] * 10,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Text(numbers[index].toString()),
+            )
+        );
+      },
+      itemCount: numbers.length,
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
+  });
+
+  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    // children with different heights
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    )
+                  );
+                },
+                itemCount: numbers.length,
+                itemExtent: 30,
+                onReorder: (int fromIndex, int toIndex) {
+                  if (fromIndex < toIndex) {
+                    toIndex--;
+                  }
+                  final int value = numbers.removeAt(fromIndex);
+                  numbers.insert(toIndex, value);
+                },
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
+  });
+
+  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableList(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  prototypeItem: const SizedBox(
+                    height: 30,
+                    child: Text('3'),
+                  ),
+                  onReorder: (int oldIndex, int newIndex) {  },
+                );
+              },
+            ),
+          ),
+        )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
+  });
+
+  group('ReorderableDragStartListener', () {
+    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+      const int itemCount = 5;
+      int onReorderCallCount = 0;
+      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+      void handleReorder(int fromIndex, int toIndex) {
+        onReorderCallCount += 1;
+        if (toIndex > fromIndex) {
+          toIndex -= 1;
+        }
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+      // The list has five elements of height 100
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableList(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                key: ValueKey<int>(items[index]),
+                height: 100,
+                child: ReorderableDragStartListener(
+                  child: Text('item ${items[index]}'),
+                  index: index,
+                ),
+              );
+            },
+            onReorder: handleReorder,
+          ),
+        ),
+      );
+
+      // Start gesture on first item
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+
+      // Drag enough to move down the first item
+      await drag.moveBy(const Offset(0, 150));
+      await tester.pump();
+      await drag.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 1);
+      expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+    });
+
+    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+      const int itemCount = 5;
+      int onReorderCallCount = 0;
+      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+      void handleReorder(int fromIndex, int toIndex) {
+        onReorderCallCount += 1;
+        if (toIndex > fromIndex) {
+          toIndex -= 1;
+        }
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+      // The list has five elements of height 100
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableList(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                key: ValueKey<int>(items[index]),
+                height: 100,
+                child: ReorderableDragStartListener(
+                  child: Text('item ${items[index]}'),
+                  index: index,
+                  enabled: false,
+                ),
+              );
+            },
+            onReorder: handleReorder,
+          ),
+        ),
+      );
+
+      // Start gesture on first item
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kLongPressTimeout);
+
+      // Drag enough to move down the first item
+      await drag.moveBy(const Offset(0, 150));
+      await tester.pump();
+      await drag.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 0);
+      expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+    });
+  });
+
+  group('ReorderableDelayedDragStartListener', () {
+    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+      const int itemCount = 5;
+      int onReorderCallCount = 0;
+      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+      void handleReorder(int fromIndex, int toIndex) {
+        onReorderCallCount += 1;
+        if (toIndex > fromIndex) {
+          toIndex -= 1;
+        }
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+      // The list has five elements of height 100
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableList(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                key: ValueKey<int>(items[index]),
+                height: 100,
+                child: ReorderableDelayedDragStartListener(
+                  child: Text('item ${items[index]}'),
+                  index: index,
+                ),
+              );
+            },
+            onReorder: handleReorder,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Start gesture on first item
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kLongPressTimeout);
+
+      // Drag enough to move down the first item
+      await drag.moveBy(const Offset(0, 50));
+      await tester.pump();
+      await drag.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 1);
+      expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+    });
+
+    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+      const int itemCount = 5;
+      int onReorderCallCount = 0;
+      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+      void handleReorder(int fromIndex, int toIndex) {
+        onReorderCallCount += 1;
+        if (toIndex > fromIndex) {
+          toIndex -= 1;
+        }
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+      // The list has five elements of height 100
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableList(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                key: ValueKey<int>(items[index]),
+                height: 100,
+                child: ReorderableDelayedDragStartListener(
+                  child: Text('item ${items[index]}'),
+                  index: index,
+                  enabled: false,
+                ),
+              );
+            },
+            onReorder: handleReorder,
+          ),
+        ),
+      );
+
+      // Start gesture on first item
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kLongPressTimeout);
+
+      // Drag enough to move down the first item
+      await drag.moveBy(const Offset(0, 50));
+      await tester.pump();
+      await drag.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 0);
+      expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+    });
+  });
 }
 
 class TestList extends StatefulWidget {
@@ -284,7 +602,7 @@ class TestList extends StatefulWidget {
   final ReorderItemProxyDecorator? proxyDecorator;
 
   @override
-  _TestListState createState() => _TestListState();
+  State<TestList> createState() => _TestListState();
 }
 
 class _TestListState extends State<TestList> {

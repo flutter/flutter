@@ -11,9 +11,9 @@
 # which should be kept in sync with this file:
 #
 #   - analysis_options.yaml (this file)
-#   - packages/flutter/lib/analysis_options_user.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by Flutter tools, such as IntelliJ,
 # Android Studio, and the `flutter analyze` command.
@@ -106,9 +106,7 @@ linter:
     # - curly_braces_in_flow_control_structures # not required by flutter style
     - deprecated_consistency
     # - diagnostic_describe_all_properties # not yet tested
-    # Temporarily disabled to unblock auto-roll of a new more aggressive lint in the latest SDK
-    # TODO(pq): re-enable (https://github.com/flutter/flutter/issues/81219)
-    # - directives_ordering
+    - directives_ordering
     # - do_not_use_environment # we do this commonly
     - empty_catches
     - empty_constructor_bodies
@@ -124,6 +122,7 @@ linter:
     - leading_newlines_in_multiline_strings
     - library_names
     - library_prefixes
+    - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
     - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
