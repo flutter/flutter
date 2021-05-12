@@ -758,7 +758,7 @@ void main() {
     final PageController controller = PageController();
     expect(
       () => controller.page,
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.message,
         'message',
         equals('PageController.page cannot be accessed before a PageView is built with it.'),
@@ -792,7 +792,7 @@ void main() {
     );
     expect(
       () => controller.page,
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.message,
         'message',
         equals('PageController.page cannot be accessed before a PageView is built with it.'),

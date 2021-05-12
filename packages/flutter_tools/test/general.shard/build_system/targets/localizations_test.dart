@@ -96,7 +96,7 @@ use-deferred-loading: string
         file: configFile,
         logger: BufferLogger.test(),
       ),
-      throwsA(isA<Exception>()),
+      throwsException,
     );
   });
 }
