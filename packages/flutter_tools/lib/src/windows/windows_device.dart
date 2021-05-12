@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
@@ -24,7 +23,7 @@ import '../features.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'build_windows.dart';
-import 'native_api.dart';
+import 'uwptool.dart';
 import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
@@ -84,12 +83,12 @@ class WindowsUWPDevice extends Device {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required OperatingSystemUtils operatingSystemUtils,
-    @required NativeApi nativeApi,
+    @required UwpTool uwptool,
   }) : _logger = logger,
        _processManager = processManager,
-       _nativeApi = nativeApi,
        _operatingSystemUtils = operatingSystemUtils,
        _fileSystem = fileSystem,
+       _uwptool = uwptool,
        super(
          'winuwp',
          platformType: PlatformType.windows,
@@ -99,9 +98,9 @@ class WindowsUWPDevice extends Device {
 
   final ProcessManager _processManager;
   final Logger _logger;
-  final NativeApi _nativeApi;
-  final OperatingSystemUtils _operatingSystemUtils;
   final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final UwpTool _uwptool;
   BuildMode _buildMode;
 
   int _processId;
@@ -199,38 +198,26 @@ class WindowsUWPDevice extends Device {
       _logger.printError('Could not find PACKAGE_GUID in ${package.project.runnerCmakeFile.path}');
       return LaunchResult.failed();
     }
-    final ProcessResult result = await _processManager.run(<String>[
-      'powershell.exe',
-      _fileSystem.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'bin', 'getaumidfromname.ps1'),
-      '-Name',
-      guid,
-    ]);
-    if (result.exitCode != 0) {
-      _logger.printError('Failed to retrieve AUMID for project: ${result.stderr}');
-      return LaunchResult.failed();
-    }
 
-    final String aumidstring = result.stdout.toString().trim();
-    final String pfn = aumidstring.split('!').first;
+    final String appId = await _uwptool.getAppIdFromPackageId(guid);
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
-      _processId = _nativeApi.launchApp(aumidstring, <String>[]);
-      return LaunchResult.succeeded();
+      _processId = await _uwptool.launchApp(appId, <String>[]);
+      return _processId != null ? LaunchResult.succeeded() : LaunchResult.failed();
     }
 
     /// If the terminal is attached, prompt the user to open the firewall port.
     if (_logger.terminal.stdinHasTerminal) {
       await _logger.terminal.promptForCharInput(<String>['Y', 'y'], logger: _logger,
         prompt: 'To continue start an admin cmd prompt and run the following command:\n'
-        '   checknetisolation loopbackexempt -is -n=$pfn\n'
+        '   checknetisolation loopbackexempt -is -n=$appId\n'
         'Press "Y/y" once this is complete.'
       );
     }
 
     /// Currently we do not have a way to discover the VM Service URI.
-    final int port = debuggingOptions.deviceVmServicePort
-        ?? await _operatingSystemUtils.findFreePort();
-    _processId = _nativeApi.launchApp(aumidstring, <String>[
+    final int port = debuggingOptions.deviceVmServicePort ?? await _operatingSystemUtils.findFreePort();
+    final List<String> args = <String>[
       '--observatory-port=$port',
       '--disable-service-auth-codes',
       '--enable-dart-profiling',
@@ -250,7 +237,11 @@ class WindowsUWPDevice extends Device {
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
-    ]);
+    ];
+    _processId = await _uwptool.launchApp(appId, args);
+    if (_processId == null) {
+      return LaunchResult.failed();
+    }
     return LaunchResult.succeeded(observatoryUri: Uri.parse('http://localhost:$port'));
   }
 
@@ -279,14 +270,14 @@ class WindowsDevices extends PollingDeviceDiscovery {
     @required OperatingSystemUtils operatingSystemUtils,
     @required WindowsWorkflow windowsWorkflow,
     @required FeatureFlags featureFlags,
-    @required NativeApi nativeApi,
+    @required UwpTool uwptool,
   }) : _fileSystem = fileSystem,
       _logger = logger,
       _processManager = processManager,
       _operatingSystemUtils = operatingSystemUtils,
       _windowsWorkflow = windowsWorkflow,
       _featureFlags = featureFlags,
-      _nativeApi = nativeApi,
+      _uwptool = uwptool,
       super('windows devices');
 
   final FileSystem _fileSystem;
@@ -295,7 +286,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   final OperatingSystemUtils _operatingSystemUtils;
   final WindowsWorkflow _windowsWorkflow;
   final FeatureFlags _featureFlags;
-  final NativeApi _nativeApi;
+  final UwpTool _uwptool;
 
   @override
   bool get supportsPlatform => _windowsWorkflow.appliesToHostPlatform;
@@ -321,7 +312,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
           logger: _logger,
           processManager: _processManager,
           operatingSystemUtils: _operatingSystemUtils,
-          nativeApi: _nativeApi,
+          uwptool: _uwptool,
         )
     ];
   }

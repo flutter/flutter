@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
-import 'package:flutter_tools/src/windows/native_api.dart';
+import 'package:flutter_tools/src/windows/uwptool.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -71,7 +71,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-      nativeApi: FakeNativeApi(),
+      uwptool: FakeUwpTool(),
     ).devices, <Device>[]);
   });
 
@@ -86,7 +86,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-      nativeApi: FakeNativeApi(),
+      uwptool: FakeUwpTool(),
     ).devices, hasLength(1));
   });
 
@@ -102,7 +102,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: featureFlags,
-      nativeApi: FakeNativeApi(),
+      uwptool: FakeUwpTool(),
     ).devices, hasLength(2));
   });
 
@@ -117,7 +117,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-      nativeApi: FakeNativeApi(),
+      uwptool: FakeUwpTool(),
     );
     // Timeout ignored.
     final List<Device> devices = await windowsDevices.discoverDevices(timeout: const Duration(seconds: 10));
@@ -168,24 +168,18 @@ void main() {
 
   testWithoutContext('WinUWPDevice can launch application', () async {
     Cache.flutterRoot = '';
-    final FakeNativeApi nativeApi = FakeNativeApi();
+    final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
         'powershell.exe',
         'build/winuwp/runner_uwp/AppPackages/testapp/testapp_1.2.3.4_Debug_Test/install.ps1',
       ]),
-      const FakeCommand(command: <String>[
-        'powershell.exe',
-        'packages/flutter_tools/bin/getaumidfromname.ps1',
-        '-Name',
-        '1234'
-      ], stdout: 'ABCDEFG'),
     ]);
     final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
       fileSystem: fileSystem,
       processManager: processManager,
-      nativeApi: nativeApi,
+      uwptool: uwptool,
     );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
@@ -197,8 +191,8 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(nativeApi.requests.single.amuid, 'ABCDEFG');
-    expect(nativeApi.requests.single.args, <String>[
+    expect(uwptool.launchRequests.single.appId, 'PACKAGE-ID_asdfghjkl');
+    expect(uwptool.launchRequests.single.args, <String>[
       '--observatory-port=12345',
       '--disable-service-auth-codes',
       '--enable-dart-profiling',
@@ -209,24 +203,18 @@ void main() {
 
    testWithoutContext('WinUWPDevice can launch application in release mode', () async {
     Cache.flutterRoot = '';
-    final FakeNativeApi nativeApi = FakeNativeApi();
+    final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
         'powershell.exe',
         'build/winuwp/runner_uwp/AppPackages/testapp/testapp_1.2.3.4_Release_Test/install.ps1',
       ]),
-      const FakeCommand(command: <String>[
-        'powershell.exe',
-        'packages/flutter_tools/bin/getaumidfromname.ps1',
-        '-Name',
-        '1234'
-      ], stdout: 'ABCDEFG'),
     ]);
     final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
       fileSystem: fileSystem,
       processManager: processManager,
-      nativeApi: nativeApi,
+      uwptool: uwptool,
     );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
@@ -238,8 +226,8 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(nativeApi.requests.single.amuid, 'ABCDEFG');
-    expect(nativeApi.requests.single.args, <String>[]);
+    expect(uwptool.launchRequests.single.appId, 'PACKAGE-ID_asdfghjkl');
+    expect(uwptool.launchRequests.single.args, <String>[]);
   });
 }
 
@@ -268,14 +256,14 @@ WindowsUWPDevice setUpWindowsUwpDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
-  NativeApi nativeApi,
+  UwpTool uwptool,
 }) {
   return WindowsUWPDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: FakeOperatingSystemUtils(),
-    nativeApi: nativeApi ?? FakeNativeApi(),
+    uwptool: uwptool ?? FakeUwpTool(),
   );
 }
 
@@ -286,26 +274,49 @@ class FakeWindowsApp extends Fake implements WindowsApp {
 
 class FakeBuildableUwpApp extends Fake implements BuildableUwpApp {
   @override
-  String get id => '1234';
+  String get id => 'PACKAGE-ID';
   @override
   String get name => 'testapp';
   @override
   String get projectVersion => '1.2.3.4';
 }
 
-class FakeNativeApi implements NativeApi {
-  final List<FakeLaunchRequest> requests = <FakeLaunchRequest>[];
+class FakeUwpTool implements UwpTool {
+  final List<_LaunchRequest> launchRequests = <_LaunchRequest>[];
+  final List<_LookupAppIdRequest> lookupAppIdRequests = <_LookupAppIdRequest>[];
 
   @override
-  int launchApp(String amuid, List<String> args) {
-    requests.add(FakeLaunchRequest(amuid, args));
-    return 0;
+  Future<List<String>> listApps() async {
+    return <String>[
+      'fb89bf4f-55db-4bcd-8f0b-d8139953e08b',
+      '3e556a66-cb7f-4335-9569-35d5f5e37219',
+      'dfe5d409-a524-4635-b2f8-78a5e9551994',
+      '51e8a06b-02e8-4f76-9131-f20ce114fc34',
+    ];
+  }
+
+  @override
+  Future<String> getAppIdFromPackageId(String packageId) async {
+    lookupAppIdRequests.add(_LookupAppIdRequest(packageId));
+    return '${packageId}_asdfghjkl';
+  }
+
+  @override
+  Future<int> launchApp(String appId, List<String> args) async {
+    launchRequests.add(_LaunchRequest(appId, args));
+    return 42;
   }
 }
 
-class FakeLaunchRequest {
-  const FakeLaunchRequest(this.amuid, this.args);
+class _LookupAppIdRequest {
+  const _LookupAppIdRequest(this.packageId);
 
-  final String amuid;
+  final String packageId;
+}
+
+class _LaunchRequest {
+  const _LaunchRequest(this.appId, this.args);
+
+  final String appId;
   final List<String> args;
 }

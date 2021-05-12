@@ -30,7 +30,6 @@ import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
-import 'windows/native_api.dart';
 
 Cache get cache => context.get<Cache>()!;
 Config get config => context.get<Config>()!;
@@ -97,8 +96,6 @@ SystemClock get systemClock => context.get<SystemClock>() ?? _systemClock;
 SystemClock _systemClock = const SystemClock();
 
 ProcessInfo get processInfo => context.get<ProcessInfo>()!;
-
-NativeApi get nativeApi => context.get<NativeApi>()!;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
