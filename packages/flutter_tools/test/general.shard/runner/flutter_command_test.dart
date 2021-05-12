@@ -210,24 +210,23 @@ void main() {
           throwToolExit('fail');
         }
       );
-      try {
-        await flutterCommand.run();
-        fail('Mock should make this fail');
-      } on ToolExit {
-        expect(usage.events, <TestUsageEvent>[
-          const TestUsageEvent(
-            'tool-command-result',
-            'dummy',
-            label: 'fail',
-          ),
-          const TestUsageEvent(
-            'tool-command-max-rss',
-            'dummy',
-            label: 'fail',
-            value: 10,
-          ),
-        ]);
-      }
+      await expectLater(
+        () => flutterCommand.run(),
+        throwsA(isA<ToolExit>()),
+      );
+      expect(usage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'fail',
+        ),
+        const TestUsageEvent(
+          'tool-command-max-rss',
+          'dummy',
+          label: 'fail',
+          value: 10,
+        ),
+      ]);
     });
 
     test('FlutterCommandResult.success()', () async {
@@ -435,18 +434,18 @@ void main() {
         },
       );
 
-      try {
-        await flutterCommand.run();
-        fail('Mock should make this fail');
-      } on ToolExit {
-        expect(usage.timings, contains(
-          const TestTimingEvent(
-            'flutter',
-            'dummy',
-            Duration(milliseconds: 1000),
-            label: 'fail',
-          )));
-      }
+      await expectLater(
+        () => flutterCommand.run(),
+        throwsA(isA<ToolExit>()),
+      );
+      expect(usage.timings, contains(
+        const TestTimingEvent(
+          'flutter',
+          'dummy',
+          Duration(milliseconds: 1000),
+          label: 'fail',
+        ),
+      ));
     });
 
     testUsingContext('reports null safety analytics when reportNullSafety is true', () async {
