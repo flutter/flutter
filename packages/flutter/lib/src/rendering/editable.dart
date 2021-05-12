@@ -745,6 +745,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (index == 0) {
       return 0;
     }
+    // print('previous char $placeholderSpans');
+    // if (placeholderSpans != null && placeholderSpans.isNotEmpty) {
+    //   for (final PlaceholderSpan span in placeholderSpans) {
+    //     if (span.range == null) {
+    //       continue;
+    //     }
+    //     print('Checking: $index ${span.range}');
+    //     if (index > span.range!.start && index <= span.range!.end) {
+    //       print('In placeholder delete $index ${span.range}');
+    //       return span.range!.start;
+    //     }
+    //   }
+    // }
 
     int count = 0;
     int? lastNonWhitespace;
@@ -3307,7 +3320,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // Hit test text spans.
-    final bool hitText = false;
+    bool hitText = false;
     final Offset effectivePosition = position - _paintOffset;
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
@@ -3659,7 +3672,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
         baselineOffset: baselineOffset,
-        range: _placeholderSpans[childIndex].range,
+        range: _placeholderSpans[childIndex].range ?? TextRange.empty,
       );
       child = childAfter(child);
       childIndex += 1;
@@ -3934,7 +3947,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         Matrix4.diagonal3Values(scale, scale, scale),
         (PaintingContext context, Offset offset) {
           context.paintChild(
-            child,
+            child!,
             offset,
           );
         },

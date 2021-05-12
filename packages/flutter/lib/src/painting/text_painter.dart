@@ -456,7 +456,7 @@ class TextPainter {
     }
     int adjustment = 0;
     for (final PlaceholderDimensions dims in _placeholderDimensions!) {
-      if (!dims.isValid()) {
+      if (!dims.range.isValid) {
         continue;
       }
       if (dims.range.end <= offset) {
@@ -486,7 +486,7 @@ class TextPainter {
       return offset;
     }
     for (final PlaceholderDimensions dims in _placeholderDimensions!) {
-      if (!dims.isValid()) {
+      if (!dims.range.isValid) {
         continue;
       }
       if (offset > dims.range.end || offset > dims.range.start && offset <= dims.range.end) {
