@@ -388,41 +388,44 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
         // Scenic currently lacks an API to enable rendering of alpha channel;
         // Flutter Embedder also lacks an API to detect if a layer has alpha or
         // not. Alpha channels are only rendered if there is a OpacityNode
-        // higher in the tree with opacity != 1. For now, always assume t he
-        // layer has alpha and clamp to a infinitesimally smaller value than 1.
+        // higher in the tree with opacity != 1. For now, assume any layer
+        // beyond the first has alpha and clamp to a infinitesimally smaller
+        // value than 1.  The first layer retains an opacity of 1 to avoid
+        // blending with anything underneath.
         //
         // This does not cause visual problems in practice, but probably has
         // performance implications.
-        auto& scenic_layer = scenic_layers_[scenic_layer_index];
-        auto& scenic_rect = found_rects->second[rect_index];
+        const SkAlpha layer_opacity =
+            first_layer ? SK_AlphaOPAQUE : SK_AlphaOPAQUE - 1;
         const float layer_elevation =
             kScenicZElevationBetweenLayers * scenic_layer_index +
             embedded_views_height;
+        auto& scenic_layer = scenic_layers_[scenic_layer_index];
+        auto& scenic_rect = found_rects->second[rect_index];
         scenic_layer.shape_node.SetLabel("Flutter::Layer");
         scenic_layer.shape_node.SetShape(scenic_rect);
         scenic_layer.shape_node.SetTranslation(
             layer->second.surface_size.width() * 0.5f,
             layer->second.surface_size.height() * 0.5f, -layer_elevation);
         scenic_layer.material.SetColor(SK_AlphaOPAQUE, SK_AlphaOPAQUE,
-                                       SK_AlphaOPAQUE, SK_AlphaOPAQUE - 1);
+                                       SK_AlphaOPAQUE, layer_opacity);
         scenic_layer.material.SetTexture(surface_image_id);
 
         // Only the first (i.e. the bottom-most) layer should receive input.
         // TODO: Workaround for invisible overlays stealing input. Remove when
         // the underlying bug is fixed.
-        if (first_layer) {
-          scenic_layer.shape_node.SetHitTestBehavior(
-              fuchsia::ui::gfx::HitTestBehavior::kDefault);
-        } else {
-          scenic_layer.shape_node.SetHitTestBehavior(
-              fuchsia::ui::gfx::HitTestBehavior::kSuppress);
-        }
-        first_layer = false;
+        const fuchsia::ui::gfx::HitTestBehavior layer_hit_test_behavior =
+            first_layer ? fuchsia::ui::gfx::HitTestBehavior::kDefault
+                        : fuchsia::ui::gfx::HitTestBehavior::kSuppress;
+        scenic_layer.shape_node.SetHitTestBehavior(layer_hit_test_behavior);
 
         // Attach the ScenicLayer to the main scene graph.
         layer_tree_node_.AddChild(scenic_layer.shape_node);
 
-        // Account for the ScenicLayer's height when positioning the next layer.
+        // Reset for the next pass:
+        //  +The next layer will not be the first layer.
+        //  +Account for the current layer's height when positioning the next.
+        first_layer = false;
         scenic_layer_index++;
       }
     }
