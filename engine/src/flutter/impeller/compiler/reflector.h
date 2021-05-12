@@ -5,14 +5,15 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "third_party/spirv_cross/spirv_msl.hpp"
+#include "flutter/fml/mapping.h"
+#include "third_party/spirv_reflect/spirv_reflect.h"
 
 namespace impeller {
 namespace compiler {
 
 class Reflector {
  public:
-  Reflector(const spirv_cross::CompilerMSL& compiler);
+  Reflector(const fml::Mapping& spirv_binary);
 
   ~Reflector();
 
