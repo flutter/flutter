@@ -10,7 +10,35 @@ namespace impeller {
 namespace compiler {
 namespace testing {
 
-TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
+class CompilerTest : public ::testing::Test {
+ public:
+  CompilerTest()
+      : directory_(fml::OpenDirectory("/Users/chinmaygarde/Desktop/shaders",
+                                      false,
+                                      fml::FilePermission::kRead)) {
+    FML_CHECK(directory_.is_valid());
+  }
+
+  ~CompilerTest() {}
+
+  void WriteCompilerIntermediates(const Compiler& compiler,
+                                  const std::string& base_name) {
+    ASSERT_TRUE(compiler.IsValid());
+    fml::WriteAtomically(directory_,
+                         std::string{base_name + std::string{".spirv"}}.c_str(),
+                         *compiler.GetSPIRVAssembly());
+    fml::WriteAtomically(directory_,
+                         std::string{base_name + std::string{".metal"}}.c_str(),
+                         *compiler.GetMSLShaderSource());
+  }
+
+ private:
+  fml::UniqueFD directory_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CompilerTest);
+};
+
+TEST_F(CompilerTest, ShaderKindMatchingIsSuccessful) {
   ASSERT_EQ(Compiler::SourceTypeFromFileName("hello.vert"),
             Compiler::SourceType::kVertexShader);
   ASSERT_EQ(Compiler::SourceTypeFromFileName("hello.frag"),
@@ -21,21 +49,16 @@ TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
             Compiler::SourceType::kUnknown);
 }
 
-TEST(CompilerTest, CanCompileSample) {
-  auto fixture = flutter::testing::OpenFixtureAsMapping("sample.frag");
+TEST_F(CompilerTest, CanCompileSample) {
+  constexpr const char* kShaderFixtureName = "sample.frag";
+  auto fixture = flutter::testing::OpenFixtureAsMapping(kShaderFixtureName);
   ASSERT_NE(fixture->GetMapping(), nullptr);
-  Compiler::SourceOptions options("sample.frag");
+  Compiler::SourceOptions options(kShaderFixtureName);
   options.working_directory = std::make_shared<fml::UniqueFD>(
       flutter::testing::OpenFixturesDirectory());
   Compiler compiler(*fixture.get(), options);
   ASSERT_TRUE(compiler.IsValid());
-
-  auto desktop = fml::OpenDirectory("/Users/chinmaygarde/Desktop", false,
-                                    fml::FilePermission::kRead);
-  fml::WriteAtomically(desktop, "sample.frag.spirv",
-                       *compiler.GetSPIRVAssembly());
-  fml::WriteAtomically(desktop, "sample.frag.metal",
-                       *compiler.GetMSLShaderSource());
+  WriteCompilerIntermediates(compiler, kShaderFixtureName);
 }
 
 }  // namespace testing
