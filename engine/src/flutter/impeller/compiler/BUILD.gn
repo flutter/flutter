@@ -11,6 +11,8 @@ source_set("compiler_lib") {
     "logger.h",
     "reflector.cc",
     "reflector.h",
+    "switches.cc",
+    "switches.h",
   ]
 
   public_deps = [
@@ -22,12 +24,14 @@ source_set("compiler_lib") {
   ]
 }
 
-executable("compiler") {
-  output_name = "impellerc"
-
+executable("impellerc") {
   sources = [ "impellerc_main.cc" ]
 
   deps = [ ":compiler_lib" ]
+}
+
+group("compiler") {
+  deps = [ ":impellerc" ]
 }
 
 test_fixtures("compiler_test_fixtures") {

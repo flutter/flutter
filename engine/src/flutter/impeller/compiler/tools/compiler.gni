@@ -2,6 +2,32 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/compiled_action.gni")
+
 template("impeller_shaders") {
-  assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+  compiled_action_foreach(target_name) {
+    assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+
+    tool = "//flutter/impeller/compiler:impellerc"
+
+    sources = invoker.shaders
+
+    metal_intermediate = "$target_gen_dir/{{source_file_part}}.metal"
+    spirv_intermediate = "$target_gen_dir/{{source_file_part}}.spirv"
+
+    outputs = [
+      metal_intermediate,
+      spirv_intermediate,
+    ]
+
+    source_path = "{{source}}"
+    metal_intermediate_path = rebase_path(metal_intermediate, root_build_dir)
+    spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
+
+    args = [
+      "--input=$source_path",
+      "--metal=$metal_intermediate_path",
+      "--spirv=$spirv_intermediate_path",
+    ]
+  }
 }

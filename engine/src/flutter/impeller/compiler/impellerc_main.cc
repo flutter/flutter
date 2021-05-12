@@ -3,14 +3,65 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/command_line.h"
+#include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
+#include "flutter/impeller/compiler/compiler.h"
+#include "flutter/impeller/compiler/switches.h"
 #include "third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp"
 
 namespace impeller {
 namespace compiler {
 
 bool Main(const fml::CommandLine& command_line) {
-  return false;
+  if (command_line.HasOption("help")) {
+    Switches::PrintHelp(std::cout);
+    return true;
+  }
+
+  Switches switches(command_line);
+  if (!switches.AreValid(std::cerr)) {
+    std::cerr << "Invalid flags specified." << std::endl;
+    Switches::PrintHelp(std::cerr);
+    return false;
+  }
+
+  auto source_file_mapping = fml::FileMapping::CreateReadOnly(
+      *switches.working_directory, switches.source_file_name);
+  if (!source_file_mapping) {
+    std::cerr << "Could not open input file." << std::endl;
+    return false;
+  }
+
+  Compiler::SourceOptions options;
+  options.type = Compiler::SourceTypeFromFileName(switches.source_file_name);
+  options.working_directory = switches.working_directory;
+  options.file_name = switches.source_file_name;
+
+  Compiler compiler(*source_file_mapping, options);
+  if (!compiler.IsValid()) {
+    std::cerr << "Compilation failed." << std::endl;
+    std::cerr << compiler.GetErrorMessages() << std::endl;
+    return false;
+  }
+
+  if (!fml::WriteAtomically(*switches.working_directory,
+                            switches.spirv_file_name.c_str(),
+                            *compiler.GetSPIRVAssembly())) {
+    std::cerr << "Could not write file to " << switches.spirv_file_name
+              << std::endl;
+    return false;
+  }
+
+  if (!fml::WriteAtomically(*switches.working_directory,
+                            switches.metal_file_name.c_str(),
+                            *compiler.GetMSLShaderSource())) {
+    std::cerr << "Could not write file to " << switches.spirv_file_name
+              << std::endl;
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace compiler
