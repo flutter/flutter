@@ -88,7 +88,10 @@ Future<void> runWebServiceWorkerTest({
       server = await AppServer.start(
         headless: headless,
         cacheControl: cacheControl,
-        appUrl: 'http://localhost:8080/index.html',
+        // TODO(yjbanov): use a better port disambiguation strategy than trying
+        //                to guess what ports other tests use.
+        appUrl: 'http://localhost:8081/index.html',
+        serverPort: 8081,
         appDirectory: _appBuildDirectory,
         additionalRequestHandlers: <Handler>[
           (Request request) {
