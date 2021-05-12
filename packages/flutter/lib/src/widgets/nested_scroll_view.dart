@@ -983,10 +983,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         assert(minRange <= maxRange);
         correctionOffset = _outerPosition!.pixels - pixels;
 
-        /// Compute IEEE-754 error that might potentially occur and cause position
-        /// to overflow when running the simulation.
+        // Compute IEEE-754 error that might potentially occur and cause position
+        // to overflow when running the simulation.
         final double ieee754Error = maxRange + correctionOffset - _outerPosition!.maxScrollExtent;
-
         if (ieee754Error != 0.0) {
           maxRange -= ieee754Error;
           correctionOffset -= ieee754Error;
