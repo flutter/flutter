@@ -9,6 +9,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/impeller/compiler/reflector.h"
 #include "shaderc/shaderc.hpp"
 #include "third_party/spirv_cross/spirv_msl.hpp"
 
@@ -54,6 +55,7 @@ class Compiler {
   std::shared_ptr<shaderc::SpvCompilationResult> spv_result_;
   std::shared_ptr<std::string> msl_string_;
   std::stringstream error_stream_;
+  std::unique_ptr<Reflector> reflector_;
   bool is_valid_ = false;
 
   std::string GetSourcePrefix() const;

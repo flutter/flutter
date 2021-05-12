@@ -9,6 +9,8 @@ source_set("compiler_lib") {
     "compiler.cc",
     "compiler.h",
     "logger.h",
+    "reflector.cc",
+    "reflector.h",
   ]
 
   public_deps = [

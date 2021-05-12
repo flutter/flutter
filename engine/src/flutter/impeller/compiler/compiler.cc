@@ -146,9 +146,14 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   }
 
   shaderc::CompileOptions options;
+
+  // Make sure reflection is as effective as possible. The generated shaders
+  // will be processed later by backend specific compilers. So optimizations
+  // here are irrelevant and get in the way of generating reflection code.
   options.SetGenerateDebugInfo();
   options.SetOptimizationLevel(
-      shaderc_optimization_level::shaderc_optimization_level_size);
+      shaderc_optimization_level::shaderc_optimization_level_zero);
+
   options.SetSourceLanguage(
       shaderc_source_language::shaderc_source_language_glsl);
   options.SetForcedVersionProfile(450, shaderc_profile::shaderc_profile_core);
@@ -156,8 +161,10 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
       shaderc_target_env::shaderc_target_env_vulkan,
       shaderc_env_version::shaderc_env_version_vulkan_1_1);
   options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_3);
+
   options.SetAutoBindUniforms(true);
   options.SetAutoMapLocations(true);
+
   options.SetIncluder(std::make_unique<Includer>(options_.working_directory));
 
   shaderc::Compiler spv_compiler;
@@ -207,19 +214,11 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  const auto resources = msl_compiler.get_shader_resources();
+  reflector_ = std::make_unique<Reflector>(msl_compiler);
 
-  for (const auto& stage_input : resources.stage_inputs) {
-    FML_LOG(ERROR) << stage_input.name;
-  }
-
-  for (const auto& stage_output : resources.stage_outputs) {
-    FML_LOG(ERROR) << stage_output.name;
-  }
-
-  for (const auto& uniform_buffer : resources.uniform_buffers) {
-    FML_LOG(ERROR) << uniform_buffer.name;
-    auto type = msl_compiler.get_type(uniform_buffer.base_type_id);
+  if (!reflector_->IsValid()) {
+    COMPILER_ERROR << "Could not complete reflection on generated shader.";
+    return;
   }
 
   is_valid_ = true;

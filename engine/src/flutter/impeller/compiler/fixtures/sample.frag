@@ -14,5 +14,5 @@ in vec2 inTextureCoord;
 out vec4 outColor;
 
 void main() {
-  outColor = texture(textureSampler, inTextureCoord * myHello.more_stuff);
+  outColor = texture(textureSampler, inTextureCoord * goodbyeHello.yet_more_stuff);
 }
