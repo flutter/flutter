@@ -305,37 +305,37 @@
       "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_integration_tests",
+      "name": "Linux web_long_running_tests_1_5",
       "repo": "flutter",
-      "task_name": "linux_web_integration_tests",
-      "enabled": true,
-      "run_if": [
-        "dev/",
-        "packages/flutter/",
-        "packages/flutter_test/",
-        "packages/flutter_tools/",
-        "packages/flutter_web_plugins/",
-        "bin/"
-      ]
-    },
-    {
-      "name": "Linux web_long_running_tests_1_3",
-      "repo": "flutter",
-      "task_name": "web_long_running_tests_1_3",
+      "task_name": "web_long_running_tests_1_5",
       "enabled": true,
       "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_long_running_tests_2_3",
+      "name": "Linux web_long_running_tests_2_5",
       "repo": "flutter",
-      "task_name": "web_long_running_tests_2_3",
+      "task_name": "web_long_running_tests_2_5",
       "enabled": true,
       "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_long_running_tests_3_3",
+      "name": "Linux web_long_running_tests_3_5",
       "repo": "flutter",
-      "task_name": "web_long_running_tests_1_3",
+      "task_name": "web_long_running_tests_3_5",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_long_running_tests_4_5",
+      "repo": "flutter",
+      "task_name": "web_long_running_tests_4_5",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_long_running_tests_5_5",
+      "repo": "flutter",
+      "task_name": "web_long_running_tests_5_5",
       "enabled": true,
       "run_if": ["dev/", "packages/", "bin/"]
     },
