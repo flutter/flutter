@@ -394,10 +394,14 @@ deps = {
    'src/third_party/abseil-cpp':
    Var('chromium_git') + '/chromium/src/third_party/abseil-cpp.git' + '@' + '2d8c1340f0350828f1287c4eaeebefcf317bcfc9',
 
-  'src/third_party/pkg/when':
-   Var('dart_git') + '/when.git' + '@' + '0.2.0',
+   # Dart packages
+  'src/third_party/pkg/archive':
+  Var('github_git') + '/brendan-duncan/archive.git' + '@' + '3.1.2',
 
-   'src/third_party/android_tools/ndk': {
+  'src/third_party/pkg/when':
+  Var('dart_git') + '/when.git' + '@' + '0.2.0',
+
+  'src/third_party/android_tools/ndk': {
      'packages': [
        {
         'package': 'flutter/android/ndk/${{platform}}',
