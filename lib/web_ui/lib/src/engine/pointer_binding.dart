@@ -11,8 +11,6 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'pointer_converter.dart';
-
 /// Set this flag to true to see all the fired events in the console.
 const bool _debugLogPointerEvents = false;
 
