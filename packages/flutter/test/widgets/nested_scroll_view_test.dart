@@ -2452,7 +2452,7 @@ void main() {
       home: Scaffold(
         body: NestedScrollView(
           floatHeaderSlivers: true,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => [
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
             const SliverAppBar(
               expandedHeight: 250.0,
             ),
