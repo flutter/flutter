@@ -17,6 +17,7 @@ import sys
 ALL_PACKAGES = [
   os.path.join("src", "flutter", "flutter_frontend_server"),
   os.path.join("src", "flutter", "tools", "const_finder"),
+  os.path.join("src", "flutter", "tools", "licenses"),
 ]
 
 

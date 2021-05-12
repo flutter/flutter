@@ -62,7 +62,6 @@ dart --version
 # Runs in a subshell.
 function collect_licenses() (
   cd "$SRC_DIR/flutter/tools/licenses"
-  pub get
   dart --enable-asserts lib/main.dart         \
     --src ../../..                            \
     --out ../../../out/license_script_output  \
