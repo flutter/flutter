@@ -1,4 +1,4 @@
-Signature: c8afa8c576b40af414fa76e7692a71fd
+Signature: ad14e06ff342023401deaac90eda0bca
 
 UNUSED LICENSES:
 
@@ -2967,6 +2967,7 @@ FILE: ../../../third_party/skia/include/core/SkCubicMap.h
 FILE: ../../../third_party/skia/include/core/SkFontMetrics.h
 FILE: ../../../third_party/skia/include/core/SkFontParameters.h
 FILE: ../../../third_party/skia/include/core/SkFontTypes.h
+FILE: ../../../third_party/skia/include/core/SkSpan.h
 FILE: ../../../third_party/skia/include/effects/SkOpPathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
 FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
@@ -3042,7 +3043,6 @@ FILE: ../../../third_party/skia/src/core/SkRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.cpp
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.h
 FILE: ../../../third_party/skia/src/core/SkSafeRange.h
-FILE: ../../../third_party/skia/src/core/SkSpan.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
 FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
