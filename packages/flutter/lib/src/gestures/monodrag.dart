@@ -33,8 +33,9 @@ typedef GestureDragEndCallback = void Function(DragEndDetails details);
 /// Used by [DragGestureRecognizer.onCancel].
 typedef GestureDragCancelCallback = void Function();
 
-/// Signature for a function that computes the distance pointer has to travel
-/// in global coordinate system for framework to be confident that this is a drag gesture.
+/// Signature for a function that computes the distance pointer has
+/// to travel in global coordinate system for framework to be confident
+/// that this is a drag gesture.
 ///
 /// Used by [DragGestureRecognizer.computeSlop].
 typedef GestureComputeSlopCallback = double Function(PointerDeviceKind event);
@@ -216,9 +217,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
-  /// Computes the distance pointer has to travel in global coordinate system for framework to be confident
-  /// that this is a drag gesture. This value will be ignored when reconginzer is a single
-  /// member of gesture arena.
+  /// Computes the distance pointer has to travel in global coordinate system
+  /// for framework to be confident that this is a drag gesture. This value
+  /// will be ignored when recognizer is the only member in gesture arena.
   ///
   /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
   /// what kind of pointer is currently being checked.
@@ -251,9 +252,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
 
-  /// The default distance pointer has to travel in global coordinate system for framework to be confident
-  /// that this is a drag gesture. This value will be ignored when reconginzer is a single
-  /// member of gesture arena.
+  /// The default distance pointer has to travel in global coordinate system
+  /// for framework to be confident that this is a drag gesture. This value
+  /// will be ignored when recognizer is the only member in gesture arena.
   ///
   /// To specify custom slop, [computeSlop] can be provided.
   ///
