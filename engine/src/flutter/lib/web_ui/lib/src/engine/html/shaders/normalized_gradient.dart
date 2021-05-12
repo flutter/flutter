@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 
 import 'package:ui/ui.dart' as ui;
-import 'shader_builder.dart';
 
 /// Converts colors and stops to typed array of bias, scale and threshold to use
 /// in shaders.
