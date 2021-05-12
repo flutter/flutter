@@ -112,7 +112,7 @@ void main() {
     environment.buildDir.childFile('main.dart.js').createSync();
     await const WebReleaseBundle().build(environment);
 
-    expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/');
+    expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
 
   test('null base href does not override existing base href in index.html', () => testbed.run(() async {
