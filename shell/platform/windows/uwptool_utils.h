@@ -23,6 +23,8 @@ class Application {
   std::wstring GetPackageId() const { return package_id_; }
 
   // Launches the application with the specified list of launch arguments.
+  //
+  // Returns the process ID on success, or -1 on failure.
   int Launch(const std::wstring_view args);
 
  private:
