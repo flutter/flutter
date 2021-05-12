@@ -505,21 +505,6 @@ Future<void> _flutterBuildMacOS(String relativePathToApplication, {
   );
 }
 
-Future<void> _flutterBuildWin32(String relativePathToApplication, {
-  @required bool release,
-  bool verifyCaching = false,
-  List<String> additionalArgs = const <String>[],
-}) async {
-  assert(Platform.isWindows);
-  await runCommand(flutter, <String>['config', '--enable-windows-desktop']);
-  print('${green}Testing Windows build$reset for $cyan$relativePathToApplication$reset...');
-  await _flutterBuild(relativePathToApplication, 'Windows', 'windows',
-    release: release,
-    verifyCaching: verifyCaching,
-    additionalArgs: additionalArgs
-  );
-}
-
 Future<void> _flutterBuild(
   String relativePathToApplication,
   String platformLabel,
