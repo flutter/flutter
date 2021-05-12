@@ -12,6 +12,7 @@ import 'package:shelf/shelf.dart';
 import 'browser.dart';
 import 'run_command.dart';
 import 'test/common.dart';
+import 'utils.dart';
 
 final String _bat = Platform.isWindows ? '.bat' : '';
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
@@ -85,14 +86,16 @@ Future<void> runWebServiceWorkerTest({
     Future<void> startAppServer({
       @required String cacheControl,
     }) async {
+      final int serverPort = await findAvailablePort();
+      final int browserDebugPort = await findAvailablePort();
       server = await AppServer.start(
         headless: headless,
         cacheControl: cacheControl,
         // TODO(yjbanov): use a better port disambiguation strategy than trying
         //                to guess what ports other tests use.
-        appUrl: 'http://localhost:9090/index.html',
-        serverPort: 9090,
-        browserDebugPort: 9091,
+        appUrl: 'http://localhost:$serverPort/index.html',
+        serverPort: serverPort,
+        browserDebugPort: browserDebugPort,
         appDirectory: _appBuildDirectory,
         additionalRequestHandlers: <Handler>[
           (Request request) {

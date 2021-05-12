@@ -851,11 +851,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
     () => runWebServiceWorkerTest(headless: true),
-    // TODO(yjbanov): reenable after resolving port conflicts
-    // () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
-    // () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
-    // () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
-    // () => _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart'),
+    () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
+    () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
+    () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
+    () => _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/stack_trace.dart'),
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
@@ -1125,9 +1124,13 @@ Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
   );
 
   // Run the app.
+  final int serverPort = await findAvailablePort();
+  final int browserDebugPort = await findAvailablePort();
   final String result = await evalTestAppInChrome(
-    appUrl: 'http://localhost:8080/index.html',
+    appUrl: 'http://localhost:$serverPort/index.html',
     appDirectory: appBuildDirectory,
+    serverPort: serverPort,
+    browserDebugPort: browserDebugPort,
   );
 
   if (result.contains('--- TEST SUCCEEDED ---')) {
@@ -1169,9 +1172,13 @@ Future<void> _runWebReleaseTest(String target, {
   );
 
   // Run the app.
+  final int serverPort = await findAvailablePort();
+  final int browserDebugPort = await findAvailablePort();
   final String result = await evalTestAppInChrome(
-    appUrl: 'http://localhost:8080/index.html',
+    appUrl: 'http://localhost:$serverPort/index.html',
     appDirectory: appBuildDirectory,
+    serverPort: serverPort,
+    browserDebugPort: browserDebugPort,
   );
 
   if (result.contains('--- TEST SUCCEEDED ---')) {
