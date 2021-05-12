@@ -73,6 +73,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   flavorUndefinedHandler,
   r8FailureHandler,
   androidXFailureHandler,
+  transformInputIssue,
 ];
 
 // Permission defined error message.
@@ -351,4 +352,38 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'flavor-undefined',
+);
+
+/// Handler when https://issuetracker.google.com/issues/141126614 or
+/// https://github.com/flutter/flutter/issues/58247 is triggered.
+@visibleForTesting
+final GradleHandledError transformInputIssue = GradleHandledError(
+  test: (String line) {
+    return line.contains('https://issuetracker.google.com/issues/158753935');
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+
+    globals.printStatus(
+      '\nThis issue appears to be https://github.com/flutter/flutter/issues/58247.\n'+
+      globals.logger.terminal.bolden(
+        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+        'android {\n'
+        '  lintOptions {\n'
+        '    checkReleaseBuilds false\n'
+        '  }\n'
+        '}'
+      )
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'transform-input-issue',
 );

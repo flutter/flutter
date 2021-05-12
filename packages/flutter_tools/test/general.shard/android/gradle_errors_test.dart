@@ -29,6 +29,7 @@ void main() {
           flavorUndefinedHandler,
           r8FailureHandler,
           androidXFailureHandler,
+          transformInputIssue,
         ])
       );
     });
@@ -646,6 +647,45 @@ assembleProfile
       FileSystem: () => MemoryFileSystem.test(),
     });
   });
+
+  // https://issuetracker.google.com/issues/141126614
+  group('transform input issue', () {
+    testWithoutContext('pattern', () {
+      expect(
+        transformInputIssue.test(
+          'https://issuetracker.google.com/issues/158753935'
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await transformInputIssue.handler(
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
+          'Fix this issue by adding the following to the file /android/app/build.gradle:\n'
+          'android {\n'
+          '  lintOptions {\n'
+          '    checkReleaseBuilds false\n'
+          '  }\n'
+          '}\n'
+          ''
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
