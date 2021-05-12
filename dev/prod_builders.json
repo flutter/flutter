@@ -376,7 +376,7 @@
       "name": "Linux platform_channels_benchmarks",
       "repo": "flutter",
       "task_name": "linux_platform_channels_benchmarks",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux platform_views_scroll_perf__timeline_summary",
