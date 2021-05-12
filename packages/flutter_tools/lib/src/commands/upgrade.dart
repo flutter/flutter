@@ -239,10 +239,9 @@ class UpgradeCommandRunner {
     // If localVersion.repositoryUrl is null, exit
     if (localVersion.repositoryUrl == null) {
       throwToolExit(
-        'Unable to upgrade Flutter: The Flutter SDK is tracking an "unknown" '
-        'remote.\n'
-        'Re-install Flutter by going to $_flutterInstallDocs. Alternatively, use '
-        '"git" directly to configure a valid upstream for the branch and retry.'
+        'Unable to upgrade Flutter: The tool could not determine the url of '
+        'the remote upstream which is currently being tracked by the SDK.\n'
+        'Re-install Flutter by going to $_flutterInstallDocs.'
       );
     }
 
@@ -329,9 +328,9 @@ class UpgradeCommandRunner {
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         throwToolExit(
-          'Unable to upgrade Flutter: No upstream repository configured for branch.\n'
-          'Re-install Flutter by going to $_flutterInstallDocs. Alternatively, use '
-          '"git" directly to configure an upstream for the branch and retry.'
+          'Unable to upgrade Flutter: No upstream repository configured for '
+          'current branch.\n'
+          'Re-install Flutter by going to $_flutterInstallDocs.'
         );
       } else {
         throwToolExit(errorString);

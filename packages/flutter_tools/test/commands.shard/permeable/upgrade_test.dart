@@ -237,9 +237,8 @@ void main() {
         err = e;
       }
       expect(err, isNotNull);
-      expect(err.toString(), contains('Unable to upgrade Flutter: No upstream repository configured for branch.'));
+      expect(err.toString(), contains('Unable to upgrade Flutter: No upstream repository configured for current branch.'));
       expect(err.toString(), contains('Re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
-      expect(err.toString(), contains('use "git" directly to configure an upstream for the branch and retry.'));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -265,9 +264,8 @@ void main() {
           err = e;
         }
         expect(err, isNotNull);
-        expect(err.toString(), contains('The Flutter SDK is tracking an "unknown" remote.'));
+        expect(err.toString(), contains('could not determine the url of the remote upstream which is currently being tracked by the SDK'));
         expect(err.toString(), contains('Re-install Flutter by going to https://flutter.dev/docs/get-started/install'));
-        expect(err.toString(), contains('use "git" directly to configure a valid upstream for the branch and retry.'));
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator> {
         ProcessManager: () => processManager,
