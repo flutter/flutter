@@ -5,8 +5,6 @@
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../browser_detection.dart';
-
 /// Counter used for generating clip path id inside an svg <defs> tag.
 int _clipIdCounter = 0;
 
