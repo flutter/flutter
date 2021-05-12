@@ -5744,6 +5744,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
 
+  /// The selection service used to perform text selection of this paragraph.
+  ///
+  /// If `null`, text selection is disabled.
   final SelectionService? selectionService;
 
   /// The directionality of the text.

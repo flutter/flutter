@@ -374,7 +374,6 @@ class RenderParagraph extends RenderBox
   }
 
   TextSelection? _textSelection;
-  Rect? _lastRect;
 
   /// Clear the current text selection, but only mark for a paint if it has
   /// been set to a non-null value.
@@ -386,7 +385,10 @@ class RenderParagraph extends RenderBox
 
   @override
   bool update(Rect rect) {
-    final Rect? boundingRect = _lastRect;
+    if (!hasSize) {
+      return false;
+    }
+    final Rect boundingRect = Rect.fromLTWH(0, 0, size.width, size.height);
     // This RO has not been laid out yet, it can't be selected.
     if (boundingRect == null) {
       _clearSelection();
@@ -400,15 +402,14 @@ class RenderParagraph extends RenderBox
     final Matrix4 transform = getTransformTo(null);
     transform.invert();
     Rect selectionRect = MatrixUtils.transformRect(transform, rect);
-    final Rect intersection = _lastRect!.intersect(selectionRect);
+    final Rect intersection = boundingRect.intersect(selectionRect);
     // If width or height are negative, there is no overlap between
     // the selection rect and the estimated bounds of this RO.
     if (intersection.width < 0 || intersection.height < 0) {
       _clearSelection();
       return false;
     }
-    // If the selection entirely clears the bounding box, expand it to the maximum
-    // width.
+    // If the selection entirely clears the bounding box, expand it to the maximum width.
     if (selectionRect.top < boundingRect.top && selectionRect.bottom > boundingRect.bottom)
       selectionRect = Rect.fromLTRB(
         math.min(selectionRect.left, boundingRect.left),
@@ -823,7 +824,6 @@ class RenderParagraph extends RenderBox
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
     _layoutTextWithConstraints(constraints);
-    _lastRect = offset & size;
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
@@ -881,7 +881,6 @@ class RenderParagraph extends RenderBox
       }
       context.canvas.restore();
     }
-    // TODO: themeing
     final TextSelection? textSelection = _textSelection;
     if (textSelection != null) {
       for (final TextBox textBox in getBoxesForSelection(textSelection)) {

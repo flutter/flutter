@@ -410,7 +410,6 @@ class RenderImage extends RenderBox implements Selectable {
       filterQuality: _filterQuality,
       isAntiAlias: _isAntiAlias,
     );
-    // TODO: themeing.
     if (_selected) {
       context.canvas.drawRect(_lastRect, Paint()..color = const Color(0xAF6694e8) ..style = PaintingStyle.fill);
     }

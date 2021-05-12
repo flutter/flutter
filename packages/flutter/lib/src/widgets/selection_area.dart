@@ -6,13 +6,18 @@ import 'package:flutter/services.dart';
 
 import '../../widgets.dart';
 
+/// A widget that introduces an area that allows for arbitrary text selection.
 class SelectionArea extends StatefulWidget {
+  /// Create a new [SelectionArea] widget/
   const SelectionArea({
     required this.child,
     Key? key,
     this.enabled = true,
   }) : super(key: key);
 
+  /// The child widget this selection area applies to.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Whether this selection area enables text selection in descendant widgets.
@@ -23,8 +28,13 @@ class SelectionArea extends StatefulWidget {
   final bool enabled;
 
   @override
-  _SelectionAreaState createState() => _SelectionAreaState();
+  State<SelectionArea> createState() => _SelectionAreaState();
 
+  /// Look up the nearest [SelectionService] introduced via a [SelectionArea]
+  /// widget.
+  ///
+  /// Returns `null` if there is no selection service or if selection was not
+  /// enabled on a [SelectionArea].
   static SelectionService? of(BuildContext context) {
     final _SelectionAreaState? state = context.findRootAncestorStateOfType<_SelectionAreaState>();
     if (state == null || !state.widget.enabled)
@@ -40,6 +50,43 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
 
   Offset? _start;
   Offset? _end;
+
+  @override
+  void initState() {
+    super.initState();
+    _gestureRecognizers[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+      () => PanGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse}),
+      (PanGestureRecognizer instance) {
+        instance
+          ..onDown = _handleDragDown
+          ..onStart = _handleDragStart
+          ..onUpdate = _handleDragUpdate
+          ..onCancel = _cancelSelection
+          ..dragStartBehavior = DragStartBehavior.down;
+      },
+    );
+    _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+        () => TapGestureRecognizer(debugOwner: this),
+        (TapGestureRecognizer instance) {
+          instance
+            .onTapDown = _handleTapDown;
+        },
+      );
+  }
+
+  @override
+  void didUpdateWidget(covariant SelectionArea oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    for (final Selectable selectable in _selectables) {
+      selectable.clear();
+    }
+    _selectables.clear();
+    super.dispose();
+  }
 
   @override
   void add(Selectable selectable) {
@@ -65,13 +112,6 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
   void _handleDragUpdate(DragUpdateDetails details) {
     final Offset offset = (context.findRenderObject() as RenderBox?)!.localToGlobal(details.localPosition);
     _updateSelection(offset);
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-  }
-
-  void _handleDragCancel() {
-    _cancelSelection();
   }
 
   void _handleTapDown(TapDownDetails details) {
@@ -117,39 +157,6 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
     // The order in which these should be concatenated is ???. For now this
     // sorts by the order in which the selectables were added.
     Clipboard.setData(ClipboardData.text(selections.join('\n')));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _gestureRecognizers[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-      () => PanGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse}),
-      (PanGestureRecognizer instance) {
-        instance
-          ..onDown = _handleDragDown
-          ..onStart = _handleDragStart
-          ..onUpdate = _handleDragUpdate
-          ..onEnd = _handleDragEnd
-          ..onCancel = _handleDragCancel
-          ..dragStartBehavior = DragStartBehavior.down;
-      },
-    );
-    _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-        () => TapGestureRecognizer(debugOwner: this),
-        (TapGestureRecognizer instance) {
-          instance
-            .onTapDown = _handleTapDown;
-        },
-      );
-  }
-
-  @override
-  void dispose() {
-    for (final Selectable selectable in _selectables) {
-      selectable.clear();
-    }
-    _selectables.clear();
-    super.dispose();
   }
 
   static const Map<ShortcutActivator, Intent> _kShortcuts = <ShortcutActivator, Intent>{
