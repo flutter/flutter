@@ -965,25 +965,25 @@ class BitmapCanvas extends EngineCanvas {
     // as well.
     assert(paint.shader == null || paint.shader is EngineImageShader,
         'Linear/Radial/SweepGradient not supported yet');
-    final Int32List? colors = vertices._colors;
-    final ui.VertexMode mode = vertices._mode;
+    final Int32List? colors = vertices.colors;
+    final ui.VertexMode mode = vertices.mode;
     html.CanvasRenderingContext2D? ctx = _canvasPool.context;
     if (colors == null && paint.style != ui.PaintingStyle.fill &&
         paint.shader == null) {
       final Float32List positions = mode == ui.VertexMode.triangles
-          ? vertices._positions
-          : _convertVertexPositions(mode, vertices._positions);
+          ? vertices.positions
+          : convertVertexPositions(mode, vertices.positions);
       // Draw hairline for vertices if no vertex colors are specified.
       save();
       final ui.Color color = paint.color ?? ui.Color(0xFF000000);
       _canvasPool.contextHandle
         ..fillStyle = null
         ..strokeStyle = colorToCssString(color);
-      _glRenderer!.drawHairline(ctx, positions);
+      glRenderer!.drawHairline(ctx, positions);
       restore();
       return;
     }
-    _glRenderer!.drawVertices(ctx, _widthInBitmapPixels, _heightInBitmapPixels,
+    glRenderer!.drawVertices(ctx, _widthInBitmapPixels, _heightInBitmapPixels,
         _canvasPool.currentTransform, vertices, blendMode, paint);
   }
 
