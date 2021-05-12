@@ -523,27 +523,33 @@
       "flaky": false
     },
     {
-      "name": "Linux web_integration_tests",
+      "name": "Linux web_long_running_tests_1_5",
       "repo": "flutter",
-      "task_name": "linux_web_integration_tests",
+      "task_name": "linux_web_long_running_tests_1_5",
       "flaky": false
     },
     {
-      "name": "Linux web_long_running_tests_1_3",
+      "name": "Linux web_long_running_tests_2_5",
       "repo": "flutter",
-      "task_name": "linux_web_long_running_tests_1_3",
+      "task_name": "linux_web_long_running_tests_2_5",
       "flaky": false
     },
     {
-      "name": "Linux web_long_running_tests_2_3",
+      "name": "Linux web_long_running_tests_3_5",
       "repo": "flutter",
-      "task_name": "linux_web_long_running_tests_2_3",
+      "task_name": "linux_web_long_running_tests_3_5",
       "flaky": false
     },
     {
-      "name": "Linux web_long_running_tests_3_3",
+      "name": "Linux web_long_running_tests_4_5",
       "repo": "flutter",
-      "task_name": "linux_web_long_running_tests_3_3",
+      "task_name": "linux_web_long_running_tests_4_5",
+      "flaky": false
+    },
+    {
+      "name": "Linux web_long_running_tests_5_5",
+      "repo": "flutter",
+      "task_name": "linux_web_long_running_tests_5_5",
       "flaky": false
     },
     {

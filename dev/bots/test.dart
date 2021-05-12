@@ -108,8 +108,9 @@ Future<void> main(List<String> args) async {
       'tool_tests': _runToolTests,
       'web_tool_tests': _runToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_tests': _runWebUnitTests,
-      'web_integration_tests': _runWebIntegrationTests,
+      // All web integration tests
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPluginsTests,
       'skp_generator': _runSkpGeneratorTests,
@@ -850,6 +851,34 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
     () => runWebServiceWorkerTest(headless: true),
+    () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
+    () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
+    () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
+    () => _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart'),
+    () => _runWebDebugTest('lib/stack_trace.dart'),
+    () => _runWebDebugTest('lib/framework_stack_trace.dart'),
+    () => _runWebDebugTest('lib/web_directory_loading.dart'),
+    () => _runWebDebugTest('test/test.dart'),
+    () => _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true),
+    () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
+    () => _runWebDebugTest('lib/web_define_loading.dart',
+      additionalArguments: <String>[
+        '--dart-define=test.valueA=Example,A',
+        '--dart-define=test.valueB=Value',
+      ]
+    ),
+    () => _runWebReleaseTest('lib/web_define_loading.dart',
+      additionalArguments: <String>[
+        '--dart-define=test.valueA=Example,A',
+        '--dart-define=test.valueB=Value',
+      ]
+    ),
+    () => _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
+      '--sound-null-safety',
+    ]),
+    () => _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
+      '--sound-null-safety',
+    ]),
   ];
   await _ensureChromeDriverIsRunning();
   await _runShardRunnerIndexOfTotalSubshard(tests);
@@ -1067,48 +1096,6 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
     },
   );
   print('${green}Integration test passed.$reset');
-}
-
-/// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/// !!! WARNING WARNING WARNING WARNING WARNING WARNING!!!
-/// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-///
-/// Do not put any more tests here. This shard is not properly subsharded.
-/// Adding more tests here will linearly increase the runtime of the shard
-/// making the overall Flutter CI build longer. Consider adding tests to
-/// [_runWebLongRunningTests] instead (increasing subshard count if necessary).
-///
-// TODO(yjbanov): increase subshard count in _runWebLongRunningTests and retire
-//                this shard.
-Future<void> _runWebIntegrationTests() async {
-  await _runWebStackTraceTest('profile', 'lib/stack_trace.dart');
-  await _runWebStackTraceTest('release', 'lib/stack_trace.dart');
-  await _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart');
-  await _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart');
-  await _runWebDebugTest('lib/stack_trace.dart');
-  await _runWebDebugTest('lib/framework_stack_trace.dart');
-  await _runWebDebugTest('lib/web_directory_loading.dart');
-  await _runWebDebugTest('test/test.dart');
-  await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
-  await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
-  await _runWebDebugTest('lib/web_define_loading.dart',
-    additionalArguments: <String>[
-      '--dart-define=test.valueA=Example,A',
-      '--dart-define=test.valueB=Value',
-    ]
-  );
-  await _runWebReleaseTest('lib/web_define_loading.dart',
-    additionalArguments: <String>[
-      '--dart-define=test.valueA=Example,A',
-      '--dart-define=test.valueB=Value',
-    ]
-  );
-  await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--sound-null-safety',
-  ]);
-  await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--sound-null-safety',
-  ]);
 }
 
 Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
