@@ -985,27 +985,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
         /// Compute IEEE-754 error that might potentially occur and cause position
         /// to overflow when running the simulation.
-        ///
-        /// See https://github.com/flutter/flutter/issues/63825
         final double ieee754Error = maxRange + correctionOffset - _outerPosition!.maxScrollExtent;
-
-        /// See https://github.com/dart-lang/sdk/issues/45998 for more context.
-        ///
-        /// ```
-        /// double b1 = 856.0;             // innerPosition.pixels
-        /// double b2 = 0.0;               // innerPosition.minScrollExtent
-        /// double b3 = 250.0;             // _outerPosition!.maxScrollExtent
-        /// double b4 = 183.7981622869321; // _outerPosition!.pixels
-        /// double p = b1 - b2 + b3;       // pixels
-        /// double e = b3 - b4;            // extra
-        /// double c = b4 - p;             // correctionOffset
-        ///
-        /// double res1 = b1 - b2 + b3     // == 0
-        ///               + b3 - b4
-        ///               + b4 - p
-        ///               - b3;
-        /// double res2 = p + e + c - b3;  // != 0
-        /// ```
 
         if (ieee754Error != 0.0) {
           maxRange -= ieee754Error;
