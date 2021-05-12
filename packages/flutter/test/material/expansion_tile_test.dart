@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({Key? key}) : super(key: key);
@@ -43,7 +43,7 @@ class TestTextState extends State<TestText> {
 
 void main() {
   const Color _dividerColor = Color(0x1f333333);
-  const Color _accentColor = Colors.blueAccent;
+  const Color _foregroundColor = Colors.blueAccent;
   const Color _unselectedWidgetColor = Colors.black54;
   const Color _headerColor = Colors.black45;
 
@@ -154,7 +154,7 @@ void main() {
     expect(collapsedContainerDecoration.border!.bottom.color, _dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('ListTileTheme', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
     final Key collapsedTitleKey = UniqueKey();
     final Key expandedIconKey = UniqueKey();
@@ -163,7 +163,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          accentColor: _accentColor,
+          colorScheme: ColorScheme.fromSwatch().copyWith(primary: _foregroundColor),
           unselectedWidgetColor: _unselectedWidgetColor,
           textTheme: const TextTheme(subtitle1: TextStyle(color: _headerColor)),
         ),
@@ -195,9 +195,9 @@ void main() {
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
-    expect(textColor(expandedTitleKey), _accentColor);
+    expect(textColor(expandedTitleKey), _foregroundColor);
     expect(textColor(collapsedTitleKey), _headerColor);
-    expect(iconColor(expandedIconKey), _accentColor);
+    expect(iconColor(expandedIconKey), _foregroundColor);
     expect(iconColor(collapsedIconKey), _unselectedWidgetColor);
 
     // Tap both tiles to change their state: collapse and extend respectively
@@ -208,9 +208,9 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(textColor(expandedTitleKey), _headerColor);
-    expect(textColor(collapsedTitleKey), _accentColor);
+    expect(textColor(collapsedTitleKey), _foregroundColor);
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
-    expect(iconColor(collapsedIconKey), _accentColor);
+    expect(iconColor(collapsedIconKey), _foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
@@ -230,37 +230,38 @@ void main() {
   });
 
   testWidgets('ExpansionTile maintainState', (WidgetTester tester) async {
-     await tester.pumpWidget(
-       MaterialApp(
-         theme: ThemeData(
-           platform: TargetPlatform.iOS,
-           dividerColor: _dividerColor,
-         ),
-         home: Material(
-           child: SingleChildScrollView(
-             child: Column(
-               children: const <Widget>[
-                 ExpansionTile(
-                   title: Text('Tile 1'),
-                   initiallyExpanded: false,
-                   maintainState: true,
-                   children: <Widget>[
-                     Text('Maintaining State'),
-                   ],
-                 ),
-                 ExpansionTile(
-                   title: Text('Title 2'),
-                   initiallyExpanded: false,
-                   maintainState: false,
-                   children: <Widget>[
-                     Text('Discarding State'),
-                   ],
-                 ),
-               ],
-             ),
-           ),
-         ),
-     ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          dividerColor: _dividerColor,
+        ),
+        home: Material(
+          child: SingleChildScrollView(
+            child: Column(
+              children: const <Widget>[
+                ExpansionTile(
+                  title: Text('Tile 1'),
+                  initiallyExpanded: false,
+                  maintainState: true,
+                  children: <Widget>[
+                    Text('Maintaining State'),
+                  ],
+                ),
+                ExpansionTile(
+                  title: Text('Title 2'),
+                  initiallyExpanded: false,
+                  maintainState: false,
+                  children: <Widget>[
+                    Text('Discarding State'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
 
      // This text should be offstage while ExpansionTile collapsed
      expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
@@ -381,8 +382,10 @@ void main() {
         ),
       );
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('CrossAxisAlignment.baseline is not supported since the expanded'
-          ' children are aligned in a column, not a row. Try to use another constant.'));
+      expect(error.toString(), contains(
+        'CrossAxisAlignment.baseline is not supported since the expanded'
+        ' children are aligned in a column, not a row. Try to use another constant.',
+      ));
       return;
     }
     fail('AssertionError was not thrown when expandedCrossAxisAlignment is CrossAxisAlignment.baseline.');

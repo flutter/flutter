@@ -4,14 +4,14 @@
 
 // @dart = 2.8
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
-import 'package:fake_async/fake_async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
+import '../src/fake_devices.dart';
 
 void main() {
   group('service_protocol discovery', () {

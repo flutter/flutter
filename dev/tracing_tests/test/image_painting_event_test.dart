@@ -7,7 +7,6 @@ import 'dart:convert' show jsonEncode;
 import 'dart:developer' as developer;
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -43,7 +42,10 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent.first.then(completer.complete);
+    vmService
+        .onExtensionEvent
+        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
@@ -76,7 +78,10 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent.first.then(completer.complete);
+    vmService
+        .onExtensionEvent
+        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();

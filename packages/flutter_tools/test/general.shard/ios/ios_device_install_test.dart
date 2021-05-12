@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -34,7 +33,7 @@ void main() {
 
   setUp(() {
     artifacts = Artifacts.test();
-    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    iosDeployPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
   });
 
   testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with USB', () async {
@@ -289,6 +288,7 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
   return IOSDevice(
     '1234',

@@ -14,10 +14,10 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 final FakePlatform linux = FakePlatform(
@@ -139,23 +139,17 @@ void main() {
   });
 
   testWithoutContext('LinuxDevice.executablePathForDevice uses the correct package executable', () async {
-    final MockLinuxApp mockApp = MockLinuxApp();
+    final FakeLinuxApp mockApp = FakeLinuxApp();
     final LinuxDevice device = LinuxDevice(
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
-    const String debugPath = 'debug/executable';
-    const String profilePath = 'profile/executable';
-    const String releasePath = 'release/executable';
-    when(mockApp.executable(BuildMode.debug)).thenReturn(debugPath);
-    when(mockApp.executable(BuildMode.profile)).thenReturn(profilePath);
-    when(mockApp.executable(BuildMode.release)).thenReturn(releasePath);
 
-    expect(device.executablePathForDevice(mockApp, BuildMode.debug), debugPath);
-    expect(device.executablePathForDevice(mockApp, BuildMode.profile), profilePath);
-    expect(device.executablePathForDevice(mockApp, BuildMode.release), releasePath);
+    expect(device.executablePathForDevice(mockApp, BuildMode.debug), 'debug/executable');
+    expect(device.executablePathForDevice(mockApp, BuildMode.profile), 'profile/executable');
+    expect(device.executablePathForDevice(mockApp, BuildMode.release), 'release/executable');
   });
 }
 
@@ -167,7 +161,21 @@ FlutterProject setUpFlutterProject(Directory directory) {
   return flutterProjectFactory.fromDirectory(directory);
 }
 
-class MockLinuxApp extends Mock implements LinuxApp {}
+class FakeLinuxApp extends Fake implements LinuxApp {
+  @override
+  String executable(BuildMode buildMode) {
+    switch (buildMode) {
+      case BuildMode.debug:
+        return 'debug/executable';
+      case BuildMode.profile:
+        return 'profile/executable';
+      case BuildMode.release:
+        return 'release/executable';
+      default:
+        throw StateError('Invalid mode: $buildMode');
+    }
+  }
+}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeOperatingSystemUtils({
     HostPlatform hostPlatform = HostPlatform.linux_x64

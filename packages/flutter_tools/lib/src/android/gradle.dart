@@ -292,9 +292,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
     if (usesAndroidX) {
-      BuildEvent('app-using-android-x', flutterUsage: _usage).send();
+      BuildEvent('app-using-android-x', type: 'gradle', flutterUsage: _usage).send();
     } else if (!usesAndroidX) {
-      BuildEvent('app-not-using-android-x', flutterUsage: _usage).send();
+      BuildEvent('app-not-using-android-x', type: 'gradle', flutterUsage: _usage).send();
       _logger.printStatus("${_logger.terminal.warningMark} Your app isn't using AndroidX.", emphasis: true);
       _logger.printStatus(
         'To avoid potential build failures, you can quickly migrate your app '
@@ -323,7 +323,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final Status status = _logger.startProgress(
       "Running Gradle task '$assembleTask'...",
-      multilineOutput: true,
     );
 
     final List<String> command = <String>[
@@ -460,7 +459,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     if (exitCode != 0) {
       if (detectedGradleError == null) {
-        BuildEvent('gradle-unknown-failure', flutterUsage: _usage).send();
+        BuildEvent('gradle-unknown-failure', type: 'gradle', flutterUsage: _usage).send();
         throwToolExit(
           'Gradle task $assembleTask failed with exit code $exitCode',
           exitCode: exitCode,
@@ -486,7 +485,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
                 shouldBuildPluginAsAar: shouldBuildPluginAsAar,
                 retries: retries - 1,
               );
-              BuildEvent(successEventLabel, flutterUsage: _usage).send();
+              BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
               return;
             case GradleBuildStatus.retryWithAarPlugins:
               await buildGradleApp(
@@ -498,13 +497,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
                 shouldBuildPluginAsAar: true,
                 retries: retries - 1,
               );
-              BuildEvent(successEventLabel, flutterUsage: _usage).send();
+              BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
               return;
             case GradleBuildStatus.exit:
             // noop.
           }
         }
-        BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: _usage).send();
+        BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
         throwToolExit(
           'Gradle task $assembleTask failed with exit code $exitCode',
           exitCode: exitCode,
@@ -636,7 +635,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final String aarTask = getAarTaskFor(buildInfo);
     final Status status = _logger.startProgress(
       "Running Gradle task '$aarTask'...",
-      multilineOutput: true,
     );
 
     final String flutterRoot = _fileSystem.path.absolute(Cache.flutterRoot);
@@ -798,7 +796,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       } on ToolExit {
         // Log the entire plugin entry in `.flutter-plugins` since it
         // includes the plugin name and the version.
-        BuildEvent('gradle-plugin-aar-failure', eventError: plugin, flutterUsage: _usage).send();
+        BuildEvent('gradle-plugin-aar-failure', type: 'gradle', eventError: plugin, flutterUsage: _usage).send();
         throwToolExit('The plugin $pluginName could not be built due to the issue above.');
       }
     }
@@ -879,7 +877,7 @@ String _calculateSha(File file) {
 }
 
 void _exitWithUnsupportedProjectMessage(Usage usage, Terminal terminal) {
-  BuildEvent('unsupported-project', eventError: 'gradle-plugin', flutterUsage: usage).send();
+  BuildEvent('unsupported-project', type: 'gradle', eventError: 'gradle-plugin', flutterUsage: usage).send();
   throwToolExit(
     '${terminal.warningMark} Your app is using an unsupported Gradle project. '
     'To fix this problem, create a new project by running `flutter create -t app <app-directory>` '
@@ -1030,6 +1028,7 @@ void _exitWithExpectedFileNotFound({
   final String androidGradlePluginVersion =
   getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot, logger);
   BuildEvent('gradle-expected-file-not-found',
+    type: 'gradle',
     settings:
     'androidGradlePluginVersion: $androidGradlePluginVersion, '
       'fileExtension: $fileExtension',

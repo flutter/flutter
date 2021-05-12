@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';

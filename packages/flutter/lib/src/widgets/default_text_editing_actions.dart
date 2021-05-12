@@ -36,6 +36,12 @@ class DefaultTextEditingActions extends Actions{
   // are called on which platform.
   static final Map<Type, Action<Intent>> _shortcutsActions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: _DoNothingAndStopPropagationTextAction(),
+    DeleteTextIntent: _DeleteTextAction(),
+    DeleteByWordTextIntent: _DeleteByWordTextAction(),
+    DeleteByLineTextIntent: _DeleteByLineTextAction(),
+    DeleteForwardTextIntent: _DeleteForwardTextAction(),
+    DeleteForwardByWordTextIntent: _DeleteForwardByWordTextAction(),
+    DeleteForwardByLineTextIntent: _DeleteForwardByLineTextAction(),
     ExtendSelectionDownTextIntent: _ExtendSelectionDownTextAction(),
     ExtendSelectionLeftByLineTextIntent: _ExtendSelectionLeftByLineTextAction(),
     ExtendSelectionLeftByWordTextIntent: _ExtendSelectionLeftByWordTextAction(),
@@ -74,6 +80,48 @@ class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothing
 
   @override
   void invoke(DoNothingAndStopPropagationTextIntent intent, [BuildContext? context]) {}
+}
+
+class _DeleteTextAction extends TextEditingAction<DeleteTextIntent> {
+  @override
+  Object? invoke(DeleteTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.delete(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteByWordTextAction extends TextEditingAction<DeleteByWordTextIntent> {
+  @override
+  Object? invoke(DeleteByWordTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteByWord(SelectionChangedCause.keyboard, false);
+  }
+}
+
+class _DeleteByLineTextAction extends TextEditingAction<DeleteByLineTextIntent> {
+  @override
+  Object? invoke(DeleteByLineTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteByLine(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteForwardTextAction extends TextEditingAction<DeleteForwardTextIntent> {
+  @override
+  Object? invoke(DeleteForwardTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForward(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteForwardByWordTextAction extends TextEditingAction<DeleteForwardByWordTextIntent> {
+  @override
+  Object? invoke(DeleteForwardByWordTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+  }
+}
+
+class _DeleteForwardByLineTextAction extends TextEditingAction<DeleteForwardByLineTextIntent> {
+  @override
+  Object? invoke(DeleteForwardByLineTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForwardByLine(SelectionChangedCause.keyboard);
+  }
 }
 
 class _ExpandSelectionLeftByLineTextAction extends TextEditingAction<ExpandSelectionLeftByLineTextIntent> {

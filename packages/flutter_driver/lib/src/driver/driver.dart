@@ -147,7 +147,12 @@ abstract class FlutterDriver {
     Map<String, dynamic>? headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
-      return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
+      return WebFlutterDriver.connectWeb(
+        hostUrl: dartVmServiceUrl,
+        timeout: timeout,
+        printCommunication: printCommunication,
+        logCommunicationToFile: logCommunicationToFile,
+      );
     }
     return VMServiceFlutterDriver.connect(
       dartVmServiceUrl: dartVmServiceUrl,
@@ -218,6 +223,11 @@ abstract class FlutterDriver {
   /// Waits until [finder] can no longer locate the target.
   Future<void> waitForAbsent(SerializableFinder finder, { Duration? timeout }) async {
     await sendCommand(WaitForAbsent(finder, timeout: timeout));
+  }
+
+  /// Waits until [finder] is tappable.
+  Future<void> waitForTappable(SerializableFinder finder, { Duration? timeout }) async {
+    await sendCommand(WaitForTappable(finder, timeout: timeout));
   }
 
   /// Waits until the given [waitCondition] is satisfied.

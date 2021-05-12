@@ -18,7 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -30,6 +30,7 @@ import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
+import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -38,8 +39,8 @@ class IMobileDevice {
     @required Cache cache,
     @required ProcessManager processManager,
     @required Logger logger,
-  }) : _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-      _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios),
+  }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
+      _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
       _dyLdLibEntry = cache.dyLdLibEntry,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _processManager = processManager;
@@ -121,7 +122,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeFinderExtendedAttributes(app.project.hostAppRoot, globals.processUtils, globals.logger);
+  await removeFinderExtendedAttributes(app.project.parent.directory, globals.processUtils, globals.logger);
 
   final XcodeProjectInfo projectInfo = await app.project.projectInfo();
   final String scheme = projectInfo.schemeFor(buildInfo);
@@ -175,9 +176,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   Map<String, String> autoSigningConfigs;
+
+  final Map<String, String> buildSettings = await app.project.buildSettingsForBuildInfo(
+        buildInfo,
+        environmentType: buildForDevice ? EnvironmentType.physical : EnvironmentType.simulator,
+      ) ?? <String, String>{};
+
   if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
-      buildSettings: await app.project.buildSettingsForBuildInfo(buildInfo),
+      buildSettings: buildSettings,
       processManager: globals.processManager,
       logger: globals.logger,
       config: globals.config,
@@ -352,44 +359,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
-  // Run -showBuildSettings again but with the exact same parameters as the
-  // build. showBuildSettings is reported to occasionally timeout. Here, we give
-  // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
-  // When there is a timeout, we retry once. See issue #35988.
-  final List<String> showBuildSettingsCommand = (List<String>
-      .of(buildCommands)
-      ..add('-showBuildSettings'))
-      // Undocumented behavior: xcodebuild craps out if -showBuildSettings
-      // is used together with -allowProvisioningUpdates or
-      // -allowProvisioningDeviceRegistration and freezes forever.
-      .where((String buildCommand) {
-        return !const <String>[
-          '-allowProvisioningUpdates',
-          '-allowProvisioningDeviceRegistration',
-        ].contains(buildCommand);
-      }).toList();
-  const Duration showBuildSettingsTimeout = Duration(minutes: 1);
-  Map<String, String> buildSettings;
-  try {
-    final RunResult showBuildSettingsResult = await globals.processUtils.run(
-      showBuildSettingsCommand,
-      throwOnError: true,
-      workingDirectory: app.project.hostAppRoot.path,
-      timeout: showBuildSettingsTimeout,
-      timeoutRetries: 1,
-    );
-    final String showBuildSettings = showBuildSettingsResult.stdout.trim();
-    buildSettings = parseXcodeBuildSettings(showBuildSettings);
-  } on ProcessException catch (e) {
-    if (e.toString().contains('timed out')) {
-      BuildEvent('xcode-show-build-settings-timeout',
-        command: showBuildSettingsCommand.join(' '),
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    rethrow;
-  }
-
   if (buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');
     if (buildResult.stderr.isNotEmpty) {
@@ -423,9 +392,10 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
         targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
       }
+      final String appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(
         targetBuildDir,
-        buildSettings['WRAPPER_NAME'],
+        appBundle,
       );
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
@@ -445,6 +415,10 @@ Future<XcodeBuildResult> buildXcodeProject({
             outputDir,
           ],
           throwOnError: true,
+        );
+        outputDir = globals.fs.path.join(
+          outputDir,
+          appBundle,
         );
       } else {
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
@@ -471,19 +445,19 @@ Future<XcodeBuildResult> buildXcodeProject({
 /// Extended attributes applied by Finder can cause code signing errors. Remove them.
 /// https://developer.apple.com/library/archive/qa/qa1940/_index.html
 @visibleForTesting
-Future<void> removeFinderExtendedAttributes(Directory iosProjectDirectory, ProcessUtils processUtils, Logger logger) async {
+Future<void> removeFinderExtendedAttributes(Directory projectDirectory, ProcessUtils processUtils, Logger logger) async {
   final bool success = await processUtils.exitsHappy(
     <String>[
       'xattr',
       '-r',
       '-d',
       'com.apple.FinderInfo',
-      iosProjectDirectory.path,
+      projectDirectory.path,
     ]
   );
   // Ignore all errors, for example if directory is missing.
   if (!success) {
-    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${iosProjectDirectory.path}');
+    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${projectDirectory.path}');
   }
 }
 
@@ -535,6 +509,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
     BuildEvent('xcode-bitcode-failure',
+      type: 'ios',
       command: result.xcodeBuildExecution.buildCommands.toString(),
       settings: result.xcodeBuildExecution.buildSettings.toString(),
       flutterUsage: flutterUsage,

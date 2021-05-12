@@ -79,7 +79,7 @@ class BuildWebCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!featureFlags.isWebEnabled) {
-      throwToolExit('"build web" is not currently supported.');
+      throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArg('target');

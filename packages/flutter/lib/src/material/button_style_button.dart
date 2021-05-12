@@ -123,7 +123,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   bool get enabled => onPressed != null || onLongPress != null;
 
   @override
-  _ButtonStyleState createState() => _ButtonStyleState();
+  State<ButtonStyleButton> createState() => _ButtonStyleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -268,6 +268,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
+    final Size? resolvedMaximumSize = resolve<Size?>((ButtonStyle? style) => style?.maximumSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -291,6 +292,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       BoxConstraints(
         minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
+        maxWidth: resolvedMaximumSize!.width,
+        maxHeight: resolvedMaximumSize.height,
       ),
     );
     if (resolvedFixedSize != null) {
@@ -309,14 +312,15 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       }
     }
 
-    final EdgeInsetsGeometry padding = resolvedPadding!.add(
-      EdgeInsets.only(
-        left: densityAdjustment.dx,
-        top: densityAdjustment.dy,
-        right: densityAdjustment.dx,
-        bottom: densityAdjustment.dy,
-      ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    // Per the Material Design team: don't allow the VisualDensity
+    // adjustment to reduce the width of the left/right padding. If we
+    // did, VisualDensity.compact, the default for desktop/web, would
+    // reduce the horizontal padding to zero.
+    final double dy = densityAdjustment.dy;
+    final double dx = math.max(0, densityAdjustment.dx);
+    final EdgeInsetsGeometry padding = resolvedPadding!
+      .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly

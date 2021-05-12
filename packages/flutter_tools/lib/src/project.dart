@@ -18,12 +18,12 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'features.dart';
 import 'flutter_manifest.dart';
+import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
-import 'ios/xcodeproj.dart' as xcode;
+import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
 import 'platform_plugins.dart';
-import 'plugins.dart';
 import 'template.dart';
 
 class FlutterProjectFactory {
@@ -279,6 +279,7 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
+      winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
     );
   }
 
@@ -291,7 +292,7 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
-    bool windowsUwpPlatform = false,
+    bool winUwpPlatform = false,
   }) async {
     if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
@@ -315,7 +316,7 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    if (windowsUwpPlatform) {
+    if (winUwpPlatform) {
       await windowsUwp.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(
@@ -326,6 +327,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       webPlatform: webPlatform,
+      winUwpPlatform: winUwpPlatform,
     );
   }
 
@@ -542,7 +544,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (allBuildSettings != null) {
       if (fromPlist != null) {
         // Perform variable substitution using build settings.
-        return xcode.substituteXcodeVariables(fromPlist, allBuildSettings);
+        return substituteXcodeVariables(fromPlist, allBuildSettings);
       }
       return allBuildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     }
@@ -591,11 +593,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo) async {
+  Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo, { EnvironmentType environmentType = EnvironmentType.physical }) async {
     if (!existsSync()) {
       return null;
     }
-    _buildSettingsByScheme ??= <String, Map<String, String>>{};
     final XcodeProjectInfo info = await projectInfo();
     if (info == null) {
       return null;
@@ -606,9 +607,15 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       info.reportFlavorNotFoundAndExit();
     }
 
-    return _buildSettingsByScheme[scheme] ??= await _xcodeProjectBuildSettings(scheme);
+    final String configuration = (await projectInfo()).buildConfigurationFor(
+      buildInfo,
+      scheme,
+    );
+    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(environmentType: environmentType, scheme: scheme, configuration: configuration);
+    return _buildSettingsByBuildContext[buildContext] ??= await _xcodeProjectBuildSettings(buildContext);
   }
-  Map<String, Map<String, String>> _buildSettingsByScheme;
+
+  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<XcodeProjectInfo> projectInfo() async {
     if (!xcodeProject.existsSync() || !globals.xcodeProjectInterpreter.isInstalled) {
@@ -618,13 +625,14 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
   XcodeProjectInfo _projectInfo;
 
-  Future<Map<String, String>> _xcodeProjectBuildSettings(String scheme) async {
+  Future<Map<String, String>> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
     if (!globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
+
     final Map<String, String> buildSettings = await globals.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
-      scheme: scheme,
+      buildContext: buildContext,
     );
     if (buildSettings != null && buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.
@@ -784,7 +792,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     );
     template.render(
       target,
-      <String, dynamic>{
+      <String, Object>{
         'ios': true,
         'projectName': parent.manifest.appName,
         'iosIdentifier': parent.manifest.iosBundleIdentifier,
@@ -968,7 +976,7 @@ to migrate your project.
     );
     template.render(
       target,
-      <String, dynamic>{
+      <String, Object>{
         'android': true,
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,

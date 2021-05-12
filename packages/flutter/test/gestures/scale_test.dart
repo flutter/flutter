@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
@@ -572,6 +572,34 @@ void main() {
     tap.dispose();
   });
 
+  // Regressing test for https://github.com/flutter/flutter/issues/78941
+  testGesture('First rotation test', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+
+    double? updatedRotation;
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      updatedRotation = details.rotation;
+    };
+
+    final TestPointer pointer1 = TestPointer(1);
+    final PointerDownEvent down = pointer1.down(Offset.zero);
+    scale.addPointer(down);
+    tester.closeArena(1);
+    tester.route(down);
+
+    final TestPointer pointer2 = TestPointer(2);
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 10.0));
+    scale.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+
+    expect(updatedRotation, isNull);
+
+    // Rotation 45°.
+    tester.route(pointer2.move(const Offset(0.0, 10.0)));
+    expect(updatedRotation, math.pi / 4.0);
+  });
+
   testGesture('Scale gestures pointer count test', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
 
@@ -622,5 +650,20 @@ void main() {
     expect(pointerCountOfEnd, 0);
 
     scale.dispose();
+  });
+
+  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        ScaleGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 }

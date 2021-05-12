@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/test_flutter_command_runner.dart';
 
 void main() {
   Directory tempDir;
@@ -232,7 +233,7 @@ Future<void> _analyzeProject(Directory workingDir) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );

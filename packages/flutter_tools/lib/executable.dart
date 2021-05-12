@@ -107,7 +107,7 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,

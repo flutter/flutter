@@ -198,7 +198,7 @@ class CupertinoPicker extends StatefulWidget {
   /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay]
   /// which is a gray rounded rectangle overlay in iOS 14 style.
   /// This property can be set to null to remove the overlay.
-  final Widget selectionOverlay;
+  final Widget? selectionOverlay;
 
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
@@ -301,7 +301,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildSelectionOverlay(widget.selectionOverlay),
+          if (widget.selectionOverlay != null)
+            _buildSelectionOverlay(widget.selectionOverlay!),
         ],
       ),
     );

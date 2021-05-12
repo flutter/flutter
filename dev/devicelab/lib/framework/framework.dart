@@ -8,8 +8,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'adb.dart';

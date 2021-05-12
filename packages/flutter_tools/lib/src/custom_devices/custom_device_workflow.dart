@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import '../features.dart';
 
 /// The custom-devices-specific implementation of a [Workflow].
@@ -18,7 +16,7 @@ import '../features.dart';
 @immutable
 class CustomDeviceWorkflow implements Workflow {
   const CustomDeviceWorkflow({
-    @required FeatureFlags featureFlags
+    required FeatureFlags featureFlags
   }) : _featureFlags = featureFlags;
 
   final FeatureFlags _featureFlags;

@@ -416,6 +416,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
+    _animation?.removeStatusListener(_handleStatusChanged);
     _controller?.dispose();
     _transitionCompleter.complete(_result);
     super.dispose();
@@ -501,7 +502,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   const HomePage({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _HomePageState createState() => _HomePageState();
+  ///   State<HomePage> createState() => _HomePageState();
   /// }
   ///
   /// class _HomePageState extends State<HomePage> {
@@ -531,7 +532,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   const SecondPage({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _SecondPageState createState() => _SecondPageState();
+  ///   State<SecondPage> createState() => _SecondPageState();
   /// }
   ///
   /// class _SecondPageState extends State<SecondPage> {

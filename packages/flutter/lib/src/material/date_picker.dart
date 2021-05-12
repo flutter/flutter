@@ -191,6 +191,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
+///  * [showTimePicker], which shows a dialog that contains a material design time picker.
 ///
 Future<DateTime?> showDatePicker({
   required BuildContext context,
@@ -411,7 +412,7 @@ class DatePickerDialog extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _DatePickerDialogState createState() => _DatePickerDialogState();
+  State<DatePickerDialog> createState() => _DatePickerDialogState();
 }
 
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
@@ -495,9 +496,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     }
   }
 
-  static final Map<LogicalKeySet, Intent> _formShortcutMap = <LogicalKeySet, Intent>{
+  static const Map<ShortcutActivator, Intent> _formShortcutMap = <ShortcutActivator, Intent>{
     // Pressing enter on the field will move focus to the next field or control.
-    LogicalKeySet(LogicalKeyboardKey.enter): const NextFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
   };
 
   @override
@@ -1311,7 +1312,7 @@ class DateRangePickerDialog extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _DateRangePickerDialogState createState() => _DateRangePickerDialogState();
+  State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
 }
 
 class _DateRangePickerDialogState extends State<DateRangePickerDialog> with RestorationMixin {
@@ -1901,7 +1902,12 @@ class _CalendarKeyboardNavigator extends StatefulWidget {
 
 class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> {
 
-  late Map<LogicalKeySet, Intent> _shortcutMap;
+  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+  };
   late Map<Type, Action<Intent>> _actionMap;
   late FocusNode _dayGridFocus;
   TraversalDirection? _dayTraversalDirection;
@@ -1911,12 +1917,6 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
   void initState() {
     super.initState();
 
-    _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-    };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleGridNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handleGridPreviousFocus),

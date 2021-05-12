@@ -4,8 +4,8 @@
 
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_test_utils.dart';
 

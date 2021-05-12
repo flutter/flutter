@@ -664,7 +664,7 @@ abstract class StatelessWidget extends Widget {
 ///   const YellowBird({ Key? key }) : super(key: key);
 ///
 ///   @override
-///   _YellowBirdState createState() => _YellowBirdState();
+///   State<YellowBird> createState() => _YellowBirdState();
 /// }
 ///
 /// class _YellowBirdState extends State<YellowBird> {
@@ -693,7 +693,7 @@ abstract class StatelessWidget extends Widget {
 ///   final Widget? child;
 ///
 ///   @override
-///   _BirdState createState() => _BirdState();
+///   State<Bird> createState() => _BirdState();
 /// }
 ///
 /// class _BirdState extends State<Bird> {
@@ -743,7 +743,7 @@ abstract class StatefulWidget extends Widget {
   ///
   /// ```dart
   /// @override
-  /// _MyState createState() => _MyState();
+  /// State<MyWidget> createState() => _MyWidgetState();
   /// ```
   ///
   /// The framework can call this method multiple times over the lifetime of
@@ -1113,9 +1113,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// The framework calls this method whenever it removes this [State] object
   /// from the tree. In some cases, the framework will reinsert the [State]
   /// object into another part of the tree (e.g., if the subtree containing this
-  /// [State] object is grafted from one location in the tree to another). If
-  /// that happens, the framework will ensure that it calls [build] to give the
-  /// [State] object a chance to adapt to its new location in the tree. If
+  /// [State] object is grafted from one location in the tree to another due to
+  /// the use of a [GlobalKey]). If that happens, the framework will call
+  /// [activate] to give the [State] object a chance to reacquire any resources
+  /// that it released in [deactivate]. It will then also call [build] to give
+  /// the [State] object a chance to adapt to its new location in the tree. If
   /// the framework does reinsert this subtree, it will do so before the end of
   /// the animation frame in which the subtree was removed from the tree. For
   /// this reason, [State] objects can defer releasing most resources until the
@@ -1135,6 +1137,40 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void deactivate() { }
+
+  /// Called when this object is reinserted into the tree after having been
+  /// removed via [deactivate].
+  ///
+  /// In most cases, after a [State] object has been deactivated, it is _not_
+  /// reinserted into the tree, and its [dispose] method will be called to
+  /// signal that it is ready to be garbage collected.
+  ///
+  /// In some cases, however, after a [State] object has been deactivated, the
+  /// framework will reinsert it into another part of the tree (e.g., if the
+  /// subtree containing this [State] object is grafted from one location in
+  /// the tree to another due to the use of a [GlobalKey]). If that happens,
+  /// the framework will call [activate] to give the [State] object a chance to
+  /// reacquire any resources that it released in [deactivate]. It will then
+  /// also call [build] to give the object a chance to adapt to its new
+  /// location in the tree. If the framework does reinsert this subtree, it
+  /// will do so before the end of the animation frame in which the subtree was
+  /// removed from the tree. For this reason, [State] objects can defer
+  /// releasing most resources until the framework calls their [dispose] method.
+  ///
+  /// The framework does not call this method the first time a [State] object
+  /// is inserted into the tree. Instead, the framework calls [initState] in
+  /// that situation.
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.activate()`.
+  ///
+  /// See also:
+  ///
+  ///  * [Element.activate], the corresponding method when an element
+  ///    transitions from the "inactive" to the "active" lifecycle state.
+  @protected
+  @mustCallSuper
+  void activate() { }
 
   /// Called when this object is removed from the tree permanently.
   ///
@@ -2296,8 +2332,8 @@ abstract class BuildContext {
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to build an off-screen widget tree used to measure
-/// the size of the rendered tree. For some use cases, the simpler [Offstage]
-/// widget may be a better alternative to this approach.
+/// the layout size of the rendered tree. For some use cases, the simpler
+/// [Offstage] widget may be a better alternative to this approach.
 ///
 /// ```dart imports
 /// import 'package:flutter/rendering.dart';
@@ -2505,6 +2541,7 @@ class BuildOwner {
   /// [debugPrintBuildScope] to true. This is useful when debugging problems
   /// involving widgets not getting marked dirty, or getting marked dirty too
   /// often.
+  @pragma('vm:notify-debugger-on-exception')
   void buildScope(Element context, [ VoidCallback? callback ]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
@@ -2833,6 +2870,7 @@ class BuildOwner {
   ///
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
+  @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
@@ -3085,8 +3123,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// The configuration for this element.
   @override
-  Widget get widget => _widget;
-  Widget _widget;
+  Widget get widget => _widget!;
+  Widget? _widget;
+
+  /// Returns true if the Element is defunct.
+  ///
+  /// This getter always returns false in profile and release builds.
+  /// See the lifecycle documentation for [Element] for additional information.
+  bool get debugIsDefunct {
+    bool isDefunct = false;
+    assert(() {
+      isDefunct = _lifecycleState == _ElementLifecycle.defunct;
+      return true;
+    }());
+    return isDefunct;
+  }
 
   /// The object that manages the lifecycle of this element.
   @override
@@ -3801,10 +3852,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(depth != null);
     assert(owner != null);
     // Use the private property to avoid a CastError during hot reload.
-    final Key? key = _widget.key;
+    final Key? key = _widget!.key;
     if (key is GlobalKey) {
       owner!._unregisterGlobalKey(key, this);
     }
+    // Release resources to reduce the severity of memory leaks caused by
+    // defunct, but accidentally retained Elements.
+    _widget = null;
+    _dependencies = null;
     _lifecycleState = _ElementLifecycle.defunct;
   }
 
@@ -4116,7 +4171,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// A short, textual description of this element.
   @override
-  String toStringShort() => widget.toStringShort();
+  String toStringShort() => _widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
@@ -4134,9 +4189,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_lifecycleState != _ElementLifecycle.initial) {
       properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
     }
-    properties.add(ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
-    properties.add(DiagnosticsProperty<Key>('key', widget.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
-    widget.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget>('widget', _widget, ifNull: 'no widget'));
+    properties.add(DiagnosticsProperty<Key>('key', _widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
+    _widget?.debugFillProperties(properties);
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       final List<DiagnosticsNode> diagnosticsDependencies = _dependencies!
@@ -4296,7 +4351,9 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
     final Element element = value as Element;
-    json['widgetRuntimeType'] = element.widget.runtimeType.toString();
+    if (!element.debugIsDefunct) {
+      json['widgetRuntimeType'] = element.widget.runtimeType.toString();
+    }
     json['stateful'] = stateful;
     return json;
   }
@@ -4560,6 +4617,7 @@ abstract class ComponentElement extends Element {
   /// Called automatically during [mount] to generate the first build, and by
   /// [rebuild] when the element needs updating.
   @override
+  @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
     if (!kReleaseMode && debugProfileBuildsEnabled)
       Timeline.startSync('${widget.runtimeType}',  arguments: timelineArgumentsIndicatingLandmarkEvent);
@@ -4660,7 +4718,7 @@ class StatelessElement extends ComponentElement {
 class StatefulElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
   StatefulElement(StatefulWidget widget)
-      : state = widget.createState(),
+      : _state = widget.createState(),
         super(widget) {
     assert(() {
       if (!state._debugTypesAreRight(widget)) {
@@ -4695,7 +4753,8 @@ class StatefulElement extends ComponentElement {
   /// There is a one-to-one relationship between [State] objects and the
   /// [StatefulElement] objects that hold them. The [State] objects are created
   /// by [StatefulElement] in [mount].
-  final State<StatefulWidget> state;
+  State<StatefulWidget> get state => _state!;
+  State<StatefulWidget>? _state;
 
   @override
   void reassemble() {
@@ -4781,6 +4840,7 @@ class StatefulElement extends ComponentElement {
   @override
   void activate() {
     super.activate();
+    state.activate();
     // Since the State could have observed the deactivate() and thus disposed of
     // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
@@ -4810,6 +4870,9 @@ class StatefulElement extends ComponentElement {
       ]);
     }());
     state._element = null;
+    // Release resources to reduce the severity of memory leaks caused by
+    // defunct, but accidentally retained Elements.
+    _state = null;
   }
 
   @override
@@ -4895,7 +4958,7 @@ class StatefulElement extends ComponentElement {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<State<StatefulWidget>>('state', state, defaultValue: null));
+    properties.add(DiagnosticsProperty<State<StatefulWidget>>('state', _state, defaultValue: null));
   }
 }
 
@@ -5705,13 +5768,14 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void unmount() {
+    final RenderObjectWidget oldWidget = widget;
     super.unmount();
     assert(
       !renderObject.attached,
       'A RenderObject was still attached when attempting to unmount its '
       'RenderObjectElement: $renderObject',
     );
-    widget.didUnmountRenderObject(renderObject);
+    oldWidget.didUnmountRenderObject(renderObject);
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
@@ -6240,6 +6304,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
+    assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
     _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);
     _forgottenChildren.clear();
   }

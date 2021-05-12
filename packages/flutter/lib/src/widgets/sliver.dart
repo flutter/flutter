@@ -446,6 +446,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   }
 
   @override
+  @pragma('vm:notify-debugger-on-exception')
   Widget? build(BuildContext context, int index) {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount!))
@@ -1669,7 +1670,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _SliverOffstageElement createElement() => _SliverOffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _SliverOffstageElement(this);
 }
 
 class _SliverOffstageElement extends SingleChildRenderObjectElement {

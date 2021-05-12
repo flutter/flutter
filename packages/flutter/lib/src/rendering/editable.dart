@@ -257,10 +257,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _obscureText = obscureText,
        _readOnly = readOnly,
        _forceLine = forceLine,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _hasFocus = hasFocus ?? false {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
-    this.hasFocus = hasFocus ?? false;
 
     _selectionPainter.highlightColor = selectionColor;
     _selectionPainter.highlightedRange = selection;
@@ -670,10 +670,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (key == LogicalKeyboardKey.delete) {
-      _handleDelete(forward: true);
-    } else if (key == LogicalKeyboardKey.backspace) {
-      _handleDelete(forward: false);
     }
   }
 
@@ -731,7 +727,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int? lastNonWhitespace;
     for (final String currentString in string.characters) {
       if (!includeWhitespace &&
-          !_isWhitespace(currentString.characters.first.toString().codeUnitAt(0))) {
+          !_isWhitespace(currentString.characters.first.codeUnitAt(0))) {
         lastNonWhitespace = count;
       }
       if (count + currentString.length >= index) {
@@ -1015,16 +1011,452 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
+  // Deletes the text within `selection` if it's non-empty.
+  void _deleteSelection(TextSelection selection, SelectionChangedCause cause) {
+    assert(!selection.isCollapsed);
+
+    if (_readOnly || !selection.isValid || selection.isCollapsed) {
+      return;
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textBefore = selection.textBefore(text);
+    final String textAfter = selection.textAfter(text);
+    final int cursorPosition = math.min(selection.start, selection.end);
+    final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  // Deletes the current non-empty selection.
+  //
+  // Operates on the text/selection contained in textSelectionDelegate, and does
+  // not depend on `RenderEditable.selection`.
+  //
+  // If the selection is currently non-empty, this method deletes the selected
+  // text and returns true. Otherwise this method does nothing and returns
+  // false.
+  bool _deleteNonEmptySelection(SelectionChangedCause cause) {
+    // TODO(LongCatIsLooong): remove this method from `RenderEditable`
+    // https://github.com/flutter/flutter/issues/80226.
+    assert(!readOnly);
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
+    assert(selection.isValid);
+
+    if (selection.isCollapsed) {
+      return false;
+    }
+
+    final String textBefore = selection.textBefore(controllerValue.text);
+    final String textAfter = selection.textAfter(controllerValue.text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: selection.start);
+    final TextRange composing = controllerValue.composing;
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - selection.start).clamp(0, selection.end - selection.start),
+        end: composing.end - (composing.end - selection.start).clamp(0, selection.end - selection.start),
+      );
+
+    _setTextEditingValue(
+      TextEditingValue(
+        text: textBefore + textAfter,
+        selection: newSelection,
+        composing: newComposingRange,
+      ),
+      cause,
+    );
+    return true;
+  }
+
+  // Deletes the from the current collapsed selection to the start of the field.
+  //
+  // The given SelectionChangedCause indicates the cause of this change and
+  // will be passed to onSelectionChanged.
+  //
+  // See also:
+  //   * _deleteToEnd
+  void _deleteToStart(TextSelection selection, SelectionChangedCause cause) {
+    assert(selection.isCollapsed);
+
+    if (_readOnly || !selection.isValid) {
+      return;
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textBefore = selection.textBefore(text);
+
+    if (textBefore.isEmpty) {
+      return;
+    }
+
+    final String textAfter = selection.textAfter(text);
+    const TextSelection newSelection = TextSelection.collapsed(offset: 0);
+    _setTextEditingValue(
+      TextEditingValue(text: textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  // Deletes the from the current collapsed selection to the end of the field.
+  //
+  // The given SelectionChangedCause indicates the cause of this change and
+  // will be passed to onSelectionChanged.
+  //
+  // See also:
+  //   * _deleteToStart
+  void _deleteToEnd(TextSelection selection, SelectionChangedCause cause) {
+    assert(selection.isCollapsed);
+
+    if (_readOnly || !selection.isValid) {
+      return;
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    final String textAfter = selection.textAfter(text);
+
+    if (textAfter.isEmpty) {
+      return;
+    }
+
+    final String textBefore = selection.textBefore(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore, selection: newSelection),
+      cause,
+    );
+  }
+
+  /// Deletes backwards from the selection in [textSelectionDelegate].
+  ///
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character before the
+  /// cursor.
+  ///
+  /// If the selection is not collapsed, deletes the selection.
+  ///
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForward], which is same but in the opposite direction.
+  void delete(SelectionChangedCause cause) {
+    // `delete` does not depend on the text layout, and the boundary analysis is
+    // done using the `previousCharacter` method instead of ICU, we can keep
+    // deleting without having to layout the text. For this reason, we can
+    // directly delete the character before the caret in the controller.
+    //
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    // https://github.com/flutter/flutter/issues/80226.
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
+
+    if (!selection.isValid || readOnly || _deleteNonEmptySelection(cause)) {
+      return;
+    }
+
+    assert(selection.isCollapsed);
+    final String textBefore = selection.textBefore(controllerValue.text);
+    if (textBefore.isEmpty) {
+      return;
+    }
+
+    final String textAfter = selection.textAfter(controllerValue.text);
+
+    final int characterBoundary = previousCharacter(textBefore.length, textBefore);
+    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
+    final TextRange composing = controllerValue.composing;
+    assert(textBefore.length >= characterBoundary);
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+        end: composing.end - (composing.end - characterBoundary).clamp(0, textBefore.length - characterBoundary),
+      );
+
+    _setTextEditingValue(
+      TextEditingValue(
+        text: textBefore.substring(0, characterBoundary) + textAfter,
+        selection: newSelection,
+        composing: newComposingRange,
+      ),
+      cause,
+    );
+  }
+
+  /// Deletes a word backwards from the current selection.
+  ///
+  /// If the [selection] is collapsed, deletes a word before the cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// {@template flutter.rendering.RenderEditable.whiteSpace}
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// extended past any whitespace and the first word following the whitespace.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForwardByWord], which is same but in the opposite direction.
+  void deleteByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(_selection != null);
+
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
+    }
+
+    // When the text is obscured, the whole thing is treated as one big line.
+    if (obscureText) {
+      return _deleteToStart(_selection!, cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textBefore = _selection!.textBefore(text);
+    if (textBefore.isEmpty) {
+      return;
+    }
+
+    final int characterBoundary = _getLeftByWord(_textPainter, textBefore.length, includeWhitespace);
+    textBefore = textBefore.trimRight().substring(0, characterBoundary);
+
+    final String textAfter = _selection!.textAfter(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: characterBoundary);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  /// Deletes a line backwards from the current selection.
+  ///
+  /// If the [selection] is collapsed, deletes a line before the cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteForwardByLine], which is same but in the opposite direction.
+  void deleteByLine(SelectionChangedCause cause) {
+    assert(_selection != null);
+
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
+    }
+
+    // When the text is obscured, the whole thing is treated as one big line.
+    if (obscureText) {
+      return _deleteToStart(_selection!, cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textBefore = _selection!.textBefore(text);
+    if (textBefore.isEmpty) {
+      return;
+    }
+
+    // When there is a line break, line delete shouldn't do anything
+    final bool isPreviousCharacterBreakLine = textBefore.codeUnitAt(textBefore.length - 1) == 0x0A;
+    if (isPreviousCharacterBreakLine) {
+      return;
+    }
+
+    final TextSelection line = _getLineAtOffset(TextPosition(offset: textBefore.length - 1));
+    textBefore = textBefore.substring(0, line.start);
+
+    final String textAfter = _selection!.textAfter(text);
+    final TextSelection newSelection = TextSelection.collapsed(offset: textBefore.length);
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: newSelection),
+      cause,
+    );
+  }
+
+  /// Deletes in the foward direction, from the current selection in
+  /// [textSelectionDelegate].
+  ///
+  /// This method operates on the text/selection contained in
+  /// [textSelectionDelegate], and does not depend on [selection].
+  ///
+  /// If the selection is collapsed, deletes a single character after the
+  /// cursor.
+  ///
+  /// If the selection is not collapsed, deletes the selection.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [delete], which is same but in the opposite direction.
+  void deleteForward(SelectionChangedCause cause) {
+    // TODO(LongCatIsLooong): remove this method from RenderEditable.
+    // https://github.com/flutter/flutter/issues/80226.
+    final TextEditingValue controllerValue = textSelectionDelegate.textEditingValue;
+    final TextSelection selection = controllerValue.selection;
+
+    if (!selection.isValid || _readOnly || _deleteNonEmptySelection(cause)) {
+      return;
+    }
+
+    assert(selection.isCollapsed);
+    final String textAfter = selection.textAfter(controllerValue.text);
+    if (textAfter.isEmpty) {
+      return;
+    }
+
+    final String textBefore = selection.textBefore(controllerValue.text);
+    final int characterBoundary = nextCharacter(0, textAfter);
+    final TextRange composing = controllerValue.composing;
+    final TextRange newComposingRange = !composing.isValid || composing.isCollapsed
+      ? TextRange.empty
+      : TextRange(
+        start: composing.start - (composing.start - textBefore.length).clamp(0, characterBoundary),
+        end: composing.end - (composing.end - textBefore.length).clamp(0, characterBoundary),
+      );
+    _setTextEditingValue(
+      TextEditingValue(
+        text: textBefore + textAfter.substring(characterBoundary),
+        selection: selection,
+        composing: newComposingRange,
+      ),
+      cause,
+    );
+  }
+
+  /// Deletes a word in the foward direction from the current selection.
+  ///
+  /// If the [selection] is collapsed, deletes a word after the cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteByWord], which is same but in the opposite direction.
+  void deleteForwardByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(_selection != null);
+
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
+    }
+
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return _deleteToEnd(_selection!, cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textAfter = _selection!.textAfter(text);
+
+    if (textAfter.isEmpty) {
+      return;
+    }
+
+    final String textBefore = _selection!.textBefore(text);
+    final int characterBoundary = _getRightByWord(_textPainter, textBefore.length, includeWhitespace);
+    textAfter = textAfter.substring(characterBoundary - textBefore.length);
+
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      cause,
+    );
+  }
+
+  /// Deletes a line in the foward direction from the current selection.
+  ///
+  /// If the [selection] is collapsed, deletes a line after the cursor.
+  ///
+  /// If the [selection] is not collapsed, deletes the selection.
+  ///
+  /// If [obscureText] is true, it treats the whole text content as
+  /// a single word.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// See also:
+  ///
+  ///   * [deleteByLine], which is same but in the opposite direction.
+  void deleteForwardByLine(SelectionChangedCause cause) {
+    assert(_selection != null);
+
+    if (_readOnly || !_selection!.isValid) {
+      return;
+    }
+
+    if (!_selection!.isCollapsed) {
+      return _deleteSelection(_selection!, cause);
+    }
+
+    // When the text is obscured, the whole thing is treated as one big line.
+    if (obscureText) {
+      return _deleteToEnd(_selection!, cause);
+    }
+
+    final String text = textSelectionDelegate.textEditingValue.text;
+    String textAfter = _selection!.textAfter(text);
+    if (textAfter.isEmpty) {
+      return;
+    }
+
+    // When there is a line break, it shouldn't do anything.
+    final bool isNextCharacterBreakLine = textAfter.codeUnitAt(0) == 0x0A;
+    if (isNextCharacterBreakLine) {
+      return;
+    }
+
+    final String textBefore = _selection!.textBefore(text);
+    final TextSelection line = _getLineAtOffset(TextPosition(offset: textBefore.length));
+    textAfter = textAfter.substring(line.end - textBefore.length, textAfter.length);
+
+    _setTextEditingValue(
+      TextEditingValue(text: textBefore + textAfter, selection: _selection!),
+      cause,
+    );
+  }
+
   /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] down by one line.
   ///
   /// If [selectionEnabled] is false, keeps the selection collapsed and just
   /// moves it down.
   ///
-  /// {@template flutter.rendering.RenderEditable.cause}
-  /// The given [SelectionChangedCause] indicates the cause of this change and
-  /// will be passed to [onSelectionChanged].
-  /// {@endtemplate}
+  /// {@macro flutter.rendering.RenderEditable.cause}
   ///
   /// See also:
   ///
@@ -1375,10 +1807,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, `includeWhitespace` is set to true, meaning that whitespace
-  /// can be considered a word in itself.  If set to false, the selection will
-  /// be extended past any whitespace and the first word following the
-  /// whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// {@template flutter.rendering.RenderEditable.stopAtReversal}
   /// The `stopAtReversal` parameter is false by default, meaning that it's
@@ -1420,12 +1849,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, `includeWhitespace` is set to true, meaning that whitespace
-  /// can be considered a word in itself.  If set to false, the selection will
-  /// be extended past any whitespace and the first word following the
-  /// whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// {@macro flutter.rendering.RenderEditable.stopAtReversal}
+  ///
   ///
   /// See also:
   ///
@@ -1585,9 +2012,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, includeWhitespace is set to true, meaning that whitespace can
-  /// be considered a word in itself.  If set to false, the selection will be
-  /// moved past any whitespace and the first word following the whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// See also:
   ///
@@ -1673,9 +2098,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
-  /// By default, includeWhitespace is set to true, meaning that whitespace can
-  /// be considered a word in itself.  If set to false, the selection will be
-  /// moved past any whitespace and the first word following the whitespace.
+  /// {@macro flutter.rendering.RenderEditable.whiteSpace}
   ///
   /// See also:
   ///
@@ -1800,7 +2223,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-      if (data != null) {
+      if (data != null && selection.isValid) {
         value = TextEditingValue(
           text: selection.textBefore(text) + data.text! + selection.textAfter(text),
           selection: TextSelection.collapsed(
@@ -1823,38 +2246,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         SelectionChangedCause.keyboard,
       );
     }
-  }
-
-  void _handleDelete({ required bool forward }) {
-    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
-    final String text = textSelectionDelegate.textEditingValue.text;
-    assert(_selection != null);
-    if (_readOnly || !selection.isValid) {
-      return;
-    }
-    String textBefore = selection.textBefore(text);
-    String textAfter = selection.textAfter(text);
-    int cursorPosition = math.min(selection.start, selection.end);
-    // If not deleting a selection, delete the next/previous character.
-    if (selection.isCollapsed) {
-      if (!forward && textBefore.isNotEmpty) {
-        final int characterBoundary = previousCharacter(textBefore.length, textBefore);
-        textBefore = textBefore.substring(0, characterBoundary);
-        cursorPosition = characterBoundary;
-      }
-      if (forward && textAfter.isNotEmpty) {
-        final int deleteCount = nextCharacter(0, textAfter);
-        textAfter = textAfter.substring(deleteCount);
-      }
-    }
-    final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
-    _setTextEditingValue(
-      TextEditingValue(
-        text: textBefore + textAfter,
-        selection: newSelection,
-      ),
-      SelectionChangedCause.keyboard,
-    );
   }
 
   @override
@@ -2016,6 +2407,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_hasFocus == value)
       return;
     _hasFocus = value;
+    markNeedsSemanticsUpdate();
+
+    if (!attached) {
+      assert(!_listenerAttached);
+      return;
+    }
+
     if (_hasFocus) {
       assert(!_listenerAttached);
       // TODO(justinmc): This listener should be ported to Actions and removed.
@@ -2029,7 +2427,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
-    markNeedsSemanticsUpdate();
   }
 
   /// Whether this rendering object will take a full line regardless the text width.
@@ -2614,8 +3011,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _offset.addListener(markNeedsPaint);
     _showHideCursor();
     _showCursor.addListener(_showHideCursor);
-    if (_listenerAttached)
+    assert(!_listenerAttached);
+    if (_hasFocus) {
       RawKeyboard.instance.addListener(_handleKeyEvent);
+      _listenerAttached = true;
+    }
   }
 
   @override
@@ -2626,8 +3026,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _showCursor.removeListener(_showHideCursor);
     // TODO(justinmc): This listener should be ported to Actions and removed.
     // https://github.com/flutter/flutter/issues/75004
-    if (_listenerAttached)
+    if (_listenerAttached) {
       RawKeyboard.instance.removeListener(_handleKeyEvent);
+      _listenerAttached = false;
+    }
     super.detach();
     _foregroundRenderObject?.detach();
     _backgroundRenderObject?.detach();
@@ -2857,7 +3259,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final TextPosition textPosition = _textPainter.getPositionForOffset(position);
+    final Offset effectivePosition = position - _paintOffset;
+    final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
     final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));

@@ -332,6 +332,7 @@ class Environment {
     @required ProcessManager processManager,
     @required Platform platform,
     @required String engineVersion,
+    @required bool generateDartPluginRegistry,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -372,6 +373,7 @@ class Environment {
       platform: platform,
       engineVersion: engineVersion,
       inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -389,6 +391,7 @@ class Environment {
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
     Platform platform,
+    bool generateDartPluginRegistry = false,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -408,6 +411,7 @@ class Environment {
       processManager: processManager,
       platform: platform ?? FakePlatform(),
       engineVersion: engineVersion,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -426,6 +430,7 @@ class Environment {
     @required this.artifacts,
     @required this.engineVersion,
     @required this.inputs,
+    @required this.generateDartPluginRegistry,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -505,6 +510,11 @@ class Environment {
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String engineVersion;
+
+  /// Whether to generate the Dart plugin registry.
+  /// When [true], the main entrypoint is wrapped and the wrapper becomes
+  /// the new entrypoint.
+  final bool generateDartPluginRegistry;
 }
 
 /// The result information from the build system.

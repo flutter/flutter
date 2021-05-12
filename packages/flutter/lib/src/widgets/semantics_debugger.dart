@@ -6,8 +6,8 @@ import 'dart:math' as math;
 import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -45,7 +45,7 @@ class SemanticsDebugger extends StatefulWidget {
   final TextStyle labelStyle;
 
   @override
-  _SemanticsDebuggerState createState() => _SemanticsDebuggerState();
+  State<SemanticsDebugger> createState() => _SemanticsDebuggerState();
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {

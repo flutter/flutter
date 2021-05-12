@@ -5,9 +5,9 @@
 import 'dart:developer';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'backdrop.dart';
 import 'demos.dart';
@@ -278,7 +278,7 @@ class GalleryHome extends StatefulWidget {
   static bool showPreviewBanner = true;
 
   @override
-  _GalleryHomeState createState() => _GalleryHomeState();
+  State<GalleryHome> createState() => _GalleryHomeState();
 }
 
 class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {

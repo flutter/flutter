@@ -42,6 +42,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     this.disabledElevation,
     this.highlightElevation,
     this.shape,
+    this.enableFeedback,
   });
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
@@ -89,6 +90,12 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// The shape to be used for the floating action button's [Material].
   final ShapeBorder? shape;
 
+  /// If specified, defines the feedback property for [FloatingActionButton].
+  ///
+  /// If [FloatingActionButton.enableFeedback] is provided, [enableFeedback] is
+  /// ignored.
+  final bool? enableFeedback;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
@@ -103,6 +110,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     double? disabledElevation,
     double? highlightElevation,
     ShapeBorder? shape,
+    bool? enableFeedback,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -116,6 +124,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       disabledElevation: disabledElevation ?? this.disabledElevation,
       highlightElevation: highlightElevation ?? this.highlightElevation,
       shape: shape ?? this.shape,
+      enableFeedback: enableFeedback ?? this.enableFeedback,
     );
   }
 
@@ -140,6 +149,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       disabledElevation: lerpDouble(a?.disabledElevation, b?.disabledElevation, t),
       highlightElevation: lerpDouble(a?.highlightElevation, b?.highlightElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
     );
   }
 
@@ -157,6 +167,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       disabledElevation,
       highlightElevation,
       shape,
+      enableFeedback,
     );
   }
 
@@ -177,7 +188,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
         && other.hoverElevation == hoverElevation
         && other.disabledElevation == disabledElevation
         && other.highlightElevation == highlightElevation
-        && other.shape == shape;
+        && other.shape == shape
+        && other.enableFeedback == enableFeedback;
   }
 
   @override
@@ -196,5 +208,6 @@ class FloatingActionButtonThemeData with Diagnosticable {
     properties.add(DoubleProperty('disabledElevation', disabledElevation, defaultValue: defaultData.disabledElevation));
     properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
+    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: defaultData.enableFeedback));
   }
 }

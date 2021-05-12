@@ -18,7 +18,7 @@ import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -312,7 +312,7 @@ abstract class CreateBase extends FlutterCommand {
 
   /// Creates a template to use for [renderTemplate].
   @protected
-  Map<String, dynamic> createTemplateContext({
+  Map<String, Object> createTemplateContext({
     String organization,
     String projectName,
     String projectDescription,
@@ -344,7 +344,7 @@ abstract class CreateBase extends FlutterCommand {
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
 
-    return <String, dynamic>{
+    return <String, Object>{
       'organization': organization,
       'projectName': projectName,
       'androidIdentifier': androidIdentifier,
@@ -385,7 +385,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderTemplate(
-      String templateName, Directory directory, Map<String, dynamic> context,
+      String templateName, Directory directory, Map<String, Object> context,
       {bool overwrite = false}) async {
     final Template template = await Template.fromName(
       templateName,
@@ -402,7 +402,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-      Directory directory, Map<String, dynamic> templateContext,
+      Directory directory, Map<String, Object> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
     generatedCount += await renderTemplate(
@@ -431,7 +431,7 @@ abstract class CreateBase extends FlutterCommand {
         macOSPlatform: templateContext['macos'] as bool ?? false,
         windowsPlatform: templateContext['windows'] as bool ?? false,
         webPlatform: templateContext['web'] as bool ?? false,
-        windowsUwpPlatform: templateContext['winuwp'] as bool ?? false,
+        winUwpPlatform: templateContext['winuwp'] as bool ?? false,
       );
     }
     if (templateContext['android'] == true) {

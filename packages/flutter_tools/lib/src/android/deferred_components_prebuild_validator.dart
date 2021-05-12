@@ -267,7 +267,7 @@ class _DeferredComponentAndroidFiles {
         templateRenderer: globals.templateRenderer,
       );
     }
-    final Map<String, dynamic> context = <String, dynamic>{
+    final Map<String, Object> context = <String, Object>{
       'androidIdentifier': FlutterProject.current().manifest.androidPackage ?? 'com.example.${FlutterProject.current().manifest.appName}',
       'componentName': name,
     };

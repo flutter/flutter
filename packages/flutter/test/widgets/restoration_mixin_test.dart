@@ -360,7 +360,7 @@ void main() {
         child: _TestRestorableWidget(
           restorationId: 'widget',
         ),
-      )
+      ),
     );
 
     _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
@@ -725,12 +725,12 @@ Map<String, dynamic> _createRawDataSet() {
       'child1' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'foo': 22,
-        }
+        },
       },
       'child2' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'bar': 33,
-        }
+        },
       },
     },
   };

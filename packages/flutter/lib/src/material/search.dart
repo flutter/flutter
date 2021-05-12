@@ -180,7 +180,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.leading], the intended use for the return value of this method.
-  Widget buildLeading(BuildContext context);
+  Widget? buildLeading(BuildContext context);
 
   /// Widgets to display after the search query in the [AppBar].
   ///
@@ -193,7 +193,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.actions], the intended use for the return value of this method.
-  List<Widget> buildActions(BuildContext context);
+  List<Widget>? buildActions(BuildContext context);
 
   /// Widget to display across the bottom of the [AppBar].
   ///

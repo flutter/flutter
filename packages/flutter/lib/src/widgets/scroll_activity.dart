@@ -278,7 +278,7 @@ class ScrollDragController implements Drag {
   /// the end of a drag. Expressed as a factor. For example with a
   /// [carriedVelocity] of 2000, we will need a velocity of at least 1000 to
   /// apply the [carriedVelocity] as well. If the velocity does not meet the
-  /// threshold the the [carriedVelocity] is lost. Decided by fair eyeballing
+  /// threshold, the [carriedVelocity] is lost. Decided by fair eyeballing
   /// with the scroll_overlay platform test.
   static const double momentumRetainVelocityThresholdFactor = 0.5;
 

@@ -61,16 +61,17 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
         // From requestExistingInputState
         const MethodCall(
-            'TextInput.setEditingState',
-            <String, dynamic>{
-              'text': '',
-              'selectionBase': -1,
-              'selectionExtent': -1,
-              'selectionAffinity': 'TextAffinity.downstream',
-              'selectionIsDirectional': false,
-              'composingBase': -1,
-              'composingExtent': -1,
-            }),
+          'TextInput.setEditingState',
+          <String, dynamic>{
+            'text': '',
+            'selectionBase': -1,
+            'selectionExtent': -1,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ),
       ]);
     });
   });
@@ -145,6 +146,14 @@ void main() {
       expect(signed.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: false)');
       expect(decimal.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: true)');
       expect(signedDecimal.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: true)');
+      expect(TextInputType.multiline.toString(), 'TextInputType(name: TextInputType.multiline, signed: null, decimal: null)');
+      expect(TextInputType.phone.toString(), 'TextInputType(name: TextInputType.phone, signed: null, decimal: null)');
+      expect(TextInputType.datetime.toString(), 'TextInputType(name: TextInputType.datetime, signed: null, decimal: null)');
+      expect(TextInputType.emailAddress.toString(), 'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null)');
+      expect(TextInputType.url.toString(), 'TextInputType(name: TextInputType.url, signed: null, decimal: null)');
+      expect(TextInputType.visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
+      expect(TextInputType.name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
+      expect(TextInputType.streetAddress.toString(), 'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
 
       expect(text == number, false);
       expect(number == number2, true);
@@ -161,6 +170,22 @@ void main() {
       expect(signed.hashCode == decimal.hashCode, false);
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
+
+      expect(TextInputType.text.index, 0);
+      expect(TextInputType.multiline.index, 1);
+      expect(TextInputType.number.index, 2);
+      expect(TextInputType.phone.index, 3);
+      expect(TextInputType.datetime.index, 4);
+      expect(TextInputType.emailAddress.index, 5);
+      expect(TextInputType.url.index, 6);
+      expect(TextInputType.visiblePassword.index, 7);
+      expect(TextInputType.name.index, 8);
+      expect(TextInputType.streetAddress.index, 9);
+
+      expect(TextEditingValue.empty.toString(),
+          'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
+      expect(const TextEditingValue(text: 'Sample Text').toString(),
+          'TextEditingValue(text: \u2524Sample Text\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
     });
 
     test('TextInputClient onConnectionClosed method is called', () async {
@@ -197,8 +222,7 @@ void main() {
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -211,8 +235,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test('TextInputClient performPrivateCommand method is called with float',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with float', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -224,8 +247,7 @@ void main() {
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : 0.5}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : 0.5}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -238,9 +260,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with CharSequence array',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with CharSequence array', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -252,8 +272,7 @@ void main() {
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : ["abc", "efg"]}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : ["abc", "efg"]}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -266,9 +285,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with CharSequence',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with CharSequence', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -281,8 +298,7 @@ void main() {
           const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : "abc"}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abc"}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -295,9 +311,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test(
-        'TextInputClient performPrivateCommand method is called with float array',
-        () async {
+    test('TextInputClient performPrivateCommand method is called with float array', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -310,8 +324,7 @@ void main() {
           const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          jsonDecode(
-              '{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}')
+          jsonDecode('{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}'),
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -324,8 +337,7 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
-    test('TextInputClient showAutocorrectionPromptRect method is called',
-        () async {
+    test('TextInputClient showAutocorrectionPromptRect method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -477,7 +489,8 @@ class FakeTextChannel implements MethodChannel {
         print(
           'Index $i did not match:\n'
           '  actual:   $outgoingString\n'
-          '  expected: $expectedString');
+          '  expected: $expectedString',
+        );
         hasError = true;
       }
     }

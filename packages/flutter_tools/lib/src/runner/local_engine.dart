@@ -13,8 +13,8 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
+import '../cache.dart';
 import '../dart/package_map.dart';
-import 'flutter_command_runner.dart';
 
 /// A strategy for locating the out/ directory of a local engine build.
 ///
@@ -152,6 +152,10 @@ class LocalEngineLocator {
   // Determine the host engine directory associated with the local engine:
   // Strip '_sim_' since there are no host simulator builds.
   String _getHostEngineBasename(String localEngineBasename) {
+    // Allow winuwp builds to be treated as host builds.
+    if (localEngineBasename.startsWith('winuwp')) {
+      return localEngineBasename;
+    }
     String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
     tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
     // Strip suffix for various archs.

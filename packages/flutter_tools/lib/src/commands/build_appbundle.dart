@@ -12,7 +12,7 @@ import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;

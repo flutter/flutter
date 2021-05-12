@@ -15,7 +15,7 @@ Future<bool> runTests({
   bool verbose = false,
   int numberShards = 1,
   int shardIndex = 0,
-  List<File> files,
+  required List<File> files,
 }) async {
   if (verbose)
     print('Starting run_tests.dart...');
@@ -66,7 +66,7 @@ Future<bool> runTests({
     if (verbose)
       print('Created temporary directory: ${checkout.path}');
     try {
-      bool success;
+      bool? success;
       bool showContacts = false;
       for (final String fetchCommand in instructions.fetch) {
         success = await shell(fetchCommand, checkout, verbose: verbose, silentFailure: skipOnFetchFailure);
@@ -86,7 +86,7 @@ Future<bool> runTests({
         }
       }
       assert(success != null);
-      if (success) {
+      if (success == true) {
         if (verbose)
           print('Running tests...');
         final Directory tests = Directory(path.join(checkout.path, 'tests'));
@@ -105,7 +105,7 @@ Future<bool> runTests({
             }
           }
         }
-        if (verbose && success)
+        if (verbose && success == true)
           print('Tests finished.');
       }
       if (showContacts) {

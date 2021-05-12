@@ -17,8 +17,8 @@ void main() {
           opacity: 1.0,
           child: RenderRepaintBoundary(
             child: c = RenderOpacity(
-              opacity: 1.0
-            )
+              opacity: 1.0,
+            ),
           ),
         ),
       ),

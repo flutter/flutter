@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 const FakeCommand kWhichSysctlCommand = FakeCommand(
@@ -188,7 +187,7 @@ void main() {
     setUp(() async {
       fileSystem = MemoryFileSystem.test();
       artifacts = Artifacts.test();
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),

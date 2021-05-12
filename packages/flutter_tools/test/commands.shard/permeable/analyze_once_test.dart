@@ -4,23 +4,28 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/base/error_handling_io.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 final Platform _kNoColorTerminalPlatform = FakePlatform(stdoutSupportsAnsi: false);
 
@@ -114,11 +119,17 @@ void main() {
     fileSystem = globals.localFileSystem;
     logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
+    final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     artifacts = CachedArtifacts(
-      cache: globals.cache,
+      cache: FlutterCache(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        osUtils: operatingSystemUtils,
+      ),
       fileSystem: fileSystem,
       platform: platform,
-      operatingSystemUtils: FakeOperatingSystemUtils(),
+      operatingSystemUtils: operatingSystemUtils,
     );
     Cache.flutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,
@@ -128,9 +139,7 @@ void main() {
   });
 
   setUp(() {
-    tempDir = fileSystem.systemTempDirectory.createTempSync(
-      'flutter_analyze_once_test_1.',
-    ).absolute;
+    tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
     projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
     fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'))
         ..createSync(recursive: true)
@@ -376,8 +385,7 @@ StringBuffer bar = StringBuffer('baz');
   });
 
   testUsingContext('analyze once with default options has info issue finally exit code 1.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_default_options_info_issue_exit_code_1.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_default_options_info_issue_exit_code_1.');
     _createDotPackages(tempDir.path);
 
     const String infoSourceCode = '''
@@ -411,8 +419,7 @@ int analyze() {}
   });
 
   testUsingContext('analyze once with no-fatal-infos has info issue finally exit code 0.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_no_fatal_infos_info_issue_exit_code_0.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_no_fatal_infos_info_issue_exit_code_0.');
     _createDotPackages(tempDir.path);
 
     const String infoSourceCode = '''
@@ -446,8 +453,7 @@ int analyze() {}
   });
 
   testUsingContext('analyze once only fatal-warnings has info issue finally exit code 0.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_only_fatal_warnings_info_issue_exit_code_0.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_only_fatal_warnings_info_issue_exit_code_0.');
     _createDotPackages(tempDir.path);
 
     const String infoSourceCode = '''
@@ -481,8 +487,7 @@ int analyze() {}
   });
 
   testUsingContext('analyze once only fatal-infos has warning issue finally exit code 1.', () async {
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analyze_once_only_fatal_infos_warning_issue_exit_code_1.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_only_fatal_infos_warning_issue_exit_code_1.');
     _createDotPackages(tempDir.path);
 
     const String warningSourceCode = '''

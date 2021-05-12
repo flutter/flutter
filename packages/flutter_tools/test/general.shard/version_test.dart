@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
@@ -32,7 +32,7 @@ void main() {
   FakeProcessManager processManager;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    processManager = FakeProcessManager.empty();
     mockProcessManager = MockProcessManager();
     mockCache = MockCache();
   });
@@ -61,17 +61,6 @@ void main() {
       });
 
       testUsingContext('prints nothing when Flutter installation looks fresh', () async {
-        fakeData(
-          mockProcessManager,
-          mockCache,
-          localCommitDate: getChannelUpToDateVersion(),
-          // Server will be pinged because we haven't pinged within last x days
-          expectServerPing: true,
-          remoteCommitDate: getChannelOutOfDateVersion(),
-          expectSetStamp: true,
-          channel: channel,
-        );
-
         processManager.addCommand(const FakeCommand(
           command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
           stdout: '1234abcd',
@@ -116,7 +105,40 @@ void main() {
           command: <String>['git', 'remote'],
         ));
 
-        await globals.flutterVersion.checkFlutterVersionFreshness();
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ar'],
+            stdout: '1 second ago',
+          ),
+          FakeCommand(
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            stdout: getChannelUpToDateVersion().toString(),
+          ),
+          FakeCommand(
+            command: const <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            stdout: channel,
+          ),
+        ]);
+
+        final FlutterVersion flutterVersion = globals.flutterVersion;
+        await flutterVersion.checkFlutterVersionFreshness();
+        expect(flutterVersion.channel, channel);
+        expect(flutterVersion.frameworkRevision, '1234abcd');
+        expect(flutterVersion.frameworkRevisionShort, '1234abcd');
+        expect(flutterVersion.frameworkVersion, '0.0.0-unknown');
+        expect(
+          flutterVersion.toString(),
+          'Flutter • channel $channel • unknown source\n'
+          'Framework • revision 1234abcd (1 second ago) • ${getChannelUpToDateVersion()}\n'
+          'Engine • revision \n'
+          'Tools • Dart null',
+        );
+        expect(flutterVersion.frameworkAge, '1 second ago');
+        expect(flutterVersion.getVersionString(), '$channel/1234abcd');
+        expect(flutterVersion.getBranchName(), channel);
+        expect(flutterVersion.getVersionString(redactUnknownBranches: true), '$channel/1234abcd');
+        expect(flutterVersion.getBranchName(redactUnknownBranches: true), channel);
+
         _expectVersionMessage('');
         expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
@@ -291,39 +313,6 @@ void main() {
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
-
-      testUsingContext('versions comparison', () async {
-        fakeData(
-          mockProcessManager,
-          mockCache,
-          localCommitDate: getChannelOutOfDateVersion(),
-          errorOnFetch: true,
-          expectServerPing: true,
-          expectSetStamp: true,
-          channel: channel,
-        );
-        final FlutterVersion version = globals.flutterVersion;
-
-        when(mockProcessManager.runSync(
-          <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
-          workingDirectory: anyNamed('workingDirectory'),
-        )).thenReturn(ProcessResult(1, 0, '', ''));
-
-        expect(
-            version.checkRevisionAncestry(
-              tentativeDescendantRevision: '123456',
-              tentativeAncestorRevision: 'abcdef',
-            ),
-            true);
-
-        verify(mockProcessManager.runSync(
-          <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
-          workingDirectory: anyNamed('workingDirectory'),
-        ));
-      }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(clock: _testClock),
-        ProcessManager: () => mockProcessManager,
-      });
     });
 
     group('$VersionCheckStamp for $channel', () {
@@ -448,6 +437,42 @@ void main() {
       });
     });
   }
+
+  testUsingContext('version handles unknown branch', () async {
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
+        stdout: '1234abcd',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', '1234abcd'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
+        stdout: '0.1.2-3-1234abcd',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
+        stdout: 'feature-branch',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        stdout: 'feature-branch',
+      ),
+    ]);
+
+    final FlutterVersion flutterVersion = globals.flutterVersion;
+    expect(flutterVersion.channel, 'feature-branch');
+    expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
+    expect(flutterVersion.getBranchName(), 'feature-branch');
+    expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
+    expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
+    expect(processManager.hasRemainingExpectations, isFalse);
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FlutterVersion(clock: _testClock),
+    ProcessManager: () => processManager,
+    Cache: () => mockCache,
+  });
 
   testUsingContext('GitTagVersion', () {
     const String hash = 'abcdef';

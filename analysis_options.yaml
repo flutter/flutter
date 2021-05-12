@@ -11,9 +11,9 @@
 # which should be kept in sync with this file:
 #
 #   - analysis_options.yaml (this file)
-#   - packages/flutter/lib/analysis_options_user.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by Flutter tools, such as IntelliJ,
 # Android Studio, and the `flutter analyze` command.
@@ -40,6 +40,8 @@ analyzer:
     unnecessary_null_comparison: ignore
   exclude:
     - "bin/cache/**"
+      # Ignore protoc generated files
+    - "dev/tools/lib/proto/*"
 
 linter:
   rules:
@@ -120,6 +122,7 @@ linter:
     - leading_newlines_in_multiline_strings
     - library_names
     - library_prefixes
+    - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
     - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181

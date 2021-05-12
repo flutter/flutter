@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,12 +14,11 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('fsUtils', () {
-    MemoryFileSystem fs;
-    FileSystemUtils fsUtils;
+    late MemoryFileSystem fs;
+    late FileSystemUtils fsUtils;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -102,6 +100,25 @@ void main() {
       expect(destination.childFile('a.txt').existsSync(), isFalse);
       expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
     });
+
+    testWithoutContext('Skip directories if shouldCopyDirectory returns false', () {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Directory origin = fileSystem.directory('/origin');
+      origin.createSync();
+      fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
+      fileSystem.directory('/origin/nested').createSync();
+      fileSystem.file(fileSystem.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
+      fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
+
+      final Directory destination = fileSystem.directory('/destination');
+      copyDirectory(origin, destination, shouldCopyDirectory: (Directory directory) {
+        return !directory.path.endsWith('nested');
+      });
+
+      expect(destination, exists);
+      expect(destination.childDirectory('nested'), isNot(exists));
+      expect(destination.childDirectory('nested').childFile('b.txt'),isNot(exists));
+    });
   });
 
   group('escapePath', () {
@@ -129,15 +146,15 @@ void main() {
   });
 
   group('LocalFileSystem', () {
-    FakeProcessSignal fakeSignal;
-    ProcessSignal signalUnderTest;
+    late FakeProcessSignal fakeSignal;
+    late ProcessSignal signalUnderTest;
 
     setUp(() {
       fakeSignal = FakeProcessSignal();
       signalUnderTest = ProcessSignal(fakeSignal);
     });
 
-    testUsingContext('deletes system temp entry on a fatal signal', () async {
+    testWithoutContext('deletes system temp entry on a fatal signal', () async {
       final Completer<void> completer = Completer<void>();
       final Signals signals = Signals.test();
       final LocalFileSystem localFileSystem = LocalFileSystem.test(

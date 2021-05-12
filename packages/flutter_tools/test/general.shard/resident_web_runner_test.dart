@@ -16,12 +16,12 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/isolated/devfs_web.dart';
-import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -34,9 +34,8 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_process_manager.dart';
+import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
-import '../src/testbed.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
@@ -196,7 +195,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -230,7 +228,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -254,7 +251,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -269,7 +265,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -374,7 +369,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -399,7 +393,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -518,7 +511,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -915,412 +907,6 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('debugDumpApp', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpApp',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpApp();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpLayerTree', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpLayerTree',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpLayerTree();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpRenderTree', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpRenderTree',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpRenderTree();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpSemanticsTreeInTraversalOrder', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpSemanticsTreeInTraversalOrder();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugDumpSemanticsTreeInInverseHitTestOrder', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-
-    await connectionInfoCompleter.future;
-    await residentWebRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleDebugPaintSizeEnabled', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugPaint',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.debugPaint',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'value': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleDebugPaintSizeEnabled();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugTogglePerformanceOverlayOverride', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.showPerformanceOverlay',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.showPerformanceOverlay',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugTogglePerformanceOverlayOverride();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleInvertOversizedImagesOverride', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.invertOversizedImages',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.invertOversizedImages',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleInvertOversizedImages();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleWidgetInspector', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.inspector.show',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.inspector.show',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleWidgetInspector();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleProfileWidgetBuilds', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.profileWidgetBuilds',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'false'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.profileWidgetBuilds',
-        args: <String, Object>{
-          'isolateId': null,
-          'enabled': 'true',
-        },
-        jsonResponse: <String, Object>{
-          'enabled': 'true'
-        },
-      )
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleProfileWidgetBuilds();
-
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugTogglePlatform', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.platformOverride',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'value': 'iOS'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.platformOverride',
-        args: <String, Object>{
-          'isolateId': null,
-          'value': 'fuchsia',
-        },
-        jsonResponse: <String, Object>{
-          'value': 'fuchsia'
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugTogglePlatform();
-
-    expect(logger.statusText,
-      contains('Switched operating system to fuchsia'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('debugToggleBrightness', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice, logger: logger);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.brightnessOverride',
-        args: <String, Object>{
-          'isolateId': null,
-        },
-        jsonResponse: <String, Object>{
-          'value': 'Brightness.light'
-        },
-      ),
-      const FakeVmServiceRequest(
-        method: 'ext.flutter.brightnessOverride',
-        args: <String, Object>{
-          'isolateId': null,
-          'value': 'Brightness.dark',
-        },
-        jsonResponse: <String, Object>{
-          'value': 'Brightness.dark'
-        },
-      ),
-    ]);
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    await residentWebRunner.debugToggleBrightness();
-
-    expect(logger.statusText,
-      contains('Changed brightness to Brightness.dark.'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
   testUsingContext('cleanup of resources is safe to call multiple times', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -1440,7 +1026,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1488,7 +1073,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
-      featureFlags: TestFeatureFlags(),
       systemClock: globals.systemClock,
     );
 
@@ -1607,7 +1191,6 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
-    featureFlags: TestFeatureFlags(),
   );
 }
 

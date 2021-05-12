@@ -6,71 +6,66 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   group('FuchsiaPM', () {
     File pm;
-    MockProcessManager mockProcessManager;
-    MockFuchsiaArtifacts mockFuchsiaArtifacts;
+    FakeProcessManager fakeProcessManager;
+    FakeFuchsiaArtifacts fakeFuchsiaArtifacts;
 
     setUp(() {
       pm = MemoryFileSystem.test().file('pm');
 
-      mockFuchsiaArtifacts = MockFuchsiaArtifacts();
-      when(mockFuchsiaArtifacts.pm).thenReturn(pm);
-
-      mockProcessManager = MockProcessManager();
+      fakeFuchsiaArtifacts = FakeFuchsiaArtifacts(pm);
+      fakeProcessManager = FakeProcessManager.empty();
     });
 
     testUsingContext('serve - IPv4 address', () async {
-      when(mockProcessManager.start(any)).thenAnswer((_) {
-        return Future<Process>.value(createMockProcess());
-      });
-
-      await FuchsiaPM().serve('<repo>', '127.0.0.1', 43819);
-
-      verify(mockProcessManager.start(<String>[
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'pm',
         'serve',
         '-repo',
         '<repo>',
         '-l',
         '127.0.0.1:43819',
-      ])).called(1);
+      ]));
+
+      await FuchsiaPM().serve('<repo>', '127.0.0.1', 43819);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => mockFuchsiaArtifacts,
-      ProcessManager: () => mockProcessManager,
+      FuchsiaArtifacts: () => fakeFuchsiaArtifacts,
+      ProcessManager: () => fakeProcessManager,
     });
 
     testUsingContext('serve - IPv6 address', () async {
-      when(mockProcessManager.start(any)).thenAnswer((_) {
-        return Future<Process>.value(createMockProcess());
-      });
-
-      await FuchsiaPM().serve('<repo>', 'fe80::ec4:7aff:fecc:ea8f%eno2', 43819);
-
-      verify(mockProcessManager.start(<String>[
+      fakeProcessManager.addCommand(const FakeCommand(command: <String>[
         'pm',
         'serve',
         '-repo',
         '<repo>',
         '-l',
         '[fe80::ec4:7aff:fecc:ea8f%eno2]:43819',
-      ])).called(1);
+      ]));
+
+      await FuchsiaPM().serve('<repo>', 'fe80::ec4:7aff:fecc:ea8f%eno2', 43819);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => mockFuchsiaArtifacts,
-      ProcessManager: () => mockProcessManager,
+      FuchsiaArtifacts: () => fakeFuchsiaArtifacts,
+      ProcessManager: () => fakeProcessManager,
     });
   });
 }
 
-class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
-class MockProcessManager extends Mock implements ProcessManager {}
+class FakeFuchsiaArtifacts extends Fake implements FuchsiaArtifacts {
+  FakeFuchsiaArtifacts(this.pm);
+
+  @override
+  final File pm;
+}

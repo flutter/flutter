@@ -21,6 +21,24 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
+/// How overflowing text should be handled.
+///
+/// A [TextOverflow] can be passed to [Text] and [RichText] via their
+/// [Text.overflow] and [RichText.overflow] properties respectively.
+enum TextOverflow {
+  /// Clip the overflowing text to fix its container.
+  clip,
+
+  /// Fade the overflowing text to transparent.
+  fade,
+
+  /// Use an ellipsis to indicate that the text has overflowed.
+  ellipsis,
+
+  /// Render overflowing text outside of its container.
+  visible,
+}
+
 /// Holds the [Size] and baseline required to represent the dimensions of
 /// a placeholder in text.
 ///

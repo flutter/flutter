@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
@@ -180,7 +181,7 @@ class ExpansionTile extends StatefulWidget {
   final Color? collapsedTextColor;
 
   @override
-  _ExpansionTileState createState() => _ExpansionTileState();
+  State<ExpansionTile> createState() => _ExpansionTileState();
 }
 
 class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
@@ -288,13 +289,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     _borderColorTween.end = theme.dividerColor;
     _headerColorTween
       ..begin = widget.collapsedTextColor ?? theme.textTheme.subtitle1!.color
-      ..end = widget.textColor ?? theme.accentColor;
+      ..end = widget.textColor ?? colorScheme.primary;
     _iconColorTween
       ..begin = widget.collapsedIconColor ?? theme.unselectedWidgetColor
-      ..end = widget.iconColor ?? theme.accentColor;
+      ..end = widget.iconColor ?? colorScheme.primary;
     _backgroundColorTween
       ..begin = widget.collapsedBackgroundColor
       ..end = widget.backgroundColor;

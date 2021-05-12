@@ -8,8 +8,8 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
@@ -158,7 +158,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///   const MyApp({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///  _MyAppState createState() => _MyAppState();
+  ///  State<MyApp> createState() => _MyAppState();
   /// }
   ///
   /// class _MyAppState extends State<MyApp> {
@@ -924,7 +924,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
-        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight - contentTop).toDouble();
+        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight - contentTop);
         assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
       }
 
@@ -1820,6 +1820,8 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will cause an
   /// assert in debug mode, and throw an exception in release mode.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
@@ -1999,6 +2001,8 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will return null.
   /// To throw an exception instead, use [of] instead of this function.
   ///
+  /// This method can be expensive (it walks the element tree).
+  ///
   /// See also:
   ///
   ///  * [of], a similar function to this one that throws if no instance
@@ -2065,6 +2069,8 @@ class Scaffold extends StatefulWidget {
   /// true. This will then set up an [InheritedWidget] relationship with the
   /// [Scaffold] so that the client widget gets rebuilt whenever the [hasDrawer]
   /// value changes.
+  ///
+  /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
@@ -2481,6 +2487,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -2554,6 +2561,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       elevation: elevation,
       shape: shape,
       clipBehavior: clipBehavior,
+      constraints: constraints,
     );
 
     if (!isPersistent)
@@ -2653,6 +2661,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
     AnimationController? transitionAnimationController,
   }) {
     assert(() {
@@ -2678,6 +2687,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         elevation: elevation,
         shape: shape,
         clipBehavior: clipBehavior,
+        constraints: constraints,
       );
     });
     return _currentBottomSheet! as PersistentBottomSheetController<T>;
@@ -3035,7 +3045,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
-      _appBarMaxHeight = widget.appBar!.preferredSize.height + topPadding;
+      _appBarMaxHeight = AppBar.preferredHeightFor(context, widget.appBar!.preferredSize) + topPadding;
       assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
       _addIfNonNull(
         children,
@@ -3238,27 +3248,29 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
-      child: Material(
-        color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-        child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-          return CustomMultiChildLayout(
-            children: children,
-            delegate: _ScaffoldLayout(
-              extendBody: _extendBody,
-              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-              minInsets: minInsets,
-              minViewPadding: minViewPadding,
-              currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-              floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-              floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-              geometryNotifier: _geometryNotifier,
-              previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-              textDirection: textDirection,
-              isSnackBarFloating: isSnackBarFloating,
-              snackBarWidth: snackBarWidth,
-            ),
-          );
-        }),
+      child: ScrollNotificationObserver(
+        child: Material(
+          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+          child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+            return CustomMultiChildLayout(
+              children: children,
+              delegate: _ScaffoldLayout(
+                extendBody: _extendBody,
+                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                minInsets: minInsets,
+                minViewPadding: minViewPadding,
+                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                geometryNotifier: _geometryNotifier,
+                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                textDirection: textDirection,
+                isSnackBarFloating: isSnackBarFloating,
+                snackBarWidth: snackBarWidth,
+              ),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -3354,6 +3366,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -3366,6 +3379,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final double? elevation;
   final ShapeBorder? shape;
   final Clip? clipBehavior;
+  final BoxConstraints? constraints;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -3470,6 +3484,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           elevation: widget.elevation,
           shape: widget.shape,
           clipBehavior: widget.clipBehavior,
+          constraints: widget.constraints,
         ),
       ),
     );
