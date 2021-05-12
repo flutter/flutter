@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/engine_layer.h"
 
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -13,14 +14,14 @@ using tonic::ToDart;
 
 namespace flutter {
 
-EngineLayer::EngineLayer(std::shared_ptr<flutter::ContainerLayer> layer)
+EngineLayer::EngineLayer(std::shared_ptr<flutter::Layer> layer)
     : layer_(layer) {}
 
 EngineLayer::~EngineLayer() = default;
 
 size_t EngineLayer::GetAllocationSize() const {
   // Provide an approximation of the total memory impact of this object to the
-  // Dart GC.  The ContainerLayer may hold references to a tree of other layers,
+  // Dart GC.  The Layer may hold references to a tree of other layers,
   // which in turn may contain Skia objects.
   return 3000;
 };

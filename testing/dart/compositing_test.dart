@@ -279,16 +279,18 @@ void main() {
     builder2.build();
   }
 
-  void testNoSharing(_TestNoSharingFunction pushFunction) {
+  void testNoSharing(_TestNoSharingFunction pushFunction, {bool isLeafLayer = false}) {
     testPushThenIllegalRetain(pushFunction);
     testAddRetainedThenIllegalPush(pushFunction);
     testDoubleAddRetained(pushFunction);
     testPushOldLayerTwice(pushFunction);
-    testPushChildLayerOfRetainedLayer(pushFunction);
-    testRetainParentLayerOfPushedChild(pushFunction);
     testRetainOldLayer(pushFunction);
     testPushOldLayer(pushFunction);
-    testRetainsParentOfOldLayer(pushFunction);
+    if (!isLeafLayer) {
+      testPushChildLayerOfRetainedLayer(pushFunction);
+      testRetainParentLayerOfPushedChild(pushFunction);
+      testRetainsParentOfOldLayer(pushFunction);
+    }
   }
 
   test('SceneBuilder does not share a layer between addRetained and push*', () {
@@ -377,6 +379,17 @@ void main() {
         oldLayer: oldLayer as ImageFilterEngineLayer,
       );
     });
+    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawPaint(Paint());
+      final Picture picture = recorder.endRecording();
+      return builder.addPicture(
+        Offset.zero,
+        picture,
+        oldLayer: oldLayer as PictureEngineLayer,
+      );
+    }, isLeafLayer: true);
   });
 }
 
