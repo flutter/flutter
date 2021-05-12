@@ -1010,7 +1010,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         if (ieee754Error != 0.0) {
           maxRange -= ieee754Error;
           correctionOffset -= ieee754Error;
-        } 
+        }
       } else if ((velocity < 0.0) && (innerPosition.pixels < innerPosition.minScrollExtent)) {
         // This handles going backward (fling down) and inner list is
         // underscrolled. We want to grab the extra pixels immediately to grow.
