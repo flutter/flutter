@@ -328,7 +328,7 @@
       "name": "Linux animated_image_gc_perf",
       "repo": "flutter",
       "task_name": "animated_image_gc_perf",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux linux_chrome_dev_mode",
