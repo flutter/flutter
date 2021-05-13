@@ -39,11 +39,11 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// [radiusWhileDragging], respectively.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-/// This sample shows a [CupertinoScrollbar] that executes a fade animation as scrolling occurs.
-/// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
-/// The thickness of the scrollbar will be 6 when it's ideal and 10 when it's being dragged by the user.
-/// The Radius of the scrollbar thumb's rounded rectangle corners will be 34 when it's ideal and 0
-/// when the scrollbar is being dragged by the user.
+/// This sample shows a [CupertinoScrollbar] that fades in and out of view as scrolling occurs.
+/// The scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
+/// The `thickness` of the scrollbar will animate from 6 pixels to the `thicknessWhileDragging` of 10
+/// when it is dragged by the user. The `radius` of the scrollbar thumb corners will animate from 34
+/// to the `radiusWhileDragging` of 0 when the scrollbar is being dragged by the user.
 ///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
@@ -54,9 +54,9 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
 ///     thickness: 6.0,
-///     thicknessWhileDragging: 10,
-///     radius: const Radius.circular(34),
-///     radiusWhileDragging: const Radius.circular(0),
+///     thicknessWhileDragging: 10.0,
+///     radius: const Radius.circular(34.0),
+///     radiusWhileDragging: const Radius.circular(0.0),
 ///     child: ListView.builder(
 ///       itemCount: 120,
 ///       itemBuilder: (BuildContext context, int index) {
@@ -71,12 +71,9 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
-/// When isAlwaysShown is true, the scrollbar thumb will remain visible without the
-/// fade animation. This requires that a ScrollController is provided to controller,
-/// or that the PrimaryScrollController is available.
-/// The thickness of the scrollbar will be 6 when it's ideal and 10 when it's being dragged by the user.
-/// The Radius of the scrollbar thumb's rounded rectangle corners will be 34 when it's ideal and 0
-/// when the scrollbar is being dragged by the user.
+/// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without the
+/// fade animation. This requires that a [ScrollController] is provided to controller,
+/// or that the [PrimaryScrollController] is available.
 ///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
@@ -89,9 +86,9 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// Widget build(BuildContext context) {
 ///   return CupertinoScrollbar(
 ///     thickness: 6.0,
-///     thicknessWhileDragging: 10,
-///     radius: const Radius.circular(34),
-///     radiusWhileDragging: const Radius.circular(0),
+///     thicknessWhileDragging: 10.0,
+///     radius: const Radius.circular(34.0),
+///     radiusWhileDragging: const Radius.circular(0.0),
 ///     controller: _controllerOne,
 ///     isAlwaysShown: true,
 ///     child: ListView.builder(
