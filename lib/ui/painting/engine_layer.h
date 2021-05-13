@@ -24,21 +24,19 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
 
   size_t GetAllocationSize() const override;
 
-  static fml::RefPtr<EngineLayer> MakeRetained(
-      Dart_Handle dart_handle,
-      std::shared_ptr<flutter::Layer> layer) {
-    auto engine_layer = fml::MakeRefCounted<EngineLayer>(std::move(layer));
+  static void MakeRetained(Dart_Handle dart_handle,
+                           std::shared_ptr<flutter::ContainerLayer> layer) {
+    auto engine_layer = fml::MakeRefCounted<EngineLayer>(layer);
     engine_layer->AssociateWithDartWrapper(dart_handle);
-    return engine_layer;
   }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-  std::shared_ptr<flutter::Layer> Layer() const { return layer_; }
+  std::shared_ptr<flutter::ContainerLayer> Layer() const { return layer_; }
 
  private:
-  explicit EngineLayer(std::shared_ptr<flutter::Layer> layer);
-  std::shared_ptr<flutter::Layer> layer_;
+  explicit EngineLayer(std::shared_ptr<flutter::ContainerLayer> layer);
+  std::shared_ptr<flutter::ContainerLayer> layer_;
 
   FML_FRIEND_MAKE_REF_COUNTED(EngineLayer);
 };
