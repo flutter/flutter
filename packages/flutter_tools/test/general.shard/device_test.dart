@@ -18,7 +18,6 @@ import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_devices.dart';
 
 void main() {
@@ -415,7 +414,7 @@ void main() {
       expect(deviceDiscovery.discoverDevicesCalled, 0);
     });
 
-    testUsingContext('refreshes device cache with a timeout', () async {
+    testWithoutContext('refreshes device cache with a timeout', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
       ];
@@ -444,7 +443,7 @@ void main() {
   });
 
   group('JSON encode devices', () {
-    testUsingContext('Consistency of JSON representation', () async {
+    testWithoutContext('Consistency of JSON representation', () async {
       expect(
         // This tests that fakeDevices is a list of tuples where "second" is the
         // correct JSON representation of the "first". Actual values are irrelevant
