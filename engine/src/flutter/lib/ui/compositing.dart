@@ -188,15 +188,6 @@ class PhysicalShapeEngineLayer extends _EngineLayerWrapper {
   PhysicalShapeEngineLayer._(EngineLayer nativeLayer) : super._(nativeLayer);
 }
 
-/// An opaque handle to a picture engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.addPicture].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-class PictureEngineLayer extends _EngineLayerWrapper {
-  PictureEngineLayer._(EngineLayer nativeLayer) : super._(nativeLayer);
-}
-
 /// Builds a [Scene] containing the given visuals.
 ///
 /// A [Scene] can then be rendered using [FlutterView.render].
@@ -708,29 +699,18 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Adds a [Picture] to the scene.
   ///
   /// The picture is rasterized at the given offset.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  PictureEngineLayer addPicture(
+  void addPicture(
     Offset offset,
     Picture picture, {
     bool isComplexHint = false,
     bool willChangeHint = false,
-    PictureEngineLayer? oldLayer,
   }) {
-    assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'addPicture'));
-    final EngineLayer engineLayer = EngineLayer._();
     final int hints = (isComplexHint ? 1 : 0) | (willChangeHint ? 2 : 0);
-    _addPicture(engineLayer, offset.dx, offset.dy, picture, hints, oldLayer?._nativeLayer);
-    return PictureEngineLayer._(engineLayer);
+    _addPicture(offset.dx, offset.dy, picture, hints);
   }
 
-  void _addPicture(
-    EngineLayer outEngineLayer,
-    double dx,
-    double dy,
-    Picture picture,
-    int hints,
-    EngineLayer? oldLayer) native 'SceneBuilder_addPicture';
+  void _addPicture(double dx, double dy, Picture picture, int hints)
+      native 'SceneBuilder_addPicture';
 
   /// Adds a backend texture to the scene.
   ///

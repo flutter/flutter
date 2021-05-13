@@ -101,12 +101,7 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                              double top,
                              double bottom);
 
-  void addPicture(Dart_Handle layer_handle,
-                  double dx,
-                  double dy,
-                  Picture* picture,
-                  int hints,
-                  fml::RefPtr<EngineLayer> oldLayer);
+  void addPicture(double dx, double dy, Picture* picture, int hints);
 
   void addTexture(double dx,
                   double dy,
