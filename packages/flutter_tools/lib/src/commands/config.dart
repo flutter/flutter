@@ -88,6 +88,7 @@ class ConfigCommand extends FlutterCommand {
                                   !globals.flutterUsage.suppressAnalytics;
     return
       'Configured Flutter settings.\n'
+      'To remove a setting, configure it to an empty string.\n'
       'Run "flutter config -h" to see all available settings.\n\n$values\n\n'
       'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
   }
