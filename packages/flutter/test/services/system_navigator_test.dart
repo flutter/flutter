@@ -18,7 +18,7 @@ void main() {
   }
 
   test('System navigator control test - platform messages', () async {
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -26,11 +26,11 @@ void main() {
       isMethodCall('SystemNavigator.pop', arguments: null),
     ]);
 
-    SystemChannels.platform.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   test('System navigator control test - navigation messages', () async {
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -54,6 +54,6 @@ void main() {
       isMethodCall('routeUpdated', arguments: <String, dynamic>{ 'routeName': 'a', 'previousRouteName': 'b' }),
     ]);
 
-    SystemChannels.navigation.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, null);
   });
 }
