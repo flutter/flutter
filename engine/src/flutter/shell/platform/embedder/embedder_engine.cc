@@ -210,7 +210,7 @@ bool EmbedderEngine::SetAccessibilityFeatures(int32_t flags) {
 
 bool EmbedderEngine::DispatchSemanticsAction(int id,
                                              flutter::SemanticsAction action,
-                                             std::vector<uint8_t> args) {
+                                             fml::MallocMapping args) {
   if (!IsValid()) {
     return false;
   }

@@ -18,7 +18,7 @@ class TestAccessibilityBridgeDelegate
       ui::AXEventGenerator::TargetedEvent targeted_event) override;
   void DispatchAccessibilityAction(AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
-                                   const std::vector<uint8_t>& data) override;
+                                   fml::MallocMapping data) override;
   std::unique_ptr<FlutterPlatformNodeDelegate>
   CreateFlutterPlatformNodeDelegate();
 

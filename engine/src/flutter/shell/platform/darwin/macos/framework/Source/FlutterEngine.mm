@@ -465,8 +465,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (void)dispatchSemanticsAction:(FlutterSemanticsAction)action
                        toTarget:(uint16_t)target
-                       withData:(const std::vector<uint8_t>&)data {
-  _embedderAPI.DispatchSemanticsAction(_engine, target, action, data.data(), data.size());
+                       withData:(fml::MallocMapping)data {
+  _embedderAPI.DispatchSemanticsAction(_engine, target, action, data.GetMapping(), data.GetSize());
 }
 
 #pragma mark - Private methods

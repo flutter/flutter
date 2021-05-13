@@ -6,20 +6,21 @@
 
 namespace flutter {
 
-std::vector<uint8_t> GetVectorFromNSData(NSData* data) {
-  const uint8_t* bytes = reinterpret_cast<const uint8_t*>(data.bytes);
-  return std::vector<uint8_t>(bytes, bytes + data.length);
+fml::MallocMapping CopyNSDataToMapping(NSData* data) {
+  const uint8_t* bytes = static_cast<const uint8_t*>(data.bytes);
+  return fml::MallocMapping::Copy(bytes, data.length);
 }
 
-NSData* GetNSDataFromVector(const std::vector<uint8_t>& buffer) {
-  return [NSData dataWithBytes:buffer.data() length:buffer.size()];
+NSData* CopyMappingToNSData(fml::MallocMapping buffer) {
+  return [NSData dataWithBytes:const_cast<uint8_t*>(buffer.GetMapping()) length:buffer.GetSize()];
 }
 
-std::unique_ptr<fml::Mapping> GetMappingFromNSData(NSData* data) {
-  return std::make_unique<fml::DataMapping>(GetVectorFromNSData(data));
+std::unique_ptr<fml::Mapping> CopyNSDataToMappingPtr(NSData* data) {
+  auto mapping = CopyNSDataToMapping(data);
+  return std::make_unique<fml::MallocMapping>(std::move(mapping));
 }
 
-NSData* GetNSDataFromMapping(std::unique_ptr<fml::Mapping> mapping) {
+NSData* CopyMappingPtrToNSData(std::unique_ptr<fml::Mapping> mapping) {
   return [NSData dataWithBytes:mapping->GetMapping() length:mapping->GetSize()];
 }
 

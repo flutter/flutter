@@ -278,7 +278,7 @@ bool RuntimeController::DispatchKeyDataPacket(const KeyDataPacket& packet,
 
 bool RuntimeController::DispatchSemanticsAction(int32_t id,
                                                 SemanticsAction action,
-                                                std::vector<uint8_t> args) {
+                                                fml::MallocMapping args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {

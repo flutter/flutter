@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FUCHSIA_INTL_H_
 
 #include <fuchsia/intl/cpp/fidl.h>
+#include "flutter/fml/mapping.h"
 
 namespace flutter_runner {
 
@@ -15,7 +16,7 @@ namespace flutter_runner {
 // This method does not return a `std::unique_ptr<flutter::PlatformMessage>` for
 // testing convenience; that would require an unreasonably large set of
 // dependencies for the unit tests.
-std::vector<uint8_t> MakeLocalizationPlatformMessageData(
+fml::MallocMapping MakeLocalizationPlatformMessageData(
     const fuchsia::intl::Profile& intl_profile);
 
 }  // namespace flutter_runner

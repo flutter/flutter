@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_COMMON_FLUTTER_PLATFORM_NODE_DELEGATE_H_
 #define FLUTTER_SHELL_PLATFORM_COMMON_FLUTTER_PLATFORM_NODE_DELEGATE_H_
 
+#include "flutter/fml/mapping.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-
 #include "flutter/third_party/accessibility/ax/ax_event_generator.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.h"
 
@@ -57,7 +57,7 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
     ///                                 action.
     virtual void DispatchAccessibilityAction(AccessibilityNodeId target,
                                              FlutterSemanticsAction action,
-                                             std::vector<uint8_t> data) = 0;
+                                             fml::MallocMapping data) = 0;
 
     //---------------------------------------------------------------------------
     /// @brief      Get the native accessibility node with the given id.
