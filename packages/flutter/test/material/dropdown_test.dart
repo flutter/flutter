@@ -237,7 +237,7 @@ void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
   expect(box0.size, equals(box1.size));
 }
 
-void verifyPaintedShadow(Finder customPaint, int elevation) {
+void verifyPaintedShadow(Finder customPaint, double elevation) {
   const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
 
   final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation]![index]);
