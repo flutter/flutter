@@ -508,6 +508,20 @@ void main() {
       '--bundle-sksl-path=foo.json',
     ]), throwsToolExit(message: 'No SkSL shader bundle found at foo.json'));
   });
+
+  testUsingContext('Configures web connection options to use web sockets by default', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '--no-pub',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(true);
+
+    expect(options.webUseSseForDebugBackend, false);
+    expect(options.webUseSseForDebugProxy, false);
+    expect(options.webUseSseForInjectedClient, false);
+  });
 }
 
 class MockCache extends Mock implements Cache {}
