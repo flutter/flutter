@@ -5,6 +5,8 @@
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 
 #define TRACE_EVENT_HIDE_MACROS
+#include <map>
+#include <set>
 #include <vector>
 
 #include "flutter/fml/logging.h"
@@ -42,6 +44,10 @@ namespace flutter {
 
 namespace {
 
+// Skia prepends this string to the category names of its trace events.
+// Defined in Skia's src/core/SkTraceEvent.h.
+constexpr std::string_view kTraceCategoryPrefix = "disabled-by-default-";
+
 #if defined(OS_FUCHSIA)
 template <class T, class U>
 inline T BitCast(const U& u) {
@@ -61,7 +67,12 @@ class FlutterEventTracer : public SkEventTracer {
   static constexpr uint8_t kYes = 1;
   static constexpr uint8_t kNo = 0;
 
-  FlutterEventTracer(bool enabled) : enabled_(enabled ? kYes : kNo){};
+  FlutterEventTracer(bool enabled, const std::vector<std::string>& allowlist)
+      : enabled_(enabled ? kYes : kNo) {
+    for (const std::string& category : allowlist) {
+      allowlist_.insert(std::string(kTraceCategoryPrefix) + category);
+    }
+  };
 
   SkEventTracer::Handle addTraceEvent(char phase,
                                       const uint8_t* category_enabled_flag,
@@ -221,39 +232,43 @@ class FlutterEventTracer : public SkEventTracer {
   }
 
   const uint8_t* getCategoryGroupEnabled(const char* name) override {
-    return &enabled_;
+    // Skia will only use long-lived string literals as event names.
+    auto flag_it = category_flag_map_.find(name);
+    if (flag_it == category_flag_map_.end()) {
+      bool allowed;
+      if (enabled_) {
+        allowed =
+            allowlist_.empty() || allowlist_.find(name) != allowlist_.end();
+      } else {
+        allowed = false;
+      }
+      flag_it = category_flag_map_.insert(std::make_pair(name, allowed)).first;
+      reverse_flag_map_.insert(std::make_pair(&flag_it->second, name));
+    }
+    return &flag_it->second;
   }
 
   const char* getCategoryGroupName(
       const uint8_t* category_enabled_flag) override {
-    return kSkiaTag;
+    auto reverse_it = reverse_flag_map_.find(category_enabled_flag);
+    if (reverse_it != reverse_flag_map_.end()) {
+      return reverse_it->second;
+    } else {
+      return kSkiaTag;
+    }
   }
-
-  void enable() { enabled_ = kYes; }
 
  private:
   uint8_t enabled_;
+  std::set<std::string> allowlist_;
+  std::map<const char*, uint8_t> category_flag_map_;
+  std::map<const uint8_t*, const char*> reverse_flag_map_;
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEventTracer);
 };
 
-bool enableSkiaTracingCallback(const char* method,
-                               const char** param_keys,
-                               const char** param_values,
-                               intptr_t num_params,
-                               void* user_data,
-                               const char** json_object) {
-  FlutterEventTracer* tracer = static_cast<FlutterEventTracer*>(user_data);
-  tracer->enable();
-  *json_object = fml::strdup("{\"type\":\"Success\"}");
-  return true;
-}
-
-void InitSkiaEventTracer(bool enabled) {
-  // TODO(chinmaygarde): Leaked https://github.com/flutter/flutter/issues/30808.
-  auto tracer = new FlutterEventTracer(enabled);
-  Dart_RegisterRootServiceRequestCallback("_flutter.enableSkiaTracing",
-                                          enableSkiaTracingCallback,
-                                          static_cast<void*>(tracer));
+void InitSkiaEventTracer(bool enabled,
+                         const std::vector<std::string>& allowlist) {
+  auto tracer = new FlutterEventTracer(enabled, allowlist);
   // Initialize the binding to Skia's tracing events. Skia will
   // take ownership of and clean up the memory allocated here.
   SkEventTracer::SetInstance(tracer);
