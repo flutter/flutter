@@ -408,7 +408,7 @@ void main() {
     FileSystem: () => windowsFileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
-  
+
   testUsingContext('Can discover Android Studio 4.2 location on Windows', () {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
       ..createSync(recursive: true)
