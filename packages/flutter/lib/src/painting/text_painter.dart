@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, TextAffinity, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -450,7 +450,7 @@ class TextPainter {
   //
   //  * _getRawOffset
   //  * _getPlaceholderAdjustedPosition
-  int _getPlaceholderAdjustedOffset(int offset) {
+  int _getPlaceholderAdjustedOffset(int offset, [TextAffinity? affinity]) {
     if (_placeholderDimensions == null) {
       return offset;
     }
@@ -468,7 +468,9 @@ class TextPainter {
         // place offset at beginning or end of placeholder depending on
         // which half it is in.
         adjustment += offset - dims.range.start;
-        if (offset > dims.range.start + dims.range.end / 2) {
+        print(affinity);
+        if (affinity == null && offset > dims.range.start + dims.range.end / 2 ||
+            affinity == TextAffinity.upstream) {
           adjustment--;
         }
       } else {
@@ -500,7 +502,7 @@ class TextPainter {
 
   TextPosition _getPlaceholderAdjustedPosition(TextPosition position) {
     return TextPosition(
-      offset: _getPlaceholderAdjustedOffset(position.offset),
+      offset: _getPlaceholderAdjustedOffset(position.offset, position.affinity),
       affinity: position.affinity
     );
   }
@@ -755,7 +757,7 @@ class TextPainter {
   /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
   int? getOffsetAfter(int offset) {
-    offset = _getPlaceholderAdjustedOffset(offset);
+    offset = _getPlaceholderAdjustedOffset(offset, TextAffinity.downstream);
     final int? nextCodeUnit = _text!.codeUnitAt(offset);
     if (nextCodeUnit == null)
       return null;
@@ -766,7 +768,7 @@ class TextPainter {
   /// Returns the closest offset before `offset` at which the input cursor can
   /// be positioned.
   int? getOffsetBefore(int offset) {
-    offset = _getPlaceholderAdjustedOffset(offset);
+    offset = _getPlaceholderAdjustedOffset(offset, TextAffinity.upstream);
     final int? prevCodeUnit = _text!.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
@@ -982,8 +984,8 @@ class TextPainter {
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
     return _paragraph!.getBoxesForRange(
-      _getPlaceholderAdjustedOffset(selection.start),
-      _getPlaceholderAdjustedOffset(selection.end),
+      _getPlaceholderAdjustedOffset(selection.start, TextAffinity.upstream),
+      _getPlaceholderAdjustedOffset(selection.end, TextAffinity.downstream),
       boxHeightStyle: boxHeightStyle,
       boxWidthStyle: boxWidthStyle,
     );
