@@ -30,7 +30,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -135,17 +135,9 @@ void main() {
 
     group('device validator', () {
       testWithoutContext('no devices', () async {
-        final MockDeviceManager mockDeviceManager = MockDeviceManager();
-
-        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
-          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
-        );
-        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
-          (Invocation invocation) => Future<List<String>>.value(<String>[])
-        );
-
+        final FakeDeviceManager deviceManager = FakeDeviceManager();
         final DeviceValidator deviceValidator = DeviceValidator(
-          deviceManager: mockDeviceManager,
+          deviceManager: deviceManager,
           userMessages: UserMessages(),
         );
         final ValidationResult result = await deviceValidator.validate();
@@ -157,17 +149,11 @@ void main() {
       });
 
       testWithoutContext('diagnostic message', () async {
-        final MockDeviceManager mockDeviceManager = MockDeviceManager();
-
-        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
-          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
-        );
-        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
-          (Invocation invocation) => Future<List<String>>.value(<String>['Device locked'])
-        );
+        final FakeDeviceManager deviceManager = FakeDeviceManager()
+          ..diagnostics = <String>['Device locked'];
 
         final DeviceValidator deviceValidator = DeviceValidator(
-          deviceManager: mockDeviceManager,
+          deviceManager: deviceManager,
           userMessages: UserMessages(),
         );
         final ValidationResult result = await deviceValidator.validate();
@@ -179,24 +165,19 @@ void main() {
       });
 
       testWithoutContext('diagnostic message and devices', () async {
-        final MockDeviceManager mockDeviceManager = MockDeviceManager();
-        final MockDevice mockDevice = MockDevice();
-
-        when(mockDeviceManager.getAllConnectedDevices()).thenAnswer(
-          (_) => Future<List<Device>>.value(<Device>[mockDevice])
-        );
-        when(mockDeviceManager.getDeviceDiagnostics()).thenAnswer(
-          (_) => Future<List<String>>.value(<String>['Device locked'])
-        );
+        final FakeDevice device = FakeDevice();
+        final FakeDeviceManager deviceManager = FakeDeviceManager()
+          ..devices = <Device>[device]
+          ..diagnostics = <String>['Device locked'];
 
         final DeviceValidator deviceValidator = DeviceValidator(
-          deviceManager: mockDeviceManager,
+          deviceManager: deviceManager,
           userMessages: UserMessages(),
         );
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.installed);
         expect(result.messages, const <ValidationMessage>[
-          ValidationMessage('null (null) • device-id • android • null'),
+          ValidationMessage('name (mobile) • device-id • android • 1.2.3'),
           ValidationMessage.hint('Device locked'),
         ]);
         expect(result.statusInfo, '1 available');
@@ -1042,13 +1023,39 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String missingExtensions = globals.fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
 
-class MockDeviceManager extends Mock implements DeviceManager {}
-class MockDevice extends Mock implements Device {
-  MockDevice() {
-    when(isSupported()).thenReturn(true);
-    when(id).thenReturn('device-id');
-    when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
-    when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
-    when(targetPlatformDisplayName).thenAnswer((_) async => 'android');
-  }
+class FakeDeviceManager extends Fake implements DeviceManager {
+  List<String> diagnostics = <String>[];
+  List<Device> devices = <Device>[];
+
+  @override
+  Future<List<Device>> getAllConnectedDevices() async => devices;
+
+  @override
+  Future<List<String>> getDeviceDiagnostics() async => diagnostics;
+}
+
+class FakeDevice extends Fake implements Device {
+  @override
+  String get name => 'name';
+
+  @override
+  String get id => 'device-id';
+
+  @override
+  Category get category => Category.mobile;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get targetPlatformDisplayName async => 'android';
+
+  @override
+  Future<String> get sdkNameAndVersion async => '1.2.3';
+
+  @override
+  Future<TargetPlatform> get targetPlatform =>  Future<TargetPlatform>.value(TargetPlatform.android);
 }
