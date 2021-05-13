@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_UWPTOOL_UTILS_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_UWPTOOL_UTILS_H_
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -13,12 +14,16 @@ namespace flutter {
 // A UWP application.
 class Application {
  public:
-  explicit Application(const std::wstring_view package_id);
+  explicit Application(const std::wstring_view package_family,
+                       const std::wstring_view package_full_name);
   Application(const Application& other) = default;
   Application& operator=(const Application& other) = default;
 
-  // Returns the package ID.
-  std::wstring GetPackageId() const { return package_id_; }
+  // Returns the package family.
+  std::wstring GetPackageFamily() const { return package_family_; }
+
+  // Returns the package full name.
+  std::wstring GetPackageFullName() const { return package_full_name_; }
 
   // Launches the application with the specified list of launch arguments.
   //
@@ -26,7 +31,8 @@ class Application {
   int Launch(const std::wstring_view args);
 
  private:
-  std::wstring package_id_;
+  std::wstring package_family_;
+  std::wstring package_full_name_;
 };
 
 // The machine-local store of installed applications.
@@ -39,7 +45,11 @@ class ApplicationStore {
   ApplicationStore& operator=(const ApplicationStore& other) = delete;
 
   // Returns a list of all installed application user model IDs.
-  std::vector<Application> GetInstalledApplications();
+  std::vector<Application> GetInstalledApplications() const;
+
+  // Returns a list of all installed application user model IDs.
+  std::optional<Application> GetInstalledApplication(
+      const std::wstring_view package_family) const;
 };
 
 }  // namespace flutter
