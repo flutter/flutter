@@ -27,7 +27,7 @@ Finder _iconRichText(Key iconKey) {
 Widget buildFormFrame({
   Key? buttonKey,
   AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
-  double elevation = 8,
+  int elevation = 8,
   String? value = 'two',
   ValueChanged<String?>? onChanged,
   VoidCallback? onTap,
@@ -125,7 +125,7 @@ class TestApp extends StatefulWidget {
   State<TestApp> createState() => _TestAppState();
 }
 
-void verifyPaintedShadow(Finder customPaint, double elevation) {
+void verifyPaintedShadow(Finder customPaint, int elevation) {
   const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
 
   final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation]![index]);

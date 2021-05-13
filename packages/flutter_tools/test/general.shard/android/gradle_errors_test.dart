@@ -29,6 +29,7 @@ void main() {
           flavorUndefinedHandler,
           r8FailureHandler,
           androidXFailureHandler,
+          minSdkVersion,
           transformInputIssue,
         ])
       );
@@ -648,6 +649,47 @@ assembleProfile
     });
   });
 
+  group('higher minSdkVersion', () {
+    const String stdoutLine = 'uses-sdk:minSdkVersion 16 cannot be smaller than version 19 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 16';
+
+    testWithoutContext('pattern', () {
+      expect(
+        minSdkVersion.test(stdoutLine),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await minSdkVersion.handler(
+        line: stdoutLine,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          'The plugin webview_flutter requires a higher Android SDK version.\n'
+          'Fix this issue by adding the following to the file /android/app/build.gradle:\n'
+          'android {\n'
+          '  defaultConfig {\n'
+          '    minSdkVersion 19\n'
+          '  }\n'
+          '}\n'
+          '\n'
+          'Note that your app won\'t be available to users running Android SDKs below 19.\n'
+          'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
+          ''
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
   // https://issuetracker.google.com/issues/141126614
   group('transform input issue', () {
     testWithoutContext('pattern', () {
@@ -685,7 +727,6 @@ assembleProfile
       ProcessManager: () => FakeProcessManager.empty(),
     });
   });
-
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {

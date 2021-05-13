@@ -1982,14 +1982,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   child: widget.label,
                 ),
                 avatar: AnimatedSwitcher(
-                  child: widget.avatar,
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: widget.avatar,
                 ),
                 deleteIcon: AnimatedSwitcher(
-                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                 ),
                 brightness: chipTheme.brightness,
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
@@ -2028,9 +2028,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     result = _ChipRedirectingHitDetectionWidget(
       constraints: constraints,
       child: Center(
-        child: result,
         widthFactor: 1.0,
         heightFactor: 1.0,
+        child: result,
       ),
     );
     return Semantics(

@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'base/file_system.dart';
 import 'project.dart';
 
 /// Extracts the `BINARY_NAME` from a project's CMake file.
@@ -15,6 +16,23 @@ String getCmakeExecutableName(CmakeBasedProject project) {
   }
   final RegExp nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
   for (final String line in project.cmakeFile.readAsLinesSync()) {
+    final RegExpMatch match = nameSetPattern.firstMatch(line);
+    if (match != null) {
+      return match.group(1);
+    }
+  }
+  return null;
+}
+
+/// Extracts the `PACKAGE_GUID` from a project's CMake file.
+///
+/// Returns `null` if it cannot be found.
+String getCmakePackageGuid(File cmakeFile) {
+  if (!cmakeFile.existsSync()) {
+    return null;
+  }
+  final RegExp nameSetPattern = RegExp(r'^\s*set\(PACKAGE_GUID\s*"(.*)"\s*\)\s*$');
+  for (final String line in cmakeFile.readAsLinesSync()) {
     final RegExpMatch match = nameSetPattern.firstMatch(line);
     if (match != null) {
       return match.group(1);

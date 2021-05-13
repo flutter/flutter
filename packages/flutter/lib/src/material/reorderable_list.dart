@@ -491,8 +491,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         final double animValue = Curves.easeInOut.transform(animation.value);
         final double elevation = lerpDouble(0, 6, animValue)!;
         return Material(
-          child: child,
           elevation: elevation,
+          child: child,
         );
       },
       child: child,

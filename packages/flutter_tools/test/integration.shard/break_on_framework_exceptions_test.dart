@@ -122,7 +122,7 @@ void main() {
 
     final int breakLine = (await flutter.getSourceLocation()).line;
     expect(breakLine, project.lineContaining(project.test, "throw 'platform message callback';"));
-  }, skip: 'TODO(goderbauer): add pragma to _DefaultBinaryMessenger.handlePlatformMessage when async methods are supported (https://github.com/dart-lang/sdk/issues/45673) and enable this test');
+  });
 
   testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
     final TestProject project = TestProject(
