@@ -50,6 +50,9 @@ typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 ///
 /// This is used in [ReplacementTextEditingController] to generate [InlineSpan]s when
 /// a match is found for replacement.
+///
+/// If returning a [PlaceholderSpan], the [TextRange] must be passed to the
+/// [PlaceholderSpan] constructor.
 typedef InlineSpanGenerator = InlineSpan Function(String, TextRange);
 
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -102,6 +105,11 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///   },
 /// )
 /// ```
+/// 
+/// See also:
+/// 
+///  * [ReplacementTextEditingController], which uses this class to create
+///    rich text fields. 
 /// {@end-tool}
 class TextEditingInlineSpanReplacement {
   /// Constructs a replacement that replaces matches of the [pattern] with the
@@ -117,7 +125,7 @@ class TextEditingInlineSpanReplacement {
   /// [Pattern].
   ///
   /// When returning a [PlaceholderSpan] such as [WidgetSpan], the [TextRange] argument
-  /// should be provided to the [PlaceholderSpan] constructor so that the caret position
+  /// must be provided to the [PlaceholderSpan] constructor so that the caret position
   /// can be computed properly.
   InlineSpanGenerator generator;
 }
@@ -265,9 +273,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     if (!value.isComposingRangeValid || !withComposing) {
       return TextSpan(style: style, text: text);
     }
-    final TextStyle composingStyle = style!.merge(
-      const TextStyle(decoration: TextDecoration.underline),
-    );
+    final TextStyle composingStyle = style != null ? style.merge(const TextStyle(decoration: TextDecoration.underline))
+        : const TextStyle(decoration: TextDecoration.underline);
     return TextSpan(
       style: style,
       children: <TextSpan>[
@@ -407,9 +414,8 @@ class ReplacementTextEditingController extends TextEditingController {
     // Add composing region as a replacement to a TextSpan with underline.
     if (!composingRegionReplaceable && value.isComposingRangeValid && withComposing) {
       _addToMappingWithoutOverlap((String value, TextRange range) {
-          final TextStyle composingStyle = style!.merge(
-            const TextStyle(decoration: TextDecoration.underline),
-          );
+          final TextStyle composingStyle = style != null ? style.merge(const TextStyle(decoration: TextDecoration.underline))
+              : const TextStyle(decoration: TextDecoration.underline);
           return TextSpan(
             style: composingStyle,
             text: value,
@@ -434,9 +440,8 @@ class ReplacementTextEditingController extends TextEditingController {
     // Add composing region as a replacement to a TextSpan with underline.
     if (composingRegionReplaceable && value.isComposingRangeValid && withComposing) {
       _addToMappingWithoutOverlap((String value, TextRange range) {
-          final TextStyle composingStyle = style!.merge(
-            const TextStyle(decoration: TextDecoration.underline),
-          );
+          final TextStyle composingStyle = style != null ? style.merge(const TextStyle(decoration: TextDecoration.underline))
+              : const TextStyle(decoration: TextDecoration.underline);
           return TextSpan(
             style: composingStyle,
             text: value,

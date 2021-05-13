@@ -318,6 +318,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _placeholderSpans = <PlaceholderSpan>[];
     span?.visitChildren((InlineSpan span) {
       if (span is PlaceholderSpan) {
+        assert(span.range != null);
         _placeholderSpans.add(span);
       }
       return true;
@@ -3102,6 +3103,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       redepthChild(foregroundChild);
     if (backgroundChild != null)
       redepthChild(backgroundChild);
+    super.redepthChildren();
   }
 
   @override
