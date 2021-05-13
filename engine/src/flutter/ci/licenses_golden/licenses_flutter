@@ -1315,6 +1315,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/default_session_connection.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/default_session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h
@@ -1355,8 +1357,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_unittest.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/session_connection.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_observers.cc

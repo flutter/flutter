@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "session_connection.h"
+#include "default_session_connection.h"
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
@@ -12,7 +12,7 @@
 
 namespace flutter_runner {
 
-SessionConnection::SessionConnection(
+DefaultSessionConnection::DefaultSessionConnection(
     std::string debug_label,
     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
     fml::closure session_error_callback,
@@ -38,7 +38,7 @@ SessionConnection::SessionConnection(
         // A frame was presented: Update our |frames_in_flight| to match the
         // updated unfinalized present requests.
         frames_in_flight_ -= num_presents_handled;
-        TRACE_EVENT2("gfx", "OnFramePresented", "frames_in_flight",
+        TRACE_EVENT2("gfx", "DSC::OnFramePresented", "frames_in_flight",
                      frames_in_flight_, "max_frames_in_flight",
                      kMaxFramesInFlight);
         FML_DCHECK(frames_in_flight_ >= 0);
@@ -78,13 +78,13 @@ SessionConnection::SessionConnection(
       });
 }
 
-SessionConnection::~SessionConnection() = default;
+DefaultSessionConnection::~DefaultSessionConnection() = default;
 
-void SessionConnection::Present() {
-  TRACE_EVENT2("gfx", "SessionConnection::Present", "frames_in_flight",
+void DefaultSessionConnection::Present() {
+  TRACE_EVENT2("gfx", "DefaultSessionConnection::Present", "frames_in_flight",
                frames_in_flight_, "max_frames_in_flight", kMaxFramesInFlight);
 
-  TRACE_FLOW_BEGIN("gfx", "SessionConnection::PresentSession",
+  TRACE_FLOW_BEGIN("gfx", "DefaultSessionConnection::PresentSession",
                    next_present_session_trace_id_);
   next_present_session_trace_id_++;
 
@@ -105,7 +105,7 @@ void SessionConnection::Present() {
   }
 }
 
-fml::TimePoint SessionConnection::CalculateNextLatchPoint(
+fml::TimePoint DefaultSessionConnection::CalculateNextLatchPoint(
     fml::TimePoint present_requested_time,
     fml::TimePoint now,
     fml::TimePoint last_latch_point_targeted,
@@ -134,8 +134,8 @@ fml::TimePoint SessionConnection::CalculateNextLatchPoint(
   return minimum_latch_point_to_target;
 }
 
-void SessionConnection::PresentSession() {
-  TRACE_EVENT0("gfx", "SessionConnection::PresentSession");
+void DefaultSessionConnection::PresentSession() {
+  TRACE_EVENT0("gfx", "DefaultSessionConnection::PresentSession");
 
   // If we cannot call Present2() because we have no more Scenic frame budget,
   // then we must wait until the OnFramePresented() event fires so we can
@@ -148,7 +148,7 @@ void SessionConnection::PresentSession() {
   present_session_pending_ = false;
 
   while (processed_present_session_trace_id_ < next_present_session_trace_id_) {
-    TRACE_FLOW_END("gfx", "SessionConnection::PresentSession",
+    TRACE_FLOW_END("gfx", "DefaultSessionConnection::PresentSession",
                    processed_present_session_trace_id_);
     processed_present_session_trace_id_++;
   }
@@ -197,7 +197,7 @@ void SessionConnection::PresentSession() {
       });
 }
 
-void SessionConnection::ToggleSignal(zx_handle_t handle, bool set) {
+void DefaultSessionConnection::ToggleSignal(zx_handle_t handle, bool set) {
   const auto signal = VsyncWaiter::SessionPresentSignal;
   auto status = zx_object_signal(handle,            // handle
                                  set ? 0 : signal,  // clear mask

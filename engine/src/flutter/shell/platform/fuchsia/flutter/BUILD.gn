@@ -53,6 +53,8 @@ template("runner_sources") {
       "accessibility_bridge.h",
       "component.cc",
       "component.h",
+      "default_session_connection.cc",
+      "default_session_connection.h",
       "engine.cc",
       "engine.h",
       "flutter_runner_product_configuration.cc",
@@ -72,8 +74,6 @@ template("runner_sources") {
       "platform_view.h",
       "runner.cc",
       "runner.h",
-      "session_connection.cc",
-      "session_connection.h",
       "surface.cc",
       "surface.h",
       "task_observers.cc",
@@ -512,7 +512,7 @@ executable("flutter_runner_scenic_unittests") {
 
   output_name = "flutter_runner_scenic_tests"
 
-  sources = [ "tests/session_connection_unittests.cc" ]
+  sources = [ "tests/default_session_connection_unittests.cc" ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
   libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]

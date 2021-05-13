@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_SESSION_CONNECTION_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_SESSION_CONNECTION_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DEFAULT_SESSION_CONNECTION_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_DEFAULT_SESSION_CONNECTION_H_
 
 #include <fuchsia/scenic/scheduling/cpp/fidl.h>
 #include <fuchsia/ui/scenic/cpp/fidl.h>
@@ -21,16 +21,17 @@ using on_frame_presented_event =
 
 // The component residing on the raster thread that is responsible for
 // maintaining the Scenic session connection and presenting node updates.
-class SessionConnection final : public flutter::SessionWrapper {
+class DefaultSessionConnection final : public flutter::SessionWrapper {
  public:
-  SessionConnection(std::string debug_label,
-                    fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
-                    fml::closure session_error_callback,
-                    on_frame_presented_event on_frame_presented_callback,
-                    zx_handle_t vsync_event_handle,
-                    uint64_t max_frames_in_flight);
+  DefaultSessionConnection(
+      std::string debug_label,
+      fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
+      fml::closure session_error_callback,
+      on_frame_presented_event on_frame_presented_callback,
+      zx_handle_t vsync_event_handle,
+      uint64_t max_frames_in_flight);
 
-  ~SessionConnection();
+  ~DefaultSessionConnection();
 
   scenic::Session* get() override { return &session_wrapper_; }
   void Present() override;
@@ -83,9 +84,9 @@ class SessionConnection final : public flutter::SessionWrapper {
 
   static void ToggleSignal(zx_handle_t handle, bool raise);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SessionConnection);
+  FML_DISALLOW_COPY_AND_ASSIGN(DefaultSessionConnection);
 };
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_SESSION_CONNECTION_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_DEFAULT_SESSION_CONNECTION_H_
