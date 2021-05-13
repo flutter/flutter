@@ -39,7 +39,9 @@ source_set("libcxxabi") {
       "src/cxa_personality.cpp",
     ]
   } else {
-    sources += [ "src/cxa_noexception.cpp" ]
+    if (!is_tsan) {
+      sources += [ "src/cxa_noexception.cpp" ]
+    }
   }
 
   # Third party dependencies may depend on RTTI. Add support for the same in
@@ -53,7 +55,6 @@ source_set("libcxxabi") {
     "src/cxa_default_handlers.cpp",
     "src/cxa_demangle.cpp",
     "src/cxa_exception_storage.cpp",
-    "src/cxa_guard.cpp",
     "src/cxa_handlers.cpp",
     "src/cxa_unexpected.cpp",
     "src/cxa_vector.cpp",
@@ -64,4 +65,8 @@ source_set("libcxxabi") {
     "src/stdlib_stdexcept.cpp",
     "src/stdlib_typeinfo.cpp",
   ]
+
+  if (!(is_tsan && is_linux)) {
+    sources += [ "src/cxa_guard.cpp" ]
+  }
 }
