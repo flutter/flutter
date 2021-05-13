@@ -209,6 +209,7 @@ Future<T> runInContext<T>(
         ),
         uwptool: UwpTool(
           artifacts: globals.artifacts,
+          fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
         ),

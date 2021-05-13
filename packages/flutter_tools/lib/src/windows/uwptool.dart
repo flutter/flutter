@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 
@@ -22,13 +23,16 @@ import '../base/process.dart';
 class UwpTool {
   UwpTool({
     @required Artifacts artifacts,
+    @required FileSystem fileSystem,
     @required Logger logger,
     @required ProcessManager processManager,
   }) : _artifacts = artifacts,
+       _fileSystem = fileSystem,
        _logger = logger,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Artifacts _artifacts;
+  final FileSystem _fileSystem;
   final Logger _logger;
   final ProcessUtils _processUtils;
 
@@ -44,44 +48,74 @@ class UwpTool {
       _logger.printError('Failed to list installed UWP apps: ${result.stderr}');
       return <String>[];
     }
-    final List<String> appIds = <String>[];
+    final List<String> packageFamilies = <String>[];
     for (final String line in result.stdout.toString().split('\n')) {
-      final String appId = line.trim();
-      if (appId.isNotEmpty) {
-        appIds.add(appId);
+      final String packageFamily = line.trim();
+      if (packageFamily.isNotEmpty) {
+        packageFamilies.add(packageFamily);
       }
     }
-    return appIds;
+    return packageFamilies;
   }
 
-  /// Returns the app ID for the specified package ID.
+  /// Returns the package family name for the specified package name.
   ///
-  /// If no installed application on the system matches the specified GUID,
-  /// returns null.
-  Future<String/*?*/> getAppIdFromPackageId(String packageId) async {
-    for (final String appId in await listApps()) {
-      if (appId.startsWith(packageId)) {
-        return appId;
+  /// If no installed application on the system matches the specified package
+  /// name, returns null.
+  Future<String/*?*/> getPackageFamilyName(String packageName) async {
+    for (final String packageFamily in await listApps()) {
+      if (packageFamily.startsWith(packageName)) {
+        return packageFamily;
       }
     }
     return null;
   }
 
-  /// Launches the app with the specified app ID.
+  /// Launches the app with the specified package family name.
   ///
   /// On success, returns the process ID of the launched app, otherwise null.
-  Future<int/*?*/> launchApp(String appId, List<String> args) async {
+  Future<int/*?*/> launchApp(String packageFamily, List<String> args) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
       'launch',
-      appId
+      packageFamily
     ] + args;
     final RunResult result = await _processUtils.run(launchCommand);
     if (result.exitCode != 0) {
-      _logger.printError('Failed to launch app $appId: ${result.stderr}');
+      _logger.printError('Failed to launch app $packageFamily: ${result.stderr}');
       return null;
     }
     // Read the process ID from stdout.
     return int.tryParse(result.stdout.toString().trim());
+  }
+
+  /// Installs the app with the specified build directory.
+  ///
+  /// Returns `true` on success.
+  Future<bool> installApp(String buildDirectory) async {
+    final List<String> launchCommand = <String>[
+      'powershell.exe',
+      _fileSystem.path.join(buildDirectory, 'install.ps1'),
+    ];
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printError(result.stdout.toString());
+      _logger.printError(result.stderr.toString());
+    }
+    return result.exitCode == 0;
+  }
+
+  Future<bool> uninstallApp(String packageFamily) async {
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      'uninstall',
+      packageFamily
+    ];
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printError('Failed to uninstall $packageFamily');
+      return false;
+    }
+    return true;
   }
 }

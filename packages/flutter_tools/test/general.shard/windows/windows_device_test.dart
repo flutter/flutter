@@ -43,13 +43,14 @@ void main() {
   });
 
   testWithoutContext('WindowsUwpDevice defaults', () async {
-    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice();
+    final FakeUwpTool uwptool = FakeUwpTool();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(uwptool: uwptool);
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
     expect(windowsDevice.name, 'Windows (UWP)');
     expect(await windowsDevice.installApp(package), true);
-    expect(await windowsDevice.uninstallApp(package), false);
+    expect(await windowsDevice.uninstallApp(package), true);
     expect(await windowsDevice.isLatestBuildInstalled(package), false);
     expect(await windowsDevice.isAppInstalled(package), false);
     expect(windowsDevice.category, Category.desktop);
@@ -170,15 +171,8 @@ void main() {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(command: <String>[
-        'powershell.exe',
-        'build/winuwp/runner_uwp/AppPackages/testapp/testapp_1.2.3.4_Debug_Test/install.ps1',
-      ]),
-    ]);
     final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
       fileSystem: fileSystem,
-      processManager: processManager,
       uwptool: uwptool,
     );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
@@ -191,7 +185,7 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(uwptool.launchRequests.single.appId, 'PACKAGE-ID_asdfghjkl');
+    expect(uwptool.launchRequests.single.packageFamily, 'PACKAGE-ID_publisher');
     expect(uwptool.launchRequests.single.args, <String>[
       '--observatory-port=12345',
       '--disable-service-auth-codes',
@@ -205,15 +199,8 @@ void main() {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(command: <String>[
-        'powershell.exe',
-        'build/winuwp/runner_uwp/AppPackages/testapp/testapp_1.2.3.4_Release_Test/install.ps1',
-      ]),
-    ]);
     final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
       fileSystem: fileSystem,
-      processManager: processManager,
       uwptool: uwptool,
     );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
@@ -226,7 +213,7 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(uwptool.launchRequests.single.appId, 'PACKAGE-ID_asdfghjkl');
+    expect(uwptool.launchRequests.single.packageFamily, 'PACKAGE-ID_publisher');
     expect(uwptool.launchRequests.single.args, <String>[]);
   });
 }
@@ -279,44 +266,71 @@ class FakeBuildableUwpApp extends Fake implements BuildableUwpApp {
   String get name => 'testapp';
   @override
   String get projectVersion => '1.2.3.4';
+
+  // Test helper to get the expected package family.
+  static const String packageFamily = 'PACKAGE-ID_publisher';
 }
 
 class FakeUwpTool implements UwpTool {
+  bool isInstalled = false;
+  final List<_GetPackageFamilyRequest> getPackageFamilyRequests = <_GetPackageFamilyRequest>[];
   final List<_LaunchRequest> launchRequests = <_LaunchRequest>[];
-  final List<_LookupAppIdRequest> lookupAppIdRequests = <_LookupAppIdRequest>[];
+  final List<_InstallRequest> installRequests = <_InstallRequest>[];
+  final List<_UninstallRequest> uninstallRequests = <_UninstallRequest>[];
 
   @override
   Future<List<String>> listApps() async {
-    return <String>[
-      'fb89bf4f-55db-4bcd-8f0b-d8139953e08b',
-      '3e556a66-cb7f-4335-9569-35d5f5e37219',
-      'dfe5d409-a524-4635-b2f8-78a5e9551994',
-      '51e8a06b-02e8-4f76-9131-f20ce114fc34',
-    ];
+    return isInstalled ? <String>[FakeBuildableUwpApp.packageFamily] : <String>[];
   }
 
   @override
-  Future<String> getAppIdFromPackageId(String packageId) async {
-    lookupAppIdRequests.add(_LookupAppIdRequest(packageId));
-    return '${packageId}_asdfghjkl';
+  Future<String/*?*/> getPackageFamilyName(String packageName) async {
+    getPackageFamilyRequests.add(_GetPackageFamilyRequest(packageName));
+    return isInstalled ? FakeBuildableUwpApp.packageFamily : null;
   }
 
   @override
-  Future<int> launchApp(String appId, List<String> args) async {
-    launchRequests.add(_LaunchRequest(appId, args));
+  Future<int/*?*/> launchApp(String packageFamily, List<String> args) async {
+    launchRequests.add(_LaunchRequest(packageFamily, args));
     return 42;
+  }
+
+  @override
+  Future<bool> installApp(String buildDirectory) async {
+    installRequests.add(_InstallRequest(buildDirectory));
+    isInstalled = true;
+    return true;
+  }
+
+  @override
+  Future<bool> uninstallApp(String packageFamily) async {
+    uninstallRequests.add(_UninstallRequest(packageFamily));
+    isInstalled = false;
+    return true;
   }
 }
 
-class _LookupAppIdRequest {
-  const _LookupAppIdRequest(this.packageId);
+class _GetPackageFamilyRequest {
+  const _GetPackageFamilyRequest(this.packageId);
 
   final String packageId;
 }
 
 class _LaunchRequest {
-  const _LaunchRequest(this.appId, this.args);
+  const _LaunchRequest(this.packageFamily, this.args);
 
-  final String appId;
+  final String packageFamily;
   final List<String> args;
+}
+
+class _InstallRequest {
+  const _InstallRequest(this.buildDirectory);
+
+  final String buildDirectory;
+}
+
+class _UninstallRequest {
+  const _UninstallRequest(this.packageFamily);
+
+  final String packageFamily;
 }
