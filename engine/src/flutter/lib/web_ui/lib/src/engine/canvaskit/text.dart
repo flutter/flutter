@@ -37,6 +37,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
         _fontFamily = fontFamily,
         _fontSize = fontSize,
         _height = height,
+        _leadingDistribution = textHeightBehavior?.leadingDistribution,
         _fontWeight = fontWeight,
         _fontStyle = fontStyle;
 
@@ -47,6 +48,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   final double? _height;
   final ui.FontWeight? _fontWeight;
   final ui.FontStyle? _fontStyle;
+  final ui.TextLeadingDistribution? _leadingDistribution;
 
   static SkTextStyleProperties toSkTextStyleProperties(
     String? fontFamily,
@@ -73,7 +75,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     return skTextStyle;
   }
 
-  static SkStrutStyleProperties toSkStrutStyleProperties(ui.StrutStyle value) {
+  static SkStrutStyleProperties toSkStrutStyleProperties(ui.StrutStyle value, ui.TextHeightBehavior? paragraphHeightBehavior) {
     EngineStrutStyle style = value as EngineStrutStyle;
     final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
     skStrutStyle.fontFamilies =
@@ -85,6 +87,18 @@ class CkParagraphStyle implements ui.ParagraphStyle {
 
     if (style._height != null) {
       skStrutStyle.heightMultiplier = style._height;
+    }
+
+    final ui.TextLeadingDistribution? effectiveLeadingDistribution = style._leadingDistribution ?? paragraphHeightBehavior?.leadingDistribution;
+    switch (effectiveLeadingDistribution) {
+      case null:
+        break;
+      case ui.TextLeadingDistribution.even:
+        skStrutStyle.halfLeading = true;
+        break;
+      case ui.TextLeadingDistribution.proportional:
+        skStrutStyle.halfLeading = false;
+        break;
     }
 
     if (style._leading != null) {
@@ -147,7 +161,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     }
 
     if (strutStyle != null) {
-      properties.strutStyle = toSkStrutStyleProperties(strutStyle);
+      properties.strutStyle = toSkStrutStyleProperties(strutStyle, textHeightBehavior);
     }
 
     properties.textStyle = toSkTextStyleProperties(
@@ -161,6 +175,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       fontFamily: _fontFamily,
       fontSize: _fontSize,
       height: _height,
+      leadingDistribution: _leadingDistribution,
       fontWeight: _fontWeight,
       fontStyle: _fontStyle,
     );
@@ -184,6 +199,7 @@ class CkTextStyle implements ui.TextStyle {
     double? letterSpacing,
     double? wordSpacing,
     double? height,
+    ui.TextLeadingDistribution? leadingDistribution,
     ui.Locale? locale,
     CkPaint? background,
     CkPaint? foreground,
@@ -205,6 +221,7 @@ class CkTextStyle implements ui.TextStyle {
       letterSpacing,
       wordSpacing,
       height,
+      leadingDistribution,
       locale,
       background,
       foreground,
@@ -228,6 +245,7 @@ class CkTextStyle implements ui.TextStyle {
     this.letterSpacing,
     this.wordSpacing,
     this.height,
+    this.leadingDistribution,
     this.locale,
     this.background,
     this.foreground,
@@ -249,6 +267,7 @@ class CkTextStyle implements ui.TextStyle {
   final double? letterSpacing;
   final double? wordSpacing;
   final double? height;
+  final ui.TextLeadingDistribution? leadingDistribution;
   final ui.Locale? locale;
   final CkPaint? background;
   final CkPaint? foreground;
@@ -275,6 +294,7 @@ class CkTextStyle implements ui.TextStyle {
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
       height: other.height ?? height,
+      leadingDistribution: other.leadingDistribution ?? leadingDistribution,
       locale: other.locale ?? locale,
       background: other.background ?? background,
       foreground: other.foreground ?? foreground,
@@ -365,6 +385,17 @@ class CkTextStyle implements ui.TextStyle {
 
     if (height != null) {
       properties.heightMultiplier = height;
+    }
+
+    switch (leadingDistribution) {
+      case null:
+        break;
+      case ui.TextLeadingDistribution.even:
+        properties.halfLeading = true;
+        break;
+      case ui.TextLeadingDistribution.proportional:
+        properties.halfLeading = false;
+        break;
     }
 
     if (locale != null) {
