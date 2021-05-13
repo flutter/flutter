@@ -864,6 +864,11 @@ Future<void> _runWebLongRunningTests() async {
       '--sound-null-safety',
     ]),
   ];
+
+  // Shuffling mixes fast tests with slow tests so shards take roughly the same
+  // amount of time to run.
+  tests.shuffle(math.Random(0));
+
   await _ensureChromeDriverIsRunning();
   await _runShardRunnerIndexOfTotalSubshard(tests);
   await _stopChromeDriver();
