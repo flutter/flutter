@@ -121,6 +121,7 @@ class Includer final : public shaderc::CompileOptions::IncluderInterface {
  private:
   std::shared_ptr<fml::UniqueFD> working_directory_;
   std::vector<std::shared_ptr<fml::UniqueFD>> include_dirs_;
+  std::string included_file_paths_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Includer);
 };
