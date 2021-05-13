@@ -12,14 +12,16 @@
 #include <winrt/Windows.Management.Deployment.h>
 #include <winrt/base.h>
 
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
 namespace flutter {
 
-Application::Application(const std::wstring_view package_id)
-    : package_id_(package_id) {}
+Application::Application(const std::wstring_view package_family,
+                         const std::wstring_view package_full_name)
+    : package_family_(package_family), package_full_name_(package_full_name) {}
 
 int Application::Launch(const std::wstring_view args) {
   // Create the ApplicationActivationManager.
@@ -34,7 +36,7 @@ int Application::Launch(const std::wstring_view args) {
   // Launch the application.
   DWORD process_id;
   ACTIVATEOPTIONS options = AO_NONE;
-  std::wstring app_user_model_id = package_id_ + L"!App";
+  std::wstring app_user_model_id = package_family_ + L"!App";
   hresult = activation_manager->ActivateApplication(
       app_user_model_id.data(), args.data(), options, &process_id);
   if (FAILED(hresult)) {
@@ -43,18 +45,34 @@ int Application::Launch(const std::wstring_view args) {
   return process_id;
 }
 
-std::vector<Application> ApplicationStore::GetInstalledApplications() {
+std::vector<Application> ApplicationStore::GetInstalledApplications() const {
   using winrt::Windows::ApplicationModel::Package;
   using winrt::Windows::Management::Deployment::PackageManager;
 
   // Find packages for the current user (default for empty string).
   PackageManager package_manager;
-  std::unordered_set<std::wstring> package_ids;
+  std::vector<Application> apps;
   for (const Package& package : package_manager.FindPackagesForUser(L"")) {
-    package_ids.emplace(package.Id().FamilyName().c_str());
+    apps.emplace_back(package.Id().FamilyName().c_str(),
+                      package.Id().FullName().c_str());
   }
-  std::vector<Application> apps(package_ids.begin(), package_ids.end());
   return apps;
+}
+
+std::optional<Application> ApplicationStore::GetInstalledApplication(
+    const std::wstring_view package_family) const {
+  using winrt::Windows::ApplicationModel::Package;
+  using winrt::Windows::Management::Deployment::PackageManager;
+
+  // Find packages for the current user (default for empty string).
+  PackageManager package_manager;
+  std::vector<Application> apps;
+  for (const Package& package :
+       package_manager.FindPackagesForUser(L"", package_family)) {
+    return std::optional(Application(package.Id().FamilyName().c_str(),
+                                     package.Id().FullName().c_str()));
+  }
+  return std::nullopt;
 }
 
 }  // namespace flutter
