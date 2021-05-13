@@ -365,6 +365,26 @@ abstract class Repository {
     );
   }
 
+  String commit(
+    String message, {
+    bool addFirst = false,
+  }) {
+    assert(!message.contains("'"));
+    if (addFirst) {
+      git.run(
+        <String>['add', '--all'],
+        'add all changes to the index',
+        workingDirectory: checkoutDirectory.path,
+      );
+    }
+    git.run(
+      <String>['commit', '--message=\'$message\''],
+      'commit changes',
+      workingDirectory: checkoutDirectory.path,
+    );
+    return reverseParse('HEAD');
+  }
+
   /// Create an empty commit and return the revision.
   @visibleForTesting
   String authorEmptyCommit([String message = 'An empty commit']) {
@@ -616,6 +636,31 @@ class EngineRepository extends Repository {
 
   static const String defaultUpstream = 'https://github.com/flutter/engine.git';
   static const String defaultBranch = 'master';
+
+  /// Update the `dart_revision` entry in the DEPS file.
+  void updateDartRevision(
+    String newRevision, {
+    @visibleForTesting File? depsFile,
+  }) {
+    assert(newRevision.length == 40);
+    depsFile ??= checkoutDirectory.childFile('DEPS');
+    final String fileContent = depsFile.readAsStringSync();
+    final RegExp dartPattern = RegExp('[ ]+\'dart_revision\': \'([a-z0-9]{40})\',');
+    final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
+    if (allMatches.length != 1) {
+      throw ConductorException(
+        'Unexpected content in the DEPS file at ${depsFile.path}\n'
+        'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
+        '${allMatches.length}.'
+      );
+    }
+    final String updatedFileContent = fileContent.replaceFirst(
+      dartPattern,
+      '  \'dart_revision\': \'$newRevision\',',
+    );
+
+    depsFile.writeAsStringSync(updatedFileContent);
+  }
 
   @override
   Repository cloneRepository(String? cloneName) {
