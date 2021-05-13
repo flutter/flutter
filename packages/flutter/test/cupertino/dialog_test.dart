@@ -127,7 +127,11 @@ void main() {
             title: const Text('The Title'),
             content: const Text('Content'),
             actions: <Widget>[
-              CupertinoDialogAction(child: const Text('Cancel'), isDefaultAction: true, onPressed: () {}),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () {},
+                child: const Text('Cancel'),
+              ),
               const CupertinoDialogAction(child: Text('OK')),
             ],
           ),

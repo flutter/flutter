@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -794,6 +795,18 @@ void main() {
       expect(terminalHandler.logger.statusText, contains('WIDGET DATA 2'));
     });
 
+    testWithoutContext('v - launchDevToolsInBrowser', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          supportsServiceProtocol: true);
+      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      await terminalHandler.processTerminalInput('v');
+      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
+    });
+
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
       await terminalHandler.processTerminalInput('w');
@@ -1348,6 +1361,19 @@ class FakeResidentRunner extends ResidentHandlers {
       calledReload = true;
     }
     return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
+  }
+
+  @override
+  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
+  final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
+}
+
+class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
+  bool calledLaunchDevToolsInBrowser = false;
+
+  @override
+  bool launchDevToolsInBrowser({List<FlutterDevice> flutterDevices}) {
+    return calledLaunchDevToolsInBrowser = true;
   }
 }
 
