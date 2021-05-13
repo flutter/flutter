@@ -11,7 +11,6 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
@@ -144,19 +143,16 @@ class WindowsUWPDevice extends Device {
     }
     final String config = toTitleCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
     final String generated = '${binaryName}_${packageVersion}_${config}_Test';
-    final ProcessResult result = await _processManager.run(<String>[
-      'powershell.exe',
-      _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generated, 'install.ps1'),
-    ]);
-    if (result.exitCode != 0) {
-      _logger.printError(result.stdout.toString());
-      _logger.printError(result.stderr.toString());
-    }
-    return result.exitCode == 0;
+    final String buildDirectory = _fileSystem.path.join(
+        'build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generated);
+    return _uwptool.installApp(buildDirectory);
   }
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async => false;
+  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async {
+    final String packageName = app.id;
+    return await _uwptool.getPackageFamilyName(packageName) != null;
+  }
 
   @override
   Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async => false;
@@ -193,16 +189,16 @@ class WindowsUWPDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final String guid = package.id;
-    if (guid == null) {
+    final String packageName = package.id;
+    if (packageName == null) {
       _logger.printError('Could not find PACKAGE_GUID in ${package.project.runnerCmakeFile.path}');
       return LaunchResult.failed();
     }
 
-    final String appId = await _uwptool.getAppIdFromPackageId(guid);
+    final String packageFamily = await _uwptool.getPackageFamilyName(packageName);
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
-      _processId = await _uwptool.launchApp(appId, <String>[]);
+      _processId = await _uwptool.launchApp(packageFamily, <String>[]);
       return _processId != null ? LaunchResult.succeeded() : LaunchResult.failed();
     }
 
@@ -210,7 +206,7 @@ class WindowsUWPDevice extends Device {
     if (_logger.terminal.stdinHasTerminal) {
       await _logger.terminal.promptForCharInput(<String>['Y', 'y'], logger: _logger,
         prompt: 'To continue start an admin cmd prompt and run the following command:\n'
-        '   checknetisolation loopbackexempt -is -n=$appId\n'
+        '   checknetisolation loopbackexempt -is -n=$packageFamily\n'
         'Press "Y/y" once this is complete.'
       );
     }
@@ -238,7 +234,7 @@ class WindowsUWPDevice extends Device {
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
-    _processId = await _uwptool.launchApp(appId, args);
+    _processId = await _uwptool.launchApp(packageFamily, args);
     if (_processId == null) {
       return LaunchResult.failed();
     }
@@ -255,7 +251,17 @@ class WindowsUWPDevice extends Device {
 
   @override
   Future<bool> uninstallApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
-    return false;
+    final String packageName = app.id;
+    if (packageName == null) {
+      _logger.printError('Could not find PACKAGE_GUID in ${app.project.runnerCmakeFile.path}');
+      return false;
+    }
+    final String packageFamily = await _uwptool.getPackageFamilyName(packageName);
+    if (packageFamily == null) {
+      // App is not installed.
+      return true;
+    }
+    return _uwptool.uninstallApp(packageFamily);
   }
 
   @override
