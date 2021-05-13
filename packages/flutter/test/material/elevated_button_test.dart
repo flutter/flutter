@@ -1142,7 +1142,7 @@ void main() {
     final Key labelKey = UniqueKey();
     final ButtonStyle style = ElevatedButton.styleFrom(
       padding: EdgeInsets.zero,
-      visualDensity: const VisualDensity(), // dx=0, dy=0
+      visualDensity: VisualDensity.standard, // dx=0, dy=0
     );
 
     await tester.pumpWidget(

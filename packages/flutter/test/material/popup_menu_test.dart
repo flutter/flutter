@@ -2314,7 +2314,7 @@ void main() {
                 onPressed: () {
                   showMenu<void>(
                     context: navigator.currentContext!,
-                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    position: RelativeRect.fill,
                     items: const <PopupMenuItem<void>>[
                       PopupMenuItem<void>(child: Text('foo')),
                     ],
