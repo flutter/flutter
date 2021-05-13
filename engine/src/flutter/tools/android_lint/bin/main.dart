@@ -6,8 +6,7 @@
 
 import 'sound_main.dart' as m;
 
-// TODO(#72542):
-// Migrate the deps in pubspec.yaml to null-safety versions.
+// TODO(dnfield): Migrate the deps in pubspec.yaml to null-safety versions.
 // In particular see the ongoing work on package:args here:
-// https://github.com/dart-lang/args/issues/153
+// https://github.com/flutter/flutter/issues/72542
 Future<void> main(List<String> args) => m.main(args);

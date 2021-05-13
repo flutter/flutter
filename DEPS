@@ -398,6 +398,15 @@ deps = {
   'src/third_party/pkg/archive':
   Var('github_git') + '/brendan-duncan/archive.git' + '@' + '3.1.2',
 
+  'src/third_party/pkg/file':
+  Var('github_git') + '/google/file.dart.git' + '@' + '427bb20ccc852425d67f2880da2a9b4707c266b4', # 6.1.0
+
+  'src/third_party/pkg/platform':
+  Var('github_git') + '/google/platform.dart.git' + '@' + 'f63fd0bc3021354a0687dc935962c9acc003f47e', # 3.0.1
+
+  'src/third_party/pkg/process':
+  Var('github_git') + '/google/process.dart.git' + '@' + '0c9aeac86dcc4e3a6cf760b76fed507107e244d5', # 4.2.1
+
   'src/third_party/pkg/when':
   Var('dart_git') + '/when.git' + '@' + '0.2.0',
 
