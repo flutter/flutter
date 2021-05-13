@@ -309,7 +309,8 @@ void main() {
     expect(positionAtOnStart, isNull);
     expect(updatedTimestamp, isNull);
 
-    tester.route(down); // The only horizontal drag gesture win the arena when the pointer down.
+    tester.route(down);
+    // The only horizontal drag gesture win the arena when the pointer down.
     expect(startTimestamp, const Duration(milliseconds: 100));
     expect(positionAtOnStart, const Offset(10.0, 10.0));
     expect(updatedTimestamp, isNull);
@@ -324,7 +325,8 @@ void main() {
     tester.route(pointer.up());
 
     // No competing, dragStartBehavior == DragStartBehavior.start
-    // When there are no other gestures to compete with this gesture, they are no different.
+    // When there are no other gestures competing with this gesture in the arena,
+    // there's no difference in behavior between the two settings.
     drag.dragStartBehavior = DragStartBehavior.start;
     startTimestamp = null;
     positionAtOnStart = null;
@@ -360,12 +362,14 @@ void main() {
     tester.closeArena(5);
     tester.route(down);
 
+    // The pointer down event do not trigger anything.
     expect(startTimestamp, isNull);
     expect(positionAtOnStart, isNull);
     expect(updatedTimestamp, isNull);
 
     tester.route(pointer.move(const Offset(30.0, 10.0), timeStamp: const Duration(milliseconds: 700)));
     expect(startTimestamp, const Duration(milliseconds: 700));
+    // Using the position of the pointer at the time this gesture recognizer won the arena.
     expect(positionAtOnStart, const Offset(30.0, 10.0));
     expect(updatedTimestamp, isNull); // Do not trigger an update event.
     tester.route(pointer.up());
@@ -389,6 +393,7 @@ void main() {
 
     tester.route(pointer.move(const Offset(30.0, 10.0), timeStamp: const Duration(milliseconds: 900)));
     expect(startTimestamp, const Duration(milliseconds: 900));
+    // Using the position of the first detected down event for the pointer.
     expect(positionAtOnStart, const Offset(10.0, 10.0));
     expect(updatedTimestamp, const Duration(milliseconds: 900)); // Also, trigger an update event.
     expect(updateDelta, const Offset(20.0, 0.0));
