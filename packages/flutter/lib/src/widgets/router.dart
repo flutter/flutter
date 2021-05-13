@@ -13,6 +13,8 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'navigator.dart';
+import 'restoration.dart';
+import 'restoration_properties.dart';
 
 /// A piece of routing information.
 ///
@@ -243,6 +245,7 @@ class Router<T> extends StatefulWidget {
     this.routeInformationParser,
     required this.routerDelegate,
     this.backButtonDispatcher,
+    this.restorationId,
   })  : assert(
           (routeInformationProvider == null) == (routeInformationParser == null),
           'Both routeInformationProvider and routeInformationParser must be provided '
@@ -292,6 +295,8 @@ class Router<T> extends StatefulWidget {
   /// The two common alternatives are the [RootBackButtonDispatcher] for root
   /// router, or the [ChildBackButtonDispatcher] for other routers.
   final BackButtonDispatcher? backButtonDispatcher;
+
+  final String? restorationId;
 
   /// Retrieves the immediate [Router] ancestor from the given context.
   ///
@@ -401,6 +406,7 @@ class Router<T> extends StatefulWidget {
 }
 
 typedef _AsyncPassthrough<Q> = Future<Q> Function(Q);
+typedef _DelegateRouteSetter<T> = Future<void> Function(T);
 
 // Whether to report the route information in this build cycle.
 enum _IntentionToReportRouteInformation {
@@ -414,10 +420,14 @@ enum _IntentionToReportRouteInformation {
   ignore,
 }
 
-class _RouterState<T> extends State<Router<T>> {
+class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   Object? _currentRouteInformationParserTransaction;
   Object? _currentRouterDelegateTransaction;
-  late _IntentionToReportRouteInformation _currentIntentionToReport;
+  _IntentionToReportRouteInformation _currentIntentionToReport = _IntentionToReportRouteInformation.none;
+  final _RestorableRouteInformation _routeInformation = _RestorableRouteInformation();
+
+  @override
+  String? get restorationId => widget.restorationId;
 
   @override
   void initState() {
@@ -425,9 +435,15 @@ class _RouterState<T> extends State<Router<T>> {
     widget.routeInformationProvider?.addListener(_handleRouteInformationProviderNotification);
     widget.backButtonDispatcher?.addCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.addListener(_handleRouterDelegateNotification);
-    _currentIntentionToReport = _IntentionToReportRouteInformation.none;
-    if (widget.routeInformationProvider != null) {
-      _processInitialRoute();
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_routeInformation, 'route');
+    if (_routeInformation.value != null) {
+      _processRouteInformation(_routeInformation.value!, () => widget.routerDelegate.setRestoredRoutePath);
+    } else if (widget.routeInformationProvider != null) {
+      _processRouteInformation(widget.routeInformationProvider!.value!, () => widget.routerDelegate.setInitialRoutePath);
     }
   }
 
@@ -447,40 +463,26 @@ class _RouterState<T> extends State<Router<T>> {
     assert(_routeInformationReportingTaskScheduled);
     _routeInformationReportingTaskScheduled = false;
 
-    switch (_currentIntentionToReport) {
-      case _IntentionToReportRouteInformation.none:
-        assert(false);
-        return;
-
-      case _IntentionToReportRouteInformation.ignore:
-        // In the ignore case, we still want to update the _lastSeenLocation.
-        final RouteInformation? routeInformation = _retrieveNewRouteInformation();
-        if (routeInformation != null) {
-          _lastSeenLocation = routeInformation.location;
-        }
-        _currentIntentionToReport = _IntentionToReportRouteInformation.none;
-        return;
-
-      case _IntentionToReportRouteInformation.maybe:
-        final RouteInformation? routeInformation = _retrieveNewRouteInformation();
-        if (routeInformation != null) {
+    if (_routeInformation.value != null) {
+      final RouteInformation routeInformation = _routeInformation.value!;
+      switch (_currentIntentionToReport) {
+        case _IntentionToReportRouteInformation.none:
+          assert(false);
+          return;
+        case _IntentionToReportRouteInformation.ignore:
+          break;
+        case _IntentionToReportRouteInformation.maybe:
           if (_lastSeenLocation != routeInformation.location) {
             widget.routeInformationProvider!.routerReportsNewRouteInformation(routeInformation);
-            _lastSeenLocation = routeInformation.location;
           }
-        }
-        _currentIntentionToReport = _IntentionToReportRouteInformation.none;
-        return;
-
-      case _IntentionToReportRouteInformation.must:
-        final RouteInformation? routeInformation = _retrieveNewRouteInformation();
-        if (routeInformation != null) {
+          break;
+        case _IntentionToReportRouteInformation.must:
           widget.routeInformationProvider!.routerReportsNewRouteInformation(routeInformation);
-          _lastSeenLocation = routeInformation.location;
-        }
-        _currentIntentionToReport = _IntentionToReportRouteInformation.none;
-        return;
+          break;
+      }
+      _lastSeenLocation = routeInformation.location;
     }
+    _currentIntentionToReport = _IntentionToReportRouteInformation.none;
   }
 
   RouteInformation? _retrieveNewRouteInformation() {
@@ -582,28 +584,21 @@ class _RouterState<T> extends State<Router<T>> {
     super.dispose();
   }
 
-  void _processInitialRoute() {
+  void _processRouteInformation(RouteInformation information, ValueGetter<_DelegateRouteSetter<T>> delegateRouteSetter) {
     _currentRouteInformationParserTransaction = Object();
     _currentRouterDelegateTransaction = Object();
-    _lastSeenLocation = widget.routeInformationProvider!.value!.location;
+    _lastSeenLocation = information.location;
     widget.routeInformationParser!
-      .parseRouteInformation(widget.routeInformationProvider!.value!)
-      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
-      .then<void>(widget.routerDelegate.setInitialRoutePath)
-      .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<void>(_rebuild);
+        .parseRouteInformation(information)
+        .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
+        .then<void>(delegateRouteSetter())
+        .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
+        .then<void>(_rebuild);
   }
 
   void _handleRouteInformationProviderNotification() {
-    _currentRouteInformationParserTransaction = Object();
-    _currentRouterDelegateTransaction = Object();
-    _lastSeenLocation = widget.routeInformationProvider!.value!.location;
-    widget.routeInformationParser!
-      .parseRouteInformation(widget.routeInformationProvider!.value!)
-      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
-      .then<void>(widget.routerDelegate.setNewRoutePath)
-      .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<void>(_rebuild);
+    assert(widget.routeInformationProvider!.value != null);
+    _processRouteInformation(widget.routeInformationProvider!.value!, () => widget.routerDelegate.setNewRoutePath);
   }
 
   Future<bool> _handleBackButtonDispatcherNotification() {
@@ -668,6 +663,7 @@ class _RouterState<T> extends State<Router<T>> {
 
   void _handleRouterDelegateNotification() {
     setState(() {/* routerDelegate wants to rebuild */});
+    _routeInformation.value = _retrieveNewRouteInformation();
     _maybeNeedToReportRouteInformation();
   }
 
@@ -1147,6 +1143,10 @@ abstract class RouterDelegate<T> extends Listenable {
     return setNewRoutePath(configuration);
   }
 
+  Future<void> setRestoredRoutePath(T configuration) {
+    return setNewRoutePath(configuration);
+  }
+
   /// Called by the [Router] when the [Router.routeInformationProvider] reports that a
   /// new route has been pushed to the application by the operating system.
   ///
@@ -1338,5 +1338,30 @@ mixin PopNavigatorRouterDelegateMixin<T> on RouterDelegate<T> {
     if (navigator == null)
       return SynchronousFuture<bool>(false);
     return navigator.maybePop();
+  }
+}
+
+class _RestorableRouteInformation extends RestorableValue<RouteInformation?> {
+  @override
+  RouteInformation? createDefaultValue() => null;
+
+  @override
+  void didUpdateValue(RouteInformation? oldValue) {
+    notifyListeners();
+  }
+
+  @override
+  RouteInformation? fromPrimitives(Object? data) {
+    if (data == null) {
+      return null;
+    }
+    assert(data is List<Object?> && data.length == 2);
+    final List<Object?> castedData = data as List<Object?>;
+    return RouteInformation(location: castedData.first as String?, state: castedData.last);
+  }
+
+  @override
+  Object? toPrimitives() {
+    return value == null ? null : <Object?>[value!.location, value!.state];
   }
 }
