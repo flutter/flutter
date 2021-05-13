@@ -80,8 +80,6 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   SkRect GetViewRect(int view_id) const;
 
  private:
-  static const int kMaxLayerAllocations = 2;
-
   // The number of frames the rasterizer task runner will continue
   // to run on the platform thread after no platform view is rendered.
   //
