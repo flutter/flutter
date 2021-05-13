@@ -69,12 +69,12 @@ int main(int argc, char** argv) {
     // Get the package ID.
     std::string package_id = args[1];
 
-    // Concatenate the remaining args, space-separated.
+    // Concatenate the remaining args, comma-separated.
     std::ostringstream app_args;
     for (int i = 2; i < args.size(); ++i) {
       app_args << args[i];
       if (i < args.size() - 1) {
-        app_args << " ";
+        app_args << ",";
       }
     }
     int process_id = LaunchApp(flutter::Utf16FromUtf8(package_id),
