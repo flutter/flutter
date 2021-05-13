@@ -26,11 +26,48 @@ struct IncluderData {
 
 class Includer final : public shaderc::CompileOptions::IncluderInterface {
  public:
-  Includer(std::shared_ptr<fml::UniqueFD> working_directory)
-      : working_directory_(std::move(working_directory)) {}
+  Includer(std::shared_ptr<fml::UniqueFD> working_directory,
+           std::vector<std::shared_ptr<fml::UniqueFD>> include_dirs)
+      : working_directory_(std::move(working_directory)),
+        include_dirs_(std::move(include_dirs)) {}
 
   // |shaderc::CompileOptions::IncluderInterface|
   ~Includer() override = default;
+
+  std::unique_ptr<fml::FileMapping> TryOpenMapping(
+      const std::shared_ptr<fml::UniqueFD>& des,
+      const char* requested_source) const {
+    if (!des || !des->is_valid()) {
+      return nullptr;
+    }
+
+    if (requested_source == nullptr) {
+      return nullptr;
+    }
+
+    std::string source(requested_source);
+    if (source.empty()) {
+      return nullptr;
+    }
+
+    return fml::FileMapping::CreateReadOnly(*des, requested_source);
+  }
+
+  std::unique_ptr<fml::FileMapping> FindFirstMapping(
+      const char* requested_source) const {
+    // Always try the working directory first no matter what the include
+    // directories are.
+    if (auto mapping = TryOpenMapping(working_directory_, requested_source)) {
+      return mapping;
+    }
+
+    for (const auto& include_dir : include_dirs_) {
+      if (auto mapping = TryOpenMapping(include_dir, requested_source)) {
+        return mapping;
+      }
+    }
+    return nullptr;
+  }
 
   // |shaderc::CompileOptions::IncluderInterface|
   shaderc_include_result* GetInclude(const char* requested_source,
@@ -56,8 +93,7 @@ class Includer final : public shaderc::CompileOptions::IncluderInterface {
       return result.release();
     }
 
-    auto file =
-        fml::FileMapping::CreateReadOnly(*working_directory_, requested_source);
+    auto file = FindFirstMapping(requested_source);
 
     if (!file || file->GetMapping() == nullptr) {
       return result.release();
@@ -84,6 +120,7 @@ class Includer final : public shaderc::CompileOptions::IncluderInterface {
 
  private:
   std::shared_ptr<fml::UniqueFD> working_directory_;
+  std::vector<std::shared_ptr<fml::UniqueFD>> include_dirs_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Includer);
 };
@@ -165,7 +202,8 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   options.SetAutoBindUniforms(true);
   options.SetAutoMapLocations(true);
 
-  options.SetIncluder(std::make_unique<Includer>(options_.working_directory));
+  options.SetIncluder(std::make_unique<Includer>(options_.working_directory,
+                                                 options_.include_dirs));
 
   shaderc::Compiler spv_compiler;
   if (!spv_compiler.IsValid()) {

@@ -1,11 +1,16 @@
+#include "types.h"
+
 uniform UniformBufferObject {
-  mat4 model;
-  mat4 view;
-  mat4 projection;
+  Uniforms uniforms;
 } ubo;
 
 in vec3 inPosition;
 
+in float stuff;
+
+out float outStuff;
+
 void main() {
-  gl_Position =  ubo.projection * ubo.view * ubo.model * vec4(inPosition, 1.0);
+  gl_Position =  ubo.uniforms.projection * ubo.uniforms.view * ubo.uniforms.model * vec4(inPosition, 1.0);
+  outStuff = stuff;
 }
