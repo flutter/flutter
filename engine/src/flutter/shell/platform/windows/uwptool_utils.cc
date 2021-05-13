@@ -7,6 +7,9 @@
 #include <Windows.h>
 #include <Winreg.h>
 #include <shobjidl_core.h>
+#include <winrt/Windows.ApplicationModel.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Windows.Management.Deployment.h>
 #include <winrt/base.h>
 
 #include <string>
@@ -41,17 +44,14 @@ int Application::Launch(const std::wstring_view args) {
 }
 
 std::vector<Application> ApplicationStore::GetInstalledApplications() {
-  constexpr wchar_t kMappingsKey[] =
-      L"\\Local Settings\\Software\\Microsoft\\Windows\\CurrentVersion"
-      L"\\AppModel\\Repository\\Families";
-  RegistryKey mappings_key(HKEY_CLASSES_ROOT, kMappingsKey, KEY_READ);
-  if (!mappings_key.IsValid()) {
-    return {};
-  }
+  using winrt::Windows::ApplicationModel::Package;
+  using winrt::Windows::Management::Deployment::PackageManager;
 
+  // Find packages for the current user (default for empty string).
+  PackageManager package_manager;
   std::unordered_set<std::wstring> package_ids;
-  for (const std::wstring& subkey_name : mappings_key.GetSubKeyNames()) {
-    package_ids.emplace(subkey_name);
+  for (const Package& package : package_manager.FindPackagesForUser(L"")) {
+    package_ids.emplace(package.Id().FamilyName().c_str());
   }
   std::vector<Application> apps(package_ids.begin(), package_ids.end());
   return apps;
