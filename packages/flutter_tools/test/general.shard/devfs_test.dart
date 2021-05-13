@@ -188,6 +188,11 @@ void main() {
       return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
     };
 
+    /// This output can change based on the host platform.
+    final List<List<int>> expectedEncoded = await osUtils.gzipLevel1Stream(
+      Stream<List<int>>.value(<int>[1, 2, 3, 4, 5]),
+    ).toList();
+
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
@@ -202,7 +207,7 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         // This is the value of `<int>[1, 2, 3, 4, 5]` run through `osUtils.gzipLevel1Stream`.
-        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[31, 139, 8, 0, 0, 0, 0, 0, 4, 10, 99, 100, 98, 102, 97, 5, 0, 244, 153, 11, 71, 5, 0, 0, 0])
+        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk])
       ]),
       uploadRetryThrottle: Duration.zero,
     );
