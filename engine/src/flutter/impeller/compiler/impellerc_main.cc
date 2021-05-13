@@ -37,6 +37,7 @@ bool Main(const fml::CommandLine& command_line) {
   options.type = Compiler::SourceTypeFromFileName(switches.source_file_name);
   options.working_directory = switches.working_directory;
   options.file_name = switches.source_file_name;
+  options.include_dirs = switches.include_directories;
 
   Compiler compiler(*source_file_mapping, options);
   if (!compiler.IsValid()) {

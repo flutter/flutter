@@ -29,6 +29,7 @@ class Compiler {
   struct SourceOptions {
     SourceType type = SourceType::kUnknown;
     std::shared_ptr<fml::UniqueFD> working_directory;
+    std::vector<std::shared_ptr<fml::UniqueFD>> include_dirs;
     std::string file_name = "main.glsl";
     std::string entry_point_name = "main";
 
