@@ -16,8 +16,15 @@ late CanvasKit canvasKit;
 /// static APIs.
 ///
 /// See, e.g. [SkPaint].
+///
+/// This also acts as a cache of an initialized CanvasKit instance. We can use
+/// this, for example, to perform a hot restart without needing to redownload
+/// and reinitialize CanvasKit.
 @JS('window.flutterCanvasKit')
-external set windowFlutterCanvasKit(CanvasKit value);
+external set windowFlutterCanvasKit(CanvasKit? value);
+
+@JS('window.flutterCanvasKit')
+external CanvasKit? get windowFlutterCanvasKit;
 
 @JS()
 @anonymous
@@ -141,7 +148,7 @@ class ColorSpace {}
 @anonymous
 class SkWebGLContextOptions {
   external factory SkWebGLContextOptions({
-    required int anitalias,
+    required int antialias,
     // WebGL version: 1 or 2.
     required int majorVersion,
   });

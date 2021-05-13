@@ -48,6 +48,9 @@ class DomRenderer {
   html.ScriptElement? get canvasKitScript => _canvasKitScript;
   html.ScriptElement? _canvasKitScript;
 
+  Future<void>? get canvasKitLoaded => _canvasKitLoaded;
+  Future<void>? _canvasKitLoaded;
+
   /// The element that contains the [sceneElement].
   ///
   /// This element is created and inserted in the HTML DOM once. It is never
@@ -441,7 +444,8 @@ flt-glass-pane * {
 
     _sceneHostElement = createElement('flt-scene-host');
 
-    final html.Element semanticsHostElement = createElement('flt-semantics-host');
+    final html.Element semanticsHostElement =
+        createElement('flt-semantics-host');
     semanticsHostElement.style
       ..position = 'absolute'
       ..transformOrigin = '0 0 0';
@@ -509,10 +513,20 @@ flt-glass-pane * {
       });
     }
 
-    if (useCanvasKit) {
+    // Only reset CanvasKit if it's not already available.
+    if (useCanvasKit && windowFlutterCanvasKit == null) {
       _canvasKitScript?.remove();
       _canvasKitScript = html.ScriptElement();
       _canvasKitScript!.src = canvasKitJavaScriptBindingsUrl;
+
+      Completer<void> canvasKitLoadCompleter = Completer<void>();
+      _canvasKitLoaded = canvasKitLoadCompleter.future;
+
+      late StreamSubscription<html.Event> loadSubscription;
+      loadSubscription = _canvasKitScript!.onLoad.listen((_) {
+        loadSubscription.cancel();
+        canvasKitLoadCompleter.complete(true);
+      });
 
       // TODO(hterkelsen): Rather than this monkey-patch hack, we should
       // build CanvasKit ourselves. See:
@@ -591,7 +605,8 @@ flt-glass-pane * {
   /// logical pixels. To compensate, we inject an inverse scale at the root
   /// level.
   void updateSemanticsScreenProperties() {
-    _semanticsHostElement!.style.transform = 'scale(${1 / html.window.devicePixelRatio})';
+    _semanticsHostElement!.style.transform =
+        'scale(${1 / html.window.devicePixelRatio})';
   }
 
   /// Called immediately after browser window metrics change.

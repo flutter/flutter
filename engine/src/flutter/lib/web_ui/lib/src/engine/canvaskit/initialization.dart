@@ -87,20 +87,23 @@ String canvasKitWasmModuleUrl(String file) => canvasKitBuildUrl + file;
 /// This calls `CanvasKitInit` and assigns the global [canvasKit] object.
 Future<void> initializeCanvasKit() {
   final Completer<void> canvasKitCompleter = Completer<void>();
-  late StreamSubscription<html.Event> loadSubscription;
-  loadSubscription = domRenderer.canvasKitScript!.onLoad.listen((_) {
-    loadSubscription.cancel();
-    final CanvasKitInitPromise canvasKitInitPromise =
-        CanvasKitInit(CanvasKitInitOptions(
-      locateFile: js.allowInterop(
-          (String file, String unusedBase) => canvasKitWasmModuleUrl(file)),
-    ));
-    canvasKitInitPromise.then(js.allowInterop((CanvasKit ck) {
-      canvasKit = ck;
-      windowFlutterCanvasKit = canvasKit;
-      canvasKitCompleter.complete();
-    }));
-  });
+  if (windowFlutterCanvasKit != null) {
+    canvasKit = windowFlutterCanvasKit!;
+    canvasKitCompleter.complete();
+  } else {
+    domRenderer.canvasKitLoaded!.then((_) {
+      final CanvasKitInitPromise canvasKitInitPromise =
+          CanvasKitInit(CanvasKitInitOptions(
+        locateFile: js.allowInterop(
+            (String file, String unusedBase) => canvasKitWasmModuleUrl(file)),
+      ));
+      canvasKitInitPromise.then(js.allowInterop((CanvasKit ck) {
+        canvasKit = ck;
+        windowFlutterCanvasKit = canvasKit;
+        canvasKitCompleter.complete();
+      }));
+    });
+  }
 
   /// Add a Skia scene host.
   skiaSceneHost = html.Element.tag('flt-scene');

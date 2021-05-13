@@ -210,7 +210,7 @@ class Surface {
         SkWebGLContextOptions(
           // Default to no anti-aliasing. Paint commands can be explicitly
           // anti-aliased by setting their `Paint` object's `antialias` property.
-          anitalias: 0,
+          antialias: 0,
           majorVersion: webGLVersion,
         ),
       );
