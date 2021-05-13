@@ -90,6 +90,7 @@ void main() {
       projectDir,
       <String>['-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
@@ -117,6 +118,7 @@ void main() {
       projectDir,
       <String>['-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
@@ -146,6 +148,7 @@ void main() {
       '.ios/Flutter/flutter_project.podspec',
       '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
+      'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.yaml',
       'README.md',
@@ -380,6 +383,7 @@ void main() {
       projectDir,
       <String>['--template=package'],
       <String>[
+        'analysis_options.yaml',
         'lib/flutter_project.dart',
         'test/flutter_project_test.dart',
       ],
@@ -417,6 +421,7 @@ void main() {
       projectDir,
       <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
       <String>[
+        'analysis_options.yaml',
         'example/lib/main.dart',
         'flutter_project.iml',
         'lib/flutter_project.dart',
@@ -500,6 +505,7 @@ void main() {
       projectDir,
       <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'ios,android'],
       <String>[
+        'analysis_options.yaml',
         'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
         'example/android/app/src/main/kotlin/com/example/flutter_project_example/MainActivity.kt',
         'example/ios/Runner/AppDelegate.swift',
@@ -592,6 +598,7 @@ void main() {
       '.gitignore',
       '.metadata',
       '.packages',
+      'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.lock',
       'pubspec.yaml',
@@ -1691,7 +1698,7 @@ void main() {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
-            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')),
+            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
           )
         ]);
       };
@@ -2450,6 +2457,47 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
     Logger: () => logger,
   });
+
+  testUsingContext('default project has analysis_options.yaml set up correctly', () async {
+    await _createProject(
+        projectDir,
+        <String>[],
+        <String>[
+          'analysis_options.yaml',
+        ],
+    );
+    final String dataPath = globals.fs.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'test',
+      'commands.shard',
+      'permeable',
+      'data',
+    );
+    final File toAnalyze = await globals.fs.file(globals.fs.path.join(dataPath, 'to_analyze.dart.test'))
+        .copy(globals.fs.path.join(projectDir.path, 'lib', 'to_analyze.dart'));
+    final String relativePath = globals.fs.path.join('lib', 'to_analyze.dart');
+    final List<String> expectedFailures = <String>[
+      '$relativePath:11:7: use_key_in_widget_constructors',
+      '$relativePath:20:3: prefer_const_constructors_in_immutables',
+      '$relativePath:31:26: use_full_hex_values_for_flutter_colors',
+    ];
+    expect(expectedFailures.length, '// LINT:'.allMatches(toAnalyze.readAsStringSync()).length);
+    await _analyzeProject(
+      projectDir.path,
+      expectedFailures: expectedFailures,
+    );
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
 }
 
 Future<void> _createProject(
@@ -2548,7 +2596,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
   snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }
 
-Future<void> _analyzeProject(String workingDir) async {
+Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures = const <String>[] }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -2567,11 +2615,27 @@ Future<void> _analyzeProject(String workingDir) async {
     args,
     workingDirectory: workingDir,
   );
-  if (exec.exitCode != 0) {
-    print(exec.stdout);
-    print(exec.stderr);
+  if (expectedFailures.isEmpty) {
+    if (exec.exitCode != 0) {
+      print(exec.stdout);
+      print(exec.stderr);
+    }
+    expect(exec.exitCode, 0);
+    return;
   }
-  expect(exec.exitCode, 0);
+  expect(exec.exitCode, isNot(0));
+  String lineParser(String line) {
+    print('#$line#');
+    final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
+    final List<String> lineComponents = line.trim().split(analyzerSeparator);
+    final String lintName = lineComponents.removeLast();
+    final String location = lineComponents.removeLast();
+    return '$location: $lintName';
+  }
+  final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
+      .where((String line) => line.trim().isNotEmpty && !line.startsWith('Analyzing'))
+      .map(lineParser).toList();
+  expect(errors, unorderedEquals(expectedFailures));
 }
 
 Future<void> _runFlutterTest(Directory workingDir, { String target }) async {

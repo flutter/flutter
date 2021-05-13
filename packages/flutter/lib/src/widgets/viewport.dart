@@ -188,7 +188,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  _ViewportElement createElement() => _ViewportElement(this);
+  MultiChildRenderObjectElement createElement() => _ViewportElement(this);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

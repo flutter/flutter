@@ -20,7 +20,7 @@ void main() {
           minHeight: 0.0,
           maxHeight: 50.0,
           child: Container(
-            key: inner
+            key: inner,
           ),
         ),
       ),

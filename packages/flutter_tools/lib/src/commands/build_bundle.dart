@@ -37,7 +37,7 @@ class BuildBundleCommand extends BuildSubCommand {
           'android-x86',
           'android-x64',
           'ios',
-          'darwin-x64',
+          'darwin',
           'linux-x64',
           'linux-arm64',
           'windows-x64',
@@ -90,7 +90,7 @@ class BuildBundleCommand extends BuildSubCommand {
     }
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
-      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin:
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }

@@ -516,7 +516,6 @@ void main() {
         '\n'
         '! Doctor found issues in 4\n'
         '  categories.\n'
-        ''
     ));
   }, overrides: <Type, Generator>{
     Platform: _kNoColorOutputPlatform,
@@ -563,7 +562,6 @@ void main() {
         '\n'
         '! Doctor found issues in 4\n'
         '  categories.\n'
-        ''
     ));
   }, overrides: <Type, Generator>{
     Platform: _kNoColorOutputPlatform,

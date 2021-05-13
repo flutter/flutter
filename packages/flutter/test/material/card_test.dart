@@ -199,7 +199,7 @@ void main() {
 
     Card _getCard(WidgetTester tester) {
       return tester.widget<Card>(
-          find.byType(Card)
+        find.byType(Card),
       );
     }
 

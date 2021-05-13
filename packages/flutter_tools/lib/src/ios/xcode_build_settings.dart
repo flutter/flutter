@@ -18,7 +18,7 @@ String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
     Artifacts artifacts) {
   final String flutterMacOSFramework = artifacts.getArtifactPath(
     Artifact.flutterMacOSFramework,
-    platform: TargetPlatform.darwin_x64,
+    platform: TargetPlatform.darwin,
     mode: mode,
   );
   return fileSystem.path

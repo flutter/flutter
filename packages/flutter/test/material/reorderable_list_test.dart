@@ -423,14 +423,14 @@ void main() {
         customController.animateTo(
           40.0,
           duration: const Duration(milliseconds: 200),
-          curve: Curves.linear
+          curve: Curves.linear,
         );
         await tester.pumpAndSettle();
         Offset listViewTopLeft = tester.getTopLeft(
           find.byType(ReorderableListView),
         );
         Offset firstBoxTopLeft = tester.getTopLeft(
-          find.byKey(firstBox)
+          find.byKey(firstBox),
         );
         expect(firstBoxTopLeft.dy, listViewTopLeft.dy - 40.0);
 
@@ -467,7 +467,7 @@ void main() {
         );
         final Widget overlay = Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(builder: (BuildContext context) => reorderableList)
+            OverlayEntry(builder: (BuildContext context) => reorderableList),
           ],
         );
         final Widget boilerplate = Localizations(
@@ -874,7 +874,7 @@ void main() {
                     padding: const EdgeInsets.all(24),
                     child: reorderableListView,
                   );
-                })
+                }),
               ],
             ),
           ),
@@ -1504,6 +1504,116 @@ void main() {
     expect(exception, isFlutterError);
     expect(exception.toString(), contains('No Overlay widget found'));
     expect(exception.toString(), contains('ReorderableListView widgets require an Overlay widget ancestor'));
+  });
+
+  testWidgets('ReorderableListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    expect(() => ReorderableListView(
+      children: const <Widget>[],
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
+  });
+
+  testWidgets('ReorderableListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+    expect(() => ReorderableListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+            key: ValueKey<int>(numbers[index]),
+            height: 20 + numbers[index] * 10,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Text(numbers[index].toString()),
+            )
+        );
+      },
+      itemCount: numbers.length,
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
+  });
+
+  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableListView.builder(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  itemExtent: 30,
+                  onReorder: (int fromIndex, int toIndex) { },
+                );
+              },
+            ),
+          ),
+        )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
+  });
+
+  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableListView.builder(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  prototypeItem: const SizedBox(
+                    height: 30,
+                    child: Text('3'),
+                  ),
+                  onReorder: (int oldIndex, int newIndex) {  },
+                );
+              },
+            ),
+          ),
+        )
+    );
+
+    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+
+    expect(item0Height, 30.0);
+    expect(item1Height, 30.0);
+    expect(item2Height, 30.0);
   });
 }
 

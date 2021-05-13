@@ -267,7 +267,7 @@ void main() {
   testWidgets('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool? checkboxValue = false;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -300,7 +300,7 @@ void main() {
     });
     expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+    SystemChannels.accessibility.setMockMessageHandler(null);
     semanticsTester.dispose();
   });
 
@@ -495,7 +495,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: Colors.orange[500], radius: splashRadius)
+      paints..circle(color: Colors.orange[500], radius: splashRadius),
     );
   });
 
@@ -902,8 +902,7 @@ void main() {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
                 value: false,
                 onChanged: (bool? newValue) {},
@@ -919,8 +918,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape,
-        roundedRectangleBorder);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, roundedRectangleBorder);
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),

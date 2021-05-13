@@ -55,6 +55,9 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
+
+  // Windows UWP app management tool.
+  uwptool,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -103,8 +106,39 @@ enum HostArtifact {
   pubExecutable,
 }
 
+// TODO(knopp): Remove once darwin artifacts are universal and moved out of darwin-x64
+String _enginePlatformDirectoryName(TargetPlatform platform) {
+  if (platform == TargetPlatform.darwin) {
+    return 'darwin-x64';
+  }
+  return getNameForTargetPlatform(platform);
+}
+
+bool _isWindows(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_uwp_x64:
+      return true;
+    case TargetPlatform.android:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+    case TargetPlatform.darwin:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.ios:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+      return false;
+  }
+  return false;
+}
+
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
-  final String exe = platform == TargetPlatform.windows_x64 ? '.exe' : '';
+  final String exe = _isWindows(platform) ? '.exe' : '';
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
@@ -154,6 +188,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
+    case Artifact.uwptool:
+      return 'uwptool$exe';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -383,7 +419,7 @@ class CachedArtifacts implements Artifacts {
         return _getAndroidArtifactPath(artifact, platform, mode);
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode, environmentType);
-      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
@@ -498,7 +534,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        final String platformDirName = getNameForTargetPlatform(platform);
+        final String platformDirName = _enginePlatformDirectoryName(platform);
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.platformKernelDill:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
@@ -514,7 +550,7 @@ class CachedArtifacts implements Artifacts {
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
-        String platformDirName = getNameForTargetPlatform(platform);
+        String platformDirName = _enginePlatformDirectoryName(platform);
         if (mode == BuildMode.profile || mode == BuildMode.release) {
           platformDirName = '$platformDirName-${getNameForBuildMode(mode)}';
         }
@@ -532,7 +568,12 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fontSubset:
       case Artifact.constFinder:
         return _cache.getArtifactDirectory('engine')
-                     .childDirectory(getNameForTargetPlatform(platform))
+                     .childDirectory(_enginePlatformDirectoryName(platform))
+                     .childFile(_artifactToFileName(artifact, platform, mode))
+                     .path;
+      case Artifact.uwptool:
+        return _cache.getArtifactDirectory('engine')
+                     .childDirectory('windows-uwp-x64-${getNameForBuildMode(mode ?? BuildMode.debug)}')
                      .childFile(_artifactToFileName(artifact, platform, mode))
                      .path;
       default:
@@ -543,11 +584,11 @@ class CachedArtifacts implements Artifacts {
 
   String _getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) {
     final String engineDir = _cache.getArtifactDirectory('engine').path;
-    final String platformName = getNameForTargetPlatform(platform);
+    final String platformName = _enginePlatformDirectoryName(platform);
     switch (platform) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
-      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
@@ -586,7 +627,7 @@ class CachedArtifacts implements Artifacts {
 
 TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils operatingSystemUtils) {
   if (platform.isMacOS) {
-    return TargetPlatform.darwin_x64;
+    return TargetPlatform.darwin;
   }
   if (platform.isLinux) {
     return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?
@@ -816,6 +857,8 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
         break;
+      case Artifact.uwptool:
+        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
@@ -836,7 +879,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   }
 
   String _genSnapshotPath() {
-    const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386'];
+    const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386', 'clang_arm64'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (final String clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(engineOutPath, clangDir, genSnapshotName);

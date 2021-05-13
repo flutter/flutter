@@ -462,7 +462,7 @@ void main() {
     Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
     expect(
       transformOfArrow.transform.getRotation(),
-      equals(Matrix3.identity())
+      equals(Matrix3.identity()),
     );
 
     // Check for descending list.
@@ -474,7 +474,7 @@ void main() {
     transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
     expect(
       transformOfArrow.transform.getRotation(),
-      equals(Matrix3.rotationZ(math.pi))
+      equals(Matrix3.rotationZ(math.pi)),
     );
   });
 
@@ -1152,7 +1152,7 @@ void main() {
               DataCell(Text('A long desert name')),
             ],
           ),
-        ]
+        ],
       );
     }
 
@@ -1226,7 +1226,7 @@ void main() {
               DataCell(Text('Content2')),
             ],
           ),
-        ]
+        ],
       );
     }
 
@@ -1451,7 +1451,7 @@ void main() {
               DataCell(Text('Content1')),
             ],
           ),
-        ]
+        ],
       );
     }
 

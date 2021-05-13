@@ -888,7 +888,7 @@ void main() {
             bottomRight: const Radius.circular(2.0),
         ))
         // The thumb.
-        ..circle(x: 400.0, y: 300.0, radius: 10.0, )
+        ..circle(x: 400.0, y: 300.0, radius: 10.0),
     );
   });
 
@@ -1152,7 +1152,7 @@ void main() {
         ..shadow(elevation: 1.0)
         ..circle(x: 24.0, y: 300.0)
         ..shadow(elevation: 6.0)
-        ..circle(x: 24.0, y: 300.0)
+        ..circle(x: 24.0, y: 300.0),
     );
 
     await gesture.up();

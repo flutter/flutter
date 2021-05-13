@@ -72,7 +72,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedContainerWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -93,7 +93,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPaddingWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -114,7 +114,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedAlignWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -135,7 +135,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPositionedWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -156,7 +156,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPositionedDirectionalWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -177,7 +177,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedOpacityWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -196,7 +196,7 @@ void main() {
       child: TestAnimatedWidget(
         switchKey: switchKey,
         state: _TestAnimatedOpacityWidgetState(),
-      )
+      ),
     ));
 
     final Finder switchFinder = find.byKey(switchKey);
@@ -244,7 +244,7 @@ void main() {
       child: TestAnimatedWidget(
         switchKey: switchKey,
         state: _TestSliverAnimatedOpacityWidgetState(),
-      )
+      ),
     ));
 
     final Finder switchFinder = find.byKey(switchKey);
@@ -273,7 +273,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedDefaultTextStyleWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -294,7 +294,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPhysicalModelWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -315,7 +315,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestTweenAnimationBuilderWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -336,7 +336,7 @@ void main() {
         callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedThemeWidgetState(),
-      )
+      ),
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -519,7 +519,8 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
       onEnd: widget.callback,
       style: toggle
         ? const TextStyle(fontStyle: FontStyle.italic)
-        : const TextStyle(fontStyle: FontStyle.normal));
+        : const TextStyle(fontStyle: FontStyle.normal),
+    );
   }
 }
 

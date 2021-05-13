@@ -830,7 +830,7 @@ class TextStyle with Diagnosticable {
       decorationStyle: decorationStyle ?? this.decorationStyle,
       decorationThickness: decorationThickness ?? this.decorationThickness,
       debugLabel: newDebugLabel,
-      overflow: overflow ?? this.overflow
+      overflow: overflow ?? this.overflow,
     );
   }
 

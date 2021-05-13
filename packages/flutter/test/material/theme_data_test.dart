@@ -25,8 +25,11 @@ void main() {
     for (final TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = ThemeData(platform: platform);
       final Typography typography = Typography.material2018(platform: platform);
-      expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
-          reason: 'Not using default typography for $platform');
+      expect(
+        theme.textTheme,
+        typography.black.apply(decoration: TextDecoration.none),
+        reason: 'Not using default typography for $platform',
+      );
     }
   });
 
@@ -46,15 +49,6 @@ void main() {
 
     expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
-  });
-
-  test('Default accent text theme contrasts with accent brightness', () {
-    final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
-
-    expect(lightTheme.accentTextTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.accentTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
   test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
@@ -83,15 +77,6 @@ void main() {
 
     expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
-  });
-
-  test('Default accent icon theme contrasts with accent brightness', () {
-    final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
-
-    expect(lightTheme.accentTextTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.accentTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
@@ -316,6 +301,7 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
@@ -409,6 +395,7 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
     );

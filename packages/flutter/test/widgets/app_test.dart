@@ -76,8 +76,8 @@ void main() {
         actions: <Type, Action<Intent>>{
           TestIntent: action,
         },
-        shortcuts: <LogicalKeySet, Intent> {
-          LogicalKeySet(LogicalKeyboardKey.space): const TestIntent(),
+        shortcuts: const <ShortcutActivator, Intent> {
+          SingleActivator(LogicalKeyboardKey.space): TestIntent(),
         },
         builder: (BuildContext context, Widget? child) {
           return Material(
@@ -227,17 +227,19 @@ void main() {
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page one');
-              }
+              },
             ),
             PageRouteBuilder<void>(
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page two');
-              }
+              },
             ),
           ];
         },
@@ -247,13 +249,14 @@ void main() {
             pageBuilder: (
               BuildContext context,
               Animation<double> animation,
-              Animation<double> secondaryAnimation) {
+              Animation<double> secondaryAnimation,
+            ) {
               return const Text('regular page');
-            }
+            },
           );
         },
         color: const Color(0xFF123456),
-      )
+      ),
     );
     expect(find.text('non-regular page two'), findsOneWidget);
     expect(find.text('non-regular page one'), findsNothing);
@@ -280,7 +283,7 @@ void main() {
           location: 'popped',
         );
         return route.didPop(result);
-      }
+      },
     );
     await tester.pumpWidget(WidgetsApp.router(
       routeInformationProvider: provider,
@@ -324,6 +327,133 @@ void main() {
       ),
     );
     expect(ScrollConfiguration.of(capturedContext).runtimeType, ScrollBehavior);
+  });
+
+  test('basicLocaleListResolution', () {
+    // Matches exactly for language code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('zh'),
+          const Locale('un'),
+          const Locale('en'),
+        ],
+        <Locale>[
+          const Locale('en'),
+        ],
+      ),
+      const Locale('en'),
+    );
+
+    // Matches exactly for language code and country code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('en'),
+          const Locale('en', 'US'),
+        ],
+        <Locale>[
+          const Locale('en', 'US'),
+        ],
+      ),
+      const Locale('en', 'US'),
+    );
+
+    // Matches language+script over language+country
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'HK',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            countryCode: 'HK',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+      ),
+    );
+
+    // Matches exactly for language code, script code and country code.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'TW',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'TW',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+        countryCode: 'TW',
+      ),
+    );
+
+    // Selects for country code if the language code is not found in the
+    // preferred locales list.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'en',
+          ),
+          const Locale.fromSubtags(
+            languageCode: 'ar',
+            countryCode: 'tn',
+          ),
+        ],
+        <Locale>[
+          const Locale.fromSubtags(
+            languageCode: 'fr',
+            countryCode: 'tn',
+          ),
+        ],
+      ),
+      const Locale.fromSubtags(
+        languageCode: 'fr',
+        countryCode: 'tn',
+      ),
+    );
+
+    // Selects first (default) locale when no match at all is found.
+    expect(
+      basicLocaleListResolution(
+        <Locale>[
+          const Locale('tn'),
+        ],
+        <Locale>[
+          const Locale('zh'),
+          const Locale('un'),
+          const Locale('en'),
+        ],
+      ),
+      const Locale('zh'),
+    );
   });
 }
 
@@ -387,7 +517,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
         MaterialPage<void>(
           key: ValueKey<String>(routeInformation.location!),
           child: builder(context, routeInformation),
-        )
+        ),
       ],
     );
   }

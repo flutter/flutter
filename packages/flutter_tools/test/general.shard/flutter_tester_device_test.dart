@@ -17,8 +17,8 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/flutter_tester_device.dart';
 import 'package:flutter_tools/src/test/font_config_manager.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -80,7 +80,7 @@ void main() {
       ], environment: <String, String>{
         'FLUTTER_TEST': expectedFlutterTestValue,
         'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
-        'SERVER_PORT': 'null',
+        'SERVER_PORT': '0',
         'APP_NAME': '',
       });
     }
@@ -244,17 +244,28 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   @override
   Future<DartDevelopmentService> startDds(Uri uri) async {
     _ddsServiceUriCompleter.complete(uri);
-    final MockDartDevelopmentService mock = MockDartDevelopmentService();
-    when(mock.uri).thenReturn(Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'));
-    return mock;
+    return FakeDartDevelopmentService(Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'), Uri.parse('http://localhost:8080'));
   }
 
   @override
-  Future<HttpServer> bind(InternetAddress host, int port) async => MockHttpServer();
+  Future<HttpServer> bind(InternetAddress host, int port) async => FakeHttpServer();
 
   @override
   Future<StreamChannel<String>> get remoteChannel async => StreamChannelController<String>().foreign;
 }
 
-class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockHttpServer extends Mock implements HttpServer {}
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  FakeDartDevelopmentService(this.uri, this.original);
+
+  final Uri original;
+
+  @override
+  final Uri uri;
+
+  @override
+  Uri get remoteVmServiceUri => original;
+}
+class FakeHttpServer extends Fake implements HttpServer {
+  @override
+  int get port => 0;
+}

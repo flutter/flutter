@@ -1153,7 +1153,7 @@ class TestPage extends Page<void> {
         return RouteWidget(
           name: name!,
         );
-      }
+      },
     );
   }
 }
@@ -1260,7 +1260,7 @@ class RouteFutureWidgetState extends State<RouteFutureWidget> with RestorationMi
         setState(() {
           value = i;
         });
-      }
+      },
     );
   }
 

@@ -14,7 +14,7 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
         child: AspectRatio(
           aspectRatio: aspectRatio,
           child: Container(
-            key: childKey
+            key: childKey,
           ),
         ),
       ),
@@ -40,7 +40,7 @@ void main() {
           child: AspectRatio(
             aspectRatio: 2.0,
             child: Container(
-              key: childKey
+              key: childKey,
             ),
           ),
         ),

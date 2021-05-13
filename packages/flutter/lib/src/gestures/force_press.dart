@@ -116,18 +116,27 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// to 1.0 for values of `pressure` that are between `pressureMin` and
   /// `pressureMax`.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   ForcePressGestureRecognizer({
     this.startPressure = 0.4,
     this.peakPressure = 0.85,
     this.interpolation = _inverseLerp,
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
        assert(interpolation != null),
        assert(peakPressure > startPressure),
-       super(debugOwner: debugOwner, kind: kind);
+       super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   /// A pointer is in contact with the screen and has just pressed with a force
   /// exceeding the [startPressure]. Consequently, if there were other gesture
