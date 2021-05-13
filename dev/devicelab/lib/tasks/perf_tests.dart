@@ -1441,7 +1441,7 @@ class DevToolsMemoryTest {
       'global',
       'deactivate',
       'devtools',
-    ]);
+    ], canFail: true);
     // The version of devtools is pinned. If we pub global activate devtools and an
     // upstream devtools release breaks our CI, it will manifest on an unrelated
     // commit, making it more difficult to determine the cause.
