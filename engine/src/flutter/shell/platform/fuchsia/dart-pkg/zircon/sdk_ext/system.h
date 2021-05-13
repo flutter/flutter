@@ -8,6 +8,7 @@
 #include <zircon/syscalls.h>
 
 #include "handle.h"
+#include "handle_disposition.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/dart_wrappable.h"
@@ -37,8 +38,13 @@ class System : public fml::RefCountedThreadSafe<System>,
   static zx_status_t ChannelWrite(fml::RefPtr<Handle> channel,
                                   const tonic::DartByteData& data,
                                   std::vector<Handle*> handles);
+  static zx_status_t ChannelWriteEtc(
+      fml::RefPtr<Handle> channel,
+      const tonic::DartByteData& data,
+      std::vector<HandleDisposition*> handle_dispositions);
   // TODO(ianloic): Add ChannelRead
   static Dart_Handle ChannelQueryAndRead(fml::RefPtr<Handle> channel);
+  static Dart_Handle ChannelQueryAndReadEtc(fml::RefPtr<Handle> channel);
 
   static Dart_Handle EventpairCreate(uint32_t options);
 

@@ -99,6 +99,49 @@ class ReadResult extends _Result {
 }
 
 @pragma('vm:entry-point')
+class HandleInfo {
+  final Handle handle;
+  final int type;
+  final int rights;
+
+  @pragma('vm:entry-point')
+  const HandleInfo(this.handle, this.type, this.rights);
+
+  @override
+  String toString() =>
+      'HandleInfo(handle=$handle, type=$type, rights=$rights)';
+}
+
+@pragma('vm:entry-point')
+class ReadEtcResult extends _Result {
+  final ByteData? _bytes;
+  final int? _numBytes;
+  final List<HandleInfo>? _handleInfos;
+
+  ByteData get bytes => _bytes!;
+  int get numBytes => _numBytes!;
+  List<HandleInfo> get handleInfos => _handleInfos!;
+
+  @pragma('vm:entry-point')
+  const ReadEtcResult(final int status, [this._bytes, this._numBytes, this._handleInfos])
+      : super(status);
+
+  /// Returns the bytes as a Uint8List. If status != OK this will throw
+  /// an exception.
+  Uint8List bytesAsUint8List() {
+    return _bytes!.buffer.asUint8List(_bytes!.offsetInBytes, _numBytes!);
+  }
+
+  /// Returns the bytes as a String. If status != OK this will throw
+  /// an exception.
+  String bytesAsUTF8String() => utf8.decode(bytesAsUint8List());
+
+  @override
+  String toString() =>
+      'ReadEtcResult(status=$status, bytes=$_bytes, numBytes=$_numBytes, handleInfos=$_handleInfos)';
+}
+
+@pragma('vm:entry-point')
 class WriteResult extends _Result {
   final int? _numBytes;
   int get numBytes => _numBytes!;
@@ -161,8 +204,12 @@ class System extends NativeFieldWrapperClass2 {
     native 'System_ConnectToService';
   static int channelWrite(Handle channel, ByteData data, List<Handle> handles)
       native 'System_ChannelWrite';
+  static int channelWriteEtc(Handle channel, ByteData data, List<HandleDisposition> handleDispositions)
+      native 'System_ChannelWriteEtc';
   static ReadResult channelQueryAndRead(Handle channel)
       native 'System_ChannelQueryAndRead';
+  static ReadEtcResult channelQueryAndReadEtc(Handle channel)
+      native 'System_ChannelQueryAndReadEtc';
 
   // Eventpair operations.
   static HandlePairResult eventpairCreate([int options = 0])

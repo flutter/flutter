@@ -9,5 +9,6 @@ import 'dart:nativewrappers';
 import 'dart:typed_data';
 
 part 'src/handle.dart';
+part 'src/handle_disposition.dart';
 part 'src/handle_waiter.dart';
 part 'src/system.dart';

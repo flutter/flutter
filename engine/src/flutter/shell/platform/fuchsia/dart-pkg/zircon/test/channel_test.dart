@@ -73,6 +73,119 @@ void main() {
     expect(readResult.handles[0].isValid, isTrue);
   });
 
+  group('etc functions', () {
+    test('moved handle', () {
+      final HandlePairResult pair = System.channelCreate();
+      final ByteData data = utf8Bytes('');
+      final HandlePairResult transferred = System.channelCreate();
+
+      final HandleDisposition disposition = HandleDisposition(ZX.HANDLE_OP_MOVE,
+          transferred.first, ZX.OBJ_TYPE_CHANNEL, ZX.RIGHTS_IO);
+      final int status = System.channelWriteEtc(
+          pair.first, data, <HandleDisposition>[disposition]);
+      expect(status, equals(ZX.OK));
+      expect(disposition.result, equals(ZX.OK));
+      expect(transferred.first.isValid, isFalse);
+
+      final ReadEtcResult readResult =
+          System.channelQueryAndReadEtc(pair.second);
+      expect(readResult.status, equals(ZX.OK));
+      expect(readResult.numBytes, equals(0));
+      expect(readResult.bytes.lengthInBytes, equals(0));
+      expect(readResult.bytesAsUTF8String(), equals(''));
+      expect(readResult.handleInfos.length, equals(1));
+      final HandleInfo handleInfo = readResult.handleInfos[0];
+      expect(handleInfo.handle.isValid, isTrue);
+      expect(handleInfo.type, equals(ZX.OBJ_TYPE_CHANNEL));
+      expect(handleInfo.rights, equals(ZX.RIGHTS_IO));
+    });
+
+    test('copied handle', () {
+      final HandlePairResult pair = System.channelCreate();
+      final ByteData data = utf8Bytes('');
+      final HandleResult vmo = System.vmoCreate(0);
+
+      final HandleDisposition disposition = HandleDisposition(
+          ZX.HANDLE_OP_DUPLICATE,
+          vmo.handle,
+          ZX.OBJ_TYPE_VMO,
+          ZX.RIGHT_SAME_RIGHTS);
+      final int status = System.channelWriteEtc(
+          pair.first, data, <HandleDisposition>[disposition]);
+      expect(status, equals(ZX.OK));
+      expect(disposition.result, equals(ZX.OK));
+      expect(vmo.handle.isValid, isTrue);
+
+      final ReadEtcResult readResult =
+          System.channelQueryAndReadEtc(pair.second);
+      expect(readResult.status, equals(ZX.OK));
+      expect(readResult.numBytes, equals(0));
+      expect(readResult.bytes.lengthInBytes, equals(0));
+      expect(readResult.bytesAsUTF8String(), equals(''));
+      expect(readResult.handleInfos.length, equals(1));
+      final HandleInfo handleInfo = readResult.handleInfos[0];
+      expect(handleInfo.handle.isValid, isTrue);
+      expect(handleInfo.type, equals(ZX.OBJ_TYPE_VMO));
+      expect(handleInfo.rights, equals(ZX.DEFAULT_VMO_RIGHTS));
+    });
+
+    test('closed handle should error', () {
+      final HandlePairResult pair = System.channelCreate();
+      final ByteData data = utf8Bytes('');
+      final HandlePairResult closed = System.channelCreate();
+
+      final HandleDisposition disposition = HandleDisposition(ZX.HANDLE_OP_MOVE,
+          closed.first, ZX.OBJ_TYPE_CHANNEL, ZX.RIGHT_SAME_RIGHTS);
+      closed.first.close();
+      final int status = System.channelWriteEtc(
+          pair.first, data, <HandleDisposition>[disposition]);
+      expect(status, equals(ZX.ERR_BAD_HANDLE));
+      expect(disposition.result, equals(ZX.ERR_BAD_HANDLE));
+      expect(closed.first.isValid, isFalse);
+
+      final ReadEtcResult readResult =
+          System.channelQueryAndReadEtc(pair.second);
+      expect(readResult.status, equals(ZX.ERR_SHOULD_WAIT));
+    });
+
+    test('multiple handles', () {
+      final HandlePairResult pair = System.channelCreate();
+      final ByteData data = utf8Bytes('');
+      final HandlePairResult transferred = System.channelCreate();
+      final HandleResult vmo = System.vmoCreate(0);
+
+      final List<HandleDisposition> dispositions = [
+        HandleDisposition(ZX.HANDLE_OP_MOVE, transferred.first,
+            ZX.OBJ_TYPE_CHANNEL, ZX.RIGHTS_IO),
+        HandleDisposition(ZX.HANDLE_OP_DUPLICATE, vmo.handle, ZX.OBJ_TYPE_VMO,
+            ZX.RIGHT_SAME_RIGHTS)
+      ];
+      final int status = System.channelWriteEtc(pair.first, data, dispositions);
+      expect(status, equals(ZX.OK));
+      expect(dispositions[0].result, equals(ZX.OK));
+      expect(dispositions[1].result, equals(ZX.OK));
+      expect(transferred.first.isValid, isFalse);
+      expect(vmo.handle.isValid, isTrue);
+
+      final ReadEtcResult readResult =
+          System.channelQueryAndReadEtc(pair.second);
+      expect(readResult.status, equals(ZX.OK));
+      expect(readResult.numBytes, equals(0));
+      expect(readResult.bytes.lengthInBytes, equals(0));
+      expect(readResult.bytesAsUTF8String(), equals(''));
+
+      expect(readResult.handleInfos.length, equals(2));
+      final HandleInfo handleInfo = readResult.handleInfos[0];
+      expect(handleInfo.handle.isValid, isTrue);
+      expect(handleInfo.type, equals(ZX.OBJ_TYPE_CHANNEL));
+      expect(handleInfo.rights, equals(ZX.RIGHTS_IO));
+      final HandleInfo vmoInfo = readResult.handleInfos[1];
+      expect(vmoInfo.handle.isValid, isTrue);
+      expect(vmoInfo.type, equals(ZX.OBJ_TYPE_VMO));
+      expect(vmoInfo.rights, equals(ZX.DEFAULT_VMO_RIGHTS));
+    });
+  });
+
   test('async wait channel read', () async {
     final HandlePairResult pair = System.channelCreate();
     final Completer<List<int>> completer = Completer<List<int>>();
