@@ -147,8 +147,8 @@ void main() {
               child: Column(
                 children: <Widget>[
                   PopupMenuButton<int>(
-                    child: Text('Tap Me', key: popupButtonKey),
                     enabled: false,
+                    child: Text('Tap Me', key: popupButtonKey),
                     itemBuilder: (BuildContext context) {
                       itemBuilderCalled = true;
                       return <PopupMenuEntry<int>>[
@@ -222,8 +222,8 @@ void main() {
             children: <Widget>[
               PopupMenuButton<int>(
                 key: popupButtonKey,
-                child: Container(key: childKey),
                 enabled: false,
+                child: Container(key: childKey),
                 itemBuilder: (BuildContext context) {
                   itemBuilderCalled = true;
                   return <PopupMenuEntry<int>>[
@@ -264,8 +264,8 @@ void main() {
                 children: <Widget>[
                   PopupMenuButton<int>(
                     key: popupButtonKey,
-                    child: Container(key: childKey),
                     enabled: false,
+                    child: Container(key: childKey),
                     itemBuilder: (BuildContext context) {
                       return <PopupMenuEntry<int>>[
                         const PopupMenuItem<int>(
@@ -365,22 +365,22 @@ void main() {
               onSelected: (String value) { selected = value; },
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 PopupMenuItem<String>(
-                  child: const Text('First option'),
                   value: 'first',
+                  child: const Text('First option'),
                   onTap: () {
                     menuItemTapCounters[0] += 1;
                   },
                 ),
                 PopupMenuItem<String>(
-                  child: const Text('Second option'),
                   value: 'second',
+                  child: const Text('Second option'),
                   onTap: () {
                     menuItemTapCounters[1] += 1;
                   },
                 ),
                const PopupMenuItem<String>(
-                 child: Text('Option without onTap'),
                  value: 'third',
+                 child: Text('Option without onTap'),
                 ),
               ],
             ),
@@ -1289,17 +1289,17 @@ void main() {
               onSelected: (String result) {
                 selectedValue = result;
               },
-              child: const Text('Menu Button'),
               initialValue: '1',
+              child: const Text('Menu Button'),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
-                  child: Text('1'),
                   value: '1',
+                  child: Text('1'),
                 ),
                 const PopupMenuDivider(),
                 const PopupMenuItem<String>(
-                  child: Text('2'),
                   value: '2',
+                  child: Text('2'),
                 ),
               ],
             ),
@@ -2166,8 +2166,8 @@ void main() {
                 ),
               ),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(child: Text('-1-'), value: 1),
-                const PopupMenuItem<int>(child: Text('-2-'), value: 2),
+                const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                const PopupMenuItem<int>(value: 2, child: Text('-2-')),
               ],
             )],
           ),
@@ -2364,8 +2364,8 @@ void main() {
                     ),
                   ),
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                    const PopupMenuItem<int>(child: Text('-1-'), value: 1),
-                    const PopupMenuItem<int>(child: Text('-2-'), value: 2),
+                    const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                    const PopupMenuItem<int>(value: 2, child: Text('-2-')),
                   ],
                 ),
                 const SizedBox(height: 600),

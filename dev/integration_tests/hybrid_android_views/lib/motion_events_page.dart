@@ -66,8 +66,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           children: <Widget>[
             Expanded(
               child: ElevatedButton(
-                child: const Text('RECORD'),
                 onPressed: listenToFlutterViewEvents,
+                child: const Text('RECORD'),
               ),
             ),
             Expanded(

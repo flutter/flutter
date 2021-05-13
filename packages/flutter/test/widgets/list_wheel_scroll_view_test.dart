@@ -36,8 +36,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
-          children: <Widget>[Container()],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container()],
         ),
       ),
     );

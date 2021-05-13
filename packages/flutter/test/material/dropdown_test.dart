@@ -604,12 +604,12 @@ void main() {
                           value: 1,
                           items: const <DropdownMenuItem<int>>[
                             DropdownMenuItem<int>(
-                              child: Text('First Item'),
                               value: 1,
+                              child: Text('First Item'),
                             ),
                             DropdownMenuItem<int>(
-                              child: Text('Second Item'),
                               value: 2,
+                              child: Text('Second Item'),
                             ),
                           ],
                           onChanged: (_) { },
@@ -1512,12 +1512,12 @@ void main() {
                 hint: hint,
                 items: const <DropdownMenuItem<String>>[
                   DropdownMenuItem<String>(
-                    child: Text('one'),
                     value: 'one',
+                    child: Text('one'),
                   ),
                   DropdownMenuItem<String>(
-                    child: Text('two'),
                     value: 'two',
+                    child: Text('two'),
                   ),
                 ],
                 value: value,
@@ -2107,8 +2107,8 @@ void main() {
                 },
                 items: items.map((String string) {
                   return DropdownMenuItem<String>(
-                    child: Text(string),
                     value: string,
+                    child: Text(string),
                   );
                 }).toList(),
               ),
@@ -2163,8 +2163,8 @@ void main() {
                 },
                 items: items.map((String item) {
                   return DropdownMenuItem<String>(
-                    child: Text(item),
                     value: item,
+                    child: Text(item),
                   );
                 }).toList(),
               ),
@@ -2523,8 +2523,8 @@ void main() {
                 },
                 items: items.map((MapEntry<String?, String> item) {
                   return DropdownMenuItem<String>(
-                    child: Text(item.value),
                     value: item.key,
+                    child: Text(item.value),
                   );
                 }).toList(),
               ),

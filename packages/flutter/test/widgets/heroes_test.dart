@@ -148,7 +148,7 @@ class ThreeRoute extends MaterialPageRoute<void> {
 class MutatingRoute extends MaterialPageRoute<void> {
   MutatingRoute()
     : super(builder: (BuildContext context) {
-        return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
+        return Hero(tag: 'a', key: UniqueKey(), child: const Text('MutatingRoute'));
       });
 
   void markNeedsBuild() {

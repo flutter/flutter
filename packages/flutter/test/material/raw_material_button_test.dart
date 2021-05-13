@@ -447,9 +447,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
