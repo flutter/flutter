@@ -394,21 +394,24 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     );
 
     final Widget prefix = Padding(
+      padding: widget.prefixInsets,
       child: IconTheme(
         data: iconThemeData,
         child: widget.prefixIcon,
       ),
-      padding: widget.prefixInsets,
     );
 
     final Widget suffix = Padding(
+      padding: widget.suffixInsets,
       child: CupertinoButton(
-        child: IconTheme(child: widget.suffixIcon, data: iconThemeData),
         onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
         minSize: 0,
         padding: EdgeInsets.zero,
+        child: IconTheme(
+          data: iconThemeData,
+          child: widget.suffixIcon,
+        ),
       ),
-      padding: widget.suffixInsets,
     );
 
     return CupertinoTextField(
