@@ -134,7 +134,7 @@ const double _kLowDprLimit = 2.0;
 ///   final AssetImage assetImage;
 ///
 ///   @override
-///   _MyImageState createState() => _MyImageState();
+///   State<MyImage> createState() => _MyImageState();
 /// }
 ///
 /// class _MyImageState extends State<MyImage> {
