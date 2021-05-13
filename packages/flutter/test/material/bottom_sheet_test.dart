@@ -791,9 +791,9 @@ void main() {
                   ),
                   builder: (BuildContext context) {
                     return MaterialButton(
-                      child: const Text('BottomSheet'),
                       onPressed: () => Navigator.pop(context),
                       key: tapTargetToClose,
+                      child: const Text('BottomSheet'),
                     );
                   },
                 );

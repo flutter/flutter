@@ -87,8 +87,8 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
           children: List<Widget>.generate(rows, (int r) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List<Widget>.generate(cols, (int c) => Container(
-              child: Text('text', style: TextStyle(fontSize: fontSize)),
               decoration: decoration,
+              child: Text('text', style: TextStyle(fontSize: fontSize)),
             )),
           )),
         ),
@@ -138,8 +138,8 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _controller,
-        child: protectChild ? RepaintBoundary(child: child) : child,
         builder: builder,
+        child: protectChild ? RepaintBoundary(child: child) : child,
       ),
     );
   }

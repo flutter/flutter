@@ -288,9 +288,9 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
         child: Transform(
           transform: _transform,
           child: SizedBox(
-            child: widget.child,
             height: widget.size.height,
             width: widget.size.width,
+            child: widget.child,
           ),
         ),
       ),

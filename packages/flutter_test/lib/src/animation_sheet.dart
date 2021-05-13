@@ -138,9 +138,9 @@ class AnimationSheetBuilder {
     assert(child != null);
     return _AnimationSheetRecorder(
       key: key,
-      child: child,
       size: frameSize,
       handleRecorded: recording ? _recordedFrames.add : null,
+      child: child,
     );
   }
 
