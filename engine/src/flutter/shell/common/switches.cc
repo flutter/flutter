@@ -155,6 +155,16 @@ const std::string_view FlagForSwitch(Switch swtch) {
   return std::string_view();
 }
 
+static std::vector<std::string> ParseCommaDelimited(const std::string& input) {
+  std::istringstream ss(input);
+  std::vector<std::string> result;
+  std::string token;
+  while (std::getline(ss, token, ',')) {
+    result.push_back(token);
+  }
+  return result;
+}
+
 static bool IsAllowedDartVMFlag(const std::string& flag) {
   for (uint32_t i = 0; i < fml::size(gAllowedDartFlags); ++i) {
     const std::string& allowed = gAllowedDartFlags[i];
@@ -289,17 +299,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.trace_skia =
       command_line.HasOption(FlagForSwitch(Switch::TraceSkia));
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::TraceAllowlist),
-                              &settings.trace_allowlist);
+  std::string trace_skia_allowlist;
+  command_line.GetOptionValue(FlagForSwitch(Switch::TraceSkiaAllowlist),
+                              &trace_skia_allowlist);
+  settings.trace_skia_allowlist = ParseCommaDelimited(trace_skia_allowlist);
 
-  if (settings.trace_allowlist.empty()) {
-    command_line.GetOptionValue(FlagForSwitch(Switch::TraceWhitelist),
-                                &settings.trace_allowlist);
-    if (!settings.trace_allowlist.empty()) {
-      FML_LOG(INFO)
-          << "--trace-whitelist is deprecated. Use --trace-allowlist instead.";
-    }
-  }
+  std::string trace_allowlist;
+  command_line.GetOptionValue(FlagForSwitch(Switch::TraceAllowlist),
+                              &trace_allowlist);
+  settings.trace_allowlist = ParseCommaDelimited(trace_allowlist);
 
   settings.trace_systrace =
       command_line.HasOption(FlagForSwitch(Switch::TraceSystrace));
@@ -384,11 +392,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   std::string all_dart_flags;
   if (command_line.GetOptionValue(FlagForSwitch(Switch::DartFlags),
                                   &all_dart_flags)) {
-    std::stringstream stream(all_dart_flags);
-    std::string flag;
-
     // Assume that individual flags are comma separated.
-    while (std::getline(stream, flag, ',')) {
+    std::vector<std::string> flags = ParseCommaDelimited(all_dart_flags);
+    for (auto flag : flags) {
       if (!IsAllowedDartVMFlag(flag)) {
         FML_LOG(FATAL) << "Encountered disallowed Dart VM flag: " << flag;
       }
