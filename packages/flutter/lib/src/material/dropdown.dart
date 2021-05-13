@@ -55,7 +55,7 @@ class _DropdownMenuPainter extends CustomPainter {
        super(repaint: resize);
 
   final Color? color;
-  final double? elevation;
+  final int? elevation;
   final int? selectedIndex;
   final Animation<double> resize;
   final ValueGetter<double> getSelectedItemOffset;
@@ -425,7 +425,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
-  final double elevation;
+  final int elevation;
   final CapturedThemes capturedThemes;
   final TextStyle style;
   final double? itemHeight;
@@ -568,7 +568,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
-  final double elevation;
+  final int elevation;
   final CapturedThemes capturedThemes;
   final TextStyle? style;
   final Color? dropdownColor;
@@ -997,8 +997,12 @@ class DropdownButton<T> extends StatefulWidget {
   final DropdownButtonBuilder? selectedItemBuilder;
 
   /// The z-coordinate at which to place the menu when open.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12,
+  /// 16, and 24. See [kElevationToShadow].
+  ///
   /// Defaults to 8, the appropriate elevation for dropdown buttons.
-  final double elevation;
+  final int elevation;
 
   /// The text style to use for text in the dropdown button and the dropdown
   /// menu that appears when you tap the button.
@@ -1536,7 +1540,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Widget? disabledHint,
     this.onChanged,
     VoidCallback? onTap,
-    double elevation = 8,
+    int elevation = 8,
     TextStyle? style,
     Widget? icon,
     Color? iconDisabledColor,
