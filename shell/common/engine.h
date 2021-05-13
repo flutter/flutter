@@ -763,7 +763,7 @@ class Engine final : public RuntimeDelegate,
   ///
   void DispatchSemanticsAction(int id,
                                SemanticsAction action,
-                               std::vector<uint8_t> args);
+                               fml::MallocMapping args);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the embedder has expressed an opinion

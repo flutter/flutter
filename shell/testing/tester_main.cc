@@ -254,12 +254,12 @@ int RunTester(const flutter::Settings& settings,
   const char* locale_json =
       "{\"method\":\"setLocale\",\"args\":[\"en\",\"US\",\"\",\"\",\"zh\","
       "\"CN\",\"\",\"\"]}";
-  std::vector<uint8_t> locale_bytes(locale_json,
-                                    locale_json + std::strlen(locale_json));
+  auto locale_bytes = fml::MallocMapping::Copy(
+      locale_json, locale_json + std::strlen(locale_json));
   fml::RefPtr<flutter::PlatformMessageResponse> response;
   shell->GetPlatformView()->DispatchPlatformMessage(
-      std::make_unique<flutter::PlatformMessage>("flutter/localization",
-                                                 locale_bytes, response));
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/localization", std::move(locale_bytes), response));
 
   std::initializer_list<fml::FileMapping::Protection> protection = {
       fml::FileMapping::Protection::kRead};

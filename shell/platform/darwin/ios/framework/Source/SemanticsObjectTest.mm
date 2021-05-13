@@ -33,7 +33,7 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   }
   void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
-                               std::vector<uint8_t> args) override {
+                               fml::MallocMapping args) override {
     SemanticsActionObservation observation(id, action);
     observations.push_back(observation);
   }

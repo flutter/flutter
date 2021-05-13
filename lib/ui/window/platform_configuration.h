@@ -325,7 +325,7 @@ class PlatformConfiguration final {
   ///
   void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
-                               std::vector<uint8_t> args);
+                               fml::MallocMapping args);
 
   //----------------------------------------------------------------------------
   /// @brief      Registers a callback to be invoked when the framework has

@@ -60,7 +60,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) override;
   void DispatchSemanticsAction(int32_t id,
                                flutter::SemanticsAction action,
-                               std::vector<uint8_t> args) override;
+                               fml::MallocMapping args) override;
   void AccessibilityObjectDidBecomeFocused(int32_t id) override;
   void AccessibilityObjectDidLoseFocus(int32_t id) override;
 

@@ -50,7 +50,7 @@ void PlatformView::DispatchKeyDataPacket(std::unique_ptr<KeyDataPacket> packet,
 
 void PlatformView::DispatchSemanticsAction(int32_t id,
                                            SemanticsAction action,
-                                           std::vector<uint8_t> args) {
+                                           fml::MallocMapping args) {
   delegate_.OnPlatformViewDispatchSemanticsAction(id, action, std::move(args));
 }
 
