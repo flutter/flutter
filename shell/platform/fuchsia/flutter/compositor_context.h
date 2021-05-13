@@ -12,7 +12,7 @@
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/fml/macros.h"
 
-#include "session_connection.h"
+#include "default_session_connection.h"
 #include "vulkan_surface_producer.h"
 
 namespace flutter_runner {
@@ -22,14 +22,14 @@ namespace flutter_runner {
 class CompositorContext final : public flutter::CompositorContext {
  public:
   CompositorContext(
-      SessionConnection& session_connection,
+      DefaultSessionConnection& session_connection,
       VulkanSurfaceProducer& surface_producer,
       std::shared_ptr<flutter::SceneUpdateContext> scene_update_context);
 
   ~CompositorContext() override;
 
  private:
-  SessionConnection& session_connection_;
+  DefaultSessionConnection& session_connection_;
   VulkanSurfaceProducer& surface_producer_;
   std::shared_ptr<flutter::SceneUpdateContext> scene_update_context_;
 

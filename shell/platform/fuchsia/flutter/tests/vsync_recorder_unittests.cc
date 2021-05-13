@@ -10,8 +10,8 @@
 #include "flutter/shell/platform/fuchsia/flutter/logging.h"
 #include "flutter/shell/platform/fuchsia/flutter/vsync_recorder.h"
 
+#include "flutter/shell/platform/fuchsia/flutter/default_session_connection.h"
 #include "flutter/shell/platform/fuchsia/flutter/runner.h"
-#include "flutter/shell/platform/fuchsia/flutter/session_connection.h"
 
 using namespace flutter_runner;
 

@@ -22,10 +22,10 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/shell.h"
 
+#include "default_session_connection.h"
 #include "flutter_runner_product_configuration.h"
 #include "fuchsia_external_view_embedder.h"
 #include "isolate_configurator.h"
-#include "session_connection.h"
 #include "thread.h"
 #include "vulkan_surface_producer.h"
 
@@ -74,7 +74,7 @@ class Engine final {
   const std::string thread_label_;
   std::array<Thread, 3> threads_;
 
-  std::optional<SessionConnection> session_connection_;
+  std::optional<DefaultSessionConnection> session_connection_;
   std::optional<VulkanSurfaceProducer> surface_producer_;
   std::shared_ptr<FuchsiaExternalViewEmbedder> external_view_embedder_;
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
