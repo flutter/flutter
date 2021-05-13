@@ -1289,6 +1289,7 @@ void _paragraphTests() {
       ..letterSpacing = 5
       ..wordSpacing = 10
       ..heightMultiplier = 2.5
+      ..halfLeading = true
       ..locale = 'en_CA'
       ..fontFamilies = <String>['Roboto', 'serif']
       ..fontStyle = (SkFontStyle()
@@ -1310,6 +1311,7 @@ void _paragraphTests() {
         ..weight = canvasKit.FontWeight.Bold)
       ..fontSize = 23
       ..heightMultiplier = 5
+      ..halfLeading = true
       ..leading = 6
       ..strutEnabled = true
       ..forceStrutHeight = false;
@@ -1337,6 +1339,8 @@ void _paragraphTests() {
         SkPaint(),
         SkPaint());
     builder.addText('!');
+    builder.pop();
+    builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
     final SkParagraph paragraph = builder.build();
     paragraph.layout(55);

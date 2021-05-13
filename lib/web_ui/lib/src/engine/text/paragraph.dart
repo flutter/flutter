@@ -1210,7 +1210,6 @@ class EngineStrutStyle implements ui.StrutStyle {
     List<String>? fontFamilyFallback,
     double? fontSize,
     double? height,
-    //TODO(LongCatIsLooong): implement leadingDistribution.
     ui.TextLeadingDistribution? leadingDistribution,
     double? leading,
     ui.FontWeight? fontWeight,
