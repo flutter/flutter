@@ -45,21 +45,14 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ui.PictureEngineLayer addPicture(
+  void addPicture(
     ui.Offset offset,
     ui.Picture picture, {
     bool isComplexHint = false,
     bool willChangeHint = false,
-    ui.PictureEngineLayer? oldLayer,
   }) {
-    final PictureLayer layer = PictureLayer(
-      picture as CkPicture,
-      offset,
-      isComplexHint,
-      willChangeHint,
-    );
-    currentLayer.add(layer);
-    return layer;
+    currentLayer.add(PictureLayer(
+        picture as CkPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override

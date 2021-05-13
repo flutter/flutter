@@ -78,7 +78,7 @@ void _recycleCanvas(EngineCanvas? canvas) {
 
 /// A surface that uses a combination of `<canvas>`, `<div>` and `<p>` elements
 /// to draw shapes and text.
-class PersistedPicture extends PersistedLeafSurface implements ui.PictureEngineLayer {
+class PersistedPicture extends PersistedLeafSurface {
   PersistedPicture(this.dx, this.dy, this.picture, this.hints)
       : localPaintBounds = picture.recordingCanvas!.pictureBounds;
 
