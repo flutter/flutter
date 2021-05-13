@@ -20,8 +20,6 @@ class AutoLogger {
   ~AutoLogger() {
     logger_ << std::endl;
     logger_.flush();
-
-    FML_DLOG(INFO) << logger_.str();
   }
 
   template <class T>

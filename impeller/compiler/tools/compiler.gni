@@ -28,6 +28,7 @@ template("impeller_shaders") {
       "--input=$source_path",
       "--metal=$metal_intermediate_path",
       "--spirv=$spirv_intermediate_path",
+      "--include={{source_dir}}",
     ]
   }
 }
