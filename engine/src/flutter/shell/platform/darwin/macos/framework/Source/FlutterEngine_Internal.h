@@ -77,6 +77,6 @@
  */
 - (void)dispatchSemanticsAction:(FlutterSemanticsAction)action
                        toTarget:(uint16_t)target
-                       withData:(const std::vector<uint8_t>&)data;
+                       withData:(fml::MallocMapping)data;
 
 @end

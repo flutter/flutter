@@ -22,12 +22,12 @@ void PlatformMessageRouter::HandlePlatformMessage(
     FlutterBinaryMessageHandler handler = it->second;
     NSData* data = nil;
     if (message->hasData()) {
-      data = GetNSDataFromVector(message->data());
+      data = CopyMappingToNSData(message->releaseData());
     }
     handler(data, ^(NSData* reply) {
       if (completer) {
         if (reply) {
-          completer->Complete(GetMappingFromNSData(reply));
+          completer->Complete(CopyNSDataToMappingPtr(reply));
         } else {
           completer->CompleteEmpty();
         }

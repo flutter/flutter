@@ -157,7 +157,7 @@ class PlatformView {
     virtual void OnPlatformViewDispatchSemanticsAction(
         int32_t id,
         SemanticsAction action,
-        std::vector<uint8_t> args) = 0;
+        fml::MallocMapping args) = 0;
 
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the embedder has expressed an
@@ -408,7 +408,7 @@ class PlatformView {
   ///
   void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
-                               std::vector<uint8_t> args);
+                               fml::MallocMapping args);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedder to notify the running isolate hosted by the

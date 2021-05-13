@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#import "flutter/fml/mapping.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 
 @class UIView;
@@ -24,7 +25,7 @@ class AccessibilityBridgeIos {
   virtual void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) = 0;
   virtual void DispatchSemanticsAction(int32_t id,
                                        flutter::SemanticsAction action,
-                                       std::vector<uint8_t> args) = 0;
+                                       fml::MallocMapping args) = 0;
   /**
    * A callback that is called when a SemanticObject receives focus.
    *

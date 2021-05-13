@@ -130,7 +130,7 @@ Dart_Handle SendPlatformMessage(Dart_Handle window,
     const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
     dart_state->platform_configuration()->client()->HandlePlatformMessage(
         std::make_unique<PlatformMessage>(
-            name, std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()),
+            name, fml::MallocMapping::Copy(buffer, data.length_in_bytes()),
             response));
   }
 
@@ -190,8 +190,8 @@ void _RespondToKeyData(Dart_NativeArguments args) {
   tonic::DartCallStatic(&RespondToKeyData, args);
 }
 
-Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
-  return tonic::DartByteData::Create(buffer.data(), buffer.size());
+Dart_Handle ToByteData(const fml::Mapping& buffer) {
+  return tonic::DartByteData::Create(buffer.GetMapping(), buffer.GetSize());
 }
 
 }  // namespace
@@ -338,7 +338,7 @@ void PlatformConfiguration::DispatchPlatformMessage(
 
 void PlatformConfiguration::DispatchSemanticsAction(int32_t id,
                                                     SemanticsAction action,
-                                                    std::vector<uint8_t> args) {
+                                                    fml::MallocMapping args) {
   std::shared_ptr<tonic::DartState> dart_state =
       dispatch_semantics_action_.dart_state().lock();
   if (!dart_state) {
@@ -346,7 +346,8 @@ void PlatformConfiguration::DispatchSemanticsAction(int32_t id,
   }
   tonic::DartState::Scope scope(dart_state);
 
-  Dart_Handle args_handle = (args.empty()) ? Dart_Null() : ToByteData(args);
+  Dart_Handle args_handle =
+      (args.GetSize() <= 0) ? Dart_Null() : ToByteData(args);
 
   if (Dart_IsError(args_handle)) {
     return;

@@ -83,6 +83,7 @@ source_set("common_cpp_accessibility") {
       [ "//flutter/third_party/accessibility:accessibility_config" ]
 
   public_deps = [
+    "//flutter/fml:fml",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/third_party/accessibility",
   ]

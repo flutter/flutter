@@ -233,7 +233,7 @@ void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, flutter::Semantic
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
                                                   flutter::SemanticsAction action,
-                                                  std::vector<uint8_t> args) {
+                                                  fml::MallocMapping args) {
   platform_view_->DispatchSemanticsAction(uid, action, std::move(args));
 }
 

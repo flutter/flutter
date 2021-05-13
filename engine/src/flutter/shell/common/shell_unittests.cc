@@ -69,7 +69,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD3(OnPlatformViewDispatchSemanticsAction,
                void(int32_t id,
                     SemanticsAction action,
-                    std::vector<uint8_t> args));
+                    fml::MallocMapping args));
 
   MOCK_METHOD1(OnPlatformViewSetSemanticsEnabled, void(bool enabled));
 
@@ -1489,7 +1489,8 @@ TEST_F(ShellTest, SetResourceCacheSize) {
                                 "method": "Skia.setResourceCacheMaxBytes",
                                 "args": 10000
                               })json";
-  std::vector<uint8_t> data(request_json.begin(), request_json.end());
+  auto data =
+      fml::MallocMapping::Copy(request_json.c_str(), request_json.length());
   auto platform_message = std::make_unique<PlatformMessage>(
       "flutter/skia", std::move(data), nullptr);
   SendEnginePlatformMessage(shell.get(), std::move(platform_message));
@@ -1811,10 +1812,7 @@ TEST_F(ShellTest, CanConvertToAndFromMappings) {
       buffer, buffer_size, MemsetPatternOp::kMemsetPatternOpSetBuffer));
 
   std::unique_ptr<fml::Mapping> mapping =
-      std::make_unique<fml::NonOwnedMapping>(
-          buffer, buffer_size, [](const uint8_t* buffer, size_t size) {
-            ::free(const_cast<uint8_t*>(buffer));
-          });
+      std::make_unique<fml::MallocMapping>(buffer, buffer_size);
 
   ASSERT_EQ(mapping->GetSize(), buffer_size);
 

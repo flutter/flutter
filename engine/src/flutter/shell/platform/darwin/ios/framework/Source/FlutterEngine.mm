@@ -807,7 +807,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   std::unique_ptr<flutter::PlatformMessage> platformMessage =
       (message == nil) ? std::make_unique<flutter::PlatformMessage>(channel.UTF8String, response)
                        : std::make_unique<flutter::PlatformMessage>(
-                             channel.UTF8String, flutter::GetVectorFromNSData(message), response);
+                             channel.UTF8String, flutter::CopyNSDataToMapping(message), response);
 
   _shell->GetPlatformView()->DispatchPlatformMessage(std::move(platformMessage));
 }

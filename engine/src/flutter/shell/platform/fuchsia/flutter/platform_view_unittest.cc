@@ -31,6 +31,11 @@
 namespace flutter_runner::testing {
 namespace {
 
+std::string ToString(const fml::Mapping& mapping) {
+  return std::string(mapping.GetMapping(),
+                     mapping.GetMapping() + mapping.GetSize());
+}
+
 class MockExternalViewEmbedder : public flutter::ExternalViewEmbedder {
  public:
   SkCanvas* GetRootCanvas() override { return nullptr; }
@@ -96,7 +101,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(int32_t id,
                                              flutter::SemanticsAction action,
-                                             std::vector<uint8_t> args) {}
+                                             fml::MallocMapping args) {}
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewSetSemanticsEnabled(bool enabled) {
     semantics_enabled_ = enabled;
@@ -570,8 +575,7 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
 
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
-          "flutter/platform_views",
-          std::vector<uint8_t>(txt, txt + sizeof(txt)),
+          "flutter/platform_views", fml::MallocMapping::Copy(txt, sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
   base_view->HandlePlatformMessage(std::move(message));
 
@@ -630,8 +634,7 @@ TEST_F(PlatformViewTests, CreateViewTest) {
 
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
-          "flutter/platform_views",
-          std::vector<uint8_t>(txt, txt + sizeof(txt)),
+          "flutter/platform_views", fml::MallocMapping::Copy(txt, sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
   base_view->HandlePlatformMessage(std::move(message));
 
@@ -681,8 +684,7 @@ TEST_F(PlatformViewTests, UpdateViewTest) {
 
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
-          "flutter/platform_views",
-          std::vector<uint8_t>(txt, txt + sizeof(txt)),
+          "flutter/platform_views", fml::MallocMapping::Copy(txt, sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
   base_view->HandlePlatformMessage(std::move(message));
 
@@ -738,8 +740,7 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
 
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
-          "flutter/platform_views",
-          std::vector<uint8_t>(txt, txt + sizeof(txt)),
+          "flutter/platform_views", fml::MallocMapping::Copy(txt, sizeof(txt)),
           fml::RefPtr<flutter::PlatformMessageResponse>());
   base_view->HandlePlatformMessage(std::move(message));
 
@@ -800,8 +801,8 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
   static_cast<flutter::PlatformView*>(&platform_view)
       ->HandlePlatformMessage(std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
-          std::vector<uint8_t>(create_view_call.begin(),
-                               create_view_call.end()),
+          fml::MallocMapping::Copy(create_view_call.c_str(),
+                                   create_view_call.size()),
           fml::RefPtr<flutter::PlatformMessageResponse>()));
   RunLoopUntilIdle();
 
@@ -827,8 +828,7 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
       << "  }"
       << "}";
   EXPECT_EQ(view_connected_expected_out.str(),
-            std::string(view_connected_msg->data().begin(),
-                        view_connected_msg->data().end()));
+            ToString(view_connected_msg->data()));
 
   // ViewDisconnected event.
   delegate.Reset();
@@ -852,8 +852,7 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
       << "  }"
       << "}";
   EXPECT_EQ(view_disconnected_expected_out.str(),
-            std::string(view_disconnected_msg->data().begin(),
-                        view_disconnected_msg->data().end()));
+            ToString(view_disconnected_msg->data()));
 
   // ViewStateChanged event.
   delegate.Reset();
@@ -883,8 +882,7 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
       << "  }"
       << "}";
   EXPECT_EQ(view_state_changed_expected_out.str(),
-            std::string(view_state_changed_msg->data().begin(),
-                        view_state_changed_msg->data().end()));
+            ToString(view_state_changed_msg->data()));
 }
 
 // This test makes sure that the PlatformView forwards messages on the
@@ -939,14 +937,13 @@ TEST_F(PlatformViewTests, RequestFocusTest) {
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
-          std::vector<uint8_t>(buff, buff + sizeof(buff)), response);
+          fml::MallocMapping::Copy(buff, sizeof(buff)), response);
   base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
   EXPECT_TRUE(mock_focuser.request_focus_called());
-  auto result = std::string((const char*)data_arg.data->GetMapping(),
-                            data_arg.data->GetSize());
+  auto result = ToString(*data_arg.data);
   EXPECT_EQ(std::string("[0]"), result);
 }
 
@@ -1002,14 +999,13 @@ TEST_F(PlatformViewTests, RequestFocusFailTest) {
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
           "flutter/platform_views",
-          std::vector<uint8_t>(buff, buff + sizeof(buff)), response);
+          fml::MallocMapping::Copy(buff, sizeof(buff)), response);
   base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
   EXPECT_TRUE(mock_focuser.request_focus_called());
-  auto result = std::string((const char*)data_arg.data->GetMapping(),
-                            data_arg.data->GetSize());
+  auto result = ToString(*data_arg.data);
   std::ostringstream out;
   out << "["
       << static_cast<std::underlying_type_t<fuchsia::ui::views::Error>>(
@@ -1094,8 +1090,8 @@ TEST_F(PlatformViewTests, OnKeyEvent) {
           key_event_status = status;
         });
     RunLoopUntilIdle();
-    const std::vector<uint8_t> data = delegate.message()->data();
-    const std::string message = std::string(data.begin(), data.end());
+    const fml::MallocMapping data = delegate.message()->releaseData();
+    const std::string message = ToString(data);
 
     EXPECT_EQ(event.expected_platform_message, message);
     EXPECT_EQ(key_event_status, event.expected_key_event_status);

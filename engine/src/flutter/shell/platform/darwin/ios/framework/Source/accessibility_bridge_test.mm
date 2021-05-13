@@ -82,7 +82,7 @@ class MockDelegate : public PlatformView::Delegate {
                                            std::function<void(bool)> callback) override {}
   void OnPlatformViewDispatchSemanticsAction(int32_t id,
                                              SemanticsAction action,
-                                             std::vector<uint8_t> args) override {}
+                                             fml::MallocMapping args) override {}
   void OnPlatformViewSetSemanticsEnabled(bool enabled) override {}
   void OnPlatformViewSetAccessibilityFeatures(int32_t flags) override {}
   void OnPlatformViewRegisterTexture(std::shared_ptr<Texture> texture) override {}

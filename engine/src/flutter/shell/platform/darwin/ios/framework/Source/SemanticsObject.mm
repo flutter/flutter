@@ -308,8 +308,9 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   args.push_back(action_id >> 8);
   args.push_back(action_id >> 16);
   args.push_back(action_id >> 24);
-  [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kCustomAction,
-                                         std::move(args));
+  [self bridge]->DispatchSemanticsAction(
+      [self uid], flutter::SemanticsAction::kCustomAction,
+      fml::MallocMapping::Copy(args.data(), args.size() * sizeof(uint8_t)));
   return YES;
 }
 

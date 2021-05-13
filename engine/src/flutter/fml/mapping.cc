@@ -82,7 +82,6 @@ const uint8_t* DataMapping::GetMapping() const {
 }
 
 // NonOwnedMapping
-
 NonOwnedMapping::NonOwnedMapping(const uint8_t* data,
                                  size_t size,
                                  const ReleaseProc& release_proc)
@@ -100,6 +99,46 @@ size_t NonOwnedMapping::GetSize() const {
 
 const uint8_t* NonOwnedMapping::GetMapping() const {
   return data_;
+}
+
+// MallocMapping
+MallocMapping::MallocMapping() : data_(nullptr), size_(0) {}
+
+MallocMapping::MallocMapping(uint8_t* data, size_t size)
+    : data_(data), size_(size) {}
+
+MallocMapping::MallocMapping(fml::MallocMapping&& mapping)
+    : data_(mapping.data_), size_(mapping.size_) {
+  mapping.data_ = nullptr;
+  mapping.size_ = 0;
+}
+
+MallocMapping::~MallocMapping() {
+  free(data_);
+  data_ = nullptr;
+}
+
+MallocMapping MallocMapping::Copy(const void* begin, size_t length) {
+  auto result =
+      MallocMapping(reinterpret_cast<uint8_t*>(malloc(length)), length);
+  FML_CHECK(result.GetMapping() != nullptr);
+  memcpy(const_cast<uint8_t*>(result.GetMapping()), begin, length);
+  return result;
+}
+
+size_t MallocMapping::GetSize() const {
+  return size_;
+}
+
+const uint8_t* MallocMapping::GetMapping() const {
+  return data_;
+}
+
+uint8_t* MallocMapping::Release() {
+  uint8_t* result = data_;
+  data_ = nullptr;
+  size_ = 0;
+  return result;
 }
 
 // Symbol Mapping

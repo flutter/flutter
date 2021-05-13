@@ -19,7 +19,7 @@ void TestAccessibilityBridgeDelegate::OnAccessibilityEvent(
 void TestAccessibilityBridgeDelegate::DispatchAccessibilityAction(
     AccessibilityNodeId target,
     FlutterSemanticsAction action,
-    const std::vector<uint8_t>& data) {
+    fml::MallocMapping data) {
   performed_actions.push_back(action);
 }
 

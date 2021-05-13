@@ -17,7 +17,7 @@ PlatformMessageResponseDarwin::~PlatformMessageResponseDarwin() = default;
 void PlatformMessageResponseDarwin::Complete(std::unique_ptr<fml::Mapping> data) {
   fml::RefPtr<PlatformMessageResponseDarwin> self(this);
   platform_task_runner_->PostTask(fml::MakeCopyable([self, data = std::move(data)]() mutable {
-    self->callback_.get()(GetNSDataFromMapping(std::move(data)));
+    self->callback_.get()(CopyMappingPtrToNSData(std::move(data)));
   }));
 }
 

@@ -27,7 +27,7 @@ namespace flutter_runner {
 
 using fuchsia::intl::Profile;
 
-std::vector<uint8_t> MakeLocalizationPlatformMessageData(
+fml::MallocMapping MakeLocalizationPlatformMessageData(
     const Profile& intl_profile) {
   rapidjson::Document document;
   auto& allocator = document.GetAllocator();
@@ -66,7 +66,7 @@ std::vector<uint8_t> MakeLocalizationPlatformMessageData(
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   document.Accept(writer);
   auto data = reinterpret_cast<const uint8_t*>(buffer.GetString());
-  return std::vector<uint8_t>(data, data + buffer.GetSize());
+  return fml::MallocMapping::Copy(data, buffer.GetSize());
 }
 
 }  // namespace flutter_runner

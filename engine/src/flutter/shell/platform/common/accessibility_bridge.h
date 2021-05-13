@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "flutter/fml/mapping.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #include "flutter/third_party/accessibility/ax/ax_event_generator.h"
@@ -86,10 +87,9 @@ class AccessibilityBridge
     /// @param[in]  action              The generated flutter semantics action.
     /// @param[in]  data                Additional data associated with the
     ///                                 action.
-    virtual void DispatchAccessibilityAction(
-        AccessibilityNodeId target,
-        FlutterSemanticsAction action,
-        const std::vector<uint8_t>& data) = 0;
+    virtual void DispatchAccessibilityAction(AccessibilityNodeId target,
+                                             FlutterSemanticsAction action,
+                                             fml::MallocMapping data) = 0;
 
     //---------------------------------------------------------------------------
     /// @brief      Creates a platform specific FlutterPlatformNodeDelegate.
@@ -277,7 +277,7 @@ class AccessibilityBridge
   // |FlutterPlatformNodeDelegate::OwnerBridge|
   void DispatchAccessibilityAction(AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
-                                   std::vector<uint8_t> data) override;
+                                   fml::MallocMapping data) override;
 
   // |FlutterPlatformNodeDelegate::OwnerBridge|
   gfx::RectF RelativeToGlobalBounds(const ui::AXNode* node,
