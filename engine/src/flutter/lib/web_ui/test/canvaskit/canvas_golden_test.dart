@@ -357,6 +357,27 @@ void testMain() {
       await testTextStyle('height', height: 2);
     });
 
+    test('text styles - leading distribution', () async {
+      await testTextStyle('half leading', height: 20, fontSize: 10, leadingDistribution: ui.TextLeadingDistribution.even);
+      await testTextStyle(
+        'half leading inherited from paragraph',
+        height: 20,
+        fontSize: 10,
+        paragraphTextHeightBehavior: ui.TextHeightBehavior(
+          leadingDistribution: ui.TextLeadingDistribution.even,
+        ),
+      );
+      await testTextStyle(
+        'text style half leading overrides paragraph style half leading',
+        height: 20,
+        fontSize: 10,
+        leadingDistribution: ui.TextLeadingDistribution.proportional,
+        paragraphTextHeightBehavior: ui.TextHeightBehavior(
+          leadingDistribution: ui.TextLeadingDistribution.even,
+        ),
+      );
+    });
+
     // TODO(yjbanov): locales specified in text styles don't work:
     //                https://github.com/flutter/flutter/issues/74687
     // TODO(yjbanov): spaces are not rendered correctly:
@@ -1118,6 +1139,7 @@ Future<void> testTextStyle(
   double? letterSpacing,
   double? wordSpacing,
   double? height,
+  ui.TextLeadingDistribution? leadingDistribution,
   ui.Locale? locale,
   CkPaint? background,
   CkPaint? foreground,
@@ -1169,6 +1191,7 @@ Future<void> testTextStyle(
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height,
+      leadingDistribution: leadingDistribution,
       locale: locale,
       background: background,
       foreground: foreground,
