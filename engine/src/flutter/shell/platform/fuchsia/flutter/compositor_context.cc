@@ -22,7 +22,7 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
               bool instrumentation_enabled,
               bool surface_supports_readback,
               fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
-              SessionConnection& session_connection,
+              DefaultSessionConnection& session_connection,
               VulkanSurfaceProducer& surface_producer,
               std::shared_ptr<flutter::SceneUpdateContext> scene_update_context)
       : flutter::CompositorContext::ScopedFrame(context,
@@ -38,7 +38,7 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
         scene_update_context_(scene_update_context) {}
 
  private:
-  SessionConnection& session_connection_;
+  DefaultSessionConnection& session_connection_;
   VulkanSurfaceProducer& surface_producer_;
   std::shared_ptr<flutter::SceneUpdateContext> scene_update_context_;
 
@@ -149,7 +149,7 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
 };
 
 CompositorContext::CompositorContext(
-    SessionConnection& session_connection,
+    DefaultSessionConnection& session_connection,
     VulkanSurfaceProducer& surface_producer,
     std::shared_ptr<flutter::SceneUpdateContext> scene_update_context)
     : session_connection_(session_connection),

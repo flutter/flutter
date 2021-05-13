@@ -8,24 +8,24 @@
 #include <lib/async-loop/default.h>
 #include <lib/sys/cpp/component_context.h>
 
+#include "flutter/shell/platform/fuchsia/flutter/default_session_connection.h"
 #include "flutter/shell/platform/fuchsia/flutter/logging.h"
 #include "flutter/shell/platform/fuchsia/flutter/runner.h"
-#include "flutter/shell/platform/fuchsia/flutter/session_connection.h"
 #include "gtest/gtest.h"
 
 using namespace flutter_runner;
 
 namespace flutter_runner_test {
 
-class SessionConnectionTest : public ::testing::Test {
+class DefaultSessionConnectionTest : public ::testing::Test {
  public:
   void SetUp() override {
     context_ = sys::ComponentContext::CreateAndServeOutgoingDirectory();
     scenic_ = context_->svc()->Connect<fuchsia::ui::scenic::Scenic>();
     presenter_ = context_->svc()->Connect<fuchsia::ui::policy::Presenter>();
 
-    FML_CHECK(ZX_OK ==
-              loop_.StartThread("SessionConnectionTestThread", &fidl_thread_));
+    FML_CHECK(ZX_OK == loop_.StartThread("DefaultSessionConnectionTestThread",
+                                         &fidl_thread_));
 
     auto session_listener_request = session_listener_.NewRequest();
 
@@ -58,7 +58,7 @@ class SessionConnectionTest : public ::testing::Test {
   thrd_t fidl_thread_;
 };
 
-TEST_F(SessionConnectionTest, SimplePresentTest) {
+TEST_F(DefaultSessionConnectionTest, SimplePresentTest) {
   fml::closure on_session_error_callback = []() { FML_CHECK(false); };
 
   uint64_t num_presents_handled = 0;
@@ -68,7 +68,7 @@ TEST_F(SessionConnectionTest, SimplePresentTest) {
         num_presents_handled += info.presentation_infos.size();
       };
 
-  flutter_runner::SessionConnection session_connection(
+  flutter_runner::DefaultSessionConnection session_connection(
       "debug label", std::move(session_), on_session_error_callback,
       on_frame_presented_callback, vsync_event_.get(), 3);
 
@@ -80,7 +80,7 @@ TEST_F(SessionConnectionTest, SimplePresentTest) {
   EXPECT_GT(num_presents_handled, 0u);
 }
 
-TEST_F(SessionConnectionTest, BatchedPresentTest) {
+TEST_F(DefaultSessionConnectionTest, BatchedPresentTest) {
   fml::closure on_session_error_callback = []() { FML_CHECK(false); };
 
   uint64_t num_presents_handled = 0;
@@ -90,7 +90,7 @@ TEST_F(SessionConnectionTest, BatchedPresentTest) {
         num_presents_handled += info.presentation_infos.size();
       };
 
-  flutter_runner::SessionConnection session_connection(
+  flutter_runner::DefaultSessionConnection session_connection(
       "debug label", std::move(session_), on_session_error_callback,
       on_frame_presented_callback, vsync_event_.get(), 3);
 
@@ -132,7 +132,7 @@ TEST(CalculateNextLatchPointTest, PresentAsSoonAsPossible) {
   EXPECT_GT(vsync_interval, TimeDeltaFromInt(0));
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -163,7 +163,7 @@ TEST(CalculateNextLatchPointTest, LongFrameBuildTime) {
   EXPECT_GT(flutter_frame_build_time, vsync_interval);
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -196,7 +196,7 @@ TEST(CalculateNextLatchPointTest, DelayedPresentRequestWithLongFrameBuildTime) {
   EXPECT_GT(now, present_requested_time + vsync_interval);
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -227,7 +227,7 @@ TEST(CalculateNextLatchPointTest, LastLastPointTargetedLate) {
   EXPECT_GT(last_latch_point_targeted, present_requested_time);
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -267,7 +267,7 @@ TEST(CalculateNextLatchPointTest, SteadyState_OnTimeFrames) {
   EXPECT_GT(vsync_interval, TimeDeltaFromInt(0));
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -306,7 +306,7 @@ TEST(CalculateNextLatchPointTest, SteadyState_LongFrameBuildTimes) {
   EXPECT_GT(flutter_frame_build_time, vsync_interval);
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -345,7 +345,7 @@ TEST(CalculateNextLatchPointTest, SteadyState_LateLastLatchPointTargeted) {
   EXPECT_GT(last_latch_point_targeted, now + vsync_interval);
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -384,7 +384,7 @@ TEST(CalculateNextLatchPointTest,
   EXPECT_GT(now, present_requested_time + vsync_interval);
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -420,7 +420,7 @@ TEST(CalculateNextLatchPointTest, SteadyState_FuzzyLatchPointsBeforeTarget) {
   EXPECT_GT(vsync_interval, TimeDeltaFromInt(0));
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
@@ -456,7 +456,7 @@ TEST(CalculateNextLatchPointTest, SteadyState_FuzzyLatchPointsAfterTarget) {
   EXPECT_GT(vsync_interval, TimeDeltaFromInt(0));
 
   fml::TimePoint calculated_latch_point =
-      SessionConnection::CalculateNextLatchPoint(
+      DefaultSessionConnection::CalculateNextLatchPoint(
           present_requested_time, now, last_latch_point_targeted,
           flutter_frame_build_time, vsync_interval, future_presentation_infos);
 
