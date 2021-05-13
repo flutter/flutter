@@ -21,7 +21,7 @@ namespace {
 void PrintInstalledApps() {
   flutter::ApplicationStore app_store;
   for (const flutter::Application& app : app_store.GetInstalledApplications()) {
-    std::wcout << app.GetPackageId() << std::endl;
+    std::wcout << app.GetPackageFamily() << std::endl;
   }
 }
 
@@ -31,9 +31,15 @@ void PrintInstalledApps() {
 // Returns -1 if no matching app, or multiple matching apps are found, or if
 // the app fails to launch. Otherwise, the process ID of the launched app is
 // returned.
-int LaunchApp(const std::wstring_view app_id, const std::wstring_view args) {
-  flutter::Application app(app_id);
-  return app.Launch(args);
+int LaunchApp(const std::wstring_view package_family,
+              const std::wstring_view args) {
+  flutter::ApplicationStore app_store;
+  std::optional<flutter::Application> app =
+      app_store.GetInstalledApplication(package_family);
+  if (!app) {
+    return -1;
+  }
+  return app->Launch(args);
 }
 
 // Prints the command usage to stderr.
@@ -66,8 +72,8 @@ int main(int argc, char** argv) {
       return 1;
     }
 
-    // Get the package ID.
-    std::string package_id = args[1];
+    // Get the package family.
+    std::string package_family = args[1];
 
     // Concatenate the remaining args, comma-separated.
     std::ostringstream app_args;
@@ -77,16 +83,16 @@ int main(int argc, char** argv) {
         app_args << ",";
       }
     }
-    int process_id = LaunchApp(flutter::Utf16FromUtf8(package_id),
+    int process_id = LaunchApp(flutter::Utf16FromUtf8(package_family),
                                flutter::Utf16FromUtf8(app_args.str()));
     if (process_id == -1) {
-      std::cerr << "error: Failed to launch app with package ID " << package_id
-                << std::endl;
+      std::cerr << "error: Failed to launch app with package family "
+                << package_family << std::endl;
       return 1;
     }
 
     // Write an informative message for the user to stderr.
-    std::cerr << "Launched app with package ID " << package_id
+    std::cerr << "Launched app with package family " << package_family
               << ". PID: " << std::endl;
     // Write the PID to stdout. The flutter tool reads this value in.
     std::cout << process_id << std::endl;
