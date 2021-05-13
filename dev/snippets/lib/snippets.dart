@@ -228,6 +228,7 @@ class SnippetGenerator {
         inCodeBlock = !inCodeBlock;
         if (match.namedGroup('language') != null) {
           language = match[1];
+          assert(language != null);
           language = language!;
           if (match.namedGroup('section') != null) {
             components.add(_ComponentTuple('code-${match.namedGroup('section')}', <String>[], language: language));
