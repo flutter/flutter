@@ -101,7 +101,6 @@ template("_fuchsia_fidl_library") {
     ]
 
     outputs = [
-      "$target_gen_dir/$library_name_slashes/c/fidl.h",
       "$target_gen_dir/$library_name_slashes/cpp/fidl.h",
       "$target_gen_dir/$library_name_slashes/cpp/fidl.cc",
       "$target_gen_dir/$library_name_slashes/cpp/tables.c",
@@ -122,8 +121,6 @@ template("_fuchsia_fidl_library") {
       rebase_path("$target_gen_dir"),
       "--output-base-cc",
       rebase_path("$target_gen_dir/$library_name_slashes/cpp/fidl"),
-      "--output-c-header",
-      rebase_path("$target_gen_dir/$library_name_slashes/c/fidl.h"),
       "--output-c-tables",
       rebase_path("$target_gen_dir/$library_name_slashes/cpp/tables.c"),
     ]
