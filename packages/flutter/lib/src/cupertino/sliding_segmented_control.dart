@@ -687,11 +687,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           animation: thumbScaleAnimation,
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
-              children: children,
               highlightedIndex: highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
               state: this,
+              children: children,
             );
           },
         ),

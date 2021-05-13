@@ -176,9 +176,9 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       child = InkWell(
         autofocus: widget.itemIndex == widget.route.selectedIndex,
         enableFeedback: widget.enableFeedback,
-        child: child,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
+        child: child,
       );
     }
     child = FadeTransition(opacity: opacity, child: child);
