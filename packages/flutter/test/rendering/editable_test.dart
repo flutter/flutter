@@ -3463,6 +3463,86 @@ void main() {
       });
     });
   });
+
+  group('delete API implementations', () {
+    // Regression test for: https://github.com/flutter/flutter/issues/80226.
+    //
+    // This textSelectionDelegate has different text and selection from the
+    // render editable.
+    final FakeEditableTextState delegate = FakeEditableTextState();
+
+    late RenderEditable editable;
+
+    setUp(() {
+      editable = RenderEditable(
+        text: TextSpan(
+          text: 'A ' * 50,
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 50),
+      );
+
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'BBB',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    });
+
+    void verifyDoesNotCrashWithInconsistentTextEditingValue(void Function(SelectionChangedCause) method) {
+      editable = RenderEditable(
+        text: TextSpan(
+          text: 'A ' * 50,
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 50),
+      );
+
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      dynamic error;
+      try {
+        method(SelectionChangedCause.tap);
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isNull);
+    }
+
+    test('delete is not racy and handles composing region correctly', () {
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'ABCDEF',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 1, end: 6),
+      );
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.delete);
+      final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
+      expect(textEditingValue.text, 'ACDEF');
+      expect(textEditingValue.selection.isCollapsed, isTrue);
+      expect(textEditingValue.selection.baseOffset, 1);
+      expect(textEditingValue.composing, const TextRange(start: 1, end: 5));
+    });
+
+    test('deleteForward is not racy and handles composing region correctly', () {
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'ABCDEF',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 2, end: 6),
+      );
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteForward);
+      final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
+      expect(textEditingValue.text, 'ABDEF');
+      expect(textEditingValue.selection.isCollapsed, isTrue);
+      expect(textEditingValue.selection.baseOffset, 2);
+      expect(textEditingValue.composing, const TextRange(start: 2, end: 5));
+    });
+  });
 }
 
 class _TestRenderEditable extends RenderEditable {

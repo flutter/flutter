@@ -288,20 +288,17 @@ void main() {
         processManager: FakeProcessManager.any(),
         logger: logger,
       );
-      try {
-        await cache.updateAll(<DevelopmentArtifact>{
-          null,
-        });
-        fail('Mock thrown exception expected');
-      } on Exception {
-        verify(artifact1.update(any, any, any, any));
-        // Don't continue when retrieval fails.
-        verifyNever(artifact2.update(any, any, any, any));
-        expect(
-          logger.errorText,
-          contains('https://flutter.dev/community/china'),
-        );
-      }
+      await expectLater(
+        () => cache.updateAll(<DevelopmentArtifact>{null}),
+        throwsException,
+      );
+      verify(artifact1.update(any, any, any, any));
+      // Don't continue when retrieval fails.
+      verifyNever(artifact2.update(any, any, any, any));
+      expect(
+        logger.errorText,
+        contains('https://flutter.dev/community/china'),
+      );
     });
 
     testWithoutContext('Invalid URI for FLUTTER_STORAGE_BASE_URL throws ToolExit', () async {

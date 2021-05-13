@@ -56,7 +56,7 @@ void main() {
           itemExtent: 20.0,
           children: const <Widget>[],
         ),
-        throwsA(isA<AssertionError>().having(
+        throwsA(isAssertionError.having(
           (AssertionError error) => error.message,
           'message',
           contains("You can't set a diameterRatio of 0"),
