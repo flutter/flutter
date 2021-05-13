@@ -104,7 +104,8 @@ struct Settings {
   bool enable_checked_mode = false;
   bool start_paused = false;
   bool trace_skia = false;
-  std::string trace_allowlist;
+  std::vector<std::string> trace_allowlist;
+  std::vector<std::string> trace_skia_allowlist;
   bool trace_startup = false;
   bool trace_systrace = false;
   bool dump_skp_on_shader_compilation = false;
