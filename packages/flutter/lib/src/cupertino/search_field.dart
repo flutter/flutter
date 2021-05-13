@@ -430,6 +430,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
       autocorrect: widget.autocorrect,
+      textInputAction: TextInputAction.search,
     );
   }
 }
