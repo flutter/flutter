@@ -1445,7 +1445,7 @@ class DevToolsMemoryTest {
       'global',
       'activate',
       'devtools',
-      '2.2.2',
+      '2.2.3',
     ]);
     _devToolsProcess = await startProcess(
       pubBin,
