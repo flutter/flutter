@@ -1266,11 +1266,14 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/fuchsia/lib/fuchsia.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/fuchsia/sdk_ext/fuchsia.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/fuchsia/sdk_ext/fuchsia.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/handle.dart
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/handle_disposition.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/handle_waiter.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/src/system.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/lib/zircon.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_disposition.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_disposition.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_waiter.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_waiter.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/natives.cc
