@@ -14,6 +14,8 @@ source_set("zircon") {
   sources = [
     "sdk_ext/handle.cc",
     "sdk_ext/handle.h",
+    "sdk_ext/handle_disposition.cc",
+    "sdk_ext/handle_disposition.h",
     "sdk_ext/handle_waiter.cc",
     "sdk_ext/handle_waiter.h",
     "sdk_ext/natives.cc",
