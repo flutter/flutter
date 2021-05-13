@@ -283,6 +283,7 @@ class _BottomSheetState extends State<BottomSheet> {
     if (constraints != null) {
       bottomSheet = Align(
         alignment: Alignment.bottomCenter,
+        heightFactor: 1.0,
         child: ConstrainedBox(
           constraints: constraints,
           child: bottomSheet,
