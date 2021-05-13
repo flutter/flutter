@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     }
 
     // Write an informative message for the user to stderr.
-    std::cerr << "Launched app with package_id " << package_id
+    std::cerr << "Launched app with package ID " << package_id
               << ". PID: " << std::endl;
     // Write the PID to stdout. The flutter tool reads this value in.
     std::cout << process_id << std::endl;

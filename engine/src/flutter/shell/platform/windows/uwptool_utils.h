@@ -8,8 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "flutter/shell/platform/windows/registry.h"
-
 namespace flutter {
 
 // A UWP application.
@@ -19,7 +17,7 @@ class Application {
   Application(const Application& other) = default;
   Application& operator=(const Application& other) = default;
 
-  // Returns the application user model ID.
+  // Returns the package ID.
   std::wstring GetPackageId() const { return package_id_; }
 
   // Launches the application with the specified list of launch arguments.
