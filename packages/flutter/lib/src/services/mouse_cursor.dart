@@ -417,7 +417,7 @@ class SystemMouseCursor extends MouseCursor {
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
-  factory SystemMouseCursors._() => throw Error();
+  SystemMouseCursors._();
 
   // The mapping in this class must be kept in sync with the following files in
   // the engine:

@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 
@@ -78,7 +77,7 @@ void main() {
       logger: BufferLogger.test(),
     );
 
-    expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
+    expect(forwarder.forward(123, hostPort: 456), throwsProcessException());
   });
 
   testWithoutContext('AndroidDevicePortForwarder forwardedPorts returns empty '
@@ -159,6 +158,6 @@ void main() {
       logger: BufferLogger.test(),
     );
 
-    expect(() => forwarder.unforward(ForwardedPort(456, 23)), throwsA(isA<ProcessException>()));
+    expect(() => forwarder.unforward(ForwardedPort(456, 23)), throwsProcessException());
   });
 }

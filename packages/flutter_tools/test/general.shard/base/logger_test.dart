@@ -227,7 +227,7 @@ void main() {
 
     expect(
       () => asLogger<AppRunLogger>(notifyingLogger),
-      throwsA(isA<StateError>()),
+      throwsStateError,
     );
   });
 
@@ -335,8 +335,8 @@ void main() {
     logger.printStatus('message');
     logger.printError('error message');
 
-    expect(() async => stdout.done, throwsA(isA<Exception>()));
-    expect(() async => stderr.done, throwsA(isA<Exception>()));
+    expect(() async => stdout.done, throwsException);
+    expect(() async => stderr.done, throwsException);
   });
 
   group('Spinners', () {

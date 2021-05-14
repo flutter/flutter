@@ -301,8 +301,8 @@ class DayPicker extends StatelessWidget {
             onTap: () {
               onChanged(dayToBuild);
             },
-            child: dayWidget,
             dragStartBehavior: dragStartBehavior,
+            child: dayWidget,
           );
         }
 
