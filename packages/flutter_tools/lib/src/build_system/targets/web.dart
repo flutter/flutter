@@ -429,7 +429,7 @@ class WebServiceWorker extends Target {
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
       if (globals.fs.path.basename(url) == 'index.html') {
-        urlToHash['/'] = hash;
+        urlToHash[''] = hash;
       }
     }
 
@@ -442,7 +442,7 @@ class WebServiceWorker extends Target {
     final String serviceWorker = generateServiceWorker(
       urlToHash,
       <String>[
-        '/',
+        '',
         'main.dart.js',
         'index.html',
         'assets/NOTICES',
@@ -482,9 +482,11 @@ String generateServiceWorker(
   }
   return '''
 'use strict';
-const MANIFEST = 'flutter-app-manifest';
-const TEMP = 'flutter-temp-cache';
-const CACHE_NAME = 'flutter-app-cache';
+const base = self.location.href.substring(0, self.location.href.lastIndexOf('/'));
+
+const MANIFEST = 'flutter-app-manifest_' + base;
+const TEMP = 'flutter-temp-cache_' + base;
+const CACHE_NAME = 'flutter-app-cache_' + base;
 const RESOURCES = {
   ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
 };
@@ -499,7 +501,7 @@ self.addEventListener("install", (event) => {
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
-        CORE.map((value) => new Request(value, {'cache': 'reload'})));
+        CORE.map((value) => new Request(base + '/' + value, {'cache': 'reload'})));
     })
   );
 });
@@ -528,12 +530,8 @@ self.addEventListener("activate", function(event) {
         return;
       }
       var oldManifest = await manifest.json();
-      var origin = self.location.origin;
       for (var request of await contentCache.keys()) {
-        var key = request.url.substring(origin.length + 1);
-        if (key == "") {
-          key = "/";
-        }
+        var key = request.url.substring(base.length + 1);
         // If a resource from the old manifest is not in the new cache, or if
         // the MD5 sum has changed, delete it. Otherwise the resource is left
         // in the cache and can be reused by the new service worker.
@@ -567,14 +565,13 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
-  var origin = self.location.origin;
-  var key = event.request.url.substring(origin.length + 1);
+  var key = event.request.url.substring(base.length + 1);
   // Redirect URLs to the index.html
   if (key.indexOf('?v=') != -1) {
     key = key.split('?v=')[0];
   }
-  if (event.request.url == origin || event.request.url.startsWith(origin + '/#') || key == '') {
-    key = '/';
+  if (event.request.url.startsWith(base + '/#')) {
+    key = '';
   }
   // If the URL is not the RESOURCE list then return to signal that the
   // browser should take over.
@@ -582,7 +579,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   // If the URL is the index.html, perform an online-first request.
-  if (key == '/') {
+  if (key == '') {
     return onlineFirst(event);
   }
   event.respondWith(caches.open(CACHE_NAME)
@@ -619,10 +616,7 @@ async function downloadOffline() {
   var contentCache = await caches.open(CACHE_NAME);
   var currentContent = {};
   for (var request of await contentCache.keys()) {
-    var key = request.url.substring(origin.length + 1);
-    if (key == "") {
-      key = "/";
-    }
+    var key = request.url.substring(base.length + 1);
     currentContent[key] = true;
   }
   for (var resourceKey of Object.keys(RESOURCES)) {
