@@ -2675,7 +2675,36 @@ class UnconstrainedBox extends StatelessWidget {
 /// [RenderFractionallySizedOverflowBox].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
+/// 
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
+/// This sample shows [FractionallySizedBox] widget that has one container
+/// with 50% height and width of the available space of parent widget.
+///
+/// If [Alignment] property is specified, then [FractionallySizedBox]
+/// should be Constraining.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return SizedBox.expand(
+///     child: new FractionallySizedBox(
+///       widthFactor: 0.5,
+///       heightFactor: 0.5,
+///       alignment: FractionalOffset.center,
+///       child: new Container(
+///         decoration: new BoxDecoration(
+///           border: new Border.all(
+///             color: Colors.blue,
+///             width: 4.0,
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+/// 
 /// See also:
 ///
 ///  * [Align], which sizes itself based on its child's size and positions
@@ -2718,8 +2747,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// unmodified.
   final double? heightFactor;
 
-  /// How to align the child. If [Alignment] property is specified, then [FractionallySizedBox]
-  /// should be Constraining.
+  /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
   /// alignment, respectively. An x value of -1.0 means that the left edge of
