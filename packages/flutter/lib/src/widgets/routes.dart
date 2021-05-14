@@ -6,15 +6,16 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'actions.dart';
-import 'base_focus.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -842,7 +843,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                             key: widget.route._subtreeKey, // immutable
                             child: Builder(
                               builder: (BuildContext context) {
-                                return FocusTrap(child: widget.route.buildPage(
+                                return _FocusTrap(child: widget.route.buildPage(
                                   context,
                                   widget.route.animation!,
                                   widget.route.secondaryAnimation!,
@@ -1981,3 +1982,61 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
+
+/// A widget that steals focus from other focusable nodes.
+///
+/// This is used to allow clicking outside of a textfield or other
+/// editable text to "de-select" the text field without needing to
+/// jump to another focusable widget.
+class _FocusTrap extends StatefulWidget {
+  /// Create a new [FocusTrap] widget.
+  const _FocusTrap({
+    required this.child,
+    this.focusNode,
+    Key? key
+  }) : super(key: key);
+
+  final Widget child;
+  final FocusNode? focusNode;
+
+  @override
+  State<_FocusTrap> createState() => _FocusTrapState();
+}
+
+class _FocusTrapState extends State<_FocusTrap> {
+  final Map<Type, GestureRecognizerFactory> _gestures = <Type, GestureRecognizerFactory>{};
+  late FocusNode _focusNode;
+
+  FocusNode get focusNode => widget.focusNode ?? _focusNode;
+
+  void _stealFocus(TapDownDetails details) {
+    if (details.kind != PointerDeviceKind.mouse)
+      return;
+    focusNode.requestFocus();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+        () => TapGestureRecognizer(debugOwner: this),
+        (TapGestureRecognizer instance) {
+          instance
+            .onTapDown = _stealFocus;
+        },
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      autofocus: true,
+      child: RawGestureDetector(
+        child: widget.child,
+        gestures: _gestures,
+      ),
+      focusNode: focusNode,
+    );
+  }
+}
