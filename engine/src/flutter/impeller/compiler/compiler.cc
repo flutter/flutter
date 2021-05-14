@@ -222,9 +222,11 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   options.SetOptimizationLevel(
       shaderc_optimization_level::shaderc_optimization_level_zero);
 
+  // Expects GLSL 4.60 (Core Profile).
+  // https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf
   options.SetSourceLanguage(
       shaderc_source_language::shaderc_source_language_glsl);
-  options.SetForcedVersionProfile(450, shaderc_profile::shaderc_profile_core);
+  options.SetForcedVersionProfile(460, shaderc_profile::shaderc_profile_core);
   options.SetTargetEnvironment(
       shaderc_target_env::shaderc_target_env_vulkan,
       shaderc_env_version::shaderc_env_version_vulkan_1_1);
