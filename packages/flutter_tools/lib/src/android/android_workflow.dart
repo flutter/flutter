@@ -470,7 +470,6 @@ class AndroidLicenseValidator extends DoctorValidator {
     if (sdkManagerPath == null) {
       return false;
     }
-    print(sdkManagerPath);
     return _processManager.canRun(sdkManagerPath);
   }
 }
