@@ -637,6 +637,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///             ScaffoldMessenger.of(context).showSnackBar(
 ///               SnackBar(content: Text('Keep calm and carry on!')),
 ///             );
+///             return null;
 ///           },
 ///         ),
 ///       },
