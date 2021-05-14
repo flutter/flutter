@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'actions.dart';
+import 'base_focus.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -841,11 +842,11 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                             key: widget.route._subtreeKey, // immutable
                             child: Builder(
                               builder: (BuildContext context) {
-                                return widget.route.buildPage(
+                                return FocusTrap(child: widget.route.buildPage(
                                   context,
                                   widget.route.animation!,
                                   widget.route.secondaryAnimation!,
-                                );
+                                ));
                               },
                             ),
                           ),
