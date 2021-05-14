@@ -456,9 +456,7 @@ void main() {
       usage: TestUsage(),
     );
 
-    expect(
-        () async => xcodeProjectInterpreter.getInfo(workingDirectory),
-        throwsToolExit(message: stderr));
+    expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -484,7 +482,7 @@ void main() {
       usage: TestUsage(),
     );
 
-    expect(() async => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
+    expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
