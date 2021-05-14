@@ -62,8 +62,6 @@ def main():
   parser.add_argument(
       '--manifest-file', dest='manifest_file', action='store', required=False)
   parser.add_argument(
-      '--manifest-json-file', dest='manifest_json_file', action='store', required=True)
-  parser.add_argument(
       '--far-name', dest='far_name', action='store', required=False)
 
   args = parser.parse_args()
@@ -91,8 +89,6 @@ def main():
       args.pm_bin,
       '-o',
       output_dir,
-      '-n',
-      args.far_name,
       '-k',
       args.signing_key,
       '-m',
@@ -102,9 +98,8 @@ def main():
   # Build and then archive the package
   # Use check_output so if anything goes wrong we get the output.
   try:
-
     pm_commands = [
-        ['build', '--output-package-manifest', args.manifest_json_file],
+        ['build'],
         ['archive', '--output='+ os.path.join(os.path.dirname(output_dir), args.far_name + "-0")],
     ]
     for pm_command in pm_commands:
