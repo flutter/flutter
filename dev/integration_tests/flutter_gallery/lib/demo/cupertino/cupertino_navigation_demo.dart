@@ -113,8 +113,8 @@ class ExitButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: const Tooltip(
         message: 'Back',
-        child: Text('Exit'),
         excludeFromSemantics: true,
+        child: Text('Exit'),
       ),
       onPressed: () {
         // The demo is on the root navigator.
@@ -808,8 +808,8 @@ class Tab3Dialog extends StatelessWidget {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoButton(
-          child: const Text('Cancel'),
           padding: EdgeInsets.zero,
+          child: const Text('Cancel'),
           onPressed: () {
             Navigator.of(context).pop(false);
           },

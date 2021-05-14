@@ -26,7 +26,7 @@ class TestDispatcher extends ActionDispatcher {
   @override
   Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
     final Object? result = super.invokeAction(action, intent, context);
-    postInvoke?.call(action: action, intent: intent, context: context!, dispatcher: this);
+    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
     return result;
   }
 }

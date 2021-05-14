@@ -453,7 +453,6 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
     '  Arguments: ${args.join(' ')}\n'
     '  Working directory: $workingDirectory\n'
     '  JAVA_HOME: $javaHome\n'
-    ''
   );
   return Process.run(
     gradle,

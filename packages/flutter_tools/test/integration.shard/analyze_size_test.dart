@@ -9,7 +9,6 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_utils.dart';
 
 const String apkDebugMessage = 'A summary of your APK analysis can be found at: ';
@@ -17,7 +16,7 @@ const String iosDebugMessage = 'A summary of your iOS bundle analysis can be fou
 const String runDevToolsMessage = 'flutter pub global activate devtools; flutter pub global run devtools ';
 
 void main() {
-  testUsingContext('--analyze-size flag produces expected output on hello_world for Android', () async {
+  testWithoutContext('--analyze-size flag produces expected output on hello_world for Android', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[

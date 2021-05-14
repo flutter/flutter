@@ -57,20 +57,20 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
           if (viewChannel != null) ... <Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
-              child: const Text('SHOW ALERT DIALOG'),
               onPressed: onShowAlertDialogPressed,
+              child: const Text('SHOW ALERT DIALOG'),
             ),
             Row(
               children: <Widget>[
                 ElevatedButton(
                   key: const ValueKey<String>('AddWindow'),
-                  child: const Text('ADD WINDOW'),
                   onPressed: onAddWindowPressed,
+                  child: const Text('ADD WINDOW'),
                 ),
                 ElevatedButton(
                   key: const ValueKey<String>('TapWindow'),
-                  child: const Text('TAP WINDOW'),
                   onPressed: onTapWindowPressed,
+                  child: const Text('TAP WINDOW'),
                 ),
                 if (windowClickCount > 0)
                   Text(

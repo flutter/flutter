@@ -11,9 +11,9 @@
 # which should be kept in sync with this file:
 #
 #   - analysis_options.yaml (this file)
-#   - packages/flutter/lib/analysis_options_user.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by Flutter tools, such as IntelliJ,
 # Android Studio, and the `flutter analyze` command.
@@ -204,7 +204,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_new
     - unnecessary_null_aware_assignments
-    # - unnecessary_null_checks # not yet tested
+    - unnecessary_null_checks
     - unnecessary_null_in_if_null_operators
     - unnecessary_nullable_for_final_variable_declarations
     - unnecessary_overrides
@@ -222,7 +222,7 @@ linter:
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables
-    # - use_named_constants # not yet tested
+    - use_named_constants
     - use_raw_strings
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested

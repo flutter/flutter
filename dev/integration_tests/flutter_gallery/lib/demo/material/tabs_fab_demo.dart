@@ -125,8 +125,8 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       key: page.fabKey,
       tooltip: 'Show explanation',
       backgroundColor: page.fabColor,
-      child: page.fabIcon,
       onPressed: _showExplanatoryText,
+      child: page.fabIcon,
     );
   }
 

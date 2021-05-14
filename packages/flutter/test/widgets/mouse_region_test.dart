@@ -598,14 +598,14 @@ void main() {
       return Container(
         alignment: Alignment.topLeft,
         child: MouseRegion(
+          onEnter: onEnter,
+          onHover: onHover,
+          onExit: onExit,
           child: Container(
             color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
             width: 100.0,
             height: 100.0,
           ),
-          onEnter: onEnter,
-          onHover: onHover,
-          onExit: onExit,
         ),
       );
     }
@@ -1143,7 +1143,7 @@ void main() {
         if (opaque == null) {
           return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, child: child);
         }
-        return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, child: child, opaque: opaque);
+        return MouseRegion(onEnter: onEnter, onHover: onHover, onExit: onExit, opaque: opaque, child: child);
       }
 
       return Directionality(

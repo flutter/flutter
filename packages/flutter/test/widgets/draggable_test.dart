@@ -3036,7 +3036,7 @@ void main() {
             feedback: const Text('Feedback'),
             dragAnchorStrategy: (Draggable<Object> widget, BuildContext context, Offset position) {
               dragAnchorStrategyCalled = true;
-              return const Offset(0, 0);
+              return Offset.zero;
             },
           ),
         ],

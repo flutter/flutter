@@ -10,15 +10,16 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 3.1.2
   args: 2.1.0
+  browser_launcher: 1.0.0
   dds: 1.7.6
-  dwds: 11.0.1
+  dwds: 11.0.2
   completion: 1.0.0
   coverage: 1.0.2
   crypto: 3.0.1
   file: 6.1.0
   flutter_template_images: 1.0.1
   html: 0.15.0
-  http: 0.13.2
+  http: 0.13.3
   intl: 0.17.0
   meta: 1.3.0
   multicast_dns: 0.3.0
@@ -33,10 +34,10 @@ dependencies:
   xml: 5.1.0
   yaml: 3.1.0
   native_stack_traces: 0.4.0
-  shelf: 1.1.1
+  shelf: 1.1.2
   vm_snapshot_analysis: 0.7.0
   uuid: 3.0.4
-  web_socket_channel: 2.0.0
+  web_socket_channel: 2.1.0
   stream_channel: 2.1.0
   shelf_web_socket: 1.0.1
   shelf_static: 1.0.0
@@ -47,7 +48,7 @@ dependencies:
   logging: 1.0.1
   http_multi_server: 3.0.1
   convert: 3.0.0
-  async: 2.6.0
+  async: 2.6.1
   ffi: 1.0.0
   win32: 2.0.5
 
@@ -106,4 +107,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: e23e
+# PUBSPEC CHECKSUM: 2647
