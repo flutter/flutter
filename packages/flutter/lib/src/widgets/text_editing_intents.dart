@@ -271,7 +271,7 @@ class MoveSelectionUpTextIntent extends Intent {
   const MoveSelectionUpTextIntent();
 }
 
-// Gesture Handling Starts.
+// ---------- Gesture Intents ----------
 
 abstract class TextEditingGestureIntent extends Intent {
   /// Creates an [Intent] that represents a gesture event happened in a text
@@ -285,140 +285,91 @@ abstract class TextEditingGestureIntent extends Intent {
   final TextSelectionGestureDetectorBuilderDelegate gestureDelegate;
 }
 
-abstract class _TextEditingGestureDetailedIntent<GestureDetails> extends TextEditingGestureIntent {
-  /// Creates an [Intent] that represents a gesture event happened in a text
-  /// field associated with [gestureDelegate].
-  const _TextEditingGestureDetailedIntent({
-    required this.gestureDetails,
+class ForcePressTextGestureIntent extends TextEditingGestureIntent {
+  ForcePressTextGestureIntent({
+    required this.forcePressDownDetails,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
   }) : super(gestureDelegate: gestureDelegate);
 
-  /// The details of the gesture event.
-  final GestureDetails gestureDetails;
+  final ForcePressDetails forcePressDownDetails;
+  ForcePressDetails? forcePressUpDetails;
 }
 
-/// An [Intent] that indicates that a single tap down event happened in the
-/// currently active [TextEditingActionTarget]. This is called for **every** tap
-/// down, even if it is a part of a double click or a long press.
-///
-/// This [Intent] is sent by [TextSelectionGestureDetector.onTapDown].
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class TapDownTextIntent extends _TextEditingGestureDetailedIntent<TapDownDetails> {
-  /// Creates an [Intent] that represents a tap down event happened in a text
-  /// field associated with [gestureDelegate].
-  const TapDownTextIntent({
-    required TapDownDetails tapDownDetails,
+class TapTextGestureIntent extends TextEditingGestureIntent {
+  TapTextGestureIntent({
+    required this.tapDownDetails,
+    required this.maxTapCount,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: tapDownDetails, gestureDelegate: gestureDelegate);
+  }) : assert(maxTapCount > 0),
+       super(gestureDelegate: gestureDelegate);
+
+  final int maxTapCount;
+
+  int recognizedTapCount = 0;
+
+  bool isCancelled = false;
+
+  TapDownDetails tapDownDetails;
+  TapUpDetails? tapUpDetails;
+
+  bool get shouldShowSelectionBar {
+    switch (tapDownDetails.kind) {
+      case null:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+        return true;
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.unknown:
+        return false;
+    }
+  }
 }
 
-class ForcePressStartTextIntent extends _TextEditingGestureDetailedIntent<ForcePressDetails> {
-  const ForcePressStartTextIntent({
-    required ForcePressDetails forcePressDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: forcePressDetails, gestureDelegate: gestureDelegate);
-}
-
-class ForcePressEndTextIntent extends _TextEditingGestureDetailedIntent<ForcePressDetails> {
-  const ForcePressEndTextIntent({
-    required ForcePressDetails forcePressDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: forcePressDetails, gestureDelegate: gestureDelegate);
-}
-
-class SecondaryTapTextIntent extends TextEditingGestureIntent {
-  /// Creates an [Intent] that represents a tap down event happened in a text
-  /// field associated with [gestureDelegate].
-  const SecondaryTapTextIntent({
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate);
-}
-
-class SecondaryTapDownTextIntent extends _TextEditingGestureDetailedIntent<TapDownDetails> {
-  const SecondaryTapDownTextIntent({
-    required TapDownDetails tapDownDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: tapDownDetails, gestureDelegate: gestureDelegate);
-}
-
-/// An [Intent] that indicates that a single tap ended in the currently active
-/// [TextEditingActionTarget].
-///
-/// This [Intent] is sent by [TextSelectionGestureDetector.onTapUp].
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class SingleTapUpTextIntent extends _TextEditingGestureDetailedIntent<TapUpDetails> {
-  /// Creates an [Intent] that represents a tap down event happened in a text
-  /// field associated with [gestureDelegate].
-  const SingleTapUpTextIntent({
-    required TapUpDetails tapUpDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: tapUpDetails, gestureDelegate: gestureDelegate);
-}
-
-class SingleTapCancelTextIntent extends TextEditingGestureIntent {
-  /// Creates an [Intent] that represents a tap down event happened in a text
-  /// field associated with [gestureDelegate].
-  const SingleTapCancelTextIntent({
+class SecondaryTapTextGestureIntent extends TextEditingGestureIntent {
+  SecondaryTapTextGestureIntent({
+    required this.tapDownDetails,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
   }) : super(gestureDelegate: gestureDelegate);
+
+  bool isRecognized = false;
+
+  final TapDownDetails tapDownDetails;
 }
 
-class SingleLongTapStartTextIntent extends _TextEditingGestureDetailedIntent<LongPressStartDetails> {
-  /// Creates an [Intent] that represents a tap down event happened in a text
-  /// field associated with [gestureDelegate].
-  const SingleLongTapStartTextIntent({
-    required LongPressStartDetails longPressStartDetails,
+class LongTapTextGestureIntent extends TextEditingGestureIntent {
+  LongTapTextGestureIntent({
+    required this.longPressStartDetails,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: longPressStartDetails, gestureDelegate: gestureDelegate);
+  }) : super(gestureDelegate: gestureDelegate);
+
+  final LongPressStartDetails longPressStartDetails;
+  LongPressMoveUpdateDetails? longPressMoveDetails;
+  LongPressEndDetails? longPressEndDetails;
 }
 
-class SingleLongTapMoveTextIntent extends _TextEditingGestureDetailedIntent<LongPressMoveUpdateDetails> {
-  /// Creates an [Intent] that represents a tap down event happened in a text
-  /// field associated with [gestureDelegate].
-  const SingleLongTapMoveTextIntent({
-    required LongPressMoveUpdateDetails longPressMoveDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: longPressMoveDetails, gestureDelegate: gestureDelegate);
-}
-
-class SingleLongTapEndTextIntent extends _TextEditingGestureDetailedIntent<LongPressEndDetails> {
-  /// Creates an [Intent] that represents a tap down event happened in a text
-  /// field associated with [gestureDelegate].
-  const SingleLongTapEndTextIntent({
-    required LongPressEndDetails longPressEndDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: longPressEndDetails, gestureDelegate: gestureDelegate);
-}
-
-class DoubleTapDownTextIntent extends _TextEditingGestureDetailedIntent<TapDownDetails> {
-  const DoubleTapDownTextIntent({
-    required TapDownDetails tapDownDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: tapDownDetails, gestureDelegate: gestureDelegate);
-}
-
-class DragSelectionStartTextIntent extends _TextEditingGestureDetailedIntent<DragStartDetails> {
-  const DragSelectionStartTextIntent({
-    required DragStartDetails dragStartDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: dragStartDetails, gestureDelegate: gestureDelegate);
-}
-
-class DragSelectionUpdateTextIntent extends _TextEditingGestureDetailedIntent<DragUpdateDetails> {
-  const DragSelectionUpdateTextIntent({
+class DragTextGestureIntent extends TextEditingGestureIntent {
+  DragTextGestureIntent({
     required this.dragStartDetails,
-    required DragUpdateDetails dragUpdateDetails,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: dragUpdateDetails, gestureDelegate: gestureDelegate);
+  }) : super(gestureDelegate: gestureDelegate);
 
   final DragStartDetails dragStartDetails;
+  TextPosition? selectionBase;
+  DragUpdateDetails? dragUpdateDetails;
+  DragEndDetails? dragEndDetails;
+
+  bool get shouldShowSelectionBar {
+    switch (dragStartDetails.kind) {
+      case null:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+        return true;
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.unknown:
+        return false;
+    }
+  }
 }
 
-class DragSelectionEndTextIntent extends _TextEditingGestureDetailedIntent<DragEndDetails> {
-  const DragSelectionEndTextIntent({
-    required DragEndDetails dragEndDetails,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDetails: dragEndDetails, gestureDelegate: gestureDelegate);
-}

@@ -6,6 +6,7 @@ import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'actions.dart';
 import 'editable_text.dart';
@@ -120,23 +121,6 @@ class _TextEditingCallbackAction<T extends TextEditingGestureIntent> extends Act
   bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
 }
 
-class _TextEditingGesturesStorage {
-  TextPosition? dragStartPosition;
-}
-
-class _GestureStateStorage extends InheritedWidget {
-  const _GestureStateStorage({
-    Key? key,
-    required this.state,
-    required Widget child,
-  }) : super(key: key, child: child);
-
-  final _TextEditingGesturesStorage state;
-
-  @override
-  bool updateShouldNotify(_GestureStateStorage oldWidget) => false;
-}
-
 class TextEditingGestureBuilder extends StatefulWidget {
   const TextEditingGestureBuilder({
     Key? key,
@@ -155,7 +139,7 @@ class TextEditingGestureBuilder extends StatefulWidget {
 
 class _TextEditingGestureBuilderState extends State<TextEditingGestureBuilder> {
   Intent _tapDownIntent(TapDownDetails details) => TapDownTextIntent(tapDownDetails: details, gestureDelegate: widget.delegate);
-  Intent _forcePressStartIntent(ForcePressDetails details) => ForcePressStartTextIntent(forcePressDetails: details, gestureDelegate: widget.delegate);
+  Intent _forcePressStartIntent(ForcePressDetails details) => ForcePressStartTextIntent.ForcePressTextGestureIntent(forcePressDetails: details, gestureDelegate: widget.delegate);
   Intent _forcePressEndIntent(ForcePressDetails details) => ForcePressEndTextIntent(forcePressDetails: details, gestureDelegate: widget.delegate);
 
   Intent get _secondaryTapIntent => SecondaryTapTextIntent(gestureDelegate: widget.delegate);
@@ -248,221 +232,150 @@ class _TextEditingGestureBuilderState extends State<TextEditingGestureBuilder> {
 class _PlatformGestureActions {
   _PlatformGestureActions._();
 
-  // Actions
-
-  @protected
-  static void _selectLastTapDownPositionOrEdgeText(SingleTapUpTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-    editableTextState.hideToolbar();
-    if (!intent.gestureDelegate.selectionEnabled) {
-      return;
-    }
-    switch (intent.gestureDetails.kind) {
-      case PointerDeviceKind.mouse:
-      case PointerDeviceKind.stylus:
-      case PointerDeviceKind.invertedStylus:
-        editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-        break;
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.unknown:
-        editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-        break;
-    }
-    editableTextState.requestKeyboard();
-  }
-
-  @protected
-  static void _selectLastTapDownPositionText(SingleTapUpTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-    editableTextState.hideToolbar();
-    if (!intent.gestureDelegate.selectionEnabled) {
-      return;
-    }
-    editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-    editableTextState.requestKeyboard();
-  }
-
-  // Platform Gesture Mappings
+  // ---------- Gesture Actions ----------
 
   @protected
   static final Map<Type, Action<Intent>> _commonActions = <Type, Action<Intent>>{
-    TapDownTextIntent: _TextEditingCallbackAction<TapDownTextIntent>(
-      onInvoke: (TapDownTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        editableTextState.renderEditable.handleTapDown(intent.gestureDetails);
-        //switch (intent.gestureDetails.kind) {
-        //  case null:
-        //  case PointerDeviceKind.touch:
-        //  case PointerDeviceKind.stylus:
-        //    break;
-        //  case PointerDeviceKind.invertedStylus:
-        //  case PointerDeviceKind.mouse:
-        //  case PointerDeviceKind.unknown:
-        //    break;
-        //}
-      },
-    ),
-
-    // Force Touch
-    ForcePressStartTextIntent: _TextEditingCallbackAction<ForcePressStartTextIntent>(
-      onInvoke: (ForcePressStartTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
+    ForcePressTextGestureIntent: _TextEditingCallbackAction<ForcePressTextGestureIntent>(
+      onInvoke: (ForcePressTextGestureIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
+        final ForcePressDetails forcePressDetails = intent.forcePressUpDetails ?? intent.forcePressDownDetails;
         editableTextState.renderEditable.selectWordsInRange(
-          from: intent.gestureDetails.globalPosition,
+          from: forcePressDetails.globalPosition,
           cause: SelectionChangedCause.forcePress,
         );
       },
-      //enabledPredicate: (ForcePressStartTextIntent intent) => intent.gestureDelegate.forcePressEnabled && intent.gestureDelegate.selectionEnabled,
+      enabledPredicate: (ForcePressTextGestureIntent intent) => intent.gestureDelegate.forcePressEnabled && intent.gestureDelegate.selectionEnabled,
     ),
 
-    ForcePressEndTextIntent: _TextEditingCallbackAction<ForcePressEndTextIntent>(
-      onInvoke: (ForcePressEndTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        editableTextState.renderEditable.selectWordsInRange(
-          from: intent.gestureDetails.globalPosition,
-          cause: SelectionChangedCause.forcePress,
-        );
-        editableTextState.showToolbar();
-      },
-    ),
+    TapTextGestureIntent: _TextEditingCallbackAction<TapTextGestureIntent>(
+      onInvoke: (TapTextGestureIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
+        assert(!intent.isCancelled);
+        assert(intent.recognizedTapCount <= intent.maxTapCount);
+        assert(intent.recognizedTapCount >= 0);
 
-    SingleLongTapStartTextIntent: _TextEditingCallbackAction<SingleLongTapStartTextIntent>(
-      onInvoke: (SingleLongTapStartTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        editableTextState.renderEditable.selectPositionAt(
-          from: intent.gestureDetails.globalPosition,
-          cause: SelectionChangedCause.longPress,
-        );
-      },
-      //enabledPredicate: (SingleLongTapStartTextIntent intent) => intent.gestureDelegate.selectionEnabled,
-    ),
+        // onTapDown. This is called for every tap down.
+        if (intent.tapUpDetails == null) {
+          editableTextState.renderEditable.handleTapDown(intent.tapDownDetails);
+        }
 
-    SingleLongTapMoveTextIntent: _TextEditingCallbackAction<SingleLongTapMoveTextIntent>(
-      onInvoke: (SingleLongTapMoveTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        editableTextState.renderEditable.selectPositionAt(
-          from: intent.gestureDetails.globalPosition,
-          cause: SelectionChangedCause.longPress,
-        );
-      },
-      //enabledPredicate: (SingleLongTapStartTextIntent intent) => intent.gestureDelegate.selectionEnabled,
-    ),
+        if (intent.recognizedTapCount == 2 && intent.tapUpDetails == null) {
+          editableTextState.renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+          if (intent.shouldShowSelectionBar) {
+            editableTextState.showToolbar();
+          }
+          return;
+        }
 
-    SingleLongTapEndTextIntent: _TextEditingCallbackAction<SingleLongTapEndTextIntent>(
-      onInvoke: (SingleLongTapEndTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        editableTextState.showToolbar();
-      },
-    ),
-
-    SecondaryTapTextIntent: _TextEditingCallbackAction<SecondaryTapTextIntent>(
-      onInvoke: (SecondaryTapTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        final TextSelection? selection = editableTextState.renderEditable.selection;
-        final Offset? lastSecondaryTapDownPosition = editableTextState.renderEditable.lastSecondaryTapDownPosition;
-
-        if (selection != null && selection.isValid && lastSecondaryTapDownPosition != null) {
-          final TextPosition textPosition = editableTextState.renderEditable.getPositionForPoint(lastSecondaryTapDownPosition);
-          final bool lastTapOnSelection = selection.start <= textPosition.offset && selection.end >= textPosition.offset;
-          if (!lastTapOnSelection) {
-            editableTextState.renderEditable.selectWord(cause: SelectionChangedCause.tap);
+        // onSingleTapUp
+        if (intent.recognizedTapCount == 1) {
+          final TapUpDetails? tapUpDetails = intent.tapUpDetails;
+          if (tapUpDetails != null) {
+            editableTextState.hideToolbar();
+            switch (tapUpDetails.kind) {
+              case PointerDeviceKind.mouse:
+              case PointerDeviceKind.stylus:
+              case PointerDeviceKind.invertedStylus:
+                editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+                break;
+              case PointerDeviceKind.touch:
+              case PointerDeviceKind.unknown:
+                editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+                break;
+            }
+            editableTextState.requestKeyboard();
           }
         }
-        editableTextState.showToolbar();
       },
-      //enabledPredicate: (SecondaryTapTextIntent intent) => intent.gestureDelegate.selectionEnabled,
+      enabledPredicate: (TapTextGestureIntent intent) => intent.gestureDelegate.selectionEnabled && !intent.isCancelled,
     ),
 
-    SecondaryTapDownTextIntent: _TextEditingCallbackAction<SecondaryTapDownTextIntent>(
-      onInvoke: (SecondaryTapDownTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        editableTextState.renderEditable.handleTapDown(intent.gestureDetails);
-      },
-    ),
+    SecondaryTapTextGestureIntent: _TextEditingCallbackAction<SecondaryTapTextGestureIntent>(
+      onInvoke: (SecondaryTapTextGestureIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
+        final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    DoubleTapDownTextIntent: _TextEditingCallbackAction<DoubleTapDownTextIntent>(
-      onInvoke: (DoubleTapDownTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        editableTextState.renderEditable.selectWord(cause: SelectionChangedCause.tap);
-        switch (intent.gestureDetails.kind) {
-          case null:
-          case PointerDeviceKind.touch:
-          case PointerDeviceKind.stylus:
-            editableTextState.showToolbar();
-            break;
-          case PointerDeviceKind.invertedStylus:
-          case PointerDeviceKind.mouse:
-          case PointerDeviceKind.unknown:
-            break;
+        // onSecondaryTap.
+        if (intent.isRecognized) {
+          final TextSelection? selection = renderEditable.selection;
+          final Offset? lastSecondaryTapDownPosition = renderEditable.lastSecondaryTapDownPosition;
+
+          if (selection != null && selection.isValid && lastSecondaryTapDownPosition != null) {
+            final TextPosition textPosition = renderEditable.getPositionForPoint(lastSecondaryTapDownPosition);
+            final bool lastTapOnSelection = selection.start <= textPosition.offset && selection.end >= textPosition.offset;
+            if (!lastTapOnSelection) {
+              renderEditable.selectWord(cause: SelectionChangedCause.tap);
+            }
+          }
+          editableTextState.hideToolbar();
+          editableTextState.showToolbar();
+        } else {
+          renderEditable.handleSecondaryTapDown(intent.tapDownDetails);
         }
       },
-      //enabledPredicate: (DoubleTapDownTextIntent intent) => intent.gestureDelegate.selectionEnabled,
+      //enabledPredicate: (SecondaryTapTextGestureIntent intent) => intent.gestureDelegate.selectionEnabled,
     ),
+    LongTapTextGestureIntent: _TextEditingCallbackAction<LongTapTextGestureIntent>(
+      onInvoke: (LongTapTextGestureIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
+        final RenderEditable renderEditable = editableTextState.renderEditable;
+        final LongPressEndDetails? endDetails = intent.longPressEndDetails;
+        final Offset globalDragLocation = intent.longPressMoveDetails?.globalPosition
+                                       ?? intent.longPressStartDetails.globalPosition;
 
-    DragSelectionStartTextIntent: _TextEditingCallbackAction<DragSelectionStartTextIntent>(
-      onInvoke: (DragSelectionStartTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        final _GestureStateStorage? storage = editableTextState.context.getElementForInheritedWidgetOfExactType<_GestureStateStorage>()?.widget as _GestureStateStorage?;
-        if (storage == null) {
+        if (endDetails != null) {
+          // End event.
+          assert(intent.longPressMoveDetails != null);
+          editableTextState.showToolbar();
+        } else {
+          // Start & Update event.
+          renderEditable.selectPositionAt(
+            from: globalDragLocation,
+            cause: SelectionChangedCause.longPress,
+          );
+        }
+      },
+      enabledPredicate: (LongTapTextGestureIntent intent) => intent.gestureDelegate.selectionEnabled,
+    ),
+    DragTextGestureIntent: _TextEditingCallbackAction<DragTextGestureIntent>(
+      onInvoke: (DragTextGestureIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
+        if (intent.dragEndDetails != null) {
+          assert(intent.dragUpdateDetails != null);
           return;
         }
-        final _TextEditingGesturesStorage state = storage.state;
-        assert(state.dragStartPosition == null);
+        assert((intent.dragUpdateDetails == null) == (intent.selectionBase == null));
+        final Offset dragLocation = intent.dragUpdateDetails?.globalPosition ?? intent.dragStartDetails.globalPosition;
+        final TextPosition currentPosition = editableTextState.renderEditable.getPositionForPoint(dragLocation);
+        final TextPosition fromPosition = intent.selectionBase ?? currentPosition;
+        intent.selectionBase ??= currentPosition;
 
-        state.dragStartPosition = editableTextState.renderEditable.getPositionForPoint(intent.gestureDetails.globalPosition);
-        editableTextState.renderEditable.selectPositionAt(
-          from: intent.gestureDetails.globalPosition,
-          cause: SelectionChangedCause.drag,
-        );
-      },
-      //enabledPredicate: (DoubleTapDownTextIntent intent) => intent.gestureDelegate.selectionEnabled,
-    ),
-
-    DragSelectionUpdateTextIntent: _TextEditingCallbackAction<DragSelectionUpdateTextIntent>(
-      onInvoke: (DragSelectionUpdateTextIntent intent, EditableTextState editableTextState, [BuildContext? context]) {
-        final _GestureStateStorage? storage = editableTextState.context.getElementForInheritedWidgetOfExactType<_GestureStateStorage>()?.widget as _GestureStateStorage?;
-        final TextPosition? dragStartPosition = storage?.state.dragStartPosition;
-        assert(dragStartPosition != null);
-        if (dragStartPosition == null) {
-          return;
-        }
-        final TextPosition dragExtent = editableTextState.renderEditable.getPositionForPoint(intent.gestureDetails.globalPosition);
-        final String plainText = editableTextState.renderEditable.text?.toPlainText(
-          includePlaceholders: false,
-          includeSemanticsLabels: false,
-        ) ?? '';
-
-        editableTextState.renderEditable.textSelectionDelegate.userUpdateTextEditingValue(
-          TextEditingValue(
-            text: plainText,
-            selection: _clampTextSelection(dragStartPosition, dragExtent, plainText),
-            composing: _clampTextRange(editableTextState.textEditingValue.composing, plainText),
+        final TextEditingValue currentTextEditingValue = editableTextState.currentTextEditingValue;
+        editableTextState.userUpdateTextEditingValue(
+          currentTextEditingValue.copyWith(
+            selection: TextSelection(
+              baseOffset: fromPosition.offset.clamp(0, currentTextEditingValue.text.length),
+              extentOffset: currentPosition.offset.clamp(0, currentTextEditingValue.text.length),
+              affinity: currentPosition.affinity,
+            ),
           ),
           SelectionChangedCause.drag,
         );
-
-        switch (intent.dragStartDetails.kind) {
-          case null:
-          case PointerDeviceKind.touch:
-          case PointerDeviceKind.stylus:
-            editableTextState.showToolbar();
-            break;
-          case PointerDeviceKind.invertedStylus:
-          case PointerDeviceKind.mouse:
-          case PointerDeviceKind.unknown:
-            break;
-        }
       },
-      //enabledPredicate: (DragSelectionUpdateTextIntent intent) => intent.gestureDelegate.selectionEnabled,
+      enabledPredicate: (DragTextGestureIntent intent) => intent.gestureDelegate.selectionEnabled,
     ),
   };
 
   @protected
   static final Map<Type, Action<Intent>> _androidActions = <Type, Action<Intent>>{
-    SingleTapUpTextIntent: _TextEditingCallbackAction<SingleTapUpTextIntent>(onInvoke:_selectLastTapDownPositionOrEdgeText),
   };
 
   @protected
   static final Map<Type, Action<Intent>> _fuchsiaActions = <Type, Action<Intent>>{
-    SingleTapUpTextIntent: _TextEditingCallbackAction<SingleTapUpTextIntent>(onInvoke: _selectLastTapDownPositionText),
   };
 
   @protected
   static final Map<Type, Action<Intent>> _iOSActions = <Type, Action<Intent>>{
-    SingleTapUpTextIntent: _TextEditingCallbackAction<SingleTapUpTextIntent>(onInvoke:_selectLastTapDownPositionOrEdgeText),
   };
 
   @protected
   static final Map<Type, Action<Intent>> _linuxActions = <Type, Action<Intent>>{
-    SingleTapUpTextIntent: _TextEditingCallbackAction<SingleTapUpTextIntent>(onInvoke: _selectLastTapDownPositionText),
   };
 
   @protected
@@ -470,7 +383,6 @@ class _PlatformGestureActions {
 
   @protected
   static final Map<Type, Action<Intent>> _windowsActions = <Type, Action<Intent>>{
-    SingleTapUpTextIntent: _TextEditingCallbackAction<SingleTapUpTextIntent>(onInvoke: _selectLastTapDownPositionText),
   };
 
   static final Map<Type, Action<Intent>> platformGestureActions = (){
