@@ -8,6 +8,7 @@ source_set("compiler_lib") {
   sources = [
     "compiler.cc",
     "compiler.h",
+    "include_dir.h",
     "logger.h",
     "reflector.cc",
     "reflector.h",

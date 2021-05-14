@@ -4,9 +4,11 @@
 
 #include "flutter/impeller/compiler/compiler.h"
 
-#include "flutter/impeller/compiler/logger.h"
-
 #include <memory>
+#include <sstream>
+
+#include "flutter/fml/paths.h"
+#include "flutter/impeller/compiler/logger.h"
 
 namespace impeller {
 namespace compiler {
@@ -27,17 +29,19 @@ struct IncluderData {
 class Includer final : public shaderc::CompileOptions::IncluderInterface {
  public:
   Includer(std::shared_ptr<fml::UniqueFD> working_directory,
-           std::vector<std::shared_ptr<fml::UniqueFD>> include_dirs)
+           std::vector<IncludeDir> include_dirs,
+           std::function<void(std::string)> on_file_included)
       : working_directory_(std::move(working_directory)),
-        include_dirs_(std::move(include_dirs)) {}
+        include_dirs_(std::move(include_dirs)),
+        on_file_included_(std::move(on_file_included)) {}
 
   // |shaderc::CompileOptions::IncluderInterface|
   ~Includer() override = default;
 
   std::unique_ptr<fml::FileMapping> TryOpenMapping(
-      const std::shared_ptr<fml::UniqueFD>& des,
-      const char* requested_source) const {
-    if (!des || !des->is_valid()) {
+      const IncludeDir& dir,
+      const char* requested_source) {
+    if (!dir.dir || !dir.dir->is_valid()) {
       return nullptr;
     }
 
@@ -50,15 +54,27 @@ class Includer final : public shaderc::CompileOptions::IncluderInterface {
       return nullptr;
     }
 
-    return fml::FileMapping::CreateReadOnly(*des, requested_source);
+    auto mapping = fml::FileMapping::CreateReadOnly(*dir.dir, requested_source);
+    if (!mapping || !mapping->IsValid()) {
+      return nullptr;
+    }
+
+    on_file_included_(fml::paths::JoinPaths({dir.name, requested_source}));
+
+    return mapping;
   }
 
   std::unique_ptr<fml::FileMapping> FindFirstMapping(
-      const char* requested_source) const {
+      const char* requested_source) {
     // Always try the working directory first no matter what the include
     // directories are.
-    if (auto mapping = TryOpenMapping(working_directory_, requested_source)) {
-      return mapping;
+    {
+      IncludeDir dir;
+      dir.name = ".";
+      dir.dir = working_directory_;
+      if (auto mapping = TryOpenMapping(dir, requested_source)) {
+        return mapping;
+      }
     }
 
     for (const auto& include_dir : include_dirs_) {
@@ -120,8 +136,8 @@ class Includer final : public shaderc::CompileOptions::IncluderInterface {
 
  private:
   std::shared_ptr<fml::UniqueFD> working_directory_;
-  std::vector<std::shared_ptr<fml::UniqueFD>> include_dirs_;
-  std::string included_file_paths_;
+  std::vector<IncludeDir> include_dirs_;
+  std::function<void(std::string)> on_file_included_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Includer);
 };
@@ -203,8 +219,14 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   options.SetAutoBindUniforms(true);
   options.SetAutoMapLocations(true);
 
-  options.SetIncluder(std::make_unique<Includer>(options_.working_directory,
-                                                 options_.include_dirs));
+  options.AddMacroDefinition("IMPELLER_DEVICE");
+
+  std::vector<std::string> included_file_names;
+  options.SetIncluder(std::make_unique<Includer>(
+      options_.working_directory, options_.include_dirs,
+      [&included_file_names](auto included_name) {
+        included_file_names.emplace_back(std::move(included_name));
+      }));
 
   shaderc::Compiler spv_compiler;
   if (!spv_compiler.IsValid()) {
@@ -234,6 +256,8 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
       COMPILER_ERROR_NO_PREFIX << spv_result_->GetErrorMessage();
     }
     return;
+  } else {
+    included_file_names_ = std::move(included_file_names);
   }
 
   // MSL Generation.
@@ -327,6 +351,44 @@ std::string Compiler::GetSourcePrefix() const {
 
 std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
+}
+
+const std::vector<std::string>& Compiler::GetIncludedFileNames() const {
+  return included_file_names_;
+}
+
+static std::string JoinStrings(std::vector<std::string> items,
+                               std::string separator) {
+  std::stringstream stream;
+  for (size_t i = 0, count = items.size(); i < count; i++) {
+    const auto is_last = (i == count - 1);
+
+    stream << items[i];
+    if (!is_last) {
+      stream << separator;
+    }
+  }
+  return stream.str();
+}
+
+std::string Compiler::GetDependencyNames(std::string separator) const {
+  std::vector<std::string> dependencies = included_file_names_;
+  dependencies.push_back(options_.file_name);
+  return JoinStrings(dependencies, separator);
+}
+
+std::unique_ptr<fml::Mapping> Compiler::CreateDepfileContents(
+    std::initializer_list<std::string> targets_names) const {
+  const auto targets = JoinStrings(targets_names, " ");
+  const auto dependencies = GetDependencyNames(" ");
+
+  std::stringstream stream;
+  stream << targets << ":\n\t" << dependencies << "\n";
+
+  auto contents = std::make_shared<std::string>(stream.str());
+  return std::make_unique<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(contents->data()), contents->size(),
+      [contents](auto, auto) {});
 }
 
 }  // namespace compiler
