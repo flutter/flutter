@@ -41,7 +41,7 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, CustomDimensions(
+    expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
       commandPackagesAndroidEmbeddingVersion: 'v1',
@@ -66,7 +66,7 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, CustomDimensions(
+    expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
       commandPackagesAndroidEmbeddingVersion: 'v1',
@@ -86,7 +86,7 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, CustomDimensions(
+    expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
       commandPackagesAndroidEmbeddingVersion: 'v1',
