@@ -128,9 +128,20 @@ FlutterDesktopTextureRegistrarRef FlutterDesktopEngineGetTextureRegistrar(
       EngineFromHandle(engine)->texture_registrar());
 }
 
-HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
-  return std::get<HWND>(*ViewFromHandle(view)->GetRenderTarget());
+#ifdef WINUWP
+ABI::Windows::ApplicationModel::Core::CoreApplicationView*
+FlutterDesktopViewGetCoreApplicationView(FlutterDesktopViewRef view) {
+  return static_cast<
+      ABI::Windows::ApplicationModel::Core::CoreApplicationView*>(
+      winrt::get_abi(ViewFromHandle(view)->GetPlatformWindow()));
 }
+#endif
+
+#ifndef WINUWP
+HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
+  return ViewFromHandle(view)->GetPlatformWindow();
+}
+#endif
 
 FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar) {

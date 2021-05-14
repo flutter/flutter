@@ -41,12 +41,12 @@ std::vector<std::string> SplitCommaSeparatedString(const std::string& s) {
 }
 
 FlutterDesktopViewControllerRef
-FlutterDesktopViewControllerCreateFromCoreWindow(
-    ABI::Windows::UI::Core::CoreWindow* window,
+FlutterDesktopViewControllerCreateFromCoreApplicationView(
+    ABI::Windows::ApplicationModel::Core::CoreApplicationView* application_view,
     ABI::Windows::ApplicationModel::Activation::IActivatedEventArgs* args,
     FlutterDesktopEngineRef engine) {
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
-      std::make_unique<flutter::FlutterWindowWinUWP>(window);
+      std::make_unique<flutter::FlutterWindowWinUWP>(application_view);
 
   auto state = std::make_unique<FlutterDesktopViewControllerState>();
   state->view =

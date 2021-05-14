@@ -20,7 +20,12 @@ class FlutterView {
   FlutterView(FlutterView const&) = delete;
   FlutterView& operator=(FlutterView const&) = delete;
 
-#ifndef WINUWP
+#ifdef WINUWP
+  // Returns the backing CoreApplicationView for the view.
+  ABI::Windows::ApplicationModel::Core::CoreApplicationView* GetNativeWindow() {
+    return FlutterDesktopViewGetCoreApplicationView(view_);
+  }
+#else
   // Returns the backing HWND for the view.
   HWND GetNativeWindow() { return FlutterDesktopViewGetHWND(view_); }
 #endif
