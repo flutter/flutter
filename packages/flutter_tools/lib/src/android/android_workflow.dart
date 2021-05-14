@@ -188,6 +188,9 @@ class AndroidValidator extends DoctorValidator {
 
     if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(_userMessages.androidSdkLicenseOnly(kAndroidHome)));
+      if (!androidSdk.cmdlineToolsAvailable) {
+        messages.add(const ValidationMessage.error('cmdline-tools component is missing'));
+      }
       return ValidationResult(ValidationType.partial, messages);
     }
 
@@ -250,7 +253,7 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidJdkLocation(javaBinary)));
 
     // Check JDK version.
-    if (! await _checkJavaVersion(javaBinary, messages)) {
+    if (!await _checkJavaVersion(javaBinary, messages)) {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 

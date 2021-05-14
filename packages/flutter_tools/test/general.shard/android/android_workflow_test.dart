@@ -292,6 +292,7 @@ Review licenses that have not been accepted (y/N)?
   testWithoutContext('detects license-only SDK installation', () async {
     sdk.licensesAvailable = true;
     sdk.platformToolsAvailable = false;
+    sdk.cmdlineToolsAvailable = false;
     final ValidationResult validationResult = await AndroidValidator(
       androidStudio: null,
       androidSdk: sdk,
@@ -304,8 +305,8 @@ Review licenses that have not been accepted (y/N)?
 
     expect(validationResult.type, ValidationType.partial);
     expect(
-      validationResult.messages.last.message,
-      UserMessages().androidSdkLicenseOnly(kAndroidHome),
+      validationResult.messages.map((ValidationMessage message) => message.message),
+      contains(contains(UserMessages().androidSdkLicenseOnly(kAndroidHome))),
     );
   });
 
@@ -456,6 +457,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   bool platformToolsAvailable;
+
+  @override
+  bool cmdlineToolsAvailable;
 
   @override
   Directory directory;

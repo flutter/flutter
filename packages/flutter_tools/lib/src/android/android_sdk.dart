@@ -47,13 +47,16 @@ class AndroidSdk {
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
 
+  /// Whether the `cmdline-tools` directory exists in the Android SDK.
+  bool get cmdlineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
+
   /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
   /// It is possible to have an Android SDK folder that is missing this with
   /// the expectation that it will be downloaded later, e.g. by gradle or the
   /// sdkmanager. The [licensesAvailable] property should be used to determine
   /// whether the licenses are at least possibly accepted.
-  bool get platformToolsAvailable => directory.childDirectory('cmdline-tools').existsSync()
+  bool get platformToolsAvailable => cmdlineToolsAvailable
      || directory.childDirectory('platform-tools').existsSync();
 
   /// Whether the `licenses` directory exists in the Android SDK.
