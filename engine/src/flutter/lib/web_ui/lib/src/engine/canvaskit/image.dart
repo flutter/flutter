@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show WebOnlyImageCodecChunkCallback;
+import 'package:ui/ui.dart' as ui;
+
+import '../util.dart';
+import 'canvaskit_api.dart';
+import 'skia_object_cache.dart';
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
 ui.Codec skiaInstantiateImageCodec(Uint8List list,

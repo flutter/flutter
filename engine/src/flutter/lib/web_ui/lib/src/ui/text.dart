@@ -45,9 +45,15 @@ class FontWeight {
   ];
   static FontWeight? lerp(FontWeight? a, FontWeight? b, double t) {
     assert(t != null); // ignore: unnecessary_null_comparison
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    return values[engine.clampInt(lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t)!.round(), 0, 8)];
+    }
+    return values[engine.clampInt(
+      lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t)!
+          .round(),
+      0,
+      8,
+    )];
   }
 
   @override
@@ -67,59 +73,103 @@ class FontWeight {
 }
 
 class FontFeature {
-  const FontFeature(
-    this.feature,
-    [ this.value = 1 ]
-  ) : assert(feature != null), // ignore: unnecessary_null_comparison
-      assert(feature.length == 4, 'Feature tag must be exactly four characters long.'),
-      assert(value != null), // ignore: unnecessary_null_comparison
-      assert(value >= 0, 'Feature value must be zero or a positive integer.');
+  const FontFeature(this.feature, [this.value = 1])
+      : assert(feature != null), // ignore: unnecessary_null_comparison
+        assert(feature.length == 4,
+            'Feature tag must be exactly four characters long.'),
+        assert(value != null), // ignore: unnecessary_null_comparison
+        assert(value >= 0, 'Feature value must be zero or a positive integer.');
   const FontFeature.enable(String feature) : this(feature, 1);
   const FontFeature.disable(String feature) : this(feature, 0);
   const FontFeature.alternative(this.value) : feature = 'aalt';
-  const FontFeature.alternativeFractions() : feature = 'afrc', value = 1;
-  const FontFeature.contextualAlternates() : feature = 'calt', value = 1;
-  const FontFeature.caseSensitiveForms() : feature = 'case', value = 1;
+  const FontFeature.alternativeFractions()
+      : feature = 'afrc',
+        value = 1;
+  const FontFeature.contextualAlternates()
+      : feature = 'calt',
+        value = 1;
+  const FontFeature.caseSensitiveForms()
+      : feature = 'case',
+        value = 1;
   factory FontFeature.characterVariant(int value) {
     assert(value >= 1);
     assert(value <= 20);
     return FontFeature('cv${value.toString().padLeft(2, "0")}');
   }
-  const FontFeature.denominator() : feature = 'dnom', value = 1;
-  const FontFeature.fractions() : feature = 'frac', value = 1;
-  const FontFeature.historicalForms() : feature = 'hist', value = 1;
-  const FontFeature.historicalLigatures() : feature = 'hlig', value = 1;
-  const FontFeature.liningFigures() : feature = 'lnum', value = 1;
-  const FontFeature.localeAware({ bool enable = true }) : feature = 'locl', value = enable ? 1 : 0;
-  const FontFeature.notationalForms([this.value = 1]) : feature = 'nalt', assert(value >= 0);
-  const FontFeature.numerators() : feature = 'numr', value = 1;
-  const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
-  const FontFeature.ordinalForms() : feature = 'ordn', value = 1;
-  const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
-  const FontFeature.randomize() : feature = 'rand', value = 1;
-  const FontFeature.stylisticAlternates() : feature = 'salt', value = 1;
-  const FontFeature.scientificInferiors() : feature = 'sinf', value = 1;
+  const FontFeature.denominator()
+      : feature = 'dnom',
+        value = 1;
+  const FontFeature.fractions()
+      : feature = 'frac',
+        value = 1;
+  const FontFeature.historicalForms()
+      : feature = 'hist',
+        value = 1;
+  const FontFeature.historicalLigatures()
+      : feature = 'hlig',
+        value = 1;
+  const FontFeature.liningFigures()
+      : feature = 'lnum',
+        value = 1;
+  const FontFeature.localeAware({bool enable = true})
+      : feature = 'locl',
+        value = enable ? 1 : 0;
+  const FontFeature.notationalForms([this.value = 1])
+      : feature = 'nalt',
+        assert(value >= 0);
+  const FontFeature.numerators()
+      : feature = 'numr',
+        value = 1;
+  const FontFeature.oldstyleFigures()
+      : feature = 'onum',
+        value = 1;
+  const FontFeature.ordinalForms()
+      : feature = 'ordn',
+        value = 1;
+  const FontFeature.proportionalFigures()
+      : feature = 'pnum',
+        value = 1;
+  const FontFeature.randomize()
+      : feature = 'rand',
+        value = 1;
+  const FontFeature.stylisticAlternates()
+      : feature = 'salt',
+        value = 1;
+  const FontFeature.scientificInferiors()
+      : feature = 'sinf',
+        value = 1;
   factory FontFeature.stylisticSet(int value) {
     assert(value >= 1);
     assert(value <= 20);
     return FontFeature('ss${value.toString().padLeft(2, "0")}');
   }
-  const FontFeature.subscripts() : feature = 'subs', value = 1;
-  const FontFeature.superscripts() : feature = 'sups', value = 1;
-  const FontFeature.swash([this.value = 1]) : feature = 'swsh', assert(value >= 0);
-  const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
-  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+  const FontFeature.subscripts()
+      : feature = 'subs',
+        value = 1;
+  const FontFeature.superscripts()
+      : feature = 'sups',
+        value = 1;
+  const FontFeature.swash([this.value = 1])
+      : feature = 'swsh',
+        assert(value >= 0);
+  const FontFeature.tabularFigures()
+      : feature = 'tnum',
+        value = 1;
+  const FontFeature.slashedZero()
+      : feature = 'zero',
+        value = 1;
 
   final String feature;
   final int value;
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
-    return other is FontFeature
-        && other.feature == feature
-        && other.value == value;
+    }
+    return other is FontFeature &&
+        other.feature == feature &&
+        other.value == value;
   }
 
   @override
@@ -166,8 +216,7 @@ class TextDecoration {
 
   @override
   bool operator ==(Object other) {
-    return other is TextDecoration
-        && other._mask == _mask;
+    return other is TextDecoration && other._mask == _mask;
   }
 
   @override
@@ -195,13 +244,7 @@ class TextDecoration {
   }
 }
 
-enum TextDecorationStyle {
-  solid,
-  double,
-  dotted,
-  dashed,
-  wavy
-}
+enum TextDecorationStyle { solid, double, dotted, dashed, wavy }
 
 enum TextLeadingDistribution {
   proportional,
@@ -220,12 +263,13 @@ class TextHeightBehavior {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-     return false;
-    return other is TextHeightBehavior
-        && other.applyHeightToFirstAscent == applyHeightToFirstAscent
-        && other.applyHeightToLastDescent == applyHeightToLastDescent
-        && other.leadingDistribution == leadingDistribution;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextHeightBehavior &&
+        other.applyHeightToFirstAscent == applyHeightToFirstAscent &&
+        other.applyHeightToLastDescent == applyHeightToLastDescent &&
+        other.leadingDistribution == leadingDistribution;
   }
 
   @override
@@ -239,10 +283,10 @@ class TextHeightBehavior {
   @override
   String toString() {
     return 'TextHeightBehavior('
-             'applyHeightToFirstAscent: $applyHeightToFirstAscent, '
-             'applyHeightToLastDescent: $applyHeightToLastDescent, '
-             'leadingDistribution: $leadingDistribution'
-           ')';
+        'applyHeightToFirstAscent: $applyHeightToFirstAscent, '
+        'applyHeightToLastDescent: $applyHeightToLastDescent, '
+        'leadingDistribution: $leadingDistribution'
+        ')';
   }
 }
 
@@ -369,6 +413,41 @@ abstract class ParagraphStyle {
 }
 
 abstract class StrutStyle {
+  /// Creates a new StrutStyle object.
+  ///
+  /// * `fontFamily`: The name of the font to use when painting the text (e.g.,
+  ///   Roboto).
+  ///
+  /// * `fontFamilyFallback`: An ordered list of font family names that will be searched for when
+  ///    the font in `fontFamily` cannot be found.
+  ///
+  /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting
+  ///   the text.
+  ///
+  /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the
+  ///   font size. The lines of the paragraph will be at least
+  ///   `(lineHeight + leading) * fontSize` tall when fontSize
+  ///   is not null. When fontSize is null, there is no minimum line height. Tall
+  ///   glyphs due to baseline alignment or large [TextStyle.fontSize] may cause
+  ///   the actual line height after layout to be taller than specified here.
+  ///   [fontSize] must be provided for this property to take effect.
+  ///
+  /// * `leading`: The minimum amount of leading between lines as a multiple of
+  ///   the font size. [fontSize] must be provided for this property to take effect.
+  ///
+  /// * `fontWeight`: The typeface thickness to use when painting the text
+  ///   (e.g., bold).
+  ///
+  /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g.,
+  ///   italics).
+  ///
+  /// * `forceStrutHeight`: When true, the paragraph will force all lines to be exactly
+  ///   `(lineHeight + leading) * fontSize` tall from baseline to baseline.
+  ///   [TextStyle] is no longer able to influence the line height, and any tall
+  ///   glyphs may overlap with lines above. If a [fontFamily] is specified, the
+  ///   total ascent of the first line will be the min of the `Ascent + half-leading`
+  ///   of the [fontFamily] and `(lineHeight + leading) * fontSize`. Otherwise, it
+  ///   will be determined by the Ascent + half-leading of the first text.
   factory StrutStyle({
     String? fontFamily,
     List<String>? fontFamilyFallback,
@@ -379,7 +458,33 @@ abstract class StrutStyle {
     FontWeight? fontWeight,
     FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) = engine.EngineStrutStyle;
+  }) {
+    if (engine.useCanvasKit) {
+      return engine.CkStrutStyle(
+        fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
+        fontSize: fontSize,
+        height: height,
+        leadingDistribution: leadingDistribution,
+        leading: leading,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        forceStrutHeight: forceStrutHeight,
+      );
+    } else {
+      return engine.EngineStrutStyle(
+        fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
+        fontSize: fontSize,
+        height: height,
+        leadingDistribution: leadingDistribution,
+        leading: leading,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        forceStrutHeight: forceStrutHeight,
+      );
+    }
+  }
 }
 
 // The order of this enum must match the order of the values in TextDirection.h's TextDirection.
@@ -418,12 +523,12 @@ class TextBox {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TextBox
-        && other.left == left
-        && other.top == top
-        && other.right == right
-        && other.bottom == bottom
-        && other.direction == direction;
+    return other is TextBox &&
+        other.left == left &&
+        other.top == top &&
+        other.right == right &&
+        other.bottom == bottom &&
+        other.direction == direction;
   }
 
   @override
@@ -454,9 +559,9 @@ class TextPosition {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TextPosition
-        && other.offset == offset
-        && other.affinity == affinity;
+    return other is TextPosition &&
+        other.offset == offset &&
+        other.affinity == affinity;
   }
 
   @override
@@ -472,10 +577,10 @@ class TextRange {
   const TextRange({
     required this.start,
     required this.end,
-  })  : assert(start != null && start >= -1), // ignore: unnecessary_null_comparison
-        assert(end != null && end >= -1); // ignore: unnecessary_null_comparison
+  })  : assert(start >= -1),
+        assert(end >= -1);
   const TextRange.collapsed(int offset)
-      : assert(offset != null && offset >= -1), // ignore: unnecessary_null_comparison
+      : assert(offset >= -1),
         start = offset,
         end = offset;
   static const TextRange empty = TextRange(start: -1, end: -1);
@@ -504,9 +609,7 @@ class TextRange {
     if (identical(this, other)) {
       return true;
     }
-    return other is TextRange
-        && other.start == start
-        && other.end == end;
+    return other is TextRange && other.start == start && other.end == end;
   }
 
   @override
@@ -530,8 +633,7 @@ class ParagraphConstraints {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ParagraphConstraints
-        && other.width == width;
+    return other is ParagraphConstraints && other.width == width;
   }
 
   @override
@@ -605,7 +707,8 @@ abstract class ParagraphBuilder {
     if (engine.useCanvasKit) {
       return engine.CkParagraphBuilder(style);
     } else if (engine.WebExperiments.instance!.useCanvasRichText) {
-      return engine.CanvasParagraphBuilder(style as engine.EngineParagraphStyle);
+      return engine.CanvasParagraphBuilder(
+          style as engine.EngineParagraphStyle);
     } else {
       return engine.DomParagraphBuilder(style as engine.EngineParagraphStyle);
     }
@@ -628,12 +731,12 @@ abstract class ParagraphBuilder {
 
 Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
   if (engine.useCanvasKit) {
-    return engine.skiaFontCollection.loadFontFromList(list, fontFamily: fontFamily).then(
-      (_) => engine.sendFontChangeMessage()
-    );
+    return engine.skiaFontCollection
+        .loadFontFromList(list, fontFamily: fontFamily)
+        .then((_) => engine.sendFontChangeMessage());
   } else {
-    return _fontCollection!.loadFontFromList(list, fontFamily: fontFamily!).then(
-      (_) => engine.sendFontChangeMessage()
-    );
+    return _fontCollection!
+        .loadFontFromList(list, fontFamily: fontFamily!)
+        .then((_) => engine.sendFontChangeMessage());
   }
 }

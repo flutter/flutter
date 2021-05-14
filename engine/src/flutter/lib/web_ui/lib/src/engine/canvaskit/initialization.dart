@@ -1,8 +1,18 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+@JS()
+library canvaskit_initialization;
 
-part of engine;
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:js' as js;
+
+import 'package:js/js.dart';
+import 'package:ui/src/engine.dart' show isDesktop, kProfileMode, domRenderer;
+
+import 'canvaskit_api.dart';
+import 'fonts.dart';
 
 /// A JavaScript entrypoint that allows developer to set rendering backend
 /// at runtime before launching the application.
@@ -10,7 +20,7 @@ part of engine;
 external String? get requestedRendererType;
 
 /// Whether to use CanvasKit as the rendering backend.
-bool get useCanvasKit => _autoDetect ? _detectRenderer() : _useSkia;
+bool get useCanvasKit => flutterWebAutoDetect ? _detectRenderer() : _useSkia;
 
 /// Returns true if CanvasKit is used.
 ///
@@ -28,7 +38,7 @@ bool _detectRenderer() {
 ///
 /// Using flutter tools option "--web-render=auto" or not specifying one
 /// would set the value to true. Otherwise, it would be false.
-const bool _autoDetect =
+const bool flutterWebAutoDetect =
     bool.fromEnvironment('FLUTTER_WEB_AUTO_DETECT', defaultValue: true);
 
 /// Enable the Skia-based rendering backend.

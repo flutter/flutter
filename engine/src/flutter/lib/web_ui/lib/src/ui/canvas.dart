@@ -87,7 +87,8 @@ abstract class Canvas {
     if (engine.useCanvasKit) {
       return engine.CanvasKitCanvas(recorder, cullRect);
     } else {
-      return engine.SurfaceCanvas(recorder as engine.EnginePictureRecorder, cullRect);
+      return engine.SurfaceCanvas(
+          recorder as engine.EnginePictureRecorder, cullRect);
     }
   }
   void save();
@@ -99,7 +100,8 @@ abstract class Canvas {
   void rotate(double radians);
   void skew(double sx, double sy);
   void transform(Float64List matrix4);
-  void clipRect(Rect rect, {ClipOp clipOp = ClipOp.intersect, bool doAntiAlias = true});
+  void clipRect(Rect rect,
+      {ClipOp clipOp = ClipOp.intersect, bool doAntiAlias = true});
   void clipRRect(RRect rrect, {bool doAntiAlias = true});
   void clipPath(Path path, {bool doAntiAlias = true});
   void drawColor(Color color, BlendMode blendMode);
@@ -110,7 +112,8 @@ abstract class Canvas {
   void drawDRRect(RRect outer, RRect inner, Paint paint);
   void drawOval(Rect rect, Paint paint);
   void drawCircle(Offset c, double radius, Paint paint);
-  void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint);
+  void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter,
+      Paint paint);
   void drawPath(Path path, Paint paint);
   void drawImage(Image image, Offset offset, Paint paint);
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint);

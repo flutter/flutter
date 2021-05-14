@@ -2,7 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show Matrix4;
+import 'package:ui/ui.dart' as ui;
+
+import 'canvaskit_api.dart';
+import 'path_metrics.dart';
+import 'skia_object_cache.dart';
 
 /// An implementation of [ui.Path] which is backed by an `SkPath`.
 ///
@@ -16,7 +24,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
     skiaObject.setFillType(toSkFillType(_fillType));
   }
 
-  CkPath._fromSkPath(SkPath skPath, this._fillType) : super(skPath) {
+  CkPath.fromSkPath(SkPath skPath, this._fillType) : super(skPath) {
     skiaObject.setFillType(toSkFillType(_fillType));
   }
 
@@ -254,7 +262,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
     // path and call `transform` on it.
     final SkPath newPath = skiaObject.copy();
     newPath.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 0.0);
-    return CkPath._fromSkPath(newPath, _fillType);
+    return CkPath.fromSkPath(newPath, _fillType);
   }
 
   static CkPath combine(
@@ -269,7 +277,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
       path2.skiaObject,
       toSkPathOp(operation),
     );
-    return CkPath._fromSkPath(newPath, path1._fillType);
+    return CkPath.fromSkPath(newPath, path1._fillType);
   }
 
   @override
@@ -287,7 +295,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
       m[7],
       m[8],
     );
-    return CkPath._fromSkPath(newPath, _fillType);
+    return CkPath.fromSkPath(newPath, _fillType);
   }
 
   String? toSvgString() {

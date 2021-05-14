@@ -6,7 +6,6 @@ part of engine;
 
 /// A canvas that renders to DOM elements and CSS properties.
 class DomCanvas extends EngineCanvas with SaveElementStackTracking {
-
   @override
   final html.Element rootElement;
 
@@ -61,14 +60,14 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
-    currentElement.append(_buildDrawRectElement(rect, paint, 'draw-rect',
-        currentTransform));
+    currentElement.append(
+        _buildDrawRectElement(rect, paint, 'draw-rect', currentTransform));
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
-    html.Element element = _buildDrawRectElement(rrect.outerRect,
-        paint, 'draw-rrect', currentTransform);
+    html.Element element = _buildDrawRectElement(
+        rrect.outerRect, paint, 'draw-rrect', currentTransform);
     _applyRRectBorderRadius(element.style, rrect);
     currentElement.append(element);
   }
@@ -112,8 +111,9 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    final html.Element paragraphElement =
-        _drawParagraphElement(paragraph as EngineParagraph, offset, transform: currentTransform);
+    final html.Element paragraphElement = _drawParagraphElement(
+        paragraph as EngineParagraph, offset,
+        transform: currentTransform);
     currentElement.append(paragraphElement);
   }
 
@@ -124,7 +124,8 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 
   @override
-  void drawPoints(ui.PointMode pointMode, Float32List points, SurfacePaintData paint) {
+  void drawPoints(
+      ui.PointMode pointMode, Float32List points, SurfacePaintData paint) {
     throw UnimplementedError();
   }
 
@@ -139,16 +140,16 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 ///
 /// Returns a color for box-shadow based on blur filter at sigma.
 ui.Color blurColor(ui.Color color, double sigma) {
-  final double strength = math.min(
-      math.sqrt(sigma) / (math.pi * 2.0), 1.0);
+  final double strength = math.min(math.sqrt(sigma) / (math.pi * 2.0), 1.0);
   final int reducedAlpha = ((1.0 - strength) * color.alpha).round();
   return ui.Color((reducedAlpha & 0xff) << 24 | (color.value & 0x00ffffff));
 }
 
-html.HtmlElement _buildDrawRectElement(ui.Rect rect, SurfacePaintData paint, String tagName,
-    Matrix4 transform) {
+html.HtmlElement _buildDrawRectElement(
+    ui.Rect rect, SurfacePaintData paint, String tagName, Matrix4 transform) {
   assert(paint.shader == null);
-  final html.HtmlElement rectangle = domRenderer.createElement(tagName) as html.HtmlElement;
+  final html.HtmlElement rectangle =
+      domRenderer.createElement(tagName) as html.HtmlElement;
   assert(() {
     rectangle.setAttribute('flt-rect', '$rect');
     rectangle.setAttribute('flt-paint', '$paint');
@@ -164,7 +165,7 @@ html.HtmlElement _buildDrawRectElement(ui.Rect rect, SurfacePaintData paint, Str
   if (transform.isIdentity()) {
     if (isStroke) {
       effectiveTransform =
-      'translate(${left - (strokeWidth / 2.0)}px, ${top - (strokeWidth / 2.0)}px)';
+          'translate(${left - (strokeWidth / 2.0)}px, ${top - (strokeWidth / 2.0)}px)';
     } else {
       effectiveTransform = 'translate(${left}px, ${top}px)';
     }
@@ -245,8 +246,8 @@ String _borderStrokeToCssUnit(double value) {
   return '${value.toStringAsFixed(3)}px';
 }
 
-html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,
-    String width, String height) {
+html.Element _pathToSvgElement(
+    SurfacePath path, SurfacePaintData paint, String width, String height) {
   final StringBuffer sb = StringBuffer();
   sb.write(
       '<svg viewBox="0 0 $width $height" width="${width}px" height="${height}px">');
@@ -254,7 +255,8 @@ html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,
   final ui.Color color = paint.color ?? const ui.Color(0xFF000000);
   if (paint.style == ui.PaintingStyle.stroke ||
       (paint.style != ui.PaintingStyle.fill &&
-      paint.strokeWidth != 0 && paint.strokeWidth != null)) {
+          paint.strokeWidth != 0 &&
+          paint.strokeWidth != null)) {
     sb.write('stroke="${colorToCssString(color)}" ');
     sb.write('stroke-width="${paint.strokeWidth ?? 1.0}" ');
     sb.write('fill="none" ');
@@ -270,5 +272,5 @@ html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,
   pathToSvg(path.pathRef, sb);
   sb.write('"></path>');
   sb.write('</svg>');
-  return html.Element.html(sb.toString(), treeSanitizer: _NullTreeSanitizer());
+  return html.Element.html(sb.toString(), treeSanitizer: NullTreeSanitizer());
 }
