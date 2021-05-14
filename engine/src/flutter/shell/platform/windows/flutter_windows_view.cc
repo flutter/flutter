@@ -487,6 +487,10 @@ WindowsRenderTarget* FlutterWindowsView::GetRenderTarget() const {
   return render_target_.get();
 }
 
+PlatformWindow FlutterWindowsView::GetPlatformWindow() const {
+  return binding_handler_->GetPlatformWindow();
+}
+
 FlutterWindowsEngine* FlutterWindowsView::GetEngine() {
   return engine_.get();
 }

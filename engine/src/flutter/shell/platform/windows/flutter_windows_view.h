@@ -59,6 +59,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // Return the currently configured WindowsRenderTarget.
   WindowsRenderTarget* GetRenderTarget() const;
 
+  // Return the currently configured PlatformWindow.
+  PlatformWindow GetPlatformWindow() const;
+
   // Returns the engine backing this view.
   FlutterWindowsEngine* GetEngine();
 

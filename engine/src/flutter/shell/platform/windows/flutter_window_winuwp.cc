@@ -10,10 +10,13 @@ namespace flutter {
 static constexpr double kControllerScrollMultiplier = 3;
 
 FlutterWindowWinUWP::FlutterWindowWinUWP(
-    ABI::Windows::UI::Core::CoreWindow* window) {
-  winrt::Windows::UI::Core::CoreWindow cw{nullptr};
-  winrt::copy_from_abi(cw, window);
-  window_ = cw;
+    ABI::Windows::ApplicationModel::Core::CoreApplicationView*
+        applicationview) {
+  winrt::Windows::ApplicationModel::Core::CoreApplicationView cav{nullptr};
+  winrt::copy_from_abi(cav, applicationview);
+
+  application_view_ = cav;
+  window_ = application_view_.CoreWindow();
 
   SetEventHandlers();
 
@@ -44,6 +47,10 @@ WindowsRenderTarget FlutterWindowWinUWP::GetRenderTarget() {
   render_target_.Size({bounds.width, bounds.height});
   return WindowsRenderTarget(render_target_);
 #endif
+}
+
+PlatformWindow FlutterWindowWinUWP::GetPlatformWindow() {
+  return application_view_;
 }
 
 void FlutterWindowWinUWP::ApplyInverseDpiScalingTransform() {
