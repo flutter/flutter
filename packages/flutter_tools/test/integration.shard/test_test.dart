@@ -209,10 +209,6 @@ void main() {
     }
     expect(result.exitCode, 0);
   });
-
-  testWithoutContext('integration test can show the license page', () async {
-    return _testFile('license', automatedTestsDirectory, integrationTestDirectory, exitCode: isZero, extraArguments: integrationTestExtraArgs);
-  });
 }
 
 Future<void> _testFile(
