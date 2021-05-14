@@ -37,16 +37,6 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-FakePlatform _kNoColorOutputPlatform() => FakePlatform(
-  localeName: 'en_US.UTF-8',
-  environment: <String, String>{},
-  stdoutSupportsAnsi: false,
-);
-
-final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorOutputPlatform,
-};
-
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{'HOME': '/foo/bar'}
@@ -88,7 +78,7 @@ void main() {
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
       expect(message.isError, isFalse);
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('No IDE Validator includes expected installation messages', () async {
       final ValidationResult result = await NoIdeValidator().validate();
@@ -98,7 +88,7 @@ void main() {
         result.messages.map((ValidationMessage vm) => vm.message),
         UserMessages().noIdeInstallationInfo,
       );
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('vs code validator when 64bit installed', () async {
       expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
@@ -114,7 +104,7 @@ void main() {
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
@@ -131,7 +121,7 @@ void main() {
       expect(message.message, startsWith('Flutter extension can be installed from'));
       expect(message.contextUrl, 'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter');
       expect(message.isError, false);
-    }, overrides: noColorTerminalOverride);
+    });
 
     group('device validator', () {
       testWithoutContext('no devices', () async {
@@ -199,7 +189,6 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-      Platform: _kNoColorOutputPlatform,
     });
   });
 
@@ -224,7 +213,6 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-      Platform: _kNoColorOutputPlatform,
       Usage: () => testUsage,
     });
 
@@ -254,7 +242,6 @@ void main() {
         ),
       ]));
     }, overrides: <Type, Generator>{
-      Platform: _kNoColorOutputPlatform,
       Usage: () => testUsage,
     });
 
@@ -289,7 +276,6 @@ void main() {
         ),
       ]));
     }, overrides: <Type, Generator>{
-      Platform: _kNoColorOutputPlatform,
       Usage: () => testUsage,
     });
 
@@ -319,7 +305,6 @@ void main() {
         ),
       ]));
     }, overrides: <Type, Generator>{
-      Platform: _kNoColorOutputPlatform,
       Usage: () => testUsage,
     });
   });
@@ -336,7 +321,7 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate non-verbose output format for run with crash', () async {
       expect(await FakeCrashingDoctor(logger).diagnose(verbose: false), isFalse);
@@ -353,12 +338,12 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
       expect(await FakeCrashingDoctor(logger).diagnose(verbose: true), isFalse);
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
-    }, overrides: noColorTerminalOverride);
+    });
 
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
@@ -385,7 +370,7 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
 
 
     testUsingContext('validate non-verbose output format when only one category fails', () async {
@@ -397,7 +382,7 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
       expect(await FakePassingDoctor(logger).diagnose(verbose: false), isTrue);
@@ -413,7 +398,7 @@ void main() {
               '\n'
               '! Doctor found issues in 2 categories.\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate non-verbose output format', () async {
       expect(await FakeDoctor(logger).diagnose(verbose: false), isFalse);
@@ -434,7 +419,7 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate verbose output format', () async {
       expect(await FakeDoctor(logger).diagnose(verbose: true), isFalse);
@@ -464,7 +449,7 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
   });
 
   testUsingContext('validate non-verbose output wrapping', () async {
@@ -498,8 +483,6 @@ void main() {
         '! Doctor found issues in 4\n'
         '  categories.\n'
     ));
-  }, overrides: <Type, Generator>{
-    Platform: _kNoColorOutputPlatform,
   });
 
   testUsingContext('validate verbose output wrapping', () async {
@@ -544,8 +527,6 @@ void main() {
         '! Doctor found issues in 4\n'
         '  categories.\n'
     ));
-  }, overrides: <Type, Generator>{
-    Platform: _kNoColorOutputPlatform,
   });
 
 
@@ -563,7 +544,7 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
       // There are two subvalidators. Only the second contains statusInfo.
@@ -575,7 +556,7 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
-    }, overrides: noColorTerminalOverride);
+    });
   });
 
   group('grouped validator merging results', () {
@@ -586,47 +567,47 @@ void main() {
     testUsingContext('validate installed + installed = installed', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[✓]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate installed + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate installed + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate partial + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate partial + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate partial + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate missing + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate missing + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: noColorTerminalOverride);
+    });
 
     testUsingContext('validate missing + missing = missing', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, missing).diagnose(), isFalse);
       expect(logger.statusText, startsWith('[✗]'));
-    }, overrides: noColorTerminalOverride);
+    });
   });
 
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
