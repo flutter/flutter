@@ -2682,7 +2682,6 @@ class UnconstrainedBox extends StatelessWidget {
 /// the box's size per the width and height factor parameters, and centered
 /// within that box by the alignment parameter.
 ///
-///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return SizedBox.expand(
