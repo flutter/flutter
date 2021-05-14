@@ -262,7 +262,7 @@ class AndroidSdk {
     return null;
   }
 
-  String? getCmdlineToolsPath(String binaryName) {
+  String? getCmdlineToolsPath(String binaryName, {bool skipTools = false}) {
     // First look for the latest version of the command-line tools
     final File cmdlineToolsLatestBinary = directory
       .childDirectory('cmdline-tools')
@@ -300,6 +300,9 @@ class AndroidSdk {
           return cmdlineToolsBinary.path;
         }
       }
+    }
+    if (skipTools) {
+      return null;
     }
 
     // Finally fallback to the old SDK tools
@@ -386,23 +389,15 @@ class AndroidSdk {
   }
 
   /// Returns the filesystem path of the Android SDK manager tool.
-  ///
-  /// The sdkmanager was previously in the tools directory but this component
-  /// was marked as obsolete in 3.6.
-  String get sdkManagerPath {
+  String? get sdkManagerPath {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final String? path = getCmdlineToolsPath(executable);
+    final String? path = getCmdlineToolsPath(executable, skipTools: true);
     if (path != null) {
       return path;
     }
-    // If no binary was found, return the default location
-    return directory
-      .childDirectory('tools')
-      .childDirectory('bin')
-      .childFile(executable)
-      .path;
+    return null;
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
@@ -468,11 +463,14 @@ class AndroidSdk {
 
   /// Returns the version of the Android SDK manager tool or null if not found.
   String? get sdkManagerVersion {
-    if (!globals.processManager.canRun(sdkManagerPath)) {
-      throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
+    if (sdkManagerPath == null || !globals.processManager.canRun(sdkManagerPath)) {
+      throwToolExit(
+        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
+        'the cmdline-tools are installed to resolve this.'
+      );
     }
     final RunResult result = globals.processUtils.runSync(
-      <String>[sdkManagerPath, '--version'],
+      <String>[sdkManagerPath!, '--version'],
       environment: sdkManagerEnv,
     );
     if (result.exitCode != 0) {
