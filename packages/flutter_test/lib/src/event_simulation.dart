@@ -212,14 +212,17 @@ class KeyEventSimulator {
       'keymap': platform,
     };
 
-    if (kIsWeb) {
+    final String resultCharacter = character ?? _keyLabel(key);
+    void assignWeb() {
       result['code'] = _getWebKeyCode(key);
-      result['key'] = _keyLabel(key);
+      result['key'] = resultCharacter;
       result['metaState'] = _getWebModifierFlags(key, isDown);
+    }
+    if (kIsWeb) {
+      assignWeb();
       return result;
     }
 
-    final String resultCharacter = character ?? _keyLabel(key);
     switch (platform) {
       case 'android':
         result['keyCode'] = keyCode;
@@ -258,11 +261,6 @@ class KeyEventSimulator {
         result['charactersIgnoringModifiers'] = resultCharacter;
         result['modifiers'] = _getIOSModifierFlags(key, isDown);
         break;
-      case 'web':
-        result['code'] = _getWebKeyCode(key);
-        result['key'] = resultCharacter;
-        result['metaState'] = _getWebModifierFlags(key, isDown);
-        break;
       case 'windows':
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
@@ -270,6 +268,10 @@ class KeyEventSimulator {
           result['characterCodePoint'] = resultCharacter.codeUnitAt(0);
         }
         result['modifiers'] = _getWindowsModifierFlags(key, isDown);
+        break;
+      case 'web':
+        assignWeb();
+        break;
     }
     return result;
   }
