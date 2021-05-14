@@ -94,6 +94,7 @@ template("fuchsia_archive") {
     testonly = pkg_testonly
   }
 
+  manifest_json_file = "${far_base_dir}/package_manifest.json"
   action(target_name) {
     script = "//flutter/tools/fuchsia/gen_package.py"
     deps = pkg_dir_deps + [
@@ -116,8 +117,11 @@ template("fuchsia_archive") {
       rebase_path("//flutter/tools/fuchsia/development.key"),
       "--far-name",
       target_name,
+      "--manifest-json-file",
+      rebase_path(manifest_json_file),
     ]
     outputs = [
+      manifest_json_file,
       "${far_base_dir}.manifest",
       "$root_out_dir/${target_name}-0.far",
     ]
