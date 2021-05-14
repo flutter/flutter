@@ -32,7 +32,7 @@ class MockClipboard {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
