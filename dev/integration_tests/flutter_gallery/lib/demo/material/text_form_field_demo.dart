@@ -280,8 +280,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   const SizedBox(height: 24.0),
                   Center(
                     child: ElevatedButton(
-                      child: const Text('SUBMIT'),
                       onPressed: _handleSubmitted,
+                      child: const Text('SUBMIT'),
                     ),
                   ),
                   const SizedBox(height: 24.0),

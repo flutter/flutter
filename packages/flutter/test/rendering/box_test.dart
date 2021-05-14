@@ -980,7 +980,7 @@ void main() {
             },
           );
         },
-        throwsA(isA<AssertionError>().having(
+        throwsA(isAssertionError.having(
           (AssertionError error) => error.message,
           'message',
           'paintTransform must be invertible.',
@@ -996,7 +996,7 @@ void main() {
             },
           );
         },
-        throwsA(isA<AssertionError>().having(
+        throwsA(isAssertionError.having(
           (AssertionError error) => error.message,
           'message',
           'Exactly one transform or offset argument must be provided.',

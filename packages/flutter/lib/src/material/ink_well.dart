@@ -580,7 +580,6 @@ class InkResponse extends StatelessWidget {
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.of(context);
     return _InkResponseStateWidget(
-      child: child,
       onTap: onTap,
       onTapDown: onTapDown,
       onTapCancel: onTapCancel,
@@ -609,6 +608,7 @@ class InkResponse extends StatelessWidget {
       parentState: parentState,
       getRectCallback: getRectCallback,
       debugCheckContext: debugCheckContext,
+      child: child,
     );
   }
 

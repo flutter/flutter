@@ -470,7 +470,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(child: child, key: key);
+    return KeyedSubtree(key: key, child: child);
   }
 
   @override
@@ -734,7 +734,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(child: child, key: key);
+    return KeyedSubtree(key: key, child: child);
   }
 
   @override

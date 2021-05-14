@@ -85,7 +85,7 @@ void main() {
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     // The width includes the width of the cursor (1.0).
-    expect(editable.getMaxIntrinsicWidth(double.infinity), 51.0);
+    expect(editable.getMaxIntrinsicWidth(double.infinity), 52.0);
     expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
     expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
 

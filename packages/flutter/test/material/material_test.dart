@@ -426,8 +426,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -441,8 +441,8 @@ void main() {
           key: materialKey,
           type: MaterialType.transparency,
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -461,8 +461,8 @@ void main() {
           key: materialKey,
           type: MaterialType.transparency,
           shape: const StadiumBorder(),
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -481,8 +481,8 @@ void main() {
         return Material(
           type: MaterialType.transparency,
           shape: shape,
-          child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
+          child: const SizedBox(width: 100.0, height: 100.0),
         );
       }
       final Widget material = buildMaterial();
@@ -563,8 +563,8 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -582,8 +582,8 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           shape: const StadiumBorder(),
-          child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -653,8 +653,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.circle,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -670,8 +670,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -688,10 +688,10 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -708,10 +708,10 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           shape: const StadiumBorder(),
           elevation: 4.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -729,7 +729,6 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           shape: const CircleBorder(
             side: BorderSide(
@@ -737,6 +736,7 @@ void main() {
               color: Color(0xFF0000FF),
             ),
           ),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -750,13 +750,13 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
             ),
           ),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -770,8 +770,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 

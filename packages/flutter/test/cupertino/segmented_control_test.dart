@@ -94,7 +94,7 @@ void main() {
           ),
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains('children.length'),
@@ -110,7 +110,7 @@ void main() {
           ),
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains('children.length'),
@@ -220,7 +220,7 @@ void main() {
           ),
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains('children'),

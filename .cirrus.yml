@@ -140,16 +140,6 @@ task:
         - (cd dev/bots; pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: web_integration_tests
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        CHROME_NO_SANDBOX: true
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
-
     - name: docs-linux # linux-only
       environment:
         CPU: 4

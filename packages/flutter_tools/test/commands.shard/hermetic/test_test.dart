@@ -211,8 +211,7 @@ dev_dependencies:
       '--coverage',
       '--',
       'test/fake_test.dart',
-    ]), throwsA(isA<ToolExit>()
-      .having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
+    ]), throwsA(isA<ToolExit>().having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),

@@ -72,7 +72,7 @@ message Repository {
   // The remote commits will be fetched from.
   Remote upstream = 5;
 
-  // The remote cherrypicks will be pushed to to create a Pull Request.
+  // The remote cherrypicks will be pushed to create a Pull Request.
   //
   // This should be a mirror owned by the user conducting the release.
   Remote mirror = 6;
