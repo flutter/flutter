@@ -38,7 +38,7 @@ void main() {
     textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Input field with no initial value works',
       (WidgetTester tester) async {
@@ -63,7 +63,7 @@ void main() {
     textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Pressing enter on the text field triggers submit',
       (WidgetTester tester) async {
@@ -96,7 +96,7 @@ void main() {
     expect(textFinder2, findsOneWidget);
     final Text text2 = tester.widget(textFinder2);
     expect(text2.data, 'enter pressed');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Jump between TextFormFields with tab key',
       (WidgetTester tester) async {
@@ -129,7 +129,7 @@ void main() {
     final InputElement input2 =
         document.getElementsByTagName('input')[0] as InputElement;
     expect(input2.value, 'Text2');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
@@ -175,7 +175,7 @@ void main() {
     final InputElement input2 =
     document.getElementsByTagName('input')[0] as InputElement;
     expect(input2.value, 'Text2');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Read-only fields work', (WidgetTester tester) async {
     const String text = 'Lorem ipsum dolor sit amet';
@@ -235,7 +235,7 @@ void main() {
     await gesture.up();
     range = TextRange(start: input.selectionStart!, end: input.selectionEnd!);
     expect(range.textInside(text), 'amet');
-  });
+  }, semanticsEnabled: false);
 }
 
 KeyboardEvent dispatchKeyboardEvent(
