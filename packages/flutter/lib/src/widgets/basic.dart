@@ -2704,7 +2704,7 @@ class UnconstrainedBox extends StatelessWidget {
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// See also:
 ///
 ///  * [Align], which sizes itself based on its child's size and positions
