@@ -321,7 +321,7 @@ void main() {
 
     tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 300)));
     expect(updatedTimestamp, const Duration(milliseconds: 300));
-    expect(updateDelta, const Offset(0.0, 0.0));
+    expect(updateDelta, Offset.zero);
     tester.route(pointer.up());
 
     // No competing, dragStartBehavior == DragStartBehavior.start
