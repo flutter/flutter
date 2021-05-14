@@ -141,6 +141,7 @@ class Drawer extends StatelessWidget {
     Key? key,
     this.elevation = 16.0,
     this.child,
+    this.color,
     this.semanticLabel,
   }) : assert(elevation != null && elevation >= 0.0),
        super(key: key);
@@ -171,6 +172,8 @@ class Drawer extends StatelessWidget {
   ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String? semanticLabel;
+  ///color label to enable user to change the drawer color
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +199,7 @@ class Drawer extends StatelessWidget {
         child: Material(
           elevation: elevation,
           child: child,
+          color: color,
         ),
       ),
     );
