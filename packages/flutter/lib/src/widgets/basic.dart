@@ -2675,7 +2675,7 @@ class UnconstrainedBox extends StatelessWidget {
 /// [RenderFractionallySizedOverflowBox].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
-/// 
+///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows [FractionallySizedBox] widget that has one container
