@@ -228,6 +228,25 @@ class RouteInformation {
 /// [RouterDelegate.currentConfiguration] and
 /// [RouteInformationParser.restoreRouteInformation] APIs to provide an optimal
 /// user experience when running on the web platform.
+///
+/// ## State Restoration
+///
+/// The [Router] will restore the current configuration of the [routerDelegate]
+/// during state restoration if it is configured with a [restorationId] and
+/// state restoration is enabled for the subtree. For that, the value of
+/// [RouterDelegate.currentConfiguration] is serialized and persisted before the
+/// app is killed by the operating system. After the app is restarted, the value
+/// is deserialized and passed back to the [RouterDelegate] via a call to
+/// [RouterDelegate.setRestoredRoutePath] (which by default just calls
+/// [RouterDelegate.setNewRoutePath]). It is the responsibility of the
+/// [RouterDelegate] to use the configuration information provided to restore
+/// its internal state.
+///
+/// To serialize [RouterDelegate.currentConfiguration] and to deserialize it
+/// again, the [Router] calls [RouteInformationParser.restoreRouteInformation]
+/// and [RouteInformationParser.parseRouteInformation], respectively. Therefore,
+/// if a [restorationId] is provided, a [routeInformationParser] must be
+/// configured as well.
 class Router<T> extends StatefulWidget {
   /// Creates a router.
   ///
@@ -235,8 +254,8 @@ class Router<T> extends StatefulWidget {
   /// router does not depend on route information. A common example is a sub router
   /// that builds its content completely based on the app state.
   ///
-  /// If the [routeInformationProvider] is not null, the [routeInformationParser] must
-  /// also not be null.
+  /// If the [routeInformationProvider] or [restorationId] is not null, then
+  /// [routeInformationParser] must also not be null.
   ///
   /// The [routerDelegate] must not be null.
   const Router({
@@ -247,10 +266,8 @@ class Router<T> extends StatefulWidget {
     this.backButtonDispatcher,
     this.restorationId,
   })  : assert(
-          (routeInformationProvider == null) == (routeInformationParser == null),
-          'Both routeInformationProvider and routeInformationParser must be provided '
-          'if this router parses route information. Otherwise, they should both '
-          'be null.',
+          !(routeInformationProvider != null || restorationId != null) || routeInformationParser != null,
+          'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.'
         ),
         assert(routerDelegate != null),
         super(key: key);
@@ -296,6 +313,25 @@ class Router<T> extends StatefulWidget {
   /// router, or the [ChildBackButtonDispatcher] for other routers.
   final BackButtonDispatcher? backButtonDispatcher;
 
+  /// Restoration ID to save and restore the state of the [Router].
+  ///
+  /// If non-null, the [Router] will persist the [RouterDelegate]'s current
+  /// configuration (i.e. [RouterDelegate.currentConfiguration]). During state
+  /// restoration, the [Router] informs the [RouterDelegate] of the previous
+  /// configuration by calling [RouterDelegate.setRestoredRoutePath] (which by
+  /// default just calls [RouterDelegate.setNewRoutePath]). It is the
+  /// responsibility of the [RouterDelegate] to restore its internal state based
+  /// on the provided configuration.
+  ///
+  /// The router uses the [RouterInformationParser] to serialize and deserialize
+  /// [RouterDelegate.currentConfiguration]. Therefore, a
+  /// [routerInformationParser] must be provided when [restorationId] is
+  /// non-null.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
   final String? restorationId;
 
   /// Retrieves the immediate [Router] ancestor from the given context.
@@ -452,7 +488,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   String? _lastSeenLocation;
 
   void _scheduleRouteInformationReportingTask() {
-    if (_routeInformationReportingTaskScheduled)
+    if (_routeInformationReportingTaskScheduled || widget.routeInformationProvider == null)
       return;
     assert(_currentIntentionToReport != _IntentionToReportRouteInformation.none);
     _routeInformationReportingTaskScheduled = true;
@@ -489,22 +525,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     final T? configuration = widget.routerDelegate.currentConfiguration;
     if (configuration == null)
       return null;
-    final RouteInformation? routeInformation = widget.routeInformationParser!.restoreRouteInformation(configuration);
-    assert((){
-      if (routeInformation == null) {
-        FlutterError.reportError(
-          const FlutterErrorDetails(
-            exception:
-              'Router.routeInformationParser returns a null RouteInformation. '
-              'If you opt for route information reporting, the '
-              'routeInformationParser must not report null for a given '
-              'configuration.',
-          ),
-        );
-      }
-      return true;
-    }());
-    return routeInformation;
+    return widget.routeInformationParser?.restoreRouteInformation(configuration);
   }
 
   void _setStateWithExplicitReportStatus(
@@ -1090,8 +1111,9 @@ abstract class RouteInformationParser<T> {
 
   /// Restore the route information from the given configuration.
   ///
-  /// This may return null, in which case the browser history will not be updated.
-  /// See [Router]'s documentation for details.
+  /// This may return null, in which case the browser history will not be
+  /// updated and state restoration is disabled. See [Router]'s documentation
+  /// for details.
   ///
   /// The [parseRouteInformation] method must produce an equivalent
   /// configuration when passed this method's return value.
@@ -1121,6 +1143,17 @@ abstract class RouteInformationParser<T> {
 ///
 /// All subclass must implement [setNewRoutePath], [popRoute], and [build].
 ///
+/// ## State Restoration
+///
+/// If the [Router] owning this delegate is configured for state restoration, it
+/// will persist and restore the configuration of this [RouterDelegate] using
+/// the following mechanism: Before the app is killed by the operating system,
+/// the value of [currentConfiguration] is serialized out and persisted. After
+/// the app restarted, the value is deserialized and passed back to the
+/// [RouterDelegate] via a call to [setRestoredRoutePath] (which by default just
+/// calls [setNewRoutePath]). It is the responsibility of the [RouterDelegate]
+/// to use the configuration information provided to restore its internal state.
+///
 /// See also:
 ///
 ///  * [RouteInformationParser], which is responsible for parsing the route
@@ -1139,10 +1172,25 @@ abstract class RouterDelegate<T> extends Listenable {
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously, so that the [Router] does not need to wait for the next
   /// microtask to schedule a build.
+  ///
+  /// See also:
+  ///
+  ///  * [setRestoredRoutePath], which is called instead of this method during
+  ///    state restoration.
   Future<void> setInitialRoutePath(T configuration) {
     return setNewRoutePath(configuration);
   }
 
+  /// Called by the [Router] during state restoration.
+  ///
+  /// When the [Router] is configured for state restoration, it will persist
+  /// the value of [currentConfiguration] during state serialization. During
+  /// state restoration, the [Router] calls this method (instead of
+  /// [setInitialRoutePath]) to pass the previous configuration back to the
+  /// delegate. It is the responsibility of the delegate to restore its internal
+  /// state based on the provided configuration.
+  ///
+  /// By default, this method forwards the `configuration` to [setNewRoutePath].
   Future<void> setRestoredRoutePath(T configuration) {
     return setNewRoutePath(configuration);
   }
@@ -1188,6 +1236,13 @@ abstract class RouterDelegate<T> extends Listenable {
   /// At most one [Router] can opt in to route information reporting. Typically,
   /// only the top-most [Router] created by [WidgetsApp.router] should opt for
   /// route information reporting.
+  ///
+  /// ## State Restoration
+  ///
+  /// This getter is also used by the [Router] to implement state restoration.
+  /// During state serialization, the [Router] will persist the current
+  /// configuration and during state restoration pass it back to the delegate
+  /// by calling [setRestoredRoutePath].
   T? get currentConfiguration => null;
 
   /// Called by the [Router] to obtain the widget tree that represents the
