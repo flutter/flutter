@@ -745,6 +745,29 @@ void main() {
     expect(webStuff.childFile('bar'), isNot(exists));
   });
 
+  testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final Directory webStuff = fileSystem.directory('web-stuff');
+    final MockCache cache = MockCache();
+    final MockArtifactUpdater artifactUpdater = MockArtifactUpdater();
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform(operatingSystem: 'linux'));
+
+    when(cache.getWebSdkDirectory()).thenReturn(webStuff);
+    when(artifactUpdater.downloadZipArchive('Downloading Web SDK...', any, any))
+      .thenAnswer((Invocation invocation) async {
+        final Directory location = invocation.positionalArguments[2] as Directory;
+        location.createSync(recursive: true);
+        location.childFile('foo').createSync();
+      });
+    webStuff.childFile('bar').createSync(recursive: true);
+    handler.addError(webStuff, FileSystemOp.delete, const FileSystemException('', '', OSError('', 2)));
+
+    await expectLater(() => webSdk.updateInner(artifactUpdater, fileSystem, MockOperatingSystemUtils()), throwsToolExit(
+      message: RegExp('The Flutter tool tried to delete the file or directory web-stuff but was unable to'),
+    ));
+  });
+
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
