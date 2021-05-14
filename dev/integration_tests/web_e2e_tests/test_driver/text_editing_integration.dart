@@ -7,6 +7,7 @@ import 'dart:js_util' as js_util;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:web_e2e_tests/text_editing_main.dart' as app;
