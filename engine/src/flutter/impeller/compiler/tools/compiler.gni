@@ -3,11 +3,14 @@
 # found in the LICENSE file.
 
 import("//build/compiled_action.gni")
+import("//flutter/impeller/tools/metal/metal_library.gni")
 
 template("impeller_shaders") {
-  compiled_action_foreach(target_name) {
-    assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+  assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+  assert(defined(invoker.name), "Name of the shader library must be specified.")
 
+  metal_sources_target_name = "metal_sources_$target_name"
+  compiled_action_foreach(metal_sources_target_name) {
     tool = "//flutter/impeller/compiler:impellerc"
 
     sources = invoker.shaders
@@ -15,20 +18,28 @@ template("impeller_shaders") {
     metal_intermediate = "$target_gen_dir/{{source_file_part}}.metal"
     spirv_intermediate = "$target_gen_dir/{{source_file_part}}.spirv"
 
-    outputs = [
-      metal_intermediate,
-      spirv_intermediate,
-    ]
+    outputs = [ metal_intermediate ]
 
+    depfile_path = "$target_gen_dir/{{source_file_part}}.d"
     source_path = "{{source}}"
     metal_intermediate_path = rebase_path(metal_intermediate, root_build_dir)
     spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
+    depfile_intermediate_path = rebase_path(depfile_path, root_build_dir)
+
+    depfile = depfile_path
 
     args = [
       "--input=$source_path",
       "--metal=$metal_intermediate_path",
       "--spirv=$spirv_intermediate_path",
       "--include={{source_dir}}",
+      "--depfile=$depfile_intermediate_path",
     ]
+  }
+
+  metal_library(target_name) {
+    name = invoker.name
+    sources = get_target_outputs(":$metal_sources_target_name")
+    deps = [ ":$metal_sources_target_name" ]
   }
 }

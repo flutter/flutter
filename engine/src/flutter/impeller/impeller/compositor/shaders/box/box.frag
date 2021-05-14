@@ -1,3 +1,5 @@
+#include "types.h"
+
 out vec4 outColor;
 
 void main() {

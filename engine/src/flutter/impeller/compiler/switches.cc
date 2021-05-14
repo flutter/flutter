@@ -16,7 +16,8 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << "--input=<glsl_file>" << std::endl;
   stream << "--metal=<metal_output_file>" << std::endl;
   stream << "--spirv=<spirv_output_file>" << std::endl;
-  stream << "[Multiple] --include=<include_directory>" << std::endl;
+  stream << "[optional,multiple] --include=<include_directory>" << std::endl;
+  stream << "[optional] --depfile=<depfile_path>" << std::endl;
 }
 
 Switches::Switches() = default;
@@ -30,10 +31,12 @@ Switches::Switches(const fml::CommandLine& command_line)
                              fml::FilePermission::kRead))),
       source_file_name(command_line.GetOptionValueWithDefault("input", "")),
       metal_file_name(command_line.GetOptionValueWithDefault("metal", "")),
-      spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")) {
+      spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")),
+      depfile_path(command_line.GetOptionValueWithDefault("depfile", "")) {
   if (!working_directory || !working_directory->is_valid()) {
     return;
   }
+
   for (const auto& include_dir_path : command_line.GetOptionValues("include")) {
     if (!include_dir_path.data()) {
       continue;
@@ -43,7 +46,12 @@ Switches::Switches(const fml::CommandLine& command_line)
     if (!dir || !dir->is_valid()) {
       continue;
     }
-    include_directories.emplace_back(std::move(dir));
+
+    IncludeDir dir_entry;
+    dir_entry.name = include_dir_path;
+    dir_entry.dir = std::move(dir);
+
+    include_directories.emplace_back(std::move(dir_entry));
   }
 }
 

@@ -62,6 +62,16 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
+  if (!switches.depfile_path.empty()) {
+    if (!fml::WriteAtomically(
+            *switches.working_directory, switches.depfile_path.c_str(),
+            *compiler.CreateDepfileContents({switches.metal_file_name}))) {
+      std::cerr << "Could not write depfile to " << switches.depfile_path
+                << std::endl;
+      return false;
+    }
+  }
+
   return true;
 }
 

@@ -9,6 +9,16 @@ template("metal_library") {
   metal_library_name = invoker.name
 
   action("$target_name") {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "inputs",
+                             "outputs",
+                             "script",
+                             "depfile",
+                             "args",
+                           ])
+
     inputs = invoker.sources
 
     metal_library_path = "$root_out_dir/shaders/$metal_library_name.metallib"
