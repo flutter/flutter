@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -100,7 +99,7 @@ void main() {
         processManager: fakeProcessManager,
       );
 
-      expect(() => utils.which(kExecutable), throwsA(isA<ToolExit>()));
+      expect(() => utils.which(kExecutable), throwsToolExit());
     });
 
     testWithoutContext('returns null when executable does not exist', () async {

@@ -105,12 +105,13 @@ void main() {
   testUsingContext('thinning fails when framework missing', () async {
     processManager.addCommand(copyFrameworkCommand);
     await expectLater(
-        const DebugUnpackMacOS().build(environment),
-        throwsA(isA<Exception>().having(
-          (Exception exception) => exception.toString(),
-          'description',
-          contains('FlutterMacOS.framework/FlutterMacOS does not exist, cannot thin'),
-        )));
+      const DebugUnpackMacOS().build(environment),
+      throwsA(isException.having(
+        (Exception exception) => exception.toString(),
+        'description',
+        contains('FlutterMacOS.framework/FlutterMacOS does not exist, cannot thin'),
+      )),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -132,12 +133,13 @@ void main() {
     ]);
 
     await expectLater(
-        const DebugUnpackMacOS().build(environment),
-        throwsA(isA<Exception>().having(
-          (Exception exception) => exception.toString(),
-          'description',
-          contains('does not contain arm64 x86_64. Running lipo -info:\nArchitectures in the fat file:'),
-        )));
+      const DebugUnpackMacOS().build(environment),
+      throwsA(isException.having(
+        (Exception exception) => exception.toString(),
+        'description',
+        contains('does not contain arm64 x86_64. Running lipo -info:\nArchitectures in the fat file:'),
+      )),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

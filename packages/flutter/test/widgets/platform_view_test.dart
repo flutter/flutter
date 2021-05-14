@@ -1075,7 +1075,7 @@ void main() {
       await tester.pump();
 
       late int lastPlatformViewTextClient;
-      SystemChannels.textInput.setMockMethodCallHandler((MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
           lastPlatformViewTextClient = call.arguments as int;
         }
@@ -2520,7 +2520,7 @@ void main() {
         Center(
           child: Column(
             children: <Widget>[
-              SizedBox(child: platformViewLink, width: 300, height: 300),
+              SizedBox(width: 300, height: 300, child: platformViewLink),
               Focus(
                 debugLabel: 'container',
                 child: Container(key: containerKey),

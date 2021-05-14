@@ -1592,8 +1592,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
         result = WidgetInspector(
-          child: result,
           selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+          child: result,
         );
       }
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {

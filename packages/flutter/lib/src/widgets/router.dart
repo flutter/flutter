@@ -370,7 +370,7 @@ class Router<T> extends StatefulWidget {
     scope.routerState._setStateWithExplicitReportStatus(_IntentionToReportRouteInformation.must, callback);
   }
 
-  /// Forces the [Router] to to run the [callback] without reporting the route
+  /// Forces the [Router] to run the [callback] without reporting the route
   /// information back to the engine.
   ///
   /// Use this method if you don't want the [Router] to report the new route

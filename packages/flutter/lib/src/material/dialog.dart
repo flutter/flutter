@@ -507,9 +507,9 @@ class AlertDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6!,
           child: Semantics(
-            child: title,
             namesRoute: label == null,
             container: true,
+            child: title,
           ),
         ),
       );
@@ -1152,7 +1152,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
-  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
+  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0)!;

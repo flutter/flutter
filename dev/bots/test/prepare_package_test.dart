@@ -274,14 +274,14 @@ void main() {
         );
         await creator.initializeRepo();
 
-        try {
-          await creator.createArchive();
-          fail('failed to throw');
-        } on Exception catch (e) {
-          expect(e is PreparePackageException, true);
-          final PreparePackageException exception = e as PreparePackageException;
-          expect(exception.message, contains('The binary $binPath was not codesigned!'));
-        }
+        await expectLater(
+          () => creator.createArchive(),
+          throwsA(isA<PreparePackageException>().having(
+            (PreparePackageException exception) => exception.message,
+            'message',
+            contains('The binary $binPath was not codesigned!'),
+          )),
+        );
       }, skip: !platform.isMacOS);
     });
 

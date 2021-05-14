@@ -1436,6 +1436,12 @@ class DevToolsMemoryTest {
   }
 
   Future<void> _launchDevTools() async {
+    // To mitigate https://github.com/flutter/flutter/issues/82142
+    await exec(pubBin, <String>[
+      'global',
+      'deactivate',
+      'devtools',
+    ], canFail: true);
     // The version of devtools is pinned. If we pub global activate devtools and an
     // upstream devtools release breaks our CI, it will manifest on an unrelated
     // commit, making it more difficult to determine the cause.
@@ -1445,7 +1451,7 @@ class DevToolsMemoryTest {
       'global',
       'activate',
       'devtools',
-      '2.2.2',
+      '2.2.3',
     ]);
     _devToolsProcess = await startProcess(
       pubBin,

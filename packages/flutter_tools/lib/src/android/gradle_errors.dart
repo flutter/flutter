@@ -73,6 +73,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   flavorUndefinedHandler,
   r8FailureHandler,
   androidXFailureHandler,
+  minSdkVersion,
 ];
 
 // Permission defined error message.
@@ -351,4 +352,45 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'flavor-undefined',
+);
+
+
+final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[\:(.+)\]');
+
+/// Handler when a plugin requires a higher Android API level.
+@visibleForTesting
+final GradleHandledError minSdkVersion = GradleHandledError(
+  test: (String line) {
+    return _minSdkVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+
+    final Match minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
+    assert(minSdkVersionMatch.groupCount == 3);
+
+    globals.printStatus(
+      '\nThe plugin ${minSdkVersionMatch.group(3)} requires a higher Android SDK version.\n'+
+      globals.logger.terminal.bolden(
+        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+        'android {\n'
+        '  defaultConfig {\n'
+        '    minSdkVersion ${minSdkVersionMatch.group(2)}\n'
+        '  }\n'
+        '}\n\n'
+      )+
+      'Note that your app won\'t be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n'
+      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'plugin-min-sdk',
 );

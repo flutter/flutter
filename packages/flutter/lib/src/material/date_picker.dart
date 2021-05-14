@@ -528,12 +528,12 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         spacing: 8,
         children: <Widget>[
           TextButton(
-            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
             onPressed: _handleCancel,
+            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
           ),
           TextButton(
-            child: Text(widget.confirmText ?? localizations.okButtonLabel),
             onPressed: _handleOk,
+            child: Text(widget.confirmText ?? localizations.okButtonLabel),
           ),
         ],
       ),
@@ -630,6 +630,8 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         width: dialogSize.width,
         height: dialogSize.height,
@@ -673,8 +675,6 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           }),
         ),
       ),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      clipBehavior: Clip.antiAlias,
     );
   }
 }
@@ -1512,6 +1512,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
     }
 
     return Dialog(
+      insetPadding: insetPadding,
+      shape: shape,
+      elevation: elevation,
+      clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         width: size.width,
         height: size.height,
@@ -1526,10 +1530,6 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           }),
         ),
       ),
-      insetPadding: insetPadding,
-      shape: shape,
-      elevation: elevation,
-      clipBehavior: Clip.antiAlias,
     );
   }
 }
@@ -1607,6 +1607,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
             const SizedBox(width: 8),
           ],
           bottom: PreferredSize(
+            preferredSize: const Size(double.infinity, 64),
             child: Row(children: <Widget>[
               SizedBox(width: MediaQuery.of(context).size.width < 360 ? 42 : 72),
               Expanded(
@@ -1654,7 +1655,6 @@ class _CalendarRangePickerDialog extends StatelessWidget {
                   child: entryModeButton!,
                 ),
             ]),
-            preferredSize: const Size(double.infinity, 64),
           ),
         ),
         body: _CalendarDateRangePicker(
@@ -2725,12 +2725,12 @@ class _InputDateRangePickerDialog extends StatelessWidget {
         spacing: 8,
         children: <Widget>[
           TextButton(
-            child: Text(cancelText ?? localizations.cancelButtonLabel),
             onPressed: onCancel,
+            child: Text(cancelText ?? localizations.cancelButtonLabel),
           ),
           TextButton(
-            child: Text(confirmText ?? localizations.okButtonLabel),
             onPressed: onConfirm,
+            child: Text(confirmText ?? localizations.okButtonLabel),
           ),
         ],
       ),
