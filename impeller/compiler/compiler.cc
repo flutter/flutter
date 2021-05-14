@@ -4,6 +4,7 @@
 
 #include "flutter/impeller/compiler/compiler.h"
 
+#include <filesystem>
 #include <memory>
 #include <sstream>
 
@@ -184,6 +185,19 @@ static shaderc_shader_kind ToShaderCShaderKind(Compiler::SourceType type) {
   return shaderc_shader_kind::shaderc_glsl_infer_from_source;
 }
 
+static spv::ExecutionModel ToExecutionModel(Compiler::SourceType type) {
+  switch (type) {
+    case Compiler::SourceType::kVertexShader:
+      return spv::ExecutionModel::ExecutionModelVertex;
+    case Compiler::SourceType::kFragmentShader:
+      return spv::ExecutionModel::ExecutionModelFragment;
+    case Compiler::SourceType::kUnknown:
+      break;
+  }
+  return spv::ExecutionModel::ExecutionModelMax;
+  ;
+}
+
 Compiler::Compiler(const fml::Mapping& source_mapping,
                    SourceOptions source_options)
     : options_(source_options) {
@@ -265,6 +279,11 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
       spv_result_->cbegin(), spv_result_->cend() - spv_result_->cbegin());
 
   {
+    msl_compiler.rename_entry_point("main", options_.entry_point_name,
+                                    ToExecutionModel(options_.type));
+  }
+
+  {
     spirv_cross::CompilerMSL::Options msl_options;
     msl_options.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
     msl_compiler.set_msl_options(msl_options);
@@ -341,6 +360,27 @@ Compiler::SourceType Compiler::SourceTypeFromFileName(
   }
 
   return Compiler::SourceType::kUnknown;
+}
+
+std::string Compiler::EntryPointFromSourceName(const std::string& file_name,
+                                               SourceType type) {
+  std::stringstream stream;
+  stream << "__impeller_";
+  std::filesystem::path file_path(file_name);
+  stream << file_path.stem().native() << "_";
+  switch (type) {
+    case SourceType::kUnknown:
+      stream << "unknown";
+      break;
+    case SourceType::kVertexShader:
+      stream << "vertex";
+      break;
+    case SourceType::kFragmentShader:
+      stream << "fragment";
+      break;
+  }
+  stream << "_main__";
+  return stream.str();
 }
 
 std::string Compiler::GetSourcePrefix() const {
