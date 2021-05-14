@@ -87,6 +87,9 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   WindowsRenderTarget GetRenderTarget() override;
 
   // |FlutterWindowBindingHandler|
+  PlatformWindow GetPlatformWindow() override;
+
+  // |FlutterWindowBindingHandler|
   float GetDpiScale() override;
 
   // |FlutterWindowBindingHandler|

@@ -5,12 +5,13 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_UWP_FLUTTER_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_UWP_FLUTTER_WINDOW_H_
 
-#include <winrt/Windows.Devices.Input.h>
-#include <winrt/Windows.UI.Composition.h>
-#include <winrt/Windows.UI.Input.h>
-#include <winrt/Windows.UI.Text.Core.h>
-#include <winrt/Windows.UI.ViewManagement.Core.h>
-#include <winrt/Windows.UI.ViewManagement.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.ApplicationModel.Core.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.Devices.Input.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.Composition.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.Input.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.Text.Core.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.ViewManagement.Core.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.UI.ViewManagement.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/display_helper_winuwp.h"
@@ -25,7 +26,8 @@ namespace flutter {
 // Specifically handles window events within windows.
 class FlutterWindowWinUWP : public WindowBindingHandler {
  public:
-  explicit FlutterWindowWinUWP(ABI::Windows::UI::Core::CoreWindow* window);
+  explicit FlutterWindowWinUWP(
+      ABI::Windows::ApplicationModel::Core::CoreApplicationView* window);
 
   virtual ~FlutterWindowWinUWP();
 
@@ -34,6 +36,9 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
 
   // |WindowBindingHandler|
   WindowsRenderTarget GetRenderTarget() override;
+
+  // |FlutterWindowBindingHandler|
+  PlatformWindow GetPlatformWindow() override;
 
   // |WindowBindingHandler|
   float GetDpiScale() override;
@@ -118,6 +123,10 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
 
   // Backing CoreWindow. nullptr if not set.
   winrt::Windows::UI::Core::CoreWindow window_{nullptr};
+
+  // CoreApplicationView that owns window_. nullptr if not set.
+  winrt::Windows::ApplicationModel::Core::CoreApplicationView application_view_{
+      nullptr};
 
   // Pointer to a FlutterWindowsView that can be
   // used to update engine windowing and input state.
