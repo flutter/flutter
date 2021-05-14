@@ -1,3 +1,4 @@
+:: TODO(yjbanov): migrate LUCI to felt.bat and delete this file.
 :: felt_windows: a command-line utility for Windows for building and testing
 :: Flutter web engine.
 :: FELT stands for Flutter Engine Local Tester.
@@ -37,13 +38,6 @@ SET SNAPSHOT_PATH="%DART_TOOL_DIR%felt.snapshot"
 :: Set revision from using git in Flutter directory.
 CD %FLUTTER_DIR%
 FOR /F "tokens=1 delims=:" %%a in ('git rev-parse HEAD') DO SET REVISION=%%a
-
-:: Uncomment for debugging the values.
-:: ECHO "FELT_DIR:%FELT_DIR%"
-:: ECHO "WEB_UI_DIR:%WEB_UI_DIR%"
-:: ECHO "FLUTTER_DIR:%FLUTTER_DIR%"
-:: ECHO "ENGINE_SRC_DIR:%ENGINE_SRC_DIR%"
-:: ECHO "REVISION:%REVISION%"
 
 SET orTempValue=1
 IF NOT EXIST %OUT_DIR% (SET orTempValue=0)
