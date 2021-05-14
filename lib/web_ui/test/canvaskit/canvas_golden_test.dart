@@ -21,13 +21,16 @@ void main() {
 
 const ui.Rect kDefaultRegion = const ui.Rect.fromLTRB(0, 0, 500, 250);
 
-Future<void> matchPictureGolden(String goldenFile, CkPicture picture, { ui.Rect region = kDefaultRegion, bool write = false }) async {
-  final EnginePlatformDispatcher dispatcher = ui.window.platformDispatcher as EnginePlatformDispatcher;
+Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
+    {ui.Rect region = kDefaultRegion, bool write = false}) async {
+  final EnginePlatformDispatcher dispatcher =
+      ui.window.platformDispatcher as EnginePlatformDispatcher;
   final LayerSceneBuilder sb = LayerSceneBuilder();
   sb.pushOffset(0, 0);
   sb.addPicture(ui.Offset.zero, picture);
   dispatcher.rasterizer!.draw(sb.build().layerTree);
-  await matchGoldenFile(goldenFile, region: region, maxDiffRatePercent: 0.0, write: write);
+  await matchGoldenFile(goldenFile,
+      region: region, maxDiffRatePercent: 0.0, write: write);
 }
 
 void testMain() {
@@ -66,8 +69,7 @@ void testMain() {
       drawTestPicture(canvas);
 
       final CkPicture originalPicture = recorder.endRecording();
-      await matchPictureGolden(
-          'canvaskit_picture.png', originalPicture);
+      await matchPictureGolden('canvaskit_picture.png', originalPicture);
 
       final ByteData originalPixels =
           await (await originalPicture.toImage(50, 50)).toByteData()
@@ -84,8 +86,7 @@ void testMain() {
           await (await restoredPicture.toImage(50, 50)).toByteData()
               as ByteData;
 
-      await matchPictureGolden(
-          'canvaskit_picture.png', restoredPicture);
+      await matchPictureGolden('canvaskit_picture.png', restoredPicture);
       expect(restoredPixels.buffer.asUint8List(),
           originalPixels.buffer.asUint8List());
     });
@@ -138,14 +139,16 @@ void testMain() {
             pb.addText('$elevation');
             final CkParagraph p = pb.build();
             p.layout(const ui.ParagraphConstraints(width: 1000));
-            canvas.drawParagraph(p, ui.Offset(20 - p.maxIntrinsicWidth / 2, 20 - p.height / 2));
+            canvas.drawParagraph(
+                p, ui.Offset(20 - p.maxIntrinsicWidth / 2, 20 - p.height / 2));
             canvas.translate(80, 0);
           }
           canvas.restore();
           canvas.translate(0, 80);
         }
       });
-      await matchPictureGolden('canvaskit_directional_shadows.png', picture, region: region);
+      await matchPictureGolden('canvaskit_directional_shadows.png', picture,
+          region: region);
     });
 
     test('computes shadow bounds correctly with parent transforms', () async {
@@ -160,16 +163,17 @@ void testMain() {
       );
       late List<PhysicalShapeEngineLayer> physicalShapeLayers;
 
-      LayerTree buildTestScene({ required bool paintShadowBounds }) {
-        final Iterator<PhysicalShapeEngineLayer>? shadowBounds = paintShadowBounds
-          ? physicalShapeLayers.iterator : null;
+      LayerTree buildTestScene({required bool paintShadowBounds}) {
+        final Iterator<PhysicalShapeEngineLayer>? shadowBounds =
+            paintShadowBounds ? physicalShapeLayers.iterator : null;
         physicalShapeLayers = <PhysicalShapeEngineLayer>[];
 
         final LayerSceneBuilder builder = LayerSceneBuilder();
         builder.pushOffset(padding + halfSize, padding + halfSize);
 
         final CkPath shape = CkPath()
-          ..addRect(const ui.Rect.fromLTRB(-halfSize, -halfSize, halfSize, halfSize));
+          ..addRect(
+              const ui.Rect.fromLTRB(-halfSize, -halfSize, halfSize, halfSize));
         final CkPaint shadowBoundsPaint = CkPaint()
           ..style = ui.PaintingStyle.stroke
           ..strokeWidth = 1
@@ -177,10 +181,13 @@ void testMain() {
 
         for (int row = 0; row < 2; row += 1) {
           for (int col = 0; col < 3; col += 1) {
-            builder.pushOffset(col * (rectSize + padding), row * (rectSize + padding));
-            builder.pushTransform(Float64List.fromList(Matrix4.rotationZ(row * math.pi / 4).storage));
+            builder.pushOffset(
+                col * (rectSize + padding), row * (rectSize + padding));
+            builder.pushTransform(Float64List.fromList(
+                Matrix4.rotationZ(row * math.pi / 4).storage));
             final double scale = 1 / (1 + col);
-            builder.pushTransform(Float64List.fromList(Matrix4.diagonal3Values(scale, scale, 1).storage));
+            builder.pushTransform(Float64List.fromList(
+                Matrix4.diagonal3Values(scale, scale, 1).storage));
             physicalShapeLayers.add(builder.pushPhysicalShape(
               path: shape,
               elevation: 6,
@@ -190,9 +197,11 @@ void testMain() {
             if (shadowBounds != null) {
               shadowBounds.moveNext();
               final ui.Rect bounds = shadowBounds.current.paintBounds;
-              builder.addPicture(ui.Offset.zero, paintPicture(region, (CkCanvas canvas) {
-                canvas.drawRect(bounds, shadowBoundsPaint);
-              }));
+              builder.addPicture(
+                  ui.Offset.zero,
+                  paintPicture(region, (CkCanvas canvas) {
+                    canvas.drawRect(bounds, shadowBoundsPaint);
+                  }));
             }
             builder.pop();
             builder.pop();
@@ -207,17 +216,18 @@ void testMain() {
       // Render the scene once without painting the shadow bounds just to
       // preroll the scene to compute the shadow bounds.
       buildTestScene(paintShadowBounds: false).rootLayer.preroll(
-        PrerollContext(
-          RasterCache(),
-          HtmlViewEmbedder(),
-        ),
-        Matrix4.identity(),
-      );
+            PrerollContext(
+              RasterCache(),
+              HtmlViewEmbedder(),
+            ),
+            Matrix4.identity(),
+          );
 
       // Render again, this time with the shadow bounds.
       final LayerTree layerTree = buildTestScene(paintShadowBounds: true);
 
-      final EnginePlatformDispatcher dispatcher = ui.window.platformDispatcher as EnginePlatformDispatcher;
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
       dispatcher.rasterizer!.draw(layerTree);
       await matchGoldenFile('canvaskit_shadow_bounds.png', region: region);
     });
@@ -227,11 +237,13 @@ void testMain() {
     });
 
     test('text styles - center aligned', () async {
-      await testTextStyle('center aligned', paragraphTextAlign: ui.TextAlign.center);
+      await testTextStyle('center aligned',
+          paragraphTextAlign: ui.TextAlign.center);
     });
 
     test('text styles - right aligned', () async {
-      await testTextStyle('right aligned', paragraphTextAlign: ui.TextAlign.right);
+      await testTextStyle('right aligned',
+          paragraphTextAlign: ui.TextAlign.right);
     });
 
     test('text styles - rtl', () async {
@@ -247,7 +259,8 @@ void testMain() {
     });
 
     test('text styles - ellipsis', () async {
-      await testTextStyle('ellipsis', paragraphMaxLines: 1, paragraphEllipsis: '...', layoutWidth: 60);
+      await testTextStyle('ellipsis',
+          paragraphMaxLines: 1, paragraphEllipsis: '...', layoutWidth: 60);
     });
 
     test('text styles - paragraph font family', () async {
@@ -259,18 +272,23 @@ void testMain() {
     });
 
     test('text styles - paragraph height', () async {
-      await testTextStyle('paragraph height', layoutWidth: 50, paragraphHeight: 1.5);
+      await testTextStyle('paragraph height',
+          layoutWidth: 50, paragraphHeight: 1.5);
     });
 
     test('text styles - paragraph text height behavior', () async {
-      await testTextStyle('paragraph text height behavior', layoutWidth: 50, paragraphHeight: 1.5, paragraphTextHeightBehavior: ui.TextHeightBehavior(
-        applyHeightToFirstAscent: false,
-        applyHeightToLastDescent: false,
-      ));
+      await testTextStyle('paragraph text height behavior',
+          layoutWidth: 50,
+          paragraphHeight: 1.5,
+          paragraphTextHeightBehavior: ui.TextHeightBehavior(
+            applyHeightToFirstAscent: false,
+            applyHeightToLastDescent: false,
+          ));
     });
 
     test('text styles - paragraph weight', () async {
-      await testTextStyle('paragraph weight', paragraphFontWeight: ui.FontWeight.w900);
+      await testTextStyle('paragraph weight',
+          paragraphFontWeight: ui.FontWeight.w900);
     });
 
     test('text style - paragraph font style', () async {
@@ -285,19 +303,31 @@ void testMain() {
     // TODO(yjbanov): spaces are not rendered correctly:
     //                https://github.com/flutter/flutter/issues/74742
     test('text styles - paragraph locale zh_CN', () async {
-      await testTextStyle('paragraph locale zh_CN', outerText: '次 化 刃 直 入 令', innerText: '', paragraphLocale: const ui.Locale('zh', 'CN'));
+      await testTextStyle('paragraph locale zh_CN',
+          outerText: '次 化 刃 直 入 令',
+          innerText: '',
+          paragraphLocale: const ui.Locale('zh', 'CN'));
     });
 
     test('text styles - paragraph locale zh_TW', () async {
-      await testTextStyle('paragraph locale zh_TW', outerText: '次 化 刃 直 入 令', innerText: '', paragraphLocale: const ui.Locale('zh', 'TW'));
+      await testTextStyle('paragraph locale zh_TW',
+          outerText: '次 化 刃 直 入 令',
+          innerText: '',
+          paragraphLocale: const ui.Locale('zh', 'TW'));
     });
 
     test('text styles - paragraph locale ja', () async {
-      await testTextStyle('paragraph locale ja', outerText: '次 化 刃 直 入 令', innerText: '', paragraphLocale: const ui.Locale('ja'));
+      await testTextStyle('paragraph locale ja',
+          outerText: '次 化 刃 直 入 令',
+          innerText: '',
+          paragraphLocale: const ui.Locale('ja'));
     });
 
     test('text styles - paragraph locale ko', () async {
-      await testTextStyle('paragraph locale ko', outerText: '次 化 刃 直 入 令', innerText: '', paragraphLocale: const ui.Locale('ko'));
+      await testTextStyle('paragraph locale ko',
+          outerText: '次 化 刃 直 入 令',
+          innerText: '',
+          paragraphLocale: const ui.Locale('ko'));
     });
 
     test('text styles - color', () async {
@@ -305,15 +335,19 @@ void testMain() {
     });
 
     test('text styles - decoration', () async {
-      await testTextStyle('decoration', decoration: ui.TextDecoration.underline);
+      await testTextStyle('decoration',
+          decoration: ui.TextDecoration.underline);
     });
 
     test('text styles - decoration style', () async {
-      await testTextStyle('decoration style', decoration: ui.TextDecoration.underline, decorationStyle: ui.TextDecorationStyle.dashed);
+      await testTextStyle('decoration style',
+          decoration: ui.TextDecoration.underline,
+          decorationStyle: ui.TextDecorationStyle.dashed);
     });
 
     test('text styles - decoration thickness', () async {
-      await testTextStyle('decoration thickness', decoration: ui.TextDecoration.underline, decorationThickness: 5.0);
+      await testTextStyle('decoration thickness',
+          decoration: ui.TextDecoration.underline, decorationThickness: 5.0);
     });
 
     test('text styles - font weight', () async {
@@ -326,7 +360,8 @@ void testMain() {
 
     // TODO(yjbanov): not sure how to test this.
     test('text styles - baseline', () async {
-      await testTextStyle('baseline', textBaseline: ui.TextBaseline.ideographic);
+      await testTextStyle('baseline',
+          textBaseline: ui.TextBaseline.ideographic);
     });
 
     test('text styles - font family', () async {
@@ -334,11 +369,13 @@ void testMain() {
     });
 
     test('text styles - non-existent font family', () async {
-      await testTextStyle('non-existent font family', fontFamily: 'DoesNotExist');
+      await testTextStyle('non-existent font family',
+          fontFamily: 'DoesNotExist');
     });
 
     test('text styles - family fallback', () async {
-      await testTextStyle('family fallback', fontFamily: 'DoesNotExist', fontFamilyFallback: <String>['Ahem']);
+      await testTextStyle('family fallback',
+          fontFamily: 'DoesNotExist', fontFamilyFallback: <String>['Ahem']);
     });
 
     test('text styles - font size', () async {
@@ -350,7 +387,8 @@ void testMain() {
     });
 
     test('text styles - word spacing', () async {
-      await testTextStyle('word spacing', innerText: 'Beautiful World!', wordSpacing: 25);
+      await testTextStyle('word spacing',
+          innerText: 'Beautiful World!', wordSpacing: 25);
     });
 
     test('text styles - height', () async {
@@ -358,7 +396,10 @@ void testMain() {
     });
 
     test('text styles - leading distribution', () async {
-      await testTextStyle('half leading', height: 20, fontSize: 10, leadingDistribution: ui.TextLeadingDistribution.even);
+      await testTextStyle('half leading',
+          height: 20,
+          fontSize: 10,
+          leadingDistribution: ui.TextLeadingDistribution.even);
       await testTextStyle(
         'half leading inherited from paragraph',
         height: 20,
@@ -383,27 +424,41 @@ void testMain() {
     // TODO(yjbanov): spaces are not rendered correctly:
     //                https://github.com/flutter/flutter/issues/74742
     test('text styles - locale zh_CN', () async {
-      await testTextStyle('locale zh_CN', innerText: '次 化 刃 直 入 令', outerText: '', locale: const ui.Locale('zh', 'CN'));
+      await testTextStyle('locale zh_CN',
+          innerText: '次 化 刃 直 入 令',
+          outerText: '',
+          locale: const ui.Locale('zh', 'CN'));
     });
 
     test('text styles - locale zh_TW', () async {
-      await testTextStyle('locale zh_TW', innerText: '次 化 刃 直 入 令', outerText: '', locale: const ui.Locale('zh', 'TW'));
+      await testTextStyle('locale zh_TW',
+          innerText: '次 化 刃 直 入 令',
+          outerText: '',
+          locale: const ui.Locale('zh', 'TW'));
     });
 
     test('text styles - locale ja', () async {
-      await testTextStyle('locale ja', innerText: '次 化 刃 直 入 令', outerText: '', locale: const ui.Locale('ja'));
+      await testTextStyle('locale ja',
+          innerText: '次 化 刃 直 入 令',
+          outerText: '',
+          locale: const ui.Locale('ja'));
     });
 
     test('text styles - locale ko', () async {
-      await testTextStyle('locale ko', innerText: '次 化 刃 直 入 令', outerText: '', locale: const ui.Locale('ko'));
+      await testTextStyle('locale ko',
+          innerText: '次 化 刃 直 入 令',
+          outerText: '',
+          locale: const ui.Locale('ko'));
     });
 
     test('text styles - background', () async {
-      await testTextStyle('background', background: CkPaint()..color = const ui.Color(0xFF00FF00));
+      await testTextStyle('background',
+          background: CkPaint()..color = const ui.Color(0xFF00FF00));
     });
 
     test('text styles - foreground', () async {
-      await testTextStyle('foreground', foreground: CkPaint()..color = const ui.Color(0xFF0000FF));
+      await testTextStyle('foreground',
+          foreground: CkPaint()..color = const ui.Color(0xFF0000FF));
     });
 
     test('text styles - foreground and background', () async {
@@ -525,15 +580,15 @@ void testMain() {
       );
     });
 
-    test('text style - foreground/background/color do not leak across paragraphs', () async {
+    test(
+        'text style - foreground/background/color do not leak across paragraphs',
+        () async {
       const double testWidth = 440;
       const double middle = testWidth / 2;
-      CkParagraph createTestParagraph({
-        ui.Color? color,
-        CkPaint? foreground,
-        CkPaint? background
-      }) {
-        final CkParagraphBuilder builder = CkParagraphBuilder(CkParagraphStyle());
+      CkParagraph createTestParagraph(
+          {ui.Color? color, CkPaint? foreground, CkPaint? background}) {
+        final CkParagraphBuilder builder =
+            CkParagraphBuilder(CkParagraphStyle());
         builder.pushStyle(CkTextStyle(
           fontSize: 16,
           color: color,
@@ -569,16 +624,18 @@ void testMain() {
       final List<ParagraphFactory> variations = <ParagraphFactory>[
         () => createTestParagraph(),
         () => createTestParagraph(color: ui.Color(0xFF009900)),
-        () => createTestParagraph(foreground: CkPaint()..color = ui.Color(0xFF990000)),
-        () => createTestParagraph(background: CkPaint()..color = ui.Color(0xFF7777FF)),
         () => createTestParagraph(
-          color: ui.Color(0xFFFF00FF),
-          background: CkPaint()..color = ui.Color(0xFF0000FF),
-        ),
+            foreground: CkPaint()..color = ui.Color(0xFF990000)),
         () => createTestParagraph(
-          foreground: CkPaint()..color = ui.Color(0xFF00FFFF),
-          background: CkPaint()..color = ui.Color(0xFF0000FF),
-        ),
+            background: CkPaint()..color = ui.Color(0xFF7777FF)),
+        () => createTestParagraph(
+              color: ui.Color(0xFFFF00FF),
+              background: CkPaint()..color = ui.Color(0xFF0000FF),
+            ),
+        () => createTestParagraph(
+              foreground: CkPaint()..color = ui.Color(0xFF00FFFF),
+              background: CkPaint()..color = ui.Color(0xFF0000FF),
+            ),
       ];
 
       final CkPictureRecorder recorder = CkPictureRecorder();
@@ -591,12 +648,14 @@ void testMain() {
           final CkParagraph fromParagraph = from();
           canvas.drawParagraph(fromParagraph, ui.Offset.zero);
 
-          final ui.Offset leftEnd = ui.Offset(fromParagraph.maxIntrinsicWidth + 10, fromParagraph.height / 2);
+          final ui.Offset leftEnd = ui.Offset(
+              fromParagraph.maxIntrinsicWidth + 10, fromParagraph.height / 2);
           final ui.Offset rightEnd = ui.Offset(middle - 10, leftEnd.dy);
           final ui.Offset tipOffset = ui.Offset(-5, -5);
           canvas.drawLine(leftEnd, rightEnd, CkPaint());
           canvas.drawLine(rightEnd, rightEnd + tipOffset, CkPaint());
-          canvas.drawLine(rightEnd, rightEnd + tipOffset.scale(1, -1), CkPaint());
+          canvas.drawLine(
+              rightEnd, rightEnd + tipOffset.scale(1, -1), CkPaint());
 
           canvas.translate(middle, 0);
           canvas.drawParagraph(to(), ui.Offset.zero);
@@ -727,14 +786,17 @@ void testMain() {
   }, skip: isIosSafari || isFirefox);
 }
 
-Future<void> testSampleText(String language, String text, { ui.TextDirection textDirection = ui.TextDirection.ltr, bool write = false }) async {
+Future<void> testSampleText(String language, String text,
+    {ui.TextDirection textDirection = ui.TextDirection.ltr,
+    bool write = false}) async {
   FontFallbackData.debugReset();
   const double testWidth = 300;
   double paragraphHeight = 0;
   final CkPicture picture = await generatePictureWhenFontsStable(() {
     final CkPictureRecorder recorder = CkPictureRecorder();
     final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
-    final CkParagraphBuilder paragraphBuilder = CkParagraphBuilder(CkParagraphStyle(
+    final CkParagraphBuilder paragraphBuilder =
+        CkParagraphBuilder(CkParagraphStyle(
       textDirection: textDirection,
     ));
     paragraphBuilder.addText(text);
@@ -1152,10 +1214,12 @@ Future<void> testTextStyle(
     final CkPictureRecorder recorder = CkPictureRecorder();
     final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
     canvas.translate(30, 10);
-    final CkParagraphBuilder descriptionBuilder = CkParagraphBuilder(CkParagraphStyle());
+    final CkParagraphBuilder descriptionBuilder =
+        CkParagraphBuilder(CkParagraphStyle());
     descriptionBuilder.addText(name);
     final CkParagraph descriptionParagraph = descriptionBuilder.build();
-    descriptionParagraph.layout(ui.ParagraphConstraints(width: testWidth / 2 - 70));
+    descriptionParagraph
+        .layout(ui.ParagraphConstraints(width: testWidth / 2 - 70));
     final ui.Offset descriptionOffset = ui.Offset(testWidth / 2 + 30, 0);
     canvas.drawParagraph(descriptionParagraph, descriptionOffset);
 
@@ -1226,7 +1290,9 @@ Future<void> testTextStyle(
     );
     const double padding = 20;
     region = ui.Rect.fromLTRB(
-      0, 0, testWidth,
+      0,
+      0,
+      testWidth,
       math.max(
         descriptionOffset.dy + descriptionParagraph.height + padding,
         p.height + padding,
@@ -1250,11 +1316,13 @@ Future<void> testTextStyle(
 
 typedef PictureGenerator = CkPicture Function();
 
-Future<CkPicture> generatePictureWhenFontsStable(PictureGenerator generator) async {
+Future<CkPicture> generatePictureWhenFontsStable(
+    PictureGenerator generator) async {
   CkPicture picture = generator();
   // Font downloading begins asynchronously so we inject a timer before checking the download queue.
   await Future<void>.delayed(Duration.zero);
-  while (notoDownloadQueue.isPending || notoDownloadQueue.downloader.debugActiveDownloadCount > 0) {
+  while (notoDownloadQueue.isPending ||
+      notoDownloadQueue.downloader.debugActiveDownloadCount > 0) {
     await notoDownloadQueue.debugWhenIdle();
     await notoDownloadQueue.downloader.debugWhenIdle();
     picture = generator();

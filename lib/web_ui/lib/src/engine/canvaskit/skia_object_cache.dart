@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:collection';
+
+import 'package:meta/meta.dart';
+import '../../engine.dart' show EnginePlatformDispatcher, Instrumentation;
+
+import 'canvaskit_api.dart';
+import '../util.dart';
 
 /// A cache of Skia objects whose memory Flutter manages.
 ///
@@ -248,7 +254,8 @@ typedef Resurrector<T> = T Function();
 /// prior to being deleted permanently. A temporary deletion may effectively
 /// be permanent if this object is garbage collected. This is safe because a
 /// temporarily deleted object has no C++ resources to collect.
-class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends SkiaObject<T> {
+class SkiaObjectBox<R extends StackTraceDebugger, T extends Object>
+    extends SkiaObject<T> {
   /// Creates an object box that's memory-managed using [SkFinalizationRegistry].
   ///
   /// This constructor must only be used if [browserSupportsFinalizationRegistry] is true.
@@ -261,7 +268,8 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends Skia
   /// Creates an object box that's memory-managed using a [Resurrector].
   ///
   /// This constructor must only be used if [browserSupportsFinalizationRegistry] is false.
-  SkiaObjectBox.resurrectable(R debugReferrer, T initialValue, this._resurrector) {
+  SkiaObjectBox.resurrectable(
+      R debugReferrer, T initialValue, this._resurrector) {
     assert(!browserSupportsFinalizationRegistry);
     _initialize(debugReferrer, initialValue);
     SkiaObjects.manageExpensive(this);
@@ -362,14 +370,16 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends Skia
 
   /// Whether the underlying [rawSkiaObject] has been deleted, but it may still
   /// be resurrected (see [SkiaObjectBox.resurrectable]).
-  bool get isDeletedTemporarily => rawSkiaObject == null && !_isDeletedPermanently;
+  bool get isDeletedTemporarily =>
+      rawSkiaObject == null && !_isDeletedPermanently;
 
   /// Increases the reference count of this box because a new object began
   /// sharing ownership of the underlying [skiaObject].
   ///
   /// Clones must be [dispose]d when finished.
   void ref(R debugReferrer) {
-    assert(!_isDeletedPermanently, 'Cannot increment ref count on a deleted handle.');
+    assert(!_isDeletedPermanently,
+        'Cannot increment ref count on a deleted handle.');
     assert(_refCount > 0);
     assert(
       debugReferrers.add(debugReferrer),
@@ -386,7 +396,8 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends Skia
   /// If this causes the reference count to drop to zero, deletes the
   /// [skObject].
   void unref(R debugReferrer) {
-    assert(!_isDeletedPermanently, 'Attempted to unref an already deleted Skia object.');
+    assert(!_isDeletedPermanently,
+        'Attempted to unref an already deleted Skia object.');
     assert(
       debugReferrers.remove(debugReferrer),
       'Attempted to decrement ref count by the same referrer more than once.',
@@ -435,7 +446,11 @@ class SkiaObjects {
     if (_addedCleanupCallback) {
       return;
     }
-    EnginePlatformDispatcher.instance.rasterizer!.addPostFrameCallback(postFrameCleanUp);
+    // This method is @visibleForTesting but we're getting a warning about
+    // using a @visibleForTesting member.
+    // ignore: invalid_use_of_visible_for_testing_member
+    EnginePlatformDispatcher.instance.rasterizer!
+        .addPostFrameCallback(postFrameCleanUp);
     _addedCleanupCallback = true;
   }
 

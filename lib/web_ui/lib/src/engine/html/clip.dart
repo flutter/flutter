@@ -342,7 +342,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     _clipElement?.remove();
     _svgElement?.remove();
     _clipElement =
-        html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
+        html.Element.html(svgClipPath, treeSanitizer: NullTreeSanitizer());
     domRenderer.append(rootElement!, _clipElement!);
     if (elevation == 0.0) {
       DomRenderer.setClipPath(rootElement!, createSvgClipUrl());
@@ -469,7 +469,7 @@ class PersistedClipPath extends PersistedContainerSurface
     final String svgClipPath =
         createSvgClipDef(childContainer as html.HtmlElement, clipPath);
     _clipElement =
-        html.Element.html(svgClipPath, treeSanitizer: _NullTreeSanitizer());
+        html.Element.html(svgClipPath, treeSanitizer: NullTreeSanitizer());
     domRenderer.append(childContainer!, _clipElement!);
   }
 

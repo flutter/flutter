@@ -37,7 +37,7 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.widthWithTrailingSpaces,
     required this.left,
     required this.lineNumber,
-  })  : assert(displayText != null), // ignore: unnecessary_null_comparison
+  })  : assert(displayText != null), // ignore: unnecessary_null_comparison,
         assert(startIndex != null), // ignore: unnecessary_null_comparison
         assert(endIndex != null), // ignore: unnecessary_null_comparison
         assert(endIndexWithoutNewlines != null), // ignore: unnecessary_null_comparison
@@ -167,33 +167,33 @@ class EngineLineMetrics implements ui.LineMetrics {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is EngineLineMetrics
-        && other.displayText == displayText
-        && other.startIndex == startIndex
-        && other.endIndex == endIndex
-        && other.hardBreak == hardBreak
-        && other.ascent == ascent
-        && other.descent == descent
-        && other.unscaledAscent == unscaledAscent
-        && other.height == height
-        && other.width == width
-        && other.left == left
-        && other.baseline == baseline
-        && other.lineNumber == lineNumber;
+    return other is EngineLineMetrics &&
+        other.displayText == displayText &&
+        other.startIndex == startIndex &&
+        other.endIndex == endIndex &&
+        other.hardBreak == hardBreak &&
+        other.ascent == ascent &&
+        other.descent == descent &&
+        other.unscaledAscent == unscaledAscent &&
+        other.height == height &&
+        other.width == width &&
+        other.left == left &&
+        other.baseline == baseline &&
+        other.lineNumber == lineNumber;
   }
 
   @override
   String toString() {
     if (assertionsEnabled) {
       return 'LineMetrics(hardBreak: $hardBreak, '
-                        'ascent: $ascent, '
-                        'descent: $descent, '
-                        'unscaledAscent: $unscaledAscent, '
-                        'height: $height, '
-                        'width: $width, '
-                        'left: $left, '
-                        'baseline: $baseline, '
-                        'lineNumber: $lineNumber)';
+          'ascent: $ascent, '
+          'descent: $descent, '
+          'unscaledAscent: $unscaledAscent, '
+          'height: $height, '
+          'width: $width, '
+          'left: $left, '
+          'baseline: $baseline, '
+          'lineNumber: $lineNumber)';
     } else {
       return super.toString();
     }
@@ -367,7 +367,8 @@ class DomParagraph implements EngineParagraph {
     _measurementResult = _measurementService.measure(this, constraints);
     if (Profiler.isBenchmarkMode) {
       stopwatch.stop();
-      Profiler.instance.benchmark('text_layout', stopwatch.elapsedMicroseconds.toDouble());
+      Profiler.instance
+          .benchmark('text_layout', stopwatch.elapsedMicroseconds.toDouble());
     }
 
     _lastUsedConstraints = constraints;
@@ -413,7 +414,8 @@ class DomParagraph implements EngineParagraph {
     // Paint the background first.
     final SurfacePaint? background = _background;
     if (background != null) {
-      final ui.Rect rect = ui.Rect.fromLTWH(offset.dx, offset.dy, width, height);
+      final ui.Rect rect =
+          ui.Rect.fromLTWH(offset.dx, offset.dy, width, height);
       canvas.drawRect(rect, background.paintData);
     }
 
@@ -837,7 +839,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
 
   // The effective style attributes should be consistent with paragraph_style.h.
   ui.TextAlign get _effectiveTextAlign => _textAlign ?? ui.TextAlign.start;
-  ui.TextDirection get _effectiveTextDirection => _textDirection ?? ui.TextDirection.ltr;
+  ui.TextDirection get _effectiveTextDirection =>
+      _textDirection ?? ui.TextDirection.ltr;
 
   String get _effectiveFontFamily {
     if (assertionsEnabled) {
@@ -880,18 +883,18 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is EngineParagraphStyle
-        && other._textAlign == _textAlign
-        && other._textDirection == _textDirection
-        && other._fontWeight == _fontWeight
-        && other._fontStyle == _fontStyle
-        && other._maxLines == _maxLines
-        && other._fontFamily == _fontFamily
-        && other._fontSize == _fontSize
-        && other._height == _height
-        && other._textHeightBehavior == _textHeightBehavior
-        && other._ellipsis == _ellipsis
-        && other._locale == _locale;
+    return other is EngineParagraphStyle &&
+        other._textAlign == _textAlign &&
+        other._textDirection == _textDirection &&
+        other._fontWeight == _fontWeight &&
+        other._fontStyle == _fontStyle &&
+        other._maxLines == _maxLines &&
+        other._fontFamily == _fontFamily &&
+        other._fontSize == _fontSize &&
+        other._height == _height &&
+        other._textHeightBehavior == _textHeightBehavior &&
+        other._ellipsis == _ellipsis &&
+        other._locale == _locale;
   }
 
   @override
@@ -1096,24 +1099,24 @@ class EngineTextStyle implements ui.TextStyle {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is EngineTextStyle
-        && other._color == _color
-        && other._decoration == _decoration
-        && other._decorationColor == _decorationColor
-        && other._decorationStyle == _decorationStyle
-        && other._fontWeight == _fontWeight
-        && other._fontStyle == _fontStyle
-        && other._textBaseline == _textBaseline
-        && other._fontFamily == _fontFamily
-        && other._fontSize == _fontSize
-        && other._letterSpacing == _letterSpacing
-        && other._wordSpacing == _wordSpacing
-        && other._height == _height
-        && other._locale == _locale
-        && other._background == _background
-        && other._foreground == _foreground
-        && _listEquals<ui.Shadow>(other._shadows, _shadows)
-        && _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
+    return other is EngineTextStyle &&
+        other._color == _color &&
+        other._decoration == _decoration &&
+        other._decorationColor == _decorationColor &&
+        other._decorationStyle == _decorationStyle &&
+        other._fontWeight == _fontWeight &&
+        other._fontStyle == _fontStyle &&
+        other._textBaseline == _textBaseline &&
+        other._fontFamily == _fontFamily &&
+        other._fontSize == _fontSize &&
+        other._letterSpacing == _letterSpacing &&
+        other._wordSpacing == _wordSpacing &&
+        other._height == _height &&
+        other._locale == _locale &&
+        other._background == _background &&
+        other._foreground == _foreground &&
+        listEquals<ui.Shadow>(other._shadows, _shadows) &&
+        listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
   }
 
   @override
@@ -1170,41 +1173,6 @@ class EngineTextStyle implements ui.TextStyle {
 
 /// The web implementation of [ui.StrutStyle].
 class EngineStrutStyle implements ui.StrutStyle {
-  /// Creates a new StrutStyle object.
-  ///
-  /// * `fontFamily`: The name of the font to use when painting the text (e.g.,
-  ///   Roboto).
-  ///
-  /// * `fontFamilyFallback`: An ordered list of font family names that will be searched for when
-  ///    the font in `fontFamily` cannot be found.
-  ///
-  /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting
-  ///   the text.
-  ///
-  /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the
-  ///   font size. The lines of the paragraph will be at least
-  ///   `(lineHeight + leading) * fontSize` tall when fontSize
-  ///   is not null. When fontSize is null, there is no minimum line height. Tall
-  ///   glyphs due to baseline alignment or large [TextStyle.fontSize] may cause
-  ///   the actual line height after layout to be taller than specified here.
-  ///   [fontSize] must be provided for this property to take effect.
-  ///
-  /// * `leading`: The minimum amount of leading between lines as a multiple of
-  ///   the font size. [fontSize] must be provided for this property to take effect.
-  ///
-  /// * `fontWeight`: The typeface thickness to use when painting the text
-  ///   (e.g., bold).
-  ///
-  /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g.,
-  ///   italics).
-  ///
-  /// * `forceStrutHeight`: When true, the paragraph will force all lines to be exactly
-  ///   `(lineHeight + leading) * fontSize` tall from baseline to baseline.
-  ///   [TextStyle] is no longer able to influence the line height, and any tall
-  ///   glyphs may overlap with lines above. If a [fontFamily] is specified, the
-  ///   total ascent of the first line will be the min of the `Ascent + half-leading`
-  ///   of the [fontFamily] and `(lineHeight + leading) * fontSize`. Otherwise, it
-  ///   will be determined by the Ascent + half-leading of the first text.
   EngineStrutStyle({
     String? fontFamily,
     List<String>? fontFamilyFallback,
@@ -1243,16 +1211,16 @@ class EngineStrutStyle implements ui.StrutStyle {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is EngineStrutStyle
-        && other._fontFamily == _fontFamily
-        && other._fontSize == _fontSize
-        && other._height == _height
-        && other._leading == _leading
-        && other._leadingDistribution == _leadingDistribution
-        && other._fontWeight == _fontWeight
-        && other._fontStyle == _fontStyle
-        && other._forceStrutHeight == _forceStrutHeight
-        && _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
+    return other is EngineStrutStyle &&
+        other._fontFamily == _fontFamily &&
+        other._fontSize == _fontSize &&
+        other._height == _height &&
+        other._leading == _leading &&
+        other._leadingDistribution == _leadingDistribution &&
+        other._fontWeight == _fontWeight &&
+        other._fontStyle == _fontStyle &&
+        other._forceStrutHeight == _forceStrutHeight &&
+        listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
   }
 
   @override
@@ -1274,7 +1242,8 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
   /// Marks a call to the [pop] method in the [_ops] list.
   static final Object _paragraphBuilderPop = Object();
 
-  final html.HtmlElement _paragraphElement = domRenderer.createElement('p') as html.HtmlElement;
+  final html.HtmlElement _paragraphElement =
+      domRenderer.createElement('p') as html.HtmlElement;
   final EngineParagraphStyle _paragraphStyle;
   final List<dynamic> _ops = <dynamic>[];
 
@@ -1324,7 +1293,9 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     // Require a baseline to be specified if using a baseline-based alignment.
     assert((alignment == ui.PlaceholderAlignment.aboveBaseline ||
             alignment == ui.PlaceholderAlignment.belowBaseline ||
-            alignment == ui.PlaceholderAlignment.baseline) ? baseline != null : true);
+            alignment == ui.PlaceholderAlignment.baseline)
+        ? baseline != null
+        : true);
 
     _placeholderCount++;
     _placeholderScales.add(scale);
@@ -1394,12 +1365,14 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     ui.FontWeight? fontWeight = _paragraphStyle._fontWeight;
     ui.FontStyle? fontStyle = _paragraphStyle._fontStyle;
     ui.TextBaseline? textBaseline;
-    String fontFamily = _paragraphStyle._fontFamily ?? DomRenderer.defaultFontFamily;
+    String fontFamily =
+        _paragraphStyle._fontFamily ?? DomRenderer.defaultFontFamily;
     List<String>? fontFamilyFallback;
     List<ui.FontFeature>? fontFeatures;
     double fontSize = _paragraphStyle._fontSize ?? DomRenderer.defaultFontSize;
     final ui.TextAlign textAlign = _paragraphStyle._effectiveTextAlign;
-    final ui.TextDirection textDirection = _paragraphStyle._effectiveTextDirection;
+    final ui.TextDirection textDirection =
+        _paragraphStyle._effectiveTextDirection;
     double? letterSpacing;
     double? wordSpacing;
     double? height;
@@ -1604,7 +1577,8 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
     for (int i = 0; i < _ops.length; i++) {
       final dynamic op = _ops[i];
       if (op is EngineTextStyle) {
-        final html.SpanElement span = domRenderer.createElement('span') as html.SpanElement;
+        final html.SpanElement span =
+            domRenderer.createElement('span') as html.SpanElement;
         _applyTextStyleToElement(element: span, style: op, isSpan: true);
         if (op._background != null) {
           _applyTextBackgroundToElement(element: span, style: op);
@@ -1789,8 +1763,7 @@ void _applyTextStyleToElement({
   if (isSpan && !ui.debugEmulateFlutterTesterEnvironment) {
     cssStyle.fontFamily = canonicalizeFontFamily(style._fontFamily);
   } else {
-    cssStyle.fontFamily =
-        canonicalizeFontFamily(style._effectiveFontFamily);
+    cssStyle.fontFamily = canonicalizeFontFamily(style._effectiveFontFamily);
   }
   if (style._letterSpacing != null) {
     cssStyle.letterSpacing = '${style._letterSpacing}px';
@@ -2002,7 +1975,8 @@ String? textDirectionIndexToCss(int textDirectionIndex) {
 /// ```css
 /// text-align: right;
 /// ```
-String textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection) {
+String textAlignToCssValue(
+    ui.TextAlign? align, ui.TextDirection textDirection) {
   switch (align) {
     case ui.TextAlign.left:
       return 'left';
@@ -2030,24 +2004,4 @@ String textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection) 
       // If align is not specified return default.
       return '';
   }
-}
-
-/// Determines if lists [a] and [b] are deep equivalent.
-///
-/// Returns true if the lists are both null, or if they are both non-null, have
-/// the same length, and contain the same elements in the same order. Returns
-/// false otherwise.
-bool _listEquals<T>(List<T>? a, List<T>? b) {
-  if (a == null) {
-    return b == null;
-  }
-  if (b == null || a.length != b.length) {
-    return false;
-  }
-  for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index]) {
-      return false;
-    }
-  }
-  return true;
 }

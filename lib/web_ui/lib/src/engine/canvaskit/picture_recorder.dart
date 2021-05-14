@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
+
+import 'canvas.dart';
+import 'canvaskit_api.dart';
+import 'picture.dart';
 
 class CkPictureRecorder implements ui.PictureRecorder {
   ui.Rect? _cullRect;
@@ -15,8 +21,8 @@ class CkPictureRecorder implements ui.PictureRecorder {
     final Float32List skRect = toSkRect(bounds);
     final SkCanvas skCanvas = recorder.beginRecording(skRect);
     return _recordingCanvas = browserSupportsFinalizationRegistry
-      ? CkCanvas(skCanvas)
-      : RecordingCkCanvas(skCanvas, bounds);
+        ? CkCanvas(skCanvas)
+        : RecordingCkCanvas(skCanvas, bounds);
   }
 
   CkCanvas? get recordingCanvas => _recordingCanvas;

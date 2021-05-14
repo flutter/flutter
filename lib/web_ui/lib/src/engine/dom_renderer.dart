@@ -366,7 +366,7 @@ flt-glass-pane * {
     setElementAttribute(
       bodyElement,
       'flt-renderer',
-      '${useCanvasKit ? 'canvaskit' : 'html'} (${_autoDetect ? 'auto-selected' : 'requested explicitly'})',
+      '${useCanvasKit ? 'canvaskit' : 'html'} (${flutterWebAutoDetect ? 'auto-selected' : 'requested explicitly'})',
     );
     setElementAttribute(bodyElement, 'flt-build-mode', buildMode);
 

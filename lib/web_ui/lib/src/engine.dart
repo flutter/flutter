@@ -15,9 +15,9 @@ library engine;
 // - https://github.com/flutter/engine/blob/master/web_sdk/sdk_rewriter.dart
 
 import 'dart:async';
+// Some of these names are used in services/buffers.dart for example.
+// ignore: unused_import
 import 'dart:collection'
-    // Some of these names are used in services/buffers.dart for example.
-    // ignore: unused_shown_name
     show ListBase, IterableBase, DoubleLinkedQueue, DoubleLinkedQueueEntry;
 import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
@@ -147,39 +147,74 @@ export 'engine/vector_math.dart';
 import 'engine/web_experiments.dart';
 export 'engine/web_experiments.dart';
 
+export 'engine/canvaskit/canvas.dart';
+
+import 'engine/canvaskit/canvaskit_api.dart';
+export 'engine/canvaskit/canvaskit_api.dart';
+
+export 'engine/canvaskit/canvaskit_canvas.dart';
+
+import 'engine/canvaskit/color_filter.dart';
+export 'engine/canvaskit/color_filter.dart';
+
+import 'engine/canvaskit/embedded_views.dart';
+export 'engine/canvaskit/embedded_views.dart';
+
+export 'engine/canvaskit/fonts.dart';
+
+export 'engine/canvaskit/font_fallbacks.dart';
+
+export 'engine/canvaskit/image.dart';
+
+export 'engine/canvaskit/image_filter.dart';
+
+import 'engine/canvaskit/initialization.dart';
+export 'engine/canvaskit/initialization.dart';
+
+export 'engine/canvaskit/interval_tree.dart';
+
+import 'engine/canvaskit/layer.dart';
+export 'engine/canvaskit/layer.dart';
+
+import 'engine/canvaskit/layer_scene_builder.dart';
+export 'engine/canvaskit/layer_scene_builder.dart';
+
+export 'engine/canvaskit/layer_tree.dart';
+
+export 'engine/canvaskit/mask_filter.dart';
+
+export 'engine/canvaskit/n_way_canvas.dart';
+
+export 'engine/canvaskit/painting.dart';
+
+export 'engine/canvaskit/path.dart';
+
+export 'engine/canvaskit/path_metrics.dart';
+
+export 'engine/canvaskit/picture.dart';
+
+export 'engine/canvaskit/picture_recorder.dart';
+
+import 'engine/canvaskit/rasterizer.dart';
+export 'engine/canvaskit/rasterizer.dart';
+
+export 'engine/canvaskit/raster_cache.dart';
+
+export 'engine/canvaskit/shader.dart';
+
+export 'engine/canvaskit/skia_object_cache.dart';
+
+import 'engine/canvaskit/surface.dart';
+export 'engine/canvaskit/surface.dart';
+
+export 'engine/canvaskit/text.dart';
+
+export 'engine/canvaskit/util.dart';
+
+export 'engine/canvaskit/vertices.dart';
+
 part 'engine/assets.dart';
 part 'engine/html/bitmap_canvas.dart';
-part 'engine/canvaskit/canvas.dart';
-part 'engine/canvaskit/canvaskit_canvas.dart';
-part 'engine/canvaskit/canvaskit_api.dart';
-part 'engine/canvaskit/color_filter.dart';
-part 'engine/canvaskit/embedded_views.dart';
-part 'engine/canvaskit/fonts.dart';
-part 'engine/canvaskit/font_fallbacks.dart';
-part 'engine/canvaskit/image.dart';
-part 'engine/canvaskit/image_filter.dart';
-part 'engine/canvaskit/initialization.dart';
-part 'engine/canvaskit/interval_tree.dart';
-part 'engine/canvaskit/layer.dart';
-part 'engine/canvaskit/layer_scene_builder.dart';
-part 'engine/canvaskit/layer_tree.dart';
-part 'engine/canvaskit/mask_filter.dart';
-part 'engine/canvaskit/n_way_canvas.dart';
-part 'engine/canvaskit/path.dart';
-part 'engine/canvaskit/painting.dart';
-part 'engine/canvaskit/path_metrics.dart';
-part 'engine/canvaskit/picture.dart';
-part 'engine/canvaskit/picture_recorder.dart';
-part 'engine/canvaskit/platform_message.dart';
-part 'engine/canvaskit/raster_cache.dart';
-part 'engine/canvaskit/rasterizer.dart';
-part 'engine/canvaskit/shader.dart';
-part 'engine/canvaskit/skia_object_cache.dart';
-part 'engine/canvaskit/surface.dart';
-part 'engine/canvaskit/text.dart';
-part 'engine/canvaskit/util.dart';
-part 'engine/canvaskit/vertices.dart';
-part 'engine/canvaskit/viewport_metrics.dart';
 part 'engine/canvas_pool.dart';
 part 'engine/clipboard.dart';
 part 'engine/color_filter.dart';
@@ -251,8 +286,11 @@ const bool kReleaseMode =
 const bool kProfileMode =
     bool.fromEnvironment('dart.vm.profile', defaultValue: false);
 const bool kDebugMode = !kReleaseMode && !kProfileMode;
-String get buildMode =>
-    kReleaseMode ? 'release' : kProfileMode ? 'profile' : 'debug';
+String get buildMode => kReleaseMode
+    ? 'release'
+    : kProfileMode
+        ? 'profile'
+        : 'debug';
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as
@@ -370,7 +408,7 @@ void _addUrlStrategyListener() {
   });
 }
 
-class _NullTreeSanitizer implements html.NodeTreeSanitizer {
+class NullTreeSanitizer implements html.NodeTreeSanitizer {
   @override
   void sanitizeTree(html.Node node) {}
 }

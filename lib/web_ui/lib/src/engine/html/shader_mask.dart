@@ -149,7 +149,7 @@ class PersistedShaderMask extends PersistedContainerSurface
           imageUrl, blendModeTemp, maskRect.width, maskRect.height)!;
 
       _shaderElement =
-          html.Element.html(code, treeSanitizer: _NullTreeSanitizer());
+          html.Element.html(code, treeSanitizer: NullTreeSanitizer());
       if (isWebKit) {
         _childContainer!.style.filter = 'url(#_fmf${_maskFilterIdCounter}';
       } else {
