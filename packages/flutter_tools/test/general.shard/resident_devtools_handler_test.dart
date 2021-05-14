@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -353,6 +355,66 @@ void main() {
       ],
     );
   });
+
+  testWithoutContext('Does not launch devtools in browser if launcher is null', () async {
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      null,
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
+    expect(handler.launchedInBrowser, isFalse);
+    expect(handler.activeDevToolsServer, null);
+  });
+
+  testWithoutContext('Does not launch devtools in browser if ResidentRunner does not support the service protocol', () async {
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher(),
+      FakeResidentRunner()..supportsServiceProtocol = false,
+      BufferLogger.test(),
+    );
+
+    handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
+    expect(handler.launchedInBrowser, isFalse);
+    expect(handler.activeDevToolsServer, null);
+  });
+
+  testWithoutContext('launchDevToolsInBrowser launches after _devToolsLauncher.ready completes', () async {
+    final Completer<void> completer = Completer<void>();
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()
+        ..devToolsUrl = null
+        // We need to set [activeDevToolsServer] to simulate the state we would
+        // be in after serving devtools completes.
+        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080)
+        ..readyCompleter = completer,
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+    expect(handler.launchedInBrowser, isFalse);
+
+    completer.complete();
+    // Await a short delay to give DevTools time to launch.
+    await Future<void>.delayed(const Duration(microseconds: 100));
+
+    expect(handler.launchedInBrowser, isTrue);
+  });
+
+  testWithoutContext('launchDevToolsInBrowser launches successfully', () async {
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()
+        ..devToolsUrl = Uri(host: 'localhost', port: 8080)
+        ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeResidentRunner(),
+      BufferLogger.test(),
+    );
+
+    expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
+    expect(handler.launchedInBrowser, isTrue);
+  });
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -360,12 +422,17 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   DevToolsServerAddress activeDevToolsServer;
 
   @override
+  Uri devToolsUrl;
+
+  @override
   Future<DevToolsServerAddress> serve() {
     return null;
   }
 
   @override
-  Future<void> get ready => Future<void>.value();
+  Future<void> get ready => readyCompleter.future;
+
+  Completer<void> readyCompleter = Completer<void>()..complete();
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {

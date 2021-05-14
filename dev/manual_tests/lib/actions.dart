@@ -299,7 +299,7 @@ class DemoButton extends StatefulWidget {
   final String name;
 
   @override
-  _DemoButtonState createState() => _DemoButtonState();
+  State<DemoButton> createState() => _DemoButtonState();
 }
 
 class _DemoButtonState extends State<DemoButton> {
@@ -351,7 +351,7 @@ class FocusDemo extends StatefulWidget {
   static GlobalKey appKey = GlobalKey();
 
   @override
-  _FocusDemoState createState() => _FocusDemoState();
+  State<FocusDemo> createState() => _FocusDemoState();
 }
 
 class _FocusDemoState extends State<FocusDemo> {
@@ -455,23 +455,23 @@ class _FocusDemoState extends State<FocusDemo> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ElevatedButton(
-                                child: const Text('UNDO'),
                                 onPressed: canUndo
                                     ? () {
                                         Actions.invoke(context, const UndoIntent());
                                       }
                                     : null,
+                                child: const Text('UNDO'),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ElevatedButton(
-                                child: const Text('REDO'),
                                 onPressed: canRedo
                                     ? () {
                                         Actions.invoke(context, const RedoIntent());
                                       }
                                     : null,
+                                child: const Text('REDO'),
                               ),
                             ),
                           ],

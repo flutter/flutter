@@ -232,7 +232,7 @@ class Dismissible extends StatefulWidget {
   final HitTestBehavior behavior;
 
   @override
-  _DismissibleState createState() => _DismissibleState();
+  State<Dismissible> createState() => _DismissibleState();
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -618,8 +618,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: widget.behavior,
-      child: content,
       dragStartBehavior: widget.dragStartBehavior,
+      child: content,
     );
   }
 }

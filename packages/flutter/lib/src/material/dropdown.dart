@@ -176,9 +176,9 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       child = InkWell(
         autofocus: widget.itemIndex == widget.route.selectedIndex,
         enableFeedback: widget.enableFeedback,
-        child: child,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
+        child: child,
       );
     }
     child = FadeTransition(opacity: opacity, child: child);
@@ -668,6 +668,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   /// The [child] argument is required.
   const _DropdownMenuItemContainer({
     Key? key,
+    this.alignment = AlignmentDirectional.centerStart,
     required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -677,11 +678,23 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
+  /// Defines how the item is positioned within the container.
+  ///
+  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
+  final AlignmentGeometry alignment;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-      alignment: AlignmentDirectional.centerStart,
+      alignment: alignment,
       child: child,
     );
   }
@@ -700,9 +713,10 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     this.onTap,
     this.value,
     this.enabled = true,
+    AlignmentGeometry alignment = AlignmentDirectional.centerStart,
     required Widget child,
   }) : assert(child != null),
-       super(key: key, child: child);
+       super(key: key, alignment:alignment, child: child);
 
   /// Called when the dropdown menu item is tapped.
   final VoidCallback? onTap;
@@ -866,6 +880,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.dropdownColor,
     this.menuMaxHeight,
     this.enableFeedback,
+    this.alignment = AlignmentDirectional.centerStart,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1138,8 +1153,20 @@ class DropdownButton<T> extends StatefulWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// Defines how the hint or the selected item is positioned within the button.
+  ///
+  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
+  final AlignmentGeometry alignment;
+
   @override
-  _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
+  State<DropdownButton<T>> createState() => _DropdownButtonState<T>();
 }
 
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
@@ -1407,7 +1434,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     } else {
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,
-        alignment: AlignmentDirectional.centerStart,
+        alignment: widget.alignment,
         children: widget.isDense ? items : items.map((Widget item) {
           return widget.itemHeight != null
             ? SizedBox(height: widget.itemHeight, child: item)
@@ -1537,6 +1564,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool autovalidate = false,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
+    bool? enableFeedback,
+    AlignmentGeometry alignment = AlignmentDirectional.centerStart,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1606,6 +1635,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      autofocus: autofocus,
                      dropdownColor: dropdownColor,
                      menuMaxHeight: menuMaxHeight,
+                     enableFeedback: enableFeedback,
+                     alignment: alignment,
                    ),
                  ),
                );

@@ -672,6 +672,8 @@ abstract class ResidentHandlers {
   /// Whether all of the connected devices support hot reload.
   bool get canHotReload;
 
+  ResidentDevtoolsHandler get residentDevtoolsHandler;
+
   @protected
   Logger get logger;
 
@@ -1113,6 +1115,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   final CommandHelp commandHelp;
   final bool machine;
 
+  @override
   ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
   ResidentDevtoolsHandler _residentDevtoolsHandler;
 
@@ -1454,6 +1457,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   void printHelpDetails() {
+    commandHelp.v.print();
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       commandHelp.s.print();
     }
@@ -1694,6 +1698,9 @@ class TerminalHandler {
         return residentRunner.debugDumpRenderTree();
       case 'U':
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+      case 'v':
+      case 'V':
+        return residentRunner.residentDevtoolsHandler.launchDevToolsInBrowser(flutterDevices: residentRunner.flutterDevices);
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();

@@ -33,7 +33,7 @@ class HoverDemo extends StatefulWidget {
   const HoverDemo({Key key}) : super(key: key);
 
   @override
-  _HoverDemoState createState() => _HoverDemoState();
+  State<HoverDemo> createState() => _HoverDemoState();
 }
 
 class _HoverDemoState extends State<HoverDemo> {
@@ -65,13 +65,13 @@ class _HoverDemoState extends State<HoverDemo> {
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     TextButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     IconButton(
                       onPressed: () => print('Button pressed'),

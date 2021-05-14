@@ -722,7 +722,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }
 
   @override
-  _AppBarState createState() => _AppBarState();
+  State<AppBar> createState() => _AppBarState();
 }
 
 class _AppBarState extends State<AppBar> {
@@ -901,8 +901,8 @@ class _AppBarState extends State<AppBar> {
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
           namesRoute: namesRoute,
-          child: title,
           header: true,
+          child: title,
         );
       }
 
@@ -1186,7 +1186,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         title: title,
         actions: actions,
         flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
-          ? Semantics(child: flexibleSpace, header: true)
+          ? Semantics(
+              header: true,
+              child: flexibleSpace,
+            )
           : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
@@ -1747,7 +1750,7 @@ class SliverAppBar extends StatefulWidget {
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   @override
-  _SliverAppBarState createState() => _SliverAppBarState();
+  State<SliverAppBar> createState() => _SliverAppBarState();
 }
 
 // This class is only Stateful because it owns the TickerProvider used

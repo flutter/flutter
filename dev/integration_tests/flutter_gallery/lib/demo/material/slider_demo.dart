@@ -14,7 +14,7 @@ class SliderDemo extends StatefulWidget {
   static const String routeName = '/material/slider';
 
   @override
-  _SliderDemoState createState() => _SliderDemoState();
+  State<SliderDemo> createState() => _SliderDemoState();
 }
 
 Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {

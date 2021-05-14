@@ -301,8 +301,8 @@ class DayPicker extends StatelessWidget {
             onTap: () {
               onChanged(dayToBuild);
             },
-            child: dayWidget,
             dragStartBehavior: dragStartBehavior,
+            child: dayWidget,
           );
         }
 
@@ -401,7 +401,7 @@ class MonthPicker extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _MonthPickerState createState() => _MonthPickerState();
+  State<MonthPicker> createState() => _MonthPickerState();
 }
 
 class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {

@@ -115,7 +115,7 @@ class AnimatedSize extends StatefulWidget {
   final Clip clipBehavior;
 
   @override
-  _AnimatedSizeState createState() => _AnimatedSizeState();
+  State<AnimatedSize> createState() => _AnimatedSizeState();
 }
 
 class _AnimatedSizeState
@@ -123,13 +123,13 @@ class _AnimatedSizeState
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
-      child: widget.child,
       alignment: widget.alignment,
       curve: widget.curve,
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
       vsync: this,
       clipBehavior: widget.clipBehavior,
+      child: widget.child,
     );
   }
 }

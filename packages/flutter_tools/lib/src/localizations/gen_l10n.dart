@@ -346,6 +346,22 @@ String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
     .replaceAll('@(name)', message.resourceId);
 }
 
+// Add spaces to pad the start of each line. Skips the first line
+// assuming that the padding is already present.
+String _addSpaces(String message, {int spaces = 0}) {
+  bool isFirstLine = true;
+  return message
+    .split('\n')
+    .map((String value) {
+      if (isFirstLine) {
+        isFirstLine = false;
+        return value;
+      }
+      return value.padLeft(spaces);
+    })
+    .join('\n');
+}
+
 String _generateLookupByAllCodes(
   AppResourceBundleCollection allBundles,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
@@ -365,7 +381,7 @@ String _generateLookupByAllCodes(
 
   return allCodesLookupTemplate.replaceAll(
     '@(allCodesSwitchClauses)',
-    switchClauses.join('\n    '),
+    switchClauses.join('\n        '),
   );
 }
 
@@ -383,13 +399,20 @@ String _generateLookupByScriptCode(
       return null;
     }
 
-    return nestedSwitchTemplate
+    return _addSpaces(nestedSwitchTemplate
       .replaceAll('@(languageCode)', language)
       .replaceAll('@(code)', 'scriptCode')
-      .replaceAll('@(switchClauses)', localesWithScriptCodes.map((LocaleInfo locale) {
-          return generateSwitchClauseTemplate(locale)
-            .replaceAll('@(case)', locale.scriptCode!);
-        }).join('\n        '));
+      .replaceAll('@(switchClauses)',
+        _addSpaces(
+          localesWithScriptCodes.map((LocaleInfo locale) {
+            return generateSwitchClauseTemplate(locale)
+              .replaceAll('@(case)', locale.scriptCode!);
+          }).join('\n'),
+          spaces: 8,
+        ),
+      ),
+      spaces: 4,
+    );
   }).whereType<String>();
 
   if (switchClauses.isEmpty) {
@@ -398,7 +421,7 @@ String _generateLookupByScriptCode(
 
   return languageCodeSwitchTemplate
     .replaceAll('@(comment)', '// Lookup logic when language+script codes are specified.')
-    .replaceAll('@(switchClauses)', switchClauses.join('\n    '),
+    .replaceAll('@(switchClauses)', switchClauses.join('\n      '),
   );
 }
 
@@ -416,13 +439,18 @@ String _generateLookupByCountryCode(
       return null;
     }
 
-    return nestedSwitchTemplate
-      .replaceAll('@(languageCode)', language)
-      .replaceAll('@(code)', 'countryCode')
-      .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
-          return generateSwitchClauseTemplate(locale)
-            .replaceAll('@(case)', locale.countryCode!);
-        }).join('\n        '));
+    return _addSpaces(
+      nestedSwitchTemplate
+        .replaceAll('@(languageCode)', language)
+        .replaceAll('@(code)', 'countryCode')
+        .replaceAll('@(switchClauses)', _addSpaces(
+          localesWithCountryCodes.map((LocaleInfo locale) {
+            return generateSwitchClauseTemplate(locale).replaceAll('@(case)', locale.countryCode!);
+          }).join('\n'),
+          spaces: 4,
+        )),
+      spaces: 4,
+    );
   }).whereType<String>();
 
   if (switchClauses.isEmpty) {
@@ -451,7 +479,7 @@ String _generateLookupByLanguageCode(
     return localesWithLanguageCode.map((LocaleInfo locale) {
       return generateSwitchClauseTemplate(locale)
         .replaceAll('@(case)', locale.languageCode);
-    }).join('\n        ');
+    }).join('\n      ');
   }).whereType<String>();
 
   if (switchClauses.isEmpty) {
@@ -1133,7 +1161,11 @@ class LocalizationsGenerator {
       .replaceAll('@(requiresFoundationImport)', useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
       .replaceAll('@(requiresIntlImport)', _containsPluralMessage() ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
-      .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!');
+      .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
+      // Removes all trailing whitespace from the generated file.
+      .split('\n').map((String line) => line.trimRight()).join('\n')
+      // Cleans out unnecessary newlines.
+      .replaceAll('\n\n\n', '\n\n');
   }
 
   bool _containsPluralMessage() => _allMessages.any((Message message) => message.isPlural);

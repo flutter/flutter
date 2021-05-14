@@ -318,7 +318,7 @@ class ReorderableListState extends State<ReorderableList> {
   void startItemDragReorder({
     required int index,
     required PointerDownEvent event,
-    required MultiDragGestureRecognizer<MultiDragPointerState> recognizer,
+    required MultiDragGestureRecognizer recognizer,
   }) {
     _sliverReorderableListKey.currentState!.startItemDragReorder(index: index, event: event, recognizer: recognizer);
   }
@@ -519,7 +519,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   _DragInfo? _dragInfo;
   int? _insertIndex;
   Offset? _finalDropPosition;
-  MultiDragGestureRecognizer<MultiDragPointerState>? _recognizer;
+  MultiDragGestureRecognizer? _recognizer;
   bool _autoScrolling = false;
 
   late ScrollableState _scrollable;
@@ -562,7 +562,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   void startItemDragReorder({
     required int index,
     required PointerDownEvent event,
-    required MultiDragGestureRecognizer<MultiDragPointerState> recognizer,
+    required MultiDragGestureRecognizer recognizer,
   }) {
     assert(0 <= index && index < widget.itemCount);
     setState(() {
@@ -852,8 +852,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     return _ReorderableItem(
       key: _ReorderableItemGlobalKey(child.key!, index, this),
       index: index,
-      child: child,
       capturedThemes: InheritedTheme.capture(from: context, to: overlay.context),
+      child: child,
     );
   }
 
@@ -1050,6 +1050,7 @@ class ReorderableDragStartListener extends StatelessWidget {
     Key? key,
     required this.child,
     required this.index,
+    this.enabled = true,
   }) : super(key: key);
 
   /// The widget for which the application would like to respond to a tap and
@@ -1059,10 +1060,16 @@ class ReorderableDragStartListener extends StatelessWidget {
   /// The index of the associated item that will be dragged in the list.
   final int index;
 
+  /// Whether the [child] item can be dragged and moved in the list.
+  ///
+  /// If true, the item can be moved to another location in the list when the
+  /// user taps on the child. If false, tapping on the child will be ignored.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     return Listener(
-      onPointerDown: (PointerDownEvent event) => _startDragging(context, event),
+      onPointerDown: enabled ? (PointerDownEvent event) => _startDragging(context, event) : null,
       child: child,
     );
   }
@@ -1073,7 +1080,7 @@ class ReorderableDragStartListener extends StatelessWidget {
   /// By default this returns an [ImmediateMultiDragGestureRecognizer] but
   /// subclasses can use this to customize the drag start gesture.
   @protected
-  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer() {
+  MultiDragGestureRecognizer createRecognizer() {
     return ImmediateMultiDragGestureRecognizer(debugOwner: this);
   }
 
@@ -1111,10 +1118,11 @@ class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
     Key? key,
     required Widget child,
     required int index,
-  }) : super(key: key, child: child, index: index);
+    bool enabled = true,
+  }) : super(key: key, child: child, index: index, enabled: enabled);
 
   @override
-  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer() {
+  MultiDragGestureRecognizer createRecognizer() {
     return DelayedMultiDragGestureRecognizer(debugOwner: this);
   }
 }
@@ -1213,11 +1221,11 @@ class _DragInfo extends Drag {
       _DragItemProxy(
         listState: listState,
         index: index,
-        child: child,
         size: itemSize,
         animation: _proxyAnimation!,
         position: dragPosition - dragOffset - _overlayOrigin(context),
         proxyDecorator: proxyDecorator,
+        child: child,
       ),
     );
   }
@@ -1262,14 +1270,14 @@ class _DragItemProxy extends StatelessWidget {
           if (dropPosition != null) {
             effectivePosition = Offset.lerp(dropPosition - overlayOrigin, effectivePosition, Curves.easeOut.transform(animation.value))!;
           }
-        return Positioned(
+          return Positioned(
+            left: effectivePosition.dx,
+            top: effectivePosition.dy,
             child: SizedBox(
               width: size.width,
               height: size.height,
               child: child,
             ),
-            left: effectivePosition.dx,
-            top: effectivePosition.dy,
           );
         },
         child: proxyChild,
