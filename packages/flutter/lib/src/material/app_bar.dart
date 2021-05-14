@@ -287,7 +287,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The primary widget displayed in the app bar.
   ///
   /// Becomes the middle component of the [NavigationToolbar] built by this widget.
-  //.
+  ///
   /// Typically a [Text] widget that contains a description of the current
   /// contents of the app.
   /// {@endtemplate}
