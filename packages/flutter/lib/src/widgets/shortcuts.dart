@@ -184,7 +184,7 @@ abstract class ShortcutActivator {
   ///
   /// This method might also return null, which means this activator declares
   /// all keys as the trigger key. All activators whose [triggers] returns null
-  /// will be tested with [accepts] on every event. Since this becomes an
+  /// will be tested with [accepts] on every event. Since this becomes a
   /// linear search, and having too many might impact performance, it is
   /// preferred to return non-null [triggers] whenever possible.
   Iterable<LogicalKeyboardKey>? get triggers;
@@ -598,7 +598,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   }
 }
 
-/// A shortcut combination that is triggered by a key event of a character.
+/// A shortcut combination that is triggered by a key event that produces a
+/// specific character.
 ///
 /// Keys often produce different characters when combined with modifiers. For
 /// example, it might be helpful for the user to bring up a help menu by
@@ -608,16 +609,9 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// and hard-coding 'Shift+Slash' in this situation is unfriendly to other
 /// keyboard layouts.
 ///
-/// The [CharacterActivator] is useful when the shortcut intent should be
-/// activated upon an event that produces a character undefined by a logical
-/// key. For example, `CharacterActivator('?')` is triggered when a key
-/// combination results in a question mark, which is 'Shift+Slash' on a US
-/// keyboard, but 'Shift+Comma' on a French keyboard.
-///
-/// The [CharacterActivator] is less reliable than [SingleActivator] since
-/// it depends on the platform to report event characters. Prefer
-/// [SingleActivator] if the desired key combination can be described with
-/// logical keys.
+/// For example, `CharacterActivator('?')` is triggered when a key combination
+/// results in a question mark, which is 'Shift+Slash' on a US keyboard, but
+/// 'Shift+Comma' on a French keyboard.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// In the following example, when a key combination results in a question mark,
@@ -630,8 +624,6 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// ```
 ///
 /// ```dart
-/// int count = 0;
-///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
@@ -641,17 +633,18 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///     child: Actions(
 ///       actions: <Type, Action<Intent>>{
 ///         HelpMenuIntent: CallbackAction<HelpMenuIntent>(
-///           onInvoke: (HelpMenuIntent intent) => setState(() {
-///             count = count + 1;
-///           }),
+///           onInvoke: (HelpMenuIntent intent) {
+///             ScaffoldMessenger.of(context).showSnackBar(
+///               SnackBar(content: Text('Keep calm and carry on!')),
+///             );
+///           },
 ///         ),
 ///       },
 ///       child: Focus(
 ///         autofocus: true,
 ///         child: Column(
 ///           children: <Widget>[
-///             const Text('Add to the counter by pressing question mark'),
-///             Text('count: $count'),
+///             const Text('Press question mark for help'),
 ///           ],
 ///         ),
 ///       ),
