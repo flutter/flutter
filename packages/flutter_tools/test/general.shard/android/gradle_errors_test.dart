@@ -355,13 +355,13 @@ Command: /home/android/gradlew assembleRelease
         .handler(line: '', project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'app-not-using-plugins',
-          },
+          }),
         ),
       ));
 
@@ -390,13 +390,13 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'app-not-using-androidx',
-          },
+          }),
         ),
       ));
 
@@ -418,13 +418,13 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'using-jetifier',
-          },
+          }),
         ),
       ));
 
@@ -453,13 +453,13 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'not-using-jetifier',
-          },
+          }),
         ),
       ));
       expect(status, equals(GradleBuildStatus.retryWithAarPlugins));

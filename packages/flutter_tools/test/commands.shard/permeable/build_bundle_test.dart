@@ -58,8 +58,7 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect(await command.usageValues,
-        containsPair(CustomDimensions.commandBuildBundleIsModule, 'true'));
+    expect((await command.usageValues).commandBuildBundleIsModule, true);
   });
 
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
@@ -68,8 +67,7 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect(await command.usageValues,
-        containsPair(CustomDimensions.commandBuildBundleIsModule, 'false'));
+    expect((await command.usageValues).commandBuildBundleIsModule, false);
   });
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
@@ -78,8 +76,7 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect(await command.usageValues,
-        containsPair(CustomDimensions.commandBuildBundleTargetPlatform, 'android-arm'));
+    expect((await command.usageValues).commandBuildBundleTargetPlatform, 'android-arm');
   });
 
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {
