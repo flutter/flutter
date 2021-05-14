@@ -2718,7 +2718,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// unmodified.
   final double? heightFactor;
 
-  /// How to align the child. If [Alignment] property is specified, then [FractionallySizedBox] 
+  /// How to align the child. If [Alignment] property is specified, then [FractionallySizedBox]
   /// should be Constraining.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
