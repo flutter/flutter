@@ -28,6 +28,9 @@ class Compiler {
 
   static SourceType SourceTypeFromFileName(const std::string& file_name);
 
+  static std::string EntryPointFromSourceName(const std::string& file_name,
+                                              SourceType type);
+
   struct SourceOptions {
     SourceType type = SourceType::kUnknown;
     std::shared_ptr<fml::UniqueFD> working_directory;
