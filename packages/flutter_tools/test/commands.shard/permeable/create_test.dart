@@ -1100,6 +1100,8 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
     expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
+    // Avoid legacy build locations to support Swift Package Manager.
+    expect(xcodeConfig, isNot(contains('SYMROOT')));
 
     // Generated export environment variables script
     final String buildPhaseScriptPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
@@ -1110,6 +1112,8 @@ void main() {
     expect(buildPhaseScript, contains('FLUTTER_APPLICATION_PATH='));
     expect(buildPhaseScript, contains('FLUTTER_TARGET='));
     expect(buildPhaseScript, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
+    // Do not override host app build settings.
+    expect(buildPhaseScript, isNot(contains('SYMROOT')));
 
     // Generated podspec
     final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
