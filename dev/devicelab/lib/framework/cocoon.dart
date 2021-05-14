@@ -29,7 +29,7 @@ typedef ProcessRunSync = ProcessResult Function(
 /// Class for test runner to interact with Flutter's infrastructure service, Cocoon.
 ///
 /// Cocoon assigns bots to run these devicelab tasks on real devices.
-/// To retrieve these results, the test runner needs to send results back so so the database can be updated.
+/// To retrieve these results, the test runner needs to send results back so the database can be updated.
 class Cocoon {
   Cocoon({
     String serviceAccountTokenPath,

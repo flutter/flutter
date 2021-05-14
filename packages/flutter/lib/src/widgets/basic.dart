@@ -6165,7 +6165,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// See also:
 ///
 ///  * [AssetBundle], the interface for asset bundles.
-///  * [rootBundle], the default default asset bundle.
+///  * [rootBundle], the default asset bundle.
 class DefaultAssetBundle extends InheritedWidget {
   /// Creates a widget that determines the default asset bundle for its descendants.
   ///

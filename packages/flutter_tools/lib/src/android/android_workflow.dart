@@ -120,7 +120,7 @@ class AndroidValidator extends DoctorValidator {
 
   /// `java -version` response is not only a number, but also includes other
   /// information eg. `openjdk version "1.7.0_212"`.
-  /// This method extracts only the semantic version from from that response.
+  /// This method extracts only the semantic version from that response.
   static String? _extractJavaVersion(String? text) {
     if (text == null || text.isEmpty) {
       return null;

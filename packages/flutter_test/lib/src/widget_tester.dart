@@ -763,7 +763,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T?>(callback, additionalTime: additionalTime);
 
-  /// Whether there are any any transient callbacks scheduled.
+  /// Whether there are any transient callbacks scheduled.
   ///
   /// This essentially checks whether all animations have completed.
   ///

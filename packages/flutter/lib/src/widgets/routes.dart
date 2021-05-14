@@ -377,7 +377,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// If false, this route's [ModalRoute.buildTransitions] `secondaryAnimation` parameter
   /// value will be [kAlwaysDismissedAnimation]. In other words, this route
-  /// will not animate when when [nextRoute] is pushed on top of it or when
+  /// will not animate when [nextRoute] is pushed on top of it or when
   /// [nextRoute] is popped off of it.
   ///
   /// Returns true by default.
@@ -577,7 +577,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///               child: const Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
-  ///                 // visible then it will will pop our local history entry, which
+  ///                 // visible then it will pop our local history entry, which
   ///                 // will hide the red rectangle. Otherwise, the SecondPage will
   ///                 // navigate back to the HomePage.
   ///                 Navigator.of(context).pop();
