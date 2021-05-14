@@ -2678,24 +2678,23 @@ class UnconstrainedBox extends StatelessWidget {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This sample shows [FractionallySizedBox] widget that has one container
-/// with 50% height and width of the available space of parent widget.
+/// This sample shows a [FractionallySizedBox] whose one child is 50% of
+/// the box's size per the width and height factor parameters, and centered
+/// within that box by the alignment parameter.
 ///
-/// If [Alignment] property is specified, then [FractionallySizedBox]
-/// should be Constraining.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return SizedBox.expand(
-///     child: new FractionallySizedBox(
+///     child: FractionallySizedBox(
 ///       widthFactor: 0.5,
 ///       heightFactor: 0.5,
 ///       alignment: FractionalOffset.center,
-///       child: new Container(
-///         decoration: new BoxDecoration(
-///           border: new Border.all(
+///       child: DecoratedBox(
+///         decoration: BoxDecoration(
+///           border: Border.all(
 ///             color: Colors.blue,
-///             width: 4.0,
+///             width: 4,
 ///           ),
 ///         ),
 ///       ),
