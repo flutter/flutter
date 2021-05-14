@@ -137,7 +137,7 @@ class AnalysisServer {
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
-        final Map<String, dynamic> error = castStringKeyedMap(response['error']!)!;
+        final Map<String, dynamic> error = castStringKeyedMap(response['error'])!;
         _logger.printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {

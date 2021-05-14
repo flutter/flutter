@@ -1652,7 +1652,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
               if (orientation == Orientation.portrait && entryModeButton != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: entryModeButton!,
+                  child: entryModeButton,
                 ),
             ]),
           ),
