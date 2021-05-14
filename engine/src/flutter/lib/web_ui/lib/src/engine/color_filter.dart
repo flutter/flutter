@@ -20,7 +20,8 @@ class EngineColorFilter implements ui.ColorFilter {
   /// The output of this filter is then composited into the background according
   /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
-  const factory EngineColorFilter.mode(ui.Color color, ui.BlendMode blendMode) = _CkBlendModeColorFilter;
+  const factory EngineColorFilter.mode(ui.Color color, ui.BlendMode blendMode) =
+      CkBlendModeColorFilter;
 
   /// Construct a color filter that transforms a color by a 5x5 matrix, where
   /// the fifth row is implicitly added in an identity configuration.
@@ -82,13 +83,16 @@ class EngineColorFilter implements ui.ColorFilter {
   ///   0,      0,      0,      1, 0,
   /// ]);
   /// ```
-  const factory EngineColorFilter.matrix(List<double> matrix) = _CkMatrixColorFilter;
+  const factory EngineColorFilter.matrix(List<double> matrix) =
+      CkMatrixColorFilter;
 
   /// Construct a color filter that applies the sRGB gamma curve to the RGB
   /// channels.
-  const factory EngineColorFilter.linearToSrgbGamma() = _CkLinearToSrgbGammaColorFilter;
+  const factory EngineColorFilter.linearToSrgbGamma() =
+      CkLinearToSrgbGammaColorFilter;
 
   /// Creates a color filter that applies the inverse of the sRGB gamma curve
   /// to the RGB channels.
-  const factory EngineColorFilter.srgbToLinearGamma() = _CkSrgbToLinearGammaColorFilter;
+  const factory EngineColorFilter.srgbToLinearGamma() =
+      CkSrgbToLinearGammaColorFilter;
 }

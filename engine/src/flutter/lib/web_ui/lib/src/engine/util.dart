@@ -293,21 +293,25 @@ void transformLTRB(Matrix4 transform, Float32List ltrb) {
   }
 
   ltrb[0] = math.min(
-      math.min(
-          math.min(_tempPointData[0], _tempPointData[1]), _tempPointData[2]),
-      _tempPointData[3]) / w;
+          math.min(math.min(_tempPointData[0], _tempPointData[1]),
+              _tempPointData[2]),
+          _tempPointData[3]) /
+      w;
   ltrb[1] = math.min(
-      math.min(
-          math.min(_tempPointData[4], _tempPointData[5]), _tempPointData[6]),
-      _tempPointData[7]) / w;
+          math.min(math.min(_tempPointData[4], _tempPointData[5]),
+              _tempPointData[6]),
+          _tempPointData[7]) /
+      w;
   ltrb[2] = math.max(
-      math.max(
-          math.max(_tempPointData[0], _tempPointData[1]), _tempPointData[2]),
-      _tempPointData[3]) / w;
+          math.max(math.max(_tempPointData[0], _tempPointData[1]),
+              _tempPointData[2]),
+          _tempPointData[3]) /
+      w;
   ltrb[3] = math.max(
-      math.max(
-          math.max(_tempPointData[4], _tempPointData[5]), _tempPointData[6]),
-      _tempPointData[7]) / w;
+          math.max(math.max(_tempPointData[4], _tempPointData[5]),
+              _tempPointData[6]),
+          _tempPointData[7]) /
+      w;
 }
 
 /// Returns true if [rect] contains every point that is also contained by the
@@ -528,3 +532,23 @@ int clampInt(int value, int min, int max) {
 /// This function can be overridden in tests. This could be useful, for example,
 /// to verify that warnings are printed under certain circumstances.
 void Function(String) printWarning = html.window.console.warn;
+
+/// Determines if lists [a] and [b] are deep equivalent.
+///
+/// Returns true if the lists are both null, or if they are both non-null, have
+/// the same length, and contain the same elements in the same order. Returns
+/// false otherwise.
+bool listEquals<T>(List<T>? a, List<T>? b) {
+  if (a == null) {
+    return b == null;
+  }
+  if (b == null || a.length != b.length) {
+    return false;
+  }
+  for (int index = 0; index < a.length; index += 1) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
+}

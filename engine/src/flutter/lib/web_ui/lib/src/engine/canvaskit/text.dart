@@ -2,7 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
+import 'package:ui/ui.dart' as ui;
+
+import '../util.dart';
+import 'canvaskit_api.dart';
+import 'font_fallbacks.dart';
+import 'initialization.dart';
+import 'painting.dart';
+import 'skia_object_cache.dart';
+import 'util.dart';
 
 @immutable
 class CkParagraphStyle implements ui.ParagraphStyle {
@@ -76,7 +87,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   }
 
   static SkStrutStyleProperties toSkStrutStyleProperties(ui.StrutStyle value, ui.TextHeightBehavior? paragraphHeightBehavior) {
-    EngineStrutStyle style = value as EngineStrutStyle;
+    CkStrutStyle style = value as CkStrutStyle;
     final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
     skStrutStyle.fontFamilies =
         _getEffectiveFontFamilies(style._fontFamily, style._fontFamilyFallback);
@@ -437,6 +448,69 @@ class CkTextStyle implements ui.TextStyle {
 
     return canvasKit.TextStyle(properties);
   }();
+}
+
+class CkStrutStyle implements ui.StrutStyle {
+  CkStrutStyle({
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    double? height,
+    //TODO(LongCatIsLooong): implement leadingDistribution.
+    ui.TextLeadingDistribution? leadingDistribution,
+    double? leading,
+    ui.FontWeight? fontWeight,
+    ui.FontStyle? fontStyle,
+    bool? forceStrutHeight,
+  })  : _fontFamily = fontFamily,
+        _fontFamilyFallback = fontFamilyFallback,
+        _fontSize = fontSize,
+        _height = height,
+        _leadingDistribution = leadingDistribution,
+        _leading = leading,
+        _fontWeight = fontWeight,
+        _fontStyle = fontStyle,
+        _forceStrutHeight = forceStrutHeight;
+
+  final String? _fontFamily;
+  final List<String>? _fontFamilyFallback;
+  final double? _fontSize;
+  final double? _height;
+  final double? _leading;
+  final ui.FontWeight? _fontWeight;
+  final ui.FontStyle? _fontStyle;
+  final bool? _forceStrutHeight;
+  final ui.TextLeadingDistribution? _leadingDistribution;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CkStrutStyle &&
+        other._fontFamily == _fontFamily &&
+        other._fontSize == _fontSize &&
+        other._height == _height &&
+        other._leading == _leading &&
+        other._leadingDistribution == _leadingDistribution &&
+        other._fontWeight == _fontWeight &&
+        other._fontStyle == _fontStyle &&
+        other._forceStrutHeight == _forceStrutHeight &&
+        listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
+  }
+
+  @override
+  int get hashCode => ui.hashValues(
+        _fontFamily,
+        _fontFamilyFallback,
+        _fontSize,
+        _height,
+        _leading,
+        _leadingDistribution,
+        _fontWeight,
+        _fontStyle,
+        _forceStrutHeight,
+      );
 }
 
 SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {

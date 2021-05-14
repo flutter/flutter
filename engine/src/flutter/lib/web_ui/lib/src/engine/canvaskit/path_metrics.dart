@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:collection';
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
+
+import 'canvaskit_api.dart';
+import 'path.dart';
+import 'skia_object_cache.dart';
 
 class CkPathMetrics extends IterableBase<ui.PathMetric>
     implements ui.PathMetrics {
@@ -14,11 +21,12 @@ class CkPathMetrics extends IterableBase<ui.PathMetric>
   /// The [CkPath.isEmpty] case is special-cased to avoid booting the WASM machinery just to find out there are no contours.
   @override
   Iterator<ui.PathMetric> get iterator => _path.isEmpty
-    ? const CkPathMetricIteratorEmpty._()
-    : CkContourMeasureIter(this);
+      ? const CkPathMetricIteratorEmpty._()
+      : CkContourMeasureIter(this);
 }
 
-class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter> implements Iterator<ui.PathMetric> {
+class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter>
+    implements Iterator<ui.PathMetric> {
   CkContourMeasureIter(this._metrics);
 
   final CkPathMetrics _metrics;
@@ -33,13 +41,13 @@ class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter> imple
     final ui.PathMetric? currentMetric = _current;
     if (currentMetric == null) {
       throw RangeError(
-        'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
-        '- The iteration has not started yet. If so, call "moveNext" to start iteration.'
-        '- The iterator ran out of elements. If so, check that "moveNext" returns true prior to calling "current".'
-      );
+          'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
+          '- The iteration has not started yet. If so, call "moveNext" to start iteration.'
+          '- The iterator ran out of elements. If so, check that "moveNext" returns true prior to calling "current".');
     }
     return currentMetric;
   }
+
   CkContourMeasure? _current;
 
   @override
@@ -50,7 +58,8 @@ class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter> imple
       return false;
     }
 
-    _current = CkContourMeasure(_metrics, skContourMeasure, _contourIndexCounter);
+    _current =
+        CkContourMeasure(_metrics, skContourMeasure, _contourIndexCounter);
     _contourIndexCounter += 1;
     return true;
   }
@@ -83,9 +92,10 @@ class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter> imple
   }
 }
 
-class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure> implements ui.PathMetric {
+class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure>
+    implements ui.PathMetric {
   CkContourMeasure(this._metrics, SkContourMeasure jsObject, this.contourIndex)
-    : super(jsObject);
+      : super(jsObject);
 
   /// The path metrics used to create this measure.
   ///
@@ -98,7 +108,7 @@ class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure> implements ui
   @override
   ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
     final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
-    return CkPath._fromSkPath(skPath, _metrics._path._fillType);
+    return CkPath.fromSkPath(skPath, _metrics._path.fillType);
   }
 
   @override
@@ -130,7 +140,8 @@ class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure> implements ui
 
   @override
   SkContourMeasure resurrect() {
-    final CkContourMeasureIter iterator = _metrics.iterator as CkContourMeasureIter;
+    final CkContourMeasureIter iterator =
+        _metrics.iterator as CkContourMeasureIter;
     final SkContourMeasureIter skIterator = iterator.skiaObject;
 
     // When resurrecting we must advance the iterator to the last known

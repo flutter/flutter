@@ -24,18 +24,21 @@ enum PaintMode {
 }
 
 void testMain() async {
-  final Rect region = Rect.fromLTWH(8, 8, 600, 400); // Compensate for old scuba tester padding
+  final Rect region =
+      Rect.fromLTWH(8, 8, 600, 400); // Compensate for old scuba tester padding
 
   Future<void> testPath(Path path, String scubaFileName,
-      {Paint paint, double maxDiffRatePercent = null, bool write = false,
+      {Paint paint,
+      double maxDiffRatePercent = null,
+      bool write = false,
       PaintMode mode = PaintMode.kStrokeAndFill}) async {
     const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 400);
-    final BitmapCanvas bitmapCanvas = BitmapCanvas(canvasBounds,
-        RenderStrategy());
+    final BitmapCanvas bitmapCanvas =
+        BitmapCanvas(canvasBounds, RenderStrategy());
     final RecordingCanvas canvas = RecordingCanvas(canvasBounds);
 
-    bool enableFill = mode == PaintMode.kStrokeAndFill ||
-        mode == PaintMode.kFill;
+    bool enableFill =
+        mode == PaintMode.kStrokeAndFill || mode == PaintMode.kFill;
     if (enableFill) {
       paint ??= Paint()
         ..color = const Color(0x807F7F7F)
@@ -46,8 +49,7 @@ void testMain() async {
     if (mode == PaintMode.kStrokeAndFill || mode == PaintMode.kStroke) {
       paint = Paint()
         ..strokeWidth = 2
-        ..color = enableFill ? const Color(0xFFFF0000) :
-            const Color(0xFF000000)
+        ..color = enableFill ? const Color(0xFFFF0000) : const Color(0xFF000000)
         ..style = PaintingStyle.stroke;
     }
 
@@ -59,8 +61,7 @@ void testMain() async {
 
     canvas.drawPath(path, paint);
 
-    final html.Element svgElement = pathToSvgElement(path, paint,
-        enableFill);
+    final html.Element svgElement = pathToSvgElement(path, paint, enableFill);
 
     html.document.body.append(bitmapCanvas.rootElement);
     html.document.body.append(svgElement);
@@ -68,8 +69,8 @@ void testMain() async {
     canvas.endRecording();
     canvas.apply(bitmapCanvas, canvasBounds);
 
-    await matchGoldenFile('$scubaFileName.png', region: region,
-        maxDiffRatePercent: maxDiffRatePercent, write: write);
+    await matchGoldenFile('$scubaFileName.png',
+        region: region, maxDiffRatePercent: maxDiffRatePercent, write: write);
 
     bitmapCanvas.rootElement.remove();
     svgElement.remove();
@@ -180,18 +181,15 @@ void testMain() async {
     final Path path = Path();
     path.moveTo(20, 20);
     path.lineTo(200, 200);
-    await testPath(path, 'svg_stroke_width',
-        mode: PaintMode.kStrokeWidthOnly);
+    await testPath(path, 'svg_stroke_width', mode: PaintMode.kStrokeWidthOnly);
   });
 }
 
-html.Element pathToSvgElement(Path path, Paint paint,
-    bool enableFill) {
+html.Element pathToSvgElement(Path path, Paint paint, bool enableFill) {
   final Rect bounds = path.getBounds();
   final StringBuffer sb = StringBuffer();
-  sb.write(
-      '<svg viewBox="0 0 ${bounds.right} ${bounds.bottom}" '
-          'width="${bounds.right}" height="${bounds.bottom}">');
+  sb.write('<svg viewBox="0 0 ${bounds.right} ${bounds.bottom}" '
+      'width="${bounds.right}" height="${bounds.bottom}">');
   sb.write('<path ');
   if (paint.style == PaintingStyle.stroke ||
       (paint.strokeWidth != null && paint.strokeWidth != 0.0)) {
@@ -209,14 +207,9 @@ html.Element pathToSvgElement(Path path, Paint paint,
   sb.write('"></path>');
   sb.write('</svg>');
   final html.Element svgElement =
-      html.Element.html(sb.toString(), treeSanitizer: _NullTreeSanitizer());
+      html.Element.html(sb.toString(), treeSanitizer: NullTreeSanitizer());
   svgElement.style.transform = 'translate(200px, 0px)';
   return svgElement;
-}
-
-class _NullTreeSanitizer implements html.NodeTreeSanitizer {
-  @override
-  void sanitizeTree(html.Node node) {}
 }
 
 class ArcSample {

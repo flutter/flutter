@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'package:ui/ui.dart' as ui;
+
+import 'canvas.dart';
+import 'canvaskit_api.dart';
+import 'image.dart';
+import 'skia_object_cache.dart';
 
 class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
   final ui.Rect? cullRect;
@@ -10,7 +15,8 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
 
   CkPicture(SkPicture picture, this.cullRect, this._snapshot) : super(picture) {
     assert(
-      browserSupportsFinalizationRegistry && _snapshot == null || _snapshot != null,
+      browserSupportsFinalizationRegistry && _snapshot == null ||
+          _snapshot != null,
       'If the browser does not support FinalizationRegistry (WeakRef), then we must have a picture snapshot to be able to resurrect it.',
     );
   }

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:math' as math;
+
+import 'font_fallbacks.dart' show CodeunitRange;
 
 /// A tree which stores a set of intervals that can be queried for intersection.
 class IntervalTree<T> {

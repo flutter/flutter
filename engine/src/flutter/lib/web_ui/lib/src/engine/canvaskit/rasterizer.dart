@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'package:ui/src/engine.dart' show frameReferences;
+import 'package:ui/ui.dart' as ui;
+
+import 'canvas.dart';
+import 'layer_tree.dart';
+import 'surface.dart';
 
 /// A class that can rasterize [LayerTree]s into a given [Surface].
 class Rasterizer {
@@ -13,7 +18,7 @@ class Rasterizer {
   Rasterizer(this.surface);
 
   void setSkiaResourceCacheMaxBytes(int bytes) =>
-    surface.setSkiaResourceCacheMaxBytes(bytes);
+      surface.setSkiaResourceCacheMaxBytes(bytes);
 
   /// Creates a new frame from this rasterizer's surface, draws the given
   /// [LayerTree] into it, and then submits the frame.
@@ -48,9 +53,9 @@ class Rasterizer {
       final ui.VoidCallback callback = _postFrameCallbacks[i];
       callback();
     }
-    for (int i = 0; i < _frameReferences.length; i++) {
-      _frameReferences[i].value = null;
+    for (int i = 0; i < frameReferences.length; i++) {
+      frameReferences[i].value = null;
     }
-    _frameReferences.clear();
+    frameReferences.clear();
   }
 }

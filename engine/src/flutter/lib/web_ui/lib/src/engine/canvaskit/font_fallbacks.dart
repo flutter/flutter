@@ -2,7 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:async';
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart' show sendFontChangeMessage;
+import 'package:ui/ui.dart' as ui;
+
+import '../util.dart';
+import 'canvaskit_api.dart';
+import 'fonts.dart';
+import 'initialization.dart';
+import 'interval_tree.dart';
 
 /// Global static font fallback data.
 class FontFallbackData {
@@ -52,7 +64,7 @@ class FontFallbackData {
   }
 
   /// Fallback fonts which have been registered and loaded.
-  final List<_RegisteredFont> registeredFallbackFonts = <_RegisteredFont>[];
+  final List<RegisteredFont> registeredFallbackFonts = <RegisteredFont>[];
 
   final List<String> globalFontFallbacks = <String>['Roboto'];
 
@@ -69,8 +81,7 @@ class FontFallbackData {
     int fontFallbackTag = fontFallbackCounts[family]!;
     fontFallbackCounts[family] = fontFallbackCounts[family]! + 1;
     String countedFamily = '$family $fontFallbackTag';
-    registeredFallbackFonts
-        .add(_RegisteredFont(bytes, countedFamily, typeface));
+    registeredFallbackFonts.add(RegisteredFont(bytes, countedFamily, typeface));
     globalFontFallbacks.add(countedFamily);
   }
 }

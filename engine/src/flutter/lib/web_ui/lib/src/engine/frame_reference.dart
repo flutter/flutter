@@ -9,7 +9,7 @@ part of engine;
 /// Used for debugging only.
 int _debugFrameNumber = 1;
 
-List<FrameReference<dynamic>> _frameReferences = <FrameReference<dynamic>>[];
+List<FrameReference<dynamic>> frameReferences = <FrameReference<dynamic>>[];
 
 /// A temporary reference to a value of type [V].
 ///
@@ -21,7 +21,7 @@ List<FrameReference<dynamic>> _frameReferences = <FrameReference<dynamic>>[];
 class FrameReference<V> {
   /// Creates a frame reference to a value.
   FrameReference([this.value]) {
-    _frameReferences.add(this);
+    frameReferences.add(this);
   }
 
   /// The current value of this reference.

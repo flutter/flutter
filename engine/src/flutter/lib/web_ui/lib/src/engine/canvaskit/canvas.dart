@@ -2,7 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of engine;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:ui/ui.dart' as ui;
+
+import 'canvaskit_api.dart';
+import 'image.dart';
+import 'image_filter.dart';
+import 'painting.dart';
+import 'path.dart';
+import 'picture.dart';
+import 'text.dart';
+import 'util.dart';
+import 'vertices.dart';
 
 /// Memoized value for ClipOp.Intersect, so we don't have to hit JS-interop
 /// every time we need it.
@@ -158,7 +171,8 @@ class CkCanvas {
     }
   }
 
-  void drawImageNine(CkImage image, ui.Rect center, ui.Rect dst, CkPaint paint) {
+  void drawImageNine(
+      CkImage image, ui.Rect center, ui.Rect dst, CkPaint paint) {
     skCanvas.drawImageNine(
       image.skImage,
       toSkRect(center),
@@ -268,13 +282,14 @@ class CkCanvas {
     skCanvas.saveLayer(paint?.skiaObject, null, null, null);
   }
 
-  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter, [ CkPaint? paint ]) {
-    final _CkManagedSkImageFilterConvertible convertible =
-        filter as _CkManagedSkImageFilterConvertible;
+  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter,
+      [CkPaint? paint]) {
+    final CkManagedSkImageFilterConvertible convertible =
+        filter as CkManagedSkImageFilterConvertible;
     return skCanvas.saveLayer(
       paint?.skiaObject,
       toSkRect(bounds),
-      convertible._imageFilter.skiaObject,
+      convertible.imageFilter.skiaObject,
       0,
     );
   }
@@ -504,7 +519,8 @@ class RecordingCkCanvas extends CkCanvas {
   }
 
   @override
-  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter, [ CkPaint? paint ]) {
+  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter,
+      [CkPaint? paint]) {
     super.saveLayerWithFilter(bounds, filter, paint);
     _addCommand(CkSaveLayerWithFilterCommand(bounds, filter, paint));
   }
@@ -1128,12 +1144,12 @@ class CkSaveLayerWithFilterCommand extends CkPaintCommand {
 
   @override
   void apply(SkCanvas canvas) {
-    final _CkManagedSkImageFilterConvertible convertible =
-        filter as _CkManagedSkImageFilterConvertible;
+    final CkManagedSkImageFilterConvertible convertible =
+        filter as CkManagedSkImageFilterConvertible;
     return canvas.saveLayer(
       paint?.skiaObject,
       toSkRect(bounds),
-      convertible._imageFilter.skiaObject,
+      convertible.imageFilter.skiaObject,
       0,
     );
   }
