@@ -10,16 +10,18 @@
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/unique_fd.h"
+#include "flutter/impeller/compiler/include_dir.h"
 
 namespace impeller {
 namespace compiler {
 
 struct Switches {
   std::shared_ptr<fml::UniqueFD> working_directory;
-  std::vector<std::shared_ptr<fml::UniqueFD>> include_directories;
+  std::vector<IncludeDir> include_directories;
   std::string source_file_name;
   std::string metal_file_name;
   std::string spirv_file_name;
+  std::string depfile_path;
 
   Switches();
 

@@ -10,6 +10,7 @@ config("impeller_config") {
 }
 
 impeller_shaders("shaders") {
+  name = "impeller"
   shaders = [
     "compositor/shaders/box/box.frag",
     "compositor/shaders/box/box.vert",
