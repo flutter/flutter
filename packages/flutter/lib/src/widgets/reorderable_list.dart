@@ -527,9 +527,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   // by the size of the dragged item. This allows us to keep the order of the
   // list, while still being able to animate the gap between the items. However
   // for the first frame of the drag, the item has not yet been replaced, so
-  // the calculations for the gap is off by the size of the gap. This flag is
+  // the calculation for the gap is off by the size of the gap. This flag is
   // used to determine if the transition to the zero sized box has completed,
-  // so the calculations can compensate for it.
+  // so the gap calculation can compensate for it.
   bool _dragStartTransitionComplete = false;
 
   late ScrollableState _scrollable;
