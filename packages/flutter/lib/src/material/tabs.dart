@@ -119,8 +119,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
-            child: icon,
             margin: iconMargin,
+            child: icon,
           ),
           _buildLabelText(),
         ],
@@ -130,8 +130,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     return SizedBox(
       height: height,
       child: Center(
-        child: label,
         widthFactor: 1.0,
+        child: label,
       ),
     );
   }

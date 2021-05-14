@@ -125,10 +125,6 @@ void _defineTests() {
           ),
         ),
       ),
-      child: Semantics(
-        container: true,
-        child: const Text('Hello', textDirection: TextDirection.ltr),
-      ),
       foregroundPainter: _PainterWithSemantics(
         semantics: const CustomPainterSemantics(
           rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
@@ -137,6 +133,10 @@ void _defineTests() {
             textDirection: TextDirection.rtl,
           ),
         ),
+      ),
+      child: Semantics(
+        container: true,
+        child: const Text('Hello', textDirection: TextDirection.ltr),
       ),
     ));
 
