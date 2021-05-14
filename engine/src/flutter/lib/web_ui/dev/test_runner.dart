@@ -294,13 +294,6 @@ class TestCommand extends Command<bool> with ArgUtils {
   Future<bool> runUnitTests() async {
     _copyTestFontsIntoWebUi();
     await _buildHostPage();
-    if (io.Platform.isWindows) {
-      // On Dart 2.7 or greater, it gives an error for not
-      // recognized "pub" version and asks for "pub" get.
-      // See: https://github.com/dart-lang/sdk/issues/39738
-      await _runPubGet();
-    }
-
     await _prepare();
     await _buildTargets();
 
@@ -633,21 +626,6 @@ class TestCommand extends Command<bool> with ArgUtils {
           throw ToolException(_createFailedShardsMessage());
         }
       }
-    }
-  }
-
-  Future<void> _runPubGet() async {
-    final int exitCode = await runProcess(
-      environment.pubExecutable,
-      <String>[
-        'get',
-      ],
-      workingDirectory: environment.webUiRootDir.path,
-    );
-
-    if (exitCode != 0) {
-      throw ToolException(
-          'Failed to run pub get. Exited with exit code $exitCode');
     }
   }
 
