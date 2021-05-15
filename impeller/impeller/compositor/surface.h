@@ -25,7 +25,7 @@ class Surface {
 
  private:
   std::shared_ptr<Context> context_;
-  dispatch_semaphore_t frames_in_flight_sema_;
+  dispatch_semaphore_t frames_in_flight_sema_ = nullptr;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);
