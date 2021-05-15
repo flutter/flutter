@@ -13,9 +13,9 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key key, this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
+  const DemoButton({Key? key, this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
 
-  final String name;
+  final String? name;
   final bool canRequestFocus;
   final bool autofocus;
 
@@ -24,7 +24,7 @@ class DemoButton extends StatefulWidget {
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  FocusNode focusNode;
+  FocusNode? focusNode;
 
   @override
   void initState() {
@@ -44,11 +44,11 @@ class _DemoButtonState extends State<DemoButton> {
   @override
   void didUpdateWidget(DemoButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    focusNode.canRequestFocus = widget.canRequestFocus;
+    focusNode?.canRequestFocus = widget.canRequestFocus;
   }
 
   void _handleOnPressed() {
-    focusNode.requestFocus();
+    focusNode?.requestFocus();
     print('Button ${widget.name} pressed.');
     debugDumpFocusTree();
   }
@@ -64,24 +64,24 @@ class _DemoButtonState extends State<DemoButton> {
             return Colors.red.withOpacity(0.25);
           if (states.contains(MaterialState.hovered))
             return Colors.blue.withOpacity(0.25);
-          return null;
+          return Colors.transparent;
         }),
       ),
       onPressed: () => _handleOnPressed(),
-      child: Text(widget.name),
+      child: Text(widget.name ?? ''),
     );
   }
 }
 
 class FocusDemo extends StatefulWidget {
-  const FocusDemo({Key key}) : super(key: key);
+  const FocusDemo({Key? key}) : super(key: key);
 
   @override
   State<FocusDemo> createState() => _FocusDemoState();
 }
 
 class _FocusDemoState extends State<FocusDemo> {
-  FocusNode outlineFocus;
+  FocusNode? outlineFocus;
 
   @override
   void initState() {
@@ -91,7 +91,7 @@ class _FocusDemoState extends State<FocusDemo> {
 
   @override
   void dispose() {
-    outlineFocus.dispose();
+    outlineFocus?.dispose();
     super.dispose();
   }
 
@@ -142,7 +142,7 @@ class _FocusDemoState extends State<FocusDemo> {
         onKey: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
-          style: textTheme.headline4,
+          style: textTheme.headline4!,
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Focus Demo'),

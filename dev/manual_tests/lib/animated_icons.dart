@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class AnimatedIconsTestApp extends StatelessWidget {
-  const AnimatedIconsTestApp({Key key}) : super(key: key);
+  const AnimatedIconsTestApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class AnimatedIconsTestApp extends StatelessWidget {
 }
 
 class IconsList extends StatelessWidget {
-  const IconsList({Key key}) : super(key: key);
+  const IconsList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class IconsList extends StatelessWidget {
 }
 
 class IconSampleRow extends StatefulWidget {
-  const IconSampleRow(this.sample, {Key key}) : super(key: key);
+  const IconSampleRow(this.sample, {Key? key}) : super(key: key);
 
   final IconSample sample;
 
@@ -39,23 +39,23 @@ class IconSampleRow extends StatefulWidget {
 }
 
 class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderStateMixin {
-  AnimationController progress;
+  AnimationController? progress;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: InkWell(
-        onTap: () { progress.forward(from: 0.0); },
+        onTap: () { progress?.forward(from: 0.0); },
         child: AnimatedIcon(
           icon: widget.sample.icon,
-          progress: progress,
+          progress: progress!,
           color: Colors.lightBlue,
         ),
       ),
       title: Text(widget.sample.description),
       subtitle: Slider(
-        value: progress.value,
-        onChanged: (double v) { progress.animateTo(v, duration: Duration.zero); },
+        value: progress!.value,
+        onChanged: (double v) { progress?.animateTo(v, duration: Duration.zero); },
       ),
     );
   }
@@ -64,12 +64,12 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   void initState() {
     super.initState();
     progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    progress.addListener(_handleChange);
+    progress?.addListener(_handleChange);
   }
 
   @override
   void dispose() {
-    progress.removeListener(_handleChange);
+    progress?.removeListener(_handleChange);
     super.dispose();
   }
 

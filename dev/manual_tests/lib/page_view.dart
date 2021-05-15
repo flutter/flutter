@@ -14,7 +14,7 @@ class CardModel {
 }
 
 class PageViewApp extends StatefulWidget {
-  const PageViewApp({Key key}) : super(key: key);
+  const PageViewApp({Key? key}) : super(key: key);
 
   @override
   PageViewAppState createState() => PageViewAppState();
@@ -33,15 +33,15 @@ class PageViewAppState extends State<PageViewApp> {
     ];
 
     cardModels = List<CardModel>.generate(cardSizes.length, (int i) {
-      final Color color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
-      return CardModel(i, cardSizes[i], color);
+      final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
+      return CardModel(i, cardSizes[i], color!);
     });
   }
 
   static const TextStyle cardLabelStyle =
     TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
-  List<CardModel> cardModels;
+  List<CardModel>? cardModels;
   Size pageSize = const Size(200.0, 200.0);
   Axis scrollDirection = Axis.horizontal;
   bool itemsWrap = false;
@@ -123,7 +123,7 @@ class PageViewAppState extends State<PageViewApp> {
     return PageView(
       // TODO(abarth): itemsWrap: itemsWrap,
       scrollDirection: scrollDirection,
-      children: cardModels.map<Widget>(buildCard).toList(),
+      children: cardModels!.map<Widget>(buildCard).toList(),
     );
   }
 

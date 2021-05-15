@@ -12,9 +12,9 @@ void main() {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({Key key, this.name}) : super(key: key);
+  const DemoButton({Key? key, this.name}) : super(key: key);
 
-  final String name;
+  final String? name;
 
   void _handleOnPressed() {
     print('Button $name pressed.');
@@ -24,13 +24,13 @@ class DemoButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () => _handleOnPressed(),
-      child: Text(name),
+      child: Text(name ?? ''),
     );
   }
 }
 
 class HoverDemo extends StatefulWidget {
-  const HoverDemo({Key key}) : super(key: key);
+  const HoverDemo({Key? key}) : super(key: key);
 
   @override
   State<HoverDemo> createState() => _HoverDemoState();
@@ -42,12 +42,12 @@ class _HoverDemoState extends State<HoverDemo> {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ButtonStyle overrideFocusColor = ButtonStyle(
       overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-        return states.contains(MaterialState.focused) ? Colors.deepOrangeAccent : null;
+        return states.contains(MaterialState.focused) ? Colors.deepOrangeAccent : Colors.transparent;
       })
     );
 
     return DefaultTextStyle(
-      style: textTheme.headline4,
+      style: textTheme.headline4!,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Hover Demo'),

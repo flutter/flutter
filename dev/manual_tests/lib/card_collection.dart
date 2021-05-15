@@ -13,12 +13,12 @@ class CardModel {
   int value;
   double height;
   int get color => ((value % 9) + 1) * 100;
-  TextEditingController textController;
+  late TextEditingController textController;
   Key get key => ObjectKey(this);
 }
 
 class CardCollection extends StatefulWidget {
-  const CardCollection({Key key}) : super(key: key);
+  const CardCollection({Key? key}) : super(key: key);
 
   @override
   CardCollectionState createState() => CardCollectionState();
@@ -41,7 +41,7 @@ class CardCollectionState extends State<CardCollection> {
   ];
 
   MaterialColor _primaryColor = Colors.deepPurple;
-  List<CardModel> _cardModels;
+  List<CardModel>? _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextAlign _textAlign = TextAlign.center;
   bool _editable = false;
@@ -53,10 +53,10 @@ class CardCollectionState extends State<CardCollection> {
     if (_fixedSizeCards)
       return;
     _cardModels = List<CardModel>.generate(
-      _cardModels.length,
+      _cardModels!.length,
       (int i) {
-        _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
-        return _cardModels[i];
+        _cardModels?[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
+        return _cardModels![i];
       },
     );
   }
@@ -90,9 +90,9 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   void dismissCard(CardModel card) {
-    if (_cardModels.contains(card)) {
+    if (_cardModels?.contains(card) == true) {
       setState(() {
-        _cardModels.remove(card);
+        _cardModels?.remove(card);
       });
     }
   }
@@ -164,21 +164,21 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _selectColor(MaterialColor selection) {
+  void _selectColor(MaterialColor? selection) {
     setState(() {
-      _primaryColor = selection;
+      _primaryColor = selection!;
     });
   }
 
-  void _changeDismissDirection(DismissDirection newDismissDirection) {
+  void _changeDismissDirection(DismissDirection? newDismissDirection) {
     setState(() {
-      _dismissDirection = newDismissDirection;
+      _dismissDirection = newDismissDirection!;
     });
   }
 
-  void _changeTextAlign(TextAlign newTextAlign) {
+  void _changeTextAlign(TextAlign? newTextAlign) {
     setState(() {
-      _textAlign = newTextAlign;
+      _textAlign = newTextAlign!;
     });
   }
 
@@ -193,7 +193,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled = true }) {
+  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor?> onChanged, { IconData? icon, bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -206,7 +206,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled = true }) {
+  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection?> onChanged, { IconData? icon, bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -219,7 +219,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled = true }) {
+  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign?> onChanged, { IconData? icon, bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -241,13 +241,13 @@ class CardCollectionState extends State<CardCollection> {
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
         alignment: const Alignment(-1.0, 0.5),
-        child: Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.headline6),
+        child: Text('Swipe Away: ${_cardModels?.length}', style: Theme.of(context).primaryTextTheme.headline6),
       ),
     );
   }
 
   Widget _buildCard(BuildContext context, int index) {
-    final CardModel cardModel = _cardModels[index];
+    final CardModel cardModel = _cardModels![index];
     final Widget card = Dismissible(
       key: ObjectKey(cardModel),
       direction: _dismissDirection,
@@ -306,7 +306,7 @@ class CardCollectionState extends State<CardCollection> {
       rightArrowIcon = Opacity(opacity: 0.1, child: rightArrowIcon);
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle backgroundTextStyle = theme.primaryTextTheme.headline6;
+    final TextStyle? backgroundTextStyle = theme.primaryTextTheme.headline6;
 
     // The background Widget appears behind the Dismissible card when the card
     // moves to the left or right. The Positioned widget ensures that the
@@ -358,7 +358,7 @@ class CardCollectionState extends State<CardCollection> {
   Widget build(BuildContext context) {
     Widget cardCollection = ListView.builder(
       itemExtent: _fixedSizeCards ? kFixedCardHeight : null,
-      itemCount: _cardModels.length,
+      itemCount: _cardModels?.length,
       itemBuilder: _buildCard,
     );
 

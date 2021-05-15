@@ -24,13 +24,13 @@ class _MarkerPainter extends CustomPainter {
     this.type,
   });
 
-  final double size;
-  final MarkerType type;
+  final double? size;
+  final MarkerType? type;
 
   @override
   void paint(Canvas canvas, _) {
     final Paint paint = Paint()..color = const Color(0x8000FF00);
-    final double r = size / 2.0;
+    final double r = size! / 2.0;
     canvas.drawCircle(Offset(r, r), r, paint);
 
     paint
@@ -56,21 +56,21 @@ class _MarkerPainter extends CustomPainter {
 
 class Marker extends StatelessWidget {
   const Marker({
-    Key key,
+    Key? key,
     this.type = MarkerType.touch,
     this.position,
     this.size = 40.0,
   }) : super(key: key);
 
-  final Offset position;
+  final Offset? position;
   final double size;
   final MarkerType type;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: position.dx - size / 2.0,
-      top: position.dy - size / 2.0,
+      left: position!.dx - size / 2.0,
+      top: position!.dy - size / 2.0,
       width: size,
       height: size,
       child: IgnorePointer(
@@ -86,7 +86,7 @@ class Marker extends StatelessWidget {
 }
 
 class OverlayGeometryApp extends StatefulWidget {
-  const OverlayGeometryApp({Key key}) : super(key: key);
+  const OverlayGeometryApp({Key? key}) : super(key: key);
 
   @override
   OverlayGeometryAppState createState() => OverlayGeometryAppState();
@@ -97,20 +97,20 @@ typedef CardTapCallback = void Function(GlobalKey targetKey, Offset globalPositi
 class CardBuilder extends SliverChildDelegate {
   CardBuilder({ this.cardModels, this.onTapUp });
 
-  final List<CardModel> cardModels;
-  final CardTapCallback onTapUp;
+  final List<CardModel>? cardModels;
+  final CardTapCallback? onTapUp;
 
   static const TextStyle cardLabelStyle =
     TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   @override
-  Widget build(BuildContext context, int index) {
-    if (index >= cardModels.length)
+  Widget? build(BuildContext context, int index) {
+    if (index >= cardModels!.length)
       return null;
-    final CardModel cardModel = cardModels[index];
+    final CardModel cardModel = cardModels![index];
     return GestureDetector(
       key: cardModel.key,
-      onTapUp: (TapUpDetails details) { onTapUp(cardModel.targetKey, details.globalPosition); },
+      onTapUp: (TapUpDetails details) { onTapUp!(cardModel.targetKey, details.globalPosition); },
       child: Card(
         key: cardModel.targetKey,
         color: cardModel.color,
@@ -124,7 +124,7 @@ class CardBuilder extends SliverChildDelegate {
   }
 
   @override
-  int get estimatedChildCount => cardModels.length;
+  int get estimatedChildCount => cardModels!.length;
 
   @override
   bool shouldRebuild(CardBuilder oldDelegate) {
@@ -133,7 +133,7 @@ class CardBuilder extends SliverChildDelegate {
 }
 
 class OverlayGeometryAppState extends State<OverlayGeometryApp> {
-  List<CardModel> cardModels;
+  List<CardModel>? cardModels;
   Map<MarkerType, Offset> markers = <MarkerType, Offset>{};
   double markersScrollOffset = 0.0;
 
@@ -146,8 +146,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     ];
     cardModels = List<CardModel>.generate(cardHeights.length, (int i) {
-      final Color color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
-      return CardModel(i, cardHeights[i], color);
+      final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
+      return CardModel(i, cardHeights[i], color!);
     });
   }
 
@@ -157,8 +157,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;
         for (final MarkerType type in markers.keys) {
-          final Offset oldPosition = markers[type];
-          markers[type] = oldPosition.translate(0.0, dy);
+          final Offset? oldPosition = markers[type];
+          markers[type] = oldPosition!.translate(0.0, dy);
         }
       });
     }
@@ -168,12 +168,12 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void handleTapUp(GlobalKey target, Offset globalPosition) {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
-      final RenderBox box = target.currentContext.findRenderObject() as RenderBox;
-      markers[MarkerType.topLeft] = box.localToGlobal(Offset.zero);
+      final RenderBox? box = target.currentContext?.findRenderObject() as RenderBox?;
+      markers[MarkerType.topLeft] = box!.localToGlobal(Offset.zero);
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));
-      final ScrollableState scrollable = Scrollable.of(target.currentContext);
-      markersScrollOffset = scrollable.position.pixels;
+      final ScrollableState? scrollable = Scrollable.of(target.currentContext!);
+      markersScrollOffset = scrollable!.position.pixels;
     });
   }
 

@@ -23,9 +23,9 @@ void main() {
 /// the undo stack when they are invoked.
 class Memento extends Object with Diagnosticable {
   const Memento({
-    @required this.name,
-    @required this.undo,
-    @required this.redo,
+    required this.name,
+    required this.undo,
+    required this.redo,
   });
 
   /// Returns true if this Memento can be used to undo.
@@ -110,11 +110,11 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   }
 
   @override
-  Object invokeAction(Action<Intent> action, Intent intent, [BuildContext context]) {
-    final Object result = super.invokeAction(action, intent, context);
+  Object? invokeAction(Action<Intent> action, Intent intent, [BuildContext? context]) {
+    final Object? result = super.invokeAction(action, intent, context);
     print('Invoking ${action is UndoableAction ? 'undoable ' : ''}$intent as $action: $this ');
     if (action is UndoableAction) {
-      _completedActions.addLast(result as Memento);
+      _completedActions.addLast(result! as Memento);
       _undoneActions.clear();
       _pruneActions();
       notifyListeners();
@@ -193,14 +193,14 @@ class UndoIntent extends Intent {
 class UndoAction extends Action<UndoIntent> {
   @override
   bool isEnabled(UndoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 
   @override
   void invoke(UndoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext) as UndoableActionDispatcher;
-    manager?.undo();
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
+    manager.undo();
   }
 }
 
@@ -211,14 +211,14 @@ class RedoIntent extends Intent {
 class RedoAction extends Action<RedoIntent> {
   @override
   bool isEnabled(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus!.context!) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 
   @override
   RedoAction invoke(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus.context) as UndoableActionDispatcher;
-    manager?.redo();
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus!.context!) as UndoableActionDispatcher;
+    manager.redo();
     return this;
   }
 }
@@ -227,7 +227,7 @@ class RedoAction extends Action<RedoIntent> {
 abstract class UndoableAction<T extends Intent> extends Action<T> {
   /// The [Intent] this action was originally invoked with.
   Intent get invocationIntent => _invocationTag;
-  Intent _invocationTag;
+  late Intent _invocationTag;
 
   @protected
   set invocationIntent(Intent value) => _invocationTag = value;
@@ -244,8 +244,8 @@ class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
   @mustCallSuper
   Memento invoke(T intent) {
     super.invoke(intent);
-    final FocusNode previousFocus = primaryFocus;
-    return Memento(name: previousFocus.debugLabel, undo: () {
+    final FocusNode? previousFocus = primaryFocus;
+    return Memento(name: previousFocus!.debugLabel!, undo: () {
       previousFocus.requestFocus();
     }, redo: () {
       return invoke(intent);
@@ -267,7 +267,7 @@ class UndoableNextFocusAction extends UndoableFocusActionBase<NextFocusIntent> {
   @override
   Memento invoke(NextFocusIntent intent) {
     final Memento memento = super.invoke(intent);
-    primaryFocus.nextFocus();
+    primaryFocus?.nextFocus();
     return memento;
   }
 }
@@ -276,34 +276,34 @@ class UndoablePreviousFocusAction extends UndoableFocusActionBase<PreviousFocusI
   @override
   Memento invoke(PreviousFocusIntent intent) {
     final Memento memento = super.invoke(intent);
-    primaryFocus.previousFocus();
+    primaryFocus?.previousFocus();
     return memento;
   }
 }
 
 class UndoableDirectionalFocusAction extends UndoableFocusActionBase<DirectionalFocusIntent> {
-  TraversalDirection direction;
+  TraversalDirection? direction;
 
   @override
   Memento invoke(DirectionalFocusIntent intent) {
     final Memento memento = super.invoke(intent);
-    primaryFocus.focusInDirection(intent.direction);
+    primaryFocus?.focusInDirection(intent.direction);
     return memento;
   }
 }
 
 /// A button class that takes focus when clicked.
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key key, this.name}) : super(key: key);
+  const DemoButton({Key? key, this.name}) : super(key: key);
 
-  final String name;
+  final String? name;
 
   @override
   State<DemoButton> createState() => _DemoButtonState();
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  FocusNode _focusNode;
+  late FocusNode _focusNode;
   final GlobalKey _nameKey = GlobalKey();
 
   @override
@@ -315,7 +315,7 @@ class _DemoButtonState extends State<DemoButton> {
   void _handleOnPressed() {
     print('Button ${widget.name} pressed.');
     setState(() {
-      Actions.invoke(_nameKey.currentContext, RequestFocusIntent(_focusNode));
+      Actions.invoke(_nameKey.currentContext!, RequestFocusIntent(_focusNode));
     });
   }
 
@@ -336,17 +336,17 @@ class _DemoButtonState extends State<DemoButton> {
             return Colors.red;
           if (states.contains(MaterialState.hovered))
             return Colors.blue;
-          return null;
+          return Colors.transparent;
         }),
       ),
       onPressed: () => _handleOnPressed(),
-      child: Text(widget.name, key: _nameKey),
+      child: Text(widget.name ?? '', key: _nameKey),
     );
   }
 }
 
 class FocusDemo extends StatefulWidget {
-  const FocusDemo({Key key}) : super(key: key);
+  const FocusDemo({Key? key}) : super(key: key);
 
   static GlobalKey appKey = GlobalKey();
 
@@ -355,10 +355,10 @@ class FocusDemo extends StatefulWidget {
 }
 
 class _FocusDemoState extends State<FocusDemo> {
-  FocusNode outlineFocus;
-  UndoableActionDispatcher dispatcher;
-  bool canUndo;
-  bool canRedo;
+  late FocusNode outlineFocus;
+  late UndoableActionDispatcher dispatcher;
+  late bool canUndo;
+  late bool canRedo;
 
   @override
   void initState() {
@@ -415,7 +415,7 @@ class _FocusDemoState extends State<FocusDemo> {
             debugLabel: 'Scope',
             autofocus: true,
             child: DefaultTextStyle(
-              style: textTheme.headline4,
+              style: textTheme.headline4!,
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Actions Demo'),
