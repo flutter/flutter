@@ -6,13 +6,17 @@
 
 #include <Metal/Metal.h>
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 
 namespace impeller {
 
+class ShaderLibrary;
+
 class Context {
  public:
-  Context();
+  Context(std::string shaders_directory);
 
   ~Context();
 
@@ -22,10 +26,13 @@ class Context {
 
   id<MTLCommandQueue> GetTransferQueue() const;
 
+  std::shared_ptr<ShaderLibrary> GetShaderLibrary() const;
+
  private:
-  id<MTLDevice> device_;
-  id<MTLCommandQueue> render_queue_;
-  id<MTLCommandQueue> transfer_queue_;
+  id<MTLDevice> device_ = nullptr;
+  id<MTLCommandQueue> render_queue_ = nullptr;
+  id<MTLCommandQueue> transfer_queue_ = nullptr;
+  std::shared_ptr<ShaderLibrary> shader_library_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Context);

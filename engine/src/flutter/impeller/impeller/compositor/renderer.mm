@@ -8,8 +8,8 @@
 
 namespace impeller {
 
-Renderer::Renderer()
-    : context_(std::make_shared<Context>()),
+Renderer::Renderer(std::string shaders_directory)
+    : context_(std::make_shared<Context>(std::move(shaders_directory))),
       surface_(std::make_unique<Surface>(context_)) {
   if (!context_->IsValid()) {
     return;
