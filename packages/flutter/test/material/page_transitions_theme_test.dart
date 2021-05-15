@@ -11,17 +11,30 @@ void main() {
   testWidgets('Default PageTransitionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
+
+    // There should only be builders for the mobile platforms.
     expect(theme.builders, isNotNull);
     for (final TargetPlatform platform in TargetPlatform.values) {
-      if (platform == TargetPlatform.fuchsia) {
-        // No builder on Fuchsia.
-        continue;
+      switch (platform) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          expect(theme.builders[platform], isNotNull, reason: 'theme builder for $platform is null');
+          break;
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(theme.builders[platform], isNull, reason: 'theme builder for $platform is not null');
+          break;
       }
-      expect(theme.builders[platform], isNotNull, reason: 'theme builder for $platform is null');
     }
+
+    // By default there should be no transitions specified for the web
+    expect(theme.webBuilders, isNotNull);
+    expect(theme.webBuilders.length, 0);
   });
 
-  testWidgets('Default PageTransitionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
+  testWidgets('Default PageTransitionsTheme builds a CupertinoPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -45,7 +58,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Default PageTransitionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

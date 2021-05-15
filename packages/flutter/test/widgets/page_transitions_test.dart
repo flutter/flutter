@@ -196,7 +196,7 @@ void main() {
     settingsOffset = tester.getTopLeft(find.text('Settings'));
     expect(settingsOffset.dx, greaterThan(100.0));
     expect(settingsOffset.dy, 100.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
@@ -239,7 +239,7 @@ void main() {
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
   testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
@@ -293,7 +293,7 @@ void main() {
 
     // Sheet did not call setState (since the gesture did nothing).
     expect(sheet.setStateCalled, isFalse);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
