@@ -125,7 +125,7 @@ class WindowsUWPDevice extends Device {
   Future<void> dispose() async { }
 
   @override
-  Future<String> get emulatorId => null;
+  Future<String> get emulatorId async => null;
 
   @override
   FutureOr<DeviceLogReader> getLogReader({covariant BuildableUwpApp app, bool includePastLogs = false}) {

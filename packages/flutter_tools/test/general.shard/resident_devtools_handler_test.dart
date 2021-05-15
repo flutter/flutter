@@ -425,7 +425,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   Uri devToolsUrl;
 
   @override
-  Future<DevToolsServerAddress> serve() {
+  Future<DevToolsServerAddress> serve() async {
     return null;
   }
 

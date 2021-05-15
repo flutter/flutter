@@ -77,7 +77,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  static Future<IOSApp> fromIosProject(IosProject project, BuildInfo buildInfo) {
+  static Future<IOSApp> fromIosProject(IosProject project, BuildInfo buildInfo) async {
     if (!globals.platform.isMacOS) {
       return null;
     }

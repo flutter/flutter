@@ -71,7 +71,7 @@ class TestCompiler {
   ResidentCompiler compiler;
   File outputDill;
 
-  Future<String> compile(Uri mainDart) {
+  Future<String> compile(Uri mainDart) async {
     final Completer<String> completer = Completer<String>();
     if (compilerController.isClosed) {
       return null;

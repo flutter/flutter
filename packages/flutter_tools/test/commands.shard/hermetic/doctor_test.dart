@@ -704,7 +704,7 @@ class NoOpDoctor implements Doctor {
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
 
   @override
-  Future<void> summary() => null;
+  Future<void> summary() async { }
 
   @override
   List<DoctorValidator> get validators => <DoctorValidator>[];

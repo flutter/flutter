@@ -117,7 +117,7 @@ class _EventChannelHandler<T> {
 
   StreamSubscription<T>? subscription;
 
-  Future<ByteData>? handle(ByteData? message) {
+  Future<ByteData?>? handle(ByteData? message) async {
     final MethodCall call = codec.decodeMethodCall(message);
     switch (call.method) {
       case 'listen':
