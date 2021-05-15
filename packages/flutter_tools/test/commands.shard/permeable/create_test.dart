@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -26,6 +27,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -81,6 +83,28 @@ void main() {
 
   tearDownAll(() async {
     await _restoreFlutterToolsSnapshot();
+  });
+
+  test('createAndroidIdentifier emits a valid identifier', () {
+    final String identifier = CreateBase.createAndroidIdentifier('42org', '8project');
+    expect(identifier.contains('.'), isTrue);
+
+    final RegExp startsWithLetter = RegExp(r'^[a-zA-Z][\w]*$');
+    final List<String> segments = identifier.split('.');
+    for (final String segment in segments) {
+      expect(startsWithLetter.hasMatch(segment), isTrue);
+    }
+  });
+
+  test('createUTIIdentifier emits a valid identifier', () {
+    final String identifier = CreateBase.createUTIIdentifier('org@', 'project');
+    expect(identifier.contains('.'), isTrue);
+    expect(identifier.contains('@'), isFalse);
+  });
+
+  test('createWindowsIdentifier emits a GUID', () {
+    final String identifier = CreateBase.createWindowsIdentifier('org', 'project');
+    expect(Uuid.isValidUUID(fromString: identifier), isTrue);
   });
 
   // Verify that we create a default project ('app') that is
