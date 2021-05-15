@@ -27,7 +27,8 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('GTK scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.xKbScanCode != null) {
-        lines.add(entry.xKbScanCode!, '  insert_record(table, ${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)});  // ${entry.constantName}');
+        lines.add(entry.xKbScanCode!,
+          '    {${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -38,7 +39,8 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
-        lines.add(value, '  insert_record(table, ${toHex(value)}, ${toHex(entry.value, digits: 11)});  // $name');
+        lines.add(value,
+          '    {${toHex(value)}, ${toHex(entry.value, digits: 11)}},  // $name');
       });
     }
     return lines.sortedJoin().trimRight();
