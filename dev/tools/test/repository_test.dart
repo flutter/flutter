@@ -225,6 +225,56 @@ vars = {
       );
     });
 
+    test('commit() passes correct commit message', () {
+      const String commit1 = 'abc123';
+      const String commit2 = 'def456';
+      const String message = 'This is a commit message.';
+      final TestStdio stdio = TestStdio();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          EngineRepository.defaultUpstream,
+          fileSystem.path
+              .join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'upstream/master',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit1),
+        const FakeCommand(command: <String>[
+          'git',
+          'commit',
+          "--message='$message'",
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit2),
+      ]);
+
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final EngineRepository repo = EngineRepository(checkouts);
+      repo.commit(message);
+    });
   });
 }
 
