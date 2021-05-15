@@ -9,16 +9,16 @@
 
 namespace impeller {
 
-std::optional<std::string> ImpellerShadersLocation(std::string library_name) {
-  auto executable_directory = fml::paths::GetExecutableDirectoryPath();
-
-  if (!executable_directory.first) {
-    FML_LOG(ERROR) << "Shaders directory could not be found.";
-    return std::nullopt;
+std::string ImpellerShadersDirectory() {
+  auto path_result = fml::paths::GetExecutableDirectoryPath();
+  if (!path_result.first) {
+    return {};
   }
+  return fml::paths::JoinPaths({path_result.second, "shaders"});
+}
 
-  auto path = fml::paths::JoinPaths(
-      {executable_directory.second, "shaders", library_name});
+std::optional<std::string> ImpellerShadersLocation(std::string library_name) {
+  auto path = fml::paths::JoinPaths({ImpellerShadersDirectory(), library_name});
 
   if (!fml::IsFile(path)) {
     FML_LOG(ERROR) << "The shader library does not exist: " << path;

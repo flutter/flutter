@@ -2,13 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <optional>
-#include <string>
+#pragma once
+
+#include "flutter/fml/macros.h"
 
 namespace impeller {
 
-std::string ImpellerShadersDirectory();
+class VertexDescriptor {
+ public:
+  VertexDescriptor();
 
-std::optional<std::string> ImpellerShadersLocation(std::string library_name);
+  ~VertexDescriptor();
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptor);
+};
 
 }  // namespace impeller

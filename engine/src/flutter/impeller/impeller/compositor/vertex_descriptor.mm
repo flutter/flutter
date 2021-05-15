@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <optional>
-#include <string>
+#include "impeller/compositor/vertex_descriptor.h"
 
 namespace impeller {
 
-std::string ImpellerShadersDirectory();
+VertexDescriptor::VertexDescriptor() = default;
 
-std::optional<std::string> ImpellerShadersLocation(std::string library_name);
+VertexDescriptor::~VertexDescriptor() = default;
 
 }  // namespace impeller

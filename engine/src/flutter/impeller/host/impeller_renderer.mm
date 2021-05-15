@@ -41,7 +41,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
   float _rotation;
 
   MTKMesh* _mesh;
-  impeller::Renderer renderer_;
+  std::unique_ptr<impeller::Renderer> renderer_;
 }
 
 - (nonnull instancetype)initWithMetalKitView:(nonnull MTKView*)view {
@@ -53,7 +53,9 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     [self _loadAssets];
   }
 
-  if (!renderer_.IsValid()) {
+  renderer_ = std::make_unique<impeller::Renderer>(
+      impeller::ImpellerShadersDirectory());
+  if (!renderer_->IsValid()) {
     FML_LOG(ERROR) << "Impeller Renderer is not valid.";
   }
 
@@ -226,7 +228,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)drawInMTKView:(nonnull MTKView*)view {
-  renderer_.Render();
+  renderer_->Render();
   /// Per frame updates here
   dispatch_semaphore_wait(_inFlightSemaphore, DISPATCH_TIME_FOREVER);
 
@@ -301,7 +303,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 }
 
 - (void)mtkView:(nonnull MTKView*)view drawableSizeWillChange:(CGSize)size {
-  renderer_.SurfaceSizeDidChange({size.width, size.height});
+  renderer_->SurfaceSizeDidChange({size.width, size.height});
 
   float aspect = size.width / (float)size.height;
   _projectionMatrix = matrix_perspective_right_hand(65.0f * (M_PI / 180.0f),

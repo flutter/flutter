@@ -4,8 +4,12 @@
 
 #pragma once
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/pipeline_descriptor.h"
+#include "impeller/compositor/shader_library.h"
+#include "impeller/compositor/vertex_descriptor.h"
 
 namespace impeller {
 
@@ -15,7 +19,17 @@ class PipelineBuilder {
 
   ~PipelineBuilder();
 
-  PipelineDescriptor Build() const;
+  PipelineBuilder& SetLabel();
+
+  PipelineBuilder& SetSampleCountCount(size_t samples);
+
+  PipelineBuilder& SetVertexFunction(std::shared_ptr<ShaderFunction> function);
+
+  PipelineBuilder& SetFragmentFunction(
+      std::shared_ptr<ShaderFunction> function);
+
+  PipelineBuilder& SetVertexDescriptor(
+      std::shared_ptr<VertexDescriptor> vertex_descriptor);
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineBuilder);

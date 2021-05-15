@@ -15,7 +15,7 @@ namespace impeller {
 
 class Renderer {
  public:
-  Renderer();
+  Renderer(std::string shaders_directory);
 
   ~Renderer();
 
