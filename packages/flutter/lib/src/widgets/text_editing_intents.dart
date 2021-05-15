@@ -274,8 +274,6 @@ class MoveSelectionUpTextIntent extends Intent {
 // ---------- Gesture Intents ----------
 
 abstract class TextEditingGestureIntent extends Intent {
-  /// Creates an [Intent] that represents a gesture event happened in a text
-  /// field associated with [gestureDelegate].
   const TextEditingGestureIntent({
     required this.gestureDelegate,
   });
@@ -285,35 +283,40 @@ abstract class TextEditingGestureIntent extends Intent {
   final TextSelectionGestureDetectorBuilderDelegate gestureDelegate;
 }
 
-class ForcePressTextGestureIntent extends TextEditingGestureIntent {
-  ForcePressTextGestureIntent({
-    required this.forcePressDownDetails,
+abstract class _TextEditingGestureIntent<GestureStatus> extends TextEditingGestureIntent {
+  /// Creates an [Intent] that represents a gesture event happened in a text
+  /// field associated with [gestureDelegate].
+  const _TextEditingGestureIntent({
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
+    required this.gestureStatus,
   }) : super(gestureDelegate: gestureDelegate);
 
-  final ForcePressDetails forcePressDownDetails;
-  ForcePressDetails? forcePressUpDetails;
+  final GestureStatus gestureStatus;
 }
 
-class TapTextGestureIntent extends TextEditingGestureIntent {
+class ForcePressTextGestureIntent extends _TextEditingGestureIntent<ForcePressTextGestureStatus> {
+  ForcePressTextGestureIntent({
+    required ForcePressTextGestureStatus gestureStatus,
+    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
+  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
+}
+
+class TapTextGestureIntent extends _TextEditingGestureIntent<TapTextGestureStatus> {
   TapTextGestureIntent({
-    required this.tapDownDetails,
+    required  TapTextGestureStatus gestureStatus,
     required this.maxTapCount,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
   }) : assert(maxTapCount > 0),
-       super(gestureDelegate: gestureDelegate);
+       super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
 
   final int maxTapCount;
 
-  int recognizedTapCount = 0;
-
-  bool isCancelled = false;
-
-  TapDownDetails tapDownDetails;
-  TapUpDetails? tapUpDetails;
-
   bool get shouldShowSelectionBar {
-    switch (tapDownDetails.kind) {
+    // The selection overlay should only be shown when the user is interacting
+    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+    // trigger the selection overlay.
+    // For backwards-compatibility, we treat a null kind the same as touch.
+    switch (gestureStatus.tapDownDetails.kind) {
       case null:
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
@@ -326,41 +329,30 @@ class TapTextGestureIntent extends TextEditingGestureIntent {
   }
 }
 
-class SecondaryTapTextGestureIntent extends TextEditingGestureIntent {
+class SecondaryTapTextGestureIntent extends _TextEditingGestureIntent<SecondaryTapTextGestureStatus > {
   SecondaryTapTextGestureIntent({
-    required this.tapDownDetails,
+    required SecondaryTapTextGestureStatus gestureStatus,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate);
-
-  bool isRecognized = false;
-
-  final TapDownDetails tapDownDetails;
+  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
 }
 
-class LongTapTextGestureIntent extends TextEditingGestureIntent {
-  LongTapTextGestureIntent({
-    required this.longPressStartDetails,
+class LongPressTextGestureIntent extends _TextEditingGestureIntent<LongPressTextGestureStatus> {
+  LongPressTextGestureIntent({
+    required LongPressTextGestureStatus gestureStatus,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate);
-
-  final LongPressStartDetails longPressStartDetails;
-  LongPressMoveUpdateDetails? longPressMoveDetails;
-  LongPressEndDetails? longPressEndDetails;
+  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
 }
 
-class DragTextGestureIntent extends TextEditingGestureIntent {
+class DragTextGestureIntent extends _TextEditingGestureIntent<DragTextGestureStatus> {
   DragTextGestureIntent({
-    required this.dragStartDetails,
+    required DragTextGestureStatus gestureStatus,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate);
+  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
 
-  final DragStartDetails dragStartDetails;
   TextPosition? selectionBase;
-  DragUpdateDetails? dragUpdateDetails;
-  DragEndDetails? dragEndDetails;
 
   bool get shouldShowSelectionBar {
-    switch (dragStartDetails.kind) {
+    switch (gestureStatus.dragStartDetails.kind) {
       case null:
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
