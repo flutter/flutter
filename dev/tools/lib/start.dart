@@ -216,7 +216,7 @@ class StartCommand extends Command<void> {
 
     if (dartRevision != null && dartRevision.isNotEmpty) {
       engine.updateDartRevision(dartRevision);
-      engine.commit('Update Dart SDK to $dartRevision');
+      engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
     final List<pb.Cherrypick> engineCherrypicks = _sortCherrypicks(
       repository: engine,
