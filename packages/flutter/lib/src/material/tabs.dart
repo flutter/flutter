@@ -153,7 +153,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
 
   @override
   Size get preferredSize {
-    var tabHeight;
+    final double tabHeight;
     if (height != null)
       tabHeight = height!;
     else if ((text != null || child != null) && icon != null)
