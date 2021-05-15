@@ -48,6 +48,9 @@ class AndroidSdk {
   AndroidSdkVersion? _latestVersion;
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
+  ///
+  /// This is required to use the newest SDK manager which only works with
+  /// the newer JDK.
   bool get cmdlineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
 
   /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
