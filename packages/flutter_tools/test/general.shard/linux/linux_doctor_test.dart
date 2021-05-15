@@ -45,7 +45,7 @@ FakeCommand _ninjaPresentCommand(String version) {
   );
 }
 
-// A command that will return typical-looking 'pgk-config --version' output with
+// A command that will return typical-looking 'pkg-config --version' output with
 // the given version number.
 FakeCommand _pkgConfigPresentCommand(String version) {
   return FakeCommand(

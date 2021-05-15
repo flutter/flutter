@@ -20,6 +20,9 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
+
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -38,12 +41,15 @@ void main() {
     textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Input field with no initial value works',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('empty-input'));
@@ -63,12 +69,15 @@ void main() {
     textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Pressing enter on the text field triggers submit',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // This text will show no-enter initially. It will have 'enter-pressed'
     // after `onFieldSubmitted` of TextField is triggered.
@@ -96,12 +105,15 @@ void main() {
     expect(textFinder2, findsOneWidget);
     final Text text2 = tester.widget(textFinder2);
     expect(text2.data, 'enter pressed');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Jump between TextFormFields with tab key',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -129,11 +141,14 @@ void main() {
     final InputElement input2 =
         document.getElementsByTagName('input')[0] as InputElement;
     expect(input2.value, 'Text2');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -175,12 +190,15 @@ void main() {
     final InputElement input2 =
     document.getElementsByTagName('input')[0] as InputElement;
     expect(input2.value, 'Text2');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Read-only fields work', (WidgetTester tester) async {
     const String text = 'Lorem ipsum dolor sit amet';
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Select something from the selectable text.
     final Finder finder = find.byKey(const Key('selectable'));
@@ -235,7 +253,7 @@ void main() {
     await gesture.up();
     range = TextRange(start: input.selectionStart!, end: input.selectionEnd!);
     expect(range.textInside(text), 'amet');
-  });
+  }, semanticsEnabled: false);
 }
 
 KeyboardEvent dispatchKeyboardEvent(
