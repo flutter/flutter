@@ -498,6 +498,8 @@ class FakeStatusLogger extends DelegatingLogger {
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeOperatingSystemUtils({this.hostPlatform = HostPlatform.linux_x64});
 
+  final List<List<String>> chmods = <List<String>>[];
+
   @override
   void makeExecutable(File file) { }
 
@@ -505,7 +507,9 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   HostPlatform hostPlatform = HostPlatform.linux_x64;
 
   @override
-  void chmod(FileSystemEntity entity, String mode) { }
+  void chmod(FileSystemEntity entity, String mode) {
+    chmods.add(<String>[entity.path, mode]);
+  }
 
   @override
   File? which(String execName) => null;

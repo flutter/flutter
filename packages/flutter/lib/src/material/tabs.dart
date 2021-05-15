@@ -125,8 +125,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
-            child: icon,
             margin: iconMargin,
+            child: icon,
           ),
           _buildLabelText(),
         ],
@@ -136,8 +136,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     return SizedBox(
       height: tabHeight,
       child: Center(
-        child: label,
         widthFactor: 1.0,
+        child: label,
       ),
     );
   }
@@ -429,8 +429,8 @@ class _IndicatorPainter extends CustomPainter {
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
     final bool ltr = index > value;
-    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex).toInt();
-    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex).toInt();
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex);
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex);
     final Rect fromRect = indicatorRect(size, from);
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());

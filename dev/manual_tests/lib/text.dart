@@ -99,7 +99,7 @@ class _HomeState extends State<Home> {
               min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
-              label: '${seed.round()}',
+              label: '$seed',
               divisions: 1025,
               onChanged: (double value) {
                 setState(() {

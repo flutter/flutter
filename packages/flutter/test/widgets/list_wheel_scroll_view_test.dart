@@ -36,8 +36,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
-          children: <Widget>[Container()],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container()],
         ),
       ),
     );
@@ -56,7 +56,7 @@ void main() {
           itemExtent: 20.0,
           children: const <Widget>[],
         ),
-        throwsA(isA<AssertionError>().having(
+        throwsA(isAssertionError.having(
           (AssertionError error) => error.message,
           'message',
           contains("You can't set a diameterRatio of 0"),
