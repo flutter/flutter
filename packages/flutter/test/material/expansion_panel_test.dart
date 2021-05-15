@@ -1542,26 +1542,41 @@ void main() {
                 return const Text('A');
               },
               body: const SizedBox(height: 100.0),
-              iconColor: firstIconColor,
-              expandedIconColor: expandedIconColor,
-              disabledIconColor: disabledIconColor
+              iconColor: MaterialStateProperty.resolveWith((Set<MaterialState>states) {
+                if (states.contains(MaterialState.selected)) {
+                  return expandedIconColor;
+                } else if (states.contains(MaterialState.disabled)) {
+                  return disabledIconColor;
+                }
+
+                return firstIconColor;
+
+              })
             ),
           ],
         ),
       ),
     ));
 
-    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+    ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
 
     expect(expandIcon.color, firstIconColor);
+
+    await tester.tap(find.byType(ExpandIcon));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+
+    expandIcon = tester.widget(find.byType(ExpandIcon));
+
     expect(expandIcon.expandedColor, expandedIconColor);
-    expect(expandIcon.disabledColor, disabledIconColor);
+    expect(expandIcon.isExpanded, true);
   });
 
     testWidgets('ExpansionPanelRadio.iconColor, ExpansionPanelRadio.expandedIconColor, ExpansionPanelRadio.disabledIconColor   test', (WidgetTester tester) async {
     const Color firstIconColor = Colors.red;
     const Color expandedIconColor = Colors.blue;
     const Color disabledIconColor = Colors.amber;
+
 
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
@@ -1572,9 +1587,16 @@ void main() {
                 return const Text('A');
               },
               body: const SizedBox(height: 100.0),
-              iconColor: firstIconColor,
-              expandedIconColor: expandedIconColor,
-              disabledIconColor: disabledIconColor,
+              iconColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
+                  return expandedIconColor;
+                } else if (states.contains(MaterialState.disabled)) {
+                  return disabledIconColor;
+                }
+
+                return firstIconColor;
+
+              }),
               value:0,
             ),
           ],
@@ -1582,10 +1604,15 @@ void main() {
       ),
     ));
 
-    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+    ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
 
     expect(expandIcon.color, firstIconColor);
+
+    await tester.tap(find.byType(ExpandIcon));
+    await tester.pumpAndSettle();
+
+    expandIcon = tester.widget(find.byType(ExpandIcon));
+
     expect(expandIcon.expandedColor, expandedIconColor);
-    expect(expandIcon.disabledColor, disabledIconColor);
   });
 }
