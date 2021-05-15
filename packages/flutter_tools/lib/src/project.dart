@@ -1164,7 +1164,6 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
         project: parent,
         buildInfo: BuildInfo.debug,
         useMacOSConfig: true,
-        setSymroot: false,
       );
     }
   }

@@ -281,6 +281,125 @@ void main() {
     expect(didEndDrag, isFalse);
   });
 
+  testGesture('DragGestureRecognizer.onStart behavior test', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
+
+    Duration? startTimestamp;
+    Offset? positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      startTimestamp = details.sourceTimeStamp;
+      positionAtOnStart = details.globalPosition;
+    };
+
+    Duration? updatedTimestamp;
+    Offset? updateDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedTimestamp = details.sourceTimeStamp;
+      updateDelta = details.delta;
+    };
+
+    // No competing, dragStartBehavior == DragStartBehavior.down
+    final TestPointer pointer = TestPointer(5);
+    PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 100));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(startTimestamp, isNull);
+    expect(positionAtOnStart, isNull);
+    expect(updatedTimestamp, isNull);
+
+    tester.route(down);
+    // The only horizontal drag gesture win the arena when the pointer down.
+    expect(startTimestamp, const Duration(milliseconds: 100));
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 200)));
+    expect(updatedTimestamp, const Duration(milliseconds: 200));
+    expect(updateDelta, const Offset(10.0, 0.0));
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 300)));
+    expect(updatedTimestamp, const Duration(milliseconds: 300));
+    expect(updateDelta, Offset.zero);
+    tester.route(pointer.up());
+
+    // No competing, dragStartBehavior == DragStartBehavior.start
+    // When there are no other gestures competing with this gesture in the arena,
+    // there's no difference in behavior between the two settings.
+    drag.dragStartBehavior = DragStartBehavior.start;
+    startTimestamp = null;
+    positionAtOnStart = null;
+    updatedTimestamp = null;
+    updateDelta = null;
+
+    down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 400));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    expect(startTimestamp, const Duration(milliseconds: 400));
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 500)));
+    expect(updatedTimestamp, const Duration(milliseconds: 500));
+    tester.route(pointer.up());
+
+    // With competing, dragStartBehavior == DragStartBehavior.start
+    startTimestamp = null;
+    positionAtOnStart = null;
+    updatedTimestamp = null;
+    updateDelta = null;
+
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
+      ..onStart = (_) {};
+    addTearDown(() => competingDrag.dispose);
+
+    down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 600));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    // The pointer down event do not trigger anything.
+    expect(startTimestamp, isNull);
+    expect(positionAtOnStart, isNull);
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(30.0, 10.0), timeStamp: const Duration(milliseconds: 700)));
+    expect(startTimestamp, const Duration(milliseconds: 700));
+    // Using the position of the pointer at the time this gesture recognizer won the arena.
+    expect(positionAtOnStart, const Offset(30.0, 10.0));
+    expect(updatedTimestamp, isNull); // Do not trigger an update event.
+    tester.route(pointer.up());
+
+    // With competing, dragStartBehavior == DragStartBehavior.down
+    drag.dragStartBehavior = DragStartBehavior.down;
+    startTimestamp = null;
+    positionAtOnStart = null;
+    updatedTimestamp = null;
+    updateDelta = null;
+
+    down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 800));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    expect(startTimestamp, isNull);
+    expect(positionAtOnStart, isNull);
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(30.0, 10.0), timeStamp: const Duration(milliseconds: 900)));
+    expect(startTimestamp, const Duration(milliseconds: 900));
+    // Using the position of the first detected down event for the pointer.
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+    expect(updatedTimestamp, const Duration(milliseconds: 900)); // Also, trigger an update event.
+    expect(updateDelta, const Offset(20.0, 0.0));
+    tester.route(pointer.up());
+  });
+
   testGesture('Should report original timestamps', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);

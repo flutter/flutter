@@ -7,23 +7,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
   test('Mock binary message handler control test', () async {
+    // Initialize all bindings because defaultBinaryMessenger.send() needs a window.
+    TestWidgetsFlutterBinding.ensureInitialized();
+
     final List<ByteData?> log = <ByteData>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('test1', (ByteData? message) async {
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('test1', (ByteData? message) async {
       log.add(message);
       return null;
     });
 
     final ByteData message = ByteData(2)..setUint16(0, 0xABCD);
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.send('test1', message);
+    await ServicesBinding.instance!.defaultBinaryMessenger.send('test1', message);
     expect(log, equals(<ByteData>[message]));
     log.clear();
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('test1', null);
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.send('test1', message);
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('test1', null);
+    await ServicesBinding.instance!.defaultBinaryMessenger.send('test1', message);
     expect(log, isEmpty);
   });
 }

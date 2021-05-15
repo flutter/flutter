@@ -27,19 +27,17 @@ typedef RecognizerCallback<T> = T Function();
 
 /// Configuration of offset passed to [DragStartDetails].
 ///
-/// The settings determines when a drag formally starts when the user
-/// initiates a drag.
-///
 /// See also:
 ///
-///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the
+///  different behaviors.
 enum DragStartBehavior {
-  /// Set the initial offset, at the position where the first down event was
+  /// Set the initial offset at the position where the first down event was
   /// detected.
   down,
 
-  /// Set the initial position at the position where the drag start event was
-  /// detected.
+  /// Set the initial position at the position where this gesture recognizer
+  /// won the arena.
   start,
 }
 
