@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -219,4 +221,85 @@ void main() {
       expect(context.clipBehavior, equals(clip));
     }
   });
+
+  test('Compute max intrinsic height with runSpacing', () {
+    final RenderBox child = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(
+        minWidth: 80,
+        minHeight: 80,
+      ),
+    );
+
+    final RenderWrap renderWrap = RenderWrap();
+    renderWrap.add(child);
+
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.vertical;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), 80);
+
+
+    final List<RenderBox> children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+    ];
+
+    children.forEach(renderWrap.add);
+
+    final double childrenHeight = renderWrap.childCount * 80.0;
+    final double runSpacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.runSpacing;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), childrenHeight + runSpacingHeight);
+  });
+
+  test('Compute max intrinsic width with spacing', () {
+    final RenderBox child = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(
+        minWidth: 80,
+        minHeight: 80,
+      ),
+    );
+
+    final RenderWrap renderWrap = RenderWrap();
+    renderWrap.add(child);
+
+    renderWrap.spacing = 5;
+    renderWrap.direction = Axis.horizontal;
+
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), 80);
+
+
+    final List<RenderBox> children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+    ];
+
+    children.forEach(renderWrap.add);
+
+    final double childrenWidth = renderWrap.childCount * 80.0;
+    final double spacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
+
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), childrenWidth + spacingHeight);
+  });
+
 }
