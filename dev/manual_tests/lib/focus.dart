@@ -24,7 +24,7 @@ class DemoButton extends StatefulWidget {
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  FocusNode? focusNode;
+  late FocusNode focusNode;
 
   @override
   void initState() {
@@ -37,18 +37,18 @@ class _DemoButtonState extends State<DemoButton> {
 
   @override
   void dispose() {
-    focusNode?.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
   @override
   void didUpdateWidget(DemoButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    focusNode?.canRequestFocus = widget.canRequestFocus;
+    focusNode.canRequestFocus = widget.canRequestFocus;
   }
 
   void _handleOnPressed() {
-    focusNode?.requestFocus();
+    focusNode.requestFocus();
     print('Button ${widget.name} pressed.');
     debugDumpFocusTree();
   }
