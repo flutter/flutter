@@ -112,4 +112,37 @@ std::vector<Application> ApplicationStore::GetApps(
   return apps;
 }
 
+bool ApplicationStore::InstallApp(
+    const std::wstring_view package_uri,
+    const std::vector<std::wstring>& dependency_uris) {
+  using winrt::Windows::Foundation::AsyncStatus;
+  using winrt::Windows::Foundation::Uri;
+  using winrt::Windows::Foundation::Collections::IVector;
+  using winrt::Windows::Management::Deployment::DeploymentOptions;
+  using winrt::Windows::Management::Deployment::PackageManager;
+
+  Uri package(package_uri);
+  IVector<Uri> dependencies = winrt::single_threaded_vector<Uri>();
+  for (const auto& dependency_uri : dependency_uris) {
+    dependencies.Append(Uri(dependency_uri));
+  }
+  PackageManager package_manager;
+  auto operation = package_manager.AddPackageAsync(package, dependencies,
+                                                   DeploymentOptions::None);
+  operation.get();
+
+  if (operation.Status() == AsyncStatus::Completed) {
+    return true;
+  } else if (operation.Status() == AsyncStatus::Canceled) {
+    return false;
+  } else if (operation.Status() == AsyncStatus::Error) {
+    auto result = operation.GetResults();
+    std::wcerr << L"error: install failed for package " << package_uri
+               << L" with error: " << result.ErrorText().c_str() << std::endl;
+    return false;
+  }
+
+  return false;
+}
+
 }  // namespace flutter
