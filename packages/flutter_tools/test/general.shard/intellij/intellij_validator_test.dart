@@ -193,6 +193,7 @@ void main() {
     const String cachePath   = r'C:\Users\foo\AppData\Local\JetBrains\IntelliJIdea2020.10';
     const String installPath = r'C:\Users\foo\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\201.0000.00';
     const String pluginPath  = r'C:\Users\foo\AppData\Roaming\JetBrains\IntelliJIdea2020.10\plugins';
+    const String appInfoStr = 'app.version.major=2021&app.version.minor=1.1';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final Directory cacheDirectory = fileSystem.directory(cachePath)
@@ -200,6 +201,11 @@ void main() {
     cacheDirectory
         .childFile('.home')
         .writeAsStringSync(installPath, flush: true);
+    final Directory appinfo = fileSystem.directory(cachePath)
+      ..createSync(recursive: true);
+    appinfo
+        .childFile('.appinfo')
+        .writeAsStringSync(appInfoStr, flush: true);
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
     createIntellijFlutterPluginJar(pluginPath + r'\flutter-intellij\lib\flutter-intellij.jar', fileSystem, version: '50.0');
@@ -220,6 +226,7 @@ void main() {
     const String cachePath   = r'C:\Users\foo\AppData\Local\JetBrains\IntelliJIdea2020.10';
     const String installPath = r'C:\Users\foo\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\201.0000.00';
     const String pluginPath  = r'C:\Users\foo\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\201.0000.00.plugins';
+    const String appInfoStr = 'app.version.major=2021&app.version.minor=1.1';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final Directory cacheDirectory = fileSystem.directory(cachePath)
@@ -227,6 +234,11 @@ void main() {
     cacheDirectory
         .childFile('.home')
         .writeAsStringSync(installPath, flush: true);
+    final Directory appinfo = fileSystem.directory(cachePath)
+      ..createSync(recursive: true);
+    appinfo
+        .childFile('.appinfo')
+        .writeAsStringSync(appInfoStr, flush: true);
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
     createIntellijFlutterPluginJar(pluginPath + r'\flutter-intellij\lib\flutter-intellij.jar', fileSystem, version: '50.0');
@@ -247,6 +259,7 @@ void main() {
     const String cachePath   = r'C:\Users\foo\AppData\Local\JetBrains\IdeaIC2020.10';
     const String installPath = r'C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2020.10.1';
     const String pluginPath  = r'C:\Users\foo\AppData\Roaming\JetBrains\IdeaIC2020.10\plugins';
+    const String appInfoStr = 'app.version.major=2021&app.version.minor=1.1';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final Directory cacheDirectory = fileSystem.directory(cachePath)
@@ -254,6 +267,11 @@ void main() {
     cacheDirectory
         .childFile('.home')
         .writeAsStringSync(installPath, flush: true);
+    final Directory appinfo = fileSystem.directory(cachePath)
+      ..createSync(recursive: true);
+    appinfo
+        .childFile('.appinfo')
+        .writeAsStringSync(appInfoStr, flush: true);
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
     createIntellijFlutterPluginJar(pluginPath + r'\flutter-intellij\lib\flutter-intellij.jar', fileSystem, version: '50.0');

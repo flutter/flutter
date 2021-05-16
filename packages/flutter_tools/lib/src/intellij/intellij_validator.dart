@@ -20,6 +20,9 @@ const String _ultimateEditionId = 'IntelliJIdea';
 const String _communityEditionTitle = 'IntelliJ IDEA Community Edition';
 const String _communityEditionId = 'IdeaIC';
 
+final RegExp majorRegExp = RegExp(r'major=?\d?\d?\d?\d');
+final RegExp minorRegExp = RegExp(r'minor=?\d?.?\d');
+
 /// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
   IntelliJValidator(String title, this.installPath, {
@@ -220,15 +223,20 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
       final String name = fileSystem.path.basename(dir.path);
       IntelliJValidator._idToTitle.forEach((String id, String title) {
         if (name.startsWith(id)) {
-          final String version = name.substring(id.length);
+          String? version;
           String? installPath;
+          String? appInfo;
           try {
             installPath = fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
+            appInfo = fileSystem.file(fileSystem.path.join(dir.path, '.appinfo')).readAsStringSync();
           } on FileSystemException {
             // ignored
           }
-          if (installPath != null && fileSystem.isDirectorySync(installPath)) {
+          if (installPath != null && fileSystem.isDirectorySync(installPath) && appInfo != null) {
             String pluginsPath;
+            final String majorVersion = majorRegExp.stringMatch(appInfo)!.substring(6);
+            final String minorVersion = minorRegExp.stringMatch(appInfo)!.substring(6);
+            version = '$majorVersion.$minorVersion';
             if (fileSystem.isDirectorySync(installPath + '.plugins')) {
               // IntelliJ 2020.3
               pluginsPath = installPath + '.plugins';
