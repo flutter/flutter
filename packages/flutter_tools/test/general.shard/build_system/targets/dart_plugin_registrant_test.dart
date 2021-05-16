@@ -7,8 +7,8 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/dart_plugin_registrant.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -104,9 +104,12 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: false);
+          generateDartPluginRegistry: false,
+          defines: <String, String>{
+            kTargetPlatform: 'darwin-x64',
+          });
 
-      expect(const DartPluginRegistrantTarget().canSkip(environment), true);
+      expect(const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
       final Environment environment2 = Environment.test(
           fileSystem.currentDirectory,
@@ -114,9 +117,46 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: true);
+          generateDartPluginRegistry: true,
+          defines: <String, String>{
+            kTargetPlatform: 'darwin-x64',
+          });
 
-      expect(const DartPluginRegistrantTarget().canSkip(environment2), false);
+      expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
+    });
+
+    testWithoutContext('skipped based on platform', () async {
+      const Map<String, bool> canSkip = <String, bool>{
+        'darwin-x64': false,
+        'linux-x64': false,
+        'linux-arm64': false,
+        'windows-x64': false,
+        'windows-uwp-x64': false,
+        'web-javascript': true,
+        'ios': true,
+        'android': true,
+        'fuchsia-arm64': true,
+        'fuchsia-x64': true,
+      };
+
+      for (final String targetPlatform in canSkip.keys) {
+        expect(
+          const DartPluginRegistrantTarget().canSkip(
+            Environment.test(
+              fileSystem.currentDirectory,
+              artifacts: null,
+              fileSystem: fileSystem,
+              logger: BufferLogger.test(),
+              processManager: FakeProcessManager.any(),
+              generateDartPluginRegistry: true,
+              defines: <String, String>{
+                kTargetPlatform: targetPlatform,
+              },
+            ),
+          ),
+          canSkip[targetPlatform],
+        );
+      }
     });
 
     testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
@@ -240,7 +280,6 @@ void main() {
           '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
-          ''
         ),
       );
     });
@@ -378,7 +417,6 @@ void main() {
           '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
-          ''
         ),
       );
     });

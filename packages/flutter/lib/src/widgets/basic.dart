@@ -2653,11 +2653,11 @@ class UnconstrainedBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstraintsTransformBox(
-      child: child,
       textDirection: textDirection,
       alignment: alignment,
       clipBehavior: clipBehavior,
       constraintsTransform: _axisToTransform(constrainedAxis),
+      child: child,
     );
   }
 
@@ -2675,6 +2675,33 @@ class UnconstrainedBox extends StatelessWidget {
 /// [RenderFractionallySizedOverflowBox].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows a [FractionallySizedBox] whose one child is 50% of
+/// the box's size per the width and height factor parameters, and centered
+/// within that box by the alignment parameter.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return SizedBox.expand(
+///     child: FractionallySizedBox(
+///       widthFactor: 0.5,
+///       heightFactor: 0.5,
+///       alignment: FractionalOffset.center,
+///       child: DecoratedBox(
+///         decoration: BoxDecoration(
+///           border: Border.all(
+///             color: Colors.blue,
+///             width: 4,
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -3118,7 +3145,7 @@ class Offstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _OffstageElement createElement() => _OffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _OffstageElement(this);
 }
 
 class _OffstageElement extends SingleChildRenderObjectElement {
@@ -5494,7 +5521,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   const FlowMenu({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _FlowMenuState createState() => _FlowMenuState();
+///   State<FlowMenu> createState() => _FlowMenuState();
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
@@ -6619,7 +6646,7 @@ class MouseRegion extends StatefulWidget {
   ///   final VoidCallback onExitButton;
   ///
   ///   @override
-  ///   _MyTimedButton createState() => _MyTimedButton();
+  ///   State<MyTimedButton> createState() => _MyTimedButton();
   /// }
   ///
   /// class _MyTimedButton extends State<MyTimedButton> {
@@ -6737,7 +6764,7 @@ class MouseRegion extends StatefulWidget {
   final Widget? child;
 
   @override
-  _MouseRegionState createState() => _MouseRegionState();
+  State<MouseRegion> createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -7896,7 +7923,7 @@ class StatefulBuilder extends StatefulWidget {
   final StatefulWidgetBuilder builder;
 
   @override
-  _StatefulBuilderState createState() => _StatefulBuilderState();
+  State<StatefulBuilder> createState() => _StatefulBuilderState();
 }
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
@@ -7918,13 +7945,13 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   final Color color;
 
   @override
-  _RenderColoredBox createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return _RenderColoredBox(color: color);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
-    renderObject.color = color;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderColoredBox).color = color;
   }
 
   @override

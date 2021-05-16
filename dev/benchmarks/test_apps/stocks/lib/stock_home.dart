@@ -310,9 +310,9 @@ class StockHomeState extends State<StockHome> {
   Widget buildFloatingActionButton() {
     return FloatingActionButton(
       tooltip: 'Create company',
-      child: const Icon(Icons.add),
       backgroundColor: Theme.of(context).colorScheme.secondary,
       onPressed: _handleCreateCompany,
+      child: const Icon(Icons.add),
     );
   }
 

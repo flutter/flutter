@@ -10,8 +10,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart';
-import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
@@ -48,18 +46,14 @@ Future<void> buildWeb(
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build'),
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetFile: target,
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
-        if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
-          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
+        ...buildInfo.toBuildSystemEnvironment(),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,

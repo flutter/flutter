@@ -198,27 +198,31 @@ class FlutterDriverService extends DriverService {
   ) async {
     Uri uri;
     if (vmServiceUri.scheme == 'ws') {
-      uri = vmServiceUri.replace(scheme: 'http', path: vmServiceUri.path.replaceFirst('ws/', ''));
+      final List<String> segments = vmServiceUri.pathSegments.toList();
+      segments.remove('ws');
+      uri = vmServiceUri.replace(scheme: 'http', path: segments.join('/'));
     } else {
       uri = vmServiceUri;
     }
     _vmServiceUri = uri.toString();
     _device = device;
-    try {
-      await device.dds.startDartDevelopmentService(
-        uri,
-        debuggingOptions.ddsPort,
-        ipv6,
-        debuggingOptions.disableServiceAuthCodes,
-        logger: _logger,
-      );
-      _vmServiceUri = device.dds.uri.toString();
-    } on dds.DartDevelopmentServiceException {
-      // If there's another flutter_tools instance still connected to the target
-      // application, DDS will already be running remotely and this call will fail.
-      // This can be ignored to continue to use the existing remote DDS instance.
+    if (debuggingOptions.enableDds) {
+      try {
+        await device.dds.startDartDevelopmentService(
+          uri,
+          debuggingOptions.ddsPort,
+          ipv6,
+          debuggingOptions.disableServiceAuthCodes,
+          logger: _logger,
+        );
+        _vmServiceUri = device.dds.uri.toString();
+      } on dds.DartDevelopmentServiceException {
+        // If there's another flutter_tools instance still connected to the target
+        // application, DDS will already be running remotely and this call will fail.
+        // This can be ignored to continue to use the existing remote DDS instance.
+      }
     }
-    _vmService = await _vmServiceConnector(uri, device: _device);
+    _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
 
