@@ -235,7 +235,7 @@ void updateLocalProperties({
       buildInfo.buildNumber ?? project.manifest.buildNumber,
       globals.logger,
     );
-    changeIfNecessary('flutter.versionCode', buildNumber);
+    changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
 
   if (changed) {

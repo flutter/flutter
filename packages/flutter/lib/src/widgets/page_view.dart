@@ -49,7 +49,7 @@ import 'viewport.dart';
 ///   const MyPageView({Key? key}) : super(key: key);
 ///
 ///   @override
-///   State<MyPageView> createState() => _MyPageViewState();
+///   _MyPageViewState createState() => _MyPageViewState();
 /// }
 ///
 /// class _MyPageViewState extends State<MyPageView> {
@@ -697,7 +697,7 @@ class PageView extends StatefulWidget {
   ///   const MyPageView({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   State<MyPageView> createState() => _MyPageViewState();
+  ///   _MyPageViewState createState() => _MyPageViewState();
   /// }
   ///
   /// class _MyPageViewState extends State<MyPageView> {
@@ -751,7 +751,7 @@ class PageView extends StatefulWidget {
   ///   final String data;
   ///
   ///   @override
-  ///   State<KeepAlive> createState() => _KeepAliveState();
+  ///   _KeepAliveState createState() => _KeepAliveState();
   /// }
   ///
   /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
@@ -892,7 +892,7 @@ class PageView extends StatefulWidget {
   final bool padEnds;
 
   @override
-  State<PageView> createState() => _PageViewState();
+  _PageViewState createState() => _PageViewState();
 }
 
 class _PageViewState extends State<PageView> {

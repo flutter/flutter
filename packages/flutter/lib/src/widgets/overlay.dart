@@ -284,8 +284,6 @@ class Overlay extends StatefulWidget {
   /// If `rootOverlay` is set to true, the state from the furthest instance of
   /// this class is given instead. Useful for installing overlay entries
   /// above all subsequent instances of [Overlay].
-  ///
-  /// This method can be expensive (it walks the element tree).
   static OverlayState? of(
     BuildContext context, {
     bool rootOverlay = false,
@@ -507,8 +505,8 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     }
     return _Theatre(
       skipCount: children.length - onstageCount,
-      clipBehavior: widget.clipBehavior,
       children: children.reversed.toList(growable: false),
+      clipBehavior: widget.clipBehavior,
     );
   }
 

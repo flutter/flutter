@@ -22,7 +22,7 @@ import 'widget_inspector_test_utils.dart';
 class ClockDemo extends StatefulWidget {
   const ClockDemo({ Key? key }) : super(key: key);
   @override
-  State<ClockDemo> createState() => _ClockDemoState();
+  _ClockDemoState createState() => _ClockDemoState();
 }
 
 class _ClockDemoState extends State<ClockDemo> {
@@ -65,7 +65,7 @@ class ClockText extends StatefulWidget {
   final int utcOffset;
 
   @override
-  State<ClockText> createState() => _ClockTextState();
+  _ClockTextState createState() => _ClockTextState();
 }
 
 class _ClockTextState extends State<ClockText> {
@@ -1961,7 +1961,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(numLocationEntries, equals(numDataEntries));
 
       final Map<int, _CreationLocation> knownLocations = <int, _CreationLocation>{};
-      _addToKnownLocationsMap(
+      addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
       );
@@ -2086,7 +2086,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(count, equals(1));
       // Verify the rebuild location is new.
       expect(knownLocations, isNot(contains(id)));
-      _addToKnownLocationsMap(
+      addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
       );
@@ -2161,7 +2161,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       final Map<int, _CreationLocation> knownLocations =
           <int, _CreationLocation>{};
-      _addToKnownLocationsMap(
+      addToKnownLocationsMap(
         knownLocations: knownLocations,
         newLocations: newLocations,
       );
@@ -3043,7 +3043,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   }
 }
 
-void _addToKnownLocationsMap({
+void addToKnownLocationsMap({
   required Map<int, _CreationLocation> knownLocations,
   required Map<String, List<int>> newLocations,
 }) {

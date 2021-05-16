@@ -180,8 +180,8 @@ void main() {
 
   testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
     const SimpleDialog dialog = SimpleDialog(
-      clipBehavior: Clip.antiAlias,
       children: <Widget>[],
+      clipBehavior: Clip.antiAlias,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -327,8 +327,8 @@ void main() {
       children: <Widget>[
         SimpleDialogOption(
           onPressed: () {},
-          padding: customPadding,
           child: const Text('First option'),
+          padding: customPadding,
         ),
       ],
     );
@@ -1263,8 +1263,8 @@ void main() {
           viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
-          insetPadding: null,
           child: Placeholder(),
+          insetPadding: null,
         ),
       ),
     );

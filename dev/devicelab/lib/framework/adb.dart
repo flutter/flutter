@@ -64,9 +64,9 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.android:
         return AndroidDeviceDiscovery();
       case DeviceOperatingSystem.androidArm:
-        return AndroidDeviceDiscovery(cpu: AndroidCPU.arm);
+        return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm);
       case DeviceOperatingSystem.androidArm64:
-        return AndroidDeviceDiscovery(cpu: AndroidCPU.arm64);
+        return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm64);
       case DeviceOperatingSystem.ios:
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
@@ -158,19 +158,19 @@ abstract class Device {
   }
 }
 
-enum AndroidCPU {
+enum _AndroidCPU {
   arm,
   arm64,
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
-  factory AndroidDeviceDiscovery({AndroidCPU cpu}) {
+  factory AndroidDeviceDiscovery({_AndroidCPU cpu}) {
     return _instance ??= AndroidDeviceDiscovery._(cpu);
   }
 
   AndroidDeviceDiscovery._(this.cpu);
 
-  final AndroidCPU cpu;
+  final _AndroidCPU cpu;
 
   // Parses information about a device. Example:
   //
@@ -199,9 +199,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     if (cpu == null)
       return true;
     switch (cpu) {
-      case AndroidCPU.arm64:
+      case _AndroidCPU.arm64:
         return device.isArm64();
-      case AndroidCPU.arm:
+      case _AndroidCPU.arm:
         return device.isArm();
     }
     return true;

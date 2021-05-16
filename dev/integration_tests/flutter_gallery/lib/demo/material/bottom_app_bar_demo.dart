@@ -35,8 +35,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     label: 'circular floating action button',
     value: FloatingActionButton(
       onPressed: _showSnackbar,
-      backgroundColor: Colors.orange,
       child: Icon(Icons.add, semanticLabel: 'Action'),
+      backgroundColor: Colors.orange,
     ),
   );
 
@@ -431,7 +431,6 @@ class _DiamondFab extends StatelessWidget {
     return Material(
       shape: const _DiamondBorder(),
       color: Colors.orange,
-      elevation: 6.0,
       child: InkWell(
         onTap: onPressed,
         child: SizedBox(
@@ -443,6 +442,7 @@ class _DiamondFab extends StatelessWidget {
           ),
         ),
       ),
+      elevation: 6.0,
     );
   }
 }

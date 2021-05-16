@@ -12,7 +12,8 @@ class MultiWidgetConstructTable extends StatefulWidget {
   final int rowCount;
 
   @override
-  State<MultiWidgetConstructTable> createState() => _MultiWidgetConstructTableState();
+  _MultiWidgetConstructTableState createState() =>
+      _MultiWidgetConstructTableState();
 }
 
 class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
@@ -75,16 +76,16 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                             key: ValueKey<int>(widgetCounter + label),
                             color: Color.lerp(
                                 Colors.white, baseColor, label / totalLength),
-                            constraints: BoxConstraints.expand(height: height),
                             child: Text('${widgetCounter + label}'),
+                            constraints: BoxConstraints.expand(height: height),
                           )
                         : MyContainer(
                             // This key forces rebuilding the element
                             key: ValueKey<int>(widgetCounter + label),
                             color: Color.lerp(
                                 Colors.white, baseColor, label / totalLength),
-                            constraints: BoxConstraints.expand(height: height),
                             child: Text('${widgetCounter + label}'),
+                            constraints: BoxConstraints.expand(height: height),
                           );
                   },
                 ),
@@ -109,8 +110,8 @@ class MyContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: color,
-      constraints: constraints,
       child: child,
+      constraints: constraints,
     );
   }
 }

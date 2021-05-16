@@ -123,7 +123,8 @@ class MergeableMaterial extends StatefulWidget {
   /// The z-coordinate at which to place all the [Material] slices.
   ///
   /// Defaults to 2, the appropriate elevation for cards.
-  final double elevation;
+  // TODO(ianh): Change this to double.
+  final int elevation;
 
   /// Whether connected pieces of [MaterialSlice] have dividers between them.
   final bool hasDividers;
@@ -138,11 +139,11 @@ class MergeableMaterial extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('mainAxis', mainAxis));
-    properties.add(DoubleProperty('elevation', elevation));
+    properties.add(DoubleProperty('elevation', elevation.toDouble()));
   }
 
   @override
-  State<MergeableMaterial> createState() => _MergeableMaterialState();
+  _MergeableMaterialState createState() => _MergeableMaterialState();
 }
 
 class _AnimationTuple {
@@ -615,7 +616,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
     return _MergeableMaterialListBody(
       mainAxis: widget.mainAxis,
-      elevation: widget.elevation,
+      elevation: widget.elevation.toDouble(),
       items: _children,
       children: widgets,
     );

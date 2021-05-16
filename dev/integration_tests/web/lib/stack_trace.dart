@@ -6,8 +6,9 @@ import 'dart:html' as html;
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:meta/dart2js.dart';
+
+import 'package:flutter/foundation.dart';
 
 /// Expected sequence of method calls.
 const List<String> callChain = <String>['baz', 'bar', 'foo'];
@@ -33,7 +34,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'packages',
     packagePath: 'web_integration/stack_trace.dart',
-    line: 120,
+    line: 121,
     column: 3,
     className: '<unknown>',
     method: 'baz',
@@ -44,7 +45,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'packages',
     packagePath: 'web_integration/stack_trace.dart',
-    line: 115,
+    line: 116,
     column: 3,
     className: '<unknown>',
     method: 'bar',
@@ -55,7 +56,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'packages',
     packagePath: 'web_integration/stack_trace.dart',
-    line: 110,
+    line: 111,
     column: 3,
     className: '<unknown>',
     method: 'foo',

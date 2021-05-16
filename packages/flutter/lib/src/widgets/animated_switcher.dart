@@ -248,7 +248,7 @@ class AnimatedSwitcher extends StatefulWidget {
   final AnimatedSwitcherLayoutBuilder layoutBuilder;
 
   @override
-  State<AnimatedSwitcher> createState() => _AnimatedSwitcherState();
+  _AnimatedSwitcherState createState() => _AnimatedSwitcherState();
 
   /// The transition builder used as the default value of [transitionBuilder].
   ///
@@ -273,11 +273,11 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
   static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
-      alignment: Alignment.center,
       children: <Widget>[
         ...previousChildren,
         if (currentChild != null) currentChild,
       ],
+      alignment: Alignment.center,
     );
   }
 

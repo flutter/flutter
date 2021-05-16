@@ -51,7 +51,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///   final String title;
 ///
 ///   @override
-///   State<MyHomePage> createState() => _MyHomePageState();
+///   _MyHomePageState createState() => _MyHomePageState();
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {

@@ -17,7 +17,7 @@ class CupertinoSegmentedControlDemo extends StatefulWidget {
   static const String routeName = 'cupertino/segmented_control';
 
   @override
-  State<CupertinoSegmentedControlDemo> createState() => _CupertinoSegmentedControlDemoState();
+  _CupertinoSegmentedControlDemoState createState() => _CupertinoSegmentedControlDemoState();
 }
 
 class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedControlDemo> {

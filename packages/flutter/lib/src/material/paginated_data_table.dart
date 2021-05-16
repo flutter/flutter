@@ -84,7 +84,6 @@ class PaginatedDataTable extends StatefulWidget {
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.arrowHeadColor,
     required this.source,
     this.checkboxHorizontalMargin,
   }) : assert(actions == null || (actions != null && header != null)),
@@ -235,9 +234,6 @@ class PaginatedDataTable extends StatefulWidget {
   /// of the table and the checkbox, as well as the margin between the checkbox
   /// and the content in the first data column. This value defaults to 24.0.
   final double? checkboxHorizontalMargin;
-
-  /// Defines the color of the arrow heads in the footer.
-  final Color? arrowHeadColor;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -446,27 +442,27 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 32.0),
       if (widget.showFirstLastButtons)
         IconButton(
-          icon: Icon(Icons.skip_previous, color: widget.arrowHeadColor),
+          icon: const Icon(Icons.skip_previous),
           padding: EdgeInsets.zero,
           tooltip: localizations.firstPageTooltip,
           onPressed: _firstRowIndex <= 0 ? null : _handleFirst,
         ),
       IconButton(
-        icon: Icon(Icons.chevron_left, color: widget.arrowHeadColor),
+        icon: const Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
         tooltip: localizations.previousPageTooltip,
         onPressed: _firstRowIndex <= 0 ? null : _handlePrevious,
       ),
       Container(width: 24.0),
       IconButton(
-        icon: Icon(Icons.chevron_right, color: widget.arrowHeadColor),
+        icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
         tooltip: localizations.nextPageTooltip,
         onPressed: _isNextPageUnavailable() ? null : _handleNext,
       ),
       if (widget.showFirstLastButtons)
         IconButton(
-          icon: Icon(Icons.skip_next, color: widget.arrowHeadColor),
+          icon: const Icon(Icons.skip_next),
           padding: EdgeInsets.zero,
           tooltip: localizations.lastPageTooltip,
           onPressed: _isNextPageUnavailable()

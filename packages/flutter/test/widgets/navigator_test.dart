@@ -2537,7 +2537,8 @@ void main() {
         '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
         '   Please create a HeroControllerScope for each Navigator or use a\n'
         '   HeroControllerScope.none to prevent subtree from receiving a\n'
-        '   HeroController.\n',
+        '   HeroController.\n'
+        '',
       ),
     );
   });
@@ -2639,7 +2640,8 @@ void main() {
         equalsIgnoringHashCodes(
           'FlutterError\n'
           '   The Navigator.onPopPage must be provided to use the\n'
-          '   Navigator.pages API\n',
+          '   Navigator.pages API\n'
+          '',
         ),
       );
     });
@@ -2674,7 +2676,8 @@ void main() {
           'FlutterError\n'
           '   A page-based route should not be added using the imperative api.\n'
           '   Provide a new list with the corresponding Page to Navigator.pages\n'
-          '   instead.\n',
+          '   instead.\n'
+          '',
         ),
       );
     }
@@ -3556,42 +3559,6 @@ void main() {
       expect(observations[7].current, 'first');
       expect(observations[7].previous, isNull);
     });
-  });
-
-  testWidgets('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
-    final NavigatorObserver observer = NavigatorObserver();
-    Widget build([Key? key]) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Navigator(
-          key: key,
-          observers: <NavigatorObserver>[observer],
-          onGenerateRoute: (RouteSettings settings) {
-            return PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
-                return Container();
-              },
-            );
-          },
-        ),
-      );
-    }
-
-    // Test without reinsertion
-    await tester.pumpWidget(build());
-    await tester.pumpWidget(Container(child: build()));
-    expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
-
-    // Clear the tree
-    await tester.pumpWidget(Container());
-    expect(observer.navigator, isNull);
-
-    // Test with reinsertion
-    final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(build(key));
-    await tester.pumpWidget(Container(child: build(key)));
-    expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
   });
 }
 

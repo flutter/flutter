@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -287,7 +288,7 @@ void main() {
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsArgumentError);
+    ), throwsA(isA<ArgumentError>()));
 
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), isNot(exists));
@@ -360,7 +361,7 @@ void main() {
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit());
+    ), throwsA(isA<ToolExit>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
@@ -384,7 +385,7 @@ void main() {
       'test message',
       Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit());
+    ), throwsA(isA<ToolExit>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });

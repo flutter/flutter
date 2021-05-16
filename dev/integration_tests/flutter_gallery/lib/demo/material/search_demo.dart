@@ -12,7 +12,7 @@ class SearchDemo extends StatefulWidget {
   static const String routeName = '/material/search';
 
   @override
-  State<SearchDemo> createState() => _SearchDemoState();
+  _SearchDemoState createState() => _SearchDemoState();
 }
 
 class _SearchDemoState extends State<SearchDemo> {

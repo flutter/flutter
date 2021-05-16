@@ -71,7 +71,7 @@ import 'restoration.dart';
 /// ```dart
 /// class RestorableDuration extends RestorableValue<Duration> {
 ///   @override
-///   Duration createDefaultValue() => Duration.zero;
+///   Duration createDefaultValue() => const Duration();
 ///
 ///   @override
 ///   void didUpdateValue(Duration? oldValue) {
@@ -84,7 +84,7 @@ import 'restoration.dart';
 ///     if (data != null) {
 ///       return Duration(microseconds: data as int);
 ///     }
-///     return Duration.zero;
+///     return const Duration();
 ///   }
 ///
 ///   @override

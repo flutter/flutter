@@ -17,7 +17,8 @@ void main() {
     });
 
     test('io_extension should throw exception', () {
-      expect(() => registerWebServiceExtension(call), throwsUnsupportedError);
+      expect(() => registerWebServiceExtension(call),
+          throwsA(isA<UnsupportedError>()));
     });
   });
 }

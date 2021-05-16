@@ -703,7 +703,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   }
 
   @override
-  State<RawAutocomplete<T>> createState() => _RawAutocompleteState<T>();
+  _RawAutocompleteState<T> createState() => _RawAutocompleteState<T>();
 }
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {

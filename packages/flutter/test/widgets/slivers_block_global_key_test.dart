@@ -12,7 +12,7 @@ class GenerationText extends StatefulWidget {
   const GenerationText(this.value, { Key? key }) : super(key: key);
   final int value;
   @override
-  State<GenerationText> createState() => _GenerationTextState();
+  _GenerationTextState createState() => _GenerationTextState();
 }
 
 class _GenerationTextState extends State<GenerationText> {

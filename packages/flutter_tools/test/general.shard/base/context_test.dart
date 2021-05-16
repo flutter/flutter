@@ -161,18 +161,13 @@ void main() {
             double: () => context.get<int>()! * 1.0,
           },
         );
-        expect(
-          () => value,
-          throwsA(
-            isA<ContextDependencyCycleException>()
-              .having((ContextDependencyCycleException error) => error.cycle, 'cycle', <Type>[String, double, int])
-              .having(
-                (ContextDependencyCycleException error) => error.toString(),
-                'toString()',
-                'Dependency cycle detected: String -> double -> int',
-              ),
-          ),
-        );
+        try {
+          await value;
+          fail('ContextDependencyCycleException expected but not thrown.');
+        } on ContextDependencyCycleException catch (e) {
+          expect(e.cycle, <Type>[String, double, int]);
+          expect(e.toString(), 'Dependency cycle detected: String -> double -> int');
+        }
       });
     });
 

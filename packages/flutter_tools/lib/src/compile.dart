@@ -662,7 +662,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
       }
       _server.stdin.writeln(message);
-      _logger.printTrace(message);
+      _logger.printTrace(message.toString());
     }
     _server.stdin.writeln(inputKey);
     _logger.printTrace('<- $inputKey');

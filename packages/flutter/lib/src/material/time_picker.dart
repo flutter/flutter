@@ -1823,7 +1823,7 @@ class TimePickerDialog extends StatefulWidget {
   final String? restorationId;
 
   @override
-  State<TimePickerDialog> createState() => _TimePickerDialogState();
+  _TimePickerDialogState createState() => _TimePickerDialogState();
 }
 
 // A restorable [TimePickerEntryMode] value.

@@ -21,6 +21,7 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
+import '../../src/testbed.dart';
 
 void main() {
   Cache.disableLocking();

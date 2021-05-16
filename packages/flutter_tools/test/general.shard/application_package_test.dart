@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -20,15 +21,23 @@ import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:test/fake.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform(stdoutSupportsAnsi: false);
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
+  Platform: _kNoColorTerminalPlatform,
+};
+
+class MockitoAndroidSdk extends Mock implements AndroidSdk {}
+class MockitoAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
+
 void main() {
   group('Apk with partial Android SDK works', () {
-    FakeAndroidSdk sdk;
+    AndroidSdk sdk;
     FakeProcessManager fakeProcessManager;
     MemoryFileSystem fs;
     Cache cache;
@@ -41,14 +50,14 @@ void main() {
     };
 
     setUp(() async {
-      sdk = FakeAndroidSdk();
+      sdk = MockitoAndroidSdk();
       fakeProcessManager = FakeProcessManager.empty();
       fs = MemoryFileSystem.test();
       cache = Cache.test(
         processManager: FakeProcessManager.any(),
       );
       Cache.flutterRoot = '../..';
-      sdk.licensesAvailable = true;
+      when(sdk.licensesAvailable).thenReturn(true);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       fs.file(project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
@@ -58,11 +67,11 @@ void main() {
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
       const String aaptPath = 'aaptPath';
       final File apkFile = globals.fs.file('app.apk');
-      final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
-      sdkVersion.aaptPath = aaptPath;
-      sdk.latestVersion = sdkVersion;
-      sdk.platformToolsAvailable = true;
-      sdk.licensesAvailable = false;
+      final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
+      when(sdkVersion.aaptPath).thenReturn(aaptPath);
+      when(sdk.latestVersion).thenReturn(sdkVersion);
+      when(sdk.platformToolsAvailable).thenReturn(true);
+      when(sdk.licensesAvailable).thenReturn(false);
 
       fakeProcessManager.addCommand(
         FakeCommand(
@@ -87,7 +96,7 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools not, apk exists', () async {
-      sdk.latestVersion = null;
+      when(sdk.latestVersion).thenReturn(null);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       project.android.hostAppGradleRoot
         .childFile('gradle.properties')
@@ -109,8 +118,8 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
-      final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
-      sdk.latestVersion = sdkVersion;
+      final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
+      when(sdk.latestVersion).thenReturn(sdkVersion);
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -120,8 +129,8 @@ void main() {
     }, overrides: overrides);
 
     testWithoutContext('returns null when failed to extract manifest', () async {
-      final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
-      sdk.latestVersion = sdkVersion;
+      final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
+      when(sdk.latestVersion).thenReturn(sdkVersion);
       final AndroidApk androidApk = AndroidApk.fromApk(
         null,
         processManager: fakeProcessManager,
@@ -233,18 +242,19 @@ void main() {
   });
 
   group('PrebuiltIOSApp', () {
-    FakeOperatingSystemUtils os;
+    MockOperatingSystemUtils os;
     FakePlistParser testPlistParser;
 
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       PlistParser: () => testPlistParser,
+      Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => os,
     };
 
     setUp(() {
-      os = FakeOperatingSystemUtils();
+      os = MockOperatingSystemUtils();
       testPlistParser = FakePlistParser();
     });
 
@@ -302,6 +312,7 @@ void main() {
 
     testUsingContext('Bad ipa zip-file, no payload dir', () {
       globals.fs.file('app.ipa').createSync();
+      when(os.unzip(globals.fs.file('app.ipa'), any)).thenAnswer((Invocation _) { });
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
       expect(
@@ -312,17 +323,19 @@ void main() {
 
     testUsingContext('Bad ipa zip-file, two app bundles', () {
       globals.fs.file('app.ipa').createSync();
-      os.onUnzip = (File zipFile, Directory targetDirectory) {
+      when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
+        final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
           return;
         }
+        final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final String bundlePath1 =
             globals.fs.path.join(targetDirectory.path, 'Payload', 'bundle1.app');
         final String bundlePath2 =
             globals.fs.path.join(targetDirectory.path, 'Payload', 'bundle2.app');
         globals.fs.directory(bundlePath1).createSync(recursive: true);
         globals.fs.directory(bundlePath2).createSync(recursive: true);
-      };
+      });
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
       expect(testLogger.errorText,
@@ -331,10 +344,12 @@ void main() {
 
     testUsingContext('Success with ipa', () {
       globals.fs.file('app.ipa').createSync();
-      os.onUnzip = (File zipFile, Directory targetDirectory) {
+      when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
+        final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
           return;
         }
+        final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final Directory bundleAppDir = globals.fs.directory(
             globals.fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'));
         bundleAppDir.createSync(recursive: true);
@@ -342,7 +357,7 @@ void main() {
         globals.fs
             .file(globals.fs.path.join(bundleAppDir.path, 'Info.plist'))
             .createSync();
-      };
+      });
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, endsWith('bundle.app'));
@@ -384,7 +399,8 @@ void main() {
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+      Platform: _kNoColorTerminalPlatform,
+      OperatingSystemUtils: () => MockOperatingSystemUtils(),
     };
 
     testUsingContext('Error on non-existing file', () {
@@ -686,27 +702,4 @@ N: android=http://schemas.android.com/apk/res/android
         A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
 ''';
 
-class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  void Function(File, Directory) onUnzip;
-
-  @override
-  void unzip(File file, Directory targetDirectory) {
-    onUnzip?.call(file, targetDirectory);
-  }
-}
-
-class FakeAndroidSdk extends Fake implements AndroidSdk {
-  @override
-  bool platformToolsAvailable;
-
-  @override
-  bool licensesAvailable;
-
-  @override
-  AndroidSdkVersion latestVersion;
-}
-
-class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
-  @override
-  String aaptPath;
-}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

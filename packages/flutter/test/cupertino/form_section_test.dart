@@ -123,8 +123,8 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: CupertinoFormSection(
-            backgroundColor: backgroundColor,
             children: <Widget>[CupertinoTextFormFieldRow()],
+            backgroundColor: backgroundColor,
           ),
         ),
       ),
@@ -142,8 +142,8 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoFormSection(
-            clipBehavior: Clip.antiAlias,
             children: <Widget>[CupertinoTextFormFieldRow()],
+            clipBehavior: Clip.antiAlias,
           ),
         ),
       ),

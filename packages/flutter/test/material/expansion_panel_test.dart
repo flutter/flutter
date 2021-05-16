@@ -20,7 +20,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   final Key? secondPanelKey;
   final bool canTapOnHeader;
   final Color? dividerColor;
-  final double elevation;
+  final int elevation;
 
   /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
   final EdgeInsets? expandedHeaderPadding;
@@ -32,7 +32,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   }
 
   @override
-  State<SimpleExpansionPanelListTestWidget> createState() => _SimpleExpansionPanelListTestWidgetState();
+  _SimpleExpansionPanelListTestWidgetState createState() => _SimpleExpansionPanelListTestWidgetState();
 }
 
 class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPanelListTestWidget> {
@@ -1397,7 +1397,7 @@ void main() {
   });
 
   testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
-    const double _elevation = 8;
+    const int _elevation = 8;
 
     // Test for ExpansionPanelList.
     await tester.pumpWidget(const MaterialApp(

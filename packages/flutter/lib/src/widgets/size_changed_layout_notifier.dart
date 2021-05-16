@@ -58,7 +58,7 @@ class SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
   }) : super(key: key, child: child);
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  _RenderSizeChangedWithCallback createRenderObject(BuildContext context) {
     return _RenderSizeChangedWithCallback(
       onLayoutChangedCallback: () {
         SizeChangedLayoutNotification().dispatch(context);

@@ -98,7 +98,7 @@ void main() {
     final BuildCommand buildCommand = BuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a']);
+    await runner.run(<String>['build', 'web', '--no-pub']);
 
     expect(fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
   }, overrides: <Type, Generator>{
@@ -106,21 +106,7 @@ void main() {
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(environment.defines, <String, String>{
-        'TargetFile': 'lib/main.dart',
-        'HasWebPlugins': 'true',
-        'cspMode': 'false',
-        'SourceMaps': 'false',
-        'NativeNullAssertions': 'true',
-        'ServiceWorkerStrategy': 'offline-first',
-        'BuildMode': 'release',
-        'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
-        'DartObfuscation': 'false',
-        'TrackWidgetCreation': 'false',
-        'TreeShakeIcons': 'false',
-      });
-    }),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {

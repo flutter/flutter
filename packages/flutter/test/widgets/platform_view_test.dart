@@ -2520,7 +2520,7 @@ void main() {
         Center(
           child: Column(
             children: <Widget>[
-              SizedBox(width: 300, height: 300, child: platformViewLink),
+              SizedBox(child: platformViewLink, width: 300, height: 300),
               Focus(
                 debugLabel: 'container',
                 child: Container(key: containerKey),

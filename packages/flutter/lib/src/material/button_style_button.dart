@@ -123,7 +123,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   bool get enabled => onPressed != null || onLongPress != null;
 
   @override
-  State<ButtonStyleButton> createState() => _ButtonStyleState();
+  _ButtonStyleState createState() => _ButtonStyleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

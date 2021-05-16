@@ -35,7 +35,7 @@ class DowngradeCommand extends FlutterCommand {
     Logger logger,
     ProcessManager processManager,
     FlutterVersion flutterVersion,
-    Terminal terminal,
+    AnsiTerminal terminal,
     Stdio stdio,
     FileSystem fileSystem,
   }) : _terminal = terminal,
@@ -61,7 +61,7 @@ class DowngradeCommand extends FlutterCommand {
     );
   }
 
-  Terminal _terminal;
+  AnsiTerminal _terminal;
   FlutterVersion _flutterVersion;
   PersistentToolState _persistentToolState;
   ProcessUtils _processUtils;

@@ -261,7 +261,7 @@ class LinkedScrollActivity extends ScrollActivity {
 class Test extends StatefulWidget {
   const Test({ Key? key }) : super(key: key);
   @override
-  State<Test> createState() => _TestState();
+  _TestState createState() => _TestState();
 }
 
 class _TestState extends State<Test> {

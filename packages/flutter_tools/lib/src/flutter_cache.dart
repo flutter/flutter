@@ -183,7 +183,9 @@ class FlutterWebSdk extends CachedArtifact {
       platformName += 'windows-x64';
     }
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
-    ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
+    if (location.existsSync()) {
+      location.deleteSync(recursive: true);
+    }
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
     final FileSystem fileSystem = location.fileSystem;

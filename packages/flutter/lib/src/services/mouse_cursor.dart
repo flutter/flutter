@@ -381,7 +381,7 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   @protected
-  MouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
+  _SystemMouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
 
   @override
   bool operator ==(Object other) {
@@ -417,7 +417,7 @@ class SystemMouseCursor extends MouseCursor {
 class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
-  SystemMouseCursors._();
+  factory SystemMouseCursors._() => throw Error();
 
   // The mapping in this class must be kept in sync with the following files in
   // the engine:

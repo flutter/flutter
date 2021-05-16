@@ -45,7 +45,7 @@ class PasswordField extends StatefulWidget {
   final ValueChanged<String>? onFieldSubmitted;
 
   @override
-  State<PasswordField> createState() => _PasswordFieldState();
+  _PasswordFieldState createState() => _PasswordFieldState();
 }
 
 class _PasswordFieldState extends State<PasswordField> {
@@ -280,8 +280,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   const SizedBox(height: 24.0),
                   Center(
                     child: ElevatedButton(
-                      onPressed: _handleSubmitted,
                       child: const Text('SUBMIT'),
+                      onPressed: _handleSubmitted,
                     ),
                   ),
                   const SizedBox(height: 24.0),

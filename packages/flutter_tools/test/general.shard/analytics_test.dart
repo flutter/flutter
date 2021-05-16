@@ -6,7 +6,6 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -22,7 +21,7 @@ import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:test/fake.dart';
+import 'package:mockito/mockito.dart';
 import 'package:usage/usage_io.dart';
 
 import '../src/common.dart';
@@ -148,24 +147,28 @@ void main() {
     });
   });
 
-  group('analytics with fakes', () {
+  group('analytics with mocks', () {
     MemoryFileSystem memoryFileSystem;
     FakeStdio fakeStdio;
     TestUsage testUsage;
     FakeClock fakeClock;
-    FakeDoctor doctor;
+    Doctor mockDoctor;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
       fakeStdio = FakeStdio();
       testUsage = TestUsage();
       fakeClock = FakeClock();
-      doctor = FakeDoctor();
+      mockDoctor = MockDoctor();
     });
 
     testUsingContext('flutter commands send timing events', () async {
       fakeClock.times = <int>[1000, 2000];
-      doctor.diagnoseSucceeds = true;
+      when(mockDoctor.diagnose(
+        androidLicenses: false,
+        verbose: false,
+        androidLicenseValidator: anyNamed('androidLicenseValidator')
+      )).thenAnswer((_) async => true);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -177,13 +180,14 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       SystemClock: () => fakeClock,
-      Doctor: () => doctor,
+      Doctor: () => mockDoctor,
       Usage: () => testUsage,
     });
 
     testUsingContext('doctor fail sends warning', () async {
       fakeClock.times = <int>[1000, 2000];
-      doctor.diagnoseSucceeds = false;
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false, androidLicenseValidator: anyNamed('androidLicenseValidator')))
+        .thenAnswer((_) async => false);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -196,7 +200,7 @@ void main() {
       ));
     }, overrides: <Type, Generator>{
       SystemClock: () => fakeClock,
-      Doctor: () => doctor,
+      Doctor: () => mockDoctor,
       Usage: () => testUsage,
     });
 
@@ -359,19 +363,7 @@ class FakeFlutterCommand extends FlutterCommand {
   }
 }
 
-class FakeDoctor extends Fake implements Doctor {
-  bool diagnoseSucceeds = false;
-
-  @override
-  Future<bool> diagnose({
-    bool androidLicenses = false,
-    bool verbose = true,
-    bool showColor = true,
-    AndroidLicenseValidator androidLicenseValidator,
-  }) async {
-    return diagnoseSucceeds;
-  }
-}
+class MockDoctor extends Mock implements Doctor {}
 
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];

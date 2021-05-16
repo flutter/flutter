@@ -474,7 +474,7 @@ class Localizations extends StatefulWidget {
   }
 
   @override
-  State<Localizations> createState() => _LocalizationsState();
+  _LocalizationsState createState() => _LocalizationsState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

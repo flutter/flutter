@@ -4,16 +4,21 @@
 
 // @dart = 2.8
 
+import 'dart:convert';
+import 'dart:io' hide Directory, File;
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -29,7 +34,8 @@ const String relativePath = 'fonts/MaterialIcons-Regular.otf';
 void main() {
   BufferLogger logger;
   MemoryFileSystem fileSystem;
-  FakeProcessManager processManager;
+  MockProcessManager mockProcessManager;
+  MockProcess fontSubsetProcess;
   Artifacts artifacts;
   DevFSStringContent fontManifestContent;
 
@@ -53,12 +59,9 @@ void main() {
     String stdout = '',
     String stderr = '',
   }) {
-    processManager.addCommand(FakeCommand(
-      command: _getConstFinderArgs(appDillPath),
-      exitCode: exitCode,
-      stdout: stdout,
-      stderr: stderr,
-    ));
+    when(mockProcessManager.run(_getConstFinderArgs(appDillPath))).thenAnswer((_) async {
+      return ProcessResult(0, exitCode, stdout, stderr);
+    });
   }
 
   void _resetFontSubsetInvocation({
@@ -69,21 +72,30 @@ void main() {
   }) {
     assert(stdinSink != null);
     stdinSink.clear();
-    processManager.addCommand(FakeCommand(
-      command: fontSubsetArgs,
-      exitCode: exitCode,
-      stdout: stdout,
-      stderr: stderr,
-      stdin: stdinSink,
-    ));
+    when(fontSubsetProcess.exitCode).thenAnswer((_) async => exitCode);
+    when(fontSubsetProcess.stdout).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stdout)]));
+    when(fontSubsetProcess.stderr).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stderr)]));
+    when(fontSubsetProcess.stdin).thenReturn(stdinSink);
+    when(mockProcessManager.start(fontSubsetArgs)).thenAnswer((_) async {
+      return fontSubsetProcess;
+    });
   }
 
   setUp(() {
-    processManager = FakeProcessManager.empty();
     fontManifestContent = DevFSStringContent(validFontManifestJson);
+
+    mockProcessManager = MockProcessManager();
+    fontSubsetProcess = MockProcess();
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
-    logger = BufferLogger.test();
+    logger = BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: FakeStdio(),
+        platform: kNoAnsiPlatform,
+      ),
+      outputPreferences: OutputPreferences.test(showColor: false),
+    );
+
     dartPath = artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     constFinderPath = artifacts.getArtifactPath(Artifact.constFinder);
     fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
@@ -123,7 +135,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -141,7 +153,9 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsets, false);
-    expect(processManager, hasNoRemainingExpectations);
+
+    verifyNever(mockProcessManager.run(any));
+    verifyNever(mockProcessManager.start(any));
   });
 
   testWithoutContext('Does not get enabled without font manifest', () {
@@ -154,7 +168,7 @@ void main() {
       environment,
       null,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -164,7 +178,8 @@ void main() {
       isEmpty,
     );
     expect(iconTreeShaker.enabled, false);
-    expect(processManager, hasNoRemainingExpectations);
+    verifyNever(mockProcessManager.run(any));
+    verifyNever(mockProcessManager.start(any));
   });
 
   testWithoutContext('Gets enabled', () {
@@ -177,7 +192,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -187,7 +202,8 @@ void main() {
       isEmpty,
     );
     expect(iconTreeShaker.enabled, true);
-    expect(processManager, hasNoRemainingExpectations);
+    verifyNever(mockProcessManager.run(any));
+    verifyNever(mockProcessManager.start(any));
   });
 
   test('No app.dill throws exception', () async {
@@ -200,7 +216,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -213,7 +229,6 @@ void main() {
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Can subset a font', () async {
@@ -228,7 +243,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -253,7 +268,9 @@ void main() {
     );
     expect(subsetted, true);
     expect(stdinSink.getAndClear(), '59470\n');
-    expect(processManager, hasNoRemainingExpectations);
+
+    verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
+    verify(mockProcessManager.start(fontSubsetArgs)).called(2);
   });
 
   testWithoutContext('Does not subset a non-supported font', () async {
@@ -268,7 +285,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -286,6 +303,9 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsetted, false);
+
+    verifyNever(mockProcessManager.run(_getConstFinderArgs(appDill.path)));
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
   testWithoutContext('Does not subset an invalid ttf font', () async {
@@ -300,7 +320,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -318,6 +338,8 @@ void main() {
     );
 
     expect(subsetted, false);
+    verifyNever(mockProcessManager.run(_getConstFinderArgs(appDill.path)));
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
   testWithoutContext('Non-constant instances', () async {
@@ -332,7 +354,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -340,7 +362,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
 
     await expectLater(
-      () => iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
@@ -351,7 +373,9 @@ void main() {
           ' again with --no-tree-shake-icons.',
       ),
     );
-    expect(processManager, hasNoRemainingExpectations);
+
+    verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
   testWithoutContext('Non-zero font-subset exit code', () async {
@@ -367,7 +391,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -377,14 +401,16 @@ void main() {
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () => iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-    expect(processManager, hasNoRemainingExpectations);
+
+    verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
+    verify(mockProcessManager.start(fontSubsetArgs)).called(1);
   });
 
   testWithoutContext('font-subset throws on write to sdtin', () async {
@@ -399,7 +425,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -409,14 +435,16 @@ void main() {
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
-      () => iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-    expect(processManager, hasNoRemainingExpectations);
+
+    verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
+    verify(mockProcessManager.start(fontSubsetArgs)).called(1);
   });
 
   testWithoutContext('Invalid font manifest', () async {
@@ -433,7 +461,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -441,14 +469,16 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
 
     await expectLater(
-      () => iconTreeShaker.subsetFont(
+      () async => iconTreeShaker.subsetFont(
         input: fileSystem.file(inputPath),
         outputPath: outputPath,
         relativePath: relativePath,
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-    expect(processManager, hasNoRemainingExpectations);
+
+    verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
   testWithoutContext('ConstFinder non-zero exit', () async {
@@ -465,7 +495,7 @@ void main() {
       environment,
       fontManifestContent,
       logger: logger,
-      processManager: processManager,
+      processManager: mockProcessManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
@@ -480,7 +510,9 @@ void main() {
       ),
       throwsA(isA<IconTreeShakerException>()),
     );
-    expect(processManager, hasNoRemainingExpectations);
+
+    verify(mockProcessManager.run(_getConstFinderArgs(appDill.path))).called(1);
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 }
 
@@ -557,3 +589,6 @@ const String invalidFontManifestJson = '''
   ]
 }
 ''';
+
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockProcess extends Mock implements Process {}

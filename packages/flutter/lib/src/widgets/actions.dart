@@ -257,7 +257,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///   const ActionListenerExample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   State<ActionListenerExample> createState() => _ActionListenerExampleState();
+///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
 /// }
 ///
 /// class _ActionListenerExampleState extends State<ActionListenerExample> {
@@ -375,7 +375,7 @@ class ActionListener extends StatefulWidget {
   final Widget child;
 
   @override
-  State<ActionListener> createState() => _ActionListenerState();
+  _ActionListenerState createState() => _ActionListenerState();
 }
 
 class _ActionListenerState extends State<ActionListener> {
@@ -605,7 +605,7 @@ class ActionDispatcher with Diagnosticable {
 ///   final ValueNotifier<bool> valueNotifier;
 ///
 ///   @override
-///   State<SaveButton> createState() => _SaveButtonState();
+///   _SaveButtonState createState() => _SaveButtonState();
 /// }
 ///
 /// class _SaveButtonState extends State<SaveButton> {
@@ -1129,7 +1129,7 @@ class _ActionsMarker extends InheritedWidget {
 ///   final Widget child;
 ///
 ///   @override
-///   State<FadButton> createState() => _FadButtonState();
+///   _FadButtonState createState() => _FadButtonState();
 /// }
 ///
 /// class _FadButtonState extends State<FadButton> {
@@ -1317,7 +1317,7 @@ class FocusableActionDetector extends StatefulWidget {
   final Widget child;
 
   @override
-  State<FocusableActionDetector> createState() => _FocusableActionDetectorState();
+  _FocusableActionDetectorState createState() => _FocusableActionDetectorState();
 }
 
 class _FocusableActionDetectorState extends State<FocusableActionDetector> {

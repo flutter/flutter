@@ -14,7 +14,7 @@ class CupertinoRefreshControlDemo extends StatefulWidget {
   static const String routeName = '/cupertino/refresh';
 
   @override
-  State<CupertinoRefreshControlDemo> createState() => _CupertinoRefreshControlDemoState();
+  _CupertinoRefreshControlDemoState createState() => _CupertinoRefreshControlDemoState();
 }
 
 class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDemo> {

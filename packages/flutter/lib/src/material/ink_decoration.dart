@@ -238,7 +238,7 @@ class Ink extends StatefulWidget {
   }
 
   @override
-  State<Ink> createState() => _InkState();
+  _InkState createState() => _InkState();
 }
 
 class _InkState extends State<Ink> {

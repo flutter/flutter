@@ -447,7 +447,7 @@ class Slider extends StatefulWidget {
   final _SliderType _sliderType ;
 
   @override
-  State<Slider> createState() => _SliderState();
+  _SliderState createState() => _SliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

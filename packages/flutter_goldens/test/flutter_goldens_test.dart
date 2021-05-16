@@ -330,6 +330,7 @@ void main() {
       final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(
         defaultComparator,
         platform,
+        local: true,
       );
       expect(
         basedir.uri,

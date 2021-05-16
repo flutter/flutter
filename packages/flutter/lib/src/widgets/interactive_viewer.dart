@@ -691,7 +691,7 @@ class InteractiveViewer extends StatefulWidget {
     // the point.
     final Vector3 l1P = point - l1;
     final Vector3 l1L2 = l2 - l1;
-    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0);
+    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0).toDouble();
     return l1 + l1L2 * fraction;
   }
 
@@ -794,8 +794,7 @@ class InteractiveViewer extends StatefulWidget {
     return closestOverall;
   }
 
-  @override
-  State<InteractiveViewer> createState() => _InteractiveViewerState();
+  @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
 
 class _InteractiveViewerState extends State<InteractiveViewer> with TickerProviderStateMixin {

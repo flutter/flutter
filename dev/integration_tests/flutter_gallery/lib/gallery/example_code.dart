@@ -26,8 +26,8 @@ ElevatedButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 const ElevatedButton(
-  onPressed: null,
   child: Text('BUTTON TITLE'),
+  onPressed: null,
 );
 
 // Create a button with an icon and a
@@ -54,8 +54,8 @@ OutlinedButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 const OutlinedButton(
-  onPressed: null,
   child: Text('BUTTON TITLE'),
+  onPressed: null,
 );
 
 // Create a button with an icon and a
@@ -82,8 +82,8 @@ TextButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 const TextButton(
-  onPressed: null,
   child: Text('BUTTON TITLE'),
+  onPressed: null,
 );
 // END
 
@@ -136,8 +136,8 @@ Scaffold(
     title: const Text('Demo'),
   ),
   floatingActionButton: const FloatingActionButton(
-    onPressed: null,
     child: Icon(Icons.add),
+    onPressed: null,
   ),
 );
 // END

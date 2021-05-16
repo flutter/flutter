@@ -12,7 +12,7 @@ class ScrollPositionListener extends StatefulWidget {
   final ValueChanged<String> log;
 
   @override
-  State<ScrollPositionListener> createState() => _ScrollPositionListenerState();
+  _ScrollPositionListenerState createState() => _ScrollPositionListenerState();
 }
 
 class _ScrollPositionListenerState extends State<ScrollPositionListener> {

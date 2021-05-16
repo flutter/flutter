@@ -6,13 +6,7 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 
 // ignore_for_file: non_constant_identifier_names
-
-/// A set of platform-adaptive material design icons.
-///
-/// Use [Icons.adaptive] to access a static instance of this class.
-class PlatformAdaptiveIcons implements Icons {
-  const PlatformAdaptiveIcons._();
-
+class _PlatformAdaptiveIcons {
   static bool _isCupertino() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -177,7 +171,7 @@ class Icons {
   ///  * [Icon]
   ///  * [IconButton]
   ///  * <https://design.google.com/icons/>
-  static PlatformAdaptiveIcons get adaptive => const PlatformAdaptiveIcons._();
+  static _PlatformAdaptiveIcons get adaptive => _PlatformAdaptiveIcons();
 
   // Generated code: do not hand-edit.
   // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons

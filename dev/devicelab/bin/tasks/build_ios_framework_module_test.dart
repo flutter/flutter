@@ -102,9 +102,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       options: <String>[
         'ios-framework',
         '--verbose',
-        '--output=$outputDirectoryName',
-        '--obfuscate',
-        '--split-debug-info=symbols',
+        '--output=$outputDirectoryName'
       ],
     );
   });
@@ -189,20 +187,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     'App.framework',
     'flutter_assets',
     'vm_snapshot_data',
-  ));
-
-  section('Check obfuscation symbols');
-
-  checkFileExists(path.join(
-    projectDir.path,
-    'symbols',
-    'app.ios-arm64.symbols',
-  ));
-
-  checkFileExists(path.join(
-    projectDir.path,
-    'symbols',
-    'app.ios-armv7.symbols',
   ));
 
   section('Check debug build has no Dart AOT');

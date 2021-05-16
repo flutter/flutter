@@ -51,10 +51,12 @@ void main() {
 
     testUsingContext('fails when target not found', () async {
       final RunCommand command = RunCommand();
-      expect(
-        () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
-        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
-      );
+      try {
+        await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']);
+        fail('Expect exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode ?? 1, 1);
+      }
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -67,20 +69,18 @@ void main() {
       fileSystem.file('.packages').createSync();
 
       final RunCommand command = RunCommand();
-      await expectLater(
-        () => createTestCommandRunner(command).run(<String>[
+      try {
+        await createTestCommandRunner(command).run(<String>[
           'run',
           '--use-application-binary=app/bar/faz',
           '--fast-start',
           '--no-pub',
           '--show-test-device',
-        ]),
-        throwsA(isException.having(
-          (Exception exception) => exception.toString(),
-          'toString',
-          isNot(contains('--fast-start is not supported with --use-application-binary')),
-        )),
-      );
+        ]);
+        fail('Expect exception');
+      } on Exception catch (e) {
+        expect(e.toString(), isNot(contains('--fast-start is not supported with --use-application-binary')));
+      }
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -97,13 +97,15 @@ void main() {
         ..createSync(recursive: true);
 
       final RunCommand command = RunCommand();
-      await expectLater(
-        () => createTestCommandRunner(command).run(<String>[
+      try {
+        await createTestCommandRunner(command).run(<String>[
           'run',
           '--no-pub',
-        ]),
-        throwsToolExit(),
-      );
+        ]);
+        fail('Expect exception');
+      } on Exception catch (e) {
+        expect(e, isA<ToolExit>());
+      }
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
       expect(
         bufferLogger.statusText,
@@ -122,13 +124,16 @@ void main() {
         .createSync(recursive: true);
 
       final RunCommand command = RunCommand();
-      await expectLater(
-        () => createTestCommandRunner(command).run(<String>[
+      try {
+        await createTestCommandRunner(command).run(<String>[
           'run',
           '--no-pub',
-        ]),
-        throwsToolExit(message: 'No pubspec.yaml file found'),
-      );
+        ]);
+        fail('Expect exception');
+      } on Exception catch (e) {
+        expect(e, isA<ToolExit>());
+        expect(e.toString(), contains('No pubspec.yaml file found'));
+      }
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -175,14 +180,16 @@ void main() {
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
 
-        await expectLater(
-          () => createTestCommandRunner(command).run(<String>[
+        try {
+          await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
             '--no-hot',
-          ]),
-          throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
-        );
+          ]);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.message, null);
+        }
 
         expect(
           testLogger.statusText,
@@ -249,14 +256,16 @@ void main() {
             (Invocation invocation) => Future<List<Device>>.value(<Device>[]),
         );
 
-        await expectLater(
-          () => createTestCommandRunner(command).run(<String>[
+        try {
+          await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
             '--no-hot',
-          ]),
-          throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
-        );
+          ]);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.message, null);
+        }
 
         expect(
           testLogger.statusText,
@@ -506,21 +515,7 @@ void main() {
       'run',
       '--no-pub',
       '--bundle-sksl-path=foo.json',
-    ]), throwsToolExit(message: 'No SkSL shader bundle found at foo.json'));
-  });
-
-  testUsingContext('Configures web connection options to use web sockets by default', () async {
-    final RunCommand command = RunCommand();
-    await expectLater(() => createTestCommandRunner(command).run(<String>[
-      'run',
-      '--no-pub',
-    ]), throwsToolExit());
-
-    final DebuggingOptions options = await command.createDebuggingOptions(true);
-
-    expect(options.webUseSseForDebugBackend, false);
-    expect(options.webUseSseForDebugProxy, false);
-    expect(options.webUseSseForInjectedClient, false);
+    ]), throwsA(isA<ToolExit>().having((ToolExit exit) => exit.message, 'message', contains('No SkSL shader bundle found at foo.json'))));
   });
 }
 

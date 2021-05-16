@@ -18,6 +18,7 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for deprecated option name aliases only
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
@@ -211,7 +212,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'ws',
+      defaultsTo: 'sse',
       help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
       'when using the Web Server device and Dart Debug extension. '
       'This is useful for editors/debug adapters that do not support debugging '
@@ -220,7 +221,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-backend-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'ws',
+      defaultsTo: 'sse',
       help: 'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
       'backend service when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -229,7 +230,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-injected-client-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'ws',
+      defaultsTo: 'sse',
       help: 'The protocol (SSE or WebSockets) to use for the injected client '
       'when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -1466,9 +1467,7 @@ DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.windows_uwp_x64:
-      if (featureFlags.isWindowsUwpEnabled) {
-        return DevelopmentArtifact.windowsUwp;
-      }
+      // No artifacts currently supported.
       return null;
   }
   return null;

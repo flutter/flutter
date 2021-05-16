@@ -1313,10 +1313,13 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       ],
       throwOnError: false,
     );
-    if (runResult.exitCode == 0) {
+    // The port may have already been unforwarded, for example if there
+    // are multiple attach process already connected.
+    if (runResult.exitCode == 0 || runResult
+      .stderr.contains("listener '$tcpLine' not found")) {
       return;
     }
-    _logger.printError('Failed to unforward port: $runResult');
+    runResult.throwException('Process exited abnormally:\n$runResult');
   }
 
   @override

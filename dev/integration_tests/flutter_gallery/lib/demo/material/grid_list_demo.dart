@@ -43,7 +43,7 @@ class GridPhotoViewer extends StatefulWidget {
   final Photo? photo;
 
   @override
-  State<GridPhotoViewer> createState() => _GridPhotoViewerState();
+  _GridPhotoViewerState createState() => _GridPhotoViewerState();
 }
 
 class _GridTitleText extends StatelessWidget {

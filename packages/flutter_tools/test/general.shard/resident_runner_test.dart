@@ -1514,7 +1514,6 @@ void main() {
           'Flutter run key commands.',
           commandHelp.r,
           commandHelp.R,
-          commandHelp.v,
           commandHelp.s,
           commandHelp.w,
           commandHelp.t,
@@ -1599,7 +1598,6 @@ void main() {
     expect(testLogger.statusText, equals(
         <dynamic>[
           'Flutter run key commands.',
-          commandHelp.v,
           commandHelp.s,
           commandHelp.hWithDetails,
           commandHelp.c,

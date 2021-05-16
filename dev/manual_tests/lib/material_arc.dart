@@ -409,7 +409,7 @@ class AnimationDemo extends StatefulWidget {
   const AnimationDemo({ Key key }) : super(key: key);
 
   @override
-  State<AnimationDemo> createState() => _AnimationDemoState();
+  _AnimationDemoState createState() => _AnimationDemoState();
 }
 
 class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {

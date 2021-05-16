@@ -10,7 +10,7 @@ class BackdropFilterPage extends StatefulWidget {
   const BackdropFilterPage({Key key}) : super(key: key);
 
   @override
-  State<BackdropFilterPage> createState() => _BackdropFilterPageState();
+  _BackdropFilterPageState createState() => _BackdropFilterPageState();
 }
 
 class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProviderStateMixin {

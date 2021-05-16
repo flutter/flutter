@@ -39,7 +39,7 @@ class GalleryApp extends StatefulWidget {
   final bool testMode;
 
   @override
-  State<GalleryApp> createState() => _GalleryAppState();
+  _GalleryAppState createState() => _GalleryAppState();
 }
 
 class _GalleryAppState extends State<GalleryApp> {

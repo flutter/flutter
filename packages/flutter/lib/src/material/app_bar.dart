@@ -402,7 +402,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? elevation;
 
   /// {@template flutter.material.appbar.shadowColor}
-  /// The color of the shadow below the app bar.
+  /// The of the shadow below the app bar.
   ///
   /// If this property is null, then [AppBarTheme.shadowColor] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default value
@@ -722,7 +722,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }
 
   @override
-  State<AppBar> createState() => _AppBarState();
+  _AppBarState createState() => _AppBarState();
 }
 
 class _AppBarState extends State<AppBar> {
@@ -901,8 +901,8 @@ class _AppBarState extends State<AppBar> {
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
           namesRoute: namesRoute,
-          header: true,
           child: title,
+          header: true,
         );
       }
 
@@ -1186,10 +1186,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         title: title,
         actions: actions,
         flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
-          ? Semantics(
-              header: true,
-              child: flexibleSpace,
-            )
+          ? Semantics(child: flexibleSpace, header: true)
           : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
@@ -1750,7 +1747,7 @@ class SliverAppBar extends StatefulWidget {
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   @override
-  State<SliverAppBar> createState() => _SliverAppBarState();
+  _SliverAppBarState createState() => _SliverAppBarState();
 }
 
 // This class is only Stateful because it owns the TickerProvider used

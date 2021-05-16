@@ -143,8 +143,8 @@ void main() {
         final List<Widget> slivers = <Widget>[
           sliverBox,
           SliverFillRemaining(
-            hasScrollBody: false,
             child: Container(color: Colors.white),
+            hasScrollBody: false,
           ),
         ];
 
@@ -296,8 +296,8 @@ void main() {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 const Flexible(
-                  fit: FlexFit.loose,
                   child: Center(child: FlutterLogo(size: 100)),
+                  fit: FlexFit.loose,
                 ),
                 ElevatedButton(
                   child: const Text('Bottom'),
@@ -568,8 +568,8 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Flexible(
-                    fit: FlexFit.loose,
                     child: Center(child: FlutterLogo(size: 100)),
+                    fit: FlexFit.loose,
                   ),
                   ElevatedButton(
                     child: const Text('Bottom'),

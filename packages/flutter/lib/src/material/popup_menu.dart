@@ -112,7 +112,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   bool represents(void value) => false;
 
   @override
-  State<PopupMenuDivider> createState() => _PopupMenuDividerState();
+  _PopupMenuDividerState createState() => _PopupMenuDividerState();
 }
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
@@ -219,7 +219,6 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   const PopupMenuItem({
     Key? key,
     this.value,
-    this.onTap,
     this.enabled = true,
     this.height = kMinInteractiveDimension,
     this.padding,
@@ -232,9 +231,6 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The value that will be returned by [showMenu] if this entry is selected.
   final T? value;
-
-  /// Called when the menu item is tapped.
-  final VoidCallback? onTap;
 
   /// Whether the user is permitted to select this item.
   ///
@@ -323,8 +319,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   /// the menu route.
   @protected
   void handleTap() {
-    widget.onTap?.call();
-
     Navigator.pop<T>(context, widget.value);
   }
 
@@ -485,7 +479,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   Widget? get child => super.child;
 
   @override
-  PopupMenuItemState<T, CheckedPopupMenuItem<T>> createState() => _CheckedPopupMenuItemState<T>();
+  _CheckedPopupMenuItemState<T> createState() => _CheckedPopupMenuItemState<T>();
 }
 
 class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
@@ -1169,8 +1163,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
-          enableFeedback: enableFeedback,
           child: widget.child,
+          enableFeedback: enableFeedback,
         ),
       );
 

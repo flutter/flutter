@@ -127,7 +127,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   ///   const BuzzingText({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   State<BuzzingText> createState() => _BuzzingTextState();
+  ///   _BuzzingTextState createState() => _BuzzingTextState();
   /// }
   ///
   /// class _BuzzingTextState extends State<BuzzingText> {

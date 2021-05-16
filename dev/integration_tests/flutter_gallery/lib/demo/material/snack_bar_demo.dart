@@ -24,7 +24,7 @@ class SnackBarDemo extends StatefulWidget {
   static const String routeName = '/material/snack-bar';
 
   @override
-  State<SnackBarDemo> createState() => _SnackBarDemoState();
+  _SnackBarDemoState createState() => _SnackBarDemoState();
 }
 
 class _SnackBarDemoState extends State<SnackBarDemo> {
@@ -84,8 +84,8 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         builder: buildBody
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Create',
         child: const Icon(Icons.add),
+        tooltip: 'Create',
         onPressed: () {
           print('Floating Action Button was pressed');
         },

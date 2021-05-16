@@ -13,27 +13,21 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/web/web_device.dart';
-import 'package:test/fake.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeDeviceManager deviceManager;
-  BufferLogger logger;
-
   setUpAll(() {
     Cache.disableLocking();
   });
 
-  setUp(() {
-    deviceManager = FakeDeviceManager();
-    logger = BufferLogger.test();
-  });
-
   testUsingContext('devices can display no connected devices with the --machine flag', () async {
+    final BufferLogger logger = context.get<Logger>() as BufferLogger;
     final DevicesCommand command = DevicesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['devices', '--machine']);
@@ -44,13 +38,16 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
-    Logger: () => logger,
   });
 
   testUsingContext('devices can display via the --machine flag', () async {
-    deviceManager.devices = <Device>[
-      WebServerDevice(logger: logger),
-    ];
+    when(globals.deviceManager.refreshAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+      return <Device>[
+        WebServerDevice(logger: BufferLogger.test()),
+      ];
+    });
+
+    final BufferLogger logger = context.get<Logger>() as BufferLogger;
     final DevicesCommand command = DevicesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['devices', '--machine']);
@@ -79,19 +76,8 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    DeviceManager: () => deviceManager,
-    Logger: () => logger,
+    DeviceManager: () => MockDeviceManager(),
   });
 }
 
-class FakeDeviceManager extends Fake implements DeviceManager {
-  List<Device> devices = <Device>[];
-
-  @override
-  String specifiedDeviceId;
-
-  @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) async {
-    return devices;
-  }
-}
+class MockDeviceManager extends Mock implements DeviceManager {}

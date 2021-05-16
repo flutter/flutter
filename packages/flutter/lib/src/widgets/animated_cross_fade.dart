@@ -234,7 +234,7 @@ class AnimatedCrossFade extends StatefulWidget {
   }
 
   @override
-  State<AnimatedCrossFade> createState() => _AnimatedCrossFadeState();
+  _AnimatedCrossFadeState createState() => _AnimatedCrossFadeState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -366,6 +366,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         duration: widget.duration,
         reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
+        vsync: this,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
       ),
     );

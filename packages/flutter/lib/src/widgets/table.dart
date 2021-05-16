@@ -303,7 +303,7 @@ class Table extends RenderObjectWidget {
   final List<Decoration?>? _rowDecorations;
 
   @override
-  RenderObjectElement createElement() => _TableElement(this);
+  _TableElement createElement() => _TableElement(this);
 
   @override
   RenderTable createRenderObject(BuildContext context) {

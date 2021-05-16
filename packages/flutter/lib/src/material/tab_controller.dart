@@ -34,7 +34,7 @@ import 'constants.dart';
 /// class MyTabbedPage extends StatefulWidget {
 ///   const MyTabbedPage({ Key? key }) : super(key: key);
 ///   @override
-///   State<MyTabbedPage> createState() => _MyTabbedPageState();
+///   _MyTabbedPageState createState() => _MyTabbedPageState();
 /// }
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
@@ -416,7 +416,7 @@ class DefaultTabController extends StatefulWidget {
   }
 
   @override
-  State<DefaultTabController> createState() => _DefaultTabControllerState();
+  _DefaultTabControllerState createState() => _DefaultTabControllerState();
 }
 
 class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {

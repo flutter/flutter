@@ -218,9 +218,9 @@ class Visibility extends StatelessWidget {
       Widget result = child;
       if (!maintainInteractivity) {
         result = IgnorePointer(
+          child: child,
           ignoring: !visible,
           ignoringSemantics: !visible && !maintainSemantics,
-          child: child,
         );
       }
       return Opacity(
@@ -235,10 +235,10 @@ class Visibility extends StatelessWidget {
     if (maintainState) {
       Widget result = child;
       if (!maintainAnimation)
-        result = TickerMode(enabled: visible, child: child);
+        result = TickerMode(child: child, enabled: visible);
       return Offstage(
-        offstage: !visible,
         child: result,
+        offstage: !visible,
       );
     }
     assert(!maintainAnimation);
@@ -473,7 +473,7 @@ class SliverVisibility extends StatelessWidget {
     if (maintainState) {
       Widget result = sliver;
       if (!maintainAnimation)
-        result = TickerMode(enabled: visible, child: sliver);
+        result = TickerMode(child: sliver, enabled: visible);
       return SliverOffstage(
         sliver: result,
         offstage: !visible,

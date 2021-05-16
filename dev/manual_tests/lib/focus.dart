@@ -20,7 +20,7 @@ class DemoButton extends StatefulWidget {
   final bool autofocus;
 
   @override
-  State<DemoButton> createState() => _DemoButtonState();
+  _DemoButtonState createState() => _DemoButtonState();
 }
 
 class _DemoButtonState extends State<DemoButton> {
@@ -77,7 +77,7 @@ class FocusDemo extends StatefulWidget {
   const FocusDemo({Key key}) : super(key: key);
 
   @override
-  State<FocusDemo> createState() => _FocusDemoState();
+  _FocusDemoState createState() => _FocusDemoState();
 }
 
 class _FocusDemoState extends State<FocusDemo> {

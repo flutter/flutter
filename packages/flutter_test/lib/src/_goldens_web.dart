@@ -64,7 +64,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
       method: 'POST',
       sendData: json.encode(<String, Object>{
         'testUri': testUri.toString(),
-        'key': key,
+        'key': key.toString(),
         'width': width.round(),
         'height': height.round(),
       }),

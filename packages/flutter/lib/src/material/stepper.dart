@@ -281,7 +281,7 @@ class Stepper extends StatefulWidget {
   final ControlsWidgetBuilder? controlsBuilder;
 
   @override
-  State<Stepper> createState() => _StepperState();
+  _StepperState createState() => _StepperState();
 }
 
 class _StepperState extends State<Stepper> with TickerProviderStateMixin {
@@ -713,6 +713,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
                 duration: kThemeAnimationDuration,
+                vsync: this,
                 child: widget.steps[widget.currentStep].content,
               ),
               _buildVerticalControls(),

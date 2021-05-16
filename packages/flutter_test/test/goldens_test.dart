@@ -183,30 +183,28 @@ void main() {
         test('and generates correct output in the correct base location', () async {
           comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
-          await expectLater(
-            () => doComparison(),
-            throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
-              'message',
-              contains('% diff detected'),
-            )),
-          );
-          final io.File master = fs.file(
-            fix('/failures/golden_masterImage.png')
-          );
-          final io.File test = fs.file(
-            fix('/failures/golden_testImage.png')
-          );
-          final io.File isolated = fs.file(
-            fix('/failures/golden_isolatedDiff.png')
-          );
-          final io.File masked = fs.file(
-            fix('/failures/golden_maskedDiff.png')
-          );
-          expect(master.existsSync(), isTrue);
-          expect(test.existsSync(), isTrue);
-          expect(isolated.existsSync(), isTrue);
-          expect(masked.existsSync(), isTrue);
+          try {
+            await doComparison();
+            fail('TestFailure expected but not thrown.');
+          } on FlutterError catch (error) {
+            expect(error.message, contains('% diff detected'));
+            final io.File master = fs.file(
+              fix('/failures/golden_masterImage.png')
+            );
+            final io.File test = fs.file(
+              fix('/failures/golden_testImage.png')
+            );
+            final io.File isolated = fs.file(
+              fix('/failures/golden_isolatedDiff.png')
+            );
+            final io.File masked = fs.file(
+              fix('/failures/golden_maskedDiff.png')
+            );
+            expect(master.existsSync(), isTrue);
+            expect(test.existsSync(), isTrue);
+            expect(isolated.existsSync(), isTrue);
+            expect(masked.existsSync(), isTrue);
+          }
         });
 
         test('and generates correct output when files are in a subdirectory', () async {
@@ -214,77 +212,67 @@ void main() {
           fs.file(fix('subdir/golden.png'))
             ..createSync(recursive:true)
             ..writeAsBytesSync(_kColorFailurePngBytes);
-          await expectLater(
-            () => doComparison('subdir/golden.png'),
-            throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
-              'message',
-              contains('% diff detected'),
-            )),
-          );
-          final io.File master = fs.file(
-            fix('/failures/golden_masterImage.png')
-          );
-          final io.File test = fs.file(
-            fix('/failures/golden_testImage.png')
-          );
-          final io.File isolated = fs.file(
-            fix('/failures/golden_isolatedDiff.png')
-          );
-          final io.File masked = fs.file(
-            fix('/failures/golden_maskedDiff.png')
-          );
-          expect(master.existsSync(), isTrue);
-          expect(test.existsSync(), isTrue);
-          expect(isolated.existsSync(), isTrue);
-          expect(masked.existsSync(), isTrue);
+          try {
+            await doComparison('subdir/golden.png');
+            fail('TestFailure expected but not thrown.');
+          } on FlutterError catch (error) {
+            expect(error.message, contains('% diff detected'));
+            final io.File master = fs.file(
+              fix('/failures/golden_masterImage.png')
+            );
+            final io.File test = fs.file(
+              fix('/failures/golden_testImage.png')
+            );
+            final io.File isolated = fs.file(
+              fix('/failures/golden_isolatedDiff.png')
+            );
+            final io.File masked = fs.file(
+              fix('/failures/golden_maskedDiff.png')
+            );
+            expect(master.existsSync(), isTrue);
+            expect(test.existsSync(), isTrue);
+            expect(isolated.existsSync(), isTrue);
+            expect(masked.existsSync(), isTrue);
+          }
         });
 
         test('when golden file does not exist', () async {
-          await expectLater(
-            () => doComparison(),
-            throwsA(isA<TestFailure>().having(
-              (TestFailure error) => error.message,
-              'message',
-              contains('Could not be compared against non-existent file'),
-            )),
-          );
+          try {
+            await doComparison();
+            fail('TestFailure expected but not thrown.');
+          } on TestFailure catch (error) {
+            expect(error.message, contains('Could not be compared against non-existent file'));
+          }
         });
 
         test('when images are not the same size', () async{
           await fs.file(fix('/golden.png')).writeAsBytes(_kSizeFailurePngBytes);
-          await expectLater(
-            () => doComparison(),
-            throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
-              'message',
-              contains('image sizes do not match'),
-            )),
-          );
+          try {
+            await doComparison();
+            fail('TestFailure expected but not thrown.');
+          } on FlutterError catch (error) {
+            expect(error.message, contains('image sizes do not match'));
+          }
         });
 
         test('when pixels do not match', () async{
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
-          await expectLater(
-            () => doComparison(),
-            throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
-              'message',
-              contains('% diff detected'),
-            )),
-          );
+          try {
+            await doComparison();
+            fail('TestFailure expected but not thrown.');
+          } on FlutterError catch (error) {
+            expect(error.message, contains('% diff detected'));
+          }
         });
 
         test('when golden bytes are empty', () async {
           await fs.file(fix('/golden.png')).writeAsBytes(<int>[]);
-          await expectLater(
-            () => doComparison(),
-            throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
-              'message',
-              contains('null image provided'),
-            )),
-          );
+          try {
+            await doComparison();
+            fail('TestFailure expected but not thrown.');
+          } on FlutterError catch (error) {
+            expect(error.message, contains('null image provided'));
+          }
         });
       });
     });

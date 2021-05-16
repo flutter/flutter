@@ -151,7 +151,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///   const MyPrefilledText({Key? key}) : super(key: key);
 ///
 ///   @override
-///   State<MyPrefilledText> createState() => _MyPrefilledTextState();
+///   _MyPrefilledTextState createState() => _MyPrefilledTextState();
 /// }
 ///
 /// class _MyPrefilledTextState extends State<MyPrefilledText> {
@@ -776,7 +776,7 @@ class CupertinoTextField extends StatefulWidget {
   final String? restorationId;
 
   @override
-  State<CupertinoTextField> createState() => _CupertinoTextFieldState();
+  _CupertinoTextFieldState createState() => _CupertinoTextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -98,7 +98,7 @@ class VideoPlayerLoading extends StatefulWidget {
   final VideoPlayerController? controller;
 
   @override
-  State<VideoPlayerLoading> createState() => _VideoPlayerLoadingState();
+  _VideoPlayerLoadingState createState() => _VideoPlayerLoadingState();
 }
 
 class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
@@ -127,11 +127,11 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
       return VideoPlayer(widget.controller!);
     }
     return Stack(
-      fit: StackFit.expand,
       children: <Widget>[
         VideoPlayer(widget.controller!),
         const Center(child: CircularProgressIndicator()),
       ],
+      fit: StackFit.expand,
     );
   }
 }
@@ -212,7 +212,7 @@ class FadeAnimation extends StatefulWidget {
   final Duration duration;
 
   @override
-  State<FadeAnimation> createState() => _FadeAnimationState();
+  _FadeAnimationState createState() => _FadeAnimationState();
 }
 
 class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProviderStateMixin {
@@ -275,7 +275,7 @@ class ConnectivityOverlay extends StatefulWidget {
   final Completer<void>? connectedCompleter;
 
   @override
-  State<ConnectivityOverlay> createState() => _ConnectivityOverlayState();
+  _ConnectivityOverlayState createState() => _ConnectivityOverlayState();
 }
 
 class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
@@ -348,7 +348,7 @@ class VideoDemo extends StatefulWidget {
   static const String routeName = '/video';
 
   @override
-  State<VideoDemo> createState() => _VideoDemoState();
+  _VideoDemoState createState() => _VideoDemoState();
 }
 
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -419,7 +419,6 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       ),
       body: isSupported
         ? ConnectivityOverlay(
-            connectedCompleter: connectedCompleter,
             child: Scrollbar(
               child: ListView(
                 children: <Widget>[
@@ -436,6 +435,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
                 ],
               ),
             ),
+            connectedCompleter: connectedCompleter,
           )
         : const Center(
             child: Text(

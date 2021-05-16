@@ -123,7 +123,7 @@ Future<void> main() async {
         child: DecoratedBox(
           decoration: ShapeDecoration(
             gradient: RadialGradient(
-              focal: AlignmentDirectional.bottomCenter,
+              focal: AlignmentDirectional(0, 1),
               focalRadius: 5,
               radius: 2,
               colors: <Color>[Colors.red, Colors.black],

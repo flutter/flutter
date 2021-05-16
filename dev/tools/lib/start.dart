@@ -216,10 +216,7 @@ class StartCommand extends Command<void> {
       stdio.printTrace(
         'Attempt to cherrypick $revision ${success ? 'succeeded' : 'failed'}',
       );
-      if (success) {
-        engine.cherryPick(revision);
-        cherrypick.state = pb.CherrypickState.COMPLETED;
-      } else {
+      if (!success) {
         cherrypick.state = pb.CherrypickState.PENDING_WITH_CONFLICT;
       }
     }
@@ -256,16 +253,10 @@ class StartCommand extends Command<void> {
 
     for (final pb.Cherrypick cherrypick in frameworkCherrypicks) {
       final String revision = cherrypick.trunkRevision;
-      final bool success = framework.canCherryPick(revision);
+      final bool result = framework.canCherryPick(revision);
       stdio.printTrace(
-        'Attempt to cherrypick $cherrypick ${success ? 'succeeded' : 'failed'}',
+        'Attempt to cherrypick $cherrypick ${result ? 'succeeded' : 'failed'}',
       );
-      if (success) {
-        framework.cherryPick(revision);
-        cherrypick.state = pb.CherrypickState.COMPLETED;
-      } else {
-        cherrypick.state = pb.CherrypickState.PENDING_WITH_CONFLICT;
-      }
     }
 
     final String frameworkHead = framework.reverseParse('HEAD');

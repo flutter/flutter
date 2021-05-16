@@ -26,7 +26,7 @@ class ListDemo extends StatefulWidget {
   static const String routeName = '/material/list';
 
   @override
-  State<ListDemo> createState() => _ListDemoState();
+  _ListDemoState createState() => _ListDemoState();
 }
 
 class _ListDemoState extends State<ListDemo> {

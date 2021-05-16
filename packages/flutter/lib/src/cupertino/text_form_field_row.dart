@@ -298,7 +298,8 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   final TextEditingController? controller;
 
   @override
-  FormFieldState<String> createState() => _CupertinoTextFormFieldRowState();
+  _CupertinoTextFormFieldRowState createState() =>
+      _CupertinoTextFormFieldRowState();
 }
 
 class _CupertinoTextFormFieldRowState extends FormFieldState<String> {

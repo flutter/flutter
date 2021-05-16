@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -15,9 +16,10 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
-import 'package:test/fake.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fake_devices.dart';
 
 void main() {
@@ -183,13 +185,18 @@ void main() {
         nonEphemeralOne,
         nonEphemeralTwo,
       ];
-      final FakeTerminal terminal = FakeTerminal()
-        ..setPrompt(<String>['1', '2', 'q', 'Q'], '1');
+      final MockTerminal mockTerminal = MockTerminal();
+      when(mockTerminal.stdinHasTerminal).thenReturn(true);
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: anyNamed('logger'),
+        prompt: anyNamed('prompt'),
+      )).thenAnswer((Invocation invocation) async => '1');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
-        terminal: terminal,
+        terminal: mockTerminal,
       );
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
@@ -203,13 +210,19 @@ void main() {
         nonEphemeralOne,
         nonEphemeralTwo,
       ];
-      final FakeTerminal terminal = FakeTerminal()
-        ..setPrompt(<String>['1', '2', 'q', 'Q'], '2');
+      final MockTerminal mockTerminal = MockTerminal();
+
+      when(mockTerminal.stdinHasTerminal).thenReturn(true);
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: anyNamed('logger'),
+        prompt: anyNamed('prompt'),
+      )).thenAnswer((Invocation invocation) async => '2');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
-        terminal: terminal,
+        terminal: mockTerminal,
       );
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
@@ -224,13 +237,19 @@ void main() {
         ephemeralTwo,
       ];
 
-      final FakeTerminal terminal = FakeTerminal()
-        ..setPrompt(<String>['1', '2', 'q', 'Q'], '1');
+      final MockTerminal mockTerminal = MockTerminal();
+
+      when(mockTerminal.stdinHasTerminal).thenReturn(true);
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: anyNamed('logger'),
+        prompt: anyNamed('prompt'),
+      )).thenAnswer((Invocation invocation) async => '1');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
-        terminal: terminal,
+        terminal: mockTerminal,
       );
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
@@ -244,13 +263,19 @@ void main() {
         ephemeralOne,
         ephemeralTwo,
       ];
-      final FakeTerminal terminal = FakeTerminal()
-        ..setPrompt(<String>['1', '2', 'q', 'Q'], '2');
+      final MockTerminal mockTerminal = MockTerminal();
+
+      when(mockTerminal.stdinHasTerminal).thenReturn(true);
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: anyNamed('logger'),
+        prompt: anyNamed('prompt'),
+      )).thenAnswer((Invocation invocation) async => '2');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
-        terminal: terminal,
+        terminal: mockTerminal,
       );
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
@@ -267,13 +292,19 @@ void main() {
         nonEphemeralTwo,
       ];
 
-      final FakeTerminal terminal = FakeTerminal()
-        ..setPrompt(<String>['1', '2', '3', '4', 'q', 'Q'], '3');
+      final MockTerminal mockTerminal = MockTerminal();
+
+      when(mockTerminal.stdinHasTerminal).thenReturn(true);
+      when(mockTerminal.promptForCharInput(<String>['1', '2', '3', '4', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: anyNamed('logger'),
+        prompt: anyNamed('prompt'),
+      )).thenAnswer((Invocation invocation) async => '3');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
-        terminal: terminal,
+        terminal: mockTerminal,
       );
 
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
@@ -289,17 +320,23 @@ void main() {
         ephemeralTwo,
       ];
 
-      final FakeTerminal terminal = FakeTerminal()
-        ..setPrompt(<String>['1', '2', 'q', 'Q'], 'q');
+      final MockTerminal mockTerminal = MockTerminal();
+
+      when(mockTerminal.stdinHasTerminal).thenReturn(true);
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
+        displayAcceptedCharacters: false,
+        logger: anyNamed('logger'),
+        prompt: anyNamed('prompt'),
+      )).thenAnswer((Invocation invocation) async => 'q');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
-        terminal: terminal,
+        terminal: mockTerminal,
       );
       await expectLater(
         () async => deviceManager.findTargetDevices(FakeFlutterProject()),
-        throwsToolExit(),
+        throwsA(isA<ToolExit>())
       );
     });
 
@@ -393,13 +430,14 @@ void main() {
       final List<Device> devices = <Device>[
         ephemeralOne,
       ];
-      final MockDeviceDiscovery deviceDiscovery = MockDeviceDiscovery()
-        ..deviceValues = devices;
+      final MockDeviceDiscovery mockDeviceDiscovery = MockDeviceDiscovery();
+      when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
+      when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
 
       final DeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         deviceDiscoveryOverrides: <DeviceDiscovery>[
-          deviceDiscovery
+          mockDeviceDiscovery
         ],
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
@@ -410,22 +448,24 @@ void main() {
       );
 
       expect(filtered.single, ephemeralOne);
-      expect(deviceDiscovery.devicesCalled, 1);
-      expect(deviceDiscovery.discoverDevicesCalled, 0);
+      verify(mockDeviceDiscovery.devices).called(1);
+      verifyNever(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout')));
     });
 
-    testWithoutContext('refreshes device cache with a timeout', () async {
+    testUsingContext('refreshes device cache with a timeout', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
       ];
       const Duration timeout = Duration(seconds: 2);
-      final MockDeviceDiscovery deviceDiscovery = MockDeviceDiscovery()
-        ..deviceValues = devices;
+      final MockDeviceDiscovery mockDeviceDiscovery = MockDeviceDiscovery();
+      when(mockDeviceDiscovery.supportsPlatform).thenReturn(true);
+      when(mockDeviceDiscovery.discoverDevices(timeout: timeout)).thenAnswer((_) async => devices);
+      when(mockDeviceDiscovery.devices).thenAnswer((_) async => devices);
 
       final DeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         deviceDiscoveryOverrides: <DeviceDiscovery>[
-          deviceDiscovery
+          mockDeviceDiscovery
         ],
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
@@ -437,13 +477,13 @@ void main() {
       );
 
       expect(filtered.single, ephemeralOne);
-      expect(deviceDiscovery.devicesCalled, 1);
-      expect(deviceDiscovery.discoverDevicesCalled, 1);
+      verify(mockDeviceDiscovery.devices).called(1);
+      verify(mockDeviceDiscovery.discoverDevices(timeout: anyNamed('timeout'))).called(1);
     });
   });
 
   group('JSON encode devices', () {
-    testWithoutContext('Consistency of JSON representation', () async {
+    testUsingContext('Consistency of JSON representation', () async {
       expect(
         // This tests that fakeDevices is a list of tuples where "second" is the
         // correct JSON representation of the "first". Actual values are irrelevant
@@ -495,28 +535,8 @@ class TestDeviceManager extends DeviceManager {
   }
 }
 
-class MockDeviceDiscovery extends Fake implements DeviceDiscovery {
-  int devicesCalled = 0;
-  int discoverDevicesCalled = 0;
-
-  @override
-  bool supportsPlatform = true;
-
-  List<Device> deviceValues = <Device>[];
-
-  @override
-  Future<List<Device>> get devices async {
-    devicesCalled += 1;
-    return deviceValues;
-  }
-
-  @override
-  Future<List<Device>> discoverDevices({Duration timeout}) async {
-    discoverDevicesCalled += 1;
-    return deviceValues;
-  }
-}
-
+class MockTerminal extends Mock implements AnsiTerminal {}
+class MockDeviceDiscovery extends Mock implements DeviceDiscovery {}
 class FakeFlutterProject extends Fake implements FlutterProject {}
 
 class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
@@ -559,32 +579,4 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   bool get canListAnything => true;
-}
-
-class FakeTerminal extends Fake implements Terminal {
-  @override
-  bool stdinHasTerminal = true;
-
-  @override
-  bool usesTerminalUi = true;
-
-  void setPrompt(List<String> characters, String result) {
-    _nextPrompt = characters;
-    _nextResult = result;
-  }
-
-  List<String> _nextPrompt;
-  String _nextResult;
-
-  @override
-  Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
-  }) async {
-    expect(acceptedCharacters, _nextPrompt);
-    return _nextResult;
-  }
 }

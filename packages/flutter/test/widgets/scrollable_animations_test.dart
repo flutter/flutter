@@ -13,8 +13,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          controller: controller,
           children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
+          controller: controller,
         ),
       ),
     );
@@ -33,8 +33,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          controller: controller,
           children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
+          controller: controller,
         ),
       ),
     );
@@ -56,8 +56,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          controller: controller,
           children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
+          controller: controller,
         ),
       ),
     );

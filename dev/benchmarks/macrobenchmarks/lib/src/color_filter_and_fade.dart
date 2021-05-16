@@ -12,7 +12,7 @@ class ColorFilterAndFadePage extends StatefulWidget {
   const ColorFilterAndFadePage({Key key}) : super(key: key);
 
   @override
-  State<ColorFilterAndFadePage> createState() => _ColorFilterAndFadePageState();
+  _ColorFilterAndFadePageState createState() => _ColorFilterAndFadePageState();
 }
 
 class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with TickerProviderStateMixin {

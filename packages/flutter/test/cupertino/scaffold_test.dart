@@ -420,8 +420,8 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
-          backgroundColor: Color(0xFF010203),
           child: Center(),
+          backgroundColor: Color(0xFF010203),
         ),
       ),
     );

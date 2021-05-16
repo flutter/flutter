@@ -41,7 +41,6 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
       child: SizedBox(
         height: 300.0,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             const Rectangle(Color(0xFF00FFFF)),
             Material(
@@ -49,7 +48,6 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                 padding: const EdgeInsets.all(10.0),
                 margin: const EdgeInsets.all(10.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     ElevatedButton(
                       child: Row(
@@ -65,11 +63,13 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                     ),
                     CircularProgressIndicator(value: value),
                   ],
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                 ),
               ),
             ),
             const Rectangle(Color(0xFFFFFF00)),
           ],
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
         ),
       ),
     ),

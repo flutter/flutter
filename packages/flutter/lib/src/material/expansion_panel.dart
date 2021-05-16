@@ -380,8 +380,14 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// Defines elevation for the [ExpansionPanel] while it's expanded.
   ///
+  /// This uses [kElevationToShadow] to simulate shadows, it does not use
+  /// [Material]'s arbitrary elevation feature.
+  ///
+  /// The following values can be used to define the elevation: 0, 1, 2, 3, 4, 6,
+  /// 8, 9, 12, 16, 24.
+  ///
   /// By default, the value of elevation is 2.
-  final double elevation;
+  final int elevation;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();

@@ -141,7 +141,7 @@ enum AnimationBehavior {
 ///   final Duration duration;
 ///
 ///   @override
-///   State<Foo> createState() => _FooState();
+///   _FooState createState() => _FooState();
 /// }
 ///
 /// class _FooState extends State<Foo> with SingleTickerProviderStateMixin {

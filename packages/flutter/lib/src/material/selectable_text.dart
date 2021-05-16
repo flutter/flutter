@@ -399,7 +399,7 @@ class SelectableText extends StatefulWidget {
   final SelectionChangedCallback? onSelectionChanged;
 
   @override
-  State<SelectableText> createState() => _SelectableTextState();
+  _SelectableTextState createState() => _SelectableTextState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

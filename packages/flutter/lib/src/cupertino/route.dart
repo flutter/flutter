@@ -265,8 +265,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
       return CupertinoFullscreenDialogTransition(
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
-        linearTransition: linearTransition,
         child: child,
+        linearTransition: linearTransition,
       );
     } else {
       return CupertinoPageTransition(
@@ -1227,8 +1227,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
   return FadeTransition(
     opacity: fadeAnimation,
     child: ScaleTransition(
-      scale: animation.drive(_dialogScaleTween),
       child: child,
+      scale: animation.drive(_dialogScaleTween),
     ),
   );
 }

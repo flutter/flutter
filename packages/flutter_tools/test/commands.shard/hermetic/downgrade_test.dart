@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/downgrade.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
-import 'package:test/fake.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -22,9 +22,9 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   FileSystem fileSystem;
   BufferLogger bufferLogger;
-  FakeTerminal terminal;
+  AnsiTerminal terminal;
   ProcessManager processManager;
-  FakeStdio stdio;
+  MockStdio mockStdio;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -35,9 +35,9 @@ void main() {
   });
 
   setUp(() {
-    stdio = FakeStdio();
+    mockStdio = MockStdio();
     processManager = FakeProcessManager.any();
-    terminal = FakeTerminal();
+    terminal = MockTerminal();
     fileSystem = MemoryFileSystem.test();
     bufferLogger = BufferLogger.test(terminal: terminal);
   });
@@ -50,7 +50,7 @@ void main() {
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
       terminal: terminal,
-      stdio: stdio,
+      stdio: mockStdio,
       flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
@@ -75,7 +75,7 @@ void main() {
         )
       ]),
       terminal: terminal,
-      stdio: stdio,
+      stdio: mockStdio,
       flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
@@ -103,7 +103,7 @@ void main() {
         )
       ]),
       terminal: terminal,
-      stdio: stdio,
+      stdio: mockStdio,
       flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
@@ -114,49 +114,67 @@ void main() {
 
    testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
-    stdio.hasTerminal = true;
+    when(mockStdio.hasTerminal).thenReturn(true);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
       terminal: terminal,
-      stdio: stdio,
+      stdio: mockStdio,
       flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
-    terminal.addPrompt(const <String>['y', 'n'], 'y');
+    when(terminal.promptForCharInput(
+      const <String>['y', 'n'],
+      prompt: anyNamed('prompt'),
+      logger: anyNamed('logger'),
+    )).thenAnswer((Invocation invocation) async => 'y');
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
+    verify(terminal.promptForCharInput(
+      const <String>['y', 'n'],
+      prompt: anyNamed('prompt'),
+      logger: anyNamed('logger'),
+    )).called(1);
     expect(bufferLogger.statusText, contains('Success'));
   });
 
    testUsingContext('Downgrade prompts for user input when terminal is attached - n', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
-    stdio.hasTerminal = true;
+    when(mockStdio.hasTerminal).thenReturn(true);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
       terminal: terminal,
-      stdio: stdio,
+      stdio: mockStdio,
       flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
-    terminal.addPrompt(const <String>['y', 'n'], 'n');
+    when(terminal.promptForCharInput(
+      const <String>['y', 'n'],
+      prompt: anyNamed('prompt'),
+      logger: anyNamed('logger'),
+    )).thenAnswer((Invocation invocation) async => 'n');
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
+    verify(terminal.promptForCharInput(
+      const <String>['y', 'n'],
+      prompt: anyNamed('prompt'),
+      logger: anyNamed('logger'),
+    )).called(1);
     expect(bufferLogger.statusText, isNot(contains('Success')));
   });
 
   testUsingContext('Downgrade does not prompt when there is no terminal', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
-    stdio.hasTerminal = false;
+    when(mockStdio.hasTerminal).thenReturn(false);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -166,19 +184,24 @@ void main() {
       ),
       processManager: processManager,
       terminal: terminal,
-      stdio: stdio,
+      stdio: mockStdio,
       flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
+    verifyNever(terminal.promptForCharInput(
+      const <String>['y', 'n'],
+      prompt: anyNamed('prompt'),
+      logger: anyNamed('logger'),
+    ));
     expect(bufferLogger.statusText, contains('Success'));
   });
 
   testUsingContext('Downgrade performs correct git commands', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
-    stdio.hasTerminal = false;
+    when(mockStdio.hasTerminal).thenReturn(false);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -205,7 +228,7 @@ void main() {
         ),
       ]),
       terminal: terminal,
-      stdio: stdio,
+      stdio: mockStdio,
       flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
@@ -216,26 +239,5 @@ void main() {
   });
 }
 
-class FakeTerminal extends Fake implements Terminal {
-  @override
-  bool usesTerminalUi = false;
-
-  void addPrompt(List<String> characters, String selected) {
-    _characters = characters;
-    _selected = selected;
-  }
-
-  List<String> _characters;
-  String _selected;
-
-  @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters, {Logger logger, String prompt, int defaultChoiceIndex, bool displayAcceptedCharacters = true}) async {
-    expect(acceptedCharacters, _characters);
-    return _selected;
-  }
-}
-
-class FakeStdio extends Fake implements Stdio {
-  @override
-  bool hasTerminal = true;
-}
+class MockTerminal extends Mock implements AnsiTerminal {}
+class MockStdio extends Mock implements Stdio {}

@@ -34,12 +34,7 @@ import 'gesture_detector.dart';
 /// [WidgetInspector.selectButtonBuilder].
 typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-/// Signature for a  method that registers the service extension `callback` with
-/// the given `name`.
-///
-/// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
-/// [BindingBase.registerServiceExtension] implements this signature.
-typedef RegisterServiceExtensionCallback = void Function({
+typedef _RegisterServiceExtensionCallback = void Function({
   required String name,
   required ServiceExtensionCallback callback,
 });
@@ -748,7 +743,7 @@ mixin WidgetInspectorService {
 
   FlutterExceptionHandler? _structuredExceptionHandler;
 
-  late RegisterServiceExtensionCallback _registerServiceExtensionCallback;
+  late _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
   ///
@@ -980,7 +975,7 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  void initServiceExtensions(RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+  void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
       FlutterError.onError = _structuredExceptionHandler;
@@ -2191,7 +2186,7 @@ class WidgetInspector extends StatefulWidget {
   final InspectorSelectButtonBuilder? selectButtonBuilder;
 
   @override
-  State<WidgetInspector> createState() => _WidgetInspectorState();
+  _WidgetInspectorState createState() => _WidgetInspectorState();
 }
 
 class _WidgetInspectorState extends State<WidgetInspector>

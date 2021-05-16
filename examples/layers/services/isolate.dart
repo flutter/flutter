@@ -255,8 +255,8 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
           Text(_status),
           Center(
             child: ElevatedButton(
-              onPressed: _handleButtonPressed,
               child: Text(_label),
+              onPressed: _handleButtonPressed,
             ),
           ),
           Text(_result),

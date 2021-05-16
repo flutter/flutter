@@ -230,7 +230,7 @@ void main() {
 class BoringTickerTest extends StatefulWidget {
   const BoringTickerTest({ Key? key }) : super(key: key);
   @override
-  State<BoringTickerTest> createState() => _BoringTickerTestState();
+  _BoringTickerTestState createState() => _BoringTickerTestState();
 }
 
 class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {

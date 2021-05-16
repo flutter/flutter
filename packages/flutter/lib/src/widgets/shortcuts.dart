@@ -1002,7 +1002,7 @@ class Shortcuts extends StatefulWidget {
   }
 
   @override
-  State<Shortcuts> createState() => _ShortcutsState();
+  _ShortcutsState createState() => _ShortcutsState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

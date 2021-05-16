@@ -8,7 +8,7 @@ class LifecycleWatcher extends StatefulWidget {
   const LifecycleWatcher({ Key? key }) : super(key: key);
 
   @override
-  State<LifecycleWatcher> createState() => _LifecycleWatcherState();
+  _LifecycleWatcherState createState() => _LifecycleWatcherState();
 }
 
 class _LifecycleWatcherState extends State<LifecycleWatcher>

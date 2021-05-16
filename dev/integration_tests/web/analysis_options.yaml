@@ -1,0 +1,6 @@
+# Exclude lib/main.dart to avoid warnings about the non_nullable
+# experiment before it is enabled.
+analyzer:
+  exclude:
+    - lib/null_safe_main.dart
+    - lib/sound_mode.dart

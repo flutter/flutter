@@ -27,7 +27,6 @@ test('generateBootstrapScript includes loading indicator', () {
       mapperUrl: 'mapper.js',
     );
     expect(result, contains('"flutter-loader"'));
-    expect(result, contains('"indeterminate"'));
   });
 
   test('generateMainModule embeds urls correctly', () {

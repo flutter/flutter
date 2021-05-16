@@ -28,10 +28,8 @@ class _StockSymbolView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
                 stock.symbol,
@@ -40,6 +38,7 @@ class _StockSymbolView extends StatelessWidget {
               ),
               arrow,
             ],
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
           ),
           Text('Last Sale', style: headings),
           Text('$lastSale ($changeInPrice)'),
@@ -62,6 +61,7 @@ class _StockSymbolView extends StatelessWidget {
             ),
           ),
         ],
+        mainAxisSize: MainAxisSize.min,
       ),
     );
   }

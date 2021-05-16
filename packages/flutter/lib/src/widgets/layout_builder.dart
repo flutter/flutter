@@ -44,7 +44,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
        super(key: key);
 
   @override
-  RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
+  _LayoutBuilderElement<ConstraintType> createElement() => _LayoutBuilderElement<ConstraintType>(this);
 
   /// Called at layout time to construct the widget tree.
   ///
@@ -321,7 +321,7 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   LayoutWidgetBuilder get builder => super.builder;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+  _RenderLayoutBuilder createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 }
 
 class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {

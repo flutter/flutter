@@ -11,7 +11,7 @@ class CountButton extends StatefulWidget {
   const CountButton({Key? key}) : super(key: key);
 
   @override
-  State<CountButton> createState() => _CountButtonState();
+  _CountButtonState createState() => _CountButtonState();
 }
 
 class _CountButtonState extends State<CountButton> {
@@ -33,7 +33,7 @@ class AnimateSample extends StatefulWidget {
   const AnimateSample({Key? key}) : super(key: key);
 
   @override
-  State<AnimateSample> createState() => _AnimateSampleState();
+  _AnimateSampleState createState() => _AnimateSampleState();
 }
 
 class _AnimateSampleState extends State<AnimateSample>

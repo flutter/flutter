@@ -158,12 +158,14 @@ class LogicalKeyData {
           value: value + kLeftModifierPlane,
           name: pair.left,
           keyLabel: null, // Modifier keys don't have keyLabels
-        )..webNames.add(pair.left);
+        )..webNames.add(pair.left)
+         ..webValues.add(value + kLeftModifierPlane);
         data[pair.right] = LogicalKeyEntry.fromName(
           value: value + kRightModifierPlane,
           name: pair.right,
           keyLabel: null, // Modifier keys don't have keyLabels
-        )..webNames.add(pair.right);
+        )..webNames.add(pair.right)
+         ..webValues.add(value + kRightModifierPlane);
         continue;
       }
 
@@ -175,7 +177,8 @@ class LogicalKeyData {
           value: char.codeUnitAt(0) + kNumpadPlane,
           name: numpadName,
           keyLabel: null, // Don't add keyLabel for numpad counterparts
-        )..webNames.add(numpadName);
+        )..webNames.add(numpadName)
+         ..webValues.add(char.codeUnitAt(0) + kNumpadPlane);
         unusedNumpad.remove(char);
       }
 
@@ -187,13 +190,14 @@ class LogicalKeyData {
           value: value + (isPrintable ? kUnicodePlane : kUnprintablePlane),
           name: name,
           keyLabel: keyLabel,
-        )..webNames.add(webName);
+        )..webNames.add(webName)
+         ..webValues.add(value);
       });
     }
 
     // Make sure every Numpad key that we care about has been defined.
     unusedNumpad.forEach((String key, String value) {
-      print('Undefined numpad key $value');
+      print('Unuadded numpad key $value');
     });
   }
 
@@ -414,6 +418,7 @@ class LogicalKeyEntry {
     required this.name,
     this.keyLabel,
   })  : webNames = <String>[],
+        webValues = <int>[],
         macOsKeyCodeNames = <String>[],
         macOsKeyCodeValues = <int>[],
         iosKeyCodeNames = <String>[],
@@ -441,17 +446,18 @@ class LogicalKeyEntry {
     : value = map['value'] as int,
       name = map['name'] as String,
       webNames = _toNonEmptyArray<String>(map['names']['web']),
+      webValues = _toNonEmptyArray<int>(map['values']['web']),
       macOsKeyCodeNames = _toNonEmptyArray<String>(map['names']['macOs']),
-      macOsKeyCodeValues = _toNonEmptyArray<int>(map['values']?['macOs']),
+      macOsKeyCodeValues = _toNonEmptyArray<int>(map['values']['macOs']),
       iosKeyCodeNames = _toNonEmptyArray<String>(map['names']['ios']),
-      iosKeyCodeValues = _toNonEmptyArray<int>(map['values']?['ios']),
+      iosKeyCodeValues = _toNonEmptyArray<int>(map['values']['ios']),
       gtkNames = _toNonEmptyArray<String>(map['names']['gtk']),
-      gtkValues = _toNonEmptyArray<int>(map['values']?['gtk']),
+      gtkValues = _toNonEmptyArray<int>(map['values']['gtk']),
       windowsNames = _toNonEmptyArray<String>(map['names']['windows']),
-      windowsValues = _toNonEmptyArray<int>(map['values']?['windows']),
+      windowsValues = _toNonEmptyArray<int>(map['values']['windows']),
       androidNames = _toNonEmptyArray<String>(map['names']['android']),
-      androidValues = _toNonEmptyArray<int>(map['values']?['android']),
-      fuchsiaValues = _toNonEmptyArray<int>(map['values']?['fuchsia']),
+      androidValues = _toNonEmptyArray<int>(map['values']['android']),
+      fuchsiaValues = _toNonEmptyArray<int>(map['values']['fuchsia']),
       keyLabel = map['keyLabel'] as String?;
 
   final int value;
@@ -467,6 +473,9 @@ class LogicalKeyEntry {
   /// but where there was no DomKey representation, derived from the Chromium
   /// symbol name.
   final List<String> webNames;
+
+  /// The value of the key.
+  final List<int> webValues;
 
   /// The names of the key codes that corresponds to this logical key on macOS,
   /// created from the corresponding physical keys.
@@ -535,6 +544,7 @@ class LogicalKeyEntry {
         'android': androidNames,
       },
       'values': <String, List<int>>{
+        'web': webValues,
         'macOs': macOsKeyCodeValues,
         'ios': iosKeyCodeValues,
         'gtk': gtkValues,

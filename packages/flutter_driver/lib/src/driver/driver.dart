@@ -147,12 +147,7 @@ abstract class FlutterDriver {
     Map<String, dynamic>? headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
-      return WebFlutterDriver.connectWeb(
-        hostUrl: dartVmServiceUrl,
-        timeout: timeout,
-        printCommunication: printCommunication,
-        logCommunicationToFile: logCommunicationToFile,
-      );
+      return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
     }
     return VMServiceFlutterDriver.connect(
       dartVmServiceUrl: dartVmServiceUrl,

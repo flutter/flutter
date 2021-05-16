@@ -66,7 +66,7 @@ import 'stock_strings_es.dart';
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 abstract class StockStrings {
-  StockStrings(String locale) : localeName = intl.Intl.canonicalizedLocale(locale);
+  StockStrings(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -136,21 +136,23 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
 
 StockStrings _lookupStockStrings(Locale locale) {
 
-  // Lookup logic when language+country codes are specified.
-  switch (locale.languageCode) {
-    case 'en': {
-      switch (locale.countryCode) {
-        case 'US': return StockStringsEnUs();
-      }
-      break;
-    }
-  }
 
-  // Lookup logic when only language code is specified.
-  switch (locale.languageCode) {
-    case 'en': return StockStringsEn();
-    case 'es': return StockStringsEs();
+// Lookup logic when language+country codes are specified.
+switch (locale.languageCode) {
+  case 'en': {
+  switch (locale.countryCode) {
+    case 'US': return StockStringsEnUs();
   }
+  break;
+}
+}
+
+// Lookup logic when only language code is specified.
+switch (locale.languageCode) {
+  case 'en': return StockStringsEn();
+    case 'es': return StockStringsEs();
+}
+
 
   throw FlutterError(
     'StockStrings.delegate failed to load unsupported locale "$locale". This is likely '

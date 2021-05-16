@@ -33,7 +33,7 @@ enum _LastTestStatus {
 class WindowManagerBodyState extends State<WindowManagerBody> {
 
   MethodChannel? viewChannel;
-  _LastTestStatus _lastTestStatus = _LastTestStatus.pending;
+  _LastTestStatus lastTestStatus = _LastTestStatus.pending;
   String? lastError;
   int? id;
   int windowClickCount = 0;
@@ -53,24 +53,24 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
               onPlatformViewCreated: onPlatformViewCreated,
             ),
           ),
-          if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
+          if (lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
-              onPressed: onShowAlertDialogPressed,
               child: const Text('SHOW ALERT DIALOG'),
+              onPressed: onShowAlertDialogPressed,
             ),
             Row(
               children: <Widget>[
                 ElevatedButton(
                   key: const ValueKey<String>('AddWindow'),
-                  onPressed: onAddWindowPressed,
                   child: const Text('ADD WINDOW'),
+                  onPressed: onAddWindowPressed,
                 ),
                 ElevatedButton(
                   key: const ValueKey<String>('TapWindow'),
-                  onPressed: onTapWindowPressed,
                   child: const Text('TAP WINDOW'),
+                  onPressed: onTapWindowPressed,
                 ),
                 if (windowClickCount > 0)
                   Text(
@@ -86,34 +86,34 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
   }
 
   Widget _statusWidget() {
-    assert(_lastTestStatus != _LastTestStatus.pending);
-    final String? message = _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
+    assert(lastTestStatus != _LastTestStatus.pending);
+    final String? message = lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
     return Container(
-      color: _lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
+      color: lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
       child: Text(
         message!,
         key: const ValueKey<String>('Status'),
         style: TextStyle(
-          color: _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
+          color: lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
         ),
       ),
     );
   }
 
   Future<void> onShowAlertDialogPressed() async {
-    if (_lastTestStatus != _LastTestStatus.pending) {
+    if (lastTestStatus != _LastTestStatus.pending) {
       setState(() {
-        _lastTestStatus = _LastTestStatus.pending;
+        lastTestStatus = _LastTestStatus.pending;
       });
     }
     try {
       await viewChannel?.invokeMethod<void>('showAndHideAlertDialog');
       setState(() {
-        _lastTestStatus = _LastTestStatus.success;
+        lastTestStatus = _LastTestStatus.success;
       });
     } catch(e) {
       setState(() {
-        _lastTestStatus = _LastTestStatus.error;
+        lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }
@@ -127,7 +127,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       });
     } catch(e) {
       setState(() {
-        _lastTestStatus = _LastTestStatus.error;
+        lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }

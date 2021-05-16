@@ -8,7 +8,7 @@ class SpinningSquare extends StatefulWidget {
   const SpinningSquare({Key? key}) : super(key: key);
 
   @override
-  State<SpinningSquare> createState() => _SpinningSquareState();
+  _SpinningSquareState createState() => _SpinningSquareState();
 }
 
 class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProviderStateMixin {

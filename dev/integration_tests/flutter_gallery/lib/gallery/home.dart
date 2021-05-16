@@ -278,7 +278,7 @@ class GalleryHome extends StatefulWidget {
   static bool showPreviewBanner = true;
 
   @override
-  State<GalleryHome> createState() => _GalleryHomeState();
+  _GalleryHomeState createState() => _GalleryHomeState();
 }
 
 class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
@@ -288,11 +288,11 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
 
   static Widget _topHomeLayout(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
-      alignment: Alignment.topCenter,
       children: <Widget>[
         ...previousChildren,
         if (currentChild != null) currentChild,
       ],
+      alignment: Alignment.topCenter,
     );
   }
 
@@ -400,8 +400,8 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       );
     }
     home = AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
       child: home,
+      value: SystemUiOverlayStyle.light,
     );
 
     return home;

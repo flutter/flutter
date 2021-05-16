@@ -104,7 +104,8 @@ void main() {
     config = Config.createForTesting(file, bufferLogger);
 
     expect(bufferLogger.errorText, contains('Could not read preferences in testfile'));
-    expect(bufferLogger.errorText, contains(r'sudo chown -R $(whoami) /testfile'));
+    // Also contains original error message:
+    expect(bufferLogger.errorText, contains('The flutter tool cannot access the file or directory'));
   });
 
   testWithoutContext('Config in home dir is used if it exists', () {

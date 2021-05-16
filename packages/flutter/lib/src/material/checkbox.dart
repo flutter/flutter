@@ -321,7 +321,7 @@ class Checkbox extends StatefulWidget {
   static const double width = 18.0;
 
   @override
-  State<Checkbox> createState() => _CheckboxState();
+  _CheckboxState createState() => _CheckboxState();
 }
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, ToggleableStateMixin {

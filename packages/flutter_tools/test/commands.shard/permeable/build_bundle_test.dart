@@ -9,6 +9,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
+import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
@@ -212,8 +214,7 @@ void main() {
         kTrackWidgetCreation: 'true',
         kFileSystemScheme: 'org-dartlang-root',
         kIconTreeShakerFlag: 'false',
-        kDeferredComponents: 'false',
-        kDartObfuscation: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
@@ -243,8 +244,7 @@ void main() {
         kFileSystemScheme: 'org-dartlang-root',
         kDartDefines: 'Zm9vPWJhcg==',
         kIconTreeShakerFlag: 'false',
-        kDeferredComponents: 'false',
-        kDartObfuscation: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
@@ -273,8 +273,7 @@ void main() {
         kTrackWidgetCreation: 'true',
         kFileSystemScheme: 'org-dartlang-root2',
         kIconTreeShakerFlag: 'false',
-        kDeferredComponents: 'false',
-        kDartObfuscation: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
@@ -304,8 +303,7 @@ void main() {
         kFileSystemScheme: 'org-dartlang-root',
         kFileSystemRoots: 'test1,test2',
         kIconTreeShakerFlag: 'false',
-        kDeferredComponents: 'false',
-        kDartObfuscation: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
@@ -335,8 +333,7 @@ void main() {
         kFileSystemScheme: 'org-dartlang-root',
         kExtraFrontEndOptions: '--testflag,--testflag2',
         kIconTreeShakerFlag: 'false',
-        kDeferredComponents: 'false',
-        kDartObfuscation: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),
@@ -366,8 +363,7 @@ void main() {
         kFileSystemScheme: 'org-dartlang-root',
         kExtraGenSnapshotOptions: '--testflag,--testflag2',
         kIconTreeShakerFlag: 'false',
-        kDeferredComponents: 'false',
-        kDartObfuscation: 'false',
+        kDeferredComponents: 'false'
       });
     }),
     FileSystem: () => MemoryFileSystem.test(),

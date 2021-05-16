@@ -1060,7 +1060,7 @@ class Image extends StatefulWidget {
   final bool isAntiAlias;
 
   @override
-  State<Image> createState() => _ImageState();
+  _ImageState createState() => _ImageState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

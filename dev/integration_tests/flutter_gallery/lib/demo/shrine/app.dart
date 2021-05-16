@@ -16,7 +16,7 @@ class ShrineApp extends StatefulWidget {
   const ShrineApp({Key? key}) : super(key: key);
 
   @override
-  State<ShrineApp> createState() => _ShrineAppState();
+  _ShrineAppState createState() => _ShrineAppState();
 }
 
 class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMixin {

@@ -197,23 +197,12 @@ abstract class MultiDragPointerState {
 ///    start vertically.
 ///  * [DelayedMultiDragGestureRecognizer], which only recognizes drags that
 ///    start after a long-press gesture.
-abstract class MultiDragGestureRecognizer extends GestureRecognizer {
+abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> extends GestureRecognizer {
   /// Initialize the object.
-  ///
-  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   MultiDragGestureRecognizer({
     required Object? debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
     PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
@@ -221,7 +210,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   /// [Drag] object returned by this callback.
   GestureMultiDragStartCallback? onStart;
 
-  Map<int, MultiDragPointerState>? _pointers = <int, MultiDragPointerState>{};
+  Map<int, T>? _pointers = <int, T>{};
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -229,7 +218,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(event.pointer != null);
     assert(event.position != null);
     assert(!_pointers!.containsKey(event.pointer));
-    final MultiDragPointerState state = createNewPointerState(event);
+    final T state = createNewPointerState(event);
     _pointers![event.pointer] = state;
     GestureBinding.instance!.pointerRouter.addRoute(event.pointer, _handleEvent);
     state._setArenaEntry(GestureBinding.instance!.gestureArena.add(event.pointer, this));
@@ -239,7 +228,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   /// objects to track the pointer associated with the given event.
   @protected
   @factory
-  MultiDragPointerState createNewPointerState(PointerDownEvent event);
+  T createNewPointerState(PointerDownEvent event);
 
   void _handleEvent(PointerEvent event) {
     assert(_pointers != null);
@@ -247,7 +236,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(event.timeStamp != null);
     assert(event.position != null);
     assert(_pointers!.containsKey(event.pointer));
-    final MultiDragPointerState state = _pointers![event.pointer]!;
+    final T state = _pointers![event.pointer]!;
     if (event is PointerMoveEvent) {
       state._move(event);
       // We might be disposed here.
@@ -272,7 +261,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   @override
   void acceptGesture(int pointer) {
     assert(_pointers != null);
-    final MultiDragPointerState? state = _pointers![pointer];
+    final T? state = _pointers![pointer];
     if (state == null)
       return; // We might already have canceled this drag if the up comes before the accept.
     state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
@@ -280,7 +269,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
 
   Drag? _startDrag(Offset initialPosition, int pointer) {
     assert(_pointers != null);
-    final MultiDragPointerState state = _pointers![pointer]!;
+    final T state = _pointers![pointer]!;
     assert(state != null);
     assert(state._pendingDelta != null);
     Drag? drag;
@@ -298,7 +287,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   void rejectGesture(int pointer) {
     assert(_pointers != null);
     if (_pointers!.containsKey(pointer)) {
-      final MultiDragPointerState state = _pointers![pointer]!;
+      final T state = _pointers![pointer]!;
       assert(state != null);
       state.rejected();
       _removeState(pointer);
@@ -357,26 +346,15 @@ class _ImmediatePointerState extends MultiDragPointerState {
 ///    start vertically.
 ///  * [DelayedMultiDragGestureRecognizer], which only recognizes drags that
 ///    start after a long-press gesture.
-class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
+class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_ImmediatePointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once.
-  ///
-  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   ImmediateMultiDragGestureRecognizer({
     Object? debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
     PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  MultiDragPointerState createNewPointerState(PointerDownEvent event) {
+  _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
     return _ImmediatePointerState(event.position, event.kind);
   }
 
@@ -416,27 +394,16 @@ class _HorizontalPointerState extends MultiDragPointerState {
 ///    the limitation that the drag must start horizontally.
 ///  * [VerticalMultiDragGestureRecognizer], which only recognizes drags that
 ///    start vertically.
-class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
+class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_HorizontalPointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once
   /// but only if they first move horizontally.
-  ///
-  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   HorizontalMultiDragGestureRecognizer({
     Object? debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
     PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  MultiDragPointerState createNewPointerState(PointerDownEvent event) {
+  _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
     return _HorizontalPointerState(event.position, event.kind);
   }
 
@@ -476,27 +443,16 @@ class _VerticalPointerState extends MultiDragPointerState {
 ///    the limitation that the drag must start vertically.
 ///  * [HorizontalMultiDragGestureRecognizer], which only recognizes drags that
 ///    start horizontally.
-class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
+class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_VerticalPointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once
   /// but only if they first move vertically.
-  ///
-  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   VerticalMultiDragGestureRecognizer({
     Object? debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
     PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  MultiDragPointerState createNewPointerState(PointerDownEvent event) {
+  _VerticalPointerState createNewPointerState(PointerDownEvent event) {
     return _VerticalPointerState(event.position, event.kind);
   }
 
@@ -585,37 +541,26 @@ class _DelayedPointerState extends MultiDragPointerState {
 ///    the delay.
 ///  * [PanGestureRecognizer], which recognizes only one drag gesture at a time,
 ///    regardless of how many fingers are involved.
-class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
+class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_DelayedPointerState> {
   /// Creates a drag recognizer that works on a per-pointer basis after a delay.
   ///
   /// In order for a drag to be recognized by this recognizer, the pointer must
   /// remain in the same place for [delay] (up to [kTouchSlop]). The [delay]
   /// defaults to [kLongPressTimeout] to match [LongPressGestureRecognizer] but
   /// can be changed for specific behaviors.
-  ///
-  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DelayedMultiDragGestureRecognizer({
     this.delay = kLongPressTimeout,
     Object? debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
     PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
   }) : assert(delay != null),
-       super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+       super(debugOwner: debugOwner, kind: kind);
 
   /// The amount of time the pointer must remain in the same place for the drag
   /// to be recognized.
   final Duration delay;
 
   @override
-  MultiDragPointerState createNewPointerState(PointerDownEvent event) {
+  _DelayedPointerState createNewPointerState(PointerDownEvent event) {
     return _DelayedPointerState(event.position, delay, event.kind);
   }
 

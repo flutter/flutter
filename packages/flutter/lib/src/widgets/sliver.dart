@@ -470,7 +470,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(key: key, child: child);
+    return KeyedSubtree(child: child, key: key);
   }
 
   @override
@@ -734,7 +734,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(key: key, child: child);
+    return KeyedSubtree(child: child, key: key);
   }
 
   @override
@@ -1670,7 +1670,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  SingleChildRenderObjectElement createElement() => _SliverOffstageElement(this);
+  _SliverOffstageElement createElement() => _SliverOffstageElement(this);
 }
 
 class _SliverOffstageElement extends SingleChildRenderObjectElement {

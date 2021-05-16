@@ -30,11 +30,6 @@ void main() {
 
 {{description}}
 
-import 'package:flutter/material.dart';
-import '../foo.dart';
-
-{{code-imports}}
-
 {{code-my-preamble}}
 
 main() {
@@ -72,10 +67,6 @@ main() {
 A description of the snippet.
 
 On several lines.
-
-```dart imports
-import 'dart:ui';
-```
 
 ```my-dart_language my-preamble
 const String name = 'snippet';
@@ -117,12 +108,6 @@ void main() {
       expect(outputContents, contains('A description of the snippet.'));
       expect(outputContents, contains('void main() {'));
       expect(outputContents, contains("const String name = 'snippet';"));
-      final List<String> lines = outputContents.split('\n');
-      final int dartUiLine = lines.indexOf("import 'dart:ui';");
-      final int materialLine = lines.indexOf("import 'package:flutter/material.dart';");
-      final int otherLine = lines.indexOf("import '../foo.dart';");
-      expect(dartUiLine, lessThan(materialLine));
-      expect(materialLine, lessThan(otherLine));
     });
 
     test('generates snippets', () async {

@@ -23,8 +23,8 @@ void main() {
         child: Stack(
           children: <Widget>[
             TextButton(
-              onPressed: onButtonPressed,
               child: const Text('TapHere'),
+              onPressed: onButtonPressed,
             ),
             DraggableScrollableSheet(
               maxChildSize: maxChildSize,

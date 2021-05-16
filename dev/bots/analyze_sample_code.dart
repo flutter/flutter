@@ -612,11 +612,8 @@ dependencies:
     sdk: flutter
 ''');
 
-
-    // Import the analysis options from the Flutter root.
-    final File rootAnalysisOptions = File(path.join(_flutterRoot,'analysis_options.yaml'));
-    final File analysisOptions = File(path.join(directory.path, 'analysis_options.yaml'));
-    analysisOptions.writeAsStringSync('include: ${rootAnalysisOptions.absolute.path}');
+    // Copy in the analysis options from the Flutter root.
+    File(path.join(_flutterRoot,'analysis_options.yaml')).copySync(path.join(directory.path, 'analysis_options.yaml'));
   }
 
   /// Writes out a sample section to the disk and returns the file.

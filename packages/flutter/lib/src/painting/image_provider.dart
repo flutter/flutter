@@ -241,7 +241,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   final ImageProvider imageProvider;
 ///
 ///   @override
-///   State<MyImage> createState() => _MyImageState();
+///   _MyImageState createState() => _MyImageState();
 /// }
 ///
 /// class _MyImageState extends State<MyImage> {
@@ -683,31 +683,28 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   }
 }
 
-/// Key used internally by [ResizeImage].
-///
-/// This is used to identify the precise resource in the [imageCache].
 @immutable
-class ResizeImageKey {
-  // Private constructor so nobody from the outside can poison the image cache
-  // with this key. It's only accessible to [ResizeImage] internally.
-  const ResizeImageKey._(this._providerCacheKey, this._width, this._height);
+class _SizeAwareCacheKey {
+  const _SizeAwareCacheKey(this.providerCacheKey, this.width, this.height);
 
-  final Object _providerCacheKey;
-  final int? _width;
-  final int? _height;
+  final Object providerCacheKey;
+
+  final int? width;
+
+  final int? height;
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    return other is ResizeImageKey
-        && other._providerCacheKey == _providerCacheKey
-        && other._width == _width
-        && other._height == _height;
+    return other is _SizeAwareCacheKey
+        && other.providerCacheKey == providerCacheKey
+        && other.width == width
+        && other.height == height;
   }
 
   @override
-  int get hashCode => hashValues(_providerCacheKey, _width, _height);
+  int get hashCode => hashValues(providerCacheKey, width, height);
 }
 
 /// Instructs Flutter to decode the image at the specified dimensions
@@ -718,7 +715,7 @@ class ResizeImageKey {
 ///
 /// The decoded image may still be displayed at sizes other than the
 /// cached size provided here.
-class ResizeImage extends ImageProvider<ResizeImageKey> {
+class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
   /// The cached image will be directly decoded and stored at the resolution
@@ -763,7 +760,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
-  ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
+  ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
     Future<ui.Codec> decodeResize(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
@@ -772,27 +769,27 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       );
       return decode(bytes, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     }
-    final ImageStreamCompleter completer = imageProvider.load(key._providerCacheKey, decodeResize);
+    final ImageStreamCompleter completer = imageProvider.load(key.providerCacheKey, decodeResize);
     if (!kReleaseMode) {
-      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
+      completer.debugLabel = '${completer.debugLabel} - Resized(${key.width}×${key.height})';
     }
     return completer;
   }
 
   @override
-  Future<ResizeImageKey> obtainKey(ImageConfiguration configuration) {
-    Completer<ResizeImageKey>? completer;
+  Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) {
+    Completer<_SizeAwareCacheKey>? completer;
     // If the imageProvider.obtainKey future is synchronous, then we will be able to fill in result with
     // a value before completer is initialized below.
-    SynchronousFuture<ResizeImageKey>? result;
+    SynchronousFuture<_SizeAwareCacheKey>? result;
     imageProvider.obtainKey(configuration).then((Object key) {
       if (completer == null) {
         // This future has completed synchronously (completer was never assigned),
         // so we can directly create the synchronous result to return.
-        result = SynchronousFuture<ResizeImageKey>(ResizeImageKey._(key, width, height));
+        result = SynchronousFuture<_SizeAwareCacheKey>(_SizeAwareCacheKey(key, width, height));
       } else {
         // This future did not synchronously complete.
-        completer.complete(ResizeImageKey._(key, width, height));
+        completer.complete(_SizeAwareCacheKey(key, width, height));
       }
     });
     if (result != null) {
@@ -800,7 +797,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     }
     // If the code reaches here, it means the imageProvider.obtainKey was not
     // completed sync, so we initialize the completer for completion later.
-    completer = Completer<ResizeImageKey>();
+    completer = Completer<_SizeAwareCacheKey>();
     return completer.future;
   }
 }

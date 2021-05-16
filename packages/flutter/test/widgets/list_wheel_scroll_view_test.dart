@@ -36,8 +36,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
-          clipBehavior: Clip.antiAlias,
           children: <Widget>[Container()],
+          clipBehavior: Clip.antiAlias,
         ),
       ),
     );
@@ -50,18 +50,16 @@ void main() {
 
   group('construction check', () {
     testWidgets('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
-      expect(
-        () => ListWheelScrollView(
+      try {
+        ListWheelScrollView(
           diameterRatio: nonconst(-2.0),
           itemExtent: 20.0,
           children: const <Widget>[],
-        ),
-        throwsA(isAssertionError.having(
-          (AssertionError error) => error.message,
-          'message',
-          contains("You can't set a diameterRatio of 0"),
-        )),
-      );
+        );
+        fail('Expected failure with negative diameterRatio');
+      } on AssertionError catch (exception) {
+        expect(exception.message, contains("You can't set a diameterRatio of 0"));
+      }
     });
 
     testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {

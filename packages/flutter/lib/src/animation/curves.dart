@@ -448,7 +448,7 @@ class ThreePointCubic extends Curve {
 ///   final Widget child;
 ///
 ///   @override
-///   State<FollowCurve2D> createState() => _FollowCurve2DState();
+///   _FollowCurve2DState createState() => _FollowCurve2DState();
 /// }
 ///
 /// class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {

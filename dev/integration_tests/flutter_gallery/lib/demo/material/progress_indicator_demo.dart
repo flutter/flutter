@@ -12,7 +12,7 @@ class ProgressIndicatorDemo extends StatefulWidget {
   static const String routeName = '/material/progress-indicator';
 
   @override
-  State<ProgressIndicatorDemo> createState() => _ProgressIndicatorDemoState();
+  _ProgressIndicatorDemoState createState() => _ProgressIndicatorDemoState();
 }
 
 class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {
@@ -96,10 +96,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map<Widget>((Widget c) => Container(
-          margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-          child: c,
-        ))
+        .map<Widget>((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
     );
   }

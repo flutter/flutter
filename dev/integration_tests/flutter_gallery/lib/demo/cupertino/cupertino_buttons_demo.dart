@@ -12,7 +12,7 @@ class CupertinoButtonsDemo extends StatefulWidget {
   static const String routeName = '/cupertino/buttons';
 
   @override
-  State<CupertinoButtonsDemo> createState() => _CupertinoButtonDemoState();
+  _CupertinoButtonDemoState createState() => _CupertinoButtonDemoState();
 }
 
 class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
@@ -61,8 +61,8 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                             },
                           ),
                           const CupertinoButton(
-                            onPressed: null,
                             child: Text('Disabled'),
+                            onPressed: null,
                           ),
                         ],
                       ),
@@ -76,8 +76,8 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                     ),
                     const Padding(padding: EdgeInsets.all(12.0)),
                     const CupertinoButton.filled(
-                      onPressed: null,
                       child: Text('Disabled'),
+                      onPressed: null,
                     ),
                   ],
                 ),

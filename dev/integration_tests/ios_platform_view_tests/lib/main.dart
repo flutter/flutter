@@ -34,7 +34,7 @@ class MyHomePage extends StatefulWidget {
   final String? title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -83,8 +83,8 @@ class PlatformViewPage extends StatelessWidget {
         children: <Widget>[
           const Expanded(
             child: SizedBox(
-              width: 300,
               child: UiKitView(viewType: 'platform_view'),
+              width: 300,
             ),
           ),
           ElevatedButton(

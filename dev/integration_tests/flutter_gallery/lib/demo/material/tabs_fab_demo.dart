@@ -40,7 +40,7 @@ class TabsFabDemo extends StatefulWidget {
   static const String routeName = '/material/tabs-fab';
 
   @override
-  State<TabsFabDemo> createState() => _TabsFabDemoState();
+  _TabsFabDemoState createState() => _TabsFabDemoState();
 }
 
 class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {
@@ -125,8 +125,8 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       key: page.fabKey,
       tooltip: 'Show explanation',
       backgroundColor: page.fabColor,
-      onPressed: _showExplanatoryText,
       child: page.fabIcon,
+      onPressed: _showExplanatoryText,
     );
   }
 

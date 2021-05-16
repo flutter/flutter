@@ -203,11 +203,11 @@ enum _TestMode {
 /// colors. Each color's description is made of several [Text] nodes.
 class BenchBuildColorsGrid extends WidgetBuildRecorder {
   BenchBuildColorsGrid.canvas()
-      : _mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
+      : mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
   BenchBuildColorsGrid.dom()
-      : _mode = _TestMode.useDomTextLayout, super(name: domBenchmarkName);
+      : mode = _TestMode.useDomTextLayout, super(name: domBenchmarkName);
   BenchBuildColorsGrid.canvasKit()
-      : _mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
+      : mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
 
   /// Disables tracing for this benchmark.
   ///
@@ -224,16 +224,16 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   static const String canvasKitBenchmarkName = 'text_canvas_kit_color_grid';
 
   /// Whether to use the new canvas-based text measurement implementation.
-  final _TestMode _mode;
+  final _TestMode mode;
 
   num _textLayoutMicros = 0;
 
   @override
   Future<void> setUpAll() async {
-    if (_mode == _TestMode.useCanvasTextLayout) {
+    if (mode == _TestMode.useCanvasTextLayout) {
       _useCanvasText(true);
     }
-    if (_mode == _TestMode.useDomTextLayout) {
+    if (mode == _TestMode.useDomTextLayout) {
       _useCanvasText(false);
     }
     registerEngineBenchmarkValueListener('text_layout', (num value) {
@@ -258,7 +258,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
     // We need to do this before calling [super.frameDidDraw] because the latter
     // updates the value of [showWidget] in preparation for the next frame.
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/53877
-    if (showWidget && _mode != _TestMode.useCanvasKit) {
+    if (showWidget && mode != _TestMode.useCanvasKit) {
       profile.addDataPoint(
         'text_layout',
         Duration(microseconds: _textLayoutMicros.toInt()),

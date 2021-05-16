@@ -512,9 +512,11 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
+        '  SizedBox-[GlobalKey#00000 problematic]\n'
+        '  Placeholder-[GlobalKey#00000 problematic]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -539,9 +541,11 @@ void main() {
     expect(
       exception.toString(),
       equalsIgnoringHashCodes(
-        'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
+        '  Container-[GlobalKey#00000 problematic]\n'
+        '  Placeholder-[GlobalKey#00000 problematic]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.',
       ),
     );
   });
@@ -1585,40 +1589,6 @@ void main() {
     expect(() => element.state, throwsA(isA<TypeError>()));
     expect(() => element.widget, throwsA(isA<TypeError>()));
   }, skip: kIsWeb);
-
-  testWidgets('Deactivate and activate are called correctly', (WidgetTester tester) async {
-    final List<String> states = <String>[];
-    Widget build([Key? key]) {
-      return StatefulWidgetSpy(
-        key: key,
-        onInitState: (BuildContext context) { states.add('initState'); },
-        onDidUpdateWidget: (BuildContext context) { states.add('didUpdateWidget'); },
-        onDeactivate: (BuildContext context) { states.add('deactivate'); },
-        onActivate: (BuildContext context) { states.add('activate'); },
-        onBuild: (BuildContext context) { states.add('build'); },
-        onDispose: (BuildContext context) { states.add('dispose'); },
-      );
-    }
-    Future<void> pumpWidget(Widget widget) {
-      states.clear();
-      return tester.pumpWidget(widget);
-    }
-
-    await pumpWidget(build());
-    expect(states, <String>['initState', 'build']);
-    await pumpWidget(Container(child: build()));
-    expect(states, <String>['deactivate', 'initState', 'build', 'dispose']);
-    await pumpWidget(Container());
-    expect(states, <String>['deactivate', 'dispose']);
-
-    final GlobalKey key = GlobalKey();
-    await pumpWidget(build(key));
-    expect(states, <String>['initState', 'build']);
-    await pumpWidget(Container(child: build(key)));
-    expect(states, <String>['deactivate', 'activate', 'didUpdateWidget', 'build']);
-    await pumpWidget(Container());
-    expect(states, <String>['deactivate', 'dispose']);
-  });
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
@@ -1678,7 +1648,7 @@ class Decorate extends StatefulWidget {
   final void Function(bool isInBuild) build;
 
   @override
-  State<Decorate> createState() => _DecorateState();
+  _DecorateState createState() => _DecorateState();
 
   @override
   DecorateElement createElement() => DecorateElement(this);
@@ -1857,7 +1827,6 @@ class StatefulWidgetSpy extends StatefulWidget {
     this.onDidChangeDependencies,
     this.onDispose,
     this.onDeactivate,
-    this.onActivate,
     this.onDidUpdateWidget,
   })  : super(key: key);
 
@@ -1866,11 +1835,10 @@ class StatefulWidgetSpy extends StatefulWidget {
   final void Function(BuildContext)? onDidChangeDependencies;
   final void Function(BuildContext)? onDispose;
   final void Function(BuildContext)? onDeactivate;
-  final void Function(BuildContext)? onActivate;
   final void Function(BuildContext)? onDidUpdateWidget;
 
   @override
-  State<StatefulWidgetSpy> createState() => _StatefulWidgetSpyState();
+  _StatefulWidgetSpyState createState() => _StatefulWidgetSpyState();
 }
 
 class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
@@ -1884,12 +1852,6 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
   void deactivate() {
     super.deactivate();
     widget.onDeactivate?.call(context);
-  }
-
-  @override
-  void activate() {
-    super.activate();
-    widget.onActivate?.call(context);
   }
 
   @override

@@ -22,7 +22,7 @@ import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
+import '../src/context.dart';
 
 void main() {
   group('Basic info', () {
@@ -244,7 +244,7 @@ void main() {
     expect(portForwarder.forwardedPorts.isEmpty, true);
   });
 
-  testWithoutContext('createDevFSWriter returns a LocalDevFSWriter', () {
+  testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
     final FakeDesktopDevice device = setUpDesktopDevice();
 
     expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());

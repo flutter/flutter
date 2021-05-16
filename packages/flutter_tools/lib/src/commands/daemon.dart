@@ -416,7 +416,7 @@ class DaemonDomain extends Domain {
   }
 }
 
-typedef RunOrAttach = Future<void> Function({
+typedef _RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
   Completer<void> appStartedCompleter,
 });
@@ -539,7 +539,7 @@ class AppDomain extends Domain {
 
   Future<AppInstance> launch(
     ResidentRunner runner,
-    RunOrAttach runOrAttach,
+    _RunOrAttach runOrAttach,
     Device device,
     String projectDirectory,
     bool enableHotReload,

@@ -30,10 +30,10 @@ class ExpandingBottomSheet extends StatefulWidget {
   final AnimationController hideController;
 
   @override
-  ExpandingBottomSheetState createState() => ExpandingBottomSheetState();
+  _ExpandingBottomSheetState createState() => _ExpandingBottomSheetState();
 
-  static ExpandingBottomSheetState? of(BuildContext context, {bool isNullOk = false}) {
-    final ExpandingBottomSheetState? result = context.findAncestorStateOfType<ExpandingBottomSheetState>();
+  static _ExpandingBottomSheetState? of(BuildContext context, {bool isNullOk = false}) {
+    final _ExpandingBottomSheetState? result = context.findAncestorStateOfType<_ExpandingBottomSheetState>();
     if (isNullOk || result != null) {
       return result;
     }
@@ -97,7 +97,7 @@ double _getPeakPoint({required double begin, required double end}) {
   return begin + (end - begin) * _kPeakVelocityProgress;
 }
 
-class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerProviderStateMixin {
+class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerProviderStateMixin {
   final GlobalKey _expandingBottomSheetKey = GlobalKey(debugLabel: 'Expanding bottom sheet');
 
   // The width of the Material, calculated by _widthFor() & based on the number
@@ -277,8 +277,8 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
               children: <Widget>[
                 AnimatedPadding(
                   padding: _cartPaddingFor(numProducts),
-                  duration: const Duration(milliseconds: 225),
                   child: const Icon(Icons.shopping_cart),
+                  duration: const Duration(milliseconds: 225),
                 ),
                 Container(
                   // Accounts for the overflow number
@@ -405,7 +405,7 @@ class ProductThumbnailRow extends StatefulWidget {
   const ProductThumbnailRow({Key? key}) : super(key: key);
 
   @override
-  State<ProductThumbnailRow> createState() => _ProductThumbnailRowState();
+  _ProductThumbnailRowState createState() => _ProductThumbnailRowState();
 }
 
 class _ProductThumbnailRowState extends State<ProductThumbnailRow> {

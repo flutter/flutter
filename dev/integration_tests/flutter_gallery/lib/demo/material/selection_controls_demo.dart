@@ -33,7 +33,7 @@ class SelectionControlsDemo extends StatefulWidget {
   static const String routeName = '/material/selection-controls';
 
   @override
-  State<SelectionControlsDemo> createState() => _SelectionControlsDemoState();
+  _SelectionControlsDemoState createState() => _SelectionControlsDemoState();
 }
 
 class _SelectionControlsDemoState extends State<SelectionControlsDemo> {

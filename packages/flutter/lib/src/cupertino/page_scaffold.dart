@@ -109,7 +109,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   final bool resizeToAvoidBottomInset;
 
   @override
-  State<CupertinoPageScaffold> createState() => _CupertinoPageScaffoldState();
+  _CupertinoPageScaffoldState createState() => _CupertinoPageScaffoldState();
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {

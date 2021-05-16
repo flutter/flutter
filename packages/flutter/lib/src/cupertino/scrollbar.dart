@@ -111,7 +111,7 @@ class CupertinoScrollbar extends RawScrollbar {
   final Radius radiusWhileDragging;
 
   @override
-  RawScrollbarState<CupertinoScrollbar> createState() => _CupertinoScrollbarState();
+  _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
 }
 
 class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {

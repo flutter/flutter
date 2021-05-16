@@ -64,7 +64,6 @@ import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
-import 'windows/uwptool.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -206,12 +205,6 @@ Future<T> runInContext<T>(
           fileSystem: globals.fs,
           logger: globals.logger,
           platform: globals.platform
-        ),
-        uwptool: UwpTool(
-          artifacts: globals.artifacts,
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
         ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(

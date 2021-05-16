@@ -174,14 +174,13 @@ void main() {
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
-  await expectLater(
-    () => flutter.evaluateInFrame('"test"'),
-    throwsA(isA<RPCError>().having(
-      (RPCError error) => error.message,
-      'message',
-      contains('Expression evaluation is not supported for this configuration'),
-    )),
-  );
+  ObjRef res;
+  try {
+    res = await flutter.evaluateInFrame('"test"');
+  } on RPCError catch (e) {
+    expect(e.message, contains('Expression evaluation is not supported for this configuration'));
+  }
+  expect(res, null);
 }
 
 Future<void> checkStaticScope(FlutterTestDriver flutter) async {

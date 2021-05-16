@@ -12,8 +12,8 @@ import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
-import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
@@ -22,18 +22,23 @@ import '../src/context.dart';
 void main() {
   group('Dart plugin registrant', () {
     FileSystem fs;
-    FakeFlutterProject flutterProject;
-    FakeFlutterManifest flutterManifest;
+    MockFlutterProject flutterProject;
+    MockFlutterManifest flutterManifest;
 
     setUp(() async {
       fs = MemoryFileSystem.test();
-      final Directory directory = fs.currentDirectory.childDirectory('app');
-      flutterManifest = FakeFlutterManifest();
-      flutterProject = FakeFlutterProject()
-        ..manifest = flutterManifest
-        ..directory = directory
-        ..flutterPluginsFile = directory.childFile('.flutter-plugins')
-        ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies');
+
+      flutterProject = MockFlutterProject();
+
+      flutterManifest = MockFlutterManifest();
+      when(flutterManifest.dependencies).thenReturn(<String>{});
+
+      when(flutterProject.manifest).thenReturn(flutterManifest);
+      when(flutterProject.directory).thenReturn(fs.systemTempDirectory.childDirectory('app'));
+
+      when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
+      when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
+
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
     });
 
@@ -559,8 +564,33 @@ void main() {
     });
 
     group('generateMainDartWithPluginRegistrant', () {
+
+      void createFakeDartPlugins(
+        FlutterProject flutterProject,
+        FlutterManifest flutterManifest,
+        FileSystem fs,
+        Map<String, String> plugins,
+      ) {
+        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
+        final File packagesFile = flutterProject.directory
+          .childFile('.packages')
+          ..createSync(recursive: true);
+
+        for (final MapEntry<String, String> entry in plugins.entries) {
+          final String name = fs.path.basename(entry.key);
+          final Directory pluginDirectory = fakePubCache.childDirectory(name);
+          packagesFile.writeAsStringSync(
+              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+              mode: FileMode.writeOnlyAppend);
+          pluginDirectory.childFile('pubspec.yaml')
+              ..createSync(recursive: true)
+              ..writeAsStringSync(entry.value);
+        }
+        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
+      }
+
       testUsingContext('Generates new entrypoint', () async {
-        flutterProject.isModule = true;
+        when(flutterProject.isModule).thenReturn(false);
 
         createFakeDartPlugins(
           flutterProject,
@@ -701,7 +731,8 @@ void main() {
           '  } else {\n'
           '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
-          '}\n',
+          '}\n'
+          '',
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -709,7 +740,7 @@ void main() {
       });
 
       testUsingContext('Plugin without platform support throws tool exit', () async {
-        flutterProject.isModule = false;
+        when(flutterProject.isModule).thenReturn(false);
 
         createFakeDartPlugins(
           flutterProject,
@@ -755,7 +786,7 @@ void main() {
       });
 
       testUsingContext('Plugin with platform support without dart plugin class throws tool exit', () async {
-        flutterProject.isModule = false;
+        when(flutterProject.isModule).thenReturn(false);
 
         createFakeDartPlugins(
           flutterProject,
@@ -828,7 +859,8 @@ void main() {
       });
 
       testUsingContext('Does not create new entrypoint if there are no platform resolutions', () async {
-        flutterProject.isModule = false;
+        when(flutterProject.isModule).thenReturn(false);
+        when(flutterManifest.dependencies).thenReturn(<String>{});
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
@@ -855,7 +887,7 @@ void main() {
       });
 
       testUsingContext('Deletes new entrypoint if there are no platform resolutions', () async {
-        flutterProject.isModule = false;
+        when(flutterProject.isModule).thenReturn(false);
 
         createFakeDartPlugins(
           flutterProject,
@@ -912,74 +944,11 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
+
     });
+
   });
 }
 
-void createFakeDartPlugins(
-  FakeFlutterProject flutterProject,
-  FakeFlutterManifest flutterManifest,
-  FileSystem fs,
-  Map<String, String> plugins,
-) {
-  final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-  final File packagesFile = flutterProject.directory
-    .childFile('.packages')
-    ..createSync(recursive: true);
-
-  for (final MapEntry<String, String> entry in plugins.entries) {
-    final String name = fs.path.basename(entry.key);
-    final Directory pluginDirectory = fakePubCache.childDirectory(name);
-    packagesFile.writeAsStringSync(
-      '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-      mode: FileMode.writeOnlyAppend,
-    );
-    pluginDirectory.childFile('pubspec.yaml')
-      ..createSync(recursive: true)
-      ..writeAsStringSync(entry.value);
-  }
-  flutterManifest.dependencies = plugins.keys.toSet();
-}
-
-class FakeFlutterManifest extends Fake implements FlutterManifest {
-  @override
-  Set<String> dependencies = <String>{};
-}
-
-class FakeFlutterProject extends Fake implements FlutterProject {
-  @override
-  bool isModule = false;
-
-  @override
-  FlutterManifest manifest;
-
-  @override
-  Directory directory;
-
-  @override
-  File flutterPluginsFile;
-
-  @override
-  File flutterPluginsDependenciesFile;
-
-  @override
-  IosProject ios;
-
-  @override
-  AndroidProject android;
-
-  @override
-  WebProject web;
-
-  @override
-  MacOSProject macos;
-
-  @override
-  LinuxProject linux;
-
-  @override
-  WindowsProject windows;
-
-  @override
-  WindowsUwpProject windowsUwp;
-}
+class MockFlutterManifest extends Mock implements FlutterManifest {}
+class MockFlutterProject extends Mock implements FlutterProject {}

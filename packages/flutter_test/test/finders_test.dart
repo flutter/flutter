@@ -81,8 +81,8 @@ void main() {
           label: 'Add',
           button: true,
           child: const TextButton(
-            onPressed: null,
             child: Text('+'),
+            onPressed: null,
           ),
         ),
       ));

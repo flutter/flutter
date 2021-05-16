@@ -1159,8 +1159,8 @@ void main() {
         home: Center(
           child: Tooltip(
             message: 'Foo',
-            excludeFromSemantics: true,
             child: Text('Bar'),
+            excludeFromSemantics: true,
           ),
         ),
       ),

@@ -370,7 +370,7 @@ class Hero extends StatefulWidget {
   }
 
   @override
-  State<Hero> createState() => _HeroState();
+  _HeroState createState() => _HeroState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

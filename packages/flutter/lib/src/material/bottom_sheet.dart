@@ -181,7 +181,7 @@ class BottomSheet extends StatefulWidget {
   final BoxConstraints? constraints;
 
   @override
-  State<BottomSheet> createState() => _BottomSheetState();
+  _BottomSheetState createState() => _BottomSheetState();
 
   /// Creates an [AnimationController] suitable for a
   /// [BottomSheet.animationController].
@@ -283,7 +283,6 @@ class _BottomSheetState extends State<BottomSheet> {
     if (constraints != null) {
       bottomSheet = Align(
         alignment: Alignment.bottomCenter,
-        heightFactor: 1.0,
         child: ConstrainedBox(
           constraints: constraints,
           child: bottomSheet,
@@ -295,8 +294,8 @@ class _BottomSheetState extends State<BottomSheet> {
       onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
-      excludeFromSemantics: true,
       child: bottomSheet,
+      excludeFromSemantics: true,
     );
   }
 }

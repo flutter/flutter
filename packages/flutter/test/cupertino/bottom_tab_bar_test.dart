@@ -30,21 +30,20 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 Future<void> main() async {
 
   testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
-    await expectLater(
-      () => pumpWidgetWithBoilerplate(tester, CupertinoTabBar(
+    try {
+      await pumpWidgetWithBoilerplate(tester, CupertinoTabBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
             label: 'Tab 1',
           ),
         ],
-      )),
-      throwsA(isAssertionError.having(
-        (AssertionError error) => error.toString(),
-        '.toString()',
-        contains('items.length'),
-      )),
-    );
+      ));
+      fail('Should not be possible to create a tab bar with just one item');
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('items.length'));
+      // Exception expected.
+    }
   });
 
   testWidgets('Active and inactive colors', (WidgetTester tester) async {

@@ -205,7 +205,7 @@ class CupertinoSlider extends StatefulWidget {
   final Color thumbColor;
 
   @override
-  State<CupertinoSlider> createState() => _CupertinoSliderState();
+  _CupertinoSliderState createState() => _CupertinoSliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

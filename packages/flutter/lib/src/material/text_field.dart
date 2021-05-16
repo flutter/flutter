@@ -818,7 +818,7 @@ class TextField extends StatefulWidget {
   final String? restorationId;
 
   @override
-  State<TextField> createState() => _TextFieldState();
+  _TextFieldState createState() => _TextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

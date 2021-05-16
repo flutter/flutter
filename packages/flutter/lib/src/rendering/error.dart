@@ -56,7 +56,8 @@ class RenderErrorBox extends RenderBox {
   /// The message to attempt to display at paint time.
   final String message;
 
-  late final ui.Paragraph? _paragraph;
+  // TODO(ianh): should be final
+  ui.Paragraph? _paragraph;
 
   @override
   double computeMaxIntrinsicWidth(double height) {

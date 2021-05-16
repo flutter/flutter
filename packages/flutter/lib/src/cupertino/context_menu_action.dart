@@ -45,7 +45,7 @@ class CupertinoContextMenuAction extends StatefulWidget {
   final IconData? trailingIcon;
 
   @override
-  State<CupertinoContextMenuAction> createState() => _CupertinoContextMenuActionState();
+  _CupertinoContextMenuActionState createState() => _CupertinoContextMenuActionState();
 }
 
 class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {

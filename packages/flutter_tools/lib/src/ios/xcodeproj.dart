@@ -235,9 +235,6 @@ class XcodeProjectInterpreter {
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
     const int missingProjectExitCode = 66;
-    // The exit code returned by 'xcodebuild -list' when the project is corrupted.
-    const int corruptedProjectExitCode = 74;
-    bool _allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
         ...xcrunCommand(),
@@ -246,11 +243,10 @@ class XcodeProjectInterpreter {
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
       throwOnError: true,
-      allowedFailures: _allowedFailures,
+      allowedFailures: (int c) => c == missingProjectExitCode,
       workingDirectory: projectPath,
     );
-    if (_allowedFailures(result.exitCode)) {
-      // User configuration error, tool exit instead of crashing.
+    if (result.exitCode == missingProjectExitCode) {
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString(), _logger);

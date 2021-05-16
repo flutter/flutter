@@ -255,14 +255,4 @@ void main() {
       );
     });
   });
-
-  test('toString works as intended', () async {
-    const MethodCall methodCall = MethodCall('sample method');
-    final PlatformException platformException = PlatformException(code: '100');
-    final MissingPluginException missingPluginException = MissingPluginException();
-
-    expect(methodCall.toString(), 'MethodCall(sample method, null)');
-    expect(platformException.toString(), 'PlatformException(100, null, null, null)');
-    expect(missingPluginException.toString(), 'MissingPluginException(null)');
-  });
 }

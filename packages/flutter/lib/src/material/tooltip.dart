@@ -203,7 +203,7 @@ class Tooltip extends StatefulWidget {
   final Duration? showDuration;
 
   @override
-  State<Tooltip> createState() => _TooltipState();
+  _TooltipState createState() => _TooltipState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

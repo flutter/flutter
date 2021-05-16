@@ -790,8 +790,8 @@ class DataTable extends StatelessWidget {
     if (onRowTap != null) {
       contents = TableRowInkWell(
         onTap: onRowTap,
-        overlayColor: overlayColor,
         child: contents,
+        overlayColor: overlayColor,
       );
     }
     return TableCell(
@@ -915,14 +915,14 @@ class DataTable extends StatelessWidget {
         onLongPress: onLongPress,
         onTapCancel: onTapCancel,
         onTapDown: onTapDown,
-        overlayColor: overlayColor,
         child: label,
+        overlayColor: overlayColor,
       );
     } else if (onSelectChanged != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
-        overlayColor: overlayColor,
         child: label,
+        overlayColor: overlayColor,
       );
     }
     return label;

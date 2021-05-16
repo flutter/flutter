@@ -9,12 +9,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
-import 'package:flutter_tools/src/windows/uwptool.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -43,16 +41,15 @@ void main() {
   });
 
   testWithoutContext('WindowsUwpDevice defaults', () async {
-    final FakeUwpTool uwptool = FakeUwpTool();
-    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(uwptool: uwptool);
-    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice();
+    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
 
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
     expect(windowsDevice.name, 'Windows (UWP)');
-    expect(await windowsDevice.installApp(package), true);
-    expect(await windowsDevice.uninstallApp(package), true);
-    expect(await windowsDevice.isLatestBuildInstalled(package), false);
-    expect(await windowsDevice.isAppInstalled(package), false);
+    expect(await windowsDevice.installApp(windowsApp), true);
+    expect(await windowsDevice.uninstallApp(windowsApp), true);
+    expect(await windowsDevice.isLatestBuildInstalled(windowsApp), true);
+    expect(await windowsDevice.isAppInstalled(windowsApp), true);
     expect(windowsDevice.category, Category.desktop);
 
     expect(windowsDevice.supportsRuntimeMode(BuildMode.debug), true);
@@ -72,7 +69,6 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-      uwptool: FakeUwpTool(),
     ).devices, <Device>[]);
   });
 
@@ -87,7 +83,6 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-      uwptool: FakeUwpTool(),
     ).devices, hasLength(1));
   });
 
@@ -103,7 +98,6 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: featureFlags,
-      uwptool: FakeUwpTool(),
     ).devices, hasLength(2));
   });
 
@@ -118,7 +112,6 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-      uwptool: FakeUwpTool(),
     );
     // Timeout ignored.
     final List<Device> devices = await windowsDevices.discoverDevices(timeout: const Duration(seconds: 10));
@@ -166,56 +159,6 @@ void main() {
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.profile), 'profile/executable');
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.release), 'release/executable');
   });
-
-  testWithoutContext('WinUWPDevice can launch application', () async {
-    Cache.flutterRoot = '';
-    final FakeUwpTool uwptool = FakeUwpTool();
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
-      fileSystem: fileSystem,
-      uwptool: uwptool,
-    );
-    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
-
-    final LaunchResult result = await windowsDevice.startApp(
-      package,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      prebuiltApplication: true,
-      platformArgs: <String, Object>{},
-    );
-
-    expect(result.started, true);
-    expect(uwptool.launchRequests.single.packageFamily, 'PACKAGE-ID_publisher');
-    expect(uwptool.launchRequests.single.args, <String>[
-      '--observatory-port=12345',
-      '--disable-service-auth-codes',
-      '--enable-dart-profiling',
-      '--enable-checked-mode',
-      '--verify-entry-points',
-    ]);
-  });
-
-   testWithoutContext('WinUWPDevice can launch application in release mode', () async {
-    Cache.flutterRoot = '';
-    final FakeUwpTool uwptool = FakeUwpTool();
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
-      fileSystem: fileSystem,
-      uwptool: uwptool,
-    );
-    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
-
-    final LaunchResult result = await windowsDevice.startApp(
-      package,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
-      prebuiltApplication: true,
-      platformArgs: <String, Object>{},
-    );
-
-    expect(result.started, true);
-    expect(uwptool.launchRequests.single.packageFamily, 'PACKAGE-ID_publisher');
-    expect(uwptool.launchRequests.single.args, <String>[]);
-  });
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
@@ -243,94 +186,16 @@ WindowsUWPDevice setUpWindowsUwpDevice({
   FileSystem fileSystem,
   Logger logger,
   ProcessManager processManager,
-  UwpTool uwptool,
 }) {
   return WindowsUWPDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: FakeOperatingSystemUtils(),
-    uwptool: uwptool ?? FakeUwpTool(),
   );
 }
 
 class FakeWindowsApp extends Fake implements WindowsApp {
   @override
   String executable(BuildMode buildMode) => '${buildMode.name}/executable';
-}
-
-class FakeBuildableUwpApp extends Fake implements BuildableUwpApp {
-  @override
-  String get id => 'PACKAGE-ID';
-  @override
-  String get name => 'testapp';
-  @override
-  String get projectVersion => '1.2.3.4';
-
-  // Test helper to get the expected package family.
-  static const String packageFamily = 'PACKAGE-ID_publisher';
-}
-
-class FakeUwpTool implements UwpTool {
-  bool isInstalled = false;
-  final List<_GetPackageFamilyRequest> getPackageFamilyRequests = <_GetPackageFamilyRequest>[];
-  final List<_LaunchRequest> launchRequests = <_LaunchRequest>[];
-  final List<_InstallRequest> installRequests = <_InstallRequest>[];
-  final List<_UninstallRequest> uninstallRequests = <_UninstallRequest>[];
-
-  @override
-  Future<List<String>> listApps() async {
-    return isInstalled ? <String>[FakeBuildableUwpApp.packageFamily] : <String>[];
-  }
-
-  @override
-  Future<String/*?*/> getPackageFamilyName(String packageName) async {
-    getPackageFamilyRequests.add(_GetPackageFamilyRequest(packageName));
-    return isInstalled ? FakeBuildableUwpApp.packageFamily : null;
-  }
-
-  @override
-  Future<int/*?*/> launchApp(String packageFamily, List<String> args) async {
-    launchRequests.add(_LaunchRequest(packageFamily, args));
-    return 42;
-  }
-
-  @override
-  Future<bool> installApp(String buildDirectory) async {
-    installRequests.add(_InstallRequest(buildDirectory));
-    isInstalled = true;
-    return true;
-  }
-
-  @override
-  Future<bool> uninstallApp(String packageFamily) async {
-    uninstallRequests.add(_UninstallRequest(packageFamily));
-    isInstalled = false;
-    return true;
-  }
-}
-
-class _GetPackageFamilyRequest {
-  const _GetPackageFamilyRequest(this.packageId);
-
-  final String packageId;
-}
-
-class _LaunchRequest {
-  const _LaunchRequest(this.packageFamily, this.args);
-
-  final String packageFamily;
-  final List<String> args;
-}
-
-class _InstallRequest {
-  const _InstallRequest(this.buildDirectory);
-
-  final String buildDirectory;
-}
-
-class _UninstallRequest {
-  const _UninstallRequest(this.packageFamily);
-
-  final String packageFamily;
 }

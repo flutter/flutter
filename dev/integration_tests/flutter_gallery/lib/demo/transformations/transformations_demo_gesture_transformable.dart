@@ -117,8 +117,7 @@ class GestureTransformable extends StatefulWidget {
   final double? initialScale;
   final double? initialRotation;
 
-  @override
-  State<GestureTransformable> createState() => _GestureTransformableState();
+  @override _GestureTransformableState createState() => _GestureTransformableState();
 }
 
 // A single user event can only represent one of these gestures. The user can't
@@ -288,9 +287,9 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
         child: Transform(
           transform: _transform,
           child: SizedBox(
+            child: widget.child,
             height: widget.size.height,
             width: widget.size.width,
-            child: widget.child,
           ),
         ),
       ),

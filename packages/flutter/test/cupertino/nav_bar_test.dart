@@ -18,8 +18,8 @@ void main() {
       const CupertinoApp(
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: null,
             child: Text('Something'),
+            onPressed: null,
           ),
           middle: Text('Title'),
         ),
@@ -133,7 +133,7 @@ void main() {
         home: Align(
           alignment: Alignment.topCenter,
           child: CupertinoNavigationBar(
-            leading: const CupertinoButton(onPressed: null, child: Text('Cheetah')),
+            leading: const CupertinoButton(child: Text('Cheetah'), onPressed: null),
             // Let the box take all the vertical space to test vertical padding but let
             // the nav bar position it horizontally.
             middle: Align(
@@ -142,7 +142,7 @@ void main() {
               widthFactor: 1.0,
               child: const Text('Title'),
             ),
-            trailing: const CupertinoButton(onPressed: null, child: Text('Puma')),
+            trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
             padding: const EdgeInsetsDirectional.only(
               start: 10.0,
               end: 20.0,
@@ -245,11 +245,11 @@ void main() {
           child: Align(
             alignment: Alignment.topCenter,
             child: CupertinoNavigationBar(
-              leading: CupertinoButton(onPressed: null, child: Text('Cheetah')),
+              leading: CupertinoButton(child: Text('Cheetah'), onPressed: null),
               // Let the box take all the vertical space to test vertical padding but let
               // the nav bar position it horizontally.
               middle: Text('Title'),
-              trailing: CupertinoButton(onPressed: null, child: Text('Puma')),
+              trailing: CupertinoButton(child: Text('Puma'), onPressed: null),
               padding: EdgeInsetsDirectional.only(
                 start: 10.0,
                 end: 20.0,

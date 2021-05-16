@@ -92,12 +92,10 @@ class SectorAppState extends State<SectorApp> {
 
   Widget buildBody() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 25.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               ElevatedButton(
                 onPressed: _enabledAdd ? addSector : null,
@@ -130,6 +128,7 @@ class SectorAppState extends State<SectorApp> {
                 ),
               ),
             ],
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
           ),
         ),
         Expanded(
@@ -146,6 +145,7 @@ class SectorAppState extends State<SectorApp> {
           ),
         ),
       ],
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
     );
   }
 

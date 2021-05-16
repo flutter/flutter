@@ -137,7 +137,7 @@ class CupertinoButton extends StatefulWidget {
   bool get enabled => onPressed != null;
 
   @override
-  State<CupertinoButton> createState() => _CupertinoButtonState();
+  _CupertinoButtonState createState() => _CupertinoButtonState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

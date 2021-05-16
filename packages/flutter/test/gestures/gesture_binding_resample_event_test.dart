@@ -69,7 +69,7 @@ void main() {
         ui.PointerData(
             change: ui.PointerChange.add,
             physicalX: 0.0,
-            timeStamp: epoch,
+            timeStamp: epoch + const Duration(milliseconds: 0),
         ),
         ui.PointerData(
             change: ui.PointerChange.down,

@@ -458,7 +458,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Subclasses can override this function to customize when they start
   /// recognizing a drag.
   @protected
-  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer(GestureMultiDragStartCallback onStart) {
     switch (affinity) {
       case Axis.horizontal:
         return HorizontalMultiDragGestureRecognizer()..onStart = onStart;
@@ -470,7 +470,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   }
 
   @override
-  State<Draggable<T>> createState() => _DraggableState<T>();
+  _DraggableState<T> createState() => _DraggableState<T>();
 }
 
 /// Makes its child draggable starting from long press.
@@ -773,7 +773,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   final HitTestBehavior hitTestBehavior;
 
   @override
-  State<DragTarget<T>> createState() => _DragTargetState<T>();
+  _DragTargetState<T> createState() => _DragTargetState<T>();
 }
 
 List<T?> _mapAvatarsToData<T extends Object>(List<_DragAvatar<Object>> avatars) {
@@ -1007,8 +1007,8 @@ class _DragAvatar<T extends Object> extends Drag {
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
       child: IgnorePointer(
-        ignoringSemantics: ignoringFeedbackSemantics,
         child: feedback,
+        ignoringSemantics: ignoringFeedbackSemantics,
       ),
     );
   }

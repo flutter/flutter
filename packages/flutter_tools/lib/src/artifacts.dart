@@ -55,9 +55,6 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
-
-  // Windows UWP app management tool.
-  uwptool,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -114,31 +111,8 @@ String _enginePlatformDirectoryName(TargetPlatform platform) {
   return getNameForTargetPlatform(platform);
 }
 
-bool _isWindows(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_uwp_x64:
-      return true;
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-    case TargetPlatform.darwin:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.ios:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-      return false;
-  }
-  return false;
-}
-
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
-  final String exe = _isWindows(platform) ? '.exe' : '';
+  final String exe = platform == TargetPlatform.windows_x64 ? '.exe' : '';
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
@@ -188,8 +162,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
-    case Artifact.uwptool:
-      return 'uwptool$exe';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -571,11 +543,6 @@ class CachedArtifacts implements Artifacts {
                      .childDirectory(_enginePlatformDirectoryName(platform))
                      .childFile(_artifactToFileName(artifact, platform, mode))
                      .path;
-      case Artifact.uwptool:
-        return _cache.getArtifactDirectory('engine')
-                     .childDirectory('windows-uwp-x64-${getNameForBuildMode(mode ?? BuildMode.debug)}')
-                     .childFile(_artifactToFileName(artifact, platform, mode))
-                     .path;
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -857,8 +824,6 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
         break;
-      case Artifact.uwptool:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

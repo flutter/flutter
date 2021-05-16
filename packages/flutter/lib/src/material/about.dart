@@ -482,7 +482,7 @@ class LicensePage extends StatefulWidget {
   final String? applicationLegalese;
 
   @override
-  State<LicensePage> createState() => _LicensePageState();
+  _LicensePageState createState() => _LicensePageState();
 }
 
 class _LicensePageState extends State<LicensePage> {

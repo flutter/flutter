@@ -120,16 +120,16 @@ abstract class Logger {
   /// The `progressId` argument provides an ID that can be used to identify
   /// this type of progress (e.g. `hot.reload`, `hot.restart`).
   ///
-  /// The `progressIndicatorPadding` can optionally be used to specify the width
-  /// of the space into which the `message` is placed before the progress
-  /// indicator, if any. It is ignored if the message is longer.
+  /// The `progressIndicatorPadding` can optionally be used to specify spacing
+  /// between the `message` and the progress indicator, if any.
   Status startProgress(
     String message, {
     String? progressId,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
 
-  /// A [SilentStatus] or an [AnonymousSpinnerStatus] (depending on whether the
+  /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
   /// terminal is fancy enough), already started.
   Status startSpinner({ VoidCallback? onFinish });
 
@@ -223,10 +223,12 @@ class DelegatingLogger implements Logger {
   @override
   Status startProgress(String message, {
     String? progressId,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     return _delegate.startProgress(message,
       progressId: progressId,
+      multilineOutput: multilineOutput,
       progressIndicatorPadding: progressIndicatorPadding,
     );
   }
@@ -361,17 +363,20 @@ class StdoutLogger extends Logger {
   Status startProgress(
     String message, {
     String? progressId,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
       return SilentStatus(
+        onFinish: _clearStatus,
         stopwatch: _stopwatchFactory.createStopwatch(),
       )..start();
     }
     if (supportsColor) {
-      _status = SpinnerStatus(
+      _status = AnsiStatus(
         message: message,
+        multilineOutput: multilineOutput,
         padding: progressIndicatorPadding,
         onFinish: _clearStatus,
         stdio: _stdio,
@@ -392,24 +397,18 @@ class StdoutLogger extends Logger {
 
   @override
   Status startSpinner({ VoidCallback? onFinish }) {
-    if (_status != null || !supportsColor) {
-      return SilentStatus(
+    if (terminal.supportsColor) {
+      return AnsiSpinner(
         onFinish: onFinish,
         stopwatch: _stopwatchFactory.createStopwatch(),
+        terminal: terminal,
+        stdio: _stdio,
       )..start();
     }
-    _status = AnonymousSpinnerStatus(
-      onFinish: () {
-        if (onFinish != null) {
-          onFinish();
-        }
-        _clearStatus();
-      },
-      stdio: _stdio,
+    return SilentStatus(
+      onFinish: onFinish,
       stopwatch: _stopwatchFactory.createStopwatch(),
-      terminal: terminal,
     )..start();
-    return _status!;
   }
 
   void _clearStatus() {
@@ -562,6 +561,7 @@ class BufferLogger extends Logger {
   Status startProgress(
     String message, {
     String? progressId,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(progressIndicatorPadding != null);
@@ -661,6 +661,7 @@ class VerboseLogger extends DelegatingLogger {
   Status startProgress(
     String message, {
     String? progressId,
+    bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     assert(progressIndicatorPadding != null);
@@ -757,11 +758,12 @@ typedef SlowWarningCallback = String Function();
 ///
 /// The [SilentStatus] class never has any output.
 ///
-/// The [SpinnerStatus] subclass shows a message with a spinner, and replaces it
-/// with timing information when stopped. When canceled, the information isn't
-/// shown. In either case, a newline is printed.
+/// The [AnsiSpinner] subclass shows a spinner, and replaces it with a single
+/// space character when stopped or canceled.
 ///
-/// The [AnonymousSpinnerStatus] subclass just shows a spinner.
+/// The [AnsiStatus] subclass shows a spinner, and replaces it with timing
+/// information when stopped. When canceled, the information isn't shown. In
+/// either case, a newline is printed.
 ///
 /// The [SummaryStatus] subclass shows only a static message (without an
 /// indicator), then updates it when the operation ends.
@@ -833,8 +835,6 @@ class SilentStatus extends Status {
   }
 }
 
-const int _kTimePadding = 8; // should fit "99,999ms"
-
 /// Constructor writes [message] to [stdout].  On [cancel] or [stop], will call
 /// [onFinish]. On [stop], will additionally print out summary information.
 class SummaryStatus extends Status {
@@ -876,8 +876,7 @@ class SummaryStatus extends Status {
       _printMessage();
     }
     super.stop();
-    assert(_messageShowingOnCurrentLine);
-    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
+    writeSummaryInformation();
     _writeToStdOut('\n');
   }
 
@@ -889,91 +888,57 @@ class SummaryStatus extends Status {
     }
   }
 
+  /// Prints a (minimum) 8 character padded time.
+  void writeSummaryInformation() {
+    assert(_messageShowingOnCurrentLine);
+    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
+  }
+
   @override
   void pause() {
     super.pause();
-    if (_messageShowingOnCurrentLine) {
-      _writeToStdOut('\n');
-      _messageShowingOnCurrentLine = false;
-    }
+    _writeToStdOut('\n');
+    _messageShowingOnCurrentLine = false;
   }
 }
 
-/// A kind of animated [Status] that has no message.
-///
-/// Call [pause] before outputting any text while this is running.
-class AnonymousSpinnerStatus extends Status {
-  AnonymousSpinnerStatus({
-    VoidCallback? onFinish,
+/// An [AnsiSpinner] is a simple animation that does nothing but implement a
+/// terminal spinner. When stopped or canceled, the animation erases itself.
+class AnsiSpinner extends Status {
+  AnsiSpinner({
     required Stopwatch stopwatch,
-    required Stdio stdio,
     required Terminal terminal,
+    VoidCallback? onFinish,
+    required Stdio stdio,
   }) : _stdio = stdio,
        _terminal = terminal,
-       _animation = _selectAnimation(terminal),
        super(
          onFinish: onFinish,
          stopwatch: stopwatch,
         );
 
+  final String _backspaceChar = '\b';
+  final String _clearChar = ' ';
   final Stdio _stdio;
   final Terminal _terminal;
 
-  static const String _backspaceChar = '\b';
-  static const String _clearChar = ' ';
+  bool timedOut = false;
 
-  static const List<String> _emojiAnimations = <String>[
-    '⣾⣽⣻⢿⡿⣟⣯⣷', // counter-clockwise
-    '⣾⣷⣯⣟⡿⢿⣻⣽', // clockwise
-    '⣾⣷⣯⣟⡿⢿⣻⣽⣷⣾⣽⣻⢿⡿⣟⣯⣷', // bouncing clockwise and counter-clockwise
-    '⣾⣷⣯⣽⣻⣟⡿⢿⣻⣟⣯⣽', // snaking
-    '⣾⣽⣻⢿⣿⣷⣯⣟⡿⣿', // alternating rain
-    '⣀⣠⣤⣦⣶⣾⣿⡿⠿⠻⠛⠋⠉⠙⠛⠟⠿⢿⣿⣷⣶⣴⣤⣄', // crawl up and down, large
-    '⠙⠚⠖⠦⢤⣠⣄⡤⠴⠲⠓⠋', // crawl up and down, small
-    '⣀⡠⠤⠔⠒⠊⠉⠑⠒⠢⠤⢄', // crawl up and down, tiny
-    '⡀⣄⣦⢷⠻⠙⠈⠀⠁⠋⠟⡾⣴⣠⢀⠀', // slide up and down
-    '⠙⠸⢰⣠⣄⡆⠇⠋', // clockwise line
-    '⠁⠈⠐⠠⢀⡀⠄⠂', // clockwise dot
-    '⢇⢣⢱⡸⡜⡎', // vertical wobble up
-    '⡇⡎⡜⡸⢸⢱⢣⢇', // vertical wobble down
-    '⡀⣀⣐⣒⣖⣶⣾⣿⢿⠿⠯⠭⠩⠉⠁⠀', // swirl
-    '⠁⠐⠄⢀⢈⢂⢠⣀⣁⣐⣄⣌⣆⣤⣥⣴⣼⣶⣷⣿⣾⣶⣦⣤⣠⣀⡀⠀⠀', // snowing and melting
-    '⠁⠋⠞⡴⣠⢀⠀⠈⠙⠻⢷⣦⣄⡀⠀⠉⠛⠲⢤⢀⠀', // falling water
-    '⠄⡢⢑⠈⠀⢀⣠⣤⡶⠞⠋⠁⠀⠈⠙⠳⣆⡀⠀⠆⡷⣹⢈⠀⠐⠪⢅⡀⠀', // fireworks
-    '⠐⢐⢒⣒⣲⣶⣷⣿⡿⡷⡧⠧⠇⠃⠁⠀⡀⡠⡡⡱⣱⣳⣷⣿⢿⢯⢧⠧⠣⠃⠂⠀⠈⠨⠸⠺⡺⡾⡿⣿⡿⡷⡗⡇⡅⡄⠄⠀⡀⡐⣐⣒⣓⣳⣻⣿⣾⣼⡼⡸⡘⡈⠈⠀', // fade
-    '⢸⡯⠭⠅⢸⣇⣀⡀⢸⣇⣸⡇⠈⢹⡏⠁⠈⢹⡏⠁⢸⣯⣭⡅⢸⡯⢕⡂⠀⠀', // text crawl
-  ];
-
-  static const List<String> _asciiAnimations = <String>[
-    r'-\|/',
-  ];
-
-  static List<String> _selectAnimation(Terminal terminal) {
-    final List<String> animations = terminal.supportsEmoji ? _emojiAnimations : _asciiAnimations;
-    return animations[terminal.preferredStyle % animations.length]
-      .runes
-      .map<String>((int scalar) => String.fromCharCode(scalar))
-      .toList();
-  }
-
-  final List<String> _animation;
-
-  Timer? timer;
   int ticks = 0;
-  int _lastAnimationFrameLength = 0;
+  Timer? timer;
+
+  // Windows console font has a limited set of Unicode characters.
+  List<String> get _animation => !_terminal.supportsEmoji
+      ? const <String>[r'-', r'\', r'|', r'/']
+      : const <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
-  int get _currentLineLength => _lastAnimationFrameLength;
+  int get _currentLength => _currentAnimationFrame.length;
+  String get _backspace => _backspaceChar * (spinnerIndent + _currentLength);
+  String get _clear => _clearChar *  (spinnerIndent + _currentLength);
 
-  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
-
-  void _clear(int length) {
-    _writeToStdOut(
-      '${_backspaceChar * length}'
-      '${_clearChar * length}'
-      '${_backspaceChar * length}'
-    );
-  }
+  @protected
+  int get spinnerIndent => 0;
 
   @override
   void start() {
@@ -982,7 +947,10 @@ class AnonymousSpinnerStatus extends Status {
     _startSpinner();
   }
 
+  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
+
   void _startSpinner() {
+    _writeToStdOut(_clear); // for _callback to backspace over
     timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
     _callback(timer!);
   }
@@ -991,23 +959,30 @@ class AnonymousSpinnerStatus extends Status {
     assert(this.timer == timer);
     assert(timer != null);
     assert(timer.isActive);
-    _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
+    _writeToStdOut(_backspace);
     ticks += 1;
-    final String newFrame = _currentAnimationFrame;
-    _lastAnimationFrameLength = newFrame.runes.length;
-    _writeToStdOut(newFrame);
+    _writeToStdOut('${_clearChar * spinnerIndent}$_currentAnimationFrame');
+  }
+
+  @override
+  void finish() {
+    assert(timer != null);
+    assert(timer!.isActive);
+    timer?.cancel();
+    timer = null;
+    _clearSpinner();
+    super.finish();
+  }
+
+  void _clearSpinner() {
+    _writeToStdOut('$_backspace$_clear$_backspace');
   }
 
   @override
   void pause() {
     assert(timer != null);
     assert(timer!.isActive);
-    if (_terminal.supportsColor) {
-      _writeToStdOut('\r\x1B[K'); // go to start of line and clear line
-    } else {
-      _clear(_currentLineLength);
-    }
-    _lastAnimationFrameLength = 0;
+    _clearSpinner();
     timer?.cancel();
   }
 
@@ -1017,90 +992,101 @@ class AnonymousSpinnerStatus extends Status {
     assert(!timer!.isActive);
     _startSpinner();
   }
-
-  @override
-  void finish() {
-    assert(timer != null);
-    assert(timer!.isActive);
-    timer?.cancel();
-    timer = null;
-    _clear(_lastAnimationFrameLength);
-    _lastAnimationFrameLength = 0;
-    super.finish();
-  }
 }
 
-/// An animated version of [Status].
-///
-/// The constructor writes [message] to [stdout] with padding, then starts an
-/// indeterminate progress indicator animation.
+const int _kTimePadding = 8; // should fit "99,999ms"
+
+/// Constructor writes [message] to [stdout] with padding, then starts an
+/// indeterminate progress indicator animation (it's a subclass of
+/// [AnsiSpinner]).
 ///
 /// On [cancel] or [stop], will call [onFinish]. On [stop], will
 /// additionally print out summary information.
-///
-/// Call [pause] before outputting any text while this is running.
-class SpinnerStatus extends AnonymousSpinnerStatus {
-  SpinnerStatus({
-    required this.message,
+class AnsiStatus extends AnsiSpinner {
+  AnsiStatus({
+    this.message = '',
+    this.multilineOutput = false,
     this.padding = kDefaultStatusPadding,
-    VoidCallback? onFinish,
     required Stopwatch stopwatch,
-    required Stdio stdio,
     required Terminal terminal,
-  }) : super(
+    VoidCallback? onFinish,
+    required Stdio stdio,
+  }) : assert(message != null),
+       assert(multilineOutput != null),
+       assert(padding != null),
+       super(
          onFinish: onFinish,
-         stopwatch: stopwatch,
          stdio: stdio,
+         stopwatch: stopwatch,
          terminal: terminal,
         );
 
   final String message;
+  final bool multilineOutput;
   final int padding;
 
-  static final String _margin = AnonymousSpinnerStatus._clearChar * (5 + _kTimePadding - 1);
+  static const String _margin = '     ';
+
+  @override
+  int get spinnerIndent => _kTimePadding - 1;
 
   int _totalMessageLength = 0;
 
   @override
-  int get _currentLineLength => _totalMessageLength + super._currentLineLength;
-
-  @override
   void start() {
-    _printStatus();
+    _startStatus();
     super.start();
   }
 
-  void _printStatus() {
+  void _startStatus() {
     final String line = '${message.padRight(padding)}$_margin';
     _totalMessageLength = line.length;
     _writeToStdOut(line);
   }
 
   @override
-  void pause() {
-    super.pause();
-    _totalMessageLength = 0;
-  }
-
-  @override
-  void resume() {
-    _printStatus();
-    super.resume();
-  }
-
-  @override
   void stop() {
-    super.stop(); // calls finish, which clears the spinner
-    assert(_totalMessageLength > _kTimePadding);
-    _writeToStdOut(AnonymousSpinnerStatus._backspaceChar * (_kTimePadding - 1));
-    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
+    super.stop();
+    writeSummaryInformation();
     _writeToStdOut('\n');
   }
 
   @override
   void cancel() {
-    super.cancel(); // calls finish, which clears the spinner
-    assert(_totalMessageLength > 0);
+    super.cancel();
     _writeToStdOut('\n');
+  }
+
+  /// Print summary information when a task is done.
+  ///
+  /// If [multilineOutput] is false, replaces the spinner with the summary message.
+  ///
+  /// If [multilineOutput] is true, then it prints the message again on a new
+  /// line before writing the elapsed time.
+  void writeSummaryInformation() {
+    if (multilineOutput) {
+      _writeToStdOut('\n${'$message Done'.padRight(padding)}$_margin');
+    }
+    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
+  }
+
+  void _clearStatus() {
+    _writeToStdOut(
+      '${_backspaceChar * _totalMessageLength}'
+      '${_clearChar * _totalMessageLength}'
+      '${_backspaceChar * _totalMessageLength}',
+    );
+  }
+
+  @override
+  void pause() {
+    super.pause();
+    _clearStatus();
+  }
+
+  @override
+  void resume() {
+    _startStatus();
+    super.resume();
   }
 }

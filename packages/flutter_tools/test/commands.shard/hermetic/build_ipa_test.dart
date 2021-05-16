@@ -76,7 +76,7 @@ void main() {
   }
 
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
-    'xattr', '-r', '-d', 'com.apple.FinderInfo', '/'
+    'xattr', '-r', '-d', 'com.apple.FinderInfo', '/ios'
   ]);
 
   // Creates a FakeCommand for the xcodebuild call to build the app

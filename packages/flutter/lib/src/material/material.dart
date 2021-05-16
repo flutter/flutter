@@ -310,14 +310,12 @@ class Material extends StatefulWidget {
   /// ```dart
   /// MaterialInkController inkController = Material.of(context);
   /// ```
-  ///
-  /// This method can be expensive (it walks the element tree).
   static MaterialInkController? of(BuildContext context) {
     return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
   }
 
   @override
-  State<Material> createState() => _MaterialState();
+  _MaterialState createState() => _MaterialState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -385,8 +383,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         key: _inkFeatureRenderer,
         absorbHitTest: widget.type != MaterialType.transparency,
         color: backgroundColor,
-        vsync: this,
         child: contents,
+        vsync: this,
       ),
     );
 
@@ -445,19 +443,19 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     required Widget contents,
   }) {
     final _ShapeBorderPaint child = _ShapeBorderPaint(
-      shape: shape,
       child: contents,
+      shape: shape,
     );
     if (clipBehavior == Clip.none) {
       return child;
     }
     return ClipPath(
+      child: child,
       clipper: ShapeBorderClipper(
         shape: shape,
         textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: clipBehavior,
-      child: child,
     );
   }
 
@@ -781,6 +779,11 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
     final ShapeBorder shape = _border!.evaluate(animation)!;
     final double elevation = _elevation!.evaluate(animation);
     return PhysicalShape(
+      child: _ShapeBorderPaint(
+        child: widget.child,
+        shape: shape,
+        borderOnForeground: widget.borderOnForeground,
+      ),
       clipper: ShapeBorderClipper(
         shape: shape,
         textDirection: Directionality.maybeOf(context),
@@ -789,11 +792,6 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       elevation: elevation,
       color: ElevationOverlay.applyOverlay(context, widget.color, elevation),
       shadowColor: _shadowColor!.evaluate(animation)!,
-      child: _ShapeBorderPaint(
-        shape: shape,
-        borderOnForeground: widget.borderOnForeground,
-        child: widget.child,
-      ),
     );
   }
 }
@@ -812,9 +810,9 @@ class _ShapeBorderPaint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
+      child: child,
       painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
       foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
-      child: child,
     );
   }
 }

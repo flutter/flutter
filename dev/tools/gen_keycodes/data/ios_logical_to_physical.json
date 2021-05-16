@@ -1,8 +1,6 @@
 
 {
   "Backspace": ["Backspace"],
-  "Tab": ["Tab"],
-  "Enter": ["Enter"],
   "Escape": ["Escape"],
   "CapsLock": ["CapsLock"],
   "NumLock": ["NumLock"],

@@ -19,8 +19,8 @@ void main() {
         child: Semantics(
           label: 'test1',
           textDirection: TextDirection.ltr,
-          selected: true,
           child: Container(),
+          selected: true,
         ),
       ),
     );

@@ -15,7 +15,7 @@ class Leaf extends StatefulWidget {
   }) : super(key: key);
   final Widget child;
   @override
-  State<Leaf> createState() => _LeafState();
+  _LeafState createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {

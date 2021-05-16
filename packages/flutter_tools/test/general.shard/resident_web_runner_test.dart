@@ -100,8 +100,10 @@ void main() {
   MockFlutterDevice mockFlutterDevice;
   MockWebDevFS mockWebDevFS;
   MockResidentCompiler mockResidentCompiler;
-  FakeChromeConnection chromeConnection;
-  FakeChromeTab chromeTab;
+  MockChromeConnection mockChromeConnection;
+  MockChromeTab mockChromeTab;
+  MockWipConnection mockWipConnection;
+  MockWipDebugger mockWipDebugger;
   MockWebServerDevice mockWebServerDevice;
   MockDevice mockDevice;
   FakeVmServiceHost fakeVmServiceHost;
@@ -119,8 +121,10 @@ void main() {
     mockFlutterDevice = MockFlutterDevice();
     mockWebDevFS = MockWebDevFS();
     mockResidentCompiler = MockResidentCompiler();
-    chromeConnection = FakeChromeConnection();
-    chromeTab = FakeChromeTab('index.html');
+    mockChromeConnection = MockChromeConnection();
+    mockChromeTab = MockChromeTab();
+    mockWipConnection = MockWipConnection();
+    mockWipDebugger = MockWipDebugger();
     mockWebServerDevice = MockWebServerDevice();
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
@@ -166,7 +170,13 @@ void main() {
     when(mockWebDevFS.sources).thenReturn(<Uri>[]);
     when(mockWebDevFS.baseUri).thenReturn(Uri.parse('http://localhost:12345'));
     when(mockFlutterDevice.generator).thenReturn(mockResidentCompiler);
-    chromeConnection.tabs.add(chromeTab);
+    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
+      return mockChromeTab;
+    });
+    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
+      return mockWipConnection;
+    });
+    when(mockWipConnection.debugger).thenReturn(mockWipDebugger);
   }
 
   testUsingContext('runner with web server device does not support debugging without --start-paused', () {
@@ -536,7 +546,7 @@ void main() {
     ]);
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-    final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
+    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
@@ -610,7 +620,7 @@ void main() {
     ]);
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-    final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
+    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
@@ -982,9 +992,9 @@ void main() {
       ...kAttachIsolateExpectations,
     ]);
     _setupMocks();
-    final FakeChromeConnection chromeConnection = FakeChromeConnection();
+    final MockChromeConnection mockChromeConnection = MockChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-    final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
+    final Chromium chrome = Chromium(1, mockChromeConnection, chromiumLauncher: chromiumLauncher);
     chromiumLauncher.instance = chrome;
 
     when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
@@ -997,8 +1007,14 @@ void main() {
     when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
       return Uri.parse('http://localhost:8765/app/');
     });
-    final FakeChromeTab chromeTab = FakeChromeTab('index.html');
-    chromeConnection.tabs.add(chromeTab);
+    final MockChromeTab mockChromeTab = MockChromeTab();
+    final MockWipConnection mockWipConnection = MockWipConnection();
+    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
+      return mockChromeTab;
+    });
+    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
+      return mockWipConnection;
+    });
 
     final ResidentWebRunner runner = ResidentWebRunner(
       mockFlutterDevice,
@@ -1185,36 +1201,11 @@ class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockWebDevFS extends Mock implements WebDevFS {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
-
-class FakeChromeConnection extends Fake implements ChromeConnection {
-  final List<ChromeTab> tabs = <ChromeTab>[];
-
-  @override
-  Future<ChromeTab> getTab(bool Function(ChromeTab tab) accept, {Duration retryFor}) async {
-    return tabs.firstWhere(accept);
-  }
-}
-
-class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.url);
-
-  @override
-  final String url;
-  final FakeWipConnection connection = FakeWipConnection();
-
-  @override
-  Future<WipConnection> connect() async {
-    return connection;
-  }
-}
-
-class FakeWipConnection extends Fake implements WipConnection {
-  @override
-  final WipDebugger debugger = FakeWipDebugger();
-}
-
-class FakeWipDebugger extends Fake implements WipDebugger {}
-
+class MockChrome extends Mock implements Chromium {}
+class MockChromeConnection extends Mock implements ChromeConnection {}
+class MockChromeTab extends Mock implements ChromeTab {}
+class MockWipConnection extends Mock implements WipConnection {}
+class MockWipDebugger extends Mock implements WipDebugger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}
 

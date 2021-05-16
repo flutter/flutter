@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
@@ -100,7 +101,7 @@ void main() {
         '--header="some header',
         '--header-file="header.txt"',
       ]),
-      throwsToolExit(),
+      throwsA(isA<ToolExit>()),
     );
   });
 

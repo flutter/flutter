@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -59,11 +60,8 @@ class AnimatedSize extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
-    @Deprecated(
-      'This field is now ignored. '
-      'This feature was deprecated after v2.2.0-10.1.pre.'
-    )
-    TickerProvider? vsync,
+    // TODO(jsimmons): deprecate when customers tests are updated.
+    TickerProvider? vsync, // ignore: avoid_unused_constructor_parameters
     this.clipBehavior = Clip.hardEdge,
   }) : assert(clipBehavior != null),
        super(key: key);
@@ -114,7 +112,7 @@ class AnimatedSize extends StatefulWidget {
   final Clip clipBehavior;
 
   @override
-  State<AnimatedSize> createState() => _AnimatedSizeState();
+  _AnimatedSizeState createState() => _AnimatedSizeState();
 }
 
 class _AnimatedSizeState
@@ -122,13 +120,13 @@ class _AnimatedSizeState
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
+      child: widget.child,
       alignment: widget.alignment,
       curve: widget.curve,
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
       vsync: this,
       clipBehavior: widget.clipBehavior,
-      child: widget.child,
     );
   }
 }

@@ -18,7 +18,7 @@ class DrawerDemo extends StatefulWidget {
   static const String routeName = '/material/drawer';
 
   @override
-  State<DrawerDemo> createState() => _DrawerDemoState();
+  _DrawerDemoState createState() => _DrawerDemoState();
 }
 
 class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {

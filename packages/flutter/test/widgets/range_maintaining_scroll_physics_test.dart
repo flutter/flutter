@@ -40,8 +40,8 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
       child: Align(
         alignment: Alignment.bottomCenter,
         child: TextButton(
-          onPressed: toggleSize,
           child: const Text('Collapse'),
+          onPressed: toggleSize,
         ),
       ),
     );

@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:test/fake.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_devices.dart';
@@ -86,10 +86,12 @@ stdout: '(lldb)     run\nsuccess',
 );
 
 void main() {
+  // TODO(jonahwilliams): This test doesn't really belong here but
+  // I don't have a better place for it for now.
   testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
     final IOSDevice device = setUpIOSDevice();
-    final FakeDevicePortForwarder devicePortForwarder = FakeDevicePortForwarder();
-    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+    final DevicePortForwarder devicePortForwarder = MockDevicePortForwarder();
+    final DeviceLogReader deviceLogReader = MockDeviceLogReader();
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
@@ -99,8 +101,8 @@ void main() {
     device.setLogReader(iosApp, deviceLogReader);
     await device.dispose();
 
-    expect(deviceLogReader.disposed, true);
-    expect(devicePortForwarder.disposed, true);
+    verify(deviceLogReader.dispose()).called(1);
+    verify(devicePortForwarder.dispose()).called(1);
   });
 
   testWithoutContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
@@ -382,11 +384,5 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
-  bool disposed = false;
-
-  @override
-  Future<void> dispose() async {
-    disposed = true;
-  }
-}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
+class MockDeviceLogReader extends Mock implements DeviceLogReader {}

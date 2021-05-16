@@ -64,7 +64,7 @@ void main() {
         'a.txt',
       ],
       clientSourcePaths: <String>['foo'],
-    ), throwsException);
+    ), throwsA(isA<Exception>()));
   });
 
   testWithoutContext('unpackDesktopArtifacts throws when attempting to copy missing directory', () async {
@@ -79,7 +79,7 @@ void main() {
         'a.txt',
       ],
       clientSourcePaths: <String>['foo'],
-    ), throwsException);
+    ), throwsA(isA<Exception>()));
   });
 
   testWithoutContext('unpackDesktopArtifacts does not require a client source path', () async {

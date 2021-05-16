@@ -70,7 +70,7 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
     }
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.');
-      _cmakeFile.writeAsStringSync(newProjectContents);
+      _cmakeFile.writeAsStringSync(newProjectContents.toString());
     }
     return true;
   }

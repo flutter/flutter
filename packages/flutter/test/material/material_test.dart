@@ -64,20 +64,6 @@ class ElevationColor {
 }
 
 void main() {
-  // Regression test for https://github.com/flutter/flutter/issues/81504
-  testWidgets('MaterialApp.home nullable and update test', (WidgetTester tester) async {
-    // _WidgetsAppState._usesNavigator == true
-    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
-
-    // _WidgetsAppState._usesNavigator == false
-    await tester.pumpWidget(const MaterialApp()); // Do not crash!
-
-    // _WidgetsAppState._usesNavigator == true
-    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink())); // Do not crash!
-
-    expect(tester.takeException(), null);
-  });
-
   testWidgets('default Material debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material().debugFillProperties(builder);
@@ -426,8 +412,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          clipBehavior: Clip.antiAlias,
           child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         ),
       );
 
@@ -441,8 +427,8 @@ void main() {
           key: materialKey,
           type: MaterialType.transparency,
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-          clipBehavior: Clip.antiAlias,
           child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         ),
       );
 
@@ -461,8 +447,8 @@ void main() {
           key: materialKey,
           type: MaterialType.transparency,
           shape: const StadiumBorder(),
-          clipBehavior: Clip.antiAlias,
           child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         ),
       );
 
@@ -481,8 +467,8 @@ void main() {
         return Material(
           type: MaterialType.transparency,
           shape: shape,
-          clipBehavior: Clip.antiAlias,
           child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         );
       }
       final Widget material = buildMaterial();
@@ -563,8 +549,8 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          elevation: 1.0,
           child: const SizedBox(width: 100.0, height: 100.0),
+          elevation: 1.0,
         ),
       );
 
@@ -582,8 +568,8 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           shape: const StadiumBorder(),
-          elevation: 1.0,
           child: const SizedBox(width: 100.0, height: 100.0),
+          elevation: 1.0,
         ),
       );
 
@@ -653,8 +639,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.circle,
-          color: const Color(0xFF0000FF),
           child: const SizedBox(width: 100.0, height: 100.0),
+          color: const Color(0xFF0000FF),
         ),
       );
 
@@ -670,8 +656,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
-          color: const Color(0xFF0000FF),
           child: const SizedBox(width: 100.0, height: 100.0),
+          color: const Color(0xFF0000FF),
         ),
       );
 
@@ -688,10 +674,10 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
+          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
-          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -708,10 +694,10 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
+          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           shape: const StadiumBorder(),
           elevation: 4.0,
-          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -729,6 +715,7 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.button,
+          child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           shape: const CircleBorder(
             side: BorderSide(
@@ -736,7 +723,6 @@ void main() {
               color: Color(0xFF0000FF),
             ),
           ),
-          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -750,13 +736,13 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
+          child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
             ),
           ),
-          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
 
@@ -770,8 +756,8 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.transparency,
-          shape: const CircleBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
+          shape: const CircleBorder(),
         ),
       );
 

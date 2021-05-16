@@ -58,8 +58,8 @@ void main() {
 
     await tester.pumpWidget(const AnimatedDefaultTextStyle(
       style: s1,
-      duration: Duration(milliseconds: 1000),
       child: textWidget,
+      duration: Duration(milliseconds: 1000),
     ));
 
     final RichText text1 = tester.firstWidget(find.byType(RichText));
@@ -80,8 +80,8 @@ void main() {
       maxLines: 3,
       textWidthBasis: TextWidthBasis.longestLine,
       textHeightBehavior: ui.TextHeightBehavior(applyHeightToFirstAscent: false),
-      duration: Duration(milliseconds: 1000),
       child: textWidget,
+      duration: Duration(milliseconds: 1000),
     ));
 
     final RichText text2 = tester.firstWidget(find.byType(RichText));

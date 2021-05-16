@@ -43,7 +43,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   const AppLifecycleReactor({ Key? key }) : super(key: key);
 ///
 ///   @override
-///   State<AppLifecycleReactor> createState() => _AppLifecycleReactorState();
+///   _AppLifecycleReactorState createState() => _AppLifecycleReactorState();
 /// }
 ///
 /// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
@@ -138,7 +138,7 @@ abstract class WidgetsBindingObserver {
   ///   const MetricsReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
-  ///   State<MetricsReactor> createState() => _MetricsReactorState();
+  ///   _MetricsReactorState createState() => _MetricsReactorState();
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
@@ -196,7 +196,7 @@ abstract class WidgetsBindingObserver {
   ///   const TextScaleFactorReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
-  ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
+  ///   _TextScaleFactorReactorState createState() => _TextScaleFactorReactorState();
   /// }
   ///
   /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {

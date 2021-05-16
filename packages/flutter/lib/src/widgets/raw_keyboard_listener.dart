@@ -65,7 +65,7 @@ class RawKeyboardListener extends StatefulWidget {
   final Widget child;
 
   @override
-  State<RawKeyboardListener> createState() => _RawKeyboardListenerState();
+  _RawKeyboardListenerState createState() => _RawKeyboardListenerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

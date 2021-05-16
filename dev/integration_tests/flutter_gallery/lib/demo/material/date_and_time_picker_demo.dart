@@ -118,7 +118,7 @@ class DateAndTimePickerDemo extends StatefulWidget {
   static const String routeName = '/material/date-and-time-pickers';
 
   @override
-  State<DateAndTimePickerDemo> createState() => _DateAndTimePickerDemoState();
+  _DateAndTimePickerDemoState createState() => _DateAndTimePickerDemoState();
 }
 
 class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {

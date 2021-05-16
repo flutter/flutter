@@ -311,7 +311,7 @@ class TextFormField extends FormField<String> {
   final TextEditingController? controller;
 
   @override
-  FormFieldState<String> createState() => _TextFormFieldState();
+  _TextFormFieldState createState() => _TextFormFieldState();
 }
 
 class _TextFormFieldState extends FormFieldState<String> {

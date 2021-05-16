@@ -18,7 +18,7 @@ class BannerDemo extends StatefulWidget {
   static const String routeName = '/material/banner';
 
   @override
-  State<BannerDemo> createState() => _BannerDemoState();
+  _BannerDemoState createState() => _BannerDemoState();
 }
 
 class _BannerDemoState extends State<BannerDemo> {

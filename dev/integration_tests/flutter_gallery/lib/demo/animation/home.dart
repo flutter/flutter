@@ -420,7 +420,7 @@ class AnimationDemoHome extends StatefulWidget {
   static const String routeName = '/animation';
 
   @override
-  State<AnimationDemoHome> createState() => _AnimationDemoHomeState();
+  _AnimationDemoHomeState createState() => _AnimationDemoHomeState();
 }
 
 class _AnimationDemoHomeState extends State<AnimationDemoHome> {
