@@ -68,7 +68,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paints
         ..translate(x: 0.0, y: 0.0)
         ..save()
@@ -121,7 +121,7 @@ void main() {
     // Initially the ripple's center is where the tap occurred;
     // paintsRipple always adds a translation of tapDownOffset.
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paintsRipple(tapDown: tapDownOffset, center: Offset.zero, radius: 30.0, alpha: 0),
     );
 
@@ -130,7 +130,7 @@ void main() {
     // center of the ink well.
     await tester.pump(const Duration(milliseconds: 50));
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paintsRipple(tapDown: tapDownOffset, center: const Offset(17, 17), radius: 56, alpha: 120),
     );
 
@@ -138,7 +138,7 @@ void main() {
     // alpha and its center has moved closer to the ink well's center.
     await tester.pump(const Duration(milliseconds: 25));
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paintsRipple(tapDown: tapDownOffset, center: const Offset(29, 29), radius: 73, alpha: 180),
     );
 
@@ -148,14 +148,14 @@ void main() {
     // The fade-out begins at 225ms = 50ms + 25ms + 150ms.
     await tester.pump(const Duration(milliseconds: 150));
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paintsRipple(tapDown: tapDownOffset, center: inkWellCenter - tapDownOffset, radius: 105, alpha: 180),
     );
 
     // After another 150ms the fade-out is complete.
     await tester.pump(const Duration(milliseconds: 150));
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paintsRipple(tapDown: tapDownOffset, center: inkWellCenter - tapDownOffset, radius: 105, alpha: 0),
     );
   });
@@ -186,7 +186,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paints
         ..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.blue.value))
         ..circle(color: Color(Colors.green.value)),
@@ -212,7 +212,7 @@ void main() {
     );
 
     expect(
-      getMaterial<InkWell>(tester),
+      getMaterialInkController<InkWell>(tester),
       paints
         ..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.red.value))
         ..circle(color: Color(Colors.green.value)),
@@ -232,8 +232,8 @@ void main() {
       ),
     );
 
-    expect(getMaterial<InkWell>(tester), isNot(paints..rect()));
-    expect(getMaterial<InkWell>(tester), isNot(paints..circle()));
+    expect(getMaterialInkController<InkWell>(tester), isNot(paints..rect()));
+    expect(getMaterialInkController<InkWell>(tester), isNot(paints..circle()));
 
     await gesture.up();
   });
@@ -382,6 +382,6 @@ void main() {
     await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
 
-    expect(getMaterial<InkWell>(tester), paintsRipple(tapDown: tapDownOffset, alpha: 0, unique: true));
+    expect(getMaterialInkController<InkWell>(tester), paintsRipple(tapDown: tapDownOffset, alpha: 0, unique: true));
   });
 }

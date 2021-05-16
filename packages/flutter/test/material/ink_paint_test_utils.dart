@@ -52,7 +52,7 @@ PaintPattern paintsRipple({Offset? tapDown, Offset? center, double? radius, Colo
   return pattern;
 }
 
-MaterialInkController getMaterial<T>(WidgetTester tester) {
+MaterialInkController getMaterialInkController<T>(WidgetTester tester) {
   return Material.of(tester.element(find.byType(T)))!;
 }
 

@@ -283,7 +283,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
       expect(
-        getMaterial<IconButton>(tester),
+        getMaterialInkController<IconButton>(tester),
         paintsRipple(color: directSplashColor)..circle(color: directHighlightColor),
       );
 
@@ -308,7 +308,7 @@ void main() {
       );
 
       expect(
-        getMaterial<IconButton>(tester),
+        getMaterialInkController<IconButton>(tester),
         paintsRipple(color: themeSplashColor1)..circle(color: themeHighlightColor1),
       );
 
@@ -326,7 +326,7 @@ void main() {
       );
 
       expect(
-        getMaterial<IconButton>(tester),
+        getMaterialInkController<IconButton>(tester),
         paints..circle(color: themeSplashColor2)..circle(color: themeHighlightColor2),
       );
 
@@ -358,7 +358,7 @@ void main() {
         await tester.pump(); // Start gesture.
         await tester.pump(const Duration(milliseconds: 1000)); // Wait for splash to be well under way.
 
-        expect(getMaterial<IconButton>(tester), paintsRipple(radius: splashRadius));
+        expect(getMaterialInkController<IconButton>(tester), paintsRipple(radius: splashRadius));
 
         await gesture.up();
       });
@@ -389,7 +389,7 @@ void main() {
         await tester.pump(); // Start gesture.
         await tester.pump(const Duration(milliseconds: 1000)); // Wait for ripple to be well under way.
 
-        expect(getMaterial<IconButton>(tester), paintsRipple(radius: splashRadius + 5));
+        expect(getMaterialInkController<IconButton>(tester), paintsRipple(radius: splashRadius + 5));
 
         await gesture.up();
       });

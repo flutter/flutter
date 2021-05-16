@@ -1400,7 +1400,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
 
       expect(
-        getMaterial<InkWell>(tester),
+        getMaterialInkController<InkWell>(tester),
         paintsRipple(center: const Offset(68, 24), color: stateColor),
       );
       await gesture.up();
@@ -1418,13 +1418,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200)); // ripple is well underway
 
       expect(
-        getMaterial<InkWell>(tester),
+        getMaterialInkController<InkWell>(tester),
         paintsRipple(center: const Offset(68, 24), color: stateColor, alpha: 0),
       );
 
       await tester.pump(const Duration(milliseconds: 200));
       expect(
-        getMaterial<InkWell>(tester),
+        getMaterialInkController<InkWell>(tester),
         paintsRipple(center: const Offset(159, 24), color: stateColor),
       );
 
