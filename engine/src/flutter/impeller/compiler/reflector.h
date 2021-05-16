@@ -6,14 +6,14 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "third_party/spirv_reflect/spirv_reflect.h"
+#include "third_party/spirv_cross/spirv_msl.hpp"
 
 namespace impeller {
 namespace compiler {
 
 class Reflector {
  public:
-  Reflector(const fml::Mapping& spirv_binary);
+  Reflector(const spirv_cross::CompilerMSL& compiler);
 
   ~Reflector();
 
