@@ -42,6 +42,19 @@ int LaunchApp(const std::wstring_view package_family,
   return -1;
 }
 
+// Installs the app in the specified build output directory.
+//
+// Returns true on success.
+bool InstallApp(const std::wstring_view package_uri,
+                const std::vector<std::wstring>& dependency_uris) {
+  flutter::ApplicationStore app_store;
+  if (app_store.InstallApp(package_uri, dependency_uris)) {
+    std::wcerr << L"Installed application " << package_uri << std::endl;
+    return true;
+  }
+  return false;
+}
+
 // Uninstalls the app with the specified package.
 //
 // Returns true on success.
@@ -63,11 +76,12 @@ bool UninstallApp(const std::wstring_view package_family) {
 
 // Prints the command usage to stderr.
 void PrintUsage() {
-  std::cerr << "usage: uwptool COMMAND [ARGUMENTS]" << std::endl;
-  std::cerr << "commands:" << std::endl;
-  std::cerr << "  listapps                  list installed apps" << std::endl;
-  std::cerr << "  launch PACKAGE_FAMILY     launch an app" << std::endl;
-  std::cerr << "  uninstall PACKAGE_FAMILY  uninstall an app" << std::endl;
+  std::cerr << "usage: uwptool COMMAND [ARGUMENTS]" << std::endl
+            << "commands:" << std::endl
+            << "  listapps                       list all apps" << std::endl
+            << "  launch PACKAGE_FAMILY          launch an app" << std::endl
+            << "  install PACKAGE_URI DEP_URI... install an app" << std::endl
+            << "  uninstall PACKAGE_FAMILY       uninstall an app" << std::endl;
 }
 
 }  // namespace
@@ -117,6 +131,17 @@ int main(int argc, char** argv) {
     // Write the PID to stdout. The flutter tool reads this value in.
     std::cout << process_id << std::endl;
     return 0;
+  } else if (command == "install") {
+    if (args.size() < 2) {
+      PrintUsage();
+      return 1;
+    }
+    std::wstring package_uri = flutter::Utf16FromUtf8(args[1]);
+    std::vector<std::wstring> dependency_uris;
+    for (int i = 2; i < args.size(); ++i) {
+      dependency_uris.push_back(flutter::Utf16FromUtf8(args[i]));
+    }
+    return InstallApp(package_uri, dependency_uris) ? 0 : 1;
   } else if (command == "uninstall") {
     if (args.size() < 2) {
       PrintUsage();

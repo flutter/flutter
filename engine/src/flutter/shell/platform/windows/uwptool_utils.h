@@ -70,6 +70,13 @@ class ApplicationStore {
   // Returns all installed applications with the specified family name.
   std::vector<Application> GetApps(
       const std::wstring_view package_family) const;
+
+  // Installs the specified application.
+  //
+  // Installs the application located at package_uri with the specified
+  // dependencies.
+  bool InstallApp(const std::wstring_view package_uri,
+                  const std::vector<std::wstring>& dependency_uris);
 };
 
 }  // namespace flutter
