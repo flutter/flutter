@@ -420,7 +420,7 @@ void main() {
       .directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
-    final AndroidStudio studio = AndroidStudio.allInstalled().single;    
+    final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
     expect(studio.version, Version(4, 2, 1));
     expect(studio.studioAppName, 'Android Studio 4.2.1');
