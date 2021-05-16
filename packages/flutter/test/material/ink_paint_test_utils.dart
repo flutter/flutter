@@ -83,7 +83,3 @@ PaintPattern paintsRipple({Offset? tapDown, Offset? center, double? radius, Colo
 MaterialInkController getMaterialInkController<T>(WidgetTester tester) {
   return Material.of(tester.element(find.byType(T)))!;
 }
-
-RenderObject getInkFeatures(WidgetTester tester) {
-  return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-}
