@@ -413,14 +413,17 @@ void main() {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.appinfo')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'app.version.major=4&app.version.minor=2.1');
     windowsFileSystem
       .directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
-    final AndroidStudio studio = AndroidStudio.allInstalled().single;
+    final AndroidStudio studio = AndroidStudio.allInstalled().single;    
 
-    expect(studio.version, Version(4, 2, 0));
-    expect(studio.studioAppName, 'Android Studio 4.2');
+    expect(studio.version, Version(4, 2, 1));
+    expect(studio.studioAppName, 'Android Studio 4.2.1');
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => windowsFileSystem,

@@ -26,6 +26,9 @@ import '../ios/plist_parser.dart';
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
+final RegExp majorRegExp = RegExp(r'major=\d');
+final RegExp minorRegExp = RegExp(r'minor=?\d?.?\d');
+
 String? get javaPath => globals.androidStudio?.javaPath;
 
 class AndroidStudio implements Comparable<AndroidStudio> {
@@ -405,13 +408,25 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         'AndroidStudio4.2',
         '.home',
       ));
-      if (homeDot.existsSync()) {
+      final File appInfo = globals.fs.file(globals.fs.path.join(
+        globals.platform.environment['LOCALAPPDATA']!,
+        'Google',
+        'AndroidStudio4.2',
+        '.appinfo',
+      ));
+      if (homeDot.existsSync() && appInfo.existsSync()) {
         final String installPath = homeDot.readAsStringSync();
+        final String appInfoStr = appInfo.readAsStringSync();
+        final String majorVersion = majorRegExp.stringMatch(appInfoStr)!.substring(6);
+        final String minorVersion = minorRegExp.stringMatch(appInfoStr)!.substring(6);
+
         if (globals.fs.isDirectorySync(installPath)) {
           final AndroidStudio studio = AndroidStudio(
             installPath,
-            version: Version(4, 2, 0),
-            studioAppName: 'Android Studio 4.2',
+            version: Version(int.parse(majorVersion),
+                             int.parse(minorVersion.substring(0, 1)),
+                             minorVersion.length == 3 ? int.parse(minorVersion.substring(2, 3)) : 0),
+            studioAppName: 'Android Studio $majorVersion.$minorVersion',
           );
           if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
             studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
