@@ -41,6 +41,32 @@ Expected - ${formattedValues(expectedCenter, expectedRadius, expectedColorWithAl
   };
 }
 
+/// Indicates that a circular ink feature is expected next.
+///
+/// This is a convenience method, that checks the paint against a
+/// [PaintPatternPredicate] representing an ink-feature-like painting. That
+/// predicate internally checks calls matching the [Canvas.drawCircle] method,
+/// with additional optional details specific to how an ink ripple or splash
+/// ink feature would be drawn. Any arguments that are passed to this method
+/// are compared to the actual [Canvas.drawCircle] call's arguments and any
+/// mismatches result in failure.
+///
+/// If no call to [Canvas.drawCircle] was made, then this results in failure.
+///
+/// Provide an offset for the `tapDown` and `center` parameters to test the
+/// position of the center of a ripple, relative to the position of the tap
+/// that initiated the ripple.
+///
+/// Provide a value for the `color` parameter to test that the ripple is drawn
+/// with a specific color. Without providing a specific `alpha` value, the
+/// predicate will check the ripple's color against it's `color`'s alpha.
+///
+/// Provide a value for the `alpha` parameter to override the alpha for the
+/// given color, or to only test the value of the ripple's alpha.
+///
+/// By default, calls made between the last matched call (if any) and the
+/// [Canvas.drawCircle] call are ignored. To test that only a ripple pattern
+/// was drawn, and no other canvas methods were called, set `unique` to `true`.
 PaintPattern paintsRipple({Offset? tapDown, Offset? center, double? radius, Color? color, int? alpha, bool unique = false}) {
   final PaintPattern pattern = paints;
   if (tapDown != null) {
@@ -52,6 +78,8 @@ PaintPattern paintsRipple({Offset? tapDown, Offset? center, double? radius, Colo
   return pattern;
 }
 
+// Returns the `MaterialInkController` used by a widget of type `T` to draw
+// ink features.
 MaterialInkController getMaterialInkController<T>(WidgetTester tester) {
   return Material.of(tester.element(find.byType(T)))!;
 }
