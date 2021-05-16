@@ -1579,10 +1579,10 @@ void main() {
 
   group('BottomNavigationBar shifting backgroundColor with transition', () {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
-    Widget runTest() {
+    Widget runTest({required InteractiveInkFeatureFactory splashFactory}) {
       int _currentIndex = 0;
       return MaterialApp(
-        theme: ThemeData(splashFactory: InkSplash.splashFactory),
+        theme: ThemeData(splashFactory: splashFactory),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
@@ -1614,20 +1614,40 @@ void main() {
         ),
       );
     }
-    for (int pump = 1; pump < 9; pump++) {
-      testWidgets('pump $pump', (WidgetTester tester) async {
-        await tester.pumpWidget(runTest());
-        await tester.tap(find.text('Green'));
 
-        for (int i = 0; i < pump; i++) {
-          await tester.pump(const Duration(milliseconds: 30));
-        }
-        await expectLater(
-          find.byType(BottomNavigationBar),
-          matchesGoldenFile('bottom_navigation_bar.shifting_transition.${pump - 1}.png'),
-        );
-      });
-    }
+    group('with InkSplash.splashFactory', () {
+      for (int pump = 1; pump < 9; pump++) {
+        testWidgets('pump $pump', (WidgetTester tester) async {
+          await tester.pumpWidget(runTest(splashFactory: InkSplash.splashFactory));
+          await tester.tap(find.text('Green'));
+
+          for (int i = 0; i < pump; i++) {
+            await tester.pump(const Duration(milliseconds: 30));
+          }
+          await expectLater(
+            find.byType(BottomNavigationBar),
+            matchesGoldenFile('bottom_navigation_bar.shifting_transition.ink_splash.${pump - 1}.png'),
+          );
+        });
+      }
+    });
+
+    group('with InkRipple.splashFactory', () {
+      for (int pump = 1; pump < 9; pump++) {
+        testWidgets('pump $pump', (WidgetTester tester) async {
+          await tester.pumpWidget(runTest(splashFactory: InkRipple.splashFactory));
+          await tester.tap(find.text('Green'));
+
+          for (int i = 0; i < pump; i++) {
+            await tester.pump(const Duration(milliseconds: 30));
+          }
+          await expectLater(
+            find.byType(BottomNavigationBar),
+            matchesGoldenFile('bottom_navigation_bar.shifting_transition.ink_ripple.${pump - 1}.png'),
+          );
+        });
+      }
+    });
   });
 
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
