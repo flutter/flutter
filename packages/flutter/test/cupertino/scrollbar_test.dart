@@ -918,7 +918,7 @@ void main() {
           rect: const Rect.fromLTRB(0.0, 0.0, 9.0, 594.0),
         )
         ..line(
-          p1: const Offset(0.0, 0.0),
+          p1: const Offset.zero,
           p2: const Offset(0.0, 594.0),
           strokeWidth: 1.0,
         )

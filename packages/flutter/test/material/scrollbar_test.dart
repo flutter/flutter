@@ -1529,7 +1529,7 @@ void main() {
           color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(0.0, 0.0),
+          p1: const Offset.zero,
           p2: const Offset(0.0, 600.0),
           strokeWidth: 1.0,
           color: Colors.transparent,
