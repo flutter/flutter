@@ -164,9 +164,9 @@ class AssembleCommand extends FlutterCommand {
     }
 
     final TargetPlatform targetPlatform = getTargetPlatformForName(platform);
-    final DevelopmentArtifact artifact = artifactFromTargetPlatform(targetPlatform);
-    if (artifact != null) {
-      return <DevelopmentArtifact>{artifact};
+    final List<DevelopmentArtifact> artifacts = artifactFromTargetPlatform(targetPlatform);
+    if (artifacts != null) {
+      return <DevelopmentArtifact>{...artifacts};
     }
     return super.requiredArtifacts;
   }

@@ -133,6 +133,28 @@ void main() {
     );
   }
 
+  testUsingContext('build windows requires win32 artifacts', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+
+    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.windows});
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('build winuwp requires winuwp and win32 artifacts', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+
+    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.windows, DevelopmentArtifact.windowsUwp});
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;

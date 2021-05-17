@@ -1422,9 +1422,9 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     };
     for (final Device device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact developmentArtifact = artifactFromTargetPlatform(targetPlatform);
-      if (developmentArtifact != null) {
-        artifacts.add(developmentArtifact);
+      final List<DevelopmentArtifact> developmentArtifacts = artifactFromTargetPlatform(targetPlatform);
+      if (developmentArtifacts != null) {
+        artifacts.addAll(developmentArtifacts);
       }
     }
     return artifacts;
@@ -1434,40 +1434,41 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // Returns the development artifact for the target platform, or null
 // if none is supported
 @protected
-DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+List<DevelopmentArtifact> artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      return DevelopmentArtifact.androidGenSnapshot;
+      return <DevelopmentArtifact>[DevelopmentArtifact.androidGenSnapshot];
     case TargetPlatform.web_javascript:
-      return DevelopmentArtifact.web;
+      return <DevelopmentArtifact>[DevelopmentArtifact.web];
     case TargetPlatform.ios:
-      return DevelopmentArtifact.iOS;
+      return <DevelopmentArtifact>[DevelopmentArtifact.iOS];
     case TargetPlatform.darwin:
       if (featureFlags.isMacOSEnabled) {
-        return DevelopmentArtifact.macOS;
+        return <DevelopmentArtifact>[DevelopmentArtifact.macOS];
       }
       return null;
     case TargetPlatform.windows_x64:
       if (featureFlags.isWindowsEnabled) {
-        return DevelopmentArtifact.windows;
+        return <DevelopmentArtifact>[DevelopmentArtifact.windows];
       }
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
       if (featureFlags.isLinuxEnabled) {
-        return DevelopmentArtifact.linux;
+        return <DevelopmentArtifact>[DevelopmentArtifact.linux];
       }
       return null;
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
+      return null;
     case TargetPlatform.windows_uwp_x64:
       if (featureFlags.isWindowsUwpEnabled) {
-        return DevelopmentArtifact.windowsUwp;
+        return <DevelopmentArtifact>[DevelopmentArtifact.windowsUwp, DevelopmentArtifact.windows];
       }
       return null;
   }

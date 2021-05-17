@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -25,6 +26,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
@@ -551,6 +553,33 @@ void main() {
       await runner.run(<String>['test', '--dds', '--disable-dds']);
       expect(() => ddsCommand.enableDds, throwsToolExit());
     });
+  });
+
+  testUsingContext('Device based development artifacts', () {
+    expect(artifactFromTargetPlatform(TargetPlatform.android), <DevelopmentArtifact>[DevelopmentArtifact.androidGenSnapshot]);
+    expect(artifactFromTargetPlatform(TargetPlatform.android_arm), <DevelopmentArtifact>[DevelopmentArtifact.androidGenSnapshot]);
+    expect(artifactFromTargetPlatform(TargetPlatform.android_arm64), <DevelopmentArtifact>[DevelopmentArtifact.androidGenSnapshot]);
+    expect(artifactFromTargetPlatform(TargetPlatform.android_x64), <DevelopmentArtifact>[DevelopmentArtifact.androidGenSnapshot]);
+    expect(artifactFromTargetPlatform(TargetPlatform.android_x86), <DevelopmentArtifact>[DevelopmentArtifact.androidGenSnapshot]);
+
+    expect(artifactFromTargetPlatform(TargetPlatform.ios), <DevelopmentArtifact>[DevelopmentArtifact.iOS]);
+
+    expect(artifactFromTargetPlatform(TargetPlatform.windows_x64), <DevelopmentArtifact>[DevelopmentArtifact.windows]);
+    expect(artifactFromTargetPlatform(TargetPlatform.windows_uwp_x64), unorderedEquals(<DevelopmentArtifact>[DevelopmentArtifact.windows, DevelopmentArtifact.windowsUwp]));
+
+    expect(artifactFromTargetPlatform(TargetPlatform.linux_arm64), <DevelopmentArtifact>[DevelopmentArtifact.linux]);
+    expect(artifactFromTargetPlatform(TargetPlatform.linux_x64), <DevelopmentArtifact>[DevelopmentArtifact.linux]);
+
+    expect(artifactFromTargetPlatform(TargetPlatform.tester), null);
+    expect(artifactFromTargetPlatform(TargetPlatform.fuchsia_arm64), null);
+    expect(artifactFromTargetPlatform(TargetPlatform.fuchsia_x64), null);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(
+      isWindowsEnabled: true,
+      isLinuxEnabled: true,
+      isMacOSEnabled: true,
+      isWindowsUwpEnabled: true,
+    ),
   });
 }
 
