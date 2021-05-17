@@ -679,6 +679,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   Future<void> _rebuild([void value]) {
     setState(() {/* routerDelegate is ready to rebuild */});
+    _routeInformation.value = _retrieveNewRouteInformation();
     return SynchronousFuture<void>(value);
   }
 

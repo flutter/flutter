@@ -85,7 +85,7 @@ void main() {
     final BuildContext textContext = key.currentContext!;
 
     // This should not throw error.
-    Router<dynamic>? router = Router.maybeOf(textContext);
+    final Router<dynamic>? router = Router.maybeOf(textContext);
     expect(router, isNull);
 
     expect(
