@@ -483,7 +483,7 @@ void _printPluginDirectoryLocationMessage(String pluginPath, String projectName,
 
 Your plugin code is in $relativePluginMain.
 
-You example app code is in $relativeExampleMain.
+Your example app code is in $relativeExampleMain.
 
 ''');
   if (platformsString != null && platformsString.isNotEmpty) {
