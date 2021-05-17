@@ -1456,6 +1456,8 @@ class DevToolsMemoryTest {
       'activate',
       'devtools',
       '2.2.3',
+      // Try to debug https://github.com/flutter/flutter/issues/82142
+      '--verbose',
     ]);
     _devToolsProcess = await startProcess(
       pubBin,
