@@ -1453,7 +1453,7 @@ List<DevelopmentArtifact> artifactFromTargetPlatform(TargetPlatform targetPlatfo
       return null;
     case TargetPlatform.windows_x64:
       if (featureFlags.isWindowsEnabled) {
-        return <DevelopmentArtifact>[DevelopmentArtifact.windows, DevelopmentArtifact.windowsCppClientWrapper];
+        return <DevelopmentArtifact>[DevelopmentArtifact.windows, DevelopmentArtifact.universal];
       }
       return null;
     case TargetPlatform.linux_x64:
@@ -1468,7 +1468,7 @@ List<DevelopmentArtifact> artifactFromTargetPlatform(TargetPlatform targetPlatfo
       return null;
     case TargetPlatform.windows_uwp_x64:
       if (featureFlags.isWindowsUwpEnabled) {
-        return <DevelopmentArtifact>[DevelopmentArtifact.windowsUwp, DevelopmentArtifact.windowsCppClientWrapper];
+        return <DevelopmentArtifact>[DevelopmentArtifact.windowsUwp, DevelopmentArtifact.universal];
       }
       return null;
   }

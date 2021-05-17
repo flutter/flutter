@@ -72,9 +72,6 @@ class DevelopmentArtifact {
   /// Artifacts required for desktop Windows UWP.
   static const DevelopmentArtifact windowsUwp = DevelopmentArtifact._('winuwp', feature: windowsUwpEmbedding);
 
-  /// Artifacts shared by win32 and Windows UWP desktop builds.
-  static const DevelopmentArtifact windowsCppClientWrapper = DevelopmentArtifact._('cpp_client_wrapper', feature: flutterWindowsDesktopFeature);
-
   /// Artifacts required for any development platform.
   ///
   /// This does not need to be explicitly returned from requiredArtifacts as
@@ -95,7 +92,6 @@ class DevelopmentArtifact {
     universal,
     flutterRunner,
     windowsUwp,
-    windowsCppClientWrapper,
   ];
 
   @override

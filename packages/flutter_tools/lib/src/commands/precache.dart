@@ -87,14 +87,6 @@ class PrecacheCommand extends FlutterCommand {
       'android_maven',
       'android_internal_build',
     ],
-    'windows': <String>[
-      'windows',
-      'cpp_client_wrapper',
-    ],
-    'winuwp': <String>[
-      'winuwp',
-      'cpp_client_wrapper',
-    ],
   };
 
   /// Returns a reverse mapping of _expandedArtifacts, from child artifact name

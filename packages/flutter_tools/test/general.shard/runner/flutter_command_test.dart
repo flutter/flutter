@@ -564,8 +564,8 @@ void main() {
 
     expect(artifactFromTargetPlatform(TargetPlatform.ios), <DevelopmentArtifact>[DevelopmentArtifact.iOS]);
 
-    expect(artifactFromTargetPlatform(TargetPlatform.windows_x64), <DevelopmentArtifact>[DevelopmentArtifact.windows, DevelopmentArtifact.windowsCppClientWrapper]);
-    expect(artifactFromTargetPlatform(TargetPlatform.windows_uwp_x64), unorderedEquals(<DevelopmentArtifact>[DevelopmentArtifact.windowsUwp, DevelopmentArtifact.windowsCppClientWrapper]));
+    expect(artifactFromTargetPlatform(TargetPlatform.windows_x64), <DevelopmentArtifact>[DevelopmentArtifact.windows, DevelopmentArtifact.universal]);
+    expect(artifactFromTargetPlatform(TargetPlatform.windows_uwp_x64), unorderedEquals(<DevelopmentArtifact>[DevelopmentArtifact.windowsUwp, DevelopmentArtifact.universal]));
 
     expect(artifactFromTargetPlatform(TargetPlatform.linux_arm64), <DevelopmentArtifact>[DevelopmentArtifact.linux]);
     expect(artifactFromTargetPlatform(TargetPlatform.linux_x64), <DevelopmentArtifact>[DevelopmentArtifact.linux]);

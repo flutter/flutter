@@ -31,7 +31,6 @@ class BuildWindowsUwpCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.windowsCppClientWrapper,
     DevelopmentArtifact.windows,
   };
 

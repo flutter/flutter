@@ -334,7 +334,7 @@ class WindowsCppClientWrapper extends EngineCachedArtifact {
        super(
         'windows-cpp-client-wrapper',
          cache,
-         DevelopmentArtifact.windowsCppClientWrapper,
+         DevelopmentArtifact.universal,
        );
 
   final Platform _platform;

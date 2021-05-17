@@ -137,7 +137,7 @@ void main() {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
 
-    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.windowsCppClientWrapper, DevelopmentArtifact.windows});
+    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.universal, DevelopmentArtifact.windows});
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
@@ -148,7 +148,7 @@ void main() {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
 
-    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.windowsCppClientWrapper, DevelopmentArtifact.windowsUwp});
+    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.universal, DevelopmentArtifact.windowsUwp});
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
