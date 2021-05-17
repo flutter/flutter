@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -14,7 +13,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -288,7 +286,7 @@ void main() {
   });
 
   testWithoutContext('pub get 69', () async {
-    String error;
+    String? error;
 
     const FakeCommand pubGetCommand = FakeCommand(
       command: <String>[
@@ -429,7 +427,7 @@ void main() {
   });
 
   testWithoutContext('pub cache in root is used', () async {
-    String error;
+    String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory pubCache = fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache')..createSync();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -503,7 +501,7 @@ void main() {
     );
 
     FakeAsync().run((FakeAsync time) {
-      String error;
+      String? error;
       pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {

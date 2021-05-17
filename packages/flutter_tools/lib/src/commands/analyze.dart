@@ -41,8 +41,8 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',
         negatable: false,
-        help: 'List every public member that is lacking documentation. '
-              '(The "public_member_api_docs" lint must be enabled in "analysis_options.yaml".)',
+        help: '(deprecated) List every public member that is lacking documentation. '
+              'This command will be removed in a future version of Flutter.',
         hide: !verboseHelp);
     argParser.addFlag('watch',
         help: 'Run analysis continuously, watching the filesystem for changes.',

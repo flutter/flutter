@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'colors.dart';
@@ -57,7 +58,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
-class Tab extends StatelessWidget {
+class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// Creates a material design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
@@ -140,6 +141,14 @@ class Tab extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('text', text, defaultValue: null));
     properties.add(DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
+  }
+
+  @override
+  Size get preferredSize {
+    if ((text != null || child != null) && icon != null)
+      return const Size.fromHeight(_kTextAndIconTabHeight);
+    else
+      return const Size.fromHeight(_kTabHeight);
   }
 }
 
@@ -824,6 +833,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The padding added to each of the tab labels.
   ///
+  /// If there are few tabs with both icon and text and few
+  /// tabs with only icon or text, this padding is vertically
+  /// adjusted to provide uniform padding to all tabs.
+  ///
   /// If this property is null, then kTabLabelPadding is used.
   final EdgeInsetsGeometry? labelPadding;
 
@@ -891,18 +904,33 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [AppBar] uses this size to compute its own preferred size.
   @override
   Size get preferredSize {
+    double maxHeight = _kTabHeight;
     for (final Widget item in tabs) {
-      if (item is Tab) {
-        final Tab tab = item;
-        if ((tab.text != null || tab.child != null) && tab.icon != null)
-          return Size.fromHeight(_kTextAndIconTabHeight + indicatorWeight);
+      if (item is PreferredSizeWidget) {
+        final double itemHeight = item.preferredSize.height;
+        maxHeight = math.max(itemHeight, maxHeight);
       }
     }
-    return Size.fromHeight(_kTabHeight + indicatorWeight);
+    return Size.fromHeight(maxHeight + indicatorWeight);
+  }
+
+  /// Returns whether the [TabBar] contains a tab with both text and icon.
+  ///
+  /// [TabBar] uses this to give uniform padding to all tabs in cases where
+  /// there are some tabs with both text and icon and some which contain only
+  /// text or icon.
+  bool get tabHasTextAndIcon {
+    for (final Widget item in tabs) {
+      if (item is PreferredSizeWidget) {
+        if (item.preferredSize.height == _kTextAndIconTabHeight)
+          return true;
+      }
+    }
+    return false;
   }
 
   @override
-  _TabBarState createState() => _TabBarState();
+  State<TabBar> createState() => _TabBarState();
 }
 
 class _TabBarState extends State<TabBar> {
@@ -1159,19 +1187,33 @@ class _TabBarState extends State<TabBar> {
 
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
-    final List<Widget> wrappedTabs = <Widget>[
-      for (int i = 0; i < widget.tabs.length; i += 1)
-        Center(
-          heightFactor: 1.0,
-          child: Padding(
-            padding: widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding,
-            child: KeyedSubtree(
-              key: _tabKeys[i],
-              child: widget.tabs[i],
-            ),
+    final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
+      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
+      EdgeInsetsGeometry? adjustedPadding;
+
+      if (widget.tabs[index] is PreferredSizeWidget) {
+        final PreferredSizeWidget tab = widget.tabs[index] as PreferredSizeWidget;
+        if (widget.tabHasTextAndIcon && tab.preferredSize.height == _kTabHeight) {
+          if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
+            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
+          }
+          else {
+            adjustedPadding = const EdgeInsets.symmetric(vertical: verticalAdjustment, horizontal: 16.0);
+          }
+        }
+      }
+
+      return Center(
+        heightFactor: 1.0,
+        child: Padding(
+          padding: adjustedPadding ?? widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding,
+          child: KeyedSubtree(
+            key: _tabKeys[index],
+            child: widget.tabs[index],
           ),
         ),
-    ];
+      );
+    });
 
     // If the controller was provided by DefaultTabController and we're part
     // of a Hero (typically the AppBar), then we will not be able to find the
@@ -1316,7 +1358,7 @@ class TabBarView extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _TabBarViewState createState() => _TabBarViewState();
+  State<TabBarView> createState() => _TabBarViewState();
 }
 
 class _TabBarViewState extends State<TabBarView> {

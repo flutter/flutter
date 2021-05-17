@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestGestureRecognizer extends GestureRecognizer {
   TestGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
@@ -48,6 +48,20 @@ void main() {
     final OffsetPair difference = offset2 - offset1;
     expect(difference.local, const Offset(40, 40));
     expect(difference.global, const Offset(40, 40));
+  });
 
+  testWidgets('EagerGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        EagerGestureRecognizer(
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 }

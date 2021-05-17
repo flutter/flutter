@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:dev_tools/codesign.dart' show CodesignCommand;
+import 'package:dev_tools/globals.dart';
+import 'package:dev_tools/repository.dart' show Checkouts;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-
-import 'package:dev_tools/codesign.dart' show CodesignCommand;
-import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/repository.dart' show Checkouts;
 
 import './common.dart';
 
@@ -21,11 +20,12 @@ void main() {
       () async {
     const Platform platform = LocalPlatform();
     const FileSystem fileSystem = LocalFileSystem();
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
     const ProcessManager processManager = LocalProcessManager();
     final TestStdio stdio = TestStdio(verbose: true);
     final Checkouts checkouts = Checkouts(
       fileSystem: fileSystem,
-      parentDirectory: localFlutterRoot.parent,
+      parentDirectory: tempDir,
       platform: platform,
       processManager: processManager,
       stdio: stdio,

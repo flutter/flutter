@@ -846,8 +846,8 @@ void main() {
     const double disabledElevation = 16;
 
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(
@@ -867,8 +867,8 @@ void main() {
 
   testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(

@@ -172,8 +172,7 @@ void main() {
     log.clear();
   });
 
-  test('During notifyListeners, a listener was added and removed immediately',
-      () {
+  test('During notifyListeners, a listener was added and removed immediately', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -200,32 +199,32 @@ void main() {
   });
 
   test(
-      'If a listener in the middle of the list of listeners removes itself, '
-      'notifyListeners still notifies all listeners', () {
-    final TestNotifier source = TestNotifier();
-    final List<String> log = <String>[];
+    'If a listener in the middle of the list of listeners removes itself, '
+    'notifyListeners still notifies all listeners',
+    () {
+      final TestNotifier source = TestNotifier();
+      final List<String> log = <String>[];
 
-    void selfRemovingListener() {
-      log.add('selfRemovingListener');
-      source.removeListener(selfRemovingListener);
-    }
+      void selfRemovingListener() {
+        log.add('selfRemovingListener');
+        source.removeListener(selfRemovingListener);
+      }
 
-    void listener1() {
-      log.add('listener1');
-    }
+      void listener1() {
+        log.add('listener1');
+      }
 
-    source.addListener(listener1);
-    source.addListener(selfRemovingListener);
-    source.addListener(listener1);
+      source.addListener(listener1);
+      source.addListener(selfRemovingListener);
+      source.addListener(listener1);
 
-    source.notify();
+      source.notify();
 
-    expect(log, <String>['listener1', 'selfRemovingListener', 'listener1']);
-  });
+      expect(log, <String>['listener1', 'selfRemovingListener', 'listener1']);
+    },
+  );
 
-  test(
-      'If the first listener removes itself, notifyListeners still notify all listeners',
-      () {
+  test('If the first listener removes itself, notifyListeners still notify all listeners', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -457,11 +456,14 @@ void main() {
     expect(error, isNotNull);
     expect(error!, isFlutterError);
     expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes('FlutterError\n'
-            '   A TestNotifier was used after being disposed.\n'
-            '   Once you have called dispose() on a TestNotifier, it can no\n'
-            '   longer be used.\n'));
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A TestNotifier was used after being disposed.\n'
+        '   Once you have called dispose() on a TestNotifier, it can no\n'
+        '   longer be used.\n',
+      ),
+    );
   });
 
   test('notifyListener can be called recursively', () {
@@ -524,7 +526,7 @@ void main() {
       8,
       9,
       10,
-      11
+      11,
     ];
     final List<String> expectedLog =
         remainingListenerIndexes.map((int i) => 'listener$i').toList();

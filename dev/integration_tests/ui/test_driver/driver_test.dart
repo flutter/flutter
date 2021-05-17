@@ -11,7 +11,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 void main() {
   group('FlutterDriver', () {
     final SerializableFinder presentText = find.text('present');
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();

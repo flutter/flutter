@@ -13,9 +13,9 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';
@@ -98,7 +98,7 @@ void main() {
     final BuildCommand buildCommand = BuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub']);
+    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a']);
 
     expect(fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
   }, overrides: <Type, Generator>{
@@ -106,7 +106,21 @@ void main() {
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        'TargetFile': 'lib/main.dart',
+        'HasWebPlugins': 'true',
+        'cspMode': 'false',
+        'SourceMaps': 'false',
+        'NativeNullAssertions': 'true',
+        'ServiceWorkerStrategy': 'offline-first',
+        'BuildMode': 'release',
+        'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
+        'DartObfuscation': 'false',
+        'TrackWidgetCreation': 'false',
+        'TreeShakeIcons': 'false',
+      });
+    }),
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {

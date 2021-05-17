@@ -4,13 +4,13 @@
 
 // @dart = 2.8
 
-import 'package:meta/meta.dart';
-
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+
+import 'package:meta/meta.dart';
 
 /// A fake implementation of [AndroidBuilder].
 class FakeAndroidBuilder implements AndroidBuilder {

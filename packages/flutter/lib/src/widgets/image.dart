@@ -8,8 +8,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1060,7 +1060,7 @@ class Image extends StatefulWidget {
   final bool isAntiAlias;
 
   @override
-  _ImageState createState() => _ImageState();
+  State<Image> createState() => _ImageState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

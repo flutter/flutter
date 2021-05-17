@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
@@ -340,7 +340,7 @@ void main() {
           color: Color(0xFFED1D7F),
         ),
         duration: const Duration(milliseconds: 200),
-      )
+      ),
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.none);
     await tester.pumpWidget(
@@ -350,7 +350,7 @@ void main() {
         ),
         duration: const Duration(milliseconds: 200),
         clipBehavior: Clip.antiAlias,
-      )
+      ),
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.antiAlias);
   });

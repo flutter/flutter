@@ -10,9 +10,9 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/dart/generate_synthetic_packages.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
+import 'package:flutter_tools/src/dart/generate_synthetic_packages.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';

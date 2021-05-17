@@ -113,13 +113,14 @@ void main() {
         if (platform != 'linux' && platform != 'windows' && platform != 'ios') {
           await simulateKeyDownEvent(LogicalKeyboardKey.fn, platform: platform);
           expect(
-              RawKeyboard.instance.keysPressed,
-              equals(
-                <LogicalKeyboardKey>{
-                  if (platform != 'macos') LogicalKeyboardKey.fn,
-                },
-              ),
-              reason: 'on $platform');
+            RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{
+                if (platform != 'macos') LogicalKeyboardKey.fn,
+              },
+            ),
+            reason: 'on $platform',
+          );
           await simulateKeyDownEvent(LogicalKeyboardKey.f12, platform: platform);
           expect(
             RawKeyboard.instance.keysPressed,
@@ -1539,7 +1540,7 @@ void main() {
           (ByteData? data) {
             final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
             lastHandled = decoded['handled'] as bool;
-          }
+          },
         );
       }
       RawKeyboard.instance.addListener(events.add);

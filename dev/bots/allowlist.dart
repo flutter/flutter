@@ -18,6 +18,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'collection',
   'fake_async',
   'file',
+  'frontend_server_client',
   'intl',
   'meta',
   'path',

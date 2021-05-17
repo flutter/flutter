@@ -9,12 +9,11 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
-
 
 void main() {
   MemoryFileSystem fileSystem;
@@ -27,7 +26,7 @@ void main() {
     config = Config.test();
   });
 
-  group('android_sdk AndroidSdk', () {
+  group('AndroidSdk', () {
     Directory sdkDir;
 
     tearDown(() {
@@ -38,7 +37,7 @@ void main() {
     });
 
     testUsingContext('parse sdk', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -51,7 +50,7 @@ void main() {
     });
 
     testUsingContext('parse sdk N', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory(withAndroidN: true);
+      sdkDir = createSdkDirectory(withAndroidN: true, fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -64,7 +63,7 @@ void main() {
     });
 
     testUsingContext('returns sdkmanager path under cmdline tools on Linux/macOS', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -81,7 +80,7 @@ void main() {
     });
 
     testUsingContext('returns sdkmanager path under cmdline tools (highest version) on Linux/macOS', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -101,7 +100,7 @@ void main() {
     });
 
     testUsingContext('Caches adb location after first access', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -122,7 +121,7 @@ void main() {
     });
 
     testUsingContext('returns sdkmanager.bat path under cmdline tools for windows', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -140,7 +139,7 @@ void main() {
     });
 
     testUsingContext("returns sdkmanager path under tools if cmdline doesn't exist", () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -154,7 +153,7 @@ void main() {
     });
 
     testUsingContext("returns sdkmanager path under tools if cmdline doesn't exist on windows", () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -168,7 +167,7 @@ void main() {
     });
 
     testUsingContext('returns sdkmanager version', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
       processManager.addCommand(
         const FakeCommand(
@@ -190,7 +189,7 @@ void main() {
     });
 
     testUsingContext('returns validate sdk is well formed', () {
-      sdkDir = createSdkDirectory(
+      sdkDir = createBrokenSdkDirectory(
         fileSystem: fileSystem,
       );
       processManager.addCommand(const FakeCommand(command: <String>[
@@ -213,7 +212,7 @@ void main() {
     });
 
     testUsingContext('does not throw on sdkmanager version check failure', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
       processManager.addCommand(
         const FakeCommand(
@@ -238,7 +237,7 @@ void main() {
     });
 
     testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory(withSdkManager: false);
+      sdkDir = createSdkDirectory(withSdkManager: false, fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
       processManager.excludedExecutables.add('/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager');
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -252,7 +251,7 @@ void main() {
     });
 
     testUsingContext('returns avdmanager path under cmdline tools', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -269,7 +268,7 @@ void main() {
     });
 
     testUsingContext('returns avdmanager path under cmdline tools on windows', () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -286,7 +285,7 @@ void main() {
     });
 
     testUsingContext("returns avdmanager path under tools if cmdline doesn't exist", () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -303,7 +302,7 @@ void main() {
     });
 
     testUsingContext("returns avdmanager path under tools if cmdline doesn't exist on windows", () {
-      sdkDir = MockAndroidSdk.createSdkDirectory();
+      sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -322,7 +321,7 @@ void main() {
 }
 
 /// A broken SDK installation.
-Directory createSdkDirectory({
+Directory createBrokenSdkDirectory({
   bool withAndroidN = false,
   bool withSdkManager = true,
   @required FileSystem fileSystem,
@@ -348,3 +347,53 @@ void _createSdkFile(Directory dir, String filePath, { String contents }) {
     file.writeAsStringSync(contents, flush: true);
   }
 }
+
+Directory createSdkDirectory({
+  bool withAndroidN = false,
+  bool withSdkManager = true,
+  bool withPlatformTools = true,
+  bool withBuildTools = true,
+  @required FileSystem fileSystem,
+}) {
+  final Directory dir = fileSystem.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+  final String exe = globals.platform.isWindows ? '.exe' : '';
+  final String bat = globals.platform.isWindows ? '.bat' : '';
+
+  void createDir(Directory dir, String path) {
+    final Directory directory = dir.fileSystem.directory(dir.fileSystem.path.join(dir.path, path));
+    directory.createSync(recursive: true);
+  }
+
+  createDir(dir, 'licenses');
+
+  if (withPlatformTools) {
+    _createSdkFile(dir, 'platform-tools/adb$exe');
+  }
+
+  if (withBuildTools) {
+    _createSdkFile(dir, 'build-tools/19.1.0/aapt$exe');
+    _createSdkFile(dir, 'build-tools/22.0.1/aapt$exe');
+    _createSdkFile(dir, 'build-tools/23.0.2/aapt$exe');
+    if (withAndroidN) {
+      _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt$exe');
+    }
+  }
+
+  _createSdkFile(dir, 'platforms/android-22/android.jar');
+  _createSdkFile(dir, 'platforms/android-23/android.jar');
+  if (withAndroidN) {
+    _createSdkFile(dir, 'platforms/android-N/android.jar');
+    _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
+  }
+
+  if (withSdkManager) {
+    _createSdkFile(dir, 'tools/bin/sdkmanager$bat');
+  }
+  return dir;
+}
+
+const String _buildProp = r'''
+ro.build.version.incremental=1624448
+ro.build.version.sdk=24
+ro.build.version.codename=REL
+''';

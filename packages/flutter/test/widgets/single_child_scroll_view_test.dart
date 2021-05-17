@@ -5,8 +5,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 
@@ -44,7 +45,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Container(height: 600.0)
+          child: Container(height: 600.0),
         ),
       ),
     );

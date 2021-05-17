@@ -47,7 +47,7 @@ void main() {
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
+      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00),
     );
 
     expect(log, hasLength(1));
@@ -65,7 +65,7 @@ void main() {
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
+      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00),
     );
 
     expect(log, isNotEmpty);

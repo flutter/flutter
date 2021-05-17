@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
 import '../src/fake_vm_services.dart';

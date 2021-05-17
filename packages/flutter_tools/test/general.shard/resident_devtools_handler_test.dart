@@ -4,17 +4,16 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
-import 'package:flutter_tools/src/vmservice.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
-
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';

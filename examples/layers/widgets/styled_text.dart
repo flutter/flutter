@@ -67,8 +67,8 @@ class SpeakerSeparator extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 64.0),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Color.fromARGB(24, 0, 0, 0))
-        )
+          bottom: BorderSide(color: Color.fromARGB(24, 0, 0, 0)),
+        ),
       ),
     );
   }
@@ -78,7 +78,7 @@ class StyledTextDemo extends StatefulWidget {
   const StyledTextDemo({Key? key}) : super(key: key);
 
   @override
-  _StyledTextDemoState createState() => _StyledTextDemoState();
+  State<StyledTextDemo> createState() => _StyledTextDemoState();
 }
 
 class _StyledTextDemoState extends State<StyledTextDemo> {

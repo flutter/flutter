@@ -9,119 +9,12 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
-import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  // Verifies that values are correctly passed through the localizations
-  // target, but does not validate them beyond the serialized data type.
-  testWithoutContext('generateLocalizations forwards arguments correctly', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Logger logger = BufferLogger.test();
-    final Directory flutterProjectDirectory = fileSystem
-      .directory(fileSystem.path.join('path', 'to', 'flutter_project'))
-      ..createSync(recursive: true);
-    final Directory arbDirectory = flutterProjectDirectory
-      .childDirectory('arb')
-      ..createSync();
-    arbDirectory.childFile('foo.arb').createSync();
-    arbDirectory.childFile('bar.arb').createSync();
-
-    final LocalizationOptions options = LocalizationOptions(
-      header: 'HEADER',
-      headerFile: Uri.file('header'),
-      arbDirectory: Uri.file('arb'),
-      deferredLoading: true,
-      outputClass: 'Foo',
-      outputLocalizationsFile: Uri.file('bar'),
-      outputDirectory: Uri.directory(fileSystem.path.join('lib', 'l10n')),
-      preferredSupportedLocales: <String>['en_US'],
-      templateArbFile: Uri.file('example.arb'),
-      untranslatedMessagesFile: Uri.file('untranslated'),
-      useSyntheticPackage: false,
-      areResourceAttributesRequired: true,
-      usesNullableGetter: false,
-    );
-
-    final LocalizationsGenerator mockLocalizationsGenerator = MockLocalizationsGenerator();
-    generateLocalizations(
-      localizationsGenerator: mockLocalizationsGenerator,
-      options: options,
-      logger: logger,
-      projectDir: fileSystem.currentDirectory,
-      dependenciesDir: fileSystem.currentDirectory,
-    );
-    verify(
-      mockLocalizationsGenerator.initialize(
-        inputPathString: 'arb',
-        outputPathString: fileSystem.path.join('lib', 'l10n/'),
-        templateArbFileName: 'example.arb',
-        outputFileString: 'bar',
-        classNameString: 'Foo',
-        preferredSupportedLocales: <String>['en_US'],
-        headerString: 'HEADER',
-        headerFile: 'header',
-        useDeferredLoading: true,
-        inputsAndOutputsListPath: '/',
-        useSyntheticPackage: false,
-        projectPathString: '/',
-        areResourceAttributesRequired: true,
-        untranslatedMessagesFile: 'untranslated',
-        usesNullableGetter: false,
-      ),
-    ).called(1);
-    verify(mockLocalizationsGenerator.loadResources()).called(1);
-    verify(mockLocalizationsGenerator.writeOutputFiles(logger, isFromYaml: true)).called(1);
-  });
-
-  testWithoutContext('generateLocalizations throws exception on missing flutter: generate: true flag', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final Directory arbDirectory = fileSystem.directory('arb')
-      ..createSync();
-    arbDirectory.childFile('foo.arb').createSync();
-    arbDirectory.childFile('bar.arb').createSync();
-
-    // Missing flutter: generate: true should throw exception.
-    fileSystem.file('pubspec.yaml').writeAsStringSync('''
-flutter:
-  uses-material-design: true
-''');
-
-    final LocalizationOptions options = LocalizationOptions(
-      header: 'HEADER',
-      headerFile: Uri.file('header'),
-      arbDirectory: Uri.file('arb'),
-      deferredLoading: true,
-      outputClass: 'Foo',
-      outputLocalizationsFile: Uri.file('bar'),
-      preferredSupportedLocales: <String>['en_US'],
-      templateArbFile: Uri.file('example.arb'),
-      untranslatedMessagesFile: Uri.file('untranslated'),
-      // Set synthetic package to true.
-      useSyntheticPackage: true,
-    );
-
-    final LocalizationsGenerator mockLocalizationsGenerator = MockLocalizationsGenerator();
-    expect(
-      () => generateLocalizations(
-        localizationsGenerator: mockLocalizationsGenerator,
-        options: options,
-        logger: logger,
-        projectDir: fileSystem.currentDirectory,
-        dependenciesDir: fileSystem.currentDirectory,
-      ),
-      throwsToolExit(
-        message: 'Attempted to generate localizations code without having the '
-          'flutter: generate flag turned on.',
-      ),
-    );
-  });
-
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
@@ -207,5 +100,3 @@ use-deferred-loading: string
     );
   });
 }
-
-class MockLocalizationsGenerator extends Mock implements LocalizationsGenerator {}

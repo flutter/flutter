@@ -24,7 +24,7 @@ void main() {
         'Directionality-[GlobalKey#00000](textDirection: ltr)\n'
         '└Builder(dependencies: [Directionality-[GlobalKey#00000]])\n'
         ' └SizedBox(renderObject: RenderConstrainedBox#00000)\n'
-        ''
+        '',
       ),
     );
 
@@ -42,7 +42,7 @@ void main() {
         'Directionality-[GlobalKey#00000](textDirection: rtl)\n'
         '└Builder(dependencies: [Directionality-[GlobalKey#00000]])\n'
         ' └SizedBox(renderObject: RenderConstrainedBox#00000)\n'
-        ''
+        '',
       ),
     );
   });

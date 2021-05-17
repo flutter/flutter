@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 int buildCount = 0;
@@ -175,7 +175,8 @@ void main() {
     expect(
       setEquals(
         description,
-        <String>{ 'brightness',
+        <String>{
+          'brightness',
           'primaryColor',
           'primaryContrastingColor',
           'barBackgroundColor',
@@ -188,7 +189,7 @@ void main() {
           'navActionTextStyle',
           'pickerTextStyle',
           'dateTimePickerTextStyle',
-        }
+        },
       ),
       isTrue,
     );

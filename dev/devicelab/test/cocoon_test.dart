@@ -7,11 +7,10 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:http/http.dart';
-import 'package:http/testing.dart';
-
 import 'package:flutter_devicelab/framework/cocoon.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:http/http.dart';
+import 'package:http/testing.dart';
 
 import 'common.dart';
 

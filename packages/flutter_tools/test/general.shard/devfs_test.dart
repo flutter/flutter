@@ -21,9 +21,9 @@ import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_http_client.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
   method: '_createDevFS',
@@ -111,6 +111,16 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
+  testWithoutContext('DevFSStringCompressingBytesContent', () {
+    final DevFSStringCompressingBytesContent content =
+        DevFSStringCompressingBytesContent('uncompressed string');
+
+    expect(content.equals('uncompressed string'), isTrue);
+    expect(content.bytes, isNotNull);
+    expect(content.isModified, isTrue);
+    expect(content.isModified, isFalse);
+  });
+
   testWithoutContext('DevFS create throws a DevFSException when vmservice disconnects unexpectedly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final OperatingSystemUtils osUtils = MockOperatingSystemUtils();
@@ -170,6 +180,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('lib/foo.dill')
         ..createSync(recursive: true)
@@ -237,6 +249,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('lib/foo.dill', 2, <Uri>[]);
     });
@@ -281,6 +295,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('example').createSync();
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
@@ -327,6 +343,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
@@ -379,6 +397,8 @@ void main() {
       any,
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
+      projectRootPath: anyNamed('projectRootPath'),
+      fs: anyNamed('fs'),
     )).thenAnswer((Invocation invocation) async {
       fileSystem.file('example').createSync();
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);

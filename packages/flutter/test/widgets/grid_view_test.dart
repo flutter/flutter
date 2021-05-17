@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
@@ -79,8 +79,7 @@ void main() {
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Pennsylvania'), findsNothing);
 
-    expect(tester.getCenter(find.text('Tennessee')),
-        equals(const Offset(300.0, 100.0)));
+    expect(tester.getCenter(find.text('Tennessee')), equals(const Offset(300.0, 100.0)));
 
     await tester.tap(find.text('Tennessee'));
     expect(log, equals(<String>['Tennessee']));
@@ -138,8 +137,7 @@ void main() {
 
     expect(find.text('Alabama'), findsNothing);
 
-    expect(tester.getCenter(find.text('Tennessee')),
-        equals(const Offset(300.0, 100.0)));
+    expect(tester.getCenter(find.text('Tennessee')), equals(const Offset(300.0, 100.0)));
 
     await tester.tap(find.text('Tennessee'));
     expect(log, equals(<String>['Tennessee']));
@@ -161,7 +159,7 @@ void main() {
               builder: (BuildContext context) {
                 log.add(i);
                 return Text('$i');
-              }
+              },
             );
           }),
         ),
@@ -253,7 +251,7 @@ void main() {
               builder: (BuildContext context) {
                 log.add(i);
                 return Text('$i');
-              }
+              },
             );
           }),
         ),
@@ -289,7 +287,7 @@ void main() {
               builder: (BuildContext context) {
                 log.add(i);
                 return Text('$i');
-              }
+              },
             );
           }),
         ),
@@ -328,7 +326,7 @@ void main() {
         viewportMainAxisExtent: 100.0,
         remainingCacheExtent: 0.0,
         cacheOrigin: 0.0,
-      )
+      ),
     );
     expect(layout.getMinChildIndexForScrollOffset(1000.0), 0.0);
   });
@@ -348,7 +346,7 @@ void main() {
               builder: (BuildContext context) {
                 log.add(i);
                 return Text('$i');
-              }
+              },
             );
           }),
         ),
@@ -384,7 +382,7 @@ void main() {
               builder: (BuildContext context) {
                 log.add(i);
                 return Text('$i');
-              }
+              },
             );
           }),
         ),
@@ -726,7 +724,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 return Text('$i');
-              }
+              },
             );
           }),
         ),
@@ -752,7 +750,7 @@ void main() {
             return Builder(
               builder: (BuildContext context) {
                 return Text('$i');
-              }
+              },
             );
           }),
         ),
