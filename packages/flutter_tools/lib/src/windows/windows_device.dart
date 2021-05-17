@@ -132,6 +132,47 @@ class WindowsUWPDevice extends Device {
     return NoOpDeviceLogReader('winuwp');
   }
 
+  // Returns `true` if the specified file is a valid package based on file extension.
+  bool _isValidPackage(String packagePath) {
+    const List<String> validPackageExtensions = <String>[
+      '.appx', '.msix',                // Architecture-specific application.
+      '.appxbundle', '.msixbundle',    // Architecture-independent application.
+      '.eappx', '.emsix',              // Encrypted architecture-specific application.
+      '.eappxbundle', '.emsixbundle',  // Encrypted architecture-independent application.
+    ];
+    return validPackageExtensions.any(packagePath.endsWith);
+  }
+
+  // Walks the build directory for any dependent packages for the specified architecture.
+  List<String> _getPackagePaths(String directory) {
+    if (!_fileSystem.isDirectorySync(directory)) {
+      return <String>[];
+    }
+    final List<String> packagePaths = <String>[];
+    for (final FileSystemEntity entity in _fileSystem.directory(directory).listSync()) {
+      if (entity.statSync().type != FileSystemEntityType.file) {
+        continue;
+      }
+      final String packagePath = entity.absolute.path;
+      if (_isValidPackage(packagePath)) {
+        packagePaths.add(packagePath);
+      }
+    }
+    return packagePaths;
+  }
+
+  // Walks the build directory for any dependent packages for the specified architecture.
+  String/*?*/ _getAppPackagePath(String buildDirectory) {
+    final List<String> packagePaths = _getPackagePaths(buildDirectory);
+    return packagePaths.isNotEmpty ? packagePaths.first : null;
+  }
+
+  // Walks the build directory for any dependent packages for the specified architecture.
+  List<String> _getDependencyPaths(String buildDirectory, String architecture) {
+    final String depsDirectory = _fileSystem.path.join(buildDirectory, 'Dependencies', architecture);
+    return _getPackagePaths(depsDirectory);
+  }
+
   @override
   Future<bool> installApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
     /// The cmake build generates an install powershell script.
@@ -142,10 +183,48 @@ class WindowsUWPDevice extends Device {
       return false;
     }
     final String config = toTitleCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
-    final String generated = '${binaryName}_${packageVersion}_${config}_Test';
-    final String buildDirectory = _fileSystem.path.join(
-        'build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generated);
-    return _uwptool.installApp(buildDirectory);
+    const String arch = 'x64';
+    final String generatedDir = '${binaryName}_${packageVersion}_${arch}_${config}_Test';
+    final String generatedApp = '${binaryName}_${packageVersion}_${arch}_$config';
+    final String buildDirectory = _fileSystem.path.absolute(_fileSystem.path.join(
+        'build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generatedDir));
+
+    // Verify package signature.
+    final String packagePath = _getAppPackagePath(buildDirectory);
+    if (!await _uwptool.isSignatureValid(packagePath)) {
+      // If signature is invalid, install the developer certificate.
+      final String certificatePath = _fileSystem.path.join(buildDirectory, '$generatedApp.cer');
+      if (_logger.terminal.stdinHasTerminal) {
+        final String response = await _logger.terminal.promptForCharInput(
+          <String>['Y', 'y', 'N', 'n'],
+          logger: _logger,
+          prompt: 'Install developer certificate.\n'
+          '\n'
+          'Windows UWP apps are signed with a developer certificate during the build\n'
+          'process. On the first install of an app with a signature from a new\n'
+          'certificate, the certificate must be installed.\n'
+          '\n'
+          'If desired, this certificate can later be removed by launching the \n'
+          '"Manage Computer Certificates" control panel from the Start menu and deleting\n'
+          'the "CMake Test Cert" certificate from the "Trusted People" > "Certificates"\n'
+          'section.\n'
+          '\n'
+          'Press "Y" to continue, or "N" to cancel.',
+          displayAcceptedCharacters: false,
+        );
+        if (response == 'N' || response == 'n') {
+          return false;
+        }
+      }
+      await _uwptool.installCertificate(certificatePath);
+    }
+
+    // Install the application and dependencies.
+    final String packageUri = Uri.file(packagePath).toString();
+    final List<String> dependencyUris = _getDependencyPaths(buildDirectory, arch)
+        .map((String path) => Uri.file(path).toString())
+        .toList();
+    return _uwptool.installApp(packageUri.toString(), dependencyUris);
   }
 
   @override
@@ -184,7 +263,11 @@ class WindowsUWPDevice extends Device {
         target: mainPath,
       );
     }
-    if (!await isAppInstalled(package) && !await installApp(package)) {
+    if (await isAppInstalled(package) && !await uninstallApp(package)) {
+      _logger.printError('Failed to uninstall previous app package');
+      return LaunchResult.failed();
+    }
+    if (!await installApp(package)) {
       _logger.printError('Failed to install app package');
       return LaunchResult.failed();
     }
@@ -204,11 +287,24 @@ class WindowsUWPDevice extends Device {
 
     /// If the terminal is attached, prompt the user to open the firewall port.
     if (_logger.terminal.stdinHasTerminal) {
-      await _logger.terminal.promptForCharInput(<String>['Y', 'y'], logger: _logger,
-        prompt: 'To continue start an admin cmd prompt and run the following command:\n'
-        '   checknetisolation loopbackexempt -is -n=$packageFamily\n'
-        'Press "Y/y" once this is complete.'
+      final String response = await _logger.terminal.promptForCharInput(
+        <String>['Y', 'y', 'N', 'n'],
+        logger: _logger,
+        prompt: 'Enable Flutter debugging from localhost.\n'
+        '\n'
+        'Windows UWP apps run in a sandboxed environment. To enable Flutter debugging\n'
+        'and hot reload, you will need to enable inbound connections to the app from the\n'
+        'Flutter tool running on your machine. To do so:\n'
+        '  1. Launch PowerShell as an Administrator\n'
+        '  2. Enter the following command:\n'
+        '     checknetisolation loopbackexempt -is -n=$packageFamily\n'
+        '\n'
+        'Press "Y" once this is complete, or "N" to abort.',
+        displayAcceptedCharacters: false,
       );
+      if (response == 'N' || response == 'n') {
+        return LaunchResult.failed();
+      }
     }
 
     /// Currently we do not have a way to discover the VM Service URI.

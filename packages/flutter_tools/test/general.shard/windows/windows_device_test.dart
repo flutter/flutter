@@ -44,9 +44,18 @@ void main() {
 
   testWithoutContext('WindowsUwpDevice defaults', () async {
     final FakeUwpTool uwptool = FakeUwpTool();
-    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(uwptool: uwptool);
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+        fileSystem: fileSystem,
+        uwptool: uwptool,
+    );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
+    final String packagePath = fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
+    );
+    fileSystem.file(packagePath).createSync(recursive:true);
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_uwp_x64);
     expect(windowsDevice.name, 'Windows (UWP)');
     expect(await windowsDevice.installApp(package), true);
@@ -167,7 +176,7 @@ void main() {
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.release), 'release/executable');
   });
 
-  testWithoutContext('WinUWPDevice can launch application', () async {
+  testWithoutContext('WinUWPDevice can launch application if cert is installed', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -177,6 +186,12 @@ void main() {
     );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
+    uwptool.hasValidSignature = true;
+    final String packagePath = fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
+    );
+    fileSystem.file(packagePath).createSync(recursive:true);
     final LaunchResult result = await windowsDevice.startApp(
       package,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -185,8 +200,9 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(uwptool.launchRequests.single.packageFamily, 'PACKAGE-ID_publisher');
-    expect(uwptool.launchRequests.single.args, <String>[
+    expect(uwptool.installCertRequests, isEmpty);
+    expect(uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
+    expect(uwptool.launchAppRequests.single.args, <String>[
       '--observatory-port=12345',
       '--disable-service-auth-codes',
       '--enable-dart-profiling',
@@ -195,7 +211,7 @@ void main() {
     ]);
   });
 
-   testWithoutContext('WinUWPDevice can launch application in release mode', () async {
+  testWithoutContext('WinUWPDevice installs cert and can launch application if cert not installed', () async {
     Cache.flutterRoot = '';
     final FakeUwpTool uwptool = FakeUwpTool();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -205,6 +221,46 @@ void main() {
     );
     final FakeBuildableUwpApp package = FakeBuildableUwpApp();
 
+    uwptool.hasValidSignature = false;
+    final String packagePath = fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Debug_Test', 'testapp_1.2.3.4_x64_Debug.msix',
+    );
+    fileSystem.file(packagePath).createSync(recursive:true);
+    final LaunchResult result = await windowsDevice.startApp(
+      package,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{},
+    );
+
+    expect(result.started, true);
+    expect(uwptool.installCertRequests, isNotEmpty);
+    expect(uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
+    expect(uwptool.launchAppRequests.single.args, <String>[
+      '--observatory-port=12345',
+      '--disable-service-auth-codes',
+      '--enable-dart-profiling',
+      '--enable-checked-mode',
+      '--verify-entry-points',
+    ]);
+  });
+
+  testWithoutContext('WinUWPDevice can launch application in release mode', () async {
+    Cache.flutterRoot = '';
+    final FakeUwpTool uwptool = FakeUwpTool();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final WindowsUWPDevice windowsDevice = setUpWindowsUwpDevice(
+      fileSystem: fileSystem,
+      uwptool: uwptool,
+    );
+    final FakeBuildableUwpApp package = FakeBuildableUwpApp();
+
+    final String packagePath = fileSystem.path.join(
+      'build', 'winuwp', 'runner_uwp', 'AppPackages', 'testapp',
+      'testapp_1.2.3.4_x64_Release_Test', 'testapp_1.2.3.4_x64_Release.msix',
+    );
+    fileSystem.file(packagePath).createSync(recursive:true);
     final LaunchResult result = await windowsDevice.startApp(
       package,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
@@ -213,8 +269,8 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(uwptool.launchRequests.single.packageFamily, 'PACKAGE-ID_publisher');
-    expect(uwptool.launchRequests.single.args, <String>[]);
+    expect(uwptool.launchAppRequests.single.packageFamily, 'PACKAGE-ID_publisher');
+    expect(uwptool.launchAppRequests.single.args, <String>[]);
   });
 }
 
@@ -273,10 +329,12 @@ class FakeBuildableUwpApp extends Fake implements BuildableUwpApp {
 
 class FakeUwpTool implements UwpTool {
   bool isInstalled = false;
+  bool hasValidSignature = false;
   final List<_GetPackageFamilyRequest> getPackageFamilyRequests = <_GetPackageFamilyRequest>[];
-  final List<_LaunchRequest> launchRequests = <_LaunchRequest>[];
-  final List<_InstallRequest> installRequests = <_InstallRequest>[];
-  final List<_UninstallRequest> uninstallRequests = <_UninstallRequest>[];
+  final List<_LaunchAppRequest> launchAppRequests = <_LaunchAppRequest>[];
+  final List<_InstallCertRequest> installCertRequests = <_InstallCertRequest>[];
+  final List<_InstallAppRequest> installAppRequests = <_InstallAppRequest>[];
+  final List<_UninstallAppRequest> uninstallAppRequests = <_UninstallAppRequest>[];
 
   @override
   Future<List<String>> listApps() async {
@@ -291,20 +349,31 @@ class FakeUwpTool implements UwpTool {
 
   @override
   Future<int/*?*/> launchApp(String packageFamily, List<String> args) async {
-    launchRequests.add(_LaunchRequest(packageFamily, args));
+    launchAppRequests.add(_LaunchAppRequest(packageFamily, args));
     return 42;
   }
 
   @override
-  Future<bool> installApp(String buildDirectory) async {
-    installRequests.add(_InstallRequest(buildDirectory));
+  Future<bool> isSignatureValid(String packagePath) async {
+    return hasValidSignature;
+  }
+
+  @override
+  Future<bool> installCertificate(String certificatePath) async {
+    installCertRequests.add(_InstallCertRequest(certificatePath));
+    return true;
+  }
+
+  @override
+  Future<bool> installApp(String packageUri, List<String> dependencyUris) async {
+    installAppRequests.add(_InstallAppRequest(packageUri, dependencyUris));
     isInstalled = true;
     return true;
   }
 
   @override
   Future<bool> uninstallApp(String packageFamily) async {
-    uninstallRequests.add(_UninstallRequest(packageFamily));
+    uninstallAppRequests.add(_UninstallAppRequest(packageFamily));
     isInstalled = false;
     return true;
   }
@@ -316,21 +385,29 @@ class _GetPackageFamilyRequest {
   final String packageId;
 }
 
-class _LaunchRequest {
-  const _LaunchRequest(this.packageFamily, this.args);
+class _LaunchAppRequest {
+  const _LaunchAppRequest(this.packageFamily, this.args);
 
   final String packageFamily;
   final List<String> args;
 }
 
-class _InstallRequest {
-  const _InstallRequest(this.buildDirectory);
+class _InstallCertRequest {
+  const _InstallCertRequest(this.certificatePath);
 
-  final String buildDirectory;
+  final String certificatePath;
 }
 
-class _UninstallRequest {
-  const _UninstallRequest(this.packageFamily);
+
+class _InstallAppRequest {
+  const _InstallAppRequest(this.packageUri, this.dependencyUris);
+
+  final String packageUri;
+  final List<String> dependencyUris;
+}
+
+class _UninstallAppRequest {
+  const _UninstallAppRequest(this.packageFamily);
 
   final String packageFamily;
 }
