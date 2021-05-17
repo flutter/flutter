@@ -61,6 +61,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       {},                                  // io manager
       {},                                  // unref queue
       {},                                  // image decoder
+      {},                                  // image generator registry
       "main.dart",                         // advisory uri
       "main",                              // advisory entrypoint,
       DartIsolate::Flags{},                // flags
@@ -104,6 +105,7 @@ TEST_F(DartIsolateTest, SpawnIsolate) {
       {},                                  // io manager
       {},                                  // unref queue
       {},                                  // image decoder
+      {},                                  // image generator registry
       "main.dart",                         // advisory uri
       "main",                              // advisory entrypoint,
       DartIsolate::Flags{},                // flags
@@ -182,6 +184,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       {},                                  // io manager
       {},                                  // unref queue
       {},                                  // image decoder
+      {},                                  // image generator registry
       "main.dart",                         // advisory uri
       "main",                              // advisory entrypoint
       DartIsolate::Flags{},                // flags
@@ -441,6 +444,7 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
       {},                                  // io manager
       {},                                  // unref queue
       {},                                  // image decoder
+      {},                                  // image generator registry
       "main.dart",                         // advisory uri
       "main",                              // advisory entrypoint,
       DartIsolate::Flags{},                // flags
@@ -542,6 +546,7 @@ TEST_F(DartIsolateTest, InvalidLoadingUnitFails) {
       {},                                  // io manager
       {},                                  // unref queue
       {},                                  // image decoder
+      {},                                  // image generator registry
       "main.dart",                         // advisory uri
       "main",                              // advisory entrypoint
       DartIsolate::Flags{},                // flags

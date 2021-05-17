@@ -13,6 +13,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/lib/ui/io_manager.h"
+#include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/volatile_path_tracker.h"
@@ -80,7 +81,13 @@ class RuntimeController : public PlatformConfigurationClient {
   ///                                         isolate to collect resources that
   ///                                         may reference resources on the
   ///                                         GPU.
-  /// @param[in]  image_decoder               The image decoder
+  /// @param[in]  image_decoder               The image decoder.
+  /// @param[in]  image_generator_registry    Cascading registry of image
+  ///                                         generator builders. Given
+  ///                                         compressed image bytes as input,
+  ///                                         this is used to find and create
+  ///                                         image generators, which can then
+  ///                                         be used for image decoding.
   /// @param[in]  advisory_script_uri         The advisory script URI (only used
   ///                                         for debugging). This does not
   ///                                         affect the code being run in the
@@ -124,6 +131,7 @@ class RuntimeController : public PlatformConfigurationClient {
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::WeakPtr<ImageDecoder> image_decoder,
+      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       const std::function<void(int64_t)>& idle_notification_callback,
@@ -627,6 +635,7 @@ class RuntimeController : public PlatformConfigurationClient {
   fml::WeakPtr<IOManager> io_manager_;
   fml::RefPtr<SkiaUnrefQueue> unref_queue_;
   fml::WeakPtr<ImageDecoder> image_decoder_;
+  fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry_;
   std::string advisory_script_uri_;
   std::string advisory_script_entrypoint_;
   std::function<void(int64_t)> idle_notification_callback_;

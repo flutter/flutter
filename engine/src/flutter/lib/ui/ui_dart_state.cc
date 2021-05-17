@@ -33,6 +33,7 @@ UIDartState::UIDartState(
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     std::string logger_prefix,
@@ -50,6 +51,7 @@ UIDartState::UIDartState(
       io_manager_(std::move(io_manager)),
       skia_unref_queue_(std::move(skia_unref_queue)),
       image_decoder_(std::move(image_decoder)),
+      image_generator_registry_(std::move(image_generator_registry)),
       volatile_path_tracker_(std::move(volatile_path_tracker)),
       advisory_script_uri_(std::move(advisory_script_uri)),
       advisory_script_entrypoint_(std::move(advisory_script_entrypoint)),
@@ -173,6 +175,11 @@ fml::WeakPtr<GrDirectContext> UIDartState::GetResourceContext() const {
 
 fml::WeakPtr<ImageDecoder> UIDartState::GetImageDecoder() const {
   return image_decoder_;
+}
+
+fml::WeakPtr<ImageGeneratorRegistry> UIDartState::GetImageGeneratorRegistry()
+    const {
+  return image_generator_registry_;
 }
 
 std::shared_ptr<IsolateNameServer> UIDartState::GetIsolateNameServer() const {

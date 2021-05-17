@@ -359,6 +359,11 @@ FILE: ../../../flutter/lib/ui/painting/image_encoding.h
 FILE: ../../../flutter/lib/ui/painting/image_encoding_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_filter.cc
 FILE: ../../../flutter/lib/ui/painting/image_filter.h
+FILE: ../../../flutter/lib/ui/painting/image_generator.cc
+FILE: ../../../flutter/lib/ui/painting/image_generator.h
+FILE: ../../../flutter/lib/ui/painting/image_generator_registry.cc
+FILE: ../../../flutter/lib/ui/painting/image_generator_registry.h
+FILE: ../../../flutter/lib/ui/painting/image_generator_registry_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_shader.cc
 FILE: ../../../flutter/lib/ui/painting/image_shader.h
 FILE: ../../../flutter/lib/ui/painting/immutable_buffer.cc

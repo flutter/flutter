@@ -130,6 +130,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
           io_manager,                          // io manager
           {},                                  // unref queue
           {},                                  // image decoder
+          {},                                  // image generator registry
           "main.dart",                         // advisory uri
           entrypoint.c_str(),                  // advisory entrypoint
           DartIsolate::Flags{},                // flags

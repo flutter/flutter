@@ -31,6 +31,7 @@ RuntimeController::RuntimeController(
     fml::WeakPtr<IOManager> p_io_manager,
     fml::RefPtr<SkiaUnrefQueue> p_unref_queue,
     fml::WeakPtr<ImageDecoder> p_image_decoder,
+    fml::WeakPtr<ImageGeneratorRegistry> p_image_generator_registry,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
     const std::function<void(int64_t)>& idle_notification_callback,
@@ -48,6 +49,7 @@ RuntimeController::RuntimeController(
       io_manager_(p_io_manager),
       unref_queue_(p_unref_queue),
       image_decoder_(p_image_decoder),
+      image_generator_registry_(p_image_generator_registry),
       advisory_script_uri_(p_advisory_script_uri),
       advisory_script_entrypoint_(p_advisory_script_entrypoint),
       idle_notification_callback_(idle_notification_callback),
@@ -68,10 +70,10 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
   auto result = std::make_unique<RuntimeController>(
       client, vm_, isolate_snapshot_, task_runners_, snapshot_delegate_,
       hint_freed_delegate_, io_manager_, unref_queue_, image_decoder_,
-      advisory_script_uri, advisory_script_entrypoint,
-      idle_notification_callback, platform_data_, isolate_create_callback,
-      isolate_shutdown_callback, persistent_isolate_data,
-      volatile_path_tracker_);
+      image_generator_registry_, advisory_script_uri,
+      advisory_script_entrypoint, idle_notification_callback, platform_data_,
+      isolate_create_callback, isolate_shutdown_callback,
+      persistent_isolate_data, volatile_path_tracker_);
   result->spawning_isolate_ = root_isolate_;
   return result;
 }
@@ -108,6 +110,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       io_manager_,                  //
       unref_queue_,                 //
       image_decoder_,               //
+      image_generator_registry_,    //
       advisory_script_uri_,         //
       advisory_script_entrypoint_,  //
       idle_notification_callback_,  //
@@ -398,6 +401,7 @@ bool RuntimeController::LaunchRootIsolate(
           io_manager_,                                    //
           unref_queue_,                                   //
           image_decoder_,                                 //
+          image_generator_registry_,                      //
           advisory_script_uri_,                           //
           advisory_script_entrypoint_,                    //
           DartIsolate::Flags{},                           //

@@ -66,6 +66,7 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
           {},                                  // io_manager
           {},                                  // unref_queue
           {},                                  // image_decoder
+          {},                                  // image_generator_registry
           "main.dart",                         // advisory_script_uri
           entrypoint.c_str(),                  // advisory_script_entrypoint
           DartIsolate::Flags{},                // flags

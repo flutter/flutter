@@ -37,6 +37,7 @@ TEST_F(DartState, IsShuttingDown) {
       {},                                  // io manager
       {},                                  // unref queue
       {},                                  // image decoder
+      {},                                  // image generator registry
       "main.dart",                         // advisory uri
       "main",                              // advisory entrypoint
       DartIsolate::Flags{},                // flags
