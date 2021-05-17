@@ -47,6 +47,7 @@ class FlutterCache extends Cache {
     registerArtifact(MacOSFuchsiaSDKArtifacts(this, platform: platform));
     registerArtifact(FlutterRunnerSDKArtifacts(this, platform: platform));
     registerArtifact(FlutterRunnerDebugSymbols(this, platform: platform));
+    registerArtifact(WindowsCppClientWrapper(this, platform: platform));
     for (final String artifactName in IosUsbArtifacts.artifactNames) {
       registerArtifact(IosUsbArtifacts(artifactName, this, platform: platform));
     }
@@ -317,6 +318,34 @@ class WindowsUwpEngineArtifacts extends EngineCachedArtifact {
   List<List<String>> getBinaryDirs() {
     if (_platform.isWindows || ignorePlatformFiltering) {
       return _windowsUwpDesktopBinaryDirs;
+    }
+    return const <List<String>>[];
+  }
+
+  @override
+  List<String> getLicenseDirs() => const <String>[];
+}
+
+/// Shared client wrapper code for win32 and winuwp.
+class WindowsCppClientWrapper extends EngineCachedArtifact {
+  WindowsCppClientWrapper(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(
+        'windows-cpp-client-wrapper',
+         cache,
+         DevelopmentArtifact.windowsCppClientWrapper,
+       );
+
+  final Platform _platform;
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    if (_platform.isWindows || ignorePlatformFiltering) {
+      return <List<String>>[<String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip']];
     }
     return const <List<String>>[];
   }
@@ -850,14 +879,12 @@ class IosUsbArtifacts extends CachedArtifact {
 // https://github.com/flutter/flutter/issues/38935
 const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
   <String>['windows-x64', 'windows-x64/windows-x64-flutter.zip'],
-  <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
   <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
   <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
 ];
 
 const List<List<String>> _windowsUwpDesktopBinaryDirs = <List<String>>[
   <String>['windows-uwp-x64-debug', 'windows-x64-debug/windows-uwp-x64-flutter.zip'],
-  <String>['windows-uwp-x64-debug', 'windows-x64/flutter-cpp-client-wrapper.zip'],
   <String>['windows-uwp-x64-profile', 'windows-x64-profile/windows-uwp-x64-flutter.zip'],
   <String>['windows-uwp-x64-release', 'windows-x64-release/windows-uwp-x64-flutter.zip'],
 ];
