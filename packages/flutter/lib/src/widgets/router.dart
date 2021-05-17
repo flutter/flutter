@@ -323,9 +323,9 @@ class Router<T> extends StatefulWidget {
   /// responsibility of the [RouterDelegate] to restore its internal state based
   /// on the provided configuration.
   ///
-  /// The router uses the [RouterInformationParser] to serialize and deserialize
+  /// The router uses the [RouteInformationParser] to serialize and deserialize
   /// [RouterDelegate.currentConfiguration]. Therefore, a
-  /// [routerInformationParser] must be provided when [restorationId] is
+  /// [routeInformationParser] must be provided when [restorationId] is
   /// non-null.
   ///
   /// See also:
