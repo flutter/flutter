@@ -257,9 +257,9 @@ void main() {
     children.forEach(renderWrap.add);
 
     final double childrenHeight = renderWrap.childCount * 80.0;
-    final double runSpacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
+    final double spacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
 
-    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), childrenHeight + runSpacingHeight);
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), childrenHeight + spacingHeight);
   });
 
   test('Compute max intrinsic width with spacing', () {
