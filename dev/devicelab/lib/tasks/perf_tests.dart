@@ -1351,30 +1351,19 @@ class DevToolsMemoryTest {
       _device = await devices.workingDevice;
       await _device.unlock();
 
-      await _launchApp();
-      if (_observatoryUri == null) {
-        return  TaskResult.failure('Observatory URI not found.');
-      }
-
-      await _launchDevTools();
-
       await flutter(
         'drive',
         options: <String>[
-          '--use-existing-app', _observatoryUri,
           '-d', _device.deviceId,
           '--screenshot',
           hostAgent.dumpDirectory.path,
           '--profile',
+          '--profile-memory', _kJsonFileName,
+          '--no-publish-port',
+          '-v',
           driverTest,
         ],
       );
-
-      _devToolsProcess.kill();
-      await _devToolsProcess.exitCode;
-
-      _runProcess.kill();
-      await _runProcess.exitCode;
 
       final Map<String, dynamic> data = json.decode(
         file('$project/$_kJsonFileName').readAsStringSync(),
@@ -1391,10 +1380,6 @@ class DevToolsMemoryTest {
         }
       }
 
-      await flutter('install', options: <String>[
-        '--uninstall-only',
-      ]);
-
       return TaskResult.success(
         <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
         benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
@@ -1402,90 +1387,7 @@ class DevToolsMemoryTest {
     });
   }
 
-  Future<void> _launchApp() async {
-    print('launching $project$driverTest on device...');
-    final String flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
-    _runProcess = await startProcess(
-      flutterPath,
-      <String>[
-        'run',
-        '--verbose',
-        '--profile',
-        '--no-publish-port',
-        '-d', _device.deviceId,
-        driverTest,
-      ],
-    );
-
-    // Listen for Observatory URI and forward stdout/stderr
-    final Completer<String> observatoryUri = Completer<String>();
-    _runProcess.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('run stdout: $line');
-          final RegExpMatch match = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(line);
-          if (match != null && !observatoryUri.isCompleted) {
-            observatoryUri.complete(match[1]);
-            _observatoryUri = match[1];
-          }
-        }, onDone: () {
-          if (!observatoryUri.isCompleted) {
-            observatoryUri.complete();
-          }
-        });
-    _forwardStream(_runProcess.stderr, 'run stderr');
-
-    _observatoryUri = await observatoryUri.future;
-  }
-
-  Future<void> _launchDevTools() async {
-    // To mitigate https://github.com/flutter/flutter/issues/82142
-    await exec(pubBin, <String>[
-      'global',
-      'deactivate',
-      'devtools',
-    ], canFail: true);
-    // The version of devtools is pinned. If we pub global activate devtools and an
-    // upstream devtools release breaks our CI, it will manifest on an unrelated
-    // commit, making it more difficult to determine the cause.
-    //
-    // Also, for release branches, all external test dependencies need to be pinned.
-    await exec(pubBin, <String>[
-      'global',
-      'activate',
-      'devtools',
-      '2.2.3',
-      // Try to debug https://github.com/flutter/flutter/issues/82142
-      '--verbose',
-    ]);
-    _devToolsProcess = await startProcess(
-      pubBin,
-      <String>[
-        'global',
-        'run',
-        'devtools',
-        '--vm-uri', _observatoryUri,
-        '--profile-memory', _kJsonFileName,
-      ],
-    );
-    _forwardStream(_devToolsProcess.stdout, 'devtools stdout');
-    _forwardStream(_devToolsProcess.stderr, 'devtools stderr');
-  }
-
-  void _forwardStream(Stream<List<int>> stream, String label) {
-    stream
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('$label: $line');
-        });
-  }
-
   Device _device;
-  String _observatoryUri;
-  Process _runProcess;
-  Process _devToolsProcess;
 
   static const String _kJsonFileName = 'devtools_memory.json';
 }
