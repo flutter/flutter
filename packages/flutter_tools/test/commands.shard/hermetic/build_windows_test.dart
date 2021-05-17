@@ -137,18 +137,18 @@ void main() {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
 
-    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.universal, DevelopmentArtifact.windows});
+    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.windows});
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('build winuwp requires winuwp and win32 artifacts', () async {
+  testUsingContext('build winuwp requires winuwp artifacts', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
 
-    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.universal, DevelopmentArtifact.windowsUwp});
+    expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.windowsUwp});
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
