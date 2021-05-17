@@ -173,6 +173,16 @@ class WindowsUWPDevice extends Device {
     return _getPackagePaths(depsDirectory);
   }
 
+  String _getPackageName(String binaryName, String version, String config, {String/*?*/ architecture}) {
+    final List<String> components = <String>[
+      binaryName,
+      version,
+      if (architecture != null) architecture,
+      config,
+    ];
+    return components.join('_');
+  }
+
   @override
   Future<bool> installApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
     /// The cmake build generates an install powershell script.
@@ -182,18 +192,40 @@ class WindowsUWPDevice extends Device {
     if (packageVersion == null) {
       return false;
     }
+    final String binaryDir = _fileSystem.path.absolute(
+        _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName));
     final String config = toTitleCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
-    const String arch = 'x64';
-    final String generatedDir = '${binaryName}_${packageVersion}_${arch}_${config}_Test';
-    final String generatedApp = '${binaryName}_${packageVersion}_${arch}_$config';
-    final String buildDirectory = _fileSystem.path.absolute(_fileSystem.path.join(
-        'build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generatedDir));
+
+    // If a multi-architecture package exists, install that; otherwise install
+    // the single-architecture package.
+    final List<String> packageNames = <String>[
+      // Multi-archtitecture package.
+      _getPackageName(binaryName, packageVersion, config),
+      // Single-archtitecture package.
+      _getPackageName(binaryName, packageVersion, config, architecture: 'x64'),
+    ];
+    String packageName;
+    String buildDirectory;
+    String packagePath;
+    for (final String name in packageNames) {
+      packageName = name;
+      buildDirectory = _fileSystem.path.join(binaryDir, '${packageName}_Test');
+      if (_fileSystem.isDirectorySync(buildDirectory)) {
+        packagePath = _getAppPackagePath(buildDirectory);
+        if (packagePath != null && _fileSystem.isFileSync(packagePath)) {
+          break;
+        }
+      }
+    }
+    if (packagePath == null) {
+      _logger.printError('Failed to locate app package to install');
+      return false;
+    }
 
     // Verify package signature.
-    final String packagePath = _getAppPackagePath(buildDirectory);
     if (!await _uwptool.isSignatureValid(packagePath)) {
       // If signature is invalid, install the developer certificate.
-      final String certificatePath = _fileSystem.path.join(buildDirectory, '$generatedApp.cer');
+      final String certificatePath = _fileSystem.path.join(buildDirectory, '$packageName.cer');
       if (_logger.terminal.stdinHasTerminal) {
         final String response = await _logger.terminal.promptForCharInput(
           <String>['Y', 'y', 'N', 'n'],
@@ -221,7 +253,7 @@ class WindowsUWPDevice extends Device {
 
     // Install the application and dependencies.
     final String packageUri = Uri.file(packagePath).toString();
-    final List<String> dependencyUris = _getDependencyPaths(buildDirectory, arch)
+    final List<String> dependencyUris = _getDependencyPaths(buildDirectory, 'x64')
         .map((String path) => Uri.file(path).toString())
         .toList();
     return _uwptool.installApp(packageUri.toString(), dependencyUris);
