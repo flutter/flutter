@@ -268,7 +268,7 @@ class AndroidSdk {
     return null;
   }
 
-  String? getCmdlineToolsPath(String binaryName, {bool skipTools = false}) {
+  String? getCmdlineToolsPath(String binaryName, {bool skipOldTools = false}) {
     // First look for the latest version of the command-line tools
     final File cmdlineToolsLatestBinary = directory
       .childDirectory('cmdline-tools')
@@ -307,7 +307,7 @@ class AndroidSdk {
         }
       }
     }
-    if (skipTools) {
+    if (skipOldTools) {
       return null;
     }
 
@@ -399,7 +399,7 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final String? path = getCmdlineToolsPath(executable, skipTools: true);
+    final String? path = getCmdlineToolsPath(executable, skipOldTools: true);
     if (path != null) {
       return path;
     }
