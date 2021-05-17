@@ -706,6 +706,85 @@ void main() {
       final String fullErrorMessage = errorDetails.toString().replaceAll('\n', ' ');
       expect(fullErrorMessage, contains('Attempted to send a key down event when no keys are in keysPressed'));
     });
+
+    testWidgets('RawKeyboard sends key events to registered handlers', (WidgetTester tester) async {
+      String character = '';
+      bool listenerReceived = false;
+      bool mainHandlerReceived = false;
+      bool firstRegisteredHandlerReceived = false;
+      bool secondRegisteredHandlerReceived = false;
+      void listenForKey(RawKeyEvent event) {
+        expect(event.character, equals(character));
+        listenerReceived = true;
+      }
+      bool mainKeyHandler(RawKeyEvent event) {
+        expect(event.character, equals(character));
+        mainHandlerReceived = true;
+        return false;
+      }
+      bool firstKeyHandler(RawKeyEvent event) {
+        expect(event.character, equals(character));
+        firstRegisteredHandlerReceived = true;
+        return true;
+      }
+      bool secondKeyHandler(RawKeyEvent event) {
+        expect(event.character, equals(character));
+        secondRegisteredHandlerReceived = true;
+        return true;
+      }
+      RawKeyboard.instance.addListener(listenForKey);
+      RawKeyboard.instance.addKeyHandler(firstKeyHandler);
+      RawKeyboard.instance.addKeyHandler(secondKeyHandler);
+      final RawKeyEventHandler? oldHandler = RawKeyboard.instance.keyEventHandler;
+      RawKeyboard.instance.keyEventHandler = mainKeyHandler;
+      character = 'a';
+      final bool result = await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(result, isTrue);
+      expect(listenerReceived, isTrue);
+      expect(mainHandlerReceived, isTrue);
+      expect(firstRegisteredHandlerReceived, isTrue);
+      expect(secondRegisteredHandlerReceived, isTrue);
+
+      RawKeyboard.instance.keyEventHandler = oldHandler;
+      RawKeyboard.instance.removeKeyHandler(firstKeyHandler);
+      RawKeyboard.instance.removeKeyHandler(secondKeyHandler);
+      RawKeyboard.instance.removeListener(listenForKey);
+    });
+
+    testWidgets('RawKeyboard does not send key events to registered handlers if handled by main handler', (WidgetTester tester) async {
+      String character = '';
+      bool listenerReceived = false;
+      bool mainHandlerReceived = false;
+      bool registeredHandlerReceived = false;
+      void listenForKey(RawKeyEvent event) {
+        expect(event.character, equals(character));
+        listenerReceived = true;
+      }
+      bool mainKeyHandler(RawKeyEvent event) {
+        expect(event.character, equals(character));
+        mainHandlerReceived = true;
+        return true;
+      }
+      bool firstKeyHandler(RawKeyEvent event) {
+        expect(event.character, equals(character));
+        registeredHandlerReceived = true;
+        return true;
+      }
+      RawKeyboard.instance.addListener(listenForKey);
+      RawKeyboard.instance.addKeyHandler(firstKeyHandler);
+      final RawKeyEventHandler? oldHandler = RawKeyboard.instance.keyEventHandler;
+      RawKeyboard.instance.keyEventHandler = mainKeyHandler;
+      character = 'a';
+      final bool result = await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(result, isTrue);
+      expect(listenerReceived, isTrue);
+      expect(mainHandlerReceived, isTrue);
+      expect(registeredHandlerReceived, isFalse);
+
+      RawKeyboard.instance.keyEventHandler = oldHandler;
+      RawKeyboard.instance.removeKeyHandler(firstKeyHandler);
+      RawKeyboard.instance.removeListener(listenForKey);
+    });
   });
 
   group('RawKeyEventDataAndroid', () {

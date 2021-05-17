@@ -588,8 +588,13 @@ class RawKeyboard {
   /// be distributed to other listeners, and to the [keyEventHandler].
   ///
   /// Most applications prefer to use the focus system (see [Focus] and
-  /// [FocusManager]) to receive key events to the focused control instead of
-  /// this kind of passive listener.
+  /// [FocusManager]), or handlers registered by [addKeyHandler] to receive key
+  /// events instead of this kind of passive listener, since the event
+  /// propagation can be terminated.
+  ///
+  /// If you would like to receive and handle key events that are not handled by
+  /// the focus system, use [addKeyHandler] instead, which allows marking the
+  /// events as handled for the platform.
   ///
   /// Listeners can be removed with [removeListener].
   void addListener(ValueChanged<RawKeyEvent> listener) {
@@ -604,8 +609,38 @@ class RawKeyboard {
     _listeners.remove(listener);
   }
 
-  /// A handler for hardware keyboard events that will stop propagation if the
-  /// handler returns true.
+  final List<RawKeyEventHandler> _keyHandlers = <RawKeyEventHandler>[];
+
+  /// Register a handler that is called when the user presses or releases
+  /// a hardware keyboard key if the [keyEventHandler] didn't handle it.
+  ///
+  /// These events will be delivered after the [keyEventHandler] (typically set
+  /// by the [FocusManager]) has returned false. If the [keyEventHandler]
+  /// returns true, then handlers registered in this way will not be called, as
+  /// the key is considered handled already.
+  ///
+  /// If any registered handler returns true, then the key event will be
+  /// considered handled by the platform, but all registered handlers will still
+  /// be called.
+  ///
+  /// If you want to listen to key events, but not handle them, use
+  /// [addListener] instead.
+  ///
+  /// Key handlers can be removed with [removeKeyHandler].
+  void addKeyHandler(RawKeyEventHandler handler) {
+    _keyHandlers.add(handler);
+  }
+
+  /// Stop calling the given handler every time the user presses or releases a
+  /// hardware keyboard key.
+  ///
+  /// Key handlers can be added with [addKeyHandler].
+  void removeKeyHandler(RawKeyEventHandler handler) {
+    _keyHandlers.remove(handler);
+  }
+
+  /// The main handler for hardware keyboard events that will stop propagation
+  /// if the handler returns true.
   ///
   /// Key events on the platform are given to Flutter to be handled by the
   /// engine. If they are not handled, then the platform will continue to
@@ -669,6 +704,7 @@ class RawKeyboard {
       'set its modifier flags. This was the event: $event and its data: '
       '${event.data}',
     );
+
     // Send the event to passive listeners.
     for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
       if (_listeners.contains(listener)) {
@@ -676,11 +712,28 @@ class RawKeyboard {
       }
     }
 
-    // Send the key event to the keyEventHandler, then send the appropriate
-    // response to the platform so that it can resolve the event's handling.
-    // Defaults to false if keyEventHandler is null.
-    final bool handled = keyEventHandler != null && keyEventHandler!(event);
+    // Send the key event to the main keyEventHandler.
+    bool handled = keyEventHandler != null && keyEventHandler!(event);
     assert(handled != null, 'keyEventHandler returned null, which is not allowed');
+
+    // If not already handled by the main handler, send the key event to all
+    // registered handlers, even if one of them handles it.
+    if (!handled) {
+      for (final RawKeyEventHandler handler in List<RawKeyEventHandler>.from(_keyHandlers)) {
+        if (_keyHandlers.contains(handler)) {
+          final bool handlerHandled = handler(event);
+          assert(handlerHandled != null, 'key handler returned null, which is not allowed');
+          // If any handler says they handled it, then report that to the
+          // platform. This does not prevent other registered handlers from also
+          // handling the event.
+          handled = handlerHandled || handled;
+        }
+      }
+    }
+
+    // Now send the appropriate response to the platform so that it can resolve
+    // the event's handling. Defaults to false if keyEventHandler is null and
+    // there are no other handlers.
     return <String, dynamic>{ 'handled': handled };
   }
 
