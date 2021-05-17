@@ -26,7 +26,6 @@ ScrollbarPainter _buildPainter({
   Radius? radius,
   double minLength = _kMinThumbExtent,
   double? minOverscrollLength,
-  ScrollbarOrientation? scrollbarOrientation,
   required ScrollMetrics scrollMetrics,
 }) {
   return ScrollbarPainter(
@@ -40,7 +39,6 @@ ScrollbarPainter _buildPainter({
     minLength: minLength,
     minOverscrollLength: minOverscrollLength ?? minLength,
     fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
-    scrollbarOrientation: scrollbarOrientation,
   )..update(scrollMetrics, scrollMetrics.axisDirection);
 }
 
@@ -249,128 +247,6 @@ void main() {
       }
     },
   );
-
-  test('scrollbarOrientation are respected', () {
-    const double viewportDimension = 23;
-    const double maxExtent = 100;
-    final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
-      maxScrollExtent: maxExtent,
-      viewportDimension: viewportDimension,
-    );
-    const Size size = Size(600, viewportDimension);
-    const double margin = 0;
-
-    for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
-      final AxisDirection axisDirection;
-      if (scrollbarOrientation == ScrollbarOrientation.left || scrollbarOrientation == ScrollbarOrientation.right)
-        axisDirection = AxisDirection.down;
-      else
-        axisDirection = AxisDirection.right;
-
-      painter = _buildPainter(
-        crossAxisMargin: margin,
-        scrollMetrics: startingMetrics,
-        scrollbarOrientation: scrollbarOrientation,
-      );
-
-      painter.update(
-        startingMetrics.copyWith(axisDirection: axisDirection),
-        axisDirection
-      );
-
-      painter.paint(testCanvas, size);
-      final Rect rect = captureRect();
-
-      switch (scrollbarOrientation) {
-        case ScrollbarOrientation.left:
-          expect(rect.left, 0);
-          expect(rect.top, 0);
-          expect(rect.right, _kThickness);
-          expect(rect.bottom, _kMinThumbExtent);
-          break;
-        case ScrollbarOrientation.right:
-          expect(rect.left, 600 - _kThickness);
-          expect(rect.top, 0);
-          expect(rect.right, 600);
-          expect(rect.bottom, _kMinThumbExtent);
-          break;
-        case ScrollbarOrientation.top:
-          expect(rect.left, 0);
-          expect(rect.top, 0);
-          expect(rect.right, _kMinThumbExtent);
-          expect(rect.bottom, _kThickness);
-          break;
-        case ScrollbarOrientation.bottom:
-          expect(rect.left, 0);
-          expect(rect.top, 23 - _kThickness);
-          expect(rect.right, _kMinThumbExtent);
-          expect(rect.bottom, 23);
-          break;
-      }
-    }
-  });
-
-  test('scrollbarOrientation default values are correct', () {
-    const double viewportDimension = 23;
-    const double maxExtent = 100;
-    final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
-      maxScrollExtent: maxExtent,
-      viewportDimension: viewportDimension,
-    );
-    const Size size = Size(600, viewportDimension);
-    const double margin = 0;
-    Rect rect;
-
-    // Vertical scroll with TextDirection.ltr
-    painter = _buildPainter(
-      crossAxisMargin: margin,
-      scrollMetrics: startingMetrics,
-      textDirection: TextDirection.ltr,
-    );
-    painter.update(
-      startingMetrics.copyWith(axisDirection: AxisDirection.down),
-      AxisDirection.down
-    );
-    painter.paint(testCanvas, size);
-    rect = captureRect();
-    expect(rect.left, 600 - _kThickness);
-    expect(rect.top, 0);
-    expect(rect.right, 600);
-    expect(rect.bottom, _kMinThumbExtent);
-
-    // Vertical scroll with TextDirection.rtl
-    painter = _buildPainter(
-      crossAxisMargin: margin,
-      scrollMetrics: startingMetrics,
-      textDirection: TextDirection.rtl,
-    );
-    painter.update(
-      startingMetrics.copyWith(axisDirection: AxisDirection.down),
-      AxisDirection.down
-    );
-    painter.paint(testCanvas, size);
-    rect = captureRect();
-    expect(rect.left, 0);
-    expect(rect.top, 0);
-    expect(rect.right, _kThickness);
-    expect(rect.bottom, _kMinThumbExtent);
-
-    // Horizontal scroll
-    painter = _buildPainter(
-      crossAxisMargin: margin,
-      scrollMetrics: startingMetrics,
-    );
-    painter.update(
-      startingMetrics.copyWith(axisDirection: AxisDirection.right),
-      AxisDirection.right,
-    );
-    painter.paint(testCanvas, size);
-    rect = captureRect();
-    expect(rect.left, 0);
-    expect(rect.top, 23 - _kThickness);
-    expect(rect.right, _kMinThumbExtent);
-    expect(rect.bottom, 23);
-  });
 
   group('Padding works for all scroll directions', () {
     const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
@@ -1337,23 +1213,5 @@ void main() {
           color: const Color(0x66bcbcbc),
         ),
     );
-  });
-
-  testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
-    final ScrollbarPainter painter = ScrollbarPainter(
-      color: _kScrollbarColor,
-      fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
-      textDirection: TextDirection.ltr,
-      scrollbarOrientation: ScrollbarOrientation.left,
-    );
-    const Size size = Size(60, 80);
-    final ScrollMetrics scrollMetrics = defaultMetrics.copyWith(
-      maxScrollExtent: 100,
-      viewportDimension: size.height,
-      axisDirection: AxisDirection.right,
-    );
-    painter.update(scrollMetrics, scrollMetrics.axisDirection);
-
-    expect(() => painter.paint(testCanvas, size), throwsA(isA<AssertionError>()));
   });
 }

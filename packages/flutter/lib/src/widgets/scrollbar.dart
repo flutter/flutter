@@ -29,21 +29,6 @@ const double _kScrollbarThickness = 6.0;
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
-/// An orientation along either the horizontal or vertical [Axis].
-enum ScrollbarOrientation {
-  /// Place towards the left of the screen.
-  left,
-
-  /// Place towards the right of the screen.
-  right,
-
-  /// Place on top of the screen.
-  top,
-
-  /// Place on the bottom of the screen.
-  bottom,
-}
-
 /// Paints a scrollbar's track and thumb.
 ///
 /// The size of the scrollbar along its scroll direction is typically
@@ -87,7 +72,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     Radius? radius,
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
-    ScrollbarOrientation? scrollbarOrientation,
   }) : assert(color != null),
        assert(thickness != null),
        assert(fadeoutOpacityAnimation != null),
@@ -109,7 +93,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _minLength = minLength,
        _trackColor = trackColor,
        _trackBorderColor = trackBorderColor,
-       _scrollbarOrientation = scrollbarOrientation,
        _minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
@@ -287,46 +270,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  /// {@template flutter.widgets.Scrollbar.scrollbarOrientation}
-  /// Dictates the orientation of the scrollbar.
-  ///
-  /// [ScrollbarOrientation.top] places the scrollbar on top of the screen.
-  /// [ScrollbarOrientation.bottom] places the scrollbar on the bottom of the screen.
-  /// [ScrollbarOrientation.left] places the scrollbar on the left of the screen.
-  /// [ScrollbarOrientation.right] places the scrollbar on the right of the screen.
-  ///
-  /// [ScrollbarOrientation.top] and [ScrollbarOrientation.bottom] can only be
-  /// used with a vertical scroll.
-  /// [ScrollbarOrientation.left] and [ScrollbarOrientation.right] can only be
-  /// used with a horizontal scroll.
-  ///
-  /// For a vertical scroll the orientation defaults to
-  /// [ScrollbarOrientation.right] for [TextDirection.ltr] and
-  /// [ScrollbarOrientation.left] for [TextDirection.rtl].
-  /// For a horizontal scroll the orientation defaults to [ScrollbarOrientation.bottom].
-  /// {@endtemplate}
-  ScrollbarOrientation? get scrollbarOrientation => _scrollbarOrientation;
-  ScrollbarOrientation? _scrollbarOrientation;
-  set scrollbarOrientation(ScrollbarOrientation? value) {
-    if (scrollbarOrientation == value)
-      return;
-
-    _scrollbarOrientation = value;
-    notifyListeners();
-  }
-
-  void _debugAssertIsValidOrientation(ScrollbarOrientation orientation) {
-    assert(
-    (_isVertical && _isVerticalOrientation(orientation)) || (!_isVertical && !_isVerticalOrientation(orientation)),
-    'The given ScrollbarOrientation: $orientation is incompatible with the current AxisDirection: $_lastAxisDirection.'
-    );
-  }
-
-  /// Check whether given scrollbar orientation is vertical
-  bool _isVerticalOrientation(ScrollbarOrientation orientation) =>
-    orientation == ScrollbarOrientation.left
-    || orientation == ScrollbarOrientation.right;
-
   ScrollMetrics? _lastMetrics;
   AxisDirection? _lastAxisDirection;
   Rect? _thumbRect;
@@ -374,48 +317,37 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       'A TextDirection must be provided before a Scrollbar can be painted.',
     );
 
-    final ScrollbarOrientation resolvedOrientation;
-
-    if (scrollbarOrientation == null) {
-      if (_isVertical)
-        resolvedOrientation = textDirection == TextDirection.ltr
-          ? ScrollbarOrientation.right
-          : ScrollbarOrientation.left;
-      else
-        resolvedOrientation = ScrollbarOrientation.bottom;
-    }
-    else {
-      resolvedOrientation = scrollbarOrientation!;
-    }
-
     final double x, y;
     final Size thumbSize, trackSize;
     final Offset trackOffset;
 
-    _debugAssertIsValidOrientation(resolvedOrientation);
-    switch(resolvedOrientation) {
-      case ScrollbarOrientation.left:
+    switch (direction) {
+      case AxisDirection.down:
         thumbSize = Size(thickness, thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = crossAxisMargin + padding.left;
+        x = textDirection == TextDirection.rtl
+          ? crossAxisMargin + padding.left
+          : size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, 0.0);
         break;
-      case ScrollbarOrientation.right:
+      case AxisDirection.up:
         thumbSize = Size(thickness, thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = size.width - thickness - crossAxisMargin - padding.right;
+        x = textDirection == TextDirection.rtl
+          ? crossAxisMargin + padding.left
+          : size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, 0.0);
         break;
-      case ScrollbarOrientation.top:
+      case AxisDirection.left:
         thumbSize = Size(thumbExtent, thickness);
-        trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = crossAxisMargin + padding.top;
+        y = size.height - thickness - crossAxisMargin - padding.bottom;
+        trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         trackOffset = Offset(0.0, y - crossAxisMargin);
         break;
-      case ScrollbarOrientation.bottom:
+      case AxisDirection.right:
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
@@ -638,8 +570,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || radius != old.radius
         || minLength != old.minLength
         || padding != old.padding
-        || minOverscrollLength != old.minOverscrollLength
-        || scrollbarOrientation != old.scrollbarOrientation;
+        || minOverscrollLength != old.minOverscrollLength;
   }
 
   @override
@@ -724,7 +655,6 @@ class RawScrollbar extends StatefulWidget {
     this.pressDuration = Duration.zero,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.interactive,
-    this.scrollbarOrientation,
   }) : assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
@@ -936,9 +866,6 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final bool? interactive;
 
-  /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
-  final ScrollbarOrientation? scrollbarOrientation;
-
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -1010,7 +937,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       color: widget.thumbColor ?? const Color(0x66BCBCBC),
       thickness: widget.thickness ?? _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
-      scrollbarOrientation: widget.scrollbarOrientation,
     );
   }
 
@@ -1116,8 +1042,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
-      ..padding = MediaQuery.of(context).padding
-      ..scrollbarOrientation = widget.scrollbarOrientation;
+      ..padding = MediaQuery.of(context).padding;
   }
 
   @override
