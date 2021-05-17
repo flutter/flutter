@@ -95,10 +95,10 @@ std::weak_ptr<DartIsolate> DartIsolate::SpawnIsolate(
       settings, GetIsolateGroupData().GetIsolateSnapshot(), GetTaskRunners(),
       std::move(platform_configuration), snapshot_delegate, hint_freed_delegate,
       GetIOManager(), GetSkiaUnrefQueue(), GetImageDecoder(),
-      advisory_script_uri, advisory_script_entrypoint, flags,
-      isolate_create_callback, isolate_shutdown_callback, dart_entrypoint,
-      dart_entrypoint_library, std::move(isolate_configration),
-      GetVolatilePathTracker(), this);
+      GetImageGeneratorRegistry(), advisory_script_uri,
+      advisory_script_entrypoint, flags, isolate_create_callback,
+      isolate_shutdown_callback, dart_entrypoint, dart_entrypoint_library,
+      std::move(isolate_configration), GetVolatilePathTracker(), this);
 }
 
 std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
@@ -111,6 +111,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     Flags isolate_flags,
@@ -143,6 +144,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
                                    io_manager,                         //
                                    skia_unref_queue,                   //
                                    image_decoder,                      //
+                                   image_generator_registry,           //
                                    advisory_script_uri,                //
                                    advisory_script_entrypoint,         //
                                    isolate_flags,                      //
@@ -222,6 +224,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     Flags flags,
@@ -247,17 +250,18 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
 
   auto isolate_data = std::make_unique<std::shared_ptr<DartIsolate>>(
       std::shared_ptr<DartIsolate>(new DartIsolate(
-          settings,                         // settings
-          task_runners,                     // task runners
-          std::move(snapshot_delegate),     // snapshot delegate
-          std::move(hint_freed_delegate),   // hint freed delegate
-          std::move(io_manager),            // IO manager
-          std::move(unref_queue),           // Skia unref queue
-          std::move(image_decoder),         // Image Decoder
-          advisory_script_uri,              // advisory URI
-          advisory_script_entrypoint,       // advisory entrypoint
-          true,                             // is_root_isolate
-          std::move(volatile_path_tracker)  // volatile path tracker
+          settings,                             // settings
+          task_runners,                         // task runners
+          std::move(snapshot_delegate),         // snapshot delegate
+          std::move(hint_freed_delegate),       // hint freed delegate
+          std::move(io_manager),                // IO manager
+          std::move(unref_queue),               // Skia unref queue
+          std::move(image_decoder),             // Image Decoder
+          std::move(image_generator_registry),  // Image generator registry
+          advisory_script_uri,                  // advisory URI
+          advisory_script_entrypoint,           // advisory entrypoint
+          true,                                 // is_root_isolate
+          std::move(volatile_path_tracker)      // volatile path tracker
           )));
 
   DartErrorString error;
@@ -326,6 +330,7 @@ DartIsolate::DartIsolate(
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     bool is_root_isolate,
@@ -338,6 +343,7 @@ DartIsolate::DartIsolate(
                   std::move(io_manager),
                   std::move(unref_queue),
                   std::move(image_decoder),
+                  std::move(image_generator_registry),
                   advisory_script_uri,
                   advisory_script_entrypoint,
                   settings.log_tag,
@@ -870,6 +876,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           {},                             // IO Manager
           {},                             // Skia unref queue
           {},                             // Image Decoder
+          {},                             // Image generator registry
           DART_VM_SERVICE_ISOLATE_NAME,   // script uri
           DART_VM_SERVICE_ISOLATE_NAME,   // script entrypoint
           DartIsolate::Flags{flags},      // flags
@@ -985,17 +992,18 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
 
   auto isolate_data = std::make_unique<std::shared_ptr<DartIsolate>>(
       std::shared_ptr<DartIsolate>(new DartIsolate(
-          (*isolate_group_data)->GetSettings(),  // settings
-          null_task_runners,                     // task_runners
-          fml::WeakPtr<SnapshotDelegate>{},      // snapshot_delegate
-          fml::WeakPtr<HintFreedDelegate>{},     // hint_freed_delegate
-          fml::WeakPtr<IOManager>{},             // io_manager
-          fml::RefPtr<SkiaUnrefQueue>{},         // unref_queue
-          fml::WeakPtr<ImageDecoder>{},          // image_decoder
-          advisory_script_uri,                   // advisory_script_uri
-          advisory_script_entrypoint,            // advisory_script_entrypoint
-          false,                                 // is_root_isolate
-          nullptr)));                            // volatile path tracker
+          (*isolate_group_data)->GetSettings(),    // settings
+          null_task_runners,                       // task_runners
+          fml::WeakPtr<SnapshotDelegate>{},        // snapshot_delegate
+          fml::WeakPtr<HintFreedDelegate>{},       // hint_freed_delegate
+          fml::WeakPtr<IOManager>{},               // io_manager
+          fml::RefPtr<SkiaUnrefQueue>{},           // unref_queue
+          fml::WeakPtr<ImageDecoder>{},            // image_decoder
+          fml::WeakPtr<ImageGeneratorRegistry>{},  // image_generator_registry
+          advisory_script_uri,                     // advisory_script_uri
+          advisory_script_entrypoint,              // advisory_script_entrypoint
+          false,                                   // is_root_isolate
+          nullptr)));                              // volatile path tracker
 
   Dart_Isolate vm_isolate = CreateDartIsolateGroup(
       std::move(isolate_group_data), std::move(isolate_data), flags, error,
@@ -1042,13 +1050,14 @@ bool DartIsolate::DartIsolateInitializeCallback(void** child_callback_data,
 
   auto embedder_isolate = std::make_unique<std::shared_ptr<DartIsolate>>(
       std::shared_ptr<DartIsolate>(new DartIsolate(
-          (*isolate_group_data)->GetSettings(),           // settings
-          null_task_runners,                              // task_runners
-          fml::WeakPtr<SnapshotDelegate>{},               // snapshot_delegate
-          fml::WeakPtr<HintFreedDelegate>{},              // hint_freed_delegate
-          fml::WeakPtr<IOManager>{},                      // io_manager
-          fml::RefPtr<SkiaUnrefQueue>{},                  // unref_queue
-          fml::WeakPtr<ImageDecoder>{},                   // image_decoder
+          (*isolate_group_data)->GetSettings(),    // settings
+          null_task_runners,                       // task_runners
+          fml::WeakPtr<SnapshotDelegate>{},        // snapshot_delegate
+          fml::WeakPtr<HintFreedDelegate>{},       // hint_freed_delegate
+          fml::WeakPtr<IOManager>{},               // io_manager
+          fml::RefPtr<SkiaUnrefQueue>{},           // unref_queue
+          fml::WeakPtr<ImageDecoder>{},            // image_decoder
+          fml::WeakPtr<ImageGeneratorRegistry>{},  // image_generator_registry
           (*isolate_group_data)->GetAdvisoryScriptURI(),  // advisory_script_uri
           (*isolate_group_data)
               ->GetAdvisoryScriptEntrypoint(),  // advisory_script_entrypoint
