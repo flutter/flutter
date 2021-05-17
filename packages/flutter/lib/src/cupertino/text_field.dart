@@ -1067,11 +1067,26 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     );
   }
 
+  KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
+    assert(node.hasFocus);
+    // TextField use the `enter` to finish the input or create a new line, and the
+    // `space` is a very common input character, so we default to terminal those
+    // two keys, otherwise, when its ancestor handles the two keys(such as `ListTile`),
+    // the functions of `TextField` will be abnormal.
+    if (event.logicalKey == LogicalKeyboardKey.space
+        || event.logicalKey == LogicalKeyboardKey.enter) {
+      return KeyEventResult.skipRemainingHandlers;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
+    final FocusNode focusNode = _effectiveFocusNode;
+    focusNode.onKey ??= _handleRawKeyEvent;
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     VoidCallback? handleDidGainAccessibilityFocus;
@@ -1089,8 +1104,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         handleDidGainAccessibilityFocus = () {
           // macOS automatically activated the TextField when it receives
           // accessibility focus.
-          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
-            _effectiveFocusNode.requestFocus();
+          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+            focusNode.requestFocus();
           }
         };
         break;
@@ -1165,7 +1180,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,
-            focusNode: _effectiveFocusNode,
+            focusNode: focusNode,
             keyboardType: widget.keyboardType,
             textInputAction: widget.textInputAction,
             textCapitalization: widget.textCapitalization,

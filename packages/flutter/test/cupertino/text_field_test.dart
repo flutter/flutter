@@ -4779,4 +4779,64 @@ void main() {
       expect(disabledColor, isSameColorAs(const Color(0xFFFAFAFA)));
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/81233
+  testWidgets('CupertinoTextField should terminal the `space` and `enter` raw key events by default', (WidgetTester tester) async {
+    final Set<FocusNode> outerReceivedAnEvent = <FocusNode>{};
+    final FocusNode outerFocusNode = FocusNode();
+    KeyEventResult outerHandleEvent(FocusNode node, RawKeyEvent event) {
+      outerReceivedAnEvent.add(node);
+      return KeyEventResult.handled;
+    }
+    outerFocusNode.onKey = outerHandleEvent;
+
+    final Set<FocusNode> innerReceivedAnEvent = <FocusNode>{};
+    final FocusNode innerFocusNode = FocusNode();
+
+    Future<void> sendEvent(LogicalKeyboardKey key) async {
+      await tester.sendKeyEvent(key, platform: 'windows');
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: Focus(
+            focusNode: outerFocusNode,
+            child: CupertinoTextField(
+              focusNode: innerFocusNode,
+            ),
+          ),
+        ),
+      ),
+    );
+    innerFocusNode.requestFocus();
+    await tester.pump();
+
+    // The inner TextField's focus node terminal the raw key event by default.
+    await sendEvent(LogicalKeyboardKey.space);
+    expect(outerReceivedAnEvent.length, 0);
+
+    await sendEvent(LogicalKeyboardKey.enter);
+    expect(outerReceivedAnEvent.length, 0);
+
+    // The `onKey` of the focus node of the TextField can be customized.
+    KeyEventResult innerHandleEvent(FocusNode node, RawKeyEvent event) {
+      innerReceivedAnEvent.add(node);
+      // The key event has not been handled, and the event should continue to be
+      // propagated to the outer key event handlers.
+      return KeyEventResult.ignored;
+    }
+    innerFocusNode.onKey = innerHandleEvent;
+
+    await sendEvent(LogicalKeyboardKey.space);
+    expect(outerReceivedAnEvent.length, 1);
+    expect(innerReceivedAnEvent.length, 1);
+
+    outerReceivedAnEvent.clear();
+    innerReceivedAnEvent.clear();
+
+    await sendEvent(LogicalKeyboardKey.enter);
+    expect(outerReceivedAnEvent.length, 1);
+    expect(innerReceivedAnEvent.length, 1);
+  }, skip: kIsWeb);
 }

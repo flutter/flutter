@@ -1111,6 +1111,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
+  KeyEventResult _handleRawKeyEvent(FocusNode node, RawKeyEvent event) {
+    assert(node.hasFocus);
+    // TextField use the `enter` to finish the input or create a new line, and the
+    // `space` is a very common input character, so we default to terminal those
+    // two keys, otherwise, when its ancestor handles the two keys(such as `ListTile`),
+    // the functions of `TextField` will be abnormal.
+    if (event.logicalKey == LogicalKeyboardKey.space
+        || event.logicalKey == LogicalKeyboardKey.enter) {
+      return KeyEventResult.skipRemainingHandlers;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1128,6 +1141,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
+    focusNode.onKey ??= _handleRawKeyEvent;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null && widget.maxLengthEnforced)
