@@ -95,6 +95,7 @@ class DevelopmentArtifact {
     universal,
     flutterRunner,
     windowsUwp,
+    windowsCppClientWrapper,
   ];
 
   @override
