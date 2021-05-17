@@ -159,12 +159,14 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void handleThumbPressStart(Offset localPosition) {
     super.handleThumbPressStart(localPosition);
-    final Axis direction = getScrollbarDirection()!;
+    final AxisDirection direction = getScrollbarDirection()!;
     switch (direction) {
-      case Axis.vertical:
+      case AxisDirection.down:
+      case AxisDirection.up:
         _pressStartAxisPosition = localPosition.dy;
         break;
-      case Axis.horizontal:
+      case AxisDirection.right:
+      case AxisDirection.left:
         _pressStartAxisPosition = localPosition.dx;
         break;
     }
@@ -183,20 +185,22 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
 
   @override
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
-    final Axis? direction = getScrollbarDirection();
+    final AxisDirection? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _thicknessAnimationController.reverse();
     super.handleThumbPressEnd(localPosition, velocity);
     switch(direction) {
-      case Axis.vertical:
+      case AxisDirection.down:
+      case AxisDirection.up:
         if (velocity.pixelsPerSecond.dy.abs() < 10 &&
           (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
         break;
-      case Axis.horizontal:
+      case AxisDirection.right:
+      case AxisDirection.left:
         if (velocity.pixelsPerSecond.dx.abs() < 10 &&
           (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
