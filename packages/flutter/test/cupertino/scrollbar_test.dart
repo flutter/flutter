@@ -786,7 +786,7 @@ void main() {
     );
   });
 
-  testWidgets('Gestures don\'t crash when no scroll controller attached', (WidgetTester tester) async {
+  testWidgets('Gestures assert that a ScrollPosition is attached', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     final ScrollController scrollController = ScrollController();
 
@@ -830,17 +830,15 @@ void main() {
     await scrollGesture.up();
     await tester.pump();
 
-     // Scroll doesn't move because the scrollbar doesn't handle gestures
-
     // Tap on the track area below the thumb.
     await tester.tapAt(const Offset(796.0, 550.0));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, scrollAmount);
-
-    // Long tap on the thumb.
-    await tester.longPressAt(const Offset(796.0, 50.0));
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, scrollAmount);
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(
+      (exception as AssertionError).message,
+      contains('The Scrollbar\'s ScrollController has no ScrollPosition attached.'),
+    );
   });
 
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
