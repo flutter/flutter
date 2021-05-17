@@ -113,9 +113,9 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       // the blur will fall within 2 * sigma pixels.
       if (browserEngine == BrowserEngine.webkit) {
         DomRenderer.setElementStyle(_filterElement!, '-webkit-backdrop-filter',
-            _imageFilterToCss(filter));
+            filter.filterAttribute);
       }
-      DomRenderer.setElementStyle(_filterElement!, 'backdrop-filter', _imageFilterToCss(filter));
+      DomRenderer.setElementStyle(_filterElement!, 'backdrop-filter', filter.filterAttribute);
     }
   }
 
