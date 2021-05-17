@@ -361,7 +361,7 @@ void testMain() async {
     viewElement6.remove();
   });
 
-  test('pushImageFilter', () async {
+  test('pushImageFilter blur', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
     builder.pushImageFilter(
       ImageFilter.blur(sigmaX: 1, sigmaY: 3),
@@ -372,6 +372,25 @@ void testMain() async {
     html.document.body.append(builder.build().webOnlyRootElement);
 
     await matchGoldenFile('compositing_image_filter.png', region: region);
+  });
+
+  test('pushImageFilter matrix', () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.pushImageFilter(
+      ImageFilter.matrix(
+          (
+              Matrix4.identity()
+                ..translate(40, 10)
+                ..rotateZ(math.pi / 6)
+                ..scale(0.75, 0.75)
+          ).toFloat64()),
+    );
+    _drawTestPicture(builder);
+    builder.pop();
+
+    html.document.body.append(builder.build().webOnlyRootElement);
+
+    await matchGoldenFile('compositing_image_filter_matrix.png', region: region);
   });
 
   group('Cull rect computation', () {

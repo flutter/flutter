@@ -660,25 +660,79 @@ class GradientConical extends GradientRadial {
 
 /// Backend implementation of [ui.ImageFilter].
 ///
-/// Currently only `blur` is supported.
-class EngineImageFilter implements ui.ImageFilter {
-  EngineImageFilter.blur({this.sigmaX = 0.0, this.sigmaY = 0.0});
+/// Currently only `blur` and `matrix` are supported.
+abstract class EngineImageFilter implements ui.ImageFilter {
+  factory EngineImageFilter.blur({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
+  }) = _BlurEngineImageFilter;
+
+  factory EngineImageFilter.matrix({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) = _MatrixEngineImageFilter;
+
+  EngineImageFilter._();
+
+  String get filterAttribute => '';
+  String get transformAttribute => '';
+}
+
+class _BlurEngineImageFilter extends EngineImageFilter {
+  _BlurEngineImageFilter({ this.sigmaX = 0.0, this.sigmaY = 0.0, this.tileMode = ui.TileMode.clamp }) : super._();
 
   final double sigmaX;
   final double sigmaY;
+  final ui.TileMode tileMode;
+
+  // TODO(flutter_web): implement TileMode.
+  String get filterAttribute => blurSigmasToCssString(sigmaX, sigmaY);
 
   @override
   bool operator ==(Object other) {
-    return other is EngineImageFilter &&
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _BlurEngineImageFilter &&
+        other.tileMode == tileMode &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY;
   }
 
   @override
-  int get hashCode => ui.hashValues(sigmaX, sigmaY);
+  int get hashCode => ui.hashValues(sigmaX, sigmaY, tileMode);
 
   @override
   String toString() {
-    return 'ImageFilter.blur($sigmaX, $sigmaY)';
+    return 'ImageFilter.blur($sigmaX, $sigmaY, $tileMode)';
+  }
+}
+
+class _MatrixEngineImageFilter extends EngineImageFilter {
+  _MatrixEngineImageFilter({ required Float64List matrix, required this.filterQuality })
+      : webMatrix = Float64List.fromList(matrix),
+        super._();
+
+  final Float64List webMatrix;
+  final ui.FilterQuality filterQuality;
+
+  // TODO(flutter_web): implement FilterQuality.
+  String get transformAttribute => float64ListToCssTransform(webMatrix);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _MatrixEngineImageFilter
+        && other.filterQuality == filterQuality
+        && listEquals<double>(other.webMatrix, webMatrix);
+  }
+
+  @override
+  int get hashCode => ui.hashValues(ui.hashList(webMatrix), filterQuality);
+
+  @override
+  String toString() {
+    return 'ImageFilter.matrix($webMatrix, $filterQuality)';
   }
 }
