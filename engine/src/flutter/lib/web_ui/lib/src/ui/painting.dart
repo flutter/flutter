@@ -399,14 +399,18 @@ class ImageFilter {
     if (engine.useCanvasKit) {
       return engine.CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
     }
-    return engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY);
+    // TODO(flutter_web): implement TileMode.
+    return engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
-  ImageFilter.matrix(Float64List matrix4, {FilterQuality filterQuality = FilterQuality.low}) {
-    // TODO(flutter_web): add implementation.
-    throw UnimplementedError('ImageFilter.matrix not implemented for web platform.');
-    //    if (matrix4.length != 16)
-    //      throw ArgumentError('"matrix4" must have 16 entries.');
+  factory ImageFilter.matrix(Float64List matrix4, {FilterQuality filterQuality = FilterQuality.low}) {
+    if (matrix4.length != 16)
+      throw ArgumentError('"matrix4" must have 16 entries.');
+    if (engine.useCanvasKit) {
+      return engine.CkImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
+    }
+    // TODO(flutter_web): implement FilterQuality.
+    return engine.EngineImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
   }
 
   ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) {

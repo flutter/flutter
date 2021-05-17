@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:ui/ui.dart' as ui;
 
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
 import 'skia_object_cache.dart';
+import '../util.dart';
 
 /// An [ImageFilter] that can create a managed skia [SkImageFilter] object.
 ///
@@ -22,7 +25,7 @@ abstract class CkManagedSkImageFilterConvertible<T extends Object>
 
 /// The CanvasKit implementation of [ui.ImageFilter].
 ///
-/// Currently only supports `blur`.
+/// Currently only supports `blur`, `matrix`, and ColorFilters.
 abstract class CkImageFilter extends ManagedSkiaObject<SkImageFilter>
     implements CkManagedSkImageFilterConvertible<SkImageFilter> {
   factory CkImageFilter.blur(
@@ -31,6 +34,9 @@ abstract class CkImageFilter extends ManagedSkiaObject<SkImageFilter>
       required ui.TileMode tileMode}) = _CkBlurImageFilter;
   factory CkImageFilter.color({required CkColorFilter colorFilter}) =
       CkColorFilterImageFilter;
+  factory CkImageFilter.matrix(
+      {required Float64List matrix,
+      required ui.FilterQuality filterQuality}) = _CkMatrixImageFilter;
 
   CkImageFilter._();
 
@@ -125,4 +131,36 @@ class _CkBlurImageFilter extends CkImageFilter {
   String toString() {
     return 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
   }
+}
+
+class _CkMatrixImageFilter extends CkImageFilter {
+  _CkMatrixImageFilter({ required Float64List matrix, required this.filterQuality })
+      : this.matrix = Float64List.fromList(matrix),
+        super._();
+
+  final Float64List matrix;
+  final ui.FilterQuality filterQuality;
+
+  SkImageFilter _initSkiaObject() {
+    return canvasKit.ImageFilter.MakeMatrixTransform(
+      toSkMatrixFromFloat64(matrix),
+      toSkFilterQuality(filterQuality),
+      null,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _CkMatrixImageFilter
+        && other.filterQuality == filterQuality
+        && listEquals<double>(other.matrix, matrix);
+  }
+
+  @override
+  int get hashCode => ui.hashValues(filterQuality, ui.hashList(matrix));
+
+  @override
+  String toString() => 'ImageFilter.matrix($matrix, $filterQuality)';
 }

@@ -81,7 +81,7 @@ void setElementTransform(html.Element element, Float32List matrix4) {
 /// See also:
 ///  * https://github.com/flutter/flutter/issues/32274
 ///  * https://bugs.chromium.org/p/chromium/issues/detail?id=1040222
-String float64ListToCssTransform(Float32List matrix) {
+String float64ListToCssTransform(List<double> matrix) {
   assert(matrix.length == 16);
   final TransformKind transformKind = transformKindOf(matrix);
   if (transformKind == TransformKind.transform2d) {
@@ -113,9 +113,9 @@ enum TransformKind {
 }
 
 /// Detects the kind of transform the [matrix] performs.
-TransformKind transformKindOf(Float32List matrix) {
+TransformKind transformKindOf(List<double> matrix) {
   assert(matrix.length == 16);
-  final Float32List m = matrix;
+  final List<double> m = matrix;
 
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
@@ -171,15 +171,15 @@ bool isIdentityFloat32ListTransform(Float32List matrix) {
 /// permitted. However, it is inefficient to construct a matrix for an identity
 /// transform. Consider removing the CSS `transform` property from elements
 /// that apply identity transform.
-String float64ListToCssTransform2d(Float32List matrix) {
+String float64ListToCssTransform2d(List<double> matrix) {
   assert(transformKindOf(matrix) != TransformKind.complex);
   return 'matrix(${matrix[0]},${matrix[1]},${matrix[4]},${matrix[5]},${matrix[12]},${matrix[13]})';
 }
 
 /// Converts [matrix] to a 3D CSS transform value.
-String float64ListToCssTransform3d(Float32List matrix) {
+String float64ListToCssTransform3d(List<double> matrix) {
   assert(matrix.length == 16);
-  final Float32List m = matrix;
+  final List<double> m = matrix;
   if (m[0] == 1.0 &&
       m[1] == 0.0 &&
       m[2] == 0.0 &&
@@ -551,4 +551,11 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
     }
   }
   return true;
+}
+
+// HTML only supports a single radius, but Flutter ImageFilter supports separate
+// horizontal and vertical radii. The best approximation we can provide is to
+// average the two radii together for a single compromise value.
+String blurSigmasToCssString(double sigmaX, double sigmaY) {
+  return 'blur(${(sigmaX + sigmaY) * 0.5}px)';
 }
