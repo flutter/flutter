@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'localizations.dart';
 
 export 'package:flutter/gestures.dart' show
   DragDownDetails,
@@ -1431,6 +1432,30 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }());
 
     semanticsGestureHandler!.validActions = actions; // will call _markNeedsSemanticsUpdate(), if required.
+    _updateScrollingActionOverrides(semanticsGestureHandler, actions);
+  }
+
+  void _updateScrollingActionOverrides(RenderSemanticsGestureHandler semanticsGestureHandler, Set<SemanticsAction> actions) {
+    Map<CustomSemanticsAction, VoidCallback>? customActionOverrides;
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      // The iOS scroll direction is the inverse from Flutter scroll direction.
+      customActionOverrides = <CustomSemanticsAction, VoidCallback> {
+        if (actions.contains(SemanticsAction.scrollUp))
+          CustomSemanticsAction.overridingActionLabel(label: localizations.scrollDown,
+              action: SemanticsAction.scrollUp): () {},
+        if (actions.contains(SemanticsAction.scrollDown))
+          CustomSemanticsAction.overridingActionLabel(label: localizations.scrollUp,
+              action: SemanticsAction.scrollDown): () {},
+        if (actions.contains(SemanticsAction.scrollLeft))
+          CustomSemanticsAction.overridingActionLabel(label: localizations.scrollRight,
+              action: SemanticsAction.scrollLeft): () {},
+        if (actions.contains(SemanticsAction.scrollRight))
+          CustomSemanticsAction.overridingActionLabel(label: localizations.scrollLeft,
+              action: SemanticsAction.scrollRight): () {},
+      };
+    }
+    semanticsGestureHandler.customSemanticsActions = customActionOverrides;
   }
 
   @override

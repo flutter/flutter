@@ -45,6 +45,18 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   TextDirection get textDirection => _textDirection;
   late TextDirection _textDirection;
 
+  @override
+  final String scrollUp = 'Scroll Up';
+
+  @override
+  final String scrollDown = 'Scroll Down';
+
+  @override
+  final String scrollLeft = 'Scroll Left';
+
+  @override
+  final String scrollRight = 'Scroll Right';
+
   /// Creates an object that provides localized resource values for the
   /// lowest levels of the Flutter framework.
   ///

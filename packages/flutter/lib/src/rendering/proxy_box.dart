@@ -3582,6 +3582,19 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the custom actions of the [SemanticsConfiguration].
+  ///
+  /// Set by the [RawGestureDetectorState] to provide appropriate label
+  /// overrides for scroll semantics actions.
+  Map<CustomSemanticsAction, VoidCallback>? get customSemanticsActions => _customSemanticsActions;
+  Map<CustomSemanticsAction, VoidCallback>? _customSemanticsActions;
+  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback>? value) {
+    if (mapEquals<CustomSemanticsAction, VoidCallback>(value, _customSemanticsActions))
+      return;
+    _customSemanticsActions = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// Called when the user taps on the render object.
   GestureTapCallback? get onTap => _onTap;
   GestureTapCallback? _onTap;
@@ -3656,6 +3669,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
         config.onScrollUp = _performSemanticScrollUp;
       if (_isValidAction(SemanticsAction.scrollDown))
         config.onScrollDown = _performSemanticScrollDown;
+    }
+    if (customSemanticsActions != null) {
+      config.customSemanticsActions = customSemanticsActions!;
     }
   }
 

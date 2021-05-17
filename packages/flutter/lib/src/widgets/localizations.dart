@@ -149,6 +149,18 @@ abstract class WidgetsLocalizations {
   /// The reading direction for text in this locale.
   TextDirection get textDirection;
 
+  /// The iOS label for scroll up semantics action.
+  String get scrollUp;
+
+  /// The iOS label for scroll down semantics action.
+  String get scrollDown;
+
+  /// The iOS label for scroll left semantics action.
+  String get scrollLeft;
+
+  /// The iOS label for scroll right semantics action.
+  String get scrollRight;
+
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -202,6 +214,18 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   TextDirection get textDirection => TextDirection.ltr;
+
+  @override
+  String get scrollUp => 'Scroll Up';
+
+  @override
+  String get scrollDown => 'Scroll Down';
+
+  @override
+  String get scrollLeft => 'Scroll Left';
+
+  @override
+  String get scrollRight => 'Scroll Right';
 
   /// Creates an object that provides US English resource values for the
   /// lowest levels of the widgets library.
