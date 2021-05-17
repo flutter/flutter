@@ -23,27 +23,33 @@ void main() {
       ),
     );
 
-    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
-
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
+    Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
     FadeTransition widget2Opacity =
         tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
-    // Android transition is vertical only.
-    expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
     // Page 1 is above page 2 mid-transition.
+    expect(widget1TopLeft.dx < widget2TopLeft.dx, true);
     expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
     // Animation begins 3/4 of the way up the page.
     expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
-    // Animation starts with page 2 being near transparent.
-    expect(widget2Opacity.opacity.value < 0.01, true);
+    // Animation starts with page 2 being none transparent.
+    expect(widget2Opacity.opacity.value == 1.0, true);
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 299));
+
+    widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+    // Page 1 is scaled larger than the screen.
+    expect(widget1TopLeft < Offset.zero, true);
+    // Page 1 is larger than the page 2.
+    expect(widget1TopLeft < widget2TopLeft, true);
+
+    await tester.pump(const Duration(milliseconds: 1));
 
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);
@@ -53,14 +59,15 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
+    widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
     widget2Opacity =
         tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
-    // Page 2 starts to move down.
-    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    // Page 2 starts to narrow down, but page 1 is still larger than the page 2.
+    expect(widget1TopLeft < widget2TopLeft, true);
     // Page 2 starts to lose opacity.
-    expect(widget2Opacity.opacity.value < 1.0, true);
+    expect(widget2Opacity.opacity.value == 1.0, true);
 
     await tester.pump(const Duration(milliseconds: 300));
 
