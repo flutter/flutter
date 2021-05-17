@@ -455,23 +455,23 @@ class _FocusDemoState extends State<FocusDemo> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ElevatedButton(
-                                child: const Text('UNDO'),
                                 onPressed: canUndo
                                     ? () {
                                         Actions.invoke(context, const UndoIntent());
                                       }
                                     : null,
+                                child: const Text('UNDO'),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ElevatedButton(
-                                child: const Text('REDO'),
                                 onPressed: canRedo
                                     ? () {
                                         Actions.invoke(context, const RedoIntent());
                                       }
                                     : null,
+                                child: const Text('REDO'),
                               ),
                             ),
                           ],

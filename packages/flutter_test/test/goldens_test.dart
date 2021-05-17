@@ -185,7 +185,7 @@ void main() {
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
           await expectLater(
             () => doComparison(),
-            throwsA(isA<FlutterError>().having(
+            throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
               contains('% diff detected'),
@@ -216,7 +216,7 @@ void main() {
             ..writeAsBytesSync(_kColorFailurePngBytes);
           await expectLater(
             () => doComparison('subdir/golden.png'),
-            throwsA(isA<FlutterError>().having(
+            throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
               contains('% diff detected'),
@@ -255,7 +255,7 @@ void main() {
           await fs.file(fix('/golden.png')).writeAsBytes(_kSizeFailurePngBytes);
           await expectLater(
             () => doComparison(),
-            throwsA(isA<FlutterError>().having(
+            throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
               contains('image sizes do not match'),
@@ -267,7 +267,7 @@ void main() {
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
           await expectLater(
             () => doComparison(),
-            throwsA(isA<FlutterError>().having(
+            throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
               contains('% diff detected'),
@@ -279,7 +279,7 @@ void main() {
           await fs.file(fix('/golden.png')).writeAsBytes(<int>[]);
           await expectLater(
             () => doComparison(),
-            throwsA(isA<FlutterError>().having(
+            throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
               contains('null image provided'),

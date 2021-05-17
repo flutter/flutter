@@ -168,7 +168,7 @@ void main() {
     when(file.deleteSync(recursive: false))
       .thenThrow(const FileSystemException('', '', OSError('', 2)));
 
-    expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsA(isA<ToolExit>()));
+    expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
   });
 
   testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
@@ -182,7 +182,7 @@ void main() {
       ErrorHandlingFileSystem.noExitOnFailure(() {
         ErrorHandlingFileSystem.deleteIfExists(file);
       });
-    }, throwsA(isA<FileSystemException>()));
+    }, throwsFileSystemException());
   });
 
   group('throws ToolExit on Windows', () {
@@ -213,7 +213,7 @@ void main() {
       final File file = fs.file('file');
 
       expect(() => ErrorHandlingFileSystem.noExitOnFailure(
-        () => file.writeAsStringSync('')), throwsA(isA<Exception>()));
+        () => file.writeAsStringSync('')), throwsException);
 
       // nesting does not unconditionally re-enable errors.
       expect(() {
@@ -221,10 +221,10 @@ void main() {
           ErrorHandlingFileSystem.noExitOnFailure(() { });
           file.writeAsStringSync('');
         });
-      }, throwsA(isA<Exception>()));
+      }, throwsException);
 
       // Check that state does not leak.
-      expect(() => file.writeAsStringSync(''), throwsA(isA<ToolExit>()));
+      expect(() => file.writeAsStringSync(''), throwsToolExit());
     });
 
     testWithoutContext('when access is denied', () async {
