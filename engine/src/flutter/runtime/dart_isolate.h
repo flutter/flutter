@@ -176,6 +176,12 @@ class DartIsolate : public UIDartState {
   /// @param[in]  io_manager                  The i/o manager.
   /// @param[in]  unref_queue                 The Skia unref queue.
   /// @param[in]  image_decoder               The image decoder.
+  /// @param[in]  image_generator_registry    Cascading registry of image
+  ///                                         generator builders. Given
+  ///                                         compressed image bytes as input,
+  ///                                         this is used to find and create
+  ///                                         image generators, which can then
+  ///                                         be used for image decoding.
   /// @param[in]  advisory_script_uri         The advisory script uri. This is
   ///                                         only used in instrumentation.
   /// @param[in]  advisory_script_entrypoint  The advisory script entrypoint.
@@ -225,6 +231,7 @@ class DartIsolate : public UIDartState {
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
       fml::WeakPtr<ImageDecoder> image_decoder,
+      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       Flags flags,
@@ -460,6 +467,7 @@ class DartIsolate : public UIDartState {
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
       fml::WeakPtr<ImageDecoder> image_decoder,
+      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       Flags flags,
@@ -475,6 +483,7 @@ class DartIsolate : public UIDartState {
               fml::WeakPtr<IOManager> io_manager,
               fml::RefPtr<SkiaUnrefQueue> unref_queue,
               fml::WeakPtr<ImageDecoder> image_decoder,
+              fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
               bool is_root_isolate,

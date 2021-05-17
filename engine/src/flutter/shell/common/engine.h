@@ -15,6 +15,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/hint_freed_delegate.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
+#include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
@@ -921,6 +922,7 @@ class Engine final : public RuntimeDelegate,
   bool have_surface_;
   std::shared_ptr<FontCollection> font_collection_;
   ImageDecoder image_decoder_;
+  ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;
   size_t hint_freed_bytes_since_last_call_ = 0;
   fml::TimePoint last_hint_freed_call_time_;

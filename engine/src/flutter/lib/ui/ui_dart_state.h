@@ -29,6 +29,7 @@
 
 namespace flutter {
 class FontSelector;
+class ImageGeneratorRegistry;
 class PlatformConfiguration;
 
 class UIDartState : public tonic::DartState {
@@ -70,6 +71,8 @@ class UIDartState : public tonic::DartState {
 
   fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
 
+  fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry() const;
+
   std::shared_ptr<IsolateNameServer> GetIsolateNameServer() const;
 
   tonic::DartErrorHandleType GetLastError();
@@ -107,6 +110,7 @@ class UIDartState : public tonic::DartState {
               fml::WeakPtr<IOManager> io_manager,
               fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
               fml::WeakPtr<ImageDecoder> image_decoder,
+              fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
               std::string logger_prefix,
@@ -137,6 +141,7 @@ class UIDartState : public tonic::DartState {
   fml::WeakPtr<IOManager> io_manager_;
   fml::RefPtr<SkiaUnrefQueue> skia_unref_queue_;
   fml::WeakPtr<ImageDecoder> image_decoder_;
+  fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry_;
   std::shared_ptr<VolatilePathTracker> volatile_path_tracker_;
   const std::string advisory_script_uri_;
   const std::string advisory_script_entrypoint_;
