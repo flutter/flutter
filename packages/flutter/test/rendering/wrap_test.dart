@@ -222,7 +222,7 @@ void main() {
     }
   });
 
-  test('Compute max intrinsic height with runSpacing', () {
+  test('Compute max intrinsic height with spacing', () {
     final RenderBox child = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints(
         minWidth: 80,
@@ -233,7 +233,7 @@ void main() {
     final RenderWrap renderWrap = RenderWrap();
     renderWrap.add(child);
 
-    renderWrap.runSpacing = 5;
+    renderWrap.spacing = 5;
     renderWrap.direction = Axis.vertical;
 
     expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), 80);
@@ -257,7 +257,7 @@ void main() {
     children.forEach(renderWrap.add);
 
     final double childrenHeight = renderWrap.childCount * 80.0;
-    final double runSpacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.runSpacing;
+    final double runSpacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
 
     expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), childrenHeight + runSpacingHeight);
   });
@@ -297,9 +297,9 @@ void main() {
     children.forEach(renderWrap.add);
 
     final double childrenWidth = renderWrap.childCount * 80.0;
-    final double spacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
+    final double spacingWidth = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
 
-    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), childrenWidth + spacingHeight);
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), childrenWidth + spacingWidth);
   });
 
 }

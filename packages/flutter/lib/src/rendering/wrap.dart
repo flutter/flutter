@@ -455,7 +455,7 @@ class RenderWrap extends RenderBox
       case Axis.horizontal:
         return computeDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
-        double height = math.max(childCount - 1, 0) * runSpacing;
+        double height = math.max(childCount - 1, 0) * spacing;
         RenderBox? child = firstChild;
         while (child != null) {
           height += child.getMaxIntrinsicHeight(double.infinity);
