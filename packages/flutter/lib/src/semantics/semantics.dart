@@ -131,8 +131,8 @@ class CustomSemanticsAction {
   ///
   /// See also:
   ///
-  /// * [RenderSemanticsGestureHandler]: which adds label overrides for
-  ///   semantics scrolling actions when the iOS switch control is on.
+  /// * [RawGestureDetector]: which adds label overrides for semantics scrolling
+  ///   actions when the platform is iOS.
   const CustomSemanticsAction.overridingActionLabel({required this.label, required SemanticsAction this.action})
       : assert(label != null && label != ''),
         assert(action != null),
