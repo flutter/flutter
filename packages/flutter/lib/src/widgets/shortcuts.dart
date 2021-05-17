@@ -635,7 +635,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///         HelpMenuIntent: CallbackAction<HelpMenuIntent>(
 ///           onInvoke: (HelpMenuIntent intent) {
 ///             ScaffoldMessenger.of(context).showSnackBar(
-///               SnackBar(content: Text('Keep calm and carry on!')),
+///               const SnackBar(content: Text('Keep calm and carry on!')),
 ///             );
 ///             return null;
 ///           },
@@ -644,8 +644,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///       child: Focus(
 ///         autofocus: true,
 ///         child: Column(
-///           children: <Widget>[
-///             const Text('Press question mark for help'),
+///           const children: <Widget>[
+///             Text('Press question mark for help'),
 ///           ],
 ///         ),
 ///       ),
