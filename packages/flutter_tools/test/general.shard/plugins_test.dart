@@ -437,7 +437,6 @@ dependencies:
           'plugin-a=${pluginA.path}/\n'
           'plugin-b=${pluginB.path}/\n'
           'plugin-c=${pluginC.path}/\n'
-          ''
         );
 
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();

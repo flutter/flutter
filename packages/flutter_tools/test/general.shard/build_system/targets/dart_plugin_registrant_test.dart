@@ -280,7 +280,6 @@ void main() {
           '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
-          ''
         ),
       );
     });
@@ -418,7 +417,6 @@ void main() {
           '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
-          ''
         ),
       );
     });

@@ -697,6 +697,67 @@ void main() {
     );
   });
 
+  testWidgets('Scrollbar will fade back in when hovering over known track area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(),
+          child: RawScrollbar(
+            child: SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    await tester.pump();
+    // Scrollbar fully showing
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+    await gesture.up();
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration * 0.5);
+
+    // Scrollbar is fading out
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
+          color: const Color(0x4fbcbcbc),
+        ),
+    );
+
+    // Hover over scrollbar with mouse to bring opacity back up
+    final TestGesture mouseGesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await mouseGesture.addPointer();
+    addTearDown(mouseGesture.removePointer);
+    await mouseGesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+    // Scrollbar should be visible
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
