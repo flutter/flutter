@@ -644,7 +644,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///       child: Focus(
 ///         autofocus: true,
 ///         child: Column(
-///           const children: <Widget>[
+///           children: const <Widget>[
 ///             Text('Press question mark for help'),
 ///           ],
 ///         ),
