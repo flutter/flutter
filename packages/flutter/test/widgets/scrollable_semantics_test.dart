@@ -27,7 +27,7 @@ void main() {
       ),
     );
 
-    expect(semantics,includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
 
     await flingUp(tester);
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]));
@@ -43,6 +43,79 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('scrollable sets the correct semantic actions override for iOS (vertical)', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          height: 10,
+          child: ListView(
+            controller: controller,
+            children: List<Widget>.generate(20, (int i) => Text('$i')),
+          )
+        ),
+      ),
+    );
+
+    final RenderSemanticsGestureHandler handler = tester.renderObject(
+      find.descendant(of: find.byType(Scrollable),
+      matching: find.byType(RawGestureDetector))
+    ) as RenderSemanticsGestureHandler;
+    List<CustomSemanticsAction> actions = handler.customSemanticsActions!.keys.toList();
+    expect(actions.length, 1);
+    expect(actions[0].label, 'Scroll Down');
+    expect(actions[0].action, SemanticsAction.scrollUp);
+
+    controller.jumpTo(10.0);
+    await tester.pumpAndSettle();
+    actions = handler.customSemanticsActions!.keys.toList();
+    expect(actions.length, 2);
+    expect(actions[0].label, 'Scroll Down');
+    expect(actions[0].action, SemanticsAction.scrollUp);
+    expect(actions[1].label, 'Scroll Up');
+    expect(actions[1].action, SemanticsAction.scrollDown);
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('scrollable exposes the correct semantic actions override for iOS (horizontal)', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+            height: 10,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              controller: controller,
+              children: List<Widget>.generate(20, (int i) => Text('$i')),
+            )
+        ),
+      ),
+    );
+
+    final RenderSemanticsGestureHandler handler = tester.renderObject(
+        find.descendant(of: find.byType(Scrollable),
+            matching: find.byType(RawGestureDetector))
+    ) as RenderSemanticsGestureHandler;
+    List<CustomSemanticsAction> actions = handler.customSemanticsActions!.keys.toList();
+    expect(actions.length, 1);
+    expect(actions[0].label, 'Scroll Right');
+    expect(actions[0].action, SemanticsAction.scrollLeft);
+
+    controller.jumpTo(10.0);
+    await tester.pumpAndSettle();
+    actions = handler.customSemanticsActions!.keys.toList();
+    expect(actions.length, 2);
+    expect(actions[0].label, 'Scroll Right');
+    expect(actions[0].action, SemanticsAction.scrollLeft);
+    expect(actions[1].label, 'Scroll Left');
+    expect(actions[1].action, SemanticsAction.scrollRight);
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('showOnScreen works in scrollable', (WidgetTester tester) async {
     semantics = SemanticsTester(tester); // enables semantics tree generation

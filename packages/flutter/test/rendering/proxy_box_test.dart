@@ -124,6 +124,22 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNull);
   });
 
+  test('RenderSemanticsGestureHandler sets custom actions', () {
+    final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
+    );
+    renderObj.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+      const CustomSemanticsAction(label: 'action1'): () { },
+      const CustomSemanticsAction(label: 'action2'): () { },
+    };
+
+    final SemanticsConfiguration config = SemanticsConfiguration();
+    renderObj.describeSemanticsConfiguration(config);
+    final List<CustomSemanticsAction> customActions = config.customSemanticsActions.keys.toList();
+    expect(customActions.length, 2);
+    expect(customActions[0].label, 'action1');
+    expect(customActions[1].label, 'action2');
+  });
+
   group('RenderPhysicalShape', () {
     test('shape change triggers repaint', () {
       for (final TargetPlatform platform in TargetPlatform.values) {
