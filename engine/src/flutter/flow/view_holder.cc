@@ -16,35 +16,11 @@ using ViewHolderBindings =
 FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<ViewHolderBindings>
     tls_view_holder_bindings;
 
-fuchsia::ui::gfx::ViewProperties ToViewProperties(float width,
-                                                  float height,
-                                                  float insetTop,
-                                                  float insetRight,
-                                                  float insetBottom,
-                                                  float insetLeft,
-                                                  bool focusable) {
-  return fuchsia::ui::gfx::ViewProperties({
-      .bounding_box = fuchsia::ui::gfx::BoundingBox({
-          .min = fuchsia::ui::gfx::vec3({
-              .x = 0.f,
-              .y = 0.f,
-              .z = -1000.f,
-          }),
-          .max = fuchsia::ui::gfx::vec3({.x = width, .y = height, .z = 0.f}),
-      }),
-      .inset_from_min = fuchsia::ui::gfx::vec3({
-          .x = insetLeft,
-          .y = insetTop,
-          .z = 0.f,
-      }),
-      .inset_from_max = fuchsia::ui::gfx::vec3({
-          .x = insetRight,
-          .y = insetBottom,
-          .z = 0.f,
-      }),
-      .focus_change = focusable,
-  });
-}
+// Rather than expend the effort to compute the proper amount of "airspace" to
+// give to the child view, just pick an arbitrarily large number.  This works
+// fine in all current production cases, and the hack of using depth to order
+// things in Z is going away with Flatland.
+constexpr float kArbitraryLargeDepth = -1000.f;
 
 }  // namespace
 
@@ -130,7 +106,10 @@ void ViewHolder::UpdateScene(scenic::Session* session,
   opacity_node_->SetOpacity(opacity / 255.0f);
   entity_node_->SetTranslation(offset.x(), offset.y(), -0.1f);
   entity_node_->SetHitTestBehavior(hit_test_behavior_);
-  view_holder_->SetViewProperties(view_properties_);
+  if (view_properties_changed_) {
+    view_holder_->SetViewProperties(view_properties_);
+    view_properties_changed_ = false;
+  }
 }
 
 void ViewHolder::SetProperties(double width,
@@ -140,8 +119,10 @@ void ViewHolder::SetProperties(double width,
                                double insetBottom,
                                double insetLeft,
                                bool focusable) {
-  view_properties_ = ToViewProperties(width, height, insetTop, insetRight,
-                                      insetBottom, insetLeft, focusable);
+  set_size(SkSize::Make(width, height));
+  set_occlusion_hint(
+      SkRect::MakeLTRB(insetLeft, insetTop, insetRight, insetBottom));
+  set_focusable(focusable);
 }
 
 void ViewHolder::set_hit_testable(bool value) {
@@ -150,22 +131,47 @@ void ViewHolder::set_hit_testable(bool value) {
 }
 
 void ViewHolder::set_focusable(bool value) {
-  view_properties_.focus_change = value;
+  if (view_properties_.focus_change != value) {
+    view_properties_.focus_change = value;
+    view_properties_changed_ = true;
+  }
 }
 
 void ViewHolder::set_size(const SkSize& size) {
+  if (size.width() > 0.f && size.height() > 0.f) {
+    if (view_properties_.bounding_box.max.x != size.width()) {
+      view_properties_.bounding_box.max.x = size.width();
+      view_properties_changed_ = true;
+    }
+    if (view_properties_.bounding_box.max.y != size.height()) {
+      view_properties_.bounding_box.max.y = size.height();
+      view_properties_changed_ = true;
+    }
+  }
+
   // TODO(dworsham): The Z-bound should be derived from elevation.  We should be
   // able to Z-limit the view's box but otherwise it uses all of the available
   // airspace.
-  view_properties_.bounding_box.max.x = size.width();
-  view_properties_.bounding_box.max.y = size.height();
+  view_properties_.bounding_box.min.z = kArbitraryLargeDepth;
 }
 
 void ViewHolder::set_occlusion_hint(const SkRect& occlusion_hint) {
-  view_properties_.inset_from_min.x = occlusion_hint.fLeft;
-  view_properties_.inset_from_min.y = occlusion_hint.fTop;
-  view_properties_.inset_from_max.x = occlusion_hint.fRight;
-  view_properties_.inset_from_max.y = occlusion_hint.fBottom;
+  if (view_properties_.inset_from_min.x != occlusion_hint.fLeft) {
+    view_properties_.inset_from_min.x = occlusion_hint.fLeft;
+    view_properties_changed_ = true;
+  }
+  if (view_properties_.inset_from_min.y != occlusion_hint.fTop) {
+    view_properties_.inset_from_min.y = occlusion_hint.fTop;
+    view_properties_changed_ = true;
+  }
+  if (view_properties_.inset_from_max.x != occlusion_hint.fRight) {
+    view_properties_.inset_from_max.x = occlusion_hint.fRight;
+    view_properties_changed_ = true;
+  }
+  if (view_properties_.inset_from_max.y != occlusion_hint.fBottom) {
+    view_properties_.inset_from_max.y = occlusion_hint.fBottom;
+    view_properties_changed_ = true;
+  }
 }
 
 }  // namespace flutter
