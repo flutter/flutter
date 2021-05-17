@@ -83,6 +83,7 @@ class ViewHolder {
   fuchsia::ui::gfx::HitTestBehavior hit_test_behavior_ =
       fuchsia::ui::gfx::HitTestBehavior::kDefault;
   fuchsia::ui::gfx::ViewProperties view_properties_;
+  bool view_properties_changed_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ViewHolder);
 };
