@@ -18,7 +18,7 @@
 
 #define LOG_AND_RETURN(cond, msg) \
   if (cond) {                     \
-    FML_DLOG(ERROR) << msg;       \
+    FML_LOG(ERROR) << msg;        \
     return false;                 \
   }
 
@@ -41,8 +41,8 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
                                       VulkanImage* out_vulkan_image) {
   TRACE_EVENT0("flutter", "CreateVulkanImage");
 
-  FML_DCHECK(!size.isEmpty());
-  FML_DCHECK(out_vulkan_image != nullptr);
+  FML_CHECK(!size.isEmpty());
+  FML_CHECK(out_vulkan_image != nullptr);
 
   out_vulkan_image->vk_collection_image_create_info = {
       .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIA,
@@ -108,16 +108,17 @@ VulkanSurface::VulkanSurface(
     const SkISize& size,
     uint32_t buffer_id)
     : vulkan_provider_(vulkan_provider), session_(session), wait_(this) {
-  FML_DCHECK(session_);
+  FML_CHECK(session_ != nullptr);
+  FML_CHECK(context != nullptr);
 
   if (!AllocateDeviceMemory(sysmem_allocator, std::move(context), size,
                             buffer_id)) {
-    FML_DLOG(INFO) << "Could not allocate device memory.";
+    FML_LOG(ERROR) << "VulkanSurface: Could not allocate device memory.";
     return;
   }
 
   if (!CreateFences()) {
-    FML_DLOG(INFO) << "Could not create signal fences.";
+    FML_LOG(ERROR) << "VulkanSurface: Could not create signal fences.";
     return;
   }
 
@@ -163,7 +164,7 @@ vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
   zx::event semaphore_event;
   zx_status_t status = event.duplicate(ZX_RIGHT_SAME_RIGHTS, &semaphore_event);
   if (status != ZX_OK) {
-    FML_DLOG(ERROR) << "failed to duplicate semaphore event";
+    FML_LOG(ERROR) << "VulkanSurface: Failed to duplicate semaphore event";
     return vulkan::VulkanHandle<VkSemaphore>();
   }
 
@@ -204,16 +205,18 @@ vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
 
 bool VulkanSurface::CreateFences() {
   if (zx::event::create(0, &acquire_event_) != ZX_OK) {
+    FML_LOG(ERROR) << "VulkanSurface: Failed to create acquire event";
     return false;
   }
 
   acquire_semaphore_ = SemaphoreFromEvent(acquire_event_);
   if (!acquire_semaphore_) {
-    FML_DLOG(ERROR) << "failed to create acquire semaphore";
+    FML_LOG(ERROR) << "VulkanSurface: Failed to create acquire semaphore";
     return false;
   }
 
   if (zx::event::create(0, &release_event_) != ZX_OK) {
+    FML_LOG(ERROR) << "VulkanSurface: Failed to create release event";
     return false;
   }
 
@@ -234,13 +237,16 @@ bool VulkanSurface::AllocateDeviceMemory(
   fuchsia::sysmem::BufferCollectionTokenSyncPtr vulkan_token;
   zx_status_t status =
       sysmem_allocator->AllocateSharedCollection(vulkan_token.NewRequest());
-  LOG_AND_RETURN(status != ZX_OK, "Failed to allocate collection");
+  LOG_AND_RETURN(status != ZX_OK,
+                 "VulkanSurface: Failed to allocate collection");
   fuchsia::sysmem::BufferCollectionTokenSyncPtr scenic_token;
   status = vulkan_token->Duplicate(std::numeric_limits<uint32_t>::max(),
                                    scenic_token.NewRequest());
-  LOG_AND_RETURN(status != ZX_OK, "Failed to duplicate token");
+  LOG_AND_RETURN(status != ZX_OK,
+                 "VulkanSurface: Failed to duplicate collection token");
   status = vulkan_token->Sync();
-  LOG_AND_RETURN(status != ZX_OK, "Failed to sync token");
+  LOG_AND_RETURN(status != ZX_OK,
+                 "VulkanSurface: Failed to sync collection token");
 
   session_->RegisterBufferCollection(buffer_id, std::move(scenic_token));
   buffer_id_ = buffer_id;
@@ -262,7 +268,7 @@ bool VulkanSurface::AllocateDeviceMemory(
 
   VulkanImage vulkan_image;
   LOG_AND_RETURN(!CreateVulkanImage(vulkan_provider_, size, &vulkan_image),
-                 "Failed to create VkImage");
+                 "VulkanSurface: Failed to create VkImage");
 
   vulkan_image_ = std::move(vulkan_image);
   const VkMemoryRequirements& memory_requirements =
@@ -328,9 +334,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
                                      SkColorType color_type,
                                      const VkImageCreateInfo& image_create_info,
                                      const VkMemoryRequirements& memory_reqs) {
-  if (context == nullptr) {
-    return false;
-  }
+  FML_CHECK(context != nullptr);
 
   GrVkAlloc alloc;
   alloc.fMemory = vk_memory_;
@@ -408,7 +412,7 @@ bool VulkanSurface::FlushSessionAcquireAndReleaseEvents() {
 
 void VulkanSurface::SignalWritesFinished(
     const std::function<void(void)>& on_writes_committed) {
-  FML_DCHECK(on_writes_committed);
+  FML_CHECK(on_writes_committed);
 
   if (!valid_) {
     on_writes_committed();
