@@ -136,23 +136,21 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
 
 StockStrings _lookupStockStrings(Locale locale) {
 
-
-// Lookup logic when language+country codes are specified.
-switch (locale.languageCode) {
-  case 'en': {
-  switch (locale.countryCode) {
-    case 'US': return StockStringsEnUs();
+  // Lookup logic when language+country codes are specified.
+  switch (locale.languageCode) {
+    case 'en': {
+      switch (locale.countryCode) {
+        case 'US': return StockStringsEnUs();
+      }
+      break;
+    }
   }
-  break;
-}
-}
 
-// Lookup logic when only language code is specified.
-switch (locale.languageCode) {
-  case 'en': return StockStringsEn();
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en': return StockStringsEn();
     case 'es': return StockStringsEs();
-}
-
+  }
 
   throw FlutterError(
     'StockStrings.delegate failed to load unsupported locale "$locale". This is likely '

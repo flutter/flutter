@@ -108,8 +108,9 @@ Future<void> main(List<String> args) async {
       'tool_tests': _runToolTests,
       'web_tool_tests': _runToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_tests': _runWebUnitTests,
-      'web_integration_tests': _runWebIntegrationTests,
+      // All web integration tests
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPluginsTests,
       'skp_generator': _runSkpGeneratorTests,
@@ -833,6 +834,16 @@ Future<void> _runWebUnitTests() async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
+    () => _runFlutterDriverWebTest(
+      testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
+      target: 'test_driver/text_editing_integration.dart',
+      buildMode: 'profile',
+    ),
+    () => _runFlutterDriverWebTest(
+      testAppDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
+      target: 'test_driver/smoke_web_engine.dart',
+      buildMode: 'profile',
+    ),
     () => _runGalleryE2eWebTest('debug'),
     () => _runGalleryE2eWebTest('debug', canvasKit: true),
     () => _runGalleryE2eWebTest('profile'),
@@ -840,10 +851,73 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
     () => runWebServiceWorkerTest(headless: true),
+    () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
+    () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
+    () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
+    () => _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart'),
+    () => _runWebDebugTest('lib/stack_trace.dart'),
+    () => _runWebDebugTest('lib/framework_stack_trace.dart'),
+    () => _runWebDebugTest('lib/web_directory_loading.dart'),
+    () => _runWebDebugTest('test/test.dart'),
+    () => _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true),
+    () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
+    () => _runWebDebugTest('lib/web_define_loading.dart',
+      additionalArguments: <String>[
+        '--dart-define=test.valueA=Example,A',
+        '--dart-define=test.valueB=Value',
+      ]
+    ),
+    () => _runWebReleaseTest('lib/web_define_loading.dart',
+      additionalArguments: <String>[
+        '--dart-define=test.valueA=Example,A',
+        '--dart-define=test.valueB=Value',
+      ]
+    ),
+    () => _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
+      '--sound-null-safety',
+    ]),
+    () => _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
+      '--sound-null-safety',
+    ]),
   ];
+
+  // Shuffling mixes fast tests with slow tests so shards take roughly the same
+  // amount of time to run.
+  tests.shuffle(math.Random(0));
+
   await _ensureChromeDriverIsRunning();
   await _runShardRunnerIndexOfTotalSubshard(tests);
   await _stopChromeDriver();
+}
+
+Future<void> _runFlutterDriverWebTest({
+  @required String target,
+  @required String buildMode,
+  @required String testAppDirectory,
+}) async {
+  print('${green}Running web_e2e_test $target in $buildMode mode.$reset');
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'drive',
+      '--target=$target',
+      '--browser-name=chrome',
+      '--no-sound-null-safety',
+      '-d',
+      'web-server',
+      '--$buildMode',
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+  print('${green}Integration test passed.$reset');
 }
 
 /// Returns the commit hash of the flutter/plugins repository that's rolled in.
@@ -893,7 +967,7 @@ Future<void> _runFlutterPluginsTests() async {
       workingDirectory: checkout.path,
     );
     await runCommand(
-      './script/incremental_build.sh',
+      './script/tool_runner.sh',
       <String>[
         'analyze',
       ],
@@ -1029,37 +1103,6 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
   print('${green}Integration test passed.$reset');
 }
 
-Future<void> _runWebIntegrationTests() async {
-  await _runWebStackTraceTest('profile', 'lib/stack_trace.dart');
-  await _runWebStackTraceTest('release', 'lib/stack_trace.dart');
-  await _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart');
-  await _runWebStackTraceTest('release', 'lib/framework_stack_trace.dart');
-  await _runWebDebugTest('lib/stack_trace.dart');
-  await _runWebDebugTest('lib/framework_stack_trace.dart');
-  await _runWebDebugTest('lib/web_directory_loading.dart');
-  await _runWebDebugTest('test/test.dart');
-  await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
-  await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
-  await _runWebDebugTest('lib/web_define_loading.dart',
-    additionalArguments: <String>[
-      '--dart-define=test.valueA=Example,A',
-      '--dart-define=test.valueB=Value',
-    ]
-  );
-  await _runWebReleaseTest('lib/web_define_loading.dart',
-    additionalArguments: <String>[
-      '--dart-define=test.valueA=Example,A',
-      '--dart-define=test.valueB=Value',
-    ]
-  );
-  await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--sound-null-safety',
-  ]);
-  await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--sound-null-safety',
-  ]);
-}
-
 Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
@@ -1086,9 +1129,13 @@ Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
   );
 
   // Run the app.
+  final int serverPort = await findAvailablePort();
+  final int browserDebugPort = await findAvailablePort();
   final String result = await evalTestAppInChrome(
-    appUrl: 'http://localhost:8080/index.html',
+    appUrl: 'http://localhost:$serverPort/index.html',
     appDirectory: appBuildDirectory,
+    serverPort: serverPort,
+    browserDebugPort: browserDebugPort,
   );
 
   if (result.contains('--- TEST SUCCEEDED ---')) {
@@ -1130,9 +1177,13 @@ Future<void> _runWebReleaseTest(String target, {
   );
 
   // Run the app.
+  final int serverPort = await findAvailablePort();
+  final int browserDebugPort = await findAvailablePort();
   final String result = await evalTestAppInChrome(
-    appUrl: 'http://localhost:8080/index.html',
+    appUrl: 'http://localhost:$serverPort/index.html',
     appDirectory: appBuildDirectory,
+    serverPort: serverPort,
+    browserDebugPort: browserDebugPort,
   );
 
   if (result.contains('--- TEST SUCCEEDED ---')) {

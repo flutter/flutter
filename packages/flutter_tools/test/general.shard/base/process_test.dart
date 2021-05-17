@@ -35,8 +35,7 @@ void main() {
         exitCode: 1,
       ));
 
-      expect(() async => processUtils.run(<String>['false'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+      expect(() async => processUtils.run(<String>['false'], throwOnError: true), throwsProcessException());
     });
   });
 
@@ -124,8 +123,7 @@ void main() {
         ],
         exitCode: 1,
       ));
-      expect(() => processUtils.run(<String>['kaboom'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+      expect(() => processUtils.run(<String>['kaboom'], throwOnError: true), throwsProcessException());
     });
 
     testWithoutContext(' does not throw on allowed Failures', () async {
@@ -158,7 +156,7 @@ void main() {
           throwOnError: true,
           allowedFailures: (int c) => c == 1,
         ),
-        throwsA(isA<ProcessException>()),
+        throwsProcessException(),
       );
     });
   });
@@ -211,13 +209,14 @@ void main() {
         exitCode: 1,
         stderr: stderr,
       ));
-      try {
-        processUtils.runSync(<String>['kaboom'], throwOnError: true);
-        fail('ProcessException expected.');
-      } on ProcessException catch (e) {
-        expect(e, isA<ProcessException>());
-        expect(e.message.contains(stderr), false);
-      }
+      expect(
+        () => processUtils.runSync(<String>['kaboom'], throwOnError: true),
+        throwsA(isA<ProcessException>().having(
+          (ProcessException error) => error.message,
+          'message',
+          isNot(contains(stderr)),
+        )),
+      );
     });
 
     testWithoutContext('throws with stderr in exception on failure with verboseExceptions', () async {
@@ -268,7 +267,8 @@ void main() {
           throwOnError: true,
           allowedFailures: (int c) => c == 1,
         ),
-        throwsA(isA<ProcessException>()));
+        throwsProcessException(),
+      );
     });
 
     testWithoutContext(' prints stdout and stderr to trace on success', () async {
@@ -293,8 +293,7 @@ void main() {
         stdout: 'stdout',
         stderr: 'stderr',
       ));
-      expect(() => processUtils.runSync(<String>['kaboom'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+      expect(() => processUtils.runSync(<String>['kaboom'], throwOnError: true), throwsProcessException());
       expect(testLogger.statusText, contains('stdout'));
       expect(testLogger.errorText, contains('stderr'));
     });

@@ -279,10 +279,10 @@ Future<Process> startProcess(
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  print('\nExecuting: $command in $finalWorkingDirectory'
-      + (environment != null ? ' with environment $environment' : ''));
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
+  newEnvironment['LANG'] = 'en_US.UTF-8';
+  print('\nExecuting: $command in $finalWorkingDirectory with environment $newEnvironment');
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: newEnvironment,

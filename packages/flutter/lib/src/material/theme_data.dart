@@ -2273,8 +2273,8 @@ class VisualDensity with Diagnosticable {
   BoxConstraints effectiveConstraints(BoxConstraints constraints){
     assert(constraints != null && constraints.debugAssertIsValid());
     return constraints.copyWith(
-      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity).toDouble(),
-      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity).toDouble(),
+      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity),
+      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity),
     );
   }
 

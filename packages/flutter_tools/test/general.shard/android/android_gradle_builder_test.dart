@@ -358,7 +358,7 @@ void main() {
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       await expectLater(() async {
-       await builder.buildGradleApp(
+        await builder.buildGradleApp(
           project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
@@ -371,8 +371,7 @@ void main() {
           isBuildingBundle: false,
           localGradleErrors: const <GradleHandledError>[],
         );
-      },
-      throwsA(isA<ProcessException>()));
+      }, throwsProcessException());
       expect(processManager, hasNoRemainingExpectations);
     });
 
