@@ -40,12 +40,8 @@ constexpr size_t kGrCacheMaxByteSize = 1024 * 600 * 12 * 4;
 VulkanSurfaceProducer::VulkanSurfaceProducer(scenic::Session* scenic_session) {
   valid_ = Initialize(scenic_session);
 
-  if (valid_) {
-    FML_DLOG(INFO)
-        << "Flutter engine: Vulkan surface producer initialization: Successful";
-  } else {
-    FML_LOG(ERROR)
-        << "Flutter engine: Vulkan surface producer initialization: Failed";
+  if (!valid_) {
+    FML_LOG(FATAL) << "VulkanSurfaceProducer: Initialization failed";
   }
 }
 
@@ -75,7 +71,8 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   if (!application_->IsValid() || !vk_->AreInstanceProcsSetup()) {
     // Make certain the application instance was created and it set up the
     // instance proc table entries.
-    FML_LOG(ERROR) << "Instance proc addresses have not been set up.";
+    FML_LOG(ERROR) << "VulkanSurfaceProducer: Instance proc addresses have not "
+                      "been set up.";
     return false;
   }
 
@@ -87,30 +84,33 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
       !vk_->AreDeviceProcsSetup()) {
     // Make certain the device was created and it set up the device proc table
     // entries.
-    FML_LOG(ERROR) << "Device proc addresses have not been set up.";
+    FML_LOG(ERROR)
+        << "VulkanSurfaceProducer: Device proc addresses have not been set up.";
     return false;
   }
 
   if (!vk_->HasAcquiredMandatoryProcAddresses()) {
-    FML_LOG(ERROR) << "Failed to acquire mandatory proc addresses.";
+    FML_LOG(ERROR)
+        << "VulkanSurfaceProducer: Failed to acquire mandatory proc addresses.";
     return false;
   }
 
   if (!vk_->IsValid()) {
-    FML_LOG(ERROR) << "VulkanProcTable invalid";
+    FML_LOG(ERROR) << "VulkanSurfaceProducer: VulkanProcTable invalid";
     return false;
   }
 
   auto getProc = vk_->CreateSkiaGetProc();
 
   if (getProc == nullptr) {
-    FML_LOG(ERROR) << "Failed to create skia getProc.";
+    FML_LOG(ERROR) << "VulkanSurfaceProducer: Failed to create skia getProc.";
     return false;
   }
 
   uint32_t skia_features = 0;
   if (!logical_device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
-    FML_LOG(ERROR) << "Failed to get physical device features.";
+    FML_LOG(ERROR)
+        << "VulkanSurfaceProducer: Failed to get physical device features.";
 
     return false;
   }
@@ -141,7 +141,8 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   context_ = GrDirectContext::MakeVulkan(backend_context);
 
   if (context_ == nullptr) {
-    FML_LOG(ERROR) << "Failed to create GrDirectContext.";
+    FML_LOG(ERROR)
+        << "VulkanSurfaceProducer: Failed to create GrDirectContext.";
     return false;
   }
 
@@ -260,14 +261,14 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
 
 std::unique_ptr<SurfaceProducerSurface> VulkanSurfaceProducer::ProduceSurface(
     const SkISize& size) {
-  FML_DCHECK(valid_);
+  FML_CHECK(valid_);
   last_produce_time_ = async::Now(async_get_default_dispatcher());
   return surface_pool_->AcquireSurface(size);
 }
 
 void VulkanSurfaceProducer::SubmitSurface(
     std::unique_ptr<SurfaceProducerSurface> surface) {
-  FML_DCHECK(valid_ && surface != nullptr);
+  FML_CHECK(valid_);
   surface_pool_->SubmitSurface(std::move(surface));
 }
 
