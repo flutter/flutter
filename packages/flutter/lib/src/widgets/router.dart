@@ -610,11 +610,11 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     _currentRouterDelegateTransaction = Object();
     _lastSeenLocation = information.location;
     widget.routeInformationParser!
-        .parseRouteInformation(information)
-        .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
-        .then<void>(delegateRouteSetter())
-        .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
-        .then<void>(_rebuild);
+      .parseRouteInformation(information)
+      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
+      .then<void>(delegateRouteSetter())
+      .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
+      .then<void>(_rebuild);
   }
 
   void _handleRouteInformationProviderNotification() {
