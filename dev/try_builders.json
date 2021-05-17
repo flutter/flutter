@@ -658,7 +658,7 @@
       "name": "Windows gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "win_gradle_plugin_light_apk_test",
-      "enabled": false,
+      "enabled": true,
       "run_if": ["dev/**", "bin/**"]
     },
     {
