@@ -566,16 +566,11 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
   /// for [TargetPlatform.android] and [TargetPlatform.fuchsia],
   /// [CupertinoPageTransitionsBuilder] for [TargetPlatform.iOS], and no
-  /// animated transition for other platforms.
-  ///
-  /// For web apps, there are no default transitions specified, but the app
-  /// can override this by creating a theme with whatever [webBuilders] they
-  /// would like.
+  /// animated transition for other platforms or if the app is running on the
+  /// web.
   const PageTransitionsTheme({
-    Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders,
-    Map<TargetPlatform, PageTransitionsBuilder> webBuilders = _defaultWebBuilders,
-  }) : _builders = builders,
-       _webBuilders = webBuilders;
+    Map<TargetPlatform, PageTransitionsBuilder> builders = kIsWeb ? _defaultWebBuilders : _defaultBuilders,
+  }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     // Only have default transitions for mobile platforms
@@ -591,11 +586,6 @@ class PageTransitionsTheme with Diagnosticable {
   /// The [PageTransitionsBuilder]s supported by this theme.
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
-
-  /// The [PageTransitionsBuilder]s supported by this theme when running as
-  /// a web app.
-  Map<TargetPlatform, PageTransitionsBuilder> get webBuilders => _webBuilders;
-  final Map<TargetPlatform, PageTransitionsBuilder> _webBuilders;
 
   /// Delegates to the builder for the current [ThemeData.platform]
   /// or [FadeUpwardsPageTransitionsBuilder].
@@ -613,7 +603,7 @@ class PageTransitionsTheme with Diagnosticable {
     if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
       platform = TargetPlatform.iOS;
 
-    final PageTransitionsBuilder? matchingBuilder = kIsWeb ? webBuilders[platform] : builders[platform];
+    final PageTransitionsBuilder? matchingBuilder = builders[platform];
     return matchingBuilder?.buildTransitions<T>(route, context, animation, secondaryAnimation, child) ?? child;
   }
 

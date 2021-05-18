@@ -28,10 +28,6 @@ void main() {
           break;
       }
     }
-
-    // By default there should be no transitions specified for the web
-    expect(theme.webBuilders, isNotNull);
-    expect(theme.webBuilders.length, 0);
   });
 
   testWidgets('Default PageTransitionsTheme builds a CupertinoPageTransition', (WidgetTester tester) async {
