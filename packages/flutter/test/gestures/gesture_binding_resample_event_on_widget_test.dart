@@ -45,12 +45,12 @@ void main() {
         ui.PointerData(
             change: ui.PointerChange.add,
             physicalX: 0.0,
-            timeStamp: epoch + Duration.zero,
+            timeStamp: epoch,
         ),
         ui.PointerData(
             change: ui.PointerChange.down,
             physicalX: 0.0,
-            timeStamp: epoch + const Duration(milliseconds: 0),
+            timeStamp: epoch,
         ),
         ui.PointerData(
             change: ui.PointerChange.move,

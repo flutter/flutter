@@ -41,7 +41,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class OptionModel extends ChangeNotifier {
@@ -139,7 +139,7 @@ class Options extends StatefulWidget {
   final OptionModel model;
 
   @override
-  _OptionsState createState() => _OptionsState();
+  State<Options> createState() => _OptionsState();
 }
 
 class _OptionsState extends State<Options> {
@@ -309,12 +309,12 @@ class _OptionsState extends State<Options> {
                       },
                       items: const <DropdownMenuItem<String>>[
                         DropdownMenuItem<String>(
-                          child: Text('Standard'),
                           value: 'standard',
+                          child: Text('Standard'),
                         ),
-                        DropdownMenuItem<String>(child: Text('Comfortable'), value: 'comfortable'),
-                        DropdownMenuItem<String>(child: Text('Compact'), value: 'compact'),
-                        DropdownMenuItem<String>(child: Text('Custom'), value: 'custom'),
+                        DropdownMenuItem<String>(value: 'comfortable', child: Text('Comfortable')),
+                        DropdownMenuItem<String>(value: 'compact', child: Text('Compact')),
+                        DropdownMenuItem<String>(value: 'custom', child: Text('Custom')),
                       ],
                       value: _densityToProfile(widget.model.density),
                     ),

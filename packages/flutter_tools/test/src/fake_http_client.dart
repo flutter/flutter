@@ -7,6 +7,8 @@ import 'dart:convert';
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+
 /// The HTTP verb for a [FakeRequest].
 enum HttpMethod {
   get,
@@ -85,12 +87,14 @@ class FakeRequest {
     this.method = HttpMethod.get,
     this.response = FakeResponse.empty,
     this.responseError,
+    this.body,
   });
 
   final Uri uri;
   final HttpMethod method;
   final FakeResponse response;
   final Object? responseError;
+  final List<int>? body;
 
   @override
   String toString() => 'Request{${_toMethodString(method)}, $uri}';
@@ -182,7 +186,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> deleteUrl(Uri url) async {
-    return _findRequest(HttpMethod.delete, url);
+    return _findRequest(HttpMethod.delete, url, StackTrace.current);
   }
 
   @override
@@ -196,7 +200,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
-    return _findRequest(HttpMethod.get, url);
+    return _findRequest(HttpMethod.get, url, StackTrace.current);
   }
 
   @override
@@ -207,7 +211,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> headUrl(Uri url) async {
-    return _findRequest(HttpMethod.head, url);
+    return _findRequest(HttpMethod.head, url, StackTrace.current);
   }
 
   @override
@@ -218,7 +222,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> openUrl(String method, Uri url) async {
-    return _findRequest(_fromMethodString(method), url);
+    return _findRequest(_fromMethodString(method), url, StackTrace.current);
   }
 
   @override
@@ -229,7 +233,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> patchUrl(Uri url) async {
-    return _findRequest(HttpMethod.patch, url);
+    return _findRequest(HttpMethod.patch, url, StackTrace.current);
   }
 
   @override
@@ -240,7 +244,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> postUrl(Uri url) async {
-    return _findRequest(HttpMethod.post, url);
+    return _findRequest(HttpMethod.post, url, StackTrace.current);
   }
 
   @override
@@ -251,12 +255,12 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> putUrl(Uri url) async {
-    return _findRequest(HttpMethod.put, url);
+    return _findRequest(HttpMethod.put, url, StackTrace.current);
   }
 
   int _requestCount = 0;
 
-  _FakeHttpClientRequest _findRequest(HttpMethod method, Uri uri) {
+  _FakeHttpClientRequest _findRequest(HttpMethod method, Uri uri, StackTrace stackTrace) {
     // Ensure the fake client throws similar errors to the real client.
     if (uri.host.isEmpty) {
       throw ArgumentError('No host specified in URI $uri');
@@ -270,6 +274,8 @@ class FakeHttpClient implements HttpClient {
         uri,
         methodString,
         null,
+        null,
+        stackTrace,
       );
     }
     FakeRequest? matchedRequest;
@@ -292,17 +298,22 @@ class FakeHttpClient implements HttpClient {
       uri,
       methodString,
       matchedRequest.responseError,
+      matchedRequest.body,
+      stackTrace,
     );
   }
 }
 
 class _FakeHttpClientRequest implements HttpClientRequest {
-  _FakeHttpClientRequest(this._response, this._uri, this._method, this._responseError);
+  _FakeHttpClientRequest(this._response, this._uri, this._method, this._responseError, this._expectedBody, this._stackTrace);
 
   final FakeResponse _response;
   final String _method;
   final Uri _uri;
   final Object? _responseError;
+  final List<int> _body = <int>[];
+  final List<int>? _expectedBody;
+  final StackTrace _stackTrace;
 
   @override
   bool bufferOutput = true;
@@ -328,16 +339,33 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   }
 
   @override
-  void add(List<int> data) { }
+  void add(List<int> data) {
+    _body.addAll(data);
+  }
 
   @override
   void addError(Object error, [StackTrace? stackTrace]) { }
 
   @override
-  Future<void> addStream(Stream<List<int>> stream) async { }
+  Future<void> addStream(Stream<List<int>> stream) async {
+    final Completer<void> completer = Completer<void>();
+    stream.listen(_body.addAll, onDone: completer.complete);
+    await completer.future;
+  }
 
   @override
   Future<HttpClientResponse> close() async {
+    final Completer<void> completer = Completer<void>();
+    Timer.run(() {
+      if (_expectedBody != null && !const ListEquality<int>().equals(_expectedBody, _body)) {
+        completer.completeError(StateError(
+          'Expected a request with the following body:\n$_expectedBody\n but found:\n$_body'
+        ), _stackTrace);
+      } else {
+        completer.complete();
+      }
+    });
+    await completer.future;
     if (_responseError != null) {
       return Future<HttpClientResponse>.error(_responseError!);
     }
@@ -366,16 +394,24 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   Uri get uri => _uri;
 
   @override
-  void write(Object? object) { }
+  void write(Object? object) {
+    _body.addAll(utf8.encode(object.toString()));
+  }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) { }
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+    _body.addAll(utf8.encode(objects.join(separator)));
+  }
 
   @override
-  void writeCharCode(int charCode) { }
+  void writeCharCode(int charCode) {
+    _body.add(charCode);
+  }
 
   @override
-  void writeln([Object? object = '']) { }
+  void writeln([Object? object = '']) {
+    _body.addAll(utf8.encode(object.toString() + '\n'));
+  }
 }
 
 class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {

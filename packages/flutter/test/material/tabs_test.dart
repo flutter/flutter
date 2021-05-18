@@ -1835,6 +1835,125 @@ void main() {
     ));
   });
 
+   testWidgets('TabBar with padding isScrollable: false', (WidgetTester tester) async {
+    const double indicatorWeight = 2.0; // default indicator weight
+    const EdgeInsets padding = EdgeInsets.only(left: 3.0, top: 7.0, right: 5.0, bottom: 3.0);
+
+    final List<Widget> tabs = <Widget>[
+      SizedBox(key: UniqueKey(), width: double.infinity, height: 30.0),
+      SizedBox(key: UniqueKey(), width: double.infinity, height: 40.0),
+    ];
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            padding: padding,
+            labelPadding: EdgeInsets.zero,
+            indicatorPadding: EdgeInsets.zero,
+            isScrollable: false,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final double tabBarHeight = 40.0 + indicatorWeight + padding.top + padding.bottom;  // 40 = max tab height
+    expect(tabBarBox.size.height, tabBarHeight);
+
+    final double tabSize = (tabBarBox.size.width - padding.horizontal) / 2.0;
+
+    // Tab0 height = 30
+    double tabLeft = padding.left;
+    double tabRight = tabLeft + tabSize;
+    double tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
+    double tabBottom = tabTop + 30.0;
+    Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
+
+    // Tab1 height = 40
+    tabLeft = tabRight;
+    tabRight = tabLeft + tabSize;
+    tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 40.0) / 2.0;
+    tabBottom = tabTop + 40.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
+
+    tabRight += padding.right;
+    expect(tabBarBox.size.width, tabRight);
+  });
+
+  testWidgets('TabBar with padding isScrollable: true', (WidgetTester tester) async {
+    const double indicatorWeight = 2.0; // default indicator weight
+    const EdgeInsets padding = EdgeInsets.only(left: 3.0, top: 7.0, right: 5.0, bottom: 3.0);
+
+    final List<Widget> tabs = <Widget>[
+      SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
+      SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
+      SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
+    ];
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            padding: padding,
+            labelPadding: EdgeInsets.zero,
+            indicatorPadding: EdgeInsets.zero,
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final double tabBarHeight = 50.0 + indicatorWeight + padding.top + padding.bottom;  // 50 = max tab height
+    expect(tabBarBox.size.height, tabBarHeight);
+
+    // Tab0 width = 130, height = 30
+    double tabLeft = padding.left;
+    double tabRight = tabLeft + 130.0;
+    double tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
+    double tabBottom = tabTop + 30.0;
+    Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
+
+    // Tab1 width = 140, height = 40
+    tabLeft = tabRight;
+    tabRight = tabLeft + 140.0;
+    tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 40.0) / 2.0;
+    tabBottom = tabTop + 40.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
+
+    // Tab2 width = 150, height = 50
+    tabLeft = tabRight;
+    tabRight = tabLeft + 150.0;
+    tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 50.0) / 2.0;
+    tabBottom = tabTop + 50.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
+
+    tabRight += padding.right;
+    expect(tabBarBox.size.width, tabRight);
+  });
+
   testWidgets('TabBar with labelPadding', (WidgetTester tester) async {
     const double indicatorWeight = 2.0; // default indicator weight
     const EdgeInsets labelPadding = EdgeInsets.only(left: 3.0, right: 7.0);
@@ -3531,6 +3650,102 @@ void main() {
     final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
 
     expect(tabBar.preferredSize, const Size.fromHeight(48.0));
+  });
+
+  testWidgets('Tabs are given uniform padding in case of few tabs having both text and icon', (WidgetTester tester) async {
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0);
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding tabOne = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 1').first);
+    final Padding tabTwo = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 2').first);
+    final Padding tabThree = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 3').first);
+
+    expect(tabOne.padding, expectedPaddingDefault);
+    expect(tabTwo.padding, expectedPaddingAdjusted);
+    expect(tabThree.padding, expectedPaddingAdjusted);
+  });
+
+  testWidgets('Tabs are given uniform padding when labelPadding is given', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 23.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              labelPadding: labelPadding,
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding tabOne = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 1').first);
+    final Padding tabTwo = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 2').first);
+    final Padding tabThree = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 3').first);
+
+    expect(tabOne.padding, expectedPaddingDefault);
+    expect(tabTwo.padding, expectedPaddingAdjusted);
+    expect(tabThree.padding, expectedPaddingAdjusted);
+  });
+
+  testWidgets('Tabs are given uniform padding TabBarTheme.labelPadding is given', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 15.0, horizontal: 20);
+    const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 28.0, horizontal: 20.0);
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          tabBarTheme: const TabBarTheme(labelPadding: labelPadding),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1', icon: Icon(Icons.plus_one)),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding tabOne = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 1').first);
+    final Padding tabTwo = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 2').first);
+    final Padding tabThree = tester.widget<Padding>(find.widgetWithText(Padding, 'Tab 3').first);
+
+    expect(tabOne.padding, expectedPaddingDefault);
+    expect(tabTwo.padding, expectedPaddingAdjusted);
+    expect(tabThree.padding, expectedPaddingAdjusted);
   });
 }
 

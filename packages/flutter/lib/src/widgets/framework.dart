@@ -664,7 +664,7 @@ abstract class StatelessWidget extends Widget {
 ///   const YellowBird({ Key? key }) : super(key: key);
 ///
 ///   @override
-///   _YellowBirdState createState() => _YellowBirdState();
+///   State<YellowBird> createState() => _YellowBirdState();
 /// }
 ///
 /// class _YellowBirdState extends State<YellowBird> {
@@ -693,7 +693,7 @@ abstract class StatelessWidget extends Widget {
 ///   final Widget? child;
 ///
 ///   @override
-///   _BirdState createState() => _BirdState();
+///   State<Bird> createState() => _BirdState();
 /// }
 ///
 /// class _BirdState extends State<Bird> {
@@ -743,7 +743,7 @@ abstract class StatefulWidget extends Widget {
   ///
   /// ```dart
   /// @override
-  /// _MyState createState() => _MyState();
+  /// State<MyWidget> createState() => _MyWidgetState();
   /// ```
   ///
   /// The framework can call this method multiple times over the lifetime of
@@ -2332,8 +2332,8 @@ abstract class BuildContext {
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to build an off-screen widget tree used to measure
-/// the size of the rendered tree. For some use cases, the simpler [Offstage]
-/// widget may be a better alternative to this approach.
+/// the layout size of the rendered tree. For some use cases, the simpler
+/// [Offstage] widget may be a better alternative to this approach.
 ///
 /// ```dart imports
 /// import 'package:flutter/rendering.dart';

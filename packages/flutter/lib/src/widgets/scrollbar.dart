@@ -481,22 +481,35 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Same as hitTest, but includes some padding when the [PointerEvent] is
   /// caused by [PointerDeviceKind.touch] to make sure that the region
   /// isn't too small to be interacted with by the user.
-  bool hitTestInteractive(Offset position, PointerDeviceKind kind) {
+  ///
+  /// The hit test area for hovering with [PointerDeviceKind.mouse] over the
+  /// scrollbar also uses this extra padding. This is to make it easier to
+  /// interact with the scrollbar by presenting it to the mouse for interaction
+  /// based on proximity. When `forHover` is true, the larger hit test area will
+  /// be used.
+  bool hitTestInteractive(Offset position, PointerDeviceKind kind, { bool forHover = false }) {
     if (_thumbRect == null) {
-      return false;
-    }
-    // The scrollbar is not able to be hit when transparent.
-    if (fadeoutOpacityAnimation.value == 0.0) {
+      // We have never painted the scrollbar, so we do not know where it will be.
       return false;
     }
 
     final Rect interactiveRect = _trackRect ?? _thumbRect!;
+    final Rect paddedRect = interactiveRect.expandToInclude(
+      Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
+    );
+
+    // The scrollbar is not able to be hit when transparent - except when
+    // hovering with a mouse. This should bring the scrollbar into view so the
+    // mouse can interact with it.
+    if (fadeoutOpacityAnimation.value == 0.0) {
+      if (forHover && kind == PointerDeviceKind.mouse)
+        return paddedRect.contains(position);
+      return false;
+    }
+
     switch (kind) {
       case PointerDeviceKind.touch:
-        final Rect touchScrollbarRect = interactiveRect.expandToInclude(
-          Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
-        );
-        return touchScrollbarRect.contains(position);
+        return paddedRect.contains(position);
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
@@ -1280,13 +1293,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
   /// Returns true if the provided [Offset] is located over the track or thumb
   /// of the [RawScrollbar].
+  ///
+  /// The hit test area for mouse hovering over the scrollbar is larger than
+  /// regular hit testing. This is to make it easier to interact with the
+  /// scrollbar and present it to the mouse for interaction based on proximity.
+  /// When `forHover` is true, the larger hit test area will be used.
   @protected
-  bool isPointerOverScrollbar(Offset position, PointerDeviceKind kind) {
+  bool isPointerOverScrollbar(Offset position, PointerDeviceKind kind, { bool forHover = false }) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter.hitTestInteractive(localOffset, kind);
+    return scrollbarPainter.hitTestInteractive(localOffset, kind, forHover: true);
   }
 
   /// Cancels the fade out animation so the scrollbar will remain visible for
@@ -1301,8 +1319,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleHover(PointerHoverEvent event) {
     // Check if the position of the pointer falls over the painted scrollbar
-    if (isPointerOverScrollbar(event.position, event.kind)) {
+    if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
       _hoverIsActive = true;
+      // Bring the scrollbar back into view if it has faded or started to fade
+      // away.
+      _fadeoutAnimationController.forward();
       _fadeoutTimer?.cancel();
     } else if (_hoverIsActive) {
       // Pointer is not over painted scrollbar.
@@ -1383,14 +1404,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
   _ThumbPressGestureRecognizer({
     double? postAcceptSlopTolerance,
-    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
     required Object debugOwner,
     required GlobalKey customPaintKey,
     required Duration pressDuration,
   }) : _customPaintKey = customPaintKey,
        super(
          postAcceptSlopTolerance: postAcceptSlopTolerance,
-         kind: kind,
+         supportedDevices: supportedDevices,
          debugOwner: debugOwner,
          duration: pressDuration,
        );

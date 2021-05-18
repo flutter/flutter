@@ -70,3 +70,24 @@ String prettyPrintDuration(Duration duration) {
 void printProgress(String action, String workingDir, String command) {
   print('$clock $action: cd $cyan$workingDir$reset; $green$command$reset');
 }
+
+int _portCounter = 8080;
+
+/// Finds the next available local port.
+Future<int> findAvailablePort() async {
+  while (!await _isPortAvailable(_portCounter)) {
+    _portCounter += 1;
+  }
+  return _portCounter++;
+}
+
+Future<bool> _isPortAvailable(int port) async {
+  try {
+    final RawSocket socket = await RawSocket.connect('localhost', port);
+    socket.shutdown(SocketDirection.both);
+    await socket.close();
+    return false;
+  } on SocketException {
+    return true;
+  }
+}

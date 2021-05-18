@@ -184,7 +184,7 @@
       "repo": "flutter",
       "task_name": "linux_skp_generator",
       "enabled": true,
-      "run_if": ["dev/", "packages/flutter/", "bin/"]
+      "run_if": ["dev/", "packages/flutter/", "packages/flutter_tools/", "bin/"]
     },
     {
       "name": "Linux tool_tests_general",
@@ -305,71 +305,39 @@
       "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_integration_tests",
+      "name": "Linux web_long_running_tests_1_5",
       "repo": "flutter",
-      "task_name": "linux_web_integration_tests",
-      "enabled": true,
-      "run_if": [
-        "dev/",
-        "packages/flutter/",
-        "packages/flutter_test/",
-        "packages/flutter_tools/",
-        "packages/flutter_web_plugins/",
-        "bin/"
-      ]
-    },
-    {
-      "name": "Linux web_long_running_tests_1_3",
-      "repo": "flutter",
-      "task_name": "web_long_running_tests_1_3",
+      "task_name": "web_long_running_tests_1_5",
       "enabled": true,
       "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_long_running_tests_2_3",
+      "name": "Linux web_long_running_tests_2_5",
       "repo": "flutter",
-      "task_name": "web_long_running_tests_2_3",
+      "task_name": "web_long_running_tests_2_5",
       "enabled": true,
       "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_long_running_tests_3_3",
+      "name": "Linux web_long_running_tests_3_5",
       "repo": "flutter",
-      "task_name": "web_long_running_tests_1_3",
+      "task_name": "web_long_running_tests_3_5",
       "enabled": true,
       "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_e2e_test",
+      "name": "Linux web_long_running_tests_4_5",
       "repo": "flutter",
-      "task_name": "linux_web_e2e_test",
+      "task_name": "web_long_running_tests_4_5",
       "enabled": true,
-      "run_if": [
-        "examples/hello_world/**",
-        "dev/**",
-        "packages/flutter/**",
-        "packages/flutter_driver/**",
-        "packages/flutter_test/**",
-        "packages/flutter_tools/lib/src/test/**",
-        "packages/flutter_web_plugins/**",
-        "bin/**"
-      ]
+      "run_if": ["dev/", "packages/", "bin/"]
     },
     {
-      "name": "Linux web_smoke_test",
+      "name": "Linux web_long_running_tests_5_5",
       "repo": "flutter",
-      "task_name": "linux_web_smoke_test",
+      "task_name": "web_long_running_tests_5_5",
       "enabled": true,
-      "run_if": [
-        "examples/hello_world/**",
-        "dev/**",
-        "packages/flutter/**",
-        "packages/flutter_driver/**",
-        "packages/flutter_test/**",
-        "packages/flutter_tools/lib/src/test/**",
-        "packages/flutter_web_plugins/**",
-        "bin/**"
-      ]
+      "run_if": ["dev/", "packages/", "bin/"]
     },
     {
       "name": "Linux flutter_plugins",
@@ -534,7 +502,7 @@
     {
       "name": "Mac plugin_test",
       "repo": "flutter",
-      "task_name": "mac_plugin_lint_mac",
+      "task_name": "mac_plugin_test",
       "enabled": true,
       "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
     },
@@ -611,7 +579,7 @@
       "name": "Windows build_tests_2_3",
       "repo": "flutter",
       "task_name": "win_build_tests_2_3",
-      "enabled": false
+      "enabled": true
     },
     {
       "name": "Windows build_tests_3_3",
