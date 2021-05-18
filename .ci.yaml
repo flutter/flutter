@@ -26,4 +26,3 @@ targets:
   - name: linux_analyze
     builder: Linux analyze
     scheduler: luci
-
