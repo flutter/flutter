@@ -49,8 +49,11 @@ void main() {
     ScaleTransition widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
     FadeTransition widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
 
+    // Page 1 is enlarging, starts from 1.0.
     expect(widget1Scale.scale.value, greaterThan(1.0));
+    // Page 2 is enlarging from the value less than 1.0.
     expect(widget2Scale.scale.value, lessThan(1.0));
+    // Page 2 is becoming none transparent.
     expect(widget2Opacity.opacity.value, lessThan(1.0));
 
     await tester.pump(const Duration(milliseconds: 250));
@@ -68,8 +71,11 @@ void main() {
     widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
     widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
 
+    // Page 1 is narrowing down, but still larger than 1.0.
     expect(widget1Scale.scale.value, greaterThan(1.0));
+    // Page 2 is smaller than 1.0.
     expect(widget2Scale.scale.value, lessThan(1.0));
+    // Page 2 is becoming transparent.
     expect(widget2Opacity.opacity.value, lessThan(1.0));
 
     await tester.pump(const Duration(milliseconds: 200));
