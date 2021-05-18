@@ -1441,31 +1441,18 @@ void main() {
     },
   );
 
-  testGesture('test1', (GestureTester tester) {
-    debugPrintGestureArenaDiagnostics = true;
+  testGesture('Does not crash when one of the 2 pointers wins by default and is then released', (GestureTester tester) {
+    // Regression test for https://github.com/flutter/flutter/issues/82784
+
+    bool didStartDrag = false;
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..onStart = (_) { didStartDrag = true; }
+      ..onEnd = (DragEndDetails details) {} // Crash triggers at onEnd.
       ..dragStartBehavior = DragStartBehavior.down;
     final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () {};
     final TapGestureRecognizer tap2 = TapGestureRecognizer()..onTap = () {};
-    addTearDown(drag.dispose);
-    addTearDown(tap.dispose);
-    addTearDown(tap2.dispose);
 
-    bool didStartDrag = false;
-    drag.onStart = (_) {
-      didStartDrag = true;
-    };
-
-    double? updatedDelta;
-    drag.onUpdate = (DragUpdateDetails details) {
-      updatedDelta = details.primaryDelta;
-    };
-
-    bool didEndDrag = false;
-    drag.onEnd = (DragEndDetails details) {
-      didEndDrag = true;
-    };
-
+    // The pointer1 is caught by drag and tap.
     final TestPointer pointer1 = TestPointer(5);
     final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
     drag.addPointer(down1);
@@ -1473,6 +1460,7 @@ void main() {
     tester.closeArena(pointer1.pointer);
     tester.route(down1);
 
+    // The pointer2 is caught by drag and tap2.
     final TestPointer pointer2 = TestPointer(6);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 10.0));
     drag.addPointer(down2);
@@ -1480,16 +1468,20 @@ void main() {
     tester.closeArena(pointer2.pointer);
     tester.route(down2);
 
-    print('Dispose Tap');
+    // The tap is disposed, leaving drag the default winner.
     tap.dispose();
 
+    // Wait for microtasks to finish, during which drag claims victory.
     tester.async.elapse(const Duration(milliseconds: 1));
     expect(didStartDrag, true);
 
+    // The pointer1 is released, leaving pointer2 drag's only pointer.
     tester.route(pointer1.up());
 
-    print('Dispose Drag');
     drag.dispose();
-    debugPrintGestureArenaDiagnostics = false;
+
+    // Passes if no crashes here.
+
+    tap2.dispose();
   });
 }
