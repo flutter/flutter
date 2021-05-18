@@ -106,7 +106,8 @@ void Animator::BeginFrame(
   frame_timings_recorder_ = std::move(frame_timings_recorder);
   frame_timings_recorder_->RecordBuildStart(fml::TimePoint::Now());
 
-  TRACE_EVENT0("flutter", "Animator::BeginFrame");
+  TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder_, "flutter",
+                                "Animator::BeginFrame");
   while (!trace_flow_ids_.empty()) {
     uint64_t trace_flow_id = trace_flow_ids_.front();
     TRACE_FLOW_END("flutter", "PointerEvent", trace_flow_id);
@@ -193,6 +194,8 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
     frame_timings_recorder_->RecordBuildStart(placeholder_time);
   }
 
+  TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder_, "flutter",
+                                "Animator::Render");
   frame_timings_recorder_->RecordBuildEnd(fml::TimePoint::Now());
 
   // Commit the pending continuation.

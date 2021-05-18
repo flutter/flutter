@@ -104,5 +104,16 @@ TEST(FrameTimingsRecorderTest, ClonedHasUniqueFrameNumber) {
   ASSERT_NE(recorder->GetFrameNumber(), cloned->GetFrameNumber());
 }
 
+TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+
+  char buff[50];
+  sprintf(buff, "%d", static_cast<int>(recorder->GetFrameNumber()));
+  std::string actual_arg = buff;
+  std::string expected_arg = recorder->GetFrameNumberTraceArg();
+
+  ASSERT_EQ(actual_arg, expected_arg);
+}
+
 }  // namespace testing
 }  // namespace flutter
