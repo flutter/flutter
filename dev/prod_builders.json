@@ -1,12 +1,6 @@
 {
   "builders": [
     {
-      "name": "Linux analyze",
-      "repo": "flutter",
-      "task_name": "linux_analyze",
-      "flaky": false
-    },
-    {
       "name": "Linux analyzer_benchmark",
       "repo": "flutter",
       "task_name": "linux_analyzer_benchmark",

@@ -23,9 +23,7 @@
 enabled_branches:
   - master
 targets:
-  - name: analyze_linux
-    bringup: true
+  - name: linux_analyze
+    bringup: false
     builder: Linux analyze
-    properties:
-      validation: analyze
-      validation_name: Analyze
+
