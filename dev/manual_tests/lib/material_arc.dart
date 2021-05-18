@@ -382,7 +382,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
               child: Text(
                 'Tap the refresh button to run the animation. Drag the rectangles '
                 "to change the animation's path.",
-                style: Theme.of(context).textTheme.caption?.copyWith(fontSize: 16.0),
+                style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16.0),
               ),
             ),
           ),

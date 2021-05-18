@@ -39,23 +39,23 @@ class IconSampleRow extends StatefulWidget {
 }
 
 class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderStateMixin {
-  AnimationController? progress;
+  late AnimationController progress;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: InkWell(
-        onTap: () { progress?.forward(from: 0.0); },
+        onTap: () { progress.forward(from: 0.0); },
         child: AnimatedIcon(
           icon: widget.sample.icon,
-          progress: progress!,
+          progress: progress,
           color: Colors.lightBlue,
         ),
       ),
       title: Text(widget.sample.description),
       subtitle: Slider(
-        value: progress!.value,
-        onChanged: (double v) { progress?.animateTo(v, duration: Duration.zero); },
+        value: progress.value,
+        onChanged: (double v) { progress.animateTo(v, duration: Duration.zero); },
       ),
     );
   }
@@ -64,12 +64,12 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   void initState() {
     super.initState();
     progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    progress?.addListener(_handleChange);
+    progress.addListener(_handleChange);
   }
 
   @override
   void dispose() {
-    progress?.removeListener(_handleChange);
+    progress.removeListener(_handleChange);
     super.dispose();
   }
 
