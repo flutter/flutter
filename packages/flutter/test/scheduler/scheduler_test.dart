@@ -11,14 +11,16 @@
 import 'dart:async';
 import 'dart:ui' show window;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'scheduler_tester.dart';
 
-class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding {
+class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding, SemanticsBinding {
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override
@@ -244,6 +246,19 @@ void main() {
     // callback that reschedules the engine frame.
     warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
+  });
+
+  test('The task was successfully executed after the animation', () async {
+    bool taskExecuted = false;
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: const TestVSync(),
+    );
+    controller.forward();
+
+    // If the task is not scheduled round-robin, this code will block the test
+    await scheduler.scheduleTask(() => taskExecuted = true, Priority.idle);
+    expect(taskExecuted, isTrue);
   });
 }
 

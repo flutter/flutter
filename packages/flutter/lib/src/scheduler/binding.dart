@@ -430,10 +430,18 @@ mixin SchedulerBinding on BindingBase {
   }
 
   // Scheduled by _ensureEventLoopCallback.
-  void _runTasks() {
+  Future<void> _runTasks() async {
     _hasRequestedAnEventLoopCallback = false;
     if (handleEventLoopCallback())
       _ensureEventLoopCallback(); // runs next task when there's time
+    else {
+      if (_taskQueue.isNotEmpty) {
+        // Avoid continuously adding tasks to the underlying queue
+        await endOfFrame;
+        // When the task queue is not empty, the judgment is made again
+        _ensureEventLoopCallback();
+      }
+    }
   }
 
   /// Execute the highest-priority task, if it is of a high enough priority.
