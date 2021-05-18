@@ -24,6 +24,5 @@ enabled_branches:
   - master
 targets:
   - name: linux_analyze
-    bringup: false
     builder: Linux analyze
 
