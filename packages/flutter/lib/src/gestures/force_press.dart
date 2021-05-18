@@ -216,14 +216,14 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   _ForceState _state = _ForceState.ready;
 
   @override
-  void addAllowedPointer(PointerDownEvent event) {
+  void addAllowedPointer(PointerEvent event) {
     // If the device has a maximum pressure of less than or equal to 1, it
     // doesn't have touch pressure sensing capabilities. Do not participate
     // in the gesture arena.
-    if (event.pressureMax <= 1.0) {
+    if (event is! PointerUpEvent && event.pressureMax <= 1.0) {
       resolve(GestureDisposition.rejected);
     } else {
-      super.addAllowedPointer(event);
+      startTrackingPointer(event.pointer, event.transform);
       if (_state == _ForceState.ready) {
         _state = _ForceState.possible;
         _lastPosition = OffsetPair.fromEventPosition(event);

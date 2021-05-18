@@ -27,7 +27,8 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
+    // We call startTrackingPointer as this is where OneSequenceGestureRecognizer joins the arena.
+    startTrackingPointer(event.pointer, event.transform);
     resolve(GestureDisposition.accepted);
     stopTrackingPointer(event.pointer);
   }

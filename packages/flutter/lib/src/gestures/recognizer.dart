@@ -248,32 +248,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   final Set<int> _trackedPointers = HashSet<int>();
 
   @override
-  @protected
-  void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
-  }
-
-  @override
-  @protected
   void handleNonAllowedPointer(PointerDownEvent event) {
     resolve(GestureDisposition.rejected);
   }
 
   /// Called when a pointer event is routed to this recognizer.
-  ///
-  /// This will be called for every pointer event while the pointer is being
-  /// tracked. Typically, this recognizer will start tracking the pointer in
-  /// [addAllowedPointer], which means that [handleEvent] will be called
-  /// starting with the [PointerDownEvent] that was passed to [addAllowedPointer].
-  ///
-  /// See also:
-  ///
-  ///  * [startTrackingPointer], which causes pointer events to be routed to
-  ///    this recognizer.
-  ///  * [stopTrackingPointer], which stops events from being routed to this
-  ///    recognizer.
-  ///  * [stopTrackingIfPointerNoLongerDown], which conditionally stops events
-  ///    from being routed to this recognizer.
   @protected
   void handleEvent(PointerEvent event);
 
@@ -359,11 +338,6 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// null if no transformation is necessary.
   ///
   /// Use [stopTrackingPointer] to remove the route added by this function.
-  ///
-  /// This method also adds this recognizer (or its [team] if it's non-null) to
-  /// the gesture arena for the specified pointer.
-  ///
-  /// This is called by [OneSequenceGestureRecognizer.addAllowedPointer].
   @protected
   void startTrackingPointer(int pointer, [Matrix4? transform]) {
     GestureBinding.instance!.pointerRouter.addRoute(pointer, handleEvent, transform);
@@ -492,27 +466,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// The current state of the recognizer.
   ///
   /// See [GestureRecognizerState] for a description of the states.
-  GestureRecognizerState get state => _state;
-  GestureRecognizerState _state = GestureRecognizerState.ready;
+  GestureRecognizerState state = GestureRecognizerState.ready;
 
   /// The ID of the primary pointer this recognizer is tracking.
-  ///
-  /// If this recognizer is no longer tracking any pointers, this field holds
-  /// the ID of the primary pointer this recognizer was most recently tracking.
-  /// This enables the recognizer to know which pointer it was most recently
-  /// tracking when [acceptGesture] or [rejectGesture] is called (which may be
-  /// called after the recognizer is no longer tracking a pointer if, e.g.
-  /// [GestureArenaManager.hold] has been called, or if there are other
-  /// recognizers keeping the arena open).
-  int? get primaryPointer => _primaryPointer;
-  int? _primaryPointer;
+  int? primaryPointer;
 
   /// The location at which the primary pointer contacted the screen.
-  ///
-  /// This will only be non-null while this recognizer is tracking at least
-  /// one pointer.
-  OffsetPair? get initialPosition => _initialPosition;
-  OffsetPair? _initialPosition;
+  OffsetPair? initialPosition;
 
   // Whether this pointer is accepted by winning the arena or as defined by
   // a subclass calling acceptGesture.
@@ -521,11 +481,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
+    startTrackingPointer(event.pointer, event.transform);
     if (state == GestureRecognizerState.ready) {
-      _state = GestureRecognizerState.possible;
-      _primaryPointer = event.pointer;
-      _initialPosition = OffsetPair(local: event.localPosition, global: event.position);
+      state = GestureRecognizerState.possible;
+      primaryPointer = event.pointer;
+      initialPosition = OffsetPair(local: event.localPosition, global: event.position);
       if (deadline != null)
         _timer = Timer(deadline!, () => didExceedDeadlineWithEvent(event));
     }
@@ -568,8 +528,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Override to be notified when [deadline] is exceeded.
   ///
   /// You must override this method or [didExceedDeadlineWithEvent] if you
-  /// supply a [deadline]. Subclasses that override this method must _not_
-  /// call `super.didExceedDeadline()`.
+  /// supply a [deadline].
   @protected
   void didExceedDeadline() {
     assert(deadline == null);
@@ -579,8 +538,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// gesture.
   ///
   /// You must override this method or [didExceedDeadline] if you supply a
-  /// [deadline]. Subclasses that override this method must _not_ call
-  /// `super.didExceedDeadlineWithEvent(event)`.
+  /// [deadline].
   @protected
   void didExceedDeadlineWithEvent(PointerDownEvent event) {
     didExceedDeadline();
@@ -598,7 +556,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   void rejectGesture(int pointer) {
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
       _stopTimer();
-      _state = GestureRecognizerState.defunct;
+      state = GestureRecognizerState.defunct;
     }
   }
 
@@ -606,9 +564,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   void didStopTrackingLastPointer(int pointer) {
     assert(state != GestureRecognizerState.ready);
     _stopTimer();
-    _state = GestureRecognizerState.ready;
-    _initialPosition = null;
-    _gestureAccepted = false;
+    state = GestureRecognizerState.ready;
   }
 
   @override
@@ -641,7 +597,6 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 /// Usually, the [global] [Offset] is in the coordinate space of the screen
 /// after conversion to logical pixels and the [local] offset is the same
 /// [Offset], but transformed to a local coordinate space.
-@immutable
 class OffsetPair {
   /// Creates a [OffsetPair] combining a [local] and [global] [Offset].
   const OffsetPair({
