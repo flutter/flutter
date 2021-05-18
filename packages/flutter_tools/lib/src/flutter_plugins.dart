@@ -103,7 +103,7 @@ const String _kFlutterPluginsDependenciesKey = 'dependencies';
 
 /// Filters [plugins] to those supported by [platformKey], optionally restricted
 /// to the specific [variant].
-List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin>plugins, String platformKey) {
+List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
   final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
     return p.platforms.containsKey(platformKey);
   });
