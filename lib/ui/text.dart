@@ -341,7 +341,7 @@ class FontFeature {
   /// Widget build(BuildContext context) {
   ///   // The Barriecito font can be downloaded from Google Fonts (https://www.google.com/fonts).
   ///   return const Text(
-  ///     'Ooohh, we weren\'t going to tell him that.',
+  ///     "Ooohh, we weren't going to tell him that.",
   ///     style: TextStyle(
   ///       fontFamily: 'Barriecito',
   ///       fontFeatures: <FontFeature>[
