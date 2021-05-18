@@ -1,23 +1,20 @@
-#version 450
-#extension GL_ARB_separate_shader_objects : enable
+#include "types.h"
 
-// Uniforms
-
-layout(set = 0, binding = 0) uniform UniformBufferObject {
-  mat4 mvp;
+uniform UniformBufferObject {
+  Uniforms uniforms;
 } ubo;
 
-// In
+uniform sampler2D world;
 
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inNormal;
-layout(location = 2) in vec2 inTextureCoords;
+in vec2 inPosition;
+in vec3 inPosition22;
+in vec4 inAnotherPosition;
+in float stuff;
 
-// Out
-
-layout(location = 0) out vec2 outTextureCoords;
+out vec4 outStuff;
 
 void main() {
-  gl_Position = ubo.mvp * vec4(inPosition, 1.0);
-  outTextureCoords = inTextureCoords;
+  gl_Position =  ubo.uniforms.projection * ubo.uniforms.view * ubo.uniforms.model * vec4(inPosition22, 1.0) * inAnotherPosition;
+  outStuff = texture(world, inPosition);
 }
+

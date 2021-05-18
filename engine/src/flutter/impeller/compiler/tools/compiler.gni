@@ -17,6 +17,9 @@ template("impeller_shaders") {
 
     metal_intermediate = "$target_gen_dir/{{source_file_part}}.metal"
     spirv_intermediate = "$target_gen_dir/{{source_file_part}}.spirv"
+    reflection_json_intermediate = "$target_gen_dir/{{source_file_part}}.json"
+    reflection_header_intermediate = "$target_gen_dir/{{source_file_part}}.h"
+    reflection_cc_intermediate = "$target_gen_dir/{{source_file_part}}.cc"
 
     outputs = [ metal_intermediate ]
 
@@ -26,12 +29,21 @@ template("impeller_shaders") {
     spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
     depfile_intermediate_path = rebase_path(depfile_path, root_build_dir)
 
+    reflection_json_path =
+        rebase_path(reflection_json_intermediate, root_build_dir)
+    reflection_header_path =
+        rebase_path(reflection_header_intermediate, root_build_dir)
+    reflection_cc_path = rebase_path(reflection_cc_intermediate, root_build_dir)
+
     depfile = depfile_path
 
     args = [
       "--input=$source_path",
       "--metal=$metal_intermediate_path",
       "--spirv=$spirv_intermediate_path",
+      "--reflection-json=$reflection_json_path",
+      "--reflection-header=$reflection_header_path",
+      "--reflection-cc=$reflection_cc_path",
       "--include={{source_dir}}",
       "--depfile=$depfile_intermediate_path",
     ]

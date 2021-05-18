@@ -4,16 +4,17 @@ uniform UniformBufferObject {
   Uniforms uniforms;
 } ubo;
 
-in vec3 inPosition;
+uniform sampler2D world;
 
+in vec2 inPosition;
+in vec3 inPosition2;
 in vec4 inAnotherPosition;
+in float stuff;
 
-layout(location = 3) in float stuff;
-
-out float outStuff;
+out vec4 outStuff;
 
 void main() {
-  gl_Position =  ubo.uniforms.projection * ubo.uniforms.view * ubo.uniforms.model * vec4(inPosition, 1.0) * inAnotherPosition;
-  outStuff = stuff;
+  gl_Position =  ubo.uniforms.projection * ubo.uniforms.view * ubo.uniforms.model * vec4(inPosition2, 1.0) * inAnotherPosition;
+  outStuff = texture(world, inPosition);
 }
 
