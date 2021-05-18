@@ -1,4 +1,4 @@
-Signature: 5cb111551d87453904843045bfded534
+Signature: 340a6d70469452c13fb3a649c639f74e
 
 UNUSED LICENSES:
 
@@ -3959,10 +3959,12 @@ FILE: ../../../third_party/skia/modules/androidkit/src/Matrix.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Paint.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/RuntimeShaderBuilder.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Shader.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/SkottieAnimation.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Surface.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Surface.h
 FILE: ../../../third_party/skia/modules/androidkit/src/SurfaceThread.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/SurfaceThread.h
+FILE: ../../../third_party/skia/modules/androidkit/src/Utils.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ThresholdEffect.cpp
@@ -5542,6 +5544,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLParsedModule.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
@@ -5550,6 +5553,7 @@ FILE: ../../../third_party/skia/src/sksl/dsl/DSLRuntimeEffects.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.h
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSL_priv.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
 ----------------------------------------------------------------------------------------------------
