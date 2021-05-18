@@ -82,12 +82,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
        );
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
-  /// Configure the behavior of offsets sent to [onStart].
+
+  /// Configure the behavior of offsets passed to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
-  /// at the time and position when this gesture recognizer wins the arena. If
-  /// [DragStartBehavior.down], [onStart] will be called at the time and
-  /// position when a down event was first detected.
+  /// with the position of the pointer at the time this gesture recognizer won
+  /// the arena. If [DragStartBehavior.down], [onStart] will be called with
+  /// the position of the first detected down event for the pointer. When there
+  /// are no other gestures competing with this gesture in the arena, there's
+  /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
   /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
@@ -96,13 +99,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// ## Example:
   ///
-  /// A finger presses down on the screen with offset (500.0, 500.0), and then
-  /// moves to position (510.0, 500.0) before winning the arena. With
+  /// A [HorizontalDragGestureRecognizer] and a [VerticalDragGestureRecognizer]
+  /// compete with each other. A finger presses down on the screen with
+  /// offset (500.0, 500.0), and then moves to position (510.0, 500.0) before
+  /// the [HorizontalDragGestureRecognizer] wins the arena. With
   /// [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
-  /// callback will be called at the time corresponding to the touch's position
-  /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
-  /// [onStart] will be called at the time corresponding to the touch's position
-  /// at (510.0, 500.0).
+  /// callback will be called with position (500.0, 500.0). If it is
+  /// instead set to [DragStartBehavior.start], [onStart] will be called with
+  /// position (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
 
   /// A pointer has contacted the screen with a primary button and might begin
@@ -121,12 +125,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// move.
   ///
   /// The position of the pointer is provided in the callback's `details`
-  /// argument, which is a [DragStartDetails] object.
-  ///
-  /// Depending on the value of [dragStartBehavior], this function will be
-  /// called on the initial touch down, if set to [DragStartBehavior.down] or
-  /// when the drag gesture is first detected, if set to
-  /// [DragStartBehavior.start].
+  /// argument, which is a [DragStartDetails] object. The [dragStartBehavior]
+  /// determines this position.
   ///
   /// See also:
   ///

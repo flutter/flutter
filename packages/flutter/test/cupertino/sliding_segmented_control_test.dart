@@ -82,7 +82,7 @@ void main() {
           onValueChanged: defaultCallback,
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains('children.length'),
@@ -97,7 +97,7 @@ void main() {
           onValueChanged: defaultCallback,
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains('children.length'),
@@ -117,7 +117,7 @@ void main() {
           onValueChanged: defaultCallback,
         ),
       ),
-      throwsA(isA<AssertionError>().having(
+      throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
         contains('groupValue must be either null or one of the keys in the children map'),

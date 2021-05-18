@@ -632,11 +632,11 @@ void main() {
 
     group('VMServiceFlutterDriver Unsupported error', () {
       test('enableAccessibility', () async {
-        expect(driver.enableAccessibility(), throwsA(isA<UnsupportedError>()));
+        expect(driver.enableAccessibility(), throwsUnsupportedError);
       });
 
       test('webDriver', () async {
-        expect(() => driver.webDriver, throwsA(isA<UnsupportedError>()));
+        expect(() => driver.webDriver, throwsUnsupportedError);
       });
     });
   });
@@ -913,28 +913,23 @@ void main() {
 
     group('WebFlutterDriver Unimplemented/Unsupported error', () {
       test('forceGC', () async {
-        expect(driver.forceGC(),
-            throwsA(isA<UnimplementedError>()));
+        expect(driver.forceGC(), throwsUnimplementedError);
       });
 
       test('getVmFlags', () async {
-        expect(driver.getVmFlags(),
-            throwsA(isA<UnimplementedError>()));
+        expect(driver.getVmFlags(), throwsUnimplementedError);
       });
 
       test('waitUntilFirstFrameRasterized', () async {
-        expect(driver.waitUntilFirstFrameRasterized(),
-            throwsA(isA<UnimplementedError>()));
+        expect(driver.waitUntilFirstFrameRasterized(), throwsUnimplementedError);
       });
 
       test('appIsoloate', () async {
-        expect(() => driver.appIsolate.extensionRPCs,
-            throwsA(isA<UnsupportedError>()));
+        expect(() => driver.appIsolate.extensionRPCs, throwsUnsupportedError);
       });
 
       test('serviceClient', () async {
-        expect(() => driver.serviceClient.getVM(),
-            throwsA(isA<UnsupportedError>()));
+        expect(() => driver.serviceClient.getVM(), throwsUnsupportedError);
       });
     });
   });
@@ -949,14 +944,10 @@ void main() {
     });
 
     test('tracing', () async {
-      expect(driver.traceAction(() async { return Future<dynamic>.value(); }),
-          throwsA(isA<UnsupportedError>()));
-      expect(driver.startTracing(),
-          throwsA(isA<UnsupportedError>()));
-      expect(driver.stopTracingAndDownloadTimeline(),
-          throwsA(isA<UnsupportedError>()));
-      expect(driver.clearTimeline(),
-          throwsA(isA<UnsupportedError>()));
+      expect(driver.traceAction(() async { return Future<dynamic>.value(); }), throwsUnsupportedError);
+      expect(driver.startTracing(), throwsUnsupportedError);
+      expect(driver.stopTracingAndDownloadTimeline(), throwsUnsupportedError);
+      expect(driver.clearTimeline(), throwsUnsupportedError);
     });
   });
 }

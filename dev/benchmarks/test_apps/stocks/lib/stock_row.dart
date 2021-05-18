@@ -57,6 +57,8 @@ class StockRow extends StatelessWidget {
             ),
             Expanded(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
                 children: <Widget>[
                   Expanded(
                     flex: 2,
@@ -77,8 +79,6 @@ class StockRow extends StatelessWidget {
                     ),
                   ),
                 ],
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
               ),
             ),
           ],

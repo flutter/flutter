@@ -82,7 +82,7 @@
       "name": "Linux complex_layout_scroll_perf__devtools_memory",
       "repo": "flutter",
       "task_name": "linux_complex_layout_scroll_perf__devtools_memory",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux complex_layout_semantics_perf",
@@ -322,13 +322,13 @@
       "name": "Linux large_image_changer_perf_android",
       "repo": "flutter",
       "task_name": "linux_large_image_changer_perf_android",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux animated_image_gc_perf",
       "repo": "flutter",
       "task_name": "animated_image_gc_perf",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Linux linux_chrome_dev_mode",
@@ -364,7 +364,7 @@
       "name": "Linux new_gallery__crane_perf",
       "repo": "flutter",
       "task_name": "linux_new_gallery__crane_perf",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux picture_cache_perf__e2e_summary",
@@ -523,27 +523,33 @@
       "flaky": false
     },
     {
-      "name": "Linux web_integration_tests",
+      "name": "Linux web_long_running_tests_1_5",
       "repo": "flutter",
-      "task_name": "linux_web_integration_tests",
+      "task_name": "linux_web_long_running_tests_1_5",
       "flaky": false
     },
     {
-      "name": "Linux web_long_running_tests_1_3",
+      "name": "Linux web_long_running_tests_2_5",
       "repo": "flutter",
-      "task_name": "linux_web_long_running_tests_1_3",
+      "task_name": "linux_web_long_running_tests_2_5",
       "flaky": false
     },
     {
-      "name": "Linux web_long_running_tests_2_3",
+      "name": "Linux web_long_running_tests_3_5",
       "repo": "flutter",
-      "task_name": "linux_web_long_running_tests_2_3",
+      "task_name": "linux_web_long_running_tests_3_5",
       "flaky": false
     },
     {
-      "name": "Linux web_long_running_tests_3_3",
+      "name": "Linux web_long_running_tests_4_5",
       "repo": "flutter",
-      "task_name": "linux_web_long_running_tests_3_3",
+      "task_name": "linux_web_long_running_tests_4_5",
+      "flaky": false
+    },
+    {
+      "name": "Linux web_long_running_tests_5_5",
+      "repo": "flutter",
+      "task_name": "linux_web_long_running_tests_5_5",
       "flaky": false
     },
     {
@@ -1147,10 +1153,10 @@
       "flaky": false
     },
     {
-      "name": "Mac_ios platform_channels_benchmarks",
+      "name": "Mac_ios platform_channels_benchmarks_ios",
       "repo": "flutter",
-      "task_name": "mac_ios_platform_channels_benchmarks",
-      "flaky": true
+      "task_name": "mac_ios_platform_channels_benchmarks_ios",
+      "flaky": false
     },
     {
       "name": "Mac_ios platform_interaction_test_ios",
@@ -1210,7 +1216,7 @@
       "name": "Windows build_tests_2_3",
       "repo": "flutter",
       "task_name": "win_build_tests_2_3",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Windows build_tests_3_3",
@@ -1246,7 +1252,7 @@
       "name": "Windows gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "win_gradle_plugin_light_apk_test",
-      "flaky": true
+      "flaky": false
     },
     {
       "name": "Windows gradle_plugin_bundle_test",

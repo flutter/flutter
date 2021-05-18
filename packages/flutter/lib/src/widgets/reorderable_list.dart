@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -521,6 +522,15 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Offset? _finalDropPosition;
   MultiDragGestureRecognizer? _recognizer;
   bool _autoScrolling = false;
+  // To implement the gap for the dragged item, we replace the dragged item
+  // with a zero sized box, and then translate all of the later items down
+  // by the size of the dragged item. This allows us to keep the order of the
+  // list, while still being able to animate the gap between the items. However
+  // for the first frame of the drag, the item has not yet been replaced, so
+  // the calculation for the gap is off by the size of the gap. This flag is
+  // used to determine if the transition to the zero sized box has completed,
+  // so the gap calculation can compensate for it.
+  bool _dragStartTransitionComplete = false;
 
   late ScrollableState _scrollable;
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
@@ -615,6 +625,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     final _ReorderableItemState item = _items[_dragIndex!]!;
     item.dragging = true;
     item.rebuild();
+    _dragStartTransitionComplete = false;
+    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+      _dragStartTransitionComplete = true;
+    });
 
     _insertIndex = item.index;
     _dragInfo = _DragInfo(
@@ -722,7 +736,14 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       if (item.index == _dragIndex! || !item.mounted)
         continue;
 
-      final Rect geometry = item.targetGeometry();
+      Rect geometry = item.targetGeometry();
+      if (!_dragStartTransitionComplete && _dragIndex! <= item.index) {
+        // Transition is not complete, so each item after the dragged item is still
+        // in its normal location and not moved up for the zero sized box that will
+        // replace the dragged item.
+        final Offset transitionOffset = _extentOffset(_reverse ? -gapExtent : gapExtent, _scrollDirection);
+        geometry = (geometry.topLeft - transitionOffset) & geometry.size;
+      }
       final double itemStart = _scrollDirection == Axis.vertical ? geometry.top : geometry.left;
       final double itemExtent = _scrollDirection == Axis.vertical ? geometry.height : geometry.width;
       final double itemEnd = itemStart + itemExtent;
@@ -852,8 +873,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     return _ReorderableItem(
       key: _ReorderableItemGlobalKey(child.key!, index, this),
       index: index,
-      child: child,
       capturedThemes: InheritedTheme.capture(from: context, to: overlay.context),
+      child: child,
     );
   }
 
@@ -1221,11 +1242,11 @@ class _DragInfo extends Drag {
       _DragItemProxy(
         listState: listState,
         index: index,
-        child: child,
         size: itemSize,
         animation: _proxyAnimation!,
         position: dragPosition - dragOffset - _overlayOrigin(context),
         proxyDecorator: proxyDecorator,
+        child: child,
       ),
     );
   }
@@ -1270,14 +1291,14 @@ class _DragItemProxy extends StatelessWidget {
           if (dropPosition != null) {
             effectivePosition = Offset.lerp(dropPosition - overlayOrigin, effectivePosition, Curves.easeOut.transform(animation.value))!;
           }
-        return Positioned(
+          return Positioned(
+            left: effectivePosition.dx,
+            top: effectivePosition.dy,
             child: SizedBox(
               width: size.width,
               height: size.height,
               child: child,
             ),
-            left: effectivePosition.dx,
-            top: effectivePosition.dy,
           );
         },
         child: proxyChild,
