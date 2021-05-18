@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 import 'package:flutter/material.dart';
 
+import '../../foundation.dart';
+
 /// Provides a flexible callback and consistent API for [State] objects to track
 /// which [MaterialState] values are in effect for their portion of the user
 /// interface.
@@ -119,4 +121,10 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
 
   /// Getter for whether this class considers [MaterialState.selected] to be active.
   bool get isSelected => materialStates.contains(MaterialState.selected);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Set<MaterialState>>('materialStates', materialStates, defaultValue: <MaterialState>{}));
+  }
 }
