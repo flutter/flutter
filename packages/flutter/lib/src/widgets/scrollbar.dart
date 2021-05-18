@@ -952,14 +952,20 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // A scroll event is required in order to paint the thumb.
   void _maybeTriggerScrollbar() {
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+      final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
       if (showScrollbar) {
         _fadeoutTimer?.cancel();
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
-        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
         _checkForValidScrollPosition();
         scrollController!.position.didUpdateScrollPositionBy(0);
+      }
+
+      // Interactive scrollbars need to be properly configured.
+      // If there is no scroll controller, there will not be gestures at all.
+      if (scrollController != null && enableGestures) {
+        _checkForValidScrollPosition();
       }
     });
   }
@@ -971,9 +977,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ? 'provided ScrollController'
       : 'PrimaryScrollController';
 
-    final String when = showScrollbar
-      ? 'Scrollbar.isAlwaysShown is true'
-      : 'using Scrollbar gestures';
+    String when = '';
+    if (showScrollbar) {
+      when = 'Scrollbar.isAlwaysShown is true';
+    } else if (enableGestures) {
+      when = 'the scrollbar is interactive';
+    } else {
+      when = 'using the Scrollbar';
+    }
+
     assert(
       scrollController != null,
       'A ScrollController is required when $when. '

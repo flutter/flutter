@@ -786,7 +786,7 @@ void main() {
     );
   });
 
-  testWidgets('Gestures assert that a ScrollPosition is attached', (WidgetTester tester) async {
+  testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     final ScrollController scrollController = ScrollController();
 
@@ -813,26 +813,6 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(scrollController.offset, 0.0);
-
-    // Scroll a bit to show the scrollbar
-    const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester.startGesture(
-      tester.getCenter(find.byType(SingleChildScrollView))
-    );
-    // Scroll down by swiping up.
-    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-
-    // Scrollbar offset has moved by scrollAmount.
-    expect(scrollController.offset, scrollAmount);
-    await scrollGesture.up();
-    await tester.pump();
-
-    // Tap on the track area below the thumb.
-    await tester.tapAt(const Offset(796.0, 550.0));
-    await tester.pumpAndSettle();
     final dynamic exception = tester.takeException();
     expect(exception, isAssertionError);
     expect(
