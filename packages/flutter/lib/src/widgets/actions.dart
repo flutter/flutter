@@ -1483,6 +1483,264 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 }
 
+/// Provides a scope to bind to the actions defined in a descendant
+/// [TargetedActions].
+///
+/// Targeted actions are useful for making actions available for invocation that
+/// are bound to descendants or siblings of the focused widget that wouldn't
+/// normally be visible in the focused widget's context. [TargetedShortcuts] is
+/// used in place or in addition to the [Shortcuts] widget that defines the key
+/// bindings for a subtree.
+///
+/// To use a targeted action, define this widget with a set of shortcuts that
+/// should be active for its descendants. Then, in a descendant widget of this
+/// one, define a [TargetedActions] widget with the actions that you wish to
+/// execute when the binding is activated with the intent defined here. If no
+/// action is defined for a scope for that intent, then the intent goes
+/// unfulfilled, and nothing happens.
+class TargetedShortcuts extends StatefulWidget {
+  /// Create a const [TargetedShortcuts].
+  ///
+  /// The [child] and [shortcuts] attributes are required.
+  const TargetedShortcuts({
+    Key? key,
+    required this.child,
+    required this.shortcuts,
+    this.manager,
+  }) : super(key: key);
+
+  /// The [ShortcutManager] that will manage the mapping between key
+  /// combinations and [Action]s.
+  ///
+  /// If not specified, uses a default-constructed [ShortcutManager].
+  ///
+  /// This manager will be given new [shortcuts] to manage whenever the
+  /// [shortcuts] change materially.
+  final ShortcutManager? manager;
+
+  /// The child widget for this [TargetedShortcuts] widget.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  /// {@macro flutter.widgets.shortcuts.shortcuts}
+  final Map<ShortcutActivator, Intent> shortcuts;
+
+  static _TargetedActionRegistry? _maybeOf(BuildContext context) {
+    assert(context != null);
+    final _TargetedActionScopeMarker? marker =
+    context.dependOnInheritedWidgetOfExactType<_TargetedActionScopeMarker>();
+    return marker?.registry;
+  }
+
+  @override
+  State<TargetedShortcuts> createState() => _TargetedShortcutsState();
+}
+
+class _TargetedShortcutsState extends State<TargetedShortcuts> {
+  late _TargetedActionRegistry registry;
+  Map<ShortcutActivator, Intent> mappedShortcuts = <ShortcutActivator, Intent>{};
+
+  @override
+  void initState() {
+    super.initState();
+    registry = _TargetedActionRegistry();
+    mappedShortcuts = _buildShortcuts();
+  }
+
+  @override
+  void didUpdateWidget(TargetedShortcuts oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shortcuts != widget.shortcuts) {
+      mappedShortcuts = _buildShortcuts();
+    }
+  }
+
+  Map<ShortcutActivator, Intent> _buildShortcuts() {
+    final Map<ShortcutActivator, Intent> mapped = <ShortcutActivator, Intent>{};
+    for (final ShortcutActivator activator in widget.shortcuts.keys) {
+      mapped[activator] = _TargetedIntent(widget.shortcuts[activator]!);
+    }
+    return mapped;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Shortcuts(
+      manager: widget.manager,
+      shortcuts: mappedShortcuts,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          _TargetedIntent: _TargetedAction(registry),
+        },
+        child: _TargetedActionScopeMarker(registry: registry, child: widget.child),
+      ),
+    );
+  }
+}
+
+class _TargetedActionScopeMarker extends InheritedWidget {
+  const _TargetedActionScopeMarker({
+    required this.registry,
+    required Widget child,
+  }) : super(child: child);
+
+  final _TargetedActionRegistry registry;
+
+  @override
+  bool updateShouldNotify(covariant _TargetedActionScopeMarker oldWidget) {
+    return oldWidget.registry != registry;
+  }
+}
+
+/// Defines the actions to fulfill the intents in a [TargetedShortcuts] widget.
+///
+/// Place an instance of this widget as a descendant of a [TargetedShortcuts]
+/// widget, and define any actions that should fulfill those [Intent]s. Any
+/// actions defined in parents of this widget will also be visible as possible
+/// targets for the intents.
+///
+/// If more than one of these exist in the same [TargetedShortcuts], then each
+/// of the corresponding contexts will be searched for an action to fulfill the
+/// intent. The first one to be found that fulfills the intent will have its
+/// action invoked and result returned. The order duplicate bindings are
+/// searched in is stable with respect to build order, but arbitrary.
+// This is a stateful widget because we need to be able to implement deactivate.
+class TargetedActions extends StatefulWidget {
+  /// Creates a const [TargetedActions].
+  ///
+  /// The [child] attribute is required.
+  const TargetedActions({Key? key, required this.child, this.actions, this.dispatcher})
+      : super(key: key);
+
+  /// The [ActionDispatcher] object that invokes actions.
+  ///
+  /// This is what is returned from [Actions.of], and used by [Actions.invoke].
+  ///
+  /// If this [dispatcher] is null, then [Actions.of] and [Actions.invoke] will
+  /// look up the tree until they find an Actions widget that has a dispatcher
+  /// set. If not such widget is found, then they will return/use a
+  /// default-constructed [ActionDispatcher].
+  final ActionDispatcher? dispatcher;
+
+  /// The child widget for this [TargetedShortcuts] widget.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  /// {@macro flutter.widgets.actions.actions}
+  final Map<Type, Action<Intent>>? actions;
+
+  @override
+  State<TargetedActions> createState() => _TargetedActionsState();
+}
+
+class _TargetedActionsState extends State<TargetedActions> {
+  final GlobalKey _subtreeKey = GlobalKey(debugLabel: 'Targeted Action Binding');
+
+  @override
+  Widget build(BuildContext context) {
+    final _TargetedActionRegistry? registry = TargetedShortcuts._maybeOf(context);
+    assert(
+    registry != null,
+    'Unable to find a $TargetedShortcuts ancestor in the widget hierarchy.\n'
+        'A $TargetedActions must be a descendant of a $TargetedShortcuts.');
+    registry!.addTarget(_subtreeKey);
+    Widget result = KeyedSubtree(
+      key: _subtreeKey,
+      child: widget.child,
+    );
+    if (widget.actions != null) {
+      result = Actions(actions: widget.actions!, dispatcher: widget.dispatcher, child: result);
+    }
+    return result;
+  }
+
+  @override
+  void deactivate() {
+    final _TargetedActionRegistry? registry = TargetedShortcuts._maybeOf(context);
+    assert(
+    registry != null,
+    'Unable to find a $TargetedShortcuts ancestor in the widget hierarchy.\n'
+        'A $TargetedActions must be a descendant of a $TargetedShortcuts.');
+    registry!.targetKeys.remove(_subtreeKey);
+    super.deactivate();
+  }
+}
+
+// This is a registry that keeps track of the set of targets in the scope, and
+// handles invoking them.
+//
+// It is found through a provider.
+class _TargetedActionRegistry {
+  _TargetedActionRegistry() : targetKeys = <GlobalKey>{};
+
+  Set<GlobalKey> targetKeys;
+
+  // Adds the given target key to the set of keys to check.
+  void addTarget(GlobalKey target) {
+    targetKeys.add(target);
+  }
+
+  bool isEnabled(Intent intent) {
+    // Check each of the target keys to see if there's an action registered in
+    // that context for the intent. If so, find out if it is enabled. It is
+    // build-order dependent which action gets invoked if there are two contexts
+    // tha support the action.
+    for (final GlobalKey key in targetKeys) {
+      if (key.currentContext != null) {
+        final Action<Intent>? foundAction =
+        Actions.maybeFind<Intent>(key.currentContext!, intent: intent);
+        if (foundAction != null && foundAction.isEnabled(intent)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Object? invoke(Intent intent) {
+    // Check each of the target keys to see if there's an action registered in
+    // that context for the intent. If so, execute it and return the result. It
+    // is build-order dependent which action gets invoked if there are two
+    // contexts tha support the action.
+    for (final GlobalKey key in targetKeys) {
+      if (key.currentContext != null) {
+        if (Actions.maybeFind<Intent>(key.currentContext!, intent: intent) != null) {
+          return Actions.invoke(key.currentContext!, intent);
+        }
+      }
+    }
+    return null;
+  }
+}
+
+// A wrapper intent class so that it can hold the "real" intent, and serve as a
+// mapping type for the _TargetedAction.
+class _TargetedIntent extends Intent {
+  const _TargetedIntent(this.intent);
+
+  final Intent intent;
+}
+
+// A special action class that invokes the intent tunneled into it via the
+// _TargetedIntent.
+class _TargetedAction extends Action<_TargetedIntent> {
+  _TargetedAction(this.registry);
+
+  final _TargetedActionRegistry registry;
+
+  @override
+  bool isEnabled(_TargetedIntent intent) {
+    return registry.isEnabled(intent.intent);
+  }
+
+  @override
+  Object? invoke(covariant _TargetedIntent intent) {
+    registry.invoke(intent.intent);
+  }
+}
+
 /// An [Intent], that is bound to a [DoNothingAction].
 ///
 /// Attaching a [DoNothingIntent] to a [Shortcuts] mapping is one way to disable
