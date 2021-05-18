@@ -82,7 +82,7 @@
       "name": "Linux complex_layout_scroll_perf__devtools_memory",
       "repo": "flutter",
       "task_name": "linux_complex_layout_scroll_perf__devtools_memory",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux complex_layout_semantics_perf",
@@ -322,7 +322,7 @@
       "name": "Linux large_image_changer_perf_android",
       "repo": "flutter",
       "task_name": "linux_large_image_changer_perf_android",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux animated_image_gc_perf",
@@ -364,7 +364,7 @@
       "name": "Linux new_gallery__crane_perf",
       "repo": "flutter",
       "task_name": "linux_new_gallery__crane_perf",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux picture_cache_perf__e2e_summary",
@@ -376,7 +376,7 @@
       "name": "Linux platform_channels_benchmarks",
       "repo": "flutter",
       "task_name": "linux_platform_channels_benchmarks",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Linux platform_views_scroll_perf__timeline_summary",
