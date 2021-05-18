@@ -97,7 +97,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// [text] or [child] is non-null.
   final EdgeInsetsGeometry iconMargin;
 
-  /// The widget height when the user defines it
+  /// The height of the [Tab].
   ///
   /// If null, the height will be calculated based on the content of the [Tab].  When `icon` is not
   /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the 
