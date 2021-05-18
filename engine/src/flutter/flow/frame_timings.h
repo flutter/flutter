@@ -12,6 +12,10 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 
+#define TRACE_EVENT_WITH_FRAME_NUMBER(recorder, category_group, name) \
+  TRACE_EVENT1(category_group, name, "frame_number",                  \
+               recorder->GetFrameNumberTraceArg())
+
 namespace flutter {
 
 /// Records timestamps for various phases of a frame rendering process.
@@ -84,13 +88,17 @@ class FrameTimingsRecorder {
   /// built at a later point of time.
   uint64_t GetFrameNumber() const;
 
+  /// Returns the frame number in a fml tracing friendly format.
+  const char* GetFrameNumberTraceArg() const;
+
  private:
-  static std::atomic_int frame_number_gen_;
+  static std::atomic<uint64_t> frame_number_gen_;
 
   mutable std::mutex state_mutex_;
   State state_ = State::kUninitialized;
 
   const uint64_t frame_number_;
+  const std::string frame_number_trace_arg_val_;
 
   fml::TimePoint vsync_start_;
   fml::TimePoint vsync_target_;
