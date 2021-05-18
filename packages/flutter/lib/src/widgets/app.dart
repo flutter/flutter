@@ -1512,6 +1512,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return true;
   }
 
+  final ActionRegistry actionRegistry = ActionRegistry();
+
   @override
   Widget build(BuildContext context) {
     Widget? routing;
@@ -1644,6 +1646,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // fall through to the defaultShortcuts.
         child: DefaultTextEditingShortcuts(
           child: Actions(
+            registry: actionRegistry,
             actions: widget.actions ?? WidgetsApp.defaultActions,
             child: DefaultTextEditingActions(
               child: FocusTraversalGroup(

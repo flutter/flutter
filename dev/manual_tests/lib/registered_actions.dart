@@ -75,34 +75,41 @@ void main() {
 ///
 /// Shortcuts can be defined here, and they will be in effect for the whole app,
 /// although different widgets may fulfill them differently.
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   static const String title = 'Shortcuts and Actions Demo';
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final ActionRegistry registry = ActionRegistry();
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: title,
+      title: MyApp.title,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: Material(
         color: Colors.grey.shade100,
-        child: TargetedShortcuts(
+        child: Shortcuts(
           manager: LoggingShortcutManager(),
           shortcuts: const <ShortcutActivator, Intent>{
             SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllIntent(),
             SingleActivator(LogicalKeyboardKey.keyS, control: true): SelectNoneIntent(),
+            SingleActivator(LogicalKeyboardKey.digit0): ToggleSelectIntent(0),
+            SingleActivator(LogicalKeyboardKey.digit1): ToggleSelectIntent(1),
+            SingleActivator(LogicalKeyboardKey.digit2): ToggleSelectIntent(2),
+            SingleActivator(LogicalKeyboardKey.digit3): ToggleSelectIntent(3),
+            SingleActivator(LogicalKeyboardKey.digit4): ToggleSelectIntent(4),
           },
-          child: Shortcuts(
-            shortcuts: const <ShortcutActivator, Intent>{
-              SingleActivator(LogicalKeyboardKey.digit0): ToggleSelectIntent(0),
-              SingleActivator(LogicalKeyboardKey.digit1): ToggleSelectIntent(1),
-              SingleActivator(LogicalKeyboardKey.digit2): ToggleSelectIntent(2),
-              SingleActivator(LogicalKeyboardKey.digit3): ToggleSelectIntent(3),
-              SingleActivator(LogicalKeyboardKey.digit4): ToggleSelectIntent(4),
-            },
+          child: Actions(
+            actions: const <Type, Action<Intent>>{},
+            registry: registry,
             child: Row(
               children: const <Widget>[
                 Expanded(flex: 1, child: MyMenu()),
@@ -122,7 +129,7 @@ class MyGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FocusTraversalGroup(
-      child: TargetedActions(
+      child: RegisteredActions(
         dispatcher: LoggingActionDispatcher(),
         actions: <Type, Action<Intent>>{
           SelectAllIntent: SelectAllAction(model),

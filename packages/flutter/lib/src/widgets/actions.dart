@@ -481,6 +481,55 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(covariant T intent) => onInvoke(intent);
 }
 
+/// A registry of actions that is checked by the [Actions] widget
+/// for actions to be invoked in addition to its own [Actions.actions].
+///
+/// Assign one of these to the [Actions.registry] attribute of the [Actions]
+/// widget you wish to serve as the highest level in the widget hierarchy that
+/// will be searched for the actions of its subtree.
+///
+/// Actions in a subtree are then automatically registered by the
+/// [RegisteredActions] widget, which is the preferred way to register actions,
+/// although you can also do it manually by looking up the registry for a
+/// context with [Actions.maybeRegistryOf].
+class ActionRegistry with Diagnosticable {
+  final Map<Type, Action<Intent>> _registeredActions = <Type, Action<Intent>>{};
+
+  /// Returns the action registered to the type of the intent (if given), or the
+  /// generic type `T` if `intent` is not given.
+  ///
+  /// Returns null if no such intent is registered.
+  Action<T>? findRegisteredAction<T extends Intent>({Type? type}) {
+    final Type finalType = type ?? T;
+    print('Looking for action for $finalType');
+    return _registeredActions[finalType] as Action<T>?;
+  }
+
+  /// Allows registering an action that don't need to be in the current
+  /// BuildContext in order to be found.
+  ///
+  /// If an action is already registered for the given `type`, this method
+  /// asserts.
+  void registerAction<T extends Intent>(Action<T> action, {Type? type}) {
+    final Type finalType = type ?? T;
+    print('Registered action for type $finalType: $action');
+    assert(!_registeredActions.containsKey(finalType),
+      'Tried to register an action for type $finalType when it already exists.');
+    _registeredActions[finalType] = action;
+  }
+
+  /// Unregisters an action registered in [registerAction].
+  ///
+  /// If the action wasn't registered before, then this method asserts.
+  void unRegisterAction<T extends Intent>({Type? type}) {
+    final Type finalType = type ?? T;
+    print('Unregistered action for type $finalType: ${_registeredActions[finalType]}');
+    assert(_registeredActions.containsKey(type),
+    "Tried to remove an action associated with type $finalType that wasn't registered.");
+    _registeredActions.remove(finalType);
+  }
+}
+
 /// An action dispatcher that simply invokes the actions given to it.
 ///
 /// See also:
@@ -705,12 +754,14 @@ class Actions extends StatefulWidget {
   const Actions({
     Key? key,
     this.dispatcher,
+    this.registry,
     required this.actions,
     required this.child,
   })  : assert(actions != null),
         assert(child != null),
         super(key: key);
 
+  /// {@template flutter.widgets.actions.dispatcher}
   /// The [ActionDispatcher] object that invokes actions.
   ///
   /// This is what is returned from [Actions.of], and used by [Actions.invoke].
@@ -719,6 +770,7 @@ class Actions extends StatefulWidget {
   /// look up the tree until they find an Actions widget that has a dispatcher
   /// set. If not such widget is found, then they will return/use a
   /// default-constructed [ActionDispatcher].
+  /// {@endtemplate}
   final ActionDispatcher? dispatcher;
 
   /// {@template flutter.widgets.actions.actions}
@@ -730,6 +782,15 @@ class Actions extends StatefulWidget {
   /// defining it inline in the build function.
   /// {@endtemplate}
   final Map<Type, Action<Intent>> actions;
+
+  /// {@template flutter.widgets.actions.registry}
+  /// A registry of actions to be added to the list of actions to be searched.
+  ///
+  /// The action mappings registered with the registry will be searched in
+  /// addition to the [actions] map, and can be added to by creating a
+  /// [RegisteredActions] widget as a descendant of this [Actions] widget.
+  /// {@endtemplate}
+  final ActionRegistry? registry;
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
@@ -765,6 +826,20 @@ class Actions extends StatefulWidget {
       return false;
     });
     return dispatcher ?? const ActionDispatcher();
+  }
+
+  // Finds the nearest valid ActionRegistry, if any.
+  static ActionRegistry? _findRegistry(BuildContext context) {
+    ActionRegistry? registry;
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final ActionRegistry? found = (element.widget as _ActionsMarker).registry;
+      if (found != null) {
+        registry = found;
+        return true;
+      }
+      return false;
+    });
+    return registry;
   }
 
   /// Returns a [VoidCallback] handler that invokes the bound action for the
@@ -873,6 +948,10 @@ class Actions extends StatefulWidget {
       }
       return false;
     });
+    if (action == null) {
+      final ActionRegistry? registry = _findRegistry(context);
+      action = registry?.findRegisteredAction<T>(type: intent.runtimeType);
+    }
 
     return action;
   }
@@ -886,6 +965,17 @@ class Actions extends StatefulWidget {
     assert(context != null);
     final _ActionsMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsMarker>();
     return marker?.dispatcher ?? _findDispatcher(context);
+  }
+
+  /// Returns the [ActionRegistry] associated with the [Actions] widget that
+  /// most tightly encloses the given [BuildContext], if any.
+  ///
+  /// Will return null if no ambient [Actions] widget is found, or if no
+  /// [Actions] widget has the [Actions.registry] attribute set.
+  static ActionRegistry? maybeRegistryOf(BuildContext context) {
+    assert(context != null);
+    final _ActionsMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsMarker>();
+    return marker?.registry ?? _findRegistry(context);
   }
 
   /// Invokes the action associated with the given [Intent] using the
@@ -1060,6 +1150,7 @@ class _ActionsState extends State<Actions> {
     return _ActionsMarker(
       actions: widget.actions,
       dispatcher: widget.dispatcher,
+      registry: widget.registry,
       rebuildKey: rebuildKey,
       child: widget.child,
     );
@@ -1071,6 +1162,7 @@ class _ActionsState extends State<Actions> {
 class _ActionsMarker extends InheritedWidget {
   const _ActionsMarker({
     required this.dispatcher,
+    required this.registry,
     required this.actions,
     required this.rebuildKey,
     Key? key,
@@ -1080,6 +1172,7 @@ class _ActionsMarker extends InheritedWidget {
         super(key: key, child: child);
 
   final ActionDispatcher? dispatcher;
+  final ActionRegistry? registry;
   final Map<Type, Action<Intent>> actions;
   final Object rebuildKey;
 
@@ -1087,6 +1180,7 @@ class _ActionsMarker extends InheritedWidget {
   bool updateShouldNotify(_ActionsMarker oldWidget) {
     return rebuildKey != oldWidget.rebuildKey
         || oldWidget.dispatcher != dispatcher
+        || oldWidget.registry != registry
         || !mapEquals<Type, Action<Intent>>(oldWidget.actions, actions);
   }
 }
@@ -1483,261 +1577,100 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 }
 
-/// Provides a scope to bind to the actions defined in a descendant
-/// [TargetedActions].
+/// Defines the actions to be registered at the nearest ancestor [Actions]
+/// widget that defines an [ActionRegistry].
 ///
-/// Targeted actions are useful for making actions available for invocation that
-/// are bound to descendants or siblings of the focused widget that wouldn't
-/// normally be visible in the focused widget's context. [TargetedShortcuts] is
-/// used in place or in addition to the [Shortcuts] widget that defines the key
-/// bindings for a subtree.
+/// These registered actions will be searched when invoking an intent in any
+/// context below the [Actions] widget that defines the registry. So, if the
+/// registry is defined at the root of the widget hierarchy, then these actions
+/// are defined globally, and invoking them with their registered intents will
+/// invoke them. The [WidgetsApp] (from which [MaterialApp] and [CupertinoApp]
+/// are derived) defines a registry, so if you use one of these, a registry will
+/// already be defined at the top level.
 ///
-/// To use a targeted action, define this widget with a set of shortcuts that
-/// should be active for its descendants. Then, in a descendant widget of this
-/// one, define a [TargetedActions] widget with the actions that you wish to
-/// execute when the binding is activated with the intent defined here. If no
-/// action is defined for a scope for that intent, then the intent goes
-/// unfulfilled, and nothing happens.
-class TargetedShortcuts extends StatefulWidget {
-  /// Create a const [TargetedShortcuts].
+/// If more than one action is registered as responding to the same [Intent]
+/// type in the same registry, then the [ActionRegistry] will assert.
+class RegisteredActions extends StatefulWidget {
+  /// Creates a const [RegisteredActions].
   ///
-  /// The [child] and [shortcuts] attributes are required.
-  const TargetedShortcuts({
+  /// The [child] and [actions] attributes are required.
+  const RegisteredActions({
     Key? key,
     required this.child,
-    required this.shortcuts,
-    this.manager,
+    required this.actions,
+    this.dispatcher,
+    this.registry,
   }) : super(key: key);
 
-  /// The [ShortcutManager] that will manage the mapping between key
-  /// combinations and [Action]s.
-  ///
-  /// If not specified, uses a default-constructed [ShortcutManager].
-  ///
-  /// This manager will be given new [shortcuts] to manage whenever the
-  /// [shortcuts] change materially.
-  final ShortcutManager? manager;
-
-  /// The child widget for this [TargetedShortcuts] widget.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  /// {@macro flutter.widgets.shortcuts.shortcuts}
-  final Map<ShortcutActivator, Intent> shortcuts;
-
-  static _TargetedActionRegistry? _maybeOf(BuildContext context) {
-    assert(context != null);
-    final _TargetedActionScopeMarker? marker =
-    context.dependOnInheritedWidgetOfExactType<_TargetedActionScopeMarker>();
-    return marker?.registry;
-  }
-
-  @override
-  State<TargetedShortcuts> createState() => _TargetedShortcutsState();
-}
-
-class _TargetedShortcutsState extends State<TargetedShortcuts> {
-  late _TargetedActionRegistry registry;
-  Map<ShortcutActivator, Intent> mappedShortcuts = <ShortcutActivator, Intent>{};
-
-  @override
-  void initState() {
-    super.initState();
-    registry = _TargetedActionRegistry();
-    mappedShortcuts = _buildShortcuts();
-  }
-
-  @override
-  void didUpdateWidget(TargetedShortcuts oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.shortcuts != widget.shortcuts) {
-      mappedShortcuts = _buildShortcuts();
-    }
-  }
-
-  Map<ShortcutActivator, Intent> _buildShortcuts() {
-    final Map<ShortcutActivator, Intent> mapped = <ShortcutActivator, Intent>{};
-    for (final ShortcutActivator activator in widget.shortcuts.keys) {
-      mapped[activator] = _TargetedIntent(widget.shortcuts[activator]!);
-    }
-    return mapped;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Shortcuts(
-      manager: widget.manager,
-      shortcuts: mappedShortcuts,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          _TargetedIntent: _TargetedAction(registry),
-        },
-        child: _TargetedActionScopeMarker(registry: registry, child: widget.child),
-      ),
-    );
-  }
-}
-
-class _TargetedActionScopeMarker extends InheritedWidget {
-  const _TargetedActionScopeMarker({
-    required this.registry,
-    required Widget child,
-  }) : super(child: child);
-
-  final _TargetedActionRegistry registry;
-
-  @override
-  bool updateShouldNotify(covariant _TargetedActionScopeMarker oldWidget) {
-    return oldWidget.registry != registry;
-  }
-}
-
-/// Defines the actions to fulfill the intents in a [TargetedShortcuts] widget.
-///
-/// Place an instance of this widget as a descendant of a [TargetedShortcuts]
-/// widget, and define any actions that should fulfill those [Intent]s. Any
-/// actions defined in parents of this widget will also be visible as possible
-/// targets for the intents.
-///
-/// If more than one of these exist in the same [TargetedShortcuts], then each
-/// of the corresponding contexts will be searched for an action to fulfill the
-/// intent. The first one to be found that fulfills the intent will have its
-/// action invoked and result returned. The order duplicate bindings are
-/// searched in is stable with respect to build order, but arbitrary.
-// This is a stateful widget because we need to be able to implement deactivate.
-class TargetedActions extends StatefulWidget {
-  /// Creates a const [TargetedActions].
-  ///
-  /// The [child] attribute is required.
-  const TargetedActions({Key? key, required this.child, this.actions, this.dispatcher})
-      : super(key: key);
-
-  /// The [ActionDispatcher] object that invokes actions.
-  ///
-  /// This is what is returned from [Actions.of], and used by [Actions.invoke].
-  ///
-  /// If this [dispatcher] is null, then [Actions.of] and [Actions.invoke] will
-  /// look up the tree until they find an Actions widget that has a dispatcher
-  /// set. If not such widget is found, then they will return/use a
-  /// default-constructed [ActionDispatcher].
+  /// {@macro flutter.widgets.actions.dispatcher}
   final ActionDispatcher? dispatcher;
 
+  /// {@macro flutter.widgets.actions.registry}
+  ///
+  /// Actions defined in this widget will not be registered with this registry:
+  /// only descendant [RegisteredActions] widgets will register with this
+  /// registry if defined.
+  final ActionRegistry? registry;
+
+  /// {@macro flutter.widgets.actions.actions}
+  final Map<Type, Action<Intent>> actions;
+
   /// The child widget for this [TargetedShortcuts] widget.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// {@macro flutter.widgets.actions.actions}
-  final Map<Type, Action<Intent>>? actions;
-
   @override
-  State<TargetedActions> createState() => _TargetedActionsState();
+  State<RegisteredActions> createState() => _RegisteredActionsState();
 }
 
-class _TargetedActionsState extends State<TargetedActions> {
-  final GlobalKey _subtreeKey = GlobalKey(debugLabel: 'Targeted Action Binding');
+class _RegisteredActionsState extends State<RegisteredActions> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ActionRegistry? registry = Actions.maybeRegistryOf(context);
+    if (registry != null) {
+      for (final Type type in widget.actions.keys) {
+        registry.registerAction<Intent>(widget.actions[type]!, type: type);
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(RegisteredActions oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final ActionRegistry? registry = Actions.maybeRegistryOf(context);
+    if (registry != null) {
+      for (final Type type in oldWidget.actions.keys) {
+        if (registry.findRegisteredAction(type: type) != null) {
+          registry.unRegisterAction<Intent>(type: type);
+        }
+      }
+      for (final Type type in widget.actions.keys) {
+        registry.registerAction<Intent>(widget.actions[type]!, type: type);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final _TargetedActionRegistry? registry = TargetedShortcuts._maybeOf(context);
-    assert(
-    registry != null,
-    'Unable to find a $TargetedShortcuts ancestor in the widget hierarchy.\n'
-        'A $TargetedActions must be a descendant of a $TargetedShortcuts.');
-    registry!.addTarget(_subtreeKey);
-    Widget result = KeyedSubtree(
-      key: _subtreeKey,
+    return Actions(
+      actions: widget.actions,
+      registry: widget.registry,
+      dispatcher: widget.dispatcher,
       child: widget.child,
     );
-    if (widget.actions != null) {
-      result = Actions(actions: widget.actions!, dispatcher: widget.dispatcher, child: result);
-    }
-    return result;
   }
 
   @override
-  void deactivate() {
-    final _TargetedActionRegistry? registry = TargetedShortcuts._maybeOf(context);
-    assert(
-    registry != null,
-    'Unable to find a $TargetedShortcuts ancestor in the widget hierarchy.\n'
-        'A $TargetedActions must be a descendant of a $TargetedShortcuts.');
-    registry!.targetKeys.remove(_subtreeKey);
-    super.deactivate();
-  }
-}
-
-// This is a registry that keeps track of the set of targets in the scope, and
-// handles invoking them.
-//
-// It is found through a provider.
-class _TargetedActionRegistry {
-  _TargetedActionRegistry() : targetKeys = <GlobalKey>{};
-
-  Set<GlobalKey> targetKeys;
-
-  // Adds the given target key to the set of keys to check.
-  void addTarget(GlobalKey target) {
-    targetKeys.add(target);
-  }
-
-  bool isEnabled(Intent intent) {
-    // Check each of the target keys to see if there's an action registered in
-    // that context for the intent. If so, find out if it is enabled. It is
-    // build-order dependent which action gets invoked if there are two contexts
-    // tha support the action.
-    for (final GlobalKey key in targetKeys) {
-      if (key.currentContext != null) {
-        final Action<Intent>? foundAction =
-        Actions.maybeFind<Intent>(key.currentContext!, intent: intent);
-        if (foundAction != null && foundAction.isEnabled(intent)) {
-          return true;
-        }
+  void dispose() {
+    final ActionRegistry? registry = Actions.maybeRegistryOf(context);
+    if (registry != null) {
+      for (final Type type in widget.actions.keys) {
+        registry.unRegisterAction<Intent>(type: type);
       }
     }
-    return false;
-  }
-
-  Object? invoke(Intent intent) {
-    // Check each of the target keys to see if there's an action registered in
-    // that context for the intent. If so, execute it and return the result. It
-    // is build-order dependent which action gets invoked if there are two
-    // contexts tha support the action.
-    for (final GlobalKey key in targetKeys) {
-      if (key.currentContext != null) {
-        if (Actions.maybeFind<Intent>(key.currentContext!, intent: intent) != null) {
-          return Actions.invoke(key.currentContext!, intent);
-        }
-      }
-    }
-    return null;
-  }
-}
-
-// A wrapper intent class so that it can hold the "real" intent, and serve as a
-// mapping type for the _TargetedAction.
-class _TargetedIntent extends Intent {
-  const _TargetedIntent(this.intent);
-
-  final Intent intent;
-}
-
-// A special action class that invokes the intent tunneled into it via the
-// _TargetedIntent.
-class _TargetedAction extends Action<_TargetedIntent> {
-  _TargetedAction(this.registry);
-
-  final _TargetedActionRegistry registry;
-
-  @override
-  bool isEnabled(_TargetedIntent intent) {
-    return registry.isEnabled(intent.intent);
-  }
-
-  @override
-  Object? invoke(covariant _TargetedIntent intent) {
-    registry.invoke(intent.intent);
+    super.dispose();
   }
 }
 
