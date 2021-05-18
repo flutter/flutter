@@ -110,7 +110,7 @@ class _TextEditingCallbackAction<T extends TextEditingGestureIntent> extends Act
   @override
   void invoke(T intent) {
     final EditableTextState? editableTextState = intent.gestureDelegate.editableTextKey.currentState;
-    if (editableTextState == null) {
+    if (editableTextState == null || editableTextState.mounted) {
       return;
     }
     onInvoke(intent, editableTextState);

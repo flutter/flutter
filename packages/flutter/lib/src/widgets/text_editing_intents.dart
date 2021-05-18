@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 
 import 'actions.dart';
 import 'editable_text.dart';
+import 'text_selection.dart';
+import 'text_selection_gestures.dart';
 
 /// An [Intent] to delete a character in the backwards direction.
 ///
@@ -273,36 +274,40 @@ class MoveSelectionUpTextIntent extends Intent {
 
 // ---------- Gesture Intents ----------
 
+/// An [Intent] that represents a gesture, or a potential gesture that has yet
+/// to be recognized.
 abstract class TextEditingGestureIntent extends Intent {
+  /// Creates an [Intent] that represents a gesture, or a potential gesture that
+  /// has yet to be recognized, that happened in a text field associated with
+  /// [gestureDelegate].
   const TextEditingGestureIntent({
     required this.gestureDelegate,
   });
 
-  /// The [TextSelectionGestureDetectorBuilderDelegate] that received the tap
-  /// up event.
+  /// The [TextSelectionGestureDetectorBuilderDelegate] that received the
+  /// gesture event, which may be part of the gesture this [Intent] represents.
   final TextSelectionGestureDetectorBuilderDelegate gestureDelegate;
 }
 
 abstract class _TextEditingGestureIntent<GestureStatus> extends TextEditingGestureIntent {
-  /// Creates an [Intent] that represents a gesture event happened in a text
-  /// field associated with [gestureDelegate].
   const _TextEditingGestureIntent({
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
     required this.gestureStatus,
   }) : super(gestureDelegate: gestureDelegate);
 
+  /// The current status of the gesture recognition process.
   final GestureStatus gestureStatus;
 }
 
 class ForcePressTextGestureIntent extends _TextEditingGestureIntent<ForcePressTextGestureStatus> {
-  ForcePressTextGestureIntent({
+  const ForcePressTextGestureIntent({
     required ForcePressTextGestureStatus gestureStatus,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
   }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
 }
 
 class TapTextGestureIntent extends _TextEditingGestureIntent<TapTextGestureStatus> {
-  TapTextGestureIntent({
+  const TapTextGestureIntent({
     required  TapTextGestureStatus gestureStatus,
     required this.maxTapCount,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
@@ -330,14 +335,14 @@ class TapTextGestureIntent extends _TextEditingGestureIntent<TapTextGestureStatu
 }
 
 class SecondaryTapTextGestureIntent extends _TextEditingGestureIntent<SecondaryTapTextGestureStatus > {
-  SecondaryTapTextGestureIntent({
+  const SecondaryTapTextGestureIntent({
     required SecondaryTapTextGestureStatus gestureStatus,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
   }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
 }
 
 class LongPressTextGestureIntent extends _TextEditingGestureIntent<LongPressTextGestureStatus> {
-  LongPressTextGestureIntent({
+  const LongPressTextGestureIntent({
     required LongPressTextGestureStatus gestureStatus,
     required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
   }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
