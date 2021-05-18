@@ -28,8 +28,16 @@ import 'restoration_properties.dart';
 /// widget when a new [RouteInformation] is available. The [Router] widget takes
 /// these information and navigates accordingly.
 ///
-/// The latter case should only happen in a web application where the [Router]
-/// reports route changes back to web engine.
+/// The latter case happens in web application where the [Router] reports route
+/// changes back to the web engine.
+///
+/// The current [RouteInformation] of an application is also used for state
+/// restoration purposes. Before an application is killed, the [Router] its
+/// current configurations and turns it into a [RouteInformation] object
+/// utilizing the [RouteInformationProvider]. The [RouteInformation] object is
+/// then serialized out and persisted. During state restoration, the object is
+/// deserialized and passed back to the [RouteInformationProvider], which turns
+/// it into a configuration for the [Router] to restore its state from.
 class RouteInformation {
   /// Creates a route information object.
   ///
@@ -50,12 +58,16 @@ class RouteInformation {
   /// the text inside a [TextField] or the scroll position in a [ScrollView].
   /// These widget states can be stored in the [state].
   ///
-  /// Currently, this information is only used by Flutter on the web:
-  /// the data is stored in the browser history entry when the
+  /// On the web, this information is stored in the browser history when the
   /// [Router] reports this route information back to the web engine
   /// through the [PlatformRouteInformationProvider]. The information
   /// is then passed back, along with the [location], when the user
   /// clicks the back or forward buttons.
+  ///
+  /// This information is also serialized and persisted alongside the
+  /// [location] for state restoration purposes. During state restoration,
+  /// the information is made available again to the [Router] so it can restore
+  /// its configuration to the previous state.
   ///
   /// The state must be serializable.
   final Object? state;
