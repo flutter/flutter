@@ -56,7 +56,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///     thickness: 6.0,
 ///     thicknessWhileDragging: 10.0,
 ///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: const Radius.circular(0.0),
+///     radiusWhileDragging: Radius.zero,
 ///     child: ListView.builder(
 ///       itemCount: 120,
 ///       itemBuilder: (BuildContext context, int index) {
@@ -88,7 +88,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///     thickness: 6.0,
 ///     thicknessWhileDragging: 10.0,
 ///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: const Radius.circular(0.0),
+///     radiusWhileDragging: Radius.zero,
 ///     controller: _controllerOne,
 ///     isAlwaysShown: true,
 ///     child: ListView.builder(
