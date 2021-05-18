@@ -1472,7 +1472,7 @@ void main() {
     tap.dispose();
 
     // Wait for microtasks to finish, during which drag claims victory.
-    tester.async.elapse(const Duration(milliseconds: 1));
+    tester.async.flushMicrotasks();
     expect(didStartDrag, true);
 
     // The pointer1 is released, leaving pointer2 drag's only pointer.
