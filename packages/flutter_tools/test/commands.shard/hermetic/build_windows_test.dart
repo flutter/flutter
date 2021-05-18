@@ -145,7 +145,7 @@ void main() {
   });
 
   testUsingContext('build winuwp requires winuwp artifacts', () async {
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
 
     expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.windowsUwp});
