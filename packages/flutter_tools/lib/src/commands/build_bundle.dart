@@ -52,7 +52,7 @@ class BuildBundleCommand extends BuildSubCommand {
         'tree-shake-icons',
         negatable: true,
         defaultsTo: false,
-        hide: true,
+        hide: !verboseHelp,
         help: '(deprecated) Icon font tree shaking is not supported by this command.',
       );
     usesPubOption();
