@@ -1440,4 +1440,56 @@ void main() {
       logs.clear();
     },
   );
+
+  testGesture('test1', (GestureTester tester) {
+    debugPrintGestureArenaDiagnostics = true;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
+    final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () {};
+    final TapGestureRecognizer tap2 = TapGestureRecognizer()..onTap = () {};
+    addTearDown(drag.dispose);
+    addTearDown(tap.dispose);
+    addTearDown(tap2.dispose);
+
+    bool didStartDrag = false;
+    drag.onStart = (_) {
+      didStartDrag = true;
+    };
+
+    double? updatedDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedDelta = details.primaryDelta;
+    };
+
+    bool didEndDrag = false;
+    drag.onEnd = (DragEndDetails details) {
+      didEndDrag = true;
+    };
+
+    final TestPointer pointer1 = TestPointer(5);
+    final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+    drag.addPointer(down1);
+    tap.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(down1);
+
+    final TestPointer pointer2 = TestPointer(6);
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 10.0));
+    drag.addPointer(down2);
+    tap2.addPointer(down2);
+    tester.closeArena(pointer2.pointer);
+    tester.route(down2);
+
+    print('Dispose Tap');
+    tap.dispose();
+
+    tester.async.elapse(const Duration(milliseconds: 1));
+    expect(didStartDrag, true);
+
+    tester.route(pointer1.up());
+
+    print('Dispose Drag');
+    drag.dispose();
+    debugPrintGestureArenaDiagnostics = false;
+  });
 }
