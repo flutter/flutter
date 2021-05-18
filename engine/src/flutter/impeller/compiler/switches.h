@@ -21,6 +21,9 @@ struct Switches {
   std::string source_file_name;
   std::string metal_file_name;
   std::string spirv_file_name;
+  std::string reflection_json_name;
+  std::string reflection_header_name;
+  std::string reflection_cc_name;
   std::string depfile_path;
 
   Switches();

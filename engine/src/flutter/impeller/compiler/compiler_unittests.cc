@@ -50,13 +50,16 @@ TEST_F(CompilerTest, ShaderKindMatchingIsSuccessful) {
 }
 
 TEST_F(CompilerTest, CanCompileSample) {
-  constexpr const char* kShaderFixtureName = "sample.frag";
+  constexpr const char* kShaderFixtureName = "sample.vert";
   auto fixture = flutter::testing::OpenFixtureAsMapping(kShaderFixtureName);
   ASSERT_NE(fixture->GetMapping(), nullptr);
   Compiler::SourceOptions options(kShaderFixtureName);
   options.working_directory = std::make_shared<fml::UniqueFD>(
       flutter::testing::OpenFixturesDirectory());
   Compiler compiler(*fixture.get(), options);
+  if (!compiler.IsValid()) {
+    FML_LOG(ERROR) << compiler.GetErrorMessages();
+  }
   ASSERT_TRUE(compiler.IsValid());
   WriteCompilerIntermediates(compiler, kShaderFixtureName);
 }

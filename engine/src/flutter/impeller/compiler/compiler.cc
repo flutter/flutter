@@ -298,7 +298,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  reflector_ = std::make_unique<Reflector>(*GetSPIRVAssembly());
+  reflector_ = std::make_unique<Reflector>(msl_compiler);
 
   if (!reflector_->IsValid()) {
     COMPILER_ERROR << "Could not complete reflection on generated shader.";
@@ -431,6 +431,10 @@ std::unique_ptr<fml::Mapping> Compiler::CreateDepfileContents(
   return std::make_unique<fml::NonOwnedMapping>(
       reinterpret_cast<const uint8_t*>(contents->data()), contents->size(),
       [contents](auto, auto) {});
+}
+
+const Reflector* Compiler::GetReflector() const {
+  return reflector_.get();
 }
 
 }  // namespace compiler
