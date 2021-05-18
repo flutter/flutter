@@ -278,7 +278,7 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when there are many actions.
   final ScrollController? scrollController;
 
-  ScrollController get _effectiveScrollController => 
+  ScrollController get _effectiveScrollController =>
     scrollController ?? ScrollController();
 
   /// A scroll controller that can be used to control the scrolling of the
@@ -292,7 +292,7 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when it is long.
   final ScrollController? actionScrollController;
 
-  ScrollController get _effectiveActionScrollController => 
+  ScrollController get _effectiveActionScrollController =>
     actionScrollController ?? ScrollController();
 
   /// {@macro flutter.material.dialog.insetAnimationDuration}
@@ -593,7 +593,7 @@ class CupertinoActionSheet extends StatelessWidget {
   /// short.
   final ScrollController? messageScrollController;
 
-  ScrollController get _effectiveMessageScrollController => 
+  ScrollController get _effectiveMessageScrollController =>
     messageScrollController ?? ScrollController();
 
   /// A scroll controller that can be used to control the scrolling of the
@@ -602,7 +602,7 @@ class CupertinoActionSheet extends StatelessWidget {
   /// This attribute is typically not needed.
   final ScrollController? actionScrollController;
 
-  ScrollController get _effectiveActionScrollController => 
+  ScrollController get _effectiveActionScrollController =>
     actionScrollController ?? ScrollController();
 
   /// The optional cancel button that is grouped separately from the other
