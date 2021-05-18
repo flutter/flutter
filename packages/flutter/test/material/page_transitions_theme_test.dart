@@ -205,4 +205,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(builtCount, 1);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('_ZoomPageTransition contains ColoredBox rather than Container', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return TextButton(
+            child: const Text('pop'),
+            onPressed: () { Navigator.pop(context); },
+          );
+        },
+      ),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: ZoomPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    expect(find.byType(ColoredBox), findsNWidgets(2));
+    expect(find.byType(Container), findsNothing);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ColoredBox), findsNWidgets(2));
+    expect(find.byType(Container), findsNothing);
+
+    await tester.tap(find.text('pop'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ColoredBox), findsNWidgets(2));
+    expect(find.byType(Container), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
