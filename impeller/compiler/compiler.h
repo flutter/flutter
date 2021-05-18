@@ -61,6 +61,8 @@ class Compiler {
   std::unique_ptr<fml::Mapping> CreateDepfileContents(
       std::initializer_list<std::string> targets) const;
 
+  const Reflector* GetReflector() const;
+
  private:
   SourceOptions options_;
   std::shared_ptr<shaderc::SpvCompilationResult> spv_result_;

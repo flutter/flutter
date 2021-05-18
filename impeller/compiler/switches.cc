@@ -16,6 +16,10 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << "--input=<glsl_file>" << std::endl;
   stream << "--metal=<metal_output_file>" << std::endl;
   stream << "--spirv=<spirv_output_file>" << std::endl;
+  stream << "[optional] --reflection-json=<reflection_json_file>" << std::endl;
+  stream << "[optional] --reflection-header=<reflection_header_file>"
+         << std::endl;
+  stream << "[optional] --reflection-cc=<reflection_cc_file>" << std::endl;
   stream << "[optional,multiple] --include=<include_directory>" << std::endl;
   stream << "[optional] --depfile=<depfile_path>" << std::endl;
 }
@@ -32,6 +36,12 @@ Switches::Switches(const fml::CommandLine& command_line)
       source_file_name(command_line.GetOptionValueWithDefault("input", "")),
       metal_file_name(command_line.GetOptionValueWithDefault("metal", "")),
       spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")),
+      reflection_json_name(
+          command_line.GetOptionValueWithDefault("reflection-json", "")),
+      reflection_header_name(
+          command_line.GetOptionValueWithDefault("reflection-header", "")),
+      reflection_cc_name(
+          command_line.GetOptionValueWithDefault("reflection-cc", "")),
       depfile_path(command_line.GetOptionValueWithDefault("depfile", "")) {
   if (!working_directory || !working_directory->is_valid()) {
     return;
