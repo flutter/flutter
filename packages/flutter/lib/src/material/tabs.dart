@@ -156,9 +156,9 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     if (height != null)
       return Size.fromHeight(height!);
     else if ((text != null || child != null) && icon != null)
-      return Size.fromHeight(_kTextAndIconTabHeight);
+      return const Size.fromHeight(_kTextAndIconTabHeight);
     else
-      return Size.fromHeight(_kTabHeight);
+      return const Size.fromHeight(_kTabHeight);
   }
 }
 
