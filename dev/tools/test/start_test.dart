@@ -168,6 +168,9 @@ void main() {
           ],
         ),
         const FakeCommand(
+          command: <String>['git', 'add', '--all'],
+        ),
+        const FakeCommand(
           command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
         ),
         const FakeCommand(
