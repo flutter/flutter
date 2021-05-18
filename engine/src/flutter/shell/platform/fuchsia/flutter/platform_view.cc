@@ -1011,7 +1011,7 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     }
 
     SkRect view_occlusion_hint_raw = SkRect::MakeEmpty();
-    auto view_occlusion_hint = args.FindMember("");
+    auto view_occlusion_hint = args.FindMember("viewOcclusionHintLTRB");
     if (view_occlusion_hint != args.MemberEnd()) {
       if (view_occlusion_hint->value.IsArray()) {
         const auto& view_occlusion_hint_array =
