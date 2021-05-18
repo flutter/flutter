@@ -223,10 +223,13 @@ void main() {
   });
 
   test('Compute max intrinsic height with spacing', () {
+    const double itemWidth = 64;
+    const double itemHeight = 32;
+
     final RenderBox child = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints(
-        minWidth: 80,
-        minHeight: 80,
+      additionalConstraints: const BoxConstraints.tightFor(
+        width: itemWidth,
+        height: itemHeight,
       ),
     );
 
@@ -236,37 +239,40 @@ void main() {
     renderWrap.spacing = 5;
     renderWrap.direction = Axis.vertical;
 
-    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), 80);
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), itemHeight);
 
 
     final List<RenderBox> children = <RenderBox>[
       RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(
-          minWidth: 80,
-          minHeight: 80,
+        additionalConstraints: const BoxConstraints.tightFor(
+          width: itemWidth,
+          height: itemHeight,
         ),
       ),
       RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(
-          minWidth: 80,
-          minHeight: 80,
+        additionalConstraints: const BoxConstraints.tightFor(
+          width: itemWidth,
+          height: itemHeight,
         ),
       ),
     ];
 
     children.forEach(renderWrap.add);
 
-    final double childrenHeight = renderWrap.childCount * 80.0;
+    final double childrenHeight = renderWrap.childCount * itemHeight;
     final double spacingHeight = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
 
     expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), childrenHeight + spacingHeight);
   });
 
   test('Compute max intrinsic width with spacing', () {
+    const double itemWidth = 64;
+    const double itemHeight = 32;
+
     final RenderBox child = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints(
-        minWidth: 80,
-        minHeight: 80,
+      additionalConstraints: const BoxConstraints.tightFor(
+        width: itemWidth,
+        height: itemHeight,
       ),
     );
 
@@ -276,27 +282,27 @@ void main() {
     renderWrap.spacing = 5;
     renderWrap.direction = Axis.horizontal;
 
-    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), 80);
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), itemWidth);
 
 
     final List<RenderBox> children = <RenderBox>[
       RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(
-          minWidth: 80,
-          minHeight: 80,
+        additionalConstraints: const BoxConstraints.tightFor(
+          width: itemWidth,
+          height: itemHeight,
         ),
       ),
       RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(
-          minWidth: 80,
-          minHeight: 80,
+        additionalConstraints: const BoxConstraints.tightFor(
+          width: itemWidth,
+          height: itemHeight,
         ),
       ),
     ];
 
     children.forEach(renderWrap.add);
 
-    final double childrenWidth = renderWrap.childCount * 80.0;
+    final double childrenWidth = renderWrap.childCount * itemWidth;
     final double spacingWidth = math.max(renderWrap.childCount - 1, 0) * renderWrap.spacing;
 
     expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), childrenWidth + spacingWidth);
