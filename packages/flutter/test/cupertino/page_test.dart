@@ -552,6 +552,14 @@ class RtlOverrideWidgetsDelegate extends LocalizationsDelegate<WidgetsLocalizati
 class RtlOverrideWidgetsLocalization implements WidgetsLocalizations {
   const RtlOverrideWidgetsLocalization();
   @override
+  String get scrollUp => '';
+  @override
+  String get scrollDown => '';
+  @override
+  String get scrollLeft => '';
+  @override
+  String get scrollRight => '';
+  @override
   TextDirection get textDirection => TextDirection.rtl;
 }
 
