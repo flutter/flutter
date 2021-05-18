@@ -100,7 +100,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   /// The height of the [Tab].
   ///
   /// If null, the height will be calculated based on the content of the [Tab].  When `icon` is not
-  /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the 
+  /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
   /// height is 46.0 pixels.
   final double? height;
 
@@ -112,16 +112,16 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
 
-    final double tabHeight;
+    final double calculatedHeight;
     final Widget label;
     if (icon == null) {
-      tabHeight = height != null ? height! : _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = _buildLabelText();
     } else if (text == null && child == null) {
-      tabHeight = height != null ? height! : _kTabHeight;
+      calculatedHeight = _kTabHeight;
       label = icon!;
     } else {
-      tabHeight = height != null ? height! : _kTextAndIconTabHeight;
+      calculatedHeight = _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,7 +136,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
     }
 
     return SizedBox(
-      height: tabHeight,
+      height: height ?? calculatedHeight,
       child: Center(
         widthFactor: 1.0,
         child: label,
@@ -153,14 +153,12 @@ class Tab extends StatelessWidget implements PreferredSizeWidget{
 
   @override
   Size get preferredSize {
-    final double tabHeight;
     if (height != null)
-      tabHeight = height!;
+      return Size.fromHeight(height!);
     else if ((text != null || child != null) && icon != null)
-      tabHeight = _kTextAndIconTabHeight;
+      return Size.fromHeight(_kTextAndIconTabHeight);
     else
-      tabHeight = _kTabHeight;
-    return Size.fromHeight(tabHeight);
+      return Size.fromHeight(_kTabHeight);
   }
 }
 
