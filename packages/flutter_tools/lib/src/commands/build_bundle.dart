@@ -90,7 +90,7 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<void> validateCommand() async {
     if (argResults['tree-shake-icons'] as bool) {
-      throwToolExit('The "--tree-shake-icons" flag is deprecated and will be removed in a future version of Flutter.');
+      throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
   }
