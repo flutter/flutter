@@ -12,6 +12,24 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('test page transition', (WidgetTester tester) async {
+    Iterable<T> _findWidgets<T extends Widget>(Finder of) {
+      return tester.widgetList<T>(
+        find.ancestor(of: of, matching: find.byType(T)),
+      );
+    }
+
+    FadeTransition _findForwardFadeTransition(Finder of) {
+      return _findWidgets<FadeTransition>(of).where(
+        (FadeTransition t) => t.opacity.status == AnimationStatus.forward,
+      ).first;
+    }
+
+    ScaleTransition _findForwardScaleTransition(Finder of) {
+      return _findWidgets<ScaleTransition>(of).where(
+        (ScaleTransition t) => t.scale.status == AnimationStatus.forward,
+      ).first;
+    }
+
     await tester.pumpWidget(
       MaterialApp(
         home: const Material(child: Text('Page 1')),
@@ -25,30 +43,17 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 50));
 
-    Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
-    FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
-    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-    final Size widget2Size = tester.getSize(find.text('Page 2'));
+    ScaleTransition widget1Scale = _findForwardScaleTransition(find.text('Page 1'));
+    ScaleTransition widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
+    FadeTransition widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
 
-    // Page 1 is above page 2 mid-transition.
-    expect(widget1TopLeft.dx < widget2TopLeft.dx, true);
-    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Animation begins 3/4 of the way up the page.
-    expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
-    // Animation starts with page 2 being none transparent.
-    expect(widget2Opacity.opacity.value == 1.0, true);
+    expect(widget1Scale.scale.value, greaterThan(1.0));
+    expect(widget2Scale.scale.value, lessThan(1.0));
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
 
-    await tester.pump(const Duration(milliseconds: 299));
-
-    widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
-    // Page 1 is scaled larger than the screen.
-    expect(widget1TopLeft < Offset.zero, true);
-    // Page 1 is larger than the page 2.
-    expect(widget1TopLeft < widget2TopLeft, true);
-
+    await tester.pump(const Duration(milliseconds: 250));
     await tester.pump(const Duration(milliseconds: 1));
 
     // Page 2 covers page 1.
@@ -57,19 +62,18 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    widget1Scale = _findForwardScaleTransition(find.text('Page 1'));
+    widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
+    widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
+
+    expect(widget1Scale.scale.value, greaterThan(1.0));
+    expect(widget2Scale.scale.value, lessThan(1.0));
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
+
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 1));
-
-    widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
-    widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
-    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-
-    // Page 2 starts to narrow down, but page 1 is still larger than the page 2.
-    expect(widget1TopLeft < widget2TopLeft, true);
-    // Page 2 starts to lose opacity.
-    expect(widget2Opacity.opacity.value == 1.0, true);
-
-    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
