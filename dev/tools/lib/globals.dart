@@ -104,7 +104,7 @@ String? getValueFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null ) {
-    return env[envName]!;
+    return env[envName];
   }
   final String? argValue = argResults[name] as String?;
   if (argValue != null) {

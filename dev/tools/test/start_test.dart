@@ -120,7 +120,6 @@ void main() {
     test('creates state file if provided correct inputs', () async {
       const String revision2 = 'def789';
       const String revision3 = '123abc';
-      const String revision4 = '456def';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
 
