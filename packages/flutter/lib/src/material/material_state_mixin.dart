@@ -52,7 +52,7 @@ import '../../foundation.dart';
 ///
 /// Example 2: Tracking MaterialState values WITH MaterialStateMixin.
 /// ```
-/// class MyWidgetState extends State<MyWidget> extends MaterialStateMixin<MyWidget> {
+/// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
