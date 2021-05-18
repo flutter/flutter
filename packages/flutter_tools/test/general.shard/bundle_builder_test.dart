@@ -31,11 +31,7 @@ void main() {
 
     await BundleBuilder().build(
       platform: TargetPlatform.ios,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        null,
-        treeShakeIcons: false
-      ),
+      buildInfo: BuildInfo.debug,
       project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       mainPath: globals.fs.path.join('lib', 'main.dart'),
       assetDirPath: 'example',
@@ -54,11 +50,7 @@ void main() {
     expect(
       () => BundleBuilder().build(
         platform: TargetPlatform.ios,
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          null,
-          treeShakeIcons: false
-        ),
+        buildInfo: BuildInfo.debug,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         mainPath: 'lib/main.dart',
         assetDirPath: 'example',

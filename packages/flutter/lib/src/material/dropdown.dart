@@ -19,6 +19,7 @@ import 'ink_well.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
@@ -55,7 +56,7 @@ class _DropdownMenuPainter extends CustomPainter {
        super(repaint: resize);
 
   final Color? color;
-  final double? elevation;
+  final int? elevation;
   final int? selectedIndex;
   final Animation<double> resize;
   final ValueGetter<double> getSelectedItemOffset;
@@ -176,9 +177,9 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       child = InkWell(
         autofocus: widget.itemIndex == widget.route.selectedIndex,
         enableFeedback: widget.enableFeedback,
-        child: child,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
+        child: child,
       );
     }
     child = FadeTransition(opacity: opacity, child: child);
@@ -425,7 +426,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
-  final double elevation;
+  final int elevation;
   final CapturedThemes capturedThemes;
   final TextStyle style;
   final double? itemHeight;
@@ -568,7 +569,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
-  final double elevation;
+  final int elevation;
   final CapturedThemes capturedThemes;
   final TextStyle? style;
   final Color? dropdownColor;
@@ -997,8 +998,12 @@ class DropdownButton<T> extends StatefulWidget {
   final DropdownButtonBuilder? selectedItemBuilder;
 
   /// The z-coordinate at which to place the menu when open.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12,
+  /// 16, and 24. See [kElevationToShadow].
+  ///
   /// Defaults to 8, the appropriate elevation for dropdown buttons.
-  final double elevation;
+  final int elevation;
 
   /// The text style to use for text in the dropdown button and the dropdown
   /// menu that appears when you tap the button.
@@ -1497,6 +1502,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!_enabled) MaterialState.disabled,
+      },
+    );
+
     return Semantics(
       button: true,
       child: Actions(
@@ -1505,10 +1517,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           canRequestFocus: _enabled,
           focusNode: focusNode,
           autofocus: widget.autofocus,
-          child: GestureDetector(
-            onTap: _enabled ? _handleTap : null,
-            behavior: HitTestBehavior.opaque,
-            child: result,
+          child: MouseRegion(
+            cursor: effectiveMouseCursor,
+            child: GestureDetector(
+              onTap: _enabled ? _handleTap : null,
+              behavior: HitTestBehavior.opaque,
+              child: result,
+            ),
           ),
         ),
       ),
@@ -1536,7 +1551,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Widget? disabledHint,
     this.onChanged,
     VoidCallback? onTap,
-    double elevation = 8,
+    int elevation = 8,
     TextStyle? style,
     Widget? icon,
     Color? iconDisabledColor,

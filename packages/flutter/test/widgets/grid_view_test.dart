@@ -632,8 +632,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-          children: <Widget>[Container(height: 2000.0)],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container(height: 2000.0)],
         ),
       ),
     );
@@ -684,8 +684,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GridView.count(
           crossAxisCount: 3,
-          children: <Widget>[Container(height: 2000.0)],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container(height: 2000.0)],
         ),
       ),
     );
@@ -699,8 +699,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GridView.extent(
           maxCrossAxisExtent: 1000,
-          children: <Widget>[Container(height: 2000.0)],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container(height: 2000.0)],
         ),
       ),
     );

@@ -563,6 +563,7 @@ void main() {
       'Flutter run key commands.',
       startsWith('r Hot reload.'),
       'R Hot restart.',
+      'v Open Flutter DevTools.',
       'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
       't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
       'L Dump layer tree to the console.                                               (debugDumpLayerTree)',

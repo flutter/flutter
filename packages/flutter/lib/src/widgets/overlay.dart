@@ -507,8 +507,8 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     }
     return _Theatre(
       skipCount: children.length - onstageCount,
-      children: children.reversed.toList(growable: false),
       clipBehavior: widget.clipBehavior,
+      children: children.reversed.toList(growable: false),
     );
   }
 

@@ -249,17 +249,17 @@ void main() {
       itemsPainted = <int>[];
       final List<Widget> items = List<Widget>.generate(itemCount, (int i) {
         return CustomPaint(
-          child: Text('$i', textDirection: TextDirection.ltr),
           painter: TestCallbackPainter(
             onPaint: () { itemsPainted.add(i); },
           ),
+          child: Text('$i', textDirection: TextDirection.ltr),
         );
       });
       return Center(
         child: IndexedStack(
           alignment: Alignment.topLeft,
-          children: items,
           index: index,
+          children: items,
         ),
       );
     }
@@ -290,9 +290,9 @@ void main() {
       return Center(
         child: IndexedStack(
           alignment: Alignment.topLeft,
-          children: items,
           key: key,
           index: index,
+          children: items,
         ),
       );
     }

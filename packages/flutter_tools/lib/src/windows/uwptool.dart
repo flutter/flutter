@@ -44,44 +44,121 @@ class UwpTool {
       _logger.printError('Failed to list installed UWP apps: ${result.stderr}');
       return <String>[];
     }
-    final List<String> appIds = <String>[];
+    final List<String> packageFamilies = <String>[];
     for (final String line in result.stdout.toString().split('\n')) {
-      final String appId = line.trim();
-      if (appId.isNotEmpty) {
-        appIds.add(appId);
+      final String packageFamily = line.trim();
+      if (packageFamily.isNotEmpty) {
+        packageFamilies.add(packageFamily);
       }
     }
-    return appIds;
+    return packageFamilies;
   }
 
-  /// Returns the app ID for the specified package ID.
+  /// Returns the package family name for the specified package name.
   ///
-  /// If no installed application on the system matches the specified GUID,
-  /// returns null.
-  Future<String/*?*/> getAppIdFromPackageId(String packageId) async {
-    for (final String appId in await listApps()) {
-      if (appId.startsWith(packageId)) {
-        return appId;
+  /// If no installed application on the system matches the specified package
+  /// name, returns null.
+  Future<String/*?*/> getPackageFamilyName(String packageName) async {
+    for (final String packageFamily in await listApps()) {
+      if (packageFamily.startsWith(packageName)) {
+        return packageFamily;
       }
     }
     return null;
   }
 
-  /// Launches the app with the specified app ID.
+  /// Launches the app with the specified package family name.
   ///
   /// On success, returns the process ID of the launched app, otherwise null.
-  Future<int/*?*/> launchApp(String appId, List<String> args) async {
+  Future<int/*?*/> launchApp(String packageFamily, List<String> args) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
       'launch',
-      appId
+      packageFamily
     ] + args;
     final RunResult result = await _processUtils.run(launchCommand);
     if (result.exitCode != 0) {
-      _logger.printError('Failed to launch app $appId: ${result.stderr}');
+      _logger.printError('Failed to launch app $packageFamily: ${result.stderr}');
       return null;
     }
     // Read the process ID from stdout.
-    return int.tryParse(result.stdout.toString().trim());
+    final int processId = int.tryParse(result.stdout.toString().trim());
+    _logger.printTrace('Launched application $packageFamily with process ID $processId');
+    return processId;
+  }
+
+  /// Returns `true` if the specified package signature is valid.
+  Future<bool> isSignatureValid(String packagePath) async {
+    final List<String> launchCommand = <String>[
+      'powershell.exe',
+      '-command',
+      'if ((Get-AuthenticodeSignature "$packagePath").Status -eq "Valid") { exit 0 } else { exit 1 }'
+    ];
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printTrace('Invalid signature found for $packagePath');
+      return false;
+    }
+    _logger.printTrace('Valid signature found for $packagePath');
+    return true;
+  }
+
+  /// Installs a developer signing cerificate.
+  ///
+  /// Returns `true` on success.
+  Future<bool> installCertificate(String certificatePath) async {
+    final List<String> launchCommand = <String>[
+      'powershell.exe',
+      'start',
+      'certutil',
+      '-argumentlist',
+      '\'-addstore TrustedPeople "$certificatePath"\'',
+      '-verb',
+      'runas'
+    ];
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printError('Failed to install certificate $certificatePath');
+      return false;
+    }
+    _logger.printTrace('Waiting for certificate store update');
+    // TODO(cbracken): Determine how we can query for success until some timeout.
+    // https://github.com/flutter/flutter/issues/82665
+    await Future<void>.delayed(const Duration(seconds: 1));
+    _logger.printTrace('Installed certificate $certificatePath');
+    return true;
+  }
+
+  /// Installs the app with the specified build directory.
+  ///
+  /// Returns `true` on success.
+  Future<bool> installApp(String packageUri, List<String> dependencyUris) async {
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      'install',
+      packageUri,
+    ] + dependencyUris;
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printError('Failed to install $packageUri');
+      return false;
+    }
+    _logger.printTrace('Installed application $packageUri');
+    return true;
+  }
+
+  Future<bool> uninstallApp(String packageFamily) async {
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      'uninstall',
+      packageFamily
+    ];
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printError('Failed to uninstall $packageFamily');
+      return false;
+    }
+    _logger.printTrace('Uninstalled application $packageFamily');
+    return true;
   }
 }

@@ -11,7 +11,6 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
@@ -133,6 +132,57 @@ class WindowsUWPDevice extends Device {
     return NoOpDeviceLogReader('winuwp');
   }
 
+  // Returns `true` if the specified file is a valid package based on file extension.
+  bool _isValidPackage(String packagePath) {
+    const List<String> validPackageExtensions = <String>[
+      '.appx', '.msix',                // Architecture-specific application.
+      '.appxbundle', '.msixbundle',    // Architecture-independent application.
+      '.eappx', '.emsix',              // Encrypted architecture-specific application.
+      '.eappxbundle', '.emsixbundle',  // Encrypted architecture-independent application.
+    ];
+    return validPackageExtensions.any(packagePath.endsWith);
+  }
+
+  // Walks the build directory for any dependent packages for the specified architecture.
+  List<String> _getPackagePaths(String directory) {
+    if (!_fileSystem.isDirectorySync(directory)) {
+      return <String>[];
+    }
+    final List<String> packagePaths = <String>[];
+    for (final FileSystemEntity entity in _fileSystem.directory(directory).listSync()) {
+      if (entity.statSync().type != FileSystemEntityType.file) {
+        continue;
+      }
+      final String packagePath = entity.absolute.path;
+      if (_isValidPackage(packagePath)) {
+        packagePaths.add(packagePath);
+      }
+    }
+    return packagePaths;
+  }
+
+  // Walks the build directory for any dependent packages for the specified architecture.
+  String/*?*/ _getAppPackagePath(String buildDirectory) {
+    final List<String> packagePaths = _getPackagePaths(buildDirectory);
+    return packagePaths.isNotEmpty ? packagePaths.first : null;
+  }
+
+  // Walks the build directory for any dependent packages for the specified architecture.
+  List<String> _getDependencyPaths(String buildDirectory, String architecture) {
+    final String depsDirectory = _fileSystem.path.join(buildDirectory, 'Dependencies', architecture);
+    return _getPackagePaths(depsDirectory);
+  }
+
+  String _getPackageName(String binaryName, String version, String config, {String/*?*/ architecture}) {
+    final List<String> components = <String>[
+      binaryName,
+      version,
+      if (architecture != null) architecture,
+      config,
+    ];
+    return components.join('_');
+  }
+
   @override
   Future<bool> installApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
     /// The cmake build generates an install powershell script.
@@ -142,21 +192,78 @@ class WindowsUWPDevice extends Device {
     if (packageVersion == null) {
       return false;
     }
+    final String binaryDir = _fileSystem.path.absolute(
+        _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName));
     final String config = toTitleCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
-    final String generated = '${binaryName}_${packageVersion}_${config}_Test';
-    final ProcessResult result = await _processManager.run(<String>[
-      'powershell.exe',
-      _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName, generated, 'install.ps1'),
-    ]);
-    if (result.exitCode != 0) {
-      _logger.printError(result.stdout.toString());
-      _logger.printError(result.stderr.toString());
+
+    // If a multi-architecture package exists, install that; otherwise install
+    // the single-architecture package.
+    final List<String> packageNames = <String>[
+      // Multi-archtitecture package.
+      _getPackageName(binaryName, packageVersion, config),
+      // Single-archtitecture package.
+      _getPackageName(binaryName, packageVersion, config, architecture: 'x64'),
+    ];
+    String packageName;
+    String buildDirectory;
+    String packagePath;
+    for (final String name in packageNames) {
+      packageName = name;
+      buildDirectory = _fileSystem.path.join(binaryDir, '${packageName}_Test');
+      if (_fileSystem.isDirectorySync(buildDirectory)) {
+        packagePath = _getAppPackagePath(buildDirectory);
+        if (packagePath != null && _fileSystem.isFileSync(packagePath)) {
+          break;
+        }
+      }
     }
-    return result.exitCode == 0;
+    if (packagePath == null) {
+      _logger.printError('Failed to locate app package to install');
+      return false;
+    }
+
+    // Verify package signature.
+    if (!await _uwptool.isSignatureValid(packagePath)) {
+      // If signature is invalid, install the developer certificate.
+      final String certificatePath = _fileSystem.path.join(buildDirectory, '$packageName.cer');
+      if (_logger.terminal.stdinHasTerminal) {
+        final String response = await _logger.terminal.promptForCharInput(
+          <String>['Y', 'y', 'N', 'n'],
+          logger: _logger,
+          prompt: 'Install developer certificate.\n'
+          '\n'
+          'Windows UWP apps are signed with a developer certificate during the build\n'
+          'process. On the first install of an app with a signature from a new\n'
+          'certificate, the certificate must be installed.\n'
+          '\n'
+          'If desired, this certificate can later be removed by launching the \n'
+          '"Manage Computer Certificates" control panel from the Start menu and deleting\n'
+          'the "CMake Test Cert" certificate from the "Trusted People" > "Certificates"\n'
+          'section.\n'
+          '\n'
+          'Press "Y" to continue, or "N" to cancel.',
+          displayAcceptedCharacters: false,
+        );
+        if (response == 'N' || response == 'n') {
+          return false;
+        }
+      }
+      await _uwptool.installCertificate(certificatePath);
+    }
+
+    // Install the application and dependencies.
+    final String packageUri = Uri.file(packagePath).toString();
+    final List<String> dependencyUris = _getDependencyPaths(buildDirectory, 'x64')
+        .map((String path) => Uri.file(path).toString())
+        .toList();
+    return _uwptool.installApp(packageUri.toString(), dependencyUris);
   }
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async => false;
+  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async {
+    final String packageName = app.id;
+    return await _uwptool.getPackageFamilyName(packageName) != null;
+  }
 
   @override
   Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async => false;
@@ -188,31 +295,48 @@ class WindowsUWPDevice extends Device {
         target: mainPath,
       );
     }
-    if (!await isAppInstalled(package) && !await installApp(package)) {
+    if (await isAppInstalled(package) && !await uninstallApp(package)) {
+      _logger.printError('Failed to uninstall previous app package');
+      return LaunchResult.failed();
+    }
+    if (!await installApp(package)) {
       _logger.printError('Failed to install app package');
       return LaunchResult.failed();
     }
 
-    final String guid = package.id;
-    if (guid == null) {
+    final String packageName = package.id;
+    if (packageName == null) {
       _logger.printError('Could not find PACKAGE_GUID in ${package.project.runnerCmakeFile.path}');
       return LaunchResult.failed();
     }
 
-    final String appId = await _uwptool.getAppIdFromPackageId(guid);
+    final String packageFamily = await _uwptool.getPackageFamilyName(packageName);
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
-      _processId = await _uwptool.launchApp(appId, <String>[]);
+      _processId = await _uwptool.launchApp(packageFamily, <String>[]);
       return _processId != null ? LaunchResult.succeeded() : LaunchResult.failed();
     }
 
     /// If the terminal is attached, prompt the user to open the firewall port.
     if (_logger.terminal.stdinHasTerminal) {
-      await _logger.terminal.promptForCharInput(<String>['Y', 'y'], logger: _logger,
-        prompt: 'To continue start an admin cmd prompt and run the following command:\n'
-        '   checknetisolation loopbackexempt -is -n=$appId\n'
-        'Press "Y/y" once this is complete.'
+      final String response = await _logger.terminal.promptForCharInput(
+        <String>['Y', 'y', 'N', 'n'],
+        logger: _logger,
+        prompt: 'Enable Flutter debugging from localhost.\n'
+        '\n'
+        'Windows UWP apps run in a sandboxed environment. To enable Flutter debugging\n'
+        'and hot reload, you will need to enable inbound connections to the app from the\n'
+        'Flutter tool running on your machine. To do so:\n'
+        '  1. Launch PowerShell as an Administrator\n'
+        '  2. Enter the following command:\n'
+        '     checknetisolation loopbackexempt -is -n=$packageFamily\n'
+        '\n'
+        'Press "Y" once this is complete, or "N" to abort.',
+        displayAcceptedCharacters: false,
       );
+      if (response == 'N' || response == 'n') {
+        return LaunchResult.failed();
+      }
     }
 
     /// Currently we do not have a way to discover the VM Service URI.
@@ -238,7 +362,7 @@ class WindowsUWPDevice extends Device {
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
-    _processId = await _uwptool.launchApp(appId, args);
+    _processId = await _uwptool.launchApp(packageFamily, args);
     if (_processId == null) {
       return LaunchResult.failed();
     }
@@ -255,7 +379,17 @@ class WindowsUWPDevice extends Device {
 
   @override
   Future<bool> uninstallApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
-    return false;
+    final String packageName = app.id;
+    if (packageName == null) {
+      _logger.printError('Could not find PACKAGE_GUID in ${app.project.runnerCmakeFile.path}');
+      return false;
+    }
+    final String packageFamily = await _uwptool.getPackageFamilyName(packageName);
+    if (packageFamily == null) {
+      // App is not installed.
+      return true;
+    }
+    return _uwptool.uninstallApp(packageFamily);
   }
 
   @override

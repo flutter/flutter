@@ -1937,9 +1937,9 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: _child,
       scopesRoute: true,
       explicitChildNodes: true,
+      child: _child,
     );
   }
 }
