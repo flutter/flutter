@@ -312,7 +312,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   }
 
   // Nested Scaffolds are handled by the ScaffoldMessenger by only presenting a
-  // SnackBar in the root Scaffold of the nested set.
+  // MaterialBanner or SnackBar in the root Scaffold of the nested set.
   bool _isRoot(ScaffoldState scaffold) {
     final ScaffoldState? parent = scaffold.context.findAncestorStateOfType<ScaffoldState>();
     return parent == null || !_scaffolds.contains(parent);
@@ -520,7 +520,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         assert(_materialBanners.first == controller);
         hideCurrentMaterialBanner(reason: MaterialBannerClosedReason.hide);
       },
-      null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
+      null, // MaterialBanner doesn't use a builder function so setState() wouldn't rebuild it
     );
     setState(() {
       _materialBanners.addLast(controller);
@@ -755,9 +755,9 @@ class ScaffoldPrelayoutGeometry {
   /// appropriate insets to apply.
   final Size scaffoldSize;
 
-  /// The [Size] of the [Scaffold]'s [MaterialBanner].
+  /// The [Size] of the [Scaffold]'s [SnackBar].
   ///
-  /// If the [Scaffold] is not showing a [MaterialBanner], this will be [Size.zero].
+  /// If the [Scaffold] is not showing a [SnackBar], this will be [Size.zero].
   final Size snackBarSize;
 
   /// The [Size] of the [Scaffold]'s [MaterialBanner].

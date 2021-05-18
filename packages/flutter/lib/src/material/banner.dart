@@ -196,9 +196,9 @@ class MaterialBanner extends StatefulWidget {
     );
   }
 
-  /// Creates a copy of this snack bar but with the animation replaced with the given animation.
+  /// Creates a copy of this material banner but with the animation replaced with the given animation.
   ///
-  /// If the original snack bar lacks a key, the newly created snack bar will
+  /// If the original material banner lacks a key, the newly created material banner will
   /// use the given fallback key.
   MaterialBanner withAnimation(Animation<double> newAnimation, { Key? fallbackKey }) {
     return MaterialBanner(
@@ -266,9 +266,6 @@ class _MaterialBannerState extends State<MaterialBanner> {
 
     assert(widget.actions.isNotEmpty);
 
-    // TODO(Calamity210): Enable this assert once the opt-in phase of the new MaterialBanner API ends.
-    // assert(widget.animation != null);
-
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
@@ -330,7 +327,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       ),
     );
 
-    // This provides a static banner during the opt-in phase of the transition to MaterialBanner's new API
+    // This provides a static banner for backwards compatibility.
     if (widget.animation == null)
       return materialBanner;
 
