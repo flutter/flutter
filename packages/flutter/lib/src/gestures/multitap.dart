@@ -587,3 +587,403 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   @override
   String get debugDescription => 'multitap';
 }
+
+/// Signature used by [SerialTapGestureRecognizer.onSerialTapDown] for when a
+/// pointer that might cause a serial tap has contacted the screen at a
+/// particular location.
+typedef GestureSerialTapDownCallback = void Function(SerialTapDownDetails details);
+
+/// Details for [GestureSerialTapDownCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [SerialTapGestureRecognizer], which passes this information to its
+///    [SerialTapGestureRecognizer.onSerialTapDown] callback.
+class SerialTapDownDetails {
+  /// Creates details for a [GestureSerialTapDownCallback].
+  ///
+  /// The `count` argument must be greater than zero.
+  SerialTapDownDetails({
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    required this.kind,
+    this.buttons = 0,
+    this.count = 1,
+  }) : assert(count > 0),
+       localPosition = localPosition ?? globalPosition;
+
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind kind;
+
+  /// Which buttons were pressed when the pointer contacted the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [PointerEvent.buttons], which this field reflects.
+  final int buttons;
+
+  /// The number of consecutive taps that this "tap down" represents.
+  ///
+  /// This value will always be greater than zero. When the first pointer in a
+  /// possible series contacts the screen, this value will be `1`, the second
+  /// tap in a double-tap will be `2`, and so on.
+  ///
+  /// If a tap is determined to not be in the same series as the tap that
+  /// preceded it (e.g. because too much time elapsed between the two taps or
+  /// the two taps had too much distance between them), then this count will
+  /// reset back to `1`, and a new series will have begun.
+  final int count;
+}
+
+/// Signature used by [SerialTapGestureRecognizer.onSerialTapCancel] for when a
+/// pointer that previously triggered a [GestureSerialTapDownCallback] will not
+/// end up completing the serial tap.
+typedef GestureSerialTapCancelCallback = void Function(SerialTapCancelDetails details);
+
+/// Details for [GestureSerialTapCancelCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [SerialTapGestureRecognizer], which passes this information to its
+///    [SerialTapGestureRecognizer.onSerialTapCancel] callback.
+class SerialTapCancelDetails {
+  /// Creates details for a [GestureSerialTapCancelCallback].
+  ///
+  /// The `count` argument must be greater than zero.
+  SerialTapCancelDetails({
+    this.count = 1,
+  }) : assert(count != null),
+       assert(count > 0);
+
+  /// The number of consecutive taps that were in progress when the gesture was
+  /// interrupted.
+  ///
+  /// This number will match the corresponding count that was specified in
+  /// [SerialTapDownDetails.count] for the tap that is being canceled. See
+  /// that field for more information on how this count is reported.
+  final int count;
+}
+
+/// Signature used by [SerialTapGestureRecognizer.onSerialTapUp] for when a
+/// pointer that will trigger a serial tap has stopped contacting the screen.
+typedef GestureSerialTapUpCallback = void Function(SerialTapUpDetails details);
+
+/// Details for [GestureSerialTapUpCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [SerialTapGestureRecognizer], which passes this information to its
+///    [SerialTapGestureRecognizer.onSerialTapUp] callback.
+class SerialTapUpDetails {
+  /// Creates details for a [GestureSerialTapUpCallback].
+  ///
+  /// The `count` argument must be greater than zero.
+  SerialTapUpDetails({
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    this.kind,
+    this.count = 1,
+  }) : assert(count > 0),
+       localPosition = localPosition ?? globalPosition;
+
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
+
+  /// The number of consecutive taps that this tap represents.
+  ///
+  /// This value will always be greater than zero. When the first pointer in a
+  /// possible series completes its tap, this value will be `1`, the second
+  /// tap in a double-tap will be `2`, and so on.
+  ///
+  /// If a tap is determined to not be in the same series as the tap that
+  /// preceded it (e.g. because too much time elapsed between the two taps or
+  /// the two taps had too much distance between them), then this count will
+  /// reset back to `1`, and a new series will have begun.
+  final int count;
+}
+
+/// Recognizes serial taps (taps in a series).
+///
+/// A collection of taps are considered to be _in a series_ if they occur in
+/// rapid succession in the same location (within a tolerance). The number of
+/// taps in the series is its count. A double-tap, for instance, is a special
+/// case of a tap series with a count of two.
+///
+/// ### Gesture arena behavior
+///
+/// [SerialTapGestureRecognizer] competes on all pointer events (regardless of
+/// button). It will declare defeat if it determines that a gesture is not a
+/// tap (e.g. if the pointer is dragged too far while it's contacting the
+/// screen). It will only ever win the gesture arena by default (i.e. if it's
+/// the only recognizer left in the arena). In other words, it will never
+/// declare victory and evict other recognizers from the arena.
+///
+/// Each time a pointer contacts the screen, this recognizer will enter that
+/// gesture into the arena. This means that this recognizer may yield multiple
+/// winning gestures for a single tap series, or it may have multiple gestures
+/// being held in the arena by another recognizer. In these cases, whether the
+/// gesture wins the arena or remains held in the arena is inconsequential,
+/// since this recognizer will still fire its [onSerialTapDown] and
+/// [onSerialTapUp] events.
+///
+/// If this recognizer loses the arena (either by declaring defeat or by
+/// another recognizer declaring victory) while the pointer is contacting the
+/// screen, it will fire [onSerialTapCancel], and [onSerialTapUp] will not
+/// be fired.
+///
+/// ### Button behavior
+///
+/// A tap series is defined to have the same buttons across all taps. If a tap
+/// with a different combination of buttons is delivered in the middle of a
+/// series, it will "steal" the series and begin a new series, starting the
+/// count over.
+///
+/// ### Relation to `TapGestureRecognizer` and `DoubleTapGestureRecognizer`
+///
+/// [SerialTapGestureRecognizer] fires [onSerialTapDown] and [onSerialTapUp]
+/// for every tap that it recognizes (passing the count in the details),
+/// regardless of whether that tap is a single-tap, double-tap, etc. This
+/// makes it especially useful when you want to respond to every tap in a
+/// series. Contrast this with [DoubleTapGestureRecognizer], which only fires
+/// if the user completes a double-tap, and [TapGestureRecognizer], which
+/// _doesn't_ fire if the recognizer is competing with a
+/// `DoubleTapGestureRecognizer`, and the user double-taps.
+///
+/// For example, consider a list item that should be _selected_ on the first
+/// tap and _cause an edit dialog to open_ on a double-tap. If you use both
+/// [TapGestureRecognizer] and [DoubleTapGestureRecognizer], there are a few
+/// problems: (1) if the user single-taps the list item, it will not select
+/// the list item until after enough time has passed to rule out a double-tap,
+/// and (2) if the user double-taps the list item, it will not select the list
+/// item at all. The solution is to use [SerialTapGestureRecognizer] and use
+/// the tap count to either select the list item or open the edit dialog.
+class SerialTapGestureRecognizer extends GestureRecognizer {
+  /// Creates a serial tap gesture recognizer.
+  SerialTapGestureRecognizer({
+    Object? debugOwner,
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+
+  /// A pointer has contacted the screen at a particular location\, which might
+  /// be the start of a serial tap.
+  ///
+  /// If this recognizer loses the arena before the serial tap is completed
+  /// (either because the gesture does not end up being a tap or because another
+  /// recognizer such a [TapGestureRecognizer] or [DoubleTapGestureRecognizer]
+  /// wins outright), [onSerialTapCancel] is called next. Otherwise,
+  /// [onSerialTapUp] is called next.
+  ///
+  /// The [SerialTapDownDetails.count] that is passed to this callback
+  /// specifies the series tap count.
+  GestureSerialTapDownCallback? onSerialTapDown;
+
+  /// A pointer that previously triggered [onSerialTapDown] will not end up
+  /// triggering the corresponding [onSerialTapUp].
+  ///
+  /// If the user completes the serial tap, [onSerialTapUp] is called instead.
+  ///
+  /// The [SerialTapCancelDetails.count] that is passed to this callback will
+  /// match the [SerialTapDownDetails.count] that was passed to the
+  /// [onSerialTapDown] callback.
+  GestureSerialTapCancelCallback? onSerialTapCancel;
+
+  /// A pointer has stopped contacting the screen at a particular location,
+  /// representing a serial tap.
+  ///
+  /// If the user didn't complete the tap, or if another recognizer won the
+  /// arena before this recognizer handled the completed tap, then
+  /// [onSerialTapCancel] is called instead.
+  ///
+  /// The [SerialTapUpDetails.count] that is passed to this callback
+  /// specifies the series tap count.
+  ///
+  /// Because this callback fires for every completed serial tap, this callback
+  /// may fire even when this recognizer doesn't win the arena. For example, if
+  /// if it is competing with [DoubleTapGestureRecognizer], both recognizers
+  /// will remain in the arena after the first tap, and [onSerialTapUp] will
+  /// fire with a [SerialTapUpDetails.count] of 1. Then, after the second tap,
+  /// the double-tap recognizer will win the arena.
+  GestureSerialTapUpCallback? onSerialTapUp;
+
+  Timer? _serialTapTimer;
+  final List<_TapTracker> _completedTaps = <_TapTracker>[];
+  _TapTracker? _pendingTap;
+
+  /// Indicates whether this recognizer is currently tracking a pointer that's
+  /// in contact with the screen.
+  ///
+  /// If this is true, it implies that [onSerialTapDown] has fired, but neither
+  /// [onSerialTapCancel] nor [onSerialTapUp] have yet fired.
+  bool get isTrackingPointer => _pendingTap != null;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    if (_completedTaps.isEmpty) {
+      if (onSerialTapDown == null && onSerialTapCancel == null && onSerialTapUp == null) {
+        return false;
+      }
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    if (_completedTaps.isNotEmpty && !_representsSameSeries(_completedTaps.last, event)) {
+      _reset();
+    } else if (_pendingTap != null) {
+      _reset();
+    }
+    _trackTap(event);
+  }
+
+  bool _representsSameSeries(_TapTracker tap, PointerDownEvent event) {
+    return tap.hasElapsedMinTime() // touch screens often detect touches intermittently
+        && tap.hasSameButton(event)
+        && tap.isWithinGlobalTolerance(event, kDoubleTapSlop);
+  }
+
+  void _trackTap(PointerDownEvent event) {
+    _stopDoubleTapTimer();
+    if (onSerialTapDown != null) {
+      final SerialTapDownDetails details = SerialTapDownDetails(
+        globalPosition: event.position,
+        localPosition: event.localPosition,
+        kind: getKindForPointer(event.pointer),
+        buttons: event.buttons,
+        count: _completedTaps.length + 1,
+      );
+      invokeCallback<void>('onSerialTapDown', () => onSerialTapDown!(details));
+    }
+    final _TapTracker tracker = _TapTracker(
+      event: event,
+      entry: GestureBinding.instance!.gestureArena.add(event.pointer, this),
+      doubleTapMinTime: kDoubleTapMinTime,
+    );
+    assert(_pendingTap == null);
+    _pendingTap = tracker;
+    tracker.startTrackingPointer(_handleEvent, event.transform);
+  }
+
+  void _handleEvent(PointerEvent event) {
+    assert(_pendingTap != null);
+    assert(_pendingTap!.pointer == event.pointer);
+    final _TapTracker tracker = _pendingTap!;
+    if (event is PointerUpEvent) {
+      _registerTap(event, tracker);
+    } else if (event is PointerMoveEvent) {
+      if (!tracker.isWithinGlobalTolerance(event, kDoubleTapTouchSlop)) {
+        _reset();
+      }
+    } else if (event is PointerCancelEvent) {
+      _reset();
+    }
+  }
+
+  @override
+  void acceptGesture(int pointer) { }
+
+  @override
+  void rejectGesture(int pointer) {
+    _reset();
+  }
+
+  void _rejectPendingTap() {
+    assert(_pendingTap != null);
+    final _TapTracker tracker = _pendingTap!;
+    _pendingTap = null;
+    // Order is important here; the `resolve` call can yield a re-entrant
+    // `reset()`, so we need to check cancel here while we can trust the
+    // length of our _completedTaps list.
+    _checkCancel(_completedTaps.length + 1);
+    tracker.entry.resolve(GestureDisposition.rejected);
+    _stopTrackingPointer(tracker);
+  }
+
+  @override
+  void dispose() {
+    if (_pendingTap != null) {
+      _rejectPendingTap();
+    }
+    _reset();
+    super.dispose();
+  }
+
+  void _reset() {
+    if (_pendingTap != null) {
+      _rejectPendingTap();
+    }
+    _pendingTap = null;
+    _completedTaps.clear();
+    _stopDoubleTapTimer();
+  }
+
+  void _registerTap(PointerUpEvent event, _TapTracker tracker) {
+    assert(_pendingTap?.pointer == event.pointer);
+    _startDoubleTapTimer();
+    // Don't explicitly resolve the entry in the arena; rather, let the arena's
+    // sweep force resolution of the arena, and we'll win by default if
+    // possible. This prevents us from "stealing" other would-be winning
+    // gestures lower in the tree (such as taps).
+    //
+    // Note, order is important below in order for the clear -> reject logic to
+    // work properly.
+    _stopTrackingPointer(tracker);
+    _pendingTap = null;
+    _checkUp(event, tracker);
+    _completedTaps.add(tracker);
+  }
+
+  void _stopTrackingPointer(_TapTracker tracker) {
+    tracker.stopTrackingPointer(_handleEvent);
+  }
+
+  void _startDoubleTapTimer() {
+    _serialTapTimer ??= Timer(kDoubleTapTimeout, _reset);
+  }
+
+  void _stopDoubleTapTimer() {
+    if (_serialTapTimer != null) {
+      _serialTapTimer!.cancel();
+      _serialTapTimer = null;
+    }
+  }
+
+  void _checkUp(PointerUpEvent event, _TapTracker tracker) {
+    if (onSerialTapUp != null) {
+      final SerialTapUpDetails details = SerialTapUpDetails(
+        globalPosition: event.position,
+        localPosition: event.localPosition,
+        kind: getKindForPointer(tracker.pointer),
+        count: _completedTaps.length + 1,
+      );
+      invokeCallback<void>('onSerialTapUp', () => onSerialTapUp!(details));
+    }
+  }
+
+  void _checkCancel(int count) {
+    if (onSerialTapCancel != null) {
+      final SerialTapCancelDetails details = SerialTapCancelDetails(
+        count: count,
+      );
+      invokeCallback<void>('onSerialTapCancel', () => onSerialTapCancel!(details));
+    }
+  }
+
+  @override
+  String get debugDescription => 'serial tap';
+}
