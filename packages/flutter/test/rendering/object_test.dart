@@ -154,20 +154,28 @@ void main() {
   });
 
   test('RenderObject.dispose clears the layer on repaint boundaries', () {
-    final TestRenderObject renderObject = TestRenderObject();
-    renderObject.layer = OffsetLayer();
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
+    // Force a layer to get set.
     renderObject.isRepaintBoundary = true;
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+    expect(renderObject.debugLayer, isA<OffsetLayer>());
+
+    // Dispose with repaint boundary still being true.
     renderObject.dispose();
-    expect(renderObject.layer, null);
+    expect(renderObject.debugLayer, null);
   });
 
   test('RenderObject.dispose does not clear the layer on non-repaint boundaries', () {
-    final TestRenderObject renderObject = TestRenderObject();
-    final OffsetLayer layer = OffsetLayer();
-    renderObject.layer = layer;
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
+    // Force a layer to get set.
+    renderObject.isRepaintBoundary = true;
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+    final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+
+    // Dispose with repaint boundary being false.
     renderObject.isRepaintBoundary = false;
     renderObject.dispose();
-    expect(renderObject.layer, layer);
+    expect(renderObject.debugLayer, layer);
   });
 }
 
@@ -213,6 +221,10 @@ class _TestCustomLayerBox extends RenderBox {
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
+  TestRenderObject({this.allowPaintBounds = false});
+
+  final bool allowPaintBounds;
+
   @override
   bool isRepaintBoundary = false;
 
@@ -221,7 +233,7 @@ class TestRenderObject extends RenderObject {
 
   @override
   Rect get paintBounds {
-    assert(false); // The test shouldn't call this.
+    assert(allowPaintBounds); // For some tests, this should not get called.
     return Rect.zero;
   }
 
