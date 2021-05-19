@@ -3199,7 +3199,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     RenderObject? result;
     void visit(Element element) {
       assert(result == null); // this verifies that there's only one child
-      if (element.unmounted) {
+      if (element._lifecycleState == _ElementLifecycle.defunct) {
         return;
       } else if (element is RenderObjectElement) {
         result = element.renderObject;
