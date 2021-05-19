@@ -204,18 +204,20 @@ class FrameTiming {
     required int buildFinish,
     required int rasterStart,
     required int rasterFinish,
+    int frameNumber = 1,
   }) {
     return FrameTiming._(<int>[
       vsyncStart,
       buildStart,
       buildFinish,
       rasterStart,
-      rasterFinish
+      rasterFinish,
+      frameNumber,
     ]);
   }
 
   FrameTiming._(this._timestamps)
-      : assert(_timestamps.length == FramePhase.values.length);
+      : assert(_timestamps.length == FramePhase.values.length + 1);
 
   int timestampInMicroseconds(FramePhase phase) => _timestamps[phase.index];
 
@@ -232,13 +234,15 @@ class FrameTiming {
   Duration get totalSpan =>
       _rawDuration(FramePhase.rasterFinish) - _rawDuration(FramePhase.vsyncStart);
 
+  int get frameNumber => _timestamps.last;
+
   final List<int> _timestamps; // in microseconds
 
   String _formatMS(Duration duration) => '${duration.inMicroseconds * 0.001}ms';
 
   @override
   String toString() {
-    return '$runtimeType(buildDuration: ${_formatMS(buildDuration)}, rasterDuration: ${_formatMS(rasterDuration)}, vsyncOverhead: ${_formatMS(vsyncOverhead)}, totalSpan: ${_formatMS(totalSpan)})';
+    return '$runtimeType(buildDuration: ${_formatMS(buildDuration)}, rasterDuration: ${_formatMS(rasterDuration)}, vsyncOverhead: ${_formatMS(vsyncOverhead)}, totalSpan: ${_formatMS(totalSpan)}, frameNumber: $frameNumber)';
   }
 }
 
