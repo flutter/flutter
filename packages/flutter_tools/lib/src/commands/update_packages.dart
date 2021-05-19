@@ -27,7 +27,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^1.0.1',
-  'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
+  'flutter_template_images': '3.0.0', // Must always exactly match flutter_tools template.
   'mockito': '4.1.1+1', // Prevent mockito from upgrading to the source gen version.
   // DART TEAM OWNED NNBD DEPS
   'archive': '">=3.0.0-nullsafety.0"',
@@ -70,6 +70,10 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'process_runner': '">=4.0.0-nullsafety.5"',
   'url_launcher': '">=6.0.0-nullsafety.1"',
   'video_player': '">=2.0.0-nullsafety.2"',
+  // This is pinned to avoid the performance regression from a reverted feature
+  // from https://github.com/dart-lang/shelf/issues/189 . This can be removed
+  // when a new major version of shelf is published.
+  'shelf': '1.1.4',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

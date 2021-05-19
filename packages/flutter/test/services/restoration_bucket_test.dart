@@ -183,7 +183,7 @@ void main() {
     // child1 is not given up before running finalizers.
     expect(
       () => manager.doSerialization(),
-      throwsA(isA<FlutterError>().having(
+      throwsA(isFlutterError.having(
         (FlutterError error) => error.message,
         'message',
         equals(

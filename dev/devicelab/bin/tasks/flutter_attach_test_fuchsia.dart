@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -202,7 +203,7 @@ void main() {
 
         section('Hot reload');
         runProcess.stdin.write('r');
-        runProcess.stdin.flush();
+        unawaited(runProcess.stdin.flush());
         await eventOrExit(reloadedCompleter.future);
 
         section('Waiting for Dart VM');
@@ -212,7 +213,7 @@ void main() {
         section('Quitting flutter run');
 
         runProcess.stdin.write('q');
-        runProcess.stdin.flush();
+        unawaited(runProcess.stdin.flush());
 
         final int runExitCode = await runProcess.exitCode;
         if (runExitCode != 0 || runStderr.isNotEmpty) {

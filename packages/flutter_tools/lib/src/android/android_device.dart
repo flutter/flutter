@@ -1031,7 +1031,7 @@ class AdbLogReader extends DeviceLogReader {
       final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
       args.addAll(<String>[
         '-T',
-        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+        if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
@@ -1313,13 +1313,10 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       ],
       throwOnError: false,
     );
-    // The port may have already been unforwarded, for example if there
-    // are multiple attach process already connected.
-    if (runResult.exitCode == 0 || runResult
-      .stderr.contains("listener '$tcpLine' not found")) {
+    if (runResult.exitCode == 0) {
       return;
     }
-    runResult.throwException('Process exited abnormally:\n$runResult');
+    _logger.printError('Failed to unforward port: $runResult');
   }
 
   @override

@@ -294,9 +294,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            child: SizedBox(key: target, width: 100.0, height: 200.0),
             transform: Matrix4.diagonal3Values(0.5, 0.5, 1),
             transformAlignment: Alignment.topLeft,
+            child: SizedBox(key: target, width: 100.0, height: 200.0),
           ),
         ),
       ),
@@ -311,9 +311,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            child: SizedBox(key: target, width: 100.0, height: 200.0),
             transform: Matrix4.diagonal3Values(0.5, 0.5, 1),
             transformAlignment: Alignment.bottomRight,
+            child: SizedBox(key: target, width: 100.0, height: 200.0),
           ),
         ),
       ),

@@ -301,6 +301,10 @@ const Feature windowsUwpEmbedding = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

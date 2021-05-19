@@ -56,7 +56,7 @@ class CodesignCommand extends Command<void> {
     argParser.addOption(
       kUpstream,
       defaultsTo: FrameworkRepository.defaultUpstream,
-      help: 'The git remote URL to use as the Flutter framework\'s upstream.',
+      help: "The git remote URL to use as the Flutter framework's upstream.",
     );
     argParser.addOption(
       kRevision,
