@@ -199,7 +199,8 @@ static spv::ExecutionModel ToExecutionModel(Compiler::SourceType type) {
 }
 
 Compiler::Compiler(const fml::Mapping& source_mapping,
-                   SourceOptions source_options)
+                   SourceOptions source_options,
+                   Reflector::Options reflector_options)
     : options_(source_options) {
   if (source_mapping.GetMapping() == nullptr) {
     COMPILER_ERROR << "Could not read shader source.";
@@ -298,7 +299,8 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  reflector_ = std::make_unique<Reflector>(msl_compiler);
+  reflector_ =
+      std::make_unique<Reflector>(std::move(reflector_options), msl_compiler);
 
   if (!reflector_->IsValid()) {
     COMPILER_ERROR << "Could not complete reflection on generated shader.";

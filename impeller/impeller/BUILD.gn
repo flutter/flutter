@@ -17,6 +17,18 @@ impeller_shaders("shaders") {
   ]
 }
 
+config("impeller_shader_glue_lib_config") {
+  include_dirs = [ "compositor" ]
+}
+
+source_set("impeller_shader_glue_lib") {
+  public_configs = [ ":impeller_shader_glue_lib_config" ]
+
+  public = [ "compositor/shader_types.h" ]
+
+  sources = [ "compositor/shader_types.cc" ]
+}
+
 source_set("impeller") {
   public_configs = [ ":impeller_config" ]
 
@@ -94,6 +106,7 @@ source_set("impeller") {
       compositor_sources + geometry_sources + entity_sources + image_sources
 
   deps = [
+    ":impeller_shader_glue_lib",
     ":shaders",
     "//flutter/fml",
     "//flutter/impeller/third_party/stb",

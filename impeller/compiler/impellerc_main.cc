@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <filesystem>
+
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/impeller/compiler/compiler.h"
 #include "flutter/impeller/compiler/switches.h"
+#include "flutter/impeller/compiler/utilities.h"
 #include "third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp"
 
 namespace impeller {
@@ -42,7 +45,15 @@ bool Main(const fml::CommandLine& command_line) {
       switches.source_file_name,
       Compiler::SourceTypeFromFileName(switches.source_file_name));
 
-  Compiler compiler(*source_file_mapping, options);
+  Reflector::Options reflector_options;
+  reflector_options.shader_name =
+      InferShaderNameFromPath(switches.source_file_name);
+  reflector_options.header_file_name =
+      std::filesystem::path{switches.reflection_header_name}
+          .filename()
+          .native();
+
+  Compiler compiler(*source_file_mapping, options, reflector_options);
   if (!compiler.IsValid()) {
     std::cerr << "Compilation failed." << std::endl;
     std::cerr << compiler.GetErrorMessages() << std::endl;
