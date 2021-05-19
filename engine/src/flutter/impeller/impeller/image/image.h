@@ -7,7 +7,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "image_result.h"
-#include "size.h"
+#include "impeller/geometry/size.h"
 
 namespace impeller {
 

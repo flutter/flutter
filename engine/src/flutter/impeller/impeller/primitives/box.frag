@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/impeller/compositor/shader_types.h"
+in vec3 color;
 
-namespace impeller {
+out vec3 fragColor;
 
-//
-
-}  // namespace impeller
+void main() {
+  fragColor = color;
+}

@@ -1,0 +1,16 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("entity") {
+  sources = [
+    "color.cc",
+    "color.h",
+    "entity.cc",
+    "entity.h",
+  ]
+
+  public_deps = [ "../image" ]
+}

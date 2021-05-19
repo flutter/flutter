@@ -70,7 +70,7 @@ template("impeller_shaders") {
                              ])
     deps = [
       ":$impellerc_target_name",
-      "//flutter/impeller/impeller:impeller_shader_glue_lib",
+      "//flutter/impeller/impeller/shader_glue",
     ]
   }
 

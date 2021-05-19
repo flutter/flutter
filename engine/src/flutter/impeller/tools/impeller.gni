@@ -1,0 +1,42 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+import("//flutter/impeller/compiler/tools/compiler.gni")
+
+template("impeller_component") {
+  source_set(target_name) {
+    forward_variables_from(invoker, "*")
+
+    if (!defined(invoker.public_configs)) {
+      public_configs = []
+    }
+
+    if (!defined(invoker.cflags_objc)) {
+      cflags_objc = []
+    }
+
+    if (!defined(invoker.cflags_objcc)) {
+      cflags_objcc = []
+    }
+
+    if (!defined(invoker.deps)) {
+      deps = []
+    }
+
+    objc_warning_flags = [ "-Wno-unused-private-field" ]
+
+    cflags_objc += flutter_cflags_objc_arc + objc_warning_flags
+    cflags_objcc += flutter_cflags_objcc_arc + objc_warning_flags
+
+    public_configs += [ "//flutter/impeller/impeller:impeller_public_config" ]
+
+    deps += [
+      "//flutter/fml",
+
+      # For tracing, seems to be pulled in by FML. Must be removed.
+      "//flutter/runtime:libdart",
+    ]
+  }
+}

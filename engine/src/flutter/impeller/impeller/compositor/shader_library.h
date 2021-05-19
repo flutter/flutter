@@ -10,7 +10,7 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
-#include "flutter/impeller/impeller/compositor/shader_types.h"
+#include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
 
