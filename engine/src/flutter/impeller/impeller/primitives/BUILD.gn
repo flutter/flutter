@@ -1,0 +1,24 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_shaders("shaders") {
+  name = "impeller"
+  shaders = [
+    "box.vert",
+    "box.frag",
+  ]
+}
+
+impeller_component("primitives") {
+  sources = [
+    "box.cc",
+    "box.h",
+  ]
+
+  public_deps = [ "../compositor" ]
+
+  deps = [ ":shaders" ]
+}

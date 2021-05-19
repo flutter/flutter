@@ -5,111 +5,17 @@
 import("//flutter/common/config.gni")
 import("//flutter/impeller/compiler/tools/compiler.gni")
 
-config("impeller_config") {
-  include_dirs = [ ".." ]
+config("impeller_public_config") {
+  include_dirs = [ "//flutter/impeller" ]
 }
 
-impeller_shaders("shaders") {
-  name = "impeller"
-  shaders = [
-    "compositor/shaders/box/box.frag",
-    "compositor/shaders/box/box.vert",
-  ]
-}
-
-config("impeller_shader_glue_lib_config") {
-  include_dirs = [ "compositor" ]
-}
-
-source_set("impeller_shader_glue_lib") {
-  public_configs = [ ":impeller_shader_glue_lib_config" ]
-
-  public = [ "compositor/shader_types.h" ]
-
-  sources = [ "compositor/shader_types.cc" ]
-}
-
-source_set("impeller") {
-  public_configs = [ ":impeller_config" ]
-
-  cflags_objc = flutter_cflags_objc_arc
-  cflags_objcc = flutter_cflags_objcc_arc
-
-  if (is_clang) {
-    cflags_cc = [ "-Wno-unused-private-field" ]
-  }
-
-  include_dirs = [
+group("impeller") {
+  deps = [
+    "compositor",
     "entity",
     "geometry",
     "image",
-    "compositor",
-  ]
-
-  compositor_sources = [
-    "compositor/context.h",
-    "compositor/context.mm",
-    "compositor/pipeline_builder.h",
-    "compositor/pipeline_builder.mm",
-    "compositor/pipeline_descriptor.h",
-    "compositor/pipeline_descriptor.mm",
-    "compositor/pipeline_library.h",
-    "compositor/pipeline_library.mm",
-    "compositor/renderer.h",
-    "compositor/renderer.mm",
-    "compositor/shader_library.h",
-    "compositor/shader_library.mm",
-    "compositor/surface.h",
-    "compositor/surface.mm",
-    "compositor/vertex_descriptor.h",
-    "compositor/vertex_descriptor.mm",
-  ]
-
-  geometry_sources = [
-    "geometry/matrix.cc",
-    "geometry/matrix.h",
-    "geometry/path.cc",
-    "geometry/path.h",
-    "geometry/path_builder.cc",
-    "geometry/path_builder.h",
-    "geometry/path_component.cc",
-    "geometry/path_component.h",
-    "geometry/point.cc",
-    "geometry/point.h",
-    "geometry/quaternion.cc",
-    "geometry/quaternion.h",
-    "geometry/rect.cc",
-    "geometry/rect.h",
-    "geometry/shear.cc",
-    "geometry/shear.h",
-    "geometry/size.cc",
-    "geometry/size.h",
-    "geometry/vector.cc",
-    "geometry/vector.h",
-  ]
-
-  entity_sources = [
-    "entity/color.cc",
-    "entity/color.h",
-    "entity/entity.cc",
-    "entity/entity.h",
-  ]
-
-  image_sources = [
-    "image/image.cc",
-    "image/image.h",
-    "image/image_result.cc",
-    "image/image_result.h",
-  ]
-
-  sources =
-      compositor_sources + geometry_sources + entity_sources + image_sources
-
-  deps = [
-    ":impeller_shader_glue_lib",
-    ":shaders",
-    "//flutter/fml",
-    "//flutter/impeller/third_party/stb",
-    "//flutter/runtime:libdart",  # For tracing, seems to be pulled in by FML.
+    "primitives",
+    "shader_glue",
   ]
 }
