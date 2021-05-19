@@ -27,7 +27,7 @@ size_t GetNextPipelineTraceID();
 /// A thread-safe queue of resources for a single consumer and a single
 /// producer.
 template <class R>
-class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
+class Pipeline {
  public:
   using Resource = R;
   using ResourcePtr = std::unique_ptr<Resource>;

@@ -1128,7 +1128,7 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
 
 // |Animator::Delegate|
 void Shell::OnAnimatorDraw(
-    fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
+    std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
     std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
   FML_DCHECK(is_setup_);
 
@@ -1153,12 +1153,16 @@ void Shell::OnAnimatorDraw(
   task_runners_.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
       [&waiting_for_first_frame = waiting_for_first_frame_,
        &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
-       rasterizer = rasterizer_->GetWeakPtr(), pipeline = std::move(pipeline),
+       rasterizer = rasterizer_->GetWeakPtr(),
+       weak_pipeline = std::weak_ptr<Pipeline<LayerTree>>(pipeline),
        discard_callback = std::move(discard_callback),
        frame_timings_recorder = std::move(frame_timings_recorder)]() mutable {
         if (rasterizer) {
-          rasterizer->Draw(std::move(frame_timings_recorder), pipeline,
-                           std::move(discard_callback));
+          std::shared_ptr<Pipeline<LayerTree>> pipeline = weak_pipeline.lock();
+          if (pipeline) {
+            rasterizer->Draw(std::move(frame_timings_recorder),
+                             std::move(pipeline), std::move(discard_callback));
+          }
 
           if (waiting_for_first_frame.load()) {
             waiting_for_first_frame.store(false);
