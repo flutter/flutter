@@ -1277,9 +1277,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
-    if (isRepaintBoundary) {
-      _layer = null;
-    }
+    _layer = null;
     assert(() {
       visitChildren((RenderObject child) {
         assert(
