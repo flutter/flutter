@@ -16,11 +16,21 @@ namespace fml {
 
 class MessageLoopImpl;
 
+/// An interface over the ability to schedule tasks on a \p TaskRunner.
 class BasicTaskRunner {
  public:
+  /// Schedules \p task to be executed on the TaskRunner's associated event
+  /// loop.
   virtual void PostTask(const fml::closure& task) = 0;
 };
 
+/// The object for scheduling tasks on a \p fml::MessageLoop.
+///
+/// Typically there is one \p TaskRunner associated with each thread.  When one
+/// wants to execute an operation on that thread they post a task to the
+/// TaskRunner.
+///
+/// \see fml::MessageLoop
 class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
                    public BasicTaskRunner {
  public:
@@ -31,12 +41,24 @@ class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
   virtual void PostTaskForTime(const fml::closure& task,
                                fml::TimePoint target_time);
 
+  /// Schedules a task to be run on the MessageLoop after the time \p delay has
+  /// passed.
+  /// \note There is latency between when the task is schedule and actually
+  /// executed so that the actual execution time is: now + delay +
+  /// message_loop_latency, where message_loop_latency is undefined and could be
+  /// tens of milliseconds.
   virtual void PostDelayedTask(const fml::closure& task, fml::TimeDelta delay);
 
+  /// Returns \p true when the current executing thread's TaskRunner matches
+  /// this instance.
   virtual bool RunsTasksOnCurrentThread();
 
+  /// Returns the unique identifier associated with the TaskRunner.
+  /// \see fml::MessageLoopTaskQueues
   virtual TaskQueueId GetTaskQueueId();
 
+  /// Executes the \p task directly if the TaskRunner \p runner is the
+  /// TaskRunner associated with the current executing thread.
   static void RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
                                const fml::closure& task);
 

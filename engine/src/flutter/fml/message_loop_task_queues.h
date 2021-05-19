@@ -22,8 +22,11 @@ namespace fml {
 
 static const TaskQueueId _kUnmerged = TaskQueueId(TaskQueueId::kUnmerged);
 
-// This is keyed by the |TaskQueueId| and contains all the queue
-// components that make up a single TaskQueue.
+/// A collection of tasks and observers associated with one TaskQueue.
+///
+/// Often a TaskQueue has a one-to-one relationship with a fml::MessageLoop,
+/// this isn't the case when TaskQueues are merged via
+/// \p fml::MessageLoopTaskQueues::Merge.
 class TaskQueueEntry {
  public:
   using TaskObservers = std::map<intptr_t, fml::closure>;
@@ -51,9 +54,12 @@ enum class FlushType {
   kAll,
 };
 
-// This class keeps track of all the tasks and observers that
-// need to be run on it's MessageLoopImpl. This also wakes up the
-// loop at the required times.
+/// A singleton container for all tasks and observers associated with all
+/// fml::MessageLoops.
+///
+/// This also wakes up the loop at the required times.
+/// \see fml::MessageLoop
+/// \see fml::Wakeable
 class MessageLoopTaskQueues
     : public fml::RefCountedThreadSafe<MessageLoopTaskQueues> {
  public:
@@ -115,7 +121,7 @@ class MessageLoopTaskQueues
   // Will return false if the owner has not been merged before.
   bool Unmerge(TaskQueueId owner);
 
-  // Returns true if owner owns the subsumed task queue.
+  /// Returns \p true if \p owner owns the \p subsumed task queue.
   bool Owns(TaskQueueId owner, TaskQueueId subsumed) const;
 
   // Returns the subsumed task queue if any or |TaskQueueId::kUnmerged|

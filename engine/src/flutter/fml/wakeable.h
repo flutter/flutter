@@ -9,6 +9,8 @@
 
 namespace fml {
 
+/// Interface over the ability to \p WakeUp a \p fml::MessageLoopImpl.
+/// \see fml::MessageLoopTaskQueues
 class Wakeable {
  public:
   virtual ~Wakeable() {}
