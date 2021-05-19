@@ -174,7 +174,10 @@ abstract class FlutterDriver {
   async_io.WebDriver get webDriver => throw UnimplementedError();
 
   /// Enables accessibility feature.
-  @Deprecated('Use setSemantics instead')
+  @Deprecated(
+    'Call setSemantics(true) instead. '
+    'This feature was deprecated after 2.3.0-12.1.pre.'
+  )
   Future<void> enableAccessibility() async {
     await setSemantics(true);
   }
