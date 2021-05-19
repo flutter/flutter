@@ -318,7 +318,7 @@ class _ZoomEnterTransition extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {
-        return Container(
+        return ColoredBox(
           color: Colors.black.withOpacity(opacity),
           child: child,
         );
