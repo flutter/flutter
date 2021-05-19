@@ -39,8 +39,10 @@ enum Artifact {
   linuxHeaders,
   /// The root of the Windows desktop sources.
   windowsDesktopPath,
-  /// The root of the cpp client code for Windows desktop and Windows UWP desktop.
+  /// The root of the cpp client code for Windows desktop.
   windowsCppClientWrapper,
+  /// The root of the cpp client code for Windows UWP desktop.
+  windowsUwpCppClientWrapper,
   /// The root of the Windows UWP desktop sources.
   windowsUwpDesktopPath,
   /// The root of the sky_engine package.
@@ -170,6 +172,7 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.linuxHeaders:
       return 'flutter_linux';
     case Artifact.windowsCppClientWrapper:
+    case Artifact.windowsUwpCppClientWrapper:
       return 'cpp_client_wrapper';
     case Artifact.windowsUwpDesktopPath:
     case Artifact.windowsDesktopPath:
@@ -562,6 +565,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
+      case Artifact.windowsUwpCppClientWrapper:
+        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+        return _fileSystem.path.join(engineArtifactsPath, 'windows-x64-uwp', _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
@@ -853,6 +859,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       case Artifact.linuxHeaders:
       case Artifact.windowsDesktopPath:
       case Artifact.windowsCppClientWrapper:
+      case Artifact.windowsUwpCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
