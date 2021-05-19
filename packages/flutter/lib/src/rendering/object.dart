@@ -1244,8 +1244,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   bool _debugDisposed = false;
 
-  /// Cause the entire subtree rooted at the given [RenderObject] to release
-  /// any resources it may be holding.
+  /// Release any resources held by this render object.
+  ///
+  /// If this render object has created any children directly, it should dispose
+  /// of those children in this method as well. However, it should not
+  /// dispose of children that were created by some other object, such as
+  /// a [RenderObjectElement].
   ///
   /// If [isRepaintBoundary] returns true, the layer tree rooted at this
   /// object's layer will also dispose.
@@ -1255,6 +1259,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (isRepaintBoundary) {
       _layer = null;
     }
+    assert(() {
+      visitChildren((RenderObject child) {
+        assert(child._debugDisposed);
+      });
+      return true;
+    }());
     assert(() {
       _debugDisposed = true;
       return true;
