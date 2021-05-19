@@ -244,7 +244,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///                             is discarded instead of being rendered
   ///
   void Draw(std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder,
-            fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
+            std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
             LayerTreeDiscardCallback discardCallback = NoDiscard);
 
   //----------------------------------------------------------------------------

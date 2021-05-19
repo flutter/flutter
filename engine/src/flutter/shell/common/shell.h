@@ -539,7 +539,7 @@ class Shell final : public PlatformView::Delegate,
 
   // |Animator::Delegate|
   void OnAnimatorDraw(
-      fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
+      std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override;
 
   // |Animator::Delegate|
