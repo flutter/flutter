@@ -109,6 +109,7 @@ FrameTiming FrameTimingsRecorder::RecordRasterEnd(fml::TimePoint raster_end) {
   timing.Set(FrameTiming::kBuildFinish, build_end_);
   timing.Set(FrameTiming::kRasterStart, raster_start_);
   timing.Set(FrameTiming::kRasterFinish, raster_end_);
+  timing.SetFrameNumber(GetFrameNumber());
   return timing;
 }
 
