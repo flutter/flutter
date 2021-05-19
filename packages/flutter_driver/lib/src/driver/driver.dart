@@ -176,7 +176,7 @@ abstract class FlutterDriver {
   /// Enables accessibility feature.
   @Deprecated(
     'Call setSemantics(true) instead. '
-    'This feature was deprecated after 2.3.0-12.1.pre.'
+    'This feature was deprecated after v2.3.0-12.1.pre.'
   )
   Future<void> enableAccessibility() async {
     await setSemantics(true);
