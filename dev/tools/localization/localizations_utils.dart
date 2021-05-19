@@ -259,11 +259,13 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
 class GeneratorOptions {
   GeneratorOptions({
     @required this.writeToFile,
+    @required this.widgetsOnly,
     @required this.materialOnly,
     @required this.cupertinoOnly,
   });
 
   final bool writeToFile;
+  final bool widgetsOnly;
   final bool materialOnly;
   final bool cupertinoOnly;
 }

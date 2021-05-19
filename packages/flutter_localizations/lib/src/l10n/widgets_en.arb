@@ -1,0 +1,21 @@
+{
+  "scrollUp": "Scroll Up",
+  "@scrollUp": {
+    "description": "The label to be shown on a button that scroll the view upward."
+  },
+
+  "scrollDown": "Scroll Down",
+  "@scrollDown": {
+    "description": "The label to be shown on a button that scroll the view downward."
+  },
+
+  "scrollLeft": "Scroll Left",
+  "@scrollLeft": {
+    "description": "The label to be shown on a button that scroll the view to the left."
+  },
+
+  "scrollRight": "Scroll Right",
+  "@scrollRight": {
+    "description": "The label to be shown on a button that scroll the view to the right."
+  }
+}

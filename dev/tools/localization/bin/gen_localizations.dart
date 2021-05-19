@@ -49,6 +49,7 @@ import 'package:path/path.dart' as path;
 
 import '../gen_cupertino_localizations.dart';
 import '../gen_material_localizations.dart';
+import '../gen_widgets_localizations.dart';
 import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 import 'encode_kn_arb_files.dart';
@@ -498,10 +499,12 @@ void main(List<String> rawArgs) {
   // code. In most cases both codes are just two characters.
 
   final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
+  final RegExp widgetsFilenameRE = RegExp(r'widgets_(\w+)\.arb$');
   final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
   final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
+    validateEnglishLocalizations(File(path.join(directory.path, 'widgets_en.arb')));
     validateEnglishLocalizations(File(path.join(directory.path, 'material_en.arb')));
     validateEnglishLocalizations(File(path.join(directory.path, 'cupertino_en.arb')));
   } on ValidationError catch (exception) {
@@ -521,6 +524,11 @@ void main(List<String> rawArgs) {
   precacheLanguageAndRegionTags();
 
   // Maps of locales to resource key/value pairs for Material ARBs.
+  final Map<LocaleInfo, Map<String, String>> widgetsLocaleToResources = <LocaleInfo, Map<String, String>>{};
+  // Maps of locales to resource key/attributes pairs for Material ARBs..
+  // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
+  final Map<LocaleInfo, Map<String, dynamic>> widgetsLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
+  // Maps of locales to resource key/value pairs for Material ARBs.
   final Map<LocaleInfo, Map<String, String>> materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Material ARBs..
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
@@ -531,6 +539,12 @@ void main(List<String> rawArgs) {
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
   final Map<LocaleInfo, Map<String, dynamic>> cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
+  loadMatchingArbsIntoBundleMaps(
+    directory: directory,
+    filenamePattern: widgetsFilenameRE,
+    localeToResources: widgetsLocaleToResources,
+    localeToResourceAttributes: widgetsLocaleToResourceAttributes,
+  );
   loadMatchingArbsIntoBundleMaps(
     directory: directory,
     filenamePattern: materialFilenameRE,
@@ -545,12 +559,28 @@ void main(List<String> rawArgs) {
   );
 
   try {
+    validateLocalizations(widgetsLocaleToResources, widgetsLocaleToResourceAttributes);
     validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes);
     validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
 
+  final String widgetsLocalizations = options.writeToFile || !options.widgetsOnly
+      ? generateArbBasedLocalizationSubclasses(
+          localeToResources: widgetsLocaleToResources,
+          localeToResourceAttributes: widgetsLocaleToResourceAttributes,
+          generatedClassPrefix: 'WidgetsLocalization',
+          baseClass: 'GlobalWidgetsLocalizations',
+          generateHeader: generateWidgetsHeader,
+          generateConstructor: generateWidgetsConstructor,
+          factoryName: widgetsFactoryName,
+          factoryDeclaration: widgetsFactoryDeclaration,
+          factoryArguments: widgetsFactoryArguments,
+          supportedLanguagesConstant: widgetsSupportedLanguagesConstant,
+          supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
+        )
+      : null;
   final String materialLocalizations = options.writeToFile || !options.cupertinoOnly
       ? generateArbBasedLocalizationSubclasses(
         localeToResources: materialLocaleToResources,
@@ -583,11 +613,16 @@ void main(List<String> rawArgs) {
       : null;
 
   if (options.writeToFile) {
+    final File widgetsLocalizationsFile = File(path.join(directory.path, 'generated_widgets_localizations.dart'));
+    widgetsLocalizationsFile.writeAsStringSync(widgetsLocalizations, flush: true);
     final File materialLocalizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
     materialLocalizationsFile.writeAsStringSync(materialLocalizations, flush: true);
     final File cupertinoLocalizationsFile = File(path.join(directory.path, 'generated_cupertino_localizations.dart'));
     cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations, flush: true);
   } else {
+    if (!options.widgetsOnly) {
+      stdout.write(widgetsLocalizations);
+    }
     if (!options.cupertinoOnly) {
       stdout.write(materialLocalizations);
     }

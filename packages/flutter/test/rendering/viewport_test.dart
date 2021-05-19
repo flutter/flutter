@@ -1842,27 +1842,33 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: MediaQuery(
+        child: Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: MediaQuery(
           data: const MediaQueryData(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              GridView(
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 3,
-                  mainAxisSpacing: 3,
-                  crossAxisSpacing: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                GridView(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 3,
+                    mainAxisSpacing: 3,
+                    crossAxisSpacing: 3,
+                  ),
+                  children: const <Widget>[
+                    Text('a'),
+                    Text('b'),
+                    Text('c'),
+                  ],
                 ),
-                children: const <Widget>[
-                  Text('a'),
-                  Text('b'),
-                  Text('c'),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

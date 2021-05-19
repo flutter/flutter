@@ -204,22 +204,27 @@ void main() {
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
         });
-
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
-            child: CupertinoPicker(
-              itemExtent: 100.0,
-              onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: List<Widget>.generate(100, (int index) {
-                return Center(
-                  child: SizedBox(
-                    width: 400.0,
-                    height: 100.0,
-                    child: Text(index.toString()),
-                  ),
-                );
-              }),
+            child: Localizations(
+              locale: const Locale('en', 'us'),
+              delegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultWidgetsLocalizations.delegate,
+              ],
+              child: CupertinoPicker(
+                itemExtent: 100.0,
+                onSelectedItemChanged: (int index) { selectedItems.add(index); },
+                children: List<Widget>.generate(100, (int index) {
+                  return Center(
+                    child: SizedBox(
+                      width: 400.0,
+                      height: 100.0,
+                      child: Text(index.toString()),
+                    ),
+                  );
+                }),
+              ),
             ),
           ),
         );
@@ -292,19 +297,25 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: CupertinoPicker(
-            scrollController: controller,
-            itemExtent: 100.0,
-            onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: List<Widget>.generate(100, (int index) {
-              return Center(
-                child: SizedBox(
-                  width: 400.0,
-                  height: 100.0,
-                  child: Text(index.toString()),
-                ),
-              );
-            }),
+          child: Localizations(
+            locale: const Locale('en', 'us'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: CupertinoPicker(
+              scrollController: controller,
+              itemExtent: 100.0,
+              onSelectedItemChanged: (int index) { selectedItems.add(index); },
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: SizedBox(
+                    width: 400.0,
+                    height: 100.0,
+                    child: Text(index.toString()),
+                  ),
+                );
+              }),
+            ),
           ),
         ),
       );
@@ -347,19 +358,25 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: CupertinoPicker(
-            scrollController: controller,
-            itemExtent: 100.0,
-            onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: List<Widget>.generate(100, (int index) {
-              return Center(
-                child: SizedBox(
-                  width: 400.0,
-                  height: 100.0,
-                  child: Text(index.toString()),
-                ),
-              );
-            }),
+          child: Localizations(
+            locale: const Locale('en', 'us'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: CupertinoPicker(
+              scrollController: controller,
+              itemExtent: 100.0,
+              onSelectedItemChanged: (int index) { selectedItems.add(index); },
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: SizedBox(
+                    width: 400.0,
+                    height: 100.0,
+                    child: Text(index.toString()),
+                  ),
+                );
+              }),
+            ),
           ),
         ),
       );

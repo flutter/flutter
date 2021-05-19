@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'l10n/generated_widgets_localizations.dart';
+
 /// Localized values for widgets.
 ///
 /// Currently this class just maps [locale] to [textDirection]. All locales
@@ -17,54 +19,18 @@ import 'package:flutter/widgets.dart';
 ///   * ps - Pashto
 ///   * sd - Sindhi
 ///   * ur - Urdu
-class GlobalWidgetsLocalizations implements WidgetsLocalizations {
+abstract class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
   /// library for the given `locale`.
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  GlobalWidgetsLocalizations(this.locale) {
-    final String language = locale.languageCode.toLowerCase();
-    _textDirection = _rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
-  }
-
-  // See http://en.wikipedia.org/wiki/Right-to-left
-  static const List<String> _rtlLanguages = <String>[
-    'ar', // Arabic
-    'fa', // Farsi
-    'he', // Hebrew
-    'ps', // Pashto
-    'ur', // Urdu
-  ];
-
-  /// The locale for which the values of this class's localized resources
-  /// have been translated.
-  final Locale locale;
+  const GlobalWidgetsLocalizations({
+    required this.textDirection,
+  });
 
   @override
-  TextDirection get textDirection => _textDirection;
-  late TextDirection _textDirection;
-
-  @override
-  final String scrollUp = 'Scroll Up';
-
-  @override
-  final String scrollDown = 'Scroll Down';
-
-  @override
-  final String scrollLeft = 'Scroll Left';
-
-  @override
-  final String scrollRight = 'Scroll Right';
-
-  /// Creates an object that provides localized resource values for the
-  /// lowest levels of the Flutter framework.
-  ///
-  /// This method is typically used to create a [LocalizationsDelegate].
-  /// The [WidgetsApp] does so by default.
-  static Future<WidgetsLocalizations> load(Locale locale) {
-    return SynchronousFuture<WidgetsLocalizations>(GlobalWidgetsLocalizations(locale));
-  }
+  final TextDirection textDirection;
 
   /// A [LocalizationsDelegate] that uses [GlobalWidgetsLocalizations.load]
   /// to create an instance of this class.
@@ -77,14 +43,33 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
   const _WidgetsLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(Locale locale) => kWidgetsSupportedLanguages.contains(locale.languageCode);
+
+  // See http://en.wikipedia.org/wiki/Right-to-left
+  static const List<String> _rtlLanguages = <String>[
+    'ar', // Arabic
+    'fa', // Farsi
+    'he', // Hebrew
+    'ps', // Pashto
+    'ur', // Urdu
+  ];
+
+  static final Map<Locale, Future<WidgetsLocalizations>> _loadedTranslations = <Locale, Future<WidgetsLocalizations>>{};
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) => GlobalWidgetsLocalizations.load(locale);
+  Future<WidgetsLocalizations> load(Locale locale) {
+    assert(isSupported(locale));
+    return _loadedTranslations.putIfAbsent(locale, () {
+      return SynchronousFuture<WidgetsLocalizations>(getWidgetsTranslation(
+        locale,
+        _rtlLanguages.contains(locale.languageCode.toLowerCase()) ? TextDirection.rtl : TextDirection.ltr,
+      )!);
+    });
+  }
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'GlobalWidgetsLocalizations.delegate(all locales)';
+  String toString() => 'GlobalWidgetsLocalizations.delegate(${kWidgetsSupportedLanguages.length} locales)';
 }

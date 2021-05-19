@@ -35,6 +35,15 @@ void main() {
     expect(find.text('loaded'), findsOneWidget);
   });
 
+  testWidgets('English translations exist for all WidgetsLocalizations properties', (WidgetTester tester) async {
+    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+    expect(localizations.scrollUp, isNotNull);
+    expect(localizations.scrollDown, isNotNull);
+    expect(localizations.scrollLeft, isNotNull);
+    expect(localizations.scrollRight, isNotNull);
+  });
+
   testWidgets('Localizations.localeOf throws when no localizations exist', (WidgetTester tester) async {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
