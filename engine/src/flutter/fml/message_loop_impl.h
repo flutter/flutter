@@ -23,6 +23,11 @@
 
 namespace fml {
 
+/// An abstract class that represents the differences in implementation of a \p
+/// fml::MessageLoop depending on the platform.
+/// \see fml::MessageLoop
+/// \see fml::MessageLoopAndroid
+/// \see fml::MessageLoopDarwin
 class MessageLoopImpl : public Wakeable,
                         public fml::RefCountedThreadSafe<MessageLoopImpl> {
  public:

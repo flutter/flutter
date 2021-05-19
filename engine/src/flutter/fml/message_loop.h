@@ -13,12 +13,22 @@ namespace fml {
 class TaskRunner;
 class MessageLoopImpl;
 
+/// An event loop associated with a thread.
+///
+/// This class is the generic front-end to the MessageLoop, differences in
+/// implementation based on the running platform are in the subclasses of
+/// flutter::MessageLoopImpl (ex flutter::MessageLoopAndroid).
+///
+/// For scheduling events on the message loop see flutter::TaskRunner.
+///
+/// \see fml::TaskRunner
+/// \see fml::MessageLoopImpl
+/// \see fml::MessageLoopTaskQueues
+/// \see fml::Wakeable
 class MessageLoop {
  public:
   FML_EMBEDDER_ONLY
   static MessageLoop& GetCurrent();
-
-  bool IsValid() const;
 
   void Run();
 
@@ -36,10 +46,15 @@ class MessageLoop {
 
   static void EnsureInitializedForCurrentThread();
 
+  /// Returns true if \p EnsureInitializedForCurrentThread has been called on
+  /// this thread already.
   static bool IsInitializedForCurrentThread();
 
   ~MessageLoop();
 
+  /// Gets the unique identifier for the TaskQueue associated with the current
+  /// thread.
+  /// \see fml::MessageLoopTaskQueues
   static TaskQueueId GetCurrentTaskQueueId();
 
  private:
