@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
@@ -58,8 +57,7 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect(await command.usageValues,
-        containsPair(CustomDimensions.commandBuildBundleIsModule, 'true'));
+    expect((await command.usageValues).commandBuildBundleIsModule, true);
   });
 
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
@@ -68,8 +66,7 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect(await command.usageValues,
-        containsPair(CustomDimensions.commandBuildBundleIsModule, 'false'));
+    expect((await command.usageValues).commandBuildBundleIsModule, false);
   });
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
@@ -78,8 +75,7 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect(await command.usageValues,
-        containsPair(CustomDimensions.commandBuildBundleTargetPlatform, 'android-arm'));
+    expect((await command.usageValues).commandBuildBundleTargetPlatform, 'android-arm');
   });
 
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {

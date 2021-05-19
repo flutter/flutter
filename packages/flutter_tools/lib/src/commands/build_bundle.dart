@@ -69,16 +69,16 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
+  Future<CustomDimensions> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
     final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
     if (flutterProject == null) {
-      return const <CustomDimensions, String>{};
+      return const CustomDimensions();
     }
-    return <CustomDimensions, String>{
-      CustomDimensions.commandBuildBundleTargetPlatform: stringArg('target-platform'),
-      CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
-    };
+    return CustomDimensions(
+      commandBuildBundleTargetPlatform: stringArg('target-platform'),
+      commandBuildBundleIsModule: flutterProject.isModule,
+    );
   }
 
   @override

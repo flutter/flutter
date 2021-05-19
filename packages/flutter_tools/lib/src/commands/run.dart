@@ -357,7 +357,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
+  Future<CustomDimensions> get usageValues async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
     bool anyAndroidDevices = false;
@@ -410,16 +410,15 @@ class RunCommand extends RunCommandBase {
 
     final BuildInfo buildInfo = await getBuildInfo();
     final String modeName = buildInfo.modeName;
-    return <CustomDimensions, String>{
-      CustomDimensions.commandRunIsEmulator: '$isEmulator',
-      CustomDimensions.commandRunTargetName: deviceType,
-      CustomDimensions.commandRunTargetOsVersion: deviceOsVersion,
-      CustomDimensions.commandRunModeName: modeName,
-      CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
-      CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
-      if (androidEmbeddingVersion != null)
-        CustomDimensions.commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
-    };
+    return CustomDimensions(
+      commandRunIsEmulator: isEmulator,
+      commandRunTargetName: deviceType,
+      commandRunTargetOsVersion: deviceOsVersion,
+      commandRunModeName: modeName,
+      commandRunProjectModule: FlutterProject.current().isModule,
+      commandRunProjectHostLanguage: hostLanguage.join(','),
+      commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
+    );
   }
 
   @override

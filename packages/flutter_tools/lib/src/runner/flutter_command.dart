@@ -1063,8 +1063,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Additional usage values to be sent with the usage ping.
-  Future<Map<CustomDimensions, String>> get usageValues async =>
-      const <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async => const CustomDimensions();
 
   /// Runs this command.
   ///
@@ -1231,12 +1230,9 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<CustomDimensions, Object> additionalUsageValues =
-        <CustomDimensions, Object>{
-          ...?await usageValues,
-          CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
-        };
-      Usage.command(commandPath, parameters: additionalUsageValues);
+      Usage.command(commandPath, parameters: CustomDimensions(
+        commandHasTerminal: globals.stdio.hasTerminal,
+      ).merge(await usageValues));
     }
 
     return runCommand();

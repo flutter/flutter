@@ -368,10 +368,10 @@ void main() {
         ]), isNull);
 
         expect(usage.commands, contains(
-          const TestUsageCommand('run', parameters: <String, String>{
+          TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'false',
-          }
+          })
         )));
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
