@@ -1,12 +1,6 @@
 {
   "builders": [
     {
-      "name": "Linux analyze",
-      "repo": "flutter",
-      "task_name": "linux_analyze",
-      "enabled": true
-    },
-    {
       "name": "Linux build_aar_module_test",
       "repo": "flutter",
       "task_name": "linux_build_aar_module_test",
@@ -658,7 +652,7 @@
       "name": "Windows gradle_plugin_light_apk_test",
       "repo": "flutter",
       "task_name": "win_gradle_plugin_light_apk_test",
-      "enabled": false,
+      "enabled": true,
       "run_if": ["dev/**", "bin/**"]
     },
     {

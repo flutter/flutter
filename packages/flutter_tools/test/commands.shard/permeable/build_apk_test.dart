@@ -43,8 +43,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
       final BuildApkCommand command = await runBuildApkCommand(projectPath);
 
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64'));
+      expect((await command.usageValues).commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -56,12 +55,10 @@ void main() {
 
       final BuildApkCommand commandWithFlag = await runBuildApkCommand(projectPath,
           arguments: <String>['--split-per-abi']);
-      expect(await commandWithFlag.usageValues,
-          containsPair(CustomDimensions.commandBuildApkSplitPerAbi, 'true'));
+      expect((await commandWithFlag.usageValues).commandBuildApkSplitPerAbi, true);
 
       final BuildApkCommand commandWithoutFlag = await runBuildApkCommand(projectPath);
-      expect(await commandWithoutFlag.usageValues,
-          containsPair(CustomDimensions.commandBuildApkSplitPerAbi, 'false'));
+      expect((await commandWithoutFlag.usageValues).commandBuildApkSplitPerAbi, false);
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -72,23 +69,19 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
 
       final BuildApkCommand commandDefault = await runBuildApkCommand(projectPath);
-      expect(await commandDefault.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'release'));
+      expect((await commandDefault.usageValues).commandBuildApkBuildMode, 'release');
 
       final BuildApkCommand commandInRelease = await runBuildApkCommand(projectPath,
           arguments: <String>['--release']);
-      expect(await commandInRelease.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'release'));
+      expect((await commandInRelease.usageValues).commandBuildApkBuildMode, 'release');
 
       final BuildApkCommand commandInDebug = await runBuildApkCommand(projectPath,
           arguments: <String>['--debug']);
-      expect(await commandInDebug.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'debug'));
+      expect((await commandInDebug.usageValues).commandBuildApkBuildMode, 'debug');
 
       final BuildApkCommand commandInProfile = await runBuildApkCommand(projectPath,
           arguments: <String>['--profile']);
-      expect(await commandInProfile.usageValues,
-          containsPair(CustomDimensions.commandBuildApkBuildMode, 'profile'));
+      expect((await commandInProfile.usageValues).commandBuildApkBuildMode, 'profile');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -315,7 +308,7 @@ void main() {
           'build',
           'gradle',
           label: 'gradle-r8-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);
@@ -368,7 +361,7 @@ void main() {
           'build',
           'gradle',
           label: 'app-not-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);
@@ -414,7 +407,7 @@ void main() {
           'build',
           'gradle',
           label: 'app-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);

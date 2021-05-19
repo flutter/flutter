@@ -205,11 +205,7 @@ void main() {
           'streamId': 'Isolate',
         }
       ),
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-        args: <String, Object>{},
-      ),
+      listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
         jsonResponse: isolate.toJson(),

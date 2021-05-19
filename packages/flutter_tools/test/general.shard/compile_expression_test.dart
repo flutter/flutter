@@ -15,18 +15,17 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
-  ProcessManager mockProcessManager;
+  FakeProcessManager processManager;
   ResidentCompiler generator;
-  MockProcess mockFrontendServer;
   MemoryIOSink frontendServerStdIn;
   StreamController<String> stdErrStreamController;
   BufferLogger testLogger;
@@ -34,33 +33,22 @@ void main() {
 
   setUp(() {
     testLogger = BufferLogger.test();
-    mockProcessManager = MockProcessManager();
-    mockFrontendServer = MockProcess();
+    processManager = FakeProcessManager();
     frontendServerStdIn = MemoryIOSink();
     fileSystem = MemoryFileSystem.test();
     generator = ResidentCompiler(
       'sdkroot',
       buildMode: BuildMode.debug,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: processManager,
       logger: testLogger,
       platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: fileSystem,
     );
 
     stdErrStreamController = StreamController<String>();
-    when(mockFrontendServer.stdin).thenReturn(frontendServerStdIn);
-    when(mockFrontendServer.stderr)
-        .thenAnswer((Invocation invocation) => stdErrStreamController.stream.transform(utf8.encoder));
-    when(mockFrontendServer.exitCode).thenAnswer((Invocation invocation) {
-      return Completer<int>().future;
-    });
-
-    when(mockProcessManager.canRun(any)).thenReturn(true);
-    when(mockProcessManager.start(any)).thenAnswer(
-            (Invocation invocation) =>
-        Future<Process>.value(mockFrontendServer)
-    );
+    processManager.process.stdin = frontendServerStdIn;
+    processManager.process.stderr = stdErrStreamController.stream.transform(utf8.encoder);
   });
 
   testWithoutContext('compile expression fails if not previously compiled', () async {
@@ -79,13 +67,10 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3, 4]);
 
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) =>
-    Stream<List<int>>.fromFutures(
+    processManager.process.stdout = Stream<List<int>>.fromFutures(
       <Future<List<int>>>[
         compileResponseCompleter.future,
-        compileExpressionResponseCompleter.future]));
-
+        compileExpressionResponseCompleter.future]);
     compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
       'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'
     )));
@@ -123,14 +108,14 @@ void main() {
     final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter2 = Completer<List<int>>();
 
-    when(mockFrontendServer.stdout)
-        .thenAnswer((Invocation invocation) =>
-    Stream<List<int>>.fromFutures(
-        <Future<List<int>>>[
-          compileResponseCompleter.future,
-          compileExpressionResponseCompleter1.future,
-          compileExpressionResponseCompleter2.future,
-        ]));
+
+    processManager.process.stdout =
+      Stream<List<int>>.fromFutures(
+          <Future<List<int>>>[
+            compileResponseCompleter.future,
+            compileExpressionResponseCompleter1.future,
+            compileExpressionResponseCompleter2.future,
+          ]);
 
     // The test manages timing via completers.
     unawaited(
@@ -192,5 +177,30 @@ void main() {
   });
 }
 
-class MockProcess extends Mock implements Process {}
-class MockProcessManager extends Mock implements ProcessManager {}
+class FakeProcess extends Fake implements Process {
+  @override
+  Stream<List<int>> stdout;
+
+  @override
+  Stream<List<int>> stderr;
+
+  @override
+  IOSink stdin;
+
+  @override
+  Future<int> get exitCode => Completer<int>().future;
+}
+
+class FakeProcessManager extends Fake implements ProcessManager {
+  final FakeProcess process = FakeProcess();
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) {
+    return true;
+  }
+
+  @override
+  Future<Process> start(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
+    return process;
+  }
+}

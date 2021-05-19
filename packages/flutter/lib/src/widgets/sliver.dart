@@ -1352,7 +1352,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         } else {
           throw FlutterError(
             'Could not find the number of children in ${widget.delegate}.\n'
-            'The childCount getter was called (implying that the delegate\'s builder returned null '
+            "The childCount getter was called (implying that the delegate's builder returned null "
             'for a positive index), but even building the child with index $hi (the maximum '
             'possible integer) did not return null. Consider implementing childCount to avoid '
             'the cost of searching for the final child.',

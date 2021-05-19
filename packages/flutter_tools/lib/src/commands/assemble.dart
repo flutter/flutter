@@ -140,20 +140,20 @@ class AssembleCommand extends FlutterCommand {
   String get name => 'assemble';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
+  Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = FlutterProject.current();
     if (flutterProject == null) {
-      return const <CustomDimensions, String>{};
+      return const CustomDimensions();
     }
     try {
-      return <CustomDimensions, String>{
-        CustomDimensions.commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
-        CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
-      };
+      return CustomDimensions(
+        commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
+        commandBuildBundleIsModule: flutterProject.isModule,
+      );
     } on Exception {
       // We've failed to send usage.
     }
-    return const <CustomDimensions, String>{};
+    return const CustomDimensions();
   }
 
   @override
