@@ -1031,7 +1031,7 @@ class AdbLogReader extends DeviceLogReader {
       final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
       args.addAll(<String>[
         '-T',
-        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+        if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));

@@ -348,7 +348,7 @@ void main() {
           classNameString: defaultClassNameString,
         ).loadResources();
     } on L10nException catch (e) {
-      expect(e.message, contains('The following .arb file\'s locale could not be determined'));
+      expect(e.message, contains("The following .arb file's locale could not be determined"));
       return;
     }
 

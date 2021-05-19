@@ -107,7 +107,7 @@ String generateDateFormattingLogic(Message message) {
           'the "${placeholder.type}" type. To properly resolve for the right '
           '${placeholder.type} format, the "format" attribute needs to be set '
           'to determine which DateFormat to use. \n'
-          'Check the intl library\'s DateFormat class constructors for allowed '
+          "Check the intl library's DateFormat class constructors for allowed "
           'date formats.'
         );
       }
@@ -115,7 +115,7 @@ String generateDateFormattingLogic(Message message) {
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
-          'constructor\n. Check the intl library\'s DateFormat class '
+          "constructor\n. Check the intl library's DateFormat class "
           'constructors for allowed date formats.'
         );
       }
@@ -140,7 +140,7 @@ String generateNumberFormattingLogic(Message message) {
         throw L10nException(
           'Number format $placeholderFormat for the ${placeholder.name} '
           'placeholder does not have a corresponding NumberFormat constructor.\n'
-          'Check the intl library\'s NumberFormat class constructors for allowed '
+          "Check the intl library's NumberFormat class constructors for allowed "
           'number formats.'
         );
       }
@@ -765,7 +765,7 @@ class LocalizationsGenerator {
     if (!directory.existsSync()) {
       throw L10nException(
         'Directory does not exist: $directory.\n'
-        'Please select a directory that contains the project\'s localizations '
+        "Please select a directory that contains the project's localizations "
         'resource files.'
       );
     }
@@ -1078,18 +1078,18 @@ class LocalizationsGenerator {
       final String? scriptCode = locale.scriptCode;
 
       if (countryCode == null && scriptCode == null) {
-        return 'Locale(\'$languageCode\')';
+        return "Locale('$languageCode')";
       } else if (countryCode != null && scriptCode == null) {
-        return 'Locale(\'$languageCode\', \'$countryCode\')';
+        return "Locale('$languageCode', '$countryCode')";
       } else if (countryCode != null && scriptCode != null) {
-        return 'Locale.fromSubtags(languageCode: \'$languageCode\', countryCode: \'$countryCode\', scriptCode: \'$scriptCode\')';
+        return "Locale.fromSubtags(languageCode: '$languageCode', countryCode: '$countryCode', scriptCode: '$scriptCode')";
       } else {
-        return 'Locale.fromSubtags(languageCode: \'$languageCode\', scriptCode: \'$scriptCode\')';
+        return "Locale.fromSubtags(languageCode: '$languageCode', scriptCode: '$scriptCode')";
       }
     });
 
     final Set<String> supportedLanguageCodes = Set<String>.from(
-      _allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
+      _allBundles.locales.map<String>((LocaleInfo locale) => "'${locale.languageCode}'")
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();

@@ -254,7 +254,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(hasPixels);
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, 'A scrollable\'s position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.');
+    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, "A scrollable's position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.");
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {

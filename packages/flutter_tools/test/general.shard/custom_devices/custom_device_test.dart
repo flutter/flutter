@@ -246,7 +246,7 @@ void main() {
     expect(pingCommandWasExecuted, true);
   });
 
-  testWithoutContext('CustomDevices.discoverDevices doesn\'t report device when ping command fails', () async {
+  testWithoutContext("CustomDevices.discoverDevices doesn't report device when ping command fails", () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory dir = fs.directory('custom_devices_config_dir');
 
@@ -272,7 +272,7 @@ void main() {
     expect(await discovery.discoverDevices(), hasLength(0));
   });
 
-  testWithoutContext('CustomDevices.discoverDevices doesn\'t report device when ping command output doesn\'t match ping success regex', () async {
+  testWithoutContext("CustomDevices.discoverDevices doesn't report device when ping command output doesn't match ping success regex", () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory dir = fs.directory('custom_devices_config_dir');
 
