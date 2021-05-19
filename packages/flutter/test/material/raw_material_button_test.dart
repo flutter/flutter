@@ -11,97 +11,356 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'ink_paint_test_utils.dart';
 
 void main() {
-  testWidgets('RawMaterialButton responds when tapped', (WidgetTester tester) async {
-    bool pressed = false;
-    const Color splashColor = Color(0xff00ff00);
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: RawMaterialButton(
-            splashColor: splashColor,
-            onPressed: () { pressed = true; },
-            child: const Text('BUTTON'),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('BUTTON'));
-    await tester.pump(const Duration(milliseconds: 10));
-
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    expect(splash, paints..circle(color: splashColor));
-
-    await tester.pumpAndSettle();
-
-    expect(pressed, isTrue);
-  });
-
-  testWidgets('RawMaterialButton responds to shortcut when activated', (WidgetTester tester) async {
-    bool pressed = false;
-    final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
-    const Color splashColor = Color(0xff00ff00);
-    await tester.pumpWidget(
-      Shortcuts(
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-        },
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: RawMaterialButton(
-              splashColor: splashColor,
-              focusNode: focusNode,
-              onPressed: () { pressed = true; },
-              child: const Text('BUTTON'),
+  group('Ink features', () {
+    group('with InkSplash.splashFactory', () {
+      testWidgets('RawMaterialButton responds with splash when tapped', (WidgetTester tester) async {
+        bool pressed = false;
+        const Color splashColor = Color(0xff00ff00);
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkSplash.splashFactory),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: RawMaterialButton(
+                  splashColor: splashColor,
+                  onPressed: () => pressed = true,
+                  child: const Text('BUTTON'),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        );
 
-    focusNode.requestFocus();
-    await tester.pump();
+        await tester.tap(find.text('BUTTON'));
+        await tester.pump(const Duration(milliseconds: 10));
 
-    // Web doesn't react to enter, just space.
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump(const Duration(milliseconds: 10));
+        expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor));
 
-    if (!kIsWeb) {
-      final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-      expect(splash, paints..circle(color: splashColor));
-    }
+        await tester.pumpAndSettle();
 
-    await tester.pumpAndSettle();
+        expect(pressed, isTrue);
+      });
 
-    expect(pressed, isTrue);
+      testWidgets('RawMaterialButton responds to shortcut with splash when activated', (WidgetTester tester) async {
+        bool pressed = false;
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
+        const Color splashColor = Color(0xff00ff00);
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkSplash.splashFactory),
+            child: Shortcuts(
+              shortcuts: <LogicalKeySet, Intent>{
+                LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+                LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+              },
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: RawMaterialButton(
+                    splashColor: splashColor,
+                    focusNode: focusNode,
+                    onPressed: () => pressed = true,
+                    child: const Text('BUTTON'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
 
-    pressed = false;
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pumpAndSettle();
+        focusNode.requestFocus();
+        await tester.pump();
 
-    expect(pressed, isTrue);
+        // Web doesn't react to enter, just space.
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump(const Duration(milliseconds: 10));
 
-    pressed = false;
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pump(const Duration(milliseconds: 10));
+        if (!kIsWeb) {
+          expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor));
+        }
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    expect(splash, paints..circle(color: splashColor));
+        await tester.pumpAndSettle();
 
-    await tester.pumpAndSettle();
+        expect(pressed, isTrue);
 
-    expect(pressed, isTrue);
+        pressed = false;
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
 
-    pressed = false;
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pumpAndSettle();
+        expect(pressed, isTrue);
 
-    expect(pressed, isTrue);
+        pressed = false;
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pump(const Duration(milliseconds: 10));
+
+        expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor));
+
+        await tester.pumpAndSettle();
+
+        expect(pressed, isTrue);
+
+        pressed = false;
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        expect(pressed, isTrue);
+      });
+
+      testWidgets('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
+        const Color highlightColor = Color(0xAAFF0000);
+        const Color splashColor = Color(0xAA0000FF);
+        const Color fillColor = Color(0xFFEF5350);
+
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkSplash.splashFactory),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: RawMaterialButton(
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  onPressed: () {},
+                  fillColor: fillColor,
+                  highlightColor: highlightColor,
+                  splashColor: splashColor,
+                  child: const SizedBox(),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final Offset center = tester.getCenter(find.byType(InkWell));
+        final TestGesture gesture = await tester.startGesture(center);
+        await tester.pump(); // start gesture
+        await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+
+        // centered in material button.
+        expect(
+          getMaterialInkController<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 18), color: splashColor),
+        );
+        await gesture.up();
+      });
+
+      testWidgets('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
+        const Color highlightColor = Color(0xAAFF0000);
+        const Color splashColor = Color(0xAA0000FF);
+        const Color fillColor = Color(0xFFEF5350);
+
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkSplash.splashFactory),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: RawMaterialButton(
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  onPressed: () {},
+                  fillColor: fillColor,
+                  highlightColor: highlightColor,
+                  splashColor: splashColor,
+                  child: const SizedBox(),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final Offset top = tester.getRect(find.byType(InkWell)).topCenter;
+        final TestGesture gesture = await tester.startGesture(top);
+        await tester.pump(); // start gesture
+        await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+        // paints above above material
+        expect(
+          getMaterialInkController<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 0), color: splashColor),
+        );
+        await gesture.up();
+      });
+    });
+
+    group('with InkRipple.splashFactory', () {
+      testWidgets('RawMaterialButton responds with ripple when tapped', (WidgetTester tester) async {
+        bool pressed = false;
+        const Color splashColor = Color(0xff00ff00);
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkRipple.splashFactory),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: RawMaterialButton(
+                  splashColor: splashColor,
+                  onPressed: () => pressed = true,
+                  child: const Text('BUTTON'),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('BUTTON'));
+        await tester.pump(const Duration(milliseconds: 10));
+
+        expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor, alpha: 0));
+
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor));
+
+        await tester.pumpAndSettle();
+
+        expect(pressed, isTrue);
+      });
+
+      testWidgets('RawMaterialButton responds to shortcut with ripple when activated', (WidgetTester tester) async {
+        bool pressed = false;
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
+        const Color splashColor = Color(0xff00ff00);
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkRipple.splashFactory),
+            child: Shortcuts(
+              shortcuts: <LogicalKeySet, Intent>{
+                LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+                LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+              },
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: RawMaterialButton(
+                    splashColor: splashColor,
+                    focusNode: focusNode,
+                    onPressed: () => pressed = true,
+                    child: const Text('BUTTON'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        focusNode.requestFocus();
+        await tester.pump();
+
+        // Web doesn't react to enter, just space.
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump(const Duration(milliseconds: 10));
+
+        if (!kIsWeb) {
+          expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor, alpha: 0));
+
+          await tester.pump(const Duration(milliseconds: 100));
+          expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor));
+        }
+
+        await tester.pumpAndSettle();
+
+        expect(pressed, isTrue);
+
+        pressed = false;
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        expect(pressed, isTrue);
+
+        pressed = false;
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pump(const Duration(milliseconds: 10));
+
+        expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor, alpha: 0));
+
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getMaterialInkController<InkWell>(tester), paintsRipple(color: splashColor));
+
+        await tester.pumpAndSettle();
+
+        expect(pressed, isTrue);
+
+        pressed = false;
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        expect(pressed, isTrue);
+      });
+
+      testWidgets('Ink ripple from center tap originates in correct location', (WidgetTester tester) async {
+        const Color highlightColor = Color(0xAAFF0000);
+        const Color splashColor = Color(0xAA0000FF);
+        const Color fillColor = Color(0xFFEF5350);
+
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkRipple.splashFactory),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: RawMaterialButton(
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  onPressed: () {},
+                  fillColor: fillColor,
+                  highlightColor: highlightColor,
+                  splashColor: splashColor,
+                  child: const SizedBox(),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final Offset center = tester.getCenter(find.byType(InkWell));
+        final TestGesture gesture = await tester.startGesture(center);
+        await tester.pump(); // start gesture
+        await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+
+        // centered in material button.
+        expect(
+          getMaterialInkController<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 18), color: splashColor),
+        );
+        await gesture.up();
+      });
+
+      testWidgets('Ink ripple from tap above material originates in correct location', (WidgetTester tester) async {
+        const Color highlightColor = Color(0xAAFF0000);
+        const Color splashColor = Color(0xAA0000FF);
+        const Color fillColor = Color(0xFFEF5350);
+
+        await tester.pumpWidget(
+          Theme(
+            data: ThemeData(splashFactory: InkRipple.splashFactory),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: RawMaterialButton(
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  onPressed: () {},
+                  fillColor: fillColor,
+                  highlightColor: highlightColor,
+                  splashColor: splashColor,
+                  child: const SizedBox(),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final Offset top = tester.getRect(find.byType(InkWell)).topCenter;
+        final TestGesture gesture = await tester.startGesture(top);
+        await tester.pump(); // start gesture
+        await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+        // paints above above material
+        expect(
+          getMaterialInkController<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 5), color: splashColor),
+        );
+        await gesture.up();
+      });
+    });
   });
 
   testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
@@ -167,69 +426,6 @@ void main() {
     ));
 
     semantics.dispose();
-  });
-
-  testWidgets('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
-    const Color splashColor = Color(0xAA0000FF);
-    const Color fillColor = Color(0xFFEF5350);
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: RawMaterialButton(
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
-            fillColor: fillColor,
-            highlightColor: highlightColor,
-            splashColor: splashColor,
-            child: const SizedBox(),
-          ),
-        ),
-      ),
-    );
-
-    final Offset center = tester.getCenter(find.byType(InkWell));
-    final TestGesture gesture = await tester.startGesture(center);
-    await tester.pump(); // start gesture
-    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
-
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    // centered in material button.
-    expect(box, paints..circle(x: 44.0, y: 18.0, color: splashColor));
-    await gesture.up();
-  });
-
-  testWidgets('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
-    const Color splashColor = Color(0xAA0000FF);
-    const Color fillColor = Color(0xFFEF5350);
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: RawMaterialButton(
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
-            fillColor: fillColor,
-            highlightColor: highlightColor,
-            splashColor: splashColor,
-            child: const SizedBox(),
-          ),
-        ),
-      ),
-    );
-
-    final Offset top = tester.getRect(find.byType(InkWell)).topCenter;
-    final TestGesture gesture = await tester.startGesture(top);
-    await tester.pump(); // start gesture
-    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    // paints above above material
-    expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
-    await gesture.up();
   });
 
   testWidgets('off-center child is hit testable', (WidgetTester tester) async {
@@ -327,13 +523,12 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    expect(box, isNot(paints..rect(color: focusColor)));
+    expect(getMaterialInkController<InkWell>(tester), isNot(paints..rect(color: focusColor)));
 
     focusNode.requestFocus();
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    expect(box, paints..rect(color: focusColor));
+    expect(getMaterialInkController<InkWell>(tester), paints..rect(color: focusColor));
   });
 
   testWidgets('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
@@ -426,16 +621,15 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    expect(box, isNot(paints..rect(color: hoverColor)));
+    expect(getMaterialInkController<InkWell>(tester), isNot(paints..rect(color: hoverColor)));
 
     await gesture.moveTo(tester.getCenter(find.byType(RawMaterialButton)));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    expect(box, paints..rect(color: hoverColor));
+    expect(getMaterialInkController<InkWell>(tester), paints..rect(color: hoverColor));
   });
 
   testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {

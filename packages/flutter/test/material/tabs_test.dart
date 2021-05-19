@@ -12,6 +12,7 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
+import 'ink_paint_test_utils.dart';
 
 Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.ltr }) {
   return Localizations(
@@ -843,7 +844,7 @@ void main() {
       boilerplate(
         child: TabBarView(
           controller: controller,
-          children: const <Widget>[ Text('First'), Text('Second') ],
+          children: const <Widget>[Text('First'), Text('Second')],
         ),
       ),
     );
@@ -2782,14 +2783,15 @@ void main() {
       await tester.pumpWidget(
         boilerplate(
           child: DefaultTabController(
-            length: 1,
-            child: TabBar(
-              tabs: const <Tab>[
-                Tab(text: 'A'),
-              ],
-              overlayColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-                 if (states.contains(MaterialState.hovered))
+              length: 1,
+              child: TabBar(
+                tabs: const <Tab>[
+                  Tab(
+                    text: 'A',
+                  )
+                ],
+                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered))
                     return const Color(0xff00ff00);
                   if (states.contains(MaterialState.pressed))
                     return const Color(0xf00fffff);
@@ -2805,44 +2807,85 @@ void main() {
       addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byType(Tab)));
       await tester.pumpAndSettle();
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-      expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xff00ff00)));
+      expect(
+        getMaterialInkController<TabBar>(tester),
+        paints..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xff00ff00)),
+      );
     });
 
-    testWidgets(
-      'Tab\'s ink response splashColor matches resolved Tab overlayColor for MaterialState.pressed',
-      (WidgetTester tester) async {
-        const Color splashColor = Color(0xf00fffff);
-        await tester.pumpWidget(
-          boilerplate(
+    testWidgets('Tab\'s InkSplash color matches resolved Tab overlayColor for MaterialState.pressed', (WidgetTester tester) async {
+      const Color splashColor = Color(0xf00fffff);
+      await tester.pumpWidget(
+        boilerplate(
+          child: Theme(
+            data: ThemeData(splashFactory: InkSplash.splashFactory),
             child: DefaultTabController(
               length: 1,
               child: TabBar(
-                tabs: const <Tab>[
-                  Tab(text: 'A'),
-                ],
-                overlayColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered))
-                      return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.pressed))
-                      return splashColor;
-                    return const Color(0xffbadbad); // Shouldn't happen.
-                  },
-                ),
+                tabs: const <Tab>[Tab(text: 'A')],
+                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered))
+                    return const Color(0xff00ff00);
+                  if (states.contains(MaterialState.pressed))
+                    return splashColor;
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }),
               ),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
-        final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-        await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-        final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-        expect(inkFeatures, paints..circle(x: 400, y: 24, color: splashColor));
-        await gesture.up();
-      },
-    );
+        ),
+      );
+      await tester.pumpAndSettle();
+      final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+      await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
+
+      expect(
+        getMaterialInkController<TabBar>(tester),
+        paintsRipple(center: const Offset(400, 24), color: splashColor),
+      );
+      await gesture.up();
+    });
+
+    testWidgets('Tab\'s InkRipple color matches resolved Tab overlayColor for MaterialState.pressed', (WidgetTester tester) async {
+      const Color splashColor = Color(0xf00fffff);
+      await tester.pumpWidget(
+        boilerplate(
+          child: Theme(
+            data: ThemeData(splashFactory: InkRipple.splashFactory),
+            child: DefaultTabController(
+              length: 1,
+              child: TabBar(
+                tabs: const <Tab>[Tab(text: 'A')],
+                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered))
+                    return const Color(0xff00ff00);
+                  if (states.contains(MaterialState.pressed))
+                    return splashColor;
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+      await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
+
+      expect(
+        getMaterialInkController<TabBar>(tester),
+        paintsRipple(center: const Offset(400, 24), color: splashColor, alpha: 0),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(
+        getMaterialInkController<TabBar>(tester),
+        paintsRipple(center: const Offset(400, 24), color: splashColor),
+      );
+      await gesture.up();
+    });
   });
+
   testWidgets('Skipping tabs with global key does not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/24660
     final List<String> tabs = <String>[
