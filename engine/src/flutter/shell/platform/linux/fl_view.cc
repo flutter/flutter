@@ -51,6 +51,9 @@ struct _FlView {
 
   GList* children_list;
   GList* pending_children_list;
+
+  // Tracks whether mouse pointer is inside the view.
+  gboolean pointer_inside;
 };
 
 typedef struct _FlViewChild {
@@ -173,6 +176,14 @@ static gboolean event_box_motion_notify_event(GtkWidget* widget,
                                               GdkEventMotion* event,
                                               FlView* view);
 
+static gboolean event_box_enter_notify_event(GtkWidget* widget,
+                                             GdkEventCrossing* event,
+                                             FlView* view);
+
+static gboolean event_box_leave_notify_event(GtkWidget* widget,
+                                             GdkEventCrossing* event,
+                                             FlView* view);
+
 static void fl_view_constructed(GObject* object) {
   FlView* self = FL_VIEW(object);
 
@@ -206,6 +217,10 @@ static void fl_view_constructed(GObject* object) {
                    G_CALLBACK(event_box_scroll_event), self);
   g_signal_connect(self->event_box, "motion-notify-event",
                    G_CALLBACK(event_box_motion_notify_event), self);
+  g_signal_connect(self->event_box, "enter-notify-event",
+                   G_CALLBACK(event_box_enter_notify_event), self);
+  g_signal_connect(self->event_box, "leave-notify-event",
+                   G_CALLBACK(event_box_leave_notify_event), self);
 }
 
 static void fl_view_set_property(GObject* object,
@@ -484,6 +499,22 @@ static gboolean event_box_scroll_event(GtkWidget* widget,
   return TRUE;
 }
 
+static void check_pointer_inside(FlView* view, GdkEvent* event) {
+  if (!view->pointer_inside) {
+    view->pointer_inside = TRUE;
+
+    gdouble x, y;
+    if (gdk_event_get_coords(event, &x, &y)) {
+      gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+
+      fl_engine_send_mouse_pointer_event(
+          view->engine, kAdd,
+          gdk_event_get_time(event) * kMicrosecondsPerMillisecond,
+          x * scale_factor, y * scale_factor, 0, 0, view->button_state);
+    }
+  }
+}
+
 static gboolean event_box_motion_notify_event(GtkWidget* widget,
                                               GdkEventMotion* event,
                                               FlView* view) {
@@ -491,11 +522,47 @@ static gboolean event_box_motion_notify_event(GtkWidget* widget,
     return FALSE;
   }
 
+  check_pointer_inside(view, reinterpret_cast<GdkEvent*>(event));
+
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
   fl_engine_send_mouse_pointer_event(
       view->engine, view->button_state != 0 ? kMove : kHover,
       event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
       event->y * scale_factor, 0, 0, view->button_state);
+
+  return TRUE;
+}
+
+static gboolean event_box_enter_notify_event(GtkWidget* widget,
+                                             GdkEventCrossing* event,
+                                             FlView* view) {
+  if (view->engine == nullptr) {
+    return FALSE;
+  }
+
+  check_pointer_inside(view, reinterpret_cast<GdkEvent*>(event));
+
+  return TRUE;
+}
+
+static gboolean event_box_leave_notify_event(GtkWidget* widget,
+                                             GdkEventCrossing* event,
+                                             FlView* view) {
+  if (view->engine == nullptr) {
+    return FALSE;
+  }
+
+  // Don't remove pointer while button is down; In case of dragging outside of
+  // window with mouse grab active Gtk will send another leave notify on
+  // release.
+  if (view->pointer_inside && view->button_state == 0) {
+    gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+    fl_engine_send_mouse_pointer_event(
+        view->engine, kRemove, event->time * kMicrosecondsPerMillisecond,
+        event->x * scale_factor, event->y * scale_factor, 0, 0,
+        view->button_state);
+    view->pointer_inside = FALSE;
+  }
 
   return TRUE;
 }
