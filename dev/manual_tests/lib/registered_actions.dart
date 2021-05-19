@@ -65,7 +65,7 @@ Model model = Model();
 void main() {
   model.items.addAll(
     List<Item>.generate(100, (int index) {
-      return Item('Item $index');
+      return Item('Item ${index + 1}');
     }),
   );
   runApp(const MyApp());
@@ -102,11 +102,11 @@ class _MyAppState extends State<MyApp> {
             SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllIntent(),
             SingleActivator(LogicalKeyboardKey.keyS, control: true): SelectNoneIntent(),
             SingleActivator(LogicalKeyboardKey.keyD, control: true): ToggleIndividualSelectIntent(),
-            SingleActivator(LogicalKeyboardKey.digit0): ToggleSelectIntent(0),
-            SingleActivator(LogicalKeyboardKey.digit1): ToggleSelectIntent(1),
-            SingleActivator(LogicalKeyboardKey.digit2): ToggleSelectIntent(2),
-            SingleActivator(LogicalKeyboardKey.digit3): ToggleSelectIntent(3),
-            SingleActivator(LogicalKeyboardKey.digit4): ToggleSelectIntent(4),
+            SingleActivator(LogicalKeyboardKey.digit1): ToggleSelectIntent(0),
+            SingleActivator(LogicalKeyboardKey.digit2): ToggleSelectIntent(1),
+            SingleActivator(LogicalKeyboardKey.digit3): ToggleSelectIntent(2),
+            SingleActivator(LogicalKeyboardKey.digit4): ToggleSelectIntent(3),
+            SingleActivator(LogicalKeyboardKey.digit5): ToggleSelectIntent(4),
           },
           child: Actions(
             actions: const <Type, Action<Intent>>{},
@@ -130,9 +130,10 @@ class MyGrid extends StatelessWidget {
   const MyGrid({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+Widget build(BuildContext context) {
     return FocusTraversalGroup(
-      child: RegisteredActions(
+      child: Actions(
+        registerActions: true,
         dispatcher: LoggingActionDispatcher(),
         actions: <Type, Action<Intent>>{
           SelectAllIntent: SelectAllAction(model),
@@ -147,7 +148,7 @@ class MyGrid extends StatelessWidget {
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 200,
             ),
-            itemCount: 300,
+            itemCount: model.items.length,
             itemBuilder: (BuildContext context, int index) {
               return ItemBox(
                 item: model.items[index],
@@ -178,33 +179,31 @@ class _MyMenuState extends State<MyMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return FocusTraversalGroup(
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Tooltip(
-              message: 'Control-A',
-              child: TextButton(
-                focusNode: focusNode,
-                child: const Text('SELECT ALL'),
-                onPressed: () {
-                  Actions.invoke<SelectAllIntent>(context, const SelectAllIntent());
-                },
-              ),
+    return Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Tooltip(
+            message: 'Control-A',
+            child: TextButton(
+              focusNode: focusNode,
+              child: const Text('SELECT ALL'),
+              onPressed: () {
+                Actions.invoke<SelectAllIntent>(context, const SelectAllIntent());
+              },
             ),
-            Tooltip(
-              message: 'Control-S',
-              child: TextButton(
-                child: const Text('SELECT NONE'),
-                onPressed: () {
-                  Actions.invoke<SelectNoneIntent>(context, const SelectNoneIntent());
-                },
-              ),
+          ),
+          Tooltip(
+            message: 'Control-S',
+            child: TextButton(
+              child: const Text('SELECT NONE'),
+              onPressed: () {
+                Actions.invoke<SelectNoneIntent>(context, const SelectNoneIntent());
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -217,7 +216,8 @@ class ItemBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RegisteredActions(
+    return Actions(
+      registerActions: true,
       actions: <Type, Action<Intent>>{
         ToggleIndividualSelectIntent: ToggleIndividualSelectAction(model, item),
       },
@@ -233,6 +233,7 @@ class ItemBox extends StatelessWidget {
                   : const Color(0x80ffffff),
             ),
             child: InkWell(
+              autofocus: false,
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               highlightColor: Colors.indigo.shade100,
               focusColor: Colors.indigo.shade400,

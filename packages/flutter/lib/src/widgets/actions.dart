@@ -501,14 +501,13 @@ class ActionRegistry with Diagnosticable {
   /// If an action is already registered for the given `type`, this method
   /// asserts.
   void registerActions(GlobalKey key) {
-    print('Registered action $key');
     _registeredActions.add(key);
   }
 
   /// Unregisters an action registered in [registerAction].
   ///
   /// If the action wasn't registered before, then this method asserts.
-  void unRegisterActions(GlobalKey key) {
+  void unregisterActions(GlobalKey key) {
     _registeredActions.remove(key);
   }
 }
@@ -738,6 +737,7 @@ class Actions extends StatefulWidget {
     Key? key,
     this.dispatcher,
     this.registry,
+    this.registerActions = false,
     required this.actions,
     required this.child,
   })  : assert(actions != null),
@@ -774,6 +774,23 @@ class Actions extends StatefulWidget {
   /// [RegisteredActions] widget as a descendant of this [Actions] widget.
   /// {@endtemplate}
   final ActionRegistry? registry;
+
+  /// Register the actions here with the nearest ancestor with a [registry] set.
+  ///
+  /// Actions defined in this widget will not be registered with this widget's
+  /// [registry], only with the nearest ancestor [registry].
+  ///
+  /// These registered actions will be searched when invoking an intent in any
+  /// context below the [Actions] widget that defines the registry. So, if the
+  /// registry is defined at the root of the widget hierarchy, then these actions
+  /// are defined globally, and invoking them with their registered intents will
+  /// invoke them. The [WidgetsApp] (from which [MaterialApp] and [CupertinoApp]
+  /// are derived) defines a registry, so if you use one of these, a registry will
+  /// already be defined at the top level.
+  ///
+  /// If more than one action is registered as responding to the same [Intent]
+  /// type, all of the actions will be invoked.
+  final bool registerActions;
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
@@ -1178,6 +1195,8 @@ class _ActionsState extends State<Actions> {
   // Used to tell the marker to rebuild its dependencies when the state of an
   // action in the map changes.
   Object rebuildKey = Object();
+  GlobalKey registeredActionSubtreeKey = GlobalKey(debugLabel: 'Registered Actions');
+  ActionRegistry? registry;
 
   @override
   void initState() {
@@ -1205,20 +1224,43 @@ class _ActionsState extends State<Actions> {
     }
     listenedActions = widgetActions;
   }
+  
+  void _registerActions() => registry?.registerActions(registeredActionSubtreeKey);
+
+  void _unregisterActions() => registry?.unregisterActions(registeredActionSubtreeKey);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    registry = Actions.maybeRegistryOf(context);
+    if (widget.registerActions) {
+  _registerActions();
+    }
+  }
 
   @override
   void didUpdateWidget(Actions oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateActionListeners();
+    if (widget.registerActions != oldWidget.registerActions) {
+      if (widget.registerActions) {
+        _registerActions();
+      } else {
+        _unregisterActions();
+      }
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
     for (final Action<Intent> action in listenedActions!) {
       action.removeActionListener(_handleActionChanged);
     }
+    if (widget.registerActions) {
+      _unregisterActions();
+    }
     listenedActions = null;
+    super.dispose();
   }
 
   @override
@@ -1228,7 +1270,12 @@ class _ActionsState extends State<Actions> {
       dispatcher: widget.dispatcher,
       registry: widget.registry,
       rebuildKey: rebuildKey,
-      child: widget.child,
+      child: widget.registerActions
+          ? KeyedSubtree(
+            key: registeredActionSubtreeKey,
+            child: widget.child,
+          )
+          : widget.child,
     );
   }
 }
@@ -1650,88 +1697,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child = Shortcuts(shortcuts: widget.shortcuts!, child: child);
     }
     return child;
-  }
-}
-
-/// Defines the actions to be registered at the nearest ancestor [Actions]
-/// widget that defines an [ActionRegistry].
-///
-/// These registered actions will be searched when invoking an intent in any
-/// context below the [Actions] widget that defines the registry. So, if the
-/// registry is defined at the root of the widget hierarchy, then these actions
-/// are defined globally, and invoking them with their registered intents will
-/// invoke them. The [WidgetsApp] (from which [MaterialApp] and [CupertinoApp]
-/// are derived) defines a registry, so if you use one of these, a registry will
-/// already be defined at the top level.
-///
-/// If more than one action is registered as responding to the same [Intent]
-/// type in the same registry, then the [ActionRegistry] will assert.
-class RegisteredActions extends StatefulWidget {
-  /// Creates a const [RegisteredActions].
-  ///
-  /// The [child] and [actions] attributes are required.
-  const RegisteredActions({
-    Key? key,
-    required this.child,
-    required this.actions,
-    this.dispatcher,
-    this.registry,
-  }) : super(key: key);
-
-  /// {@macro flutter.widgets.actions.dispatcher}
-  final ActionDispatcher? dispatcher;
-
-  /// {@macro flutter.widgets.actions.registry}
-  ///
-  /// Actions defined in this widget will not be registered with this registry:
-  /// only descendant [RegisteredActions] widgets will register with this
-  /// registry if defined.
-  final ActionRegistry? registry;
-
-  /// {@macro flutter.widgets.actions.actions}
-  final Map<Type, Action<Intent>> actions;
-
-  /// The child widget for this [TargetedShortcuts] widget.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  @override
-  State<RegisteredActions> createState() => _RegisteredActionsState();
-}
-
-class _RegisteredActionsState extends State<RegisteredActions> {
-  GlobalKey subtreeKey = GlobalKey(debugLabel: 'Registered Action');
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final ActionRegistry? registry = Actions.maybeRegistryOf(context);
-    if (registry != null) {
-      registry.registerActions(subtreeKey);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Actions(
-      actions: widget.actions,
-      registry: widget.registry,
-      dispatcher: widget.dispatcher,
-      child: KeyedSubtree(
-        key: subtreeKey,
-        child: widget.child,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    final ActionRegistry? registry = Actions.maybeRegistryOf(context);
-    if (registry != null) {
-      registry.unRegisterActions(subtreeKey);
-    }
-    super.dispose();
   }
 }
 
