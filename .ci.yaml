@@ -9,6 +9,10 @@ enabled_branches:
   - master
 
 targets:
+  - name: linux_analyze
+    builder: Linux analyze
+    scheduler: luci
+
   - name: linux_build_aar_module_test
     builder: Linux build_aar_module_test
     scheduler: luci
