@@ -15,7 +15,12 @@ namespace compiler {
 
 class Reflector {
  public:
-  Reflector(const spirv_cross::CompilerMSL& compiler);
+  struct Options {
+    std::string shader_name;
+    std::string header_file_name;
+  };
+
+  Reflector(Options options, const spirv_cross::CompilerMSL& compiler);
 
   ~Reflector();
 
@@ -28,6 +33,7 @@ class Reflector {
   std::shared_ptr<fml::Mapping> GetReflectionCC() const;
 
  private:
+  const Options options_;
   std::shared_ptr<fml::Mapping> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;
   std::shared_ptr<fml::Mapping> reflection_cc_;

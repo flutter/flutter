@@ -44,7 +44,9 @@ class Compiler {
         : type(SourceTypeFromFileName(file_name)), file_name(file_name) {}
   };
 
-  Compiler(const fml::Mapping& source_mapping, SourceOptions options);
+  Compiler(const fml::Mapping& source_mapping,
+           SourceOptions options,
+           Reflector::Options reflector_options);
 
   ~Compiler();
 

@@ -9,8 +9,8 @@ template("impeller_shaders") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.name), "Name of the shader library must be specified.")
 
-  metal_sources_target_name = "metal_sources_$target_name"
-  compiled_action_foreach(metal_sources_target_name) {
+  impellerc_target_name = "impellerc_$target_name"
+  compiled_action_foreach(impellerc_target_name) {
     tool = "//flutter/impeller/compiler:impellerc"
 
     sources = invoker.shaders
@@ -21,7 +21,11 @@ template("impeller_shaders") {
     reflection_header_intermediate = "$target_gen_dir/{{source_file_part}}.h"
     reflection_cc_intermediate = "$target_gen_dir/{{source_file_part}}.cc"
 
-    outputs = [ metal_intermediate ]
+    outputs = [
+      metal_intermediate,
+      reflection_header_intermediate,
+      reflection_cc_intermediate,
+    ]
 
     depfile_path = "$target_gen_dir/{{source_file_part}}.d"
     source_path = "{{source}}"
@@ -49,9 +53,31 @@ template("impeller_shaders") {
     ]
   }
 
-  metal_library(target_name) {
+  metal_library_target_name = "metal_library_$target_name"
+  metal_library(metal_library_target_name) {
     name = invoker.name
-    sources = get_target_outputs(":$metal_sources_target_name")
-    deps = [ ":$metal_sources_target_name" ]
+    sources = filter_include(get_target_outputs(":$impellerc_target_name"),
+                             [ "*.metal" ])
+    deps = [ ":$impellerc_target_name" ]
+  }
+
+  shader_glue_target_name = "glue_$target_name"
+  source_set(shader_glue_target_name) {
+    sources = filter_include(get_target_outputs(":$impellerc_target_name"),
+                             [
+                               "*.h",
+                               "*.cc",
+                             ])
+    deps = [
+      ":$impellerc_target_name",
+      "//flutter/impeller/impeller:impeller_shader_glue_lib",
+    ]
+  }
+
+  group(target_name) {
+    deps = [
+      ":$metal_library_target_name",
+      ":$shader_glue_target_name",
+    ]
   }
 }

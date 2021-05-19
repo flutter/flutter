@@ -10,15 +10,11 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
+#include "flutter/impeller/impeller/compositor/shader_types.h"
 
 namespace impeller {
 
 class Context;
-
-enum class ShaderStage {
-  kVertex,
-  kFragment,
-};
 
 class ShaderFunction {
  public:

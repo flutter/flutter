@@ -9,6 +9,8 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
+#include "flutter/impeller/compiler/code_gen_template.h"
+#include "flutter/impeller/compiler/utilities.h"
 #include "inja/inja.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
@@ -148,15 +150,16 @@ static bool ReflectUniformBuffer(Writer& writer,
 static std::string ExecutionModelToString(spv::ExecutionModel model) {
   switch (model) {
     case spv::ExecutionModel::ExecutionModelVertex:
-      return "vertex";
+      return "ShaderStage::kVertex";
     case spv::ExecutionModel::ExecutionModelFragment:
-      return "fragment";
+      return "ShaderStage::kFragment";
     default:
-      return "unsupported";
+      return "ShaderStage::kUnsupported";
   }
 }
 
 static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
+    const Reflector::Options& options,
     const spirv_cross::CompilerMSL& compiler) {
   auto buffer = std::make_shared<rapidjson::StringBuffer>();
   Writer writer(*buffer);
@@ -174,8 +177,14 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
     writer.Key("entrypoint");
     writer.String(entrypoints.front().name);
 
+    writer.Key("shader_name");
+    writer.String(options.shader_name);
+
     writer.Key("shader_stage");
     writer.String(ExecutionModelToString(entrypoints.front().execution_model));
+
+    writer.Key("header_file_name");
+    writer.String(options.header_file_name);
   }
 
   {
@@ -206,27 +215,46 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
   writer.EndObject();  // root
 
   return std::make_shared<fml::NonOwnedMapping>(
-      buffer->GetString(), buffer->GetSize(), [buffer]() {});
+      reinterpret_cast<const uint8_t*>(buffer->GetString()), buffer->GetSize(),
+      [buffer](auto, auto) {});
 }
 
-static std::shared_ptr<fml::Mapping> ConstructReflectionHeader(
+static std::shared_ptr<fml::Mapping> InflateTemplate(
     const spirv_cross::CompilerMSL& compiler,
+    const std::string_view& tmpl,
     const fml::Mapping* reflection_args) {
-  return nullptr;
+  if (!reflection_args) {
+    return nullptr;
+  }
+
+  inja::Environment env;
+  env.set_trim_blocks(true);
+  env.set_lstrip_blocks(true);
+
+  env.add_callback("camel_case", 1u, [](inja::Arguments& args) {
+    return ConvertToCamelCase(args.at(0u)->get<std::string>());
+  });
+
+  auto template_data = inja::json::parse(
+      reinterpret_cast<const char*>(reflection_args->GetMapping()));
+
+  auto inflated_template =
+      std::make_shared<std::string>(env.render(tmpl, template_data));
+
+  return std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(inflated_template->data()),
+      inflated_template->size(), [inflated_template](auto, auto) {});
 }
 
-static std::shared_ptr<fml::Mapping> ConstructReflectionCC(
-    const spirv_cross::CompilerMSL& compiler,
-    const fml::Mapping* reflection_args) {
-  return nullptr;
-}
-
-Reflector::Reflector(const spirv_cross::CompilerMSL& compiler)
-    : template_arguments_(ReflectTemplateArguments(compiler)),
-      reflection_header_(
-          ConstructReflectionHeader(compiler, template_arguments_.get())),
-      reflection_cc_(
-          ConstructReflectionCC(compiler, template_arguments_.get())) {
+Reflector::Reflector(Options options, const spirv_cross::CompilerMSL& compiler)
+    : options_(std::move(options)),
+      template_arguments_(ReflectTemplateArguments(options_, compiler)),
+      reflection_header_(InflateTemplate(compiler,
+                                         kReflectionHeaderTemplate,
+                                         template_arguments_.get())),
+      reflection_cc_(InflateTemplate(compiler,
+                                     kReflectionCCTemplate,
+                                     template_arguments_.get())) {
   if (!template_arguments_) {
     return;
   }
@@ -253,11 +281,11 @@ std::shared_ptr<fml::Mapping> Reflector::GetReflectionJSON() const {
 }
 
 std::shared_ptr<fml::Mapping> Reflector::GetReflectionHeader() const {
-  return nullptr;
+  return reflection_header_;
 }
 
 std::shared_ptr<fml::Mapping> Reflector::GetReflectionCC() const {
-  return nullptr;
+  return reflection_cc_;
 }
 
 }  // namespace compiler

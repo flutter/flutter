@@ -6,6 +6,7 @@ import("//flutter/testing/testing.gni")
 
 source_set("compiler_lib") {
   sources = [
+    "code_gen_template.h",
     "compiler.cc",
     "compiler.h",
     "include_dir.h",
@@ -14,6 +15,8 @@ source_set("compiler_lib") {
     "reflector.h",
     "switches.cc",
     "switches.h",
+    "utilities.cc",
+    "utilities.h",
   ]
 
   public_deps = [
