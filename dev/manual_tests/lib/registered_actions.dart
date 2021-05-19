@@ -110,11 +110,13 @@ class _MyAppState extends State<MyApp> {
           child: Actions(
             actions: const <Type, Action<Intent>>{},
             registry: registry,
-            child: Row(
-              children: const <Widget>[
-                Expanded(flex: 1, child: MyMenu()),
-                Expanded(flex: 5, child: MyGrid()),
-              ],
+            child: FocusScope(
+              child: Row(
+                children: const <Widget>[
+                  Expanded(flex: 1, child: MyMenu()),
+                  Expanded(flex: 5, child: MyGrid()),
+                ],
+              ),
             ),
           ),
         ),
@@ -157,8 +159,21 @@ class MyGrid extends StatelessWidget {
   }
 }
 
-class MyMenu extends StatelessWidget {
+class MyMenu extends StatefulWidget {
   const MyMenu({Key? key}) : super(key: key);
+
+  @override
+  State<MyMenu> createState() => _MyMenuState();
+}
+
+class _MyMenuState extends State<MyMenu> {
+  final FocusNode focusNode = FocusNode(debugLabel: 'Menu Focus');
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,16 +186,20 @@ class MyMenu extends StatelessWidget {
             Tooltip(
               message: 'Control-A',
               child: TextButton(
-                autofocus: true,
+                focusNode: focusNode,
                 child: const Text('SELECT ALL'),
-                onPressed: model.selectAll,
+                onPressed: () {
+                  Actions.invoke<SelectAllIntent>(context, const SelectAllIntent());
+                },
               ),
             ),
             Tooltip(
               message: 'Control-S',
               child: TextButton(
                 child: const Text('SELECT NONE'),
-                onPressed: model.selectNone,
+                onPressed: () {
+                  Actions.invoke<SelectNoneIntent>(context, const SelectNoneIntent());
+                },
               ),
             ),
           ],
@@ -210,7 +229,6 @@ class ItemBox extends StatelessWidget {
           ),
           child: InkWell(
             borderRadius: const BorderRadius.all(Radius.circular(10)),
-            canRequestFocus: true,
             highlightColor: Colors.indigo.shade100,
             focusColor: Colors.indigo.shade400,
             hoverColor: Colors.indigo.shade200,

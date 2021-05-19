@@ -493,40 +493,23 @@ class CallbackAction<T extends Intent> extends Action<T> {
 /// although you can also do it manually by looking up the registry for a
 /// context with [Actions.maybeRegistryOf].
 class ActionRegistry with Diagnosticable {
-  final Map<Type, Action<Intent>> _registeredActions = <Type, Action<Intent>>{};
-
-  /// Returns the action registered to the type of the intent (if given), or the
-  /// generic type `T` if `intent` is not given.
-  ///
-  /// Returns null if no such intent is registered.
-  Action<T>? findRegisteredAction<T extends Intent>({Type? type}) {
-    final Type finalType = type ?? T;
-    print('Looking for action for $finalType');
-    return _registeredActions[finalType] as Action<T>?;
-  }
+  final Set<GlobalKey> _registeredActions = <GlobalKey>{};
 
   /// Allows registering an action that don't need to be in the current
   /// BuildContext in order to be found.
   ///
   /// If an action is already registered for the given `type`, this method
   /// asserts.
-  void registerAction<T extends Intent>(Action<T> action, {Type? type}) {
-    final Type finalType = type ?? T;
-    print('Registered action for type $finalType: $action');
-    assert(!_registeredActions.containsKey(finalType),
-      'Tried to register an action for type $finalType when it already exists.');
-    _registeredActions[finalType] = action;
+  void registerActions(GlobalKey key) {
+    print('Registered action $key');
+    _registeredActions.add(key);
   }
 
   /// Unregisters an action registered in [registerAction].
   ///
   /// If the action wasn't registered before, then this method asserts.
-  void unRegisterAction<T extends Intent>({Type? type}) {
-    final Type finalType = type ?? T;
-    print('Unregistered action for type $finalType: ${_registeredActions[finalType]}');
-    assert(_registeredActions.containsKey(type),
-    "Tried to remove an action associated with type $finalType that wasn't registered.");
-    _registeredActions.remove(finalType);
+  void unRegisterActions(GlobalKey key) {
+    _registeredActions.remove(key);
   }
 }
 
@@ -937,8 +920,9 @@ class Actions extends StatefulWidget {
       'specified. Intent may be used as the generic type as long as the optional '
       '"intent" argument is passed.',
     );
+    final List<GlobalKey> registeredKeys = <GlobalKey>[];
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    bool searchActions(InheritedElement element, bool collect) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = actions.actions[type] as Action<T>?;
       if (result != null) {
@@ -946,11 +930,23 @@ class Actions extends StatefulWidget {
         action = result;
         return true;
       }
+      if (collect && actions.registry != null) {
+        registeredKeys.addAll(actions.registry!._registeredActions);
+      }
       return false;
-    });
+    }
+
+    _visitActionsAncestors(context, (InheritedElement element) => searchActions(element, true));
+
     if (action == null) {
-      final ActionRegistry? registry = _findRegistry(context);
-      action = registry?.findRegisteredAction<T>(type: intent.runtimeType);
+      for (final GlobalKey key in registeredKeys) {
+        if (key.currentContext != null) {
+          _visitActionsAncestors(key.currentContext!, (InheritedElement element) => searchActions(element, false));
+          if (action != null) {
+            break;
+          }
+        }
+      }
     }
 
     return action;
@@ -1002,8 +998,9 @@ class Actions extends StatefulWidget {
     assert(context != null);
     Action<T>? action;
     InheritedElement? actionElement;
+    final List<GlobalKey> registeredKeys = <GlobalKey>[];
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    bool searchActions(InheritedElement element, bool collect) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
       if (result != null) {
@@ -1013,8 +1010,24 @@ class Actions extends StatefulWidget {
           return true;
         }
       }
+      if (collect && actions.registry != null) {
+        registeredKeys.addAll(actions.registry!._registeredActions);
+      }
       return false;
-    });
+    }
+
+    _visitActionsAncestors(context, (InheritedElement element) => searchActions(element, true));
+
+    if (action == null) {
+      for (final GlobalKey key in registeredKeys) {
+        if (key.currentContext != null) {
+          _visitActionsAncestors(key.currentContext!, (InheritedElement element) => searchActions(element, false));
+          if (action != null) {
+            break;
+          }
+        }
+      }
+    }
 
     assert(() {
       if (actionElement == null) {
@@ -1625,30 +1638,14 @@ class RegisteredActions extends StatefulWidget {
 }
 
 class _RegisteredActionsState extends State<RegisteredActions> {
+  GlobalKey subtreeKey = GlobalKey(debugLabel: 'Registered Action');
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ActionRegistry? registry = Actions.maybeRegistryOf(context);
     if (registry != null) {
-      for (final Type type in widget.actions.keys) {
-        registry.registerAction<Intent>(widget.actions[type]!, type: type);
-      }
-    }
-  }
-
-  @override
-  void didUpdateWidget(RegisteredActions oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final ActionRegistry? registry = Actions.maybeRegistryOf(context);
-    if (registry != null) {
-      for (final Type type in oldWidget.actions.keys) {
-        if (registry.findRegisteredAction(type: type) != null) {
-          registry.unRegisterAction<Intent>(type: type);
-        }
-      }
-      for (final Type type in widget.actions.keys) {
-        registry.registerAction<Intent>(widget.actions[type]!, type: type);
-      }
+      registry.registerActions(subtreeKey);
     }
   }
 
@@ -1658,7 +1655,10 @@ class _RegisteredActionsState extends State<RegisteredActions> {
       actions: widget.actions,
       registry: widget.registry,
       dispatcher: widget.dispatcher,
-      child: widget.child,
+      child: KeyedSubtree(
+        key: subtreeKey,
+        child: widget.child,
+      ),
     );
   }
 
@@ -1666,9 +1666,7 @@ class _RegisteredActionsState extends State<RegisteredActions> {
   void dispose() {
     final ActionRegistry? registry = Actions.maybeRegistryOf(context);
     if (registry != null) {
-      for (final Type type in widget.actions.keys) {
-        registry.unRegisterAction<Intent>(type: type);
-      }
+      registry.unRegisterActions(subtreeKey);
     }
     super.dispose();
   }
