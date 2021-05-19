@@ -161,7 +161,7 @@ void main() {
     expect(
       () {
         Router<RouteInformation>(
-          restorationId: 'foo',
+          restorationScopeId: 'foo',
           routerDelegate: SimpleRouterDelegate(
             builder: (BuildContext context, RouteInformation? information) {
               return Text(information!.location!);

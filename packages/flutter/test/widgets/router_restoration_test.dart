@@ -157,7 +157,7 @@ class _TestWidgetState extends State<_TestWidget> {
       restorationId: 'root',
       child: Router<String>(
         key: widget.routerKey,
-        restorationId: 'router',
+        restorationScopeId: 'router',
         routerDelegate: _TestRouterDelegate(),
         routeInformationParser: _TestRouteInformationParser(),
         routeInformationProvider: widget.withInformationProvider ? _TestRouteInformationProvider() : null,
