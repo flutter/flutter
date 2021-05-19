@@ -101,6 +101,7 @@ class _MyAppState extends State<MyApp> {
           shortcuts: const <ShortcutActivator, Intent>{
             SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllIntent(),
             SingleActivator(LogicalKeyboardKey.keyS, control: true): SelectNoneIntent(),
+            SingleActivator(LogicalKeyboardKey.keyD, control: true): ToggleIndividualSelectIntent(),
             SingleActivator(LogicalKeyboardKey.digit0): ToggleSelectIntent(0),
             SingleActivator(LogicalKeyboardKey.digit1): ToggleSelectIntent(1),
             SingleActivator(LogicalKeyboardKey.digit2): ToggleSelectIntent(2),
@@ -216,31 +217,36 @@ class ItemBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: model,
-      builder: (BuildContext context, Widget? child) {
-        return Container(
-          margin: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            color: model.selectedItems.contains(item)
-                ? const Color(0x80ff8080)
-                : const Color(0x80ffffff),
-          ),
-          child: InkWell(
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            highlightColor: Colors.indigo.shade100,
-            focusColor: Colors.indigo.shade400,
-            hoverColor: Colors.indigo.shade200,
-            onTap: () {
-              Actions.maybeInvoke(context, ToggleSelectItemIntent(item));
-            },
-            child: Center(
-              child: Text(item.name),
-            ),
-          ),
-        );
+    return RegisteredActions(
+      actions: <Type, Action<Intent>>{
+        ToggleIndividualSelectIntent: ToggleIndividualSelectAction(model, item),
       },
+      child: AnimatedBuilder(
+        animation: model,
+        builder: (BuildContext context, Widget? child) {
+          return Container(
+            margin: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              color: model.selectedItems.contains(item)
+                  ? const Color(0x80ff8080)
+                  : const Color(0x80ffffff),
+            ),
+            child: InkWell(
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              highlightColor: Colors.indigo.shade100,
+              focusColor: Colors.indigo.shade400,
+              hoverColor: Colors.indigo.shade200,
+              onTap: () {
+                Actions.maybeInvoke(context, ToggleSelectItemIntent(item));
+              },
+              child: Center(
+                child: Text(item.name),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -289,6 +295,22 @@ class SelectIndexAction extends Action<SelectIndexIntent> {
   @override
   Object? invoke(covariant SelectIndexIntent intent) {
     model.select(model.items[intent.index]);
+  }
+}
+
+class ToggleIndividualSelectIntent extends Intent {
+  const ToggleIndividualSelectIntent();
+}
+
+class ToggleIndividualSelectAction extends Action<ToggleIndividualSelectIntent> {
+  ToggleIndividualSelectAction(this.model, this.item);
+
+  final Model model;
+  final Item item;
+
+  @override
+  Object? invoke(covariant ToggleIndividualSelectIntent intent) {
+    model.toggleSelect(item);
   }
 }
 

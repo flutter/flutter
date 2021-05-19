@@ -928,7 +928,10 @@ class Actions extends StatefulWidget {
       if (result != null) {
         context.dependOnInheritedElement(element);
         action = result;
-        return true;
+        if (collect) {
+          // If we're collecting, and we find an action, we can stop looking.
+          return true;
+        }
       }
       if (collect && actions.registry != null) {
         registeredKeys.addAll(actions.registry!._registeredActions);
@@ -950,6 +953,56 @@ class Actions extends StatefulWidget {
     }
 
     return action;
+  }
+
+  /// Finds all actions associated with an intent in the current context.
+  static List<Action<T>> findAll<T extends Intent>(BuildContext context, { T? intent }) {
+    final List<Action<T>> actions = <Action<T>>[];
+
+    // Specialize the type if a runtime example instance of the intent is given.
+    // This allows this function to be called by code that doesn't know the
+    // concrete type of the intent at compile time.
+    final Type type = intent?.runtimeType ?? T;
+    assert(
+    type != Intent,
+    'The type passed to "find" resolved to "Intent": either a non-Intent '
+        'generic type argument or an example intent derived from Intent must be '
+        'specified. Intent may be used as the generic type as long as the optional '
+        '"intent" argument is passed.',
+    );
+    final List<GlobalKey> registeredKeys = <GlobalKey>[];
+
+    bool searchActions(InheritedElement element, bool collect) {
+      final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
+      final Action<T>? result = actionsMarker.actions[type] as Action<T>?;
+      if (result != null) {
+        context.dependOnInheritedElement(element);
+        actions.add(result);
+        if (collect) {
+          // If we're collecting, and we find an action, we can stop looking.
+          return true;
+        }
+      }
+      if (collect && actionsMarker.registry != null) {
+        registeredKeys.addAll(actionsMarker.registry!._registeredActions);
+      }
+      return false;
+    }
+
+    // First search for non-registered actions, and collect the registered actions.
+    _visitActionsAncestors(context, (InheritedElement element) => searchActions(element, true));
+
+    // If a non-registered action is found, then use that, otherwise collect any
+    // registered actions as well.
+    if (actions.isEmpty) {
+      for (final GlobalKey key in registeredKeys) {
+        if (key.currentContext != null) {
+          _visitActionsAncestors(key.currentContext!, (InheritedElement element) => searchActions(element, false));
+        }
+      }
+    }
+
+    return actions;
   }
 
   /// Returns the [ActionDispatcher] associated with the [Actions] widget that
@@ -996,35 +1049,35 @@ class Actions extends StatefulWidget {
   ) {
     assert(intent != null);
     assert(context != null);
-    Action<T>? action;
+    final Map<Action<T>, InheritedElement> actions = <Action<T>, InheritedElement>{};
     InheritedElement? actionElement;
     final List<GlobalKey> registeredKeys = <GlobalKey>[];
 
     bool searchActions(InheritedElement element, bool collect) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
+      final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
+      final Action<T>? result = actionsMarker.actions[intent.runtimeType] as Action<T>?;
       if (result != null) {
         actionElement = element;
         if (result.isEnabled(intent)) {
-          action = result;
-          return true;
+          actions[result] = element;
+          if (collect) {
+            // If we're collecting, and we find an action, we can stop looking.
+            return true;
+          }
         }
       }
-      if (collect && actions.registry != null) {
-        registeredKeys.addAll(actions.registry!._registeredActions);
+      if (collect && actionsMarker.registry != null) {
+        registeredKeys.addAll(actionsMarker.registry!._registeredActions);
       }
       return false;
     }
 
     _visitActionsAncestors(context, (InheritedElement element) => searchActions(element, true));
 
-    if (action == null) {
+    if (actions.isEmpty) {
       for (final GlobalKey key in registeredKeys) {
         if (key.currentContext != null) {
           _visitActionsAncestors(key.currentContext!, (InheritedElement element) => searchActions(element, false));
-          if (action != null) {
-            break;
-          }
         }
       }
     }
@@ -1046,12 +1099,22 @@ class Actions extends StatefulWidget {
       }
       return true;
     }());
-    if (actionElement == null || action == null) {
+
+    if (actionElement == null || actions.isEmpty) {
       return null;
     }
+
     // Invoke the action we found using the relevant dispatcher from the Actions
     // Element we found.
-    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+    final List<Object?> results = <Object?>[];
+    for (final Action<T> action in actions.keys) {
+      final ActionDispatcher dispatcher = _findDispatcher(actions[action]!);
+      results.add(dispatcher.invokeAction(action, intent, context));
+    }
+    if (results.length > 1) {
+      return results;
+    }
+    return results.first;
   }
 
   /// Invokes the action associated with the given [Intent] using the
