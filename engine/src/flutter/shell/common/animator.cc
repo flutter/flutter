@@ -101,7 +101,8 @@ static int64_t FxlToDartOrEarlier(fml::TimePoint time) {
 void Animator::BeginFrame(
     std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending",
-                         frame_timings_recorder->GetFrameNumber());
+                         frame_request_number_);
+  frame_request_number_++;
 
   frame_timings_recorder_ = std::move(frame_timings_recorder);
   frame_timings_recorder_->RecordBuildStart(fml::TimePoint::Now());
@@ -246,19 +247,16 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  uint64_t frame_number = 0;
-  if (frame_timings_recorder_) {
-    frame_number = frame_timings_recorder_->GetFrameNumber();
-  }
-
-  task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
-                                             frame_number = frame_number]() {
-    if (!self) {
-      return;
-    }
-    TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
-    self->AwaitVSync();
-  });
+  task_runners_.GetUITaskRunner()->PostTask(
+      [self = weak_factory_.GetWeakPtr(),
+       frame_request_number = frame_request_number_]() {
+        if (!self) {
+          return;
+        }
+        TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending",
+                                 frame_request_number);
+        self->AwaitVSync();
+      });
   frame_scheduled_ = true;
 }
 
