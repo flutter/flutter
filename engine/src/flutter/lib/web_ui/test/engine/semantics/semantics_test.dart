@@ -98,25 +98,13 @@ void _testEngineSemanticsOwner() {
       clientY: (rect.top + (rect.bottom - rect.top) / 2).floor(),
     ));
 
-    // On mobile semantics is not enabled synchronously. This is because the
-    // placeholder receives pointer events in non-accessibility mode too, and
-    // therefore we wait to see if any subsequent pointer events are issued
-    // indicating that this is not a request to enable accessibility.
+    // On mobile semantics is enabled asynchronously.
     if (isMobile) {
-      while (!semantics().semanticsEnabled) {
+      while (placeholder.isConnected) {
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
     }
     expect(semantics().semanticsEnabled, true);
-
-    // The placeholder should be removed
-    if (isMobile) {
-      // On mobile the placeholder is not removed synchronously. Instead it is
-      // removed upon the next DOM event. Otherwise Safari swallows pointerup.
-      expect(placeholder.isConnected, true);
-      placeholder.click();
-      await Future<void>.delayed(Duration.zero);
-    }
     expect(placeholder.isConnected, false);
   });
 
