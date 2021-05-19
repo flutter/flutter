@@ -70,8 +70,11 @@ Future<void> pumpTestWidget(
 }
 
 void main() {
-  // Find the exact transform which contains an [Icon].
-  final Finder findTransform = find.byWidgetPredicate((Widget widget) => widget is Transform && widget.child is Icon);
+  // Find the exact transform which is the descendant of [UserAccountsDrawerHeader].
+  final Finder findTransform = find.descendant(
+    of: find.byType(UserAccountsDrawerHeader),
+    matching: find.byType(Transform),
+  );
 
   testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
