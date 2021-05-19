@@ -175,7 +175,7 @@ Future<void> main() async {
     expect(image.colorBlendMode, BlendMode.color);
   });
 
-  test('Render image disposes its image', () async {
+  test('RenderImage disposes its image', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -192,7 +192,7 @@ Future<void> main() async {
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // Web doesn't track open image handles.
 
-  test('Render image does not dispose its image if setting the same image twice', () async {
+  test('RenderImage does not dispose its image if setting the same image twice', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 

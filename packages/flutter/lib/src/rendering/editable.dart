@@ -286,7 +286,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void dispose() {
     _foregroundRenderObject?.dispose();
+    _foregroundRenderObject = null;
     _backgroundRenderObject?.dispose();
+    _backgroundRenderObject = null;
     super.dispose();
   }
 

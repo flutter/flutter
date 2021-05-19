@@ -201,6 +201,14 @@ class RenderSectorWithChildren extends RenderDecoratedSector with ContainerRende
   RenderSectorWithChildren(BoxDecoration? decoration) : super(decoration);
 
   @override
+  void dispose() {
+    visitChildren((RenderObject child) {
+      child.dispose();
+    });
+    super.dispose();
+  }
+
+  @override
   void hitTestChildren(SectorHitTestResult result, { required double radius, required double theta }) {
     RenderSector? child = lastChild;
     while (child != null) {
@@ -461,6 +469,12 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     this.child = child;
   }
 
+  @override
+  void dispose() {
+    child?.dispose();
+    super.dispose();
+  }
+
   double _innerRadius;
   double get innerRadius => _innerRadius;
   set innerRadius(double value) {
@@ -567,7 +581,6 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     result.add(BoxHitTestEntry(this, position));
     return true;
   }
-
 }
 
 class RenderSolidColor extends RenderDecoratedSector {
