@@ -1230,6 +1230,37 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     });
   }
 
+  /// Whether this has been disposed.
+  ///
+  /// If asserts are disabled, this property is always null.
+  bool? get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _debugDisposed;
+      return true;
+    }());
+    return disposed;
+  }
+
+  bool _debugDisposed = false;
+
+  /// Cause the entire subtree rooted at the given [RenderObject] to release
+  /// any resources it may be holding.
+  ///
+  /// If [isRepaintBoundary] returns true, the layer tree rooted at this
+  /// object's layer will also dispose.
+  @mustCallSuper
+  void dispose() {
+    assert(!_debugDisposed);
+    if (isRepaintBoundary) {
+      _layer = null;
+    }
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
+  }
+
   // LAYOUT
 
   /// Data for use by the parent render object.
@@ -1367,6 +1398,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool get _debugCanPerformMutations {
     late bool result;
     assert(() {
+      if (_debugDisposed) {
+        result = false;
+        return true;
+      }
       if (owner != null && !owner!.debugDoingLayout) {
         result = true;
         return true;
@@ -2234,6 +2269,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
 
   void _paintWithContext(PaintingContext context, Offset offset) {
+    assert(!_debugDisposed);
     assert(() {
       if (_debugDoingThisPaint) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2841,6 +2877,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       header += ' NEEDS-COMPOSITING-BITS-UPDATE';
     if (!attached)
       header += ' DETACHED';
+    if (_debugDisposed)
+      header += ' DISPOSED';
     return header;
   }
 

@@ -144,6 +144,31 @@ void main() {
       return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
+
+  test('RenderObject.dispose sets debugDisposed to true', () {
+    final TestRenderObject renderObject = TestRenderObject();
+    expect(renderObject.debugDisposed, false);
+    renderObject.dispose();
+    expect(renderObject.debugDisposed, true);
+    expect(renderObject.toStringShort(), contains('DISPOSED'));
+  });
+
+  test('RenderObject.dispose clears the layer on repaint boundaries', () {
+    final TestRenderObject renderObject = TestRenderObject();
+    renderObject.layer = OffsetLayer();
+    renderObject.isRepaintBoundary = true;
+    renderObject.dispose();
+    expect(renderObject.layer, null);
+  });
+
+  test('RenderObject.dispose does not clear the layer on non-repaint boundaries', () {
+    final TestRenderObject renderObject = TestRenderObject();
+    final OffsetLayer layer = OffsetLayer();
+    renderObject.layer = layer;
+    renderObject.isRepaintBoundary = false;
+    renderObject.dispose();
+    expect(renderObject.layer, layer);
+  });
 }
 
 // Tests the create-update cycle by pumping two frames. The first frame has no
@@ -188,6 +213,9 @@ class _TestCustomLayerBox extends RenderBox {
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
+  @override
+  bool isRepaintBoundary = false;
+
   @override
   void debugAssertDoesMeetConstraints() { }
 

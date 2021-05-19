@@ -3199,10 +3199,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     RenderObject? result;
     void visit(Element element) {
       assert(result == null); // this verifies that there's only one child
-      if (element is RenderObjectElement)
-        result = element.renderObject;
-      else
+      if (element is RenderObjectElement) {
+        // Don't use the getter, the _renderObject may be null if the element
+        // is defunct, and the getter asserts that it is not null. This method
+        // does not guarantee a non-null return anyway.
+        result = element._renderObject;
+      } else {
         element.visitChildren(visit);
+      }
     }
     visit(this);
     return result;
@@ -5422,8 +5426,13 @@ abstract class RenderObjectElement extends Element {
   RenderObjectWidget get widget => super.widget as RenderObjectWidget;
 
   /// The underlying [RenderObject] for this element.
+  ///
+  /// If this element has been [unmount]ed, this getter will throw.
   @override
-  RenderObject get renderObject => _renderObject!;
+  RenderObject get renderObject {
+    assert(_renderObject != null, 'Object disposed');
+    return _renderObject!;
+  }
   RenderObject? _renderObject;
 
   bool _debugDoingBuild = false;
@@ -5491,6 +5500,7 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     _renderObject = widget.createRenderObject(this);
+    assert(!_renderObject!.debugDisposed!);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5768,6 +5778,11 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void unmount() {
+    assert(
+      !renderObject.debugDisposed!,
+      'A RenderObject was disposed prior to its owning element being unmounted: '
+      '$renderObject',
+    );
     final RenderObjectWidget oldWidget = widget;
     super.unmount();
     assert(
@@ -5776,6 +5791,8 @@ abstract class RenderObjectElement extends Element {
       'RenderObjectElement: $renderObject',
     );
     oldWidget.didUnmountRenderObject(renderObject);
+    _renderObject?.dispose();
+    _renderObject = null;
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
