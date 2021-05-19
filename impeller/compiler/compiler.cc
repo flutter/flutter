@@ -203,7 +203,8 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
                    Reflector::Options reflector_options)
     : options_(source_options) {
   if (source_mapping.GetMapping() == nullptr) {
-    COMPILER_ERROR << "Could not read shader source.";
+    COMPILER_ERROR
+        << "Could not read shader source or shader source was empty.";
     return;
   }
 

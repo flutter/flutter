@@ -1,0 +1,31 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("compositor") {
+  sources = [
+    "context.h",
+    "context.mm",
+    "pipeline_builder.h",
+    "pipeline_builder.mm",
+    "pipeline_descriptor.h",
+    "pipeline_descriptor.mm",
+    "pipeline_library.h",
+    "pipeline_library.mm",
+    "renderer.h",
+    "renderer.mm",
+    "shader_library.h",
+    "shader_library.mm",
+    "surface.h",
+    "surface.mm",
+    "vertex_descriptor.h",
+    "vertex_descriptor.mm",
+  ]
+
+  public_deps = [
+    "../geometry",
+    "../shader_glue",
+  ]
+}
