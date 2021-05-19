@@ -53,10 +53,11 @@ TEST(FrameTimingsRecorderTest, RecordRasterTimes) {
   const auto raster_start = fml::TimePoint::Now();
   const auto raster_end = raster_start + fml::TimeDelta::FromMillisecondsF(16);
   recorder->RecordRasterStart(raster_start);
-  recorder->RecordRasterEnd(raster_end);
+  const auto timing = recorder->RecordRasterEnd(raster_end);
 
   ASSERT_EQ(raster_start, recorder->GetRasterStartTime());
   ASSERT_EQ(raster_end, recorder->GetRasterEndTime());
+  ASSERT_EQ(recorder->GetFrameNumber(), timing.GetFrameNumber());
 }
 
 // Windows and Fuchsia don't allow testing with killed by signal.

@@ -1353,8 +1353,8 @@ void Shell::ReportTimings() {
 size_t Shell::UnreportedFramesCount() const {
   // Check that this is running on the raster thread to avoid race conditions.
   FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
-  FML_DCHECK(unreported_timings_.size() % FrameTiming::kCount == 0);
-  return unreported_timings_.size() / FrameTiming::kCount;
+  FML_DCHECK(unreported_timings_.size() % (FrameTiming::kCount + 1) == 0);
+  return unreported_timings_.size() / (FrameTiming::kCount + 1);
 }
 
 void Shell::OnFrameRasterized(const FrameTiming& timing) {
@@ -1375,6 +1375,7 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
     unreported_timings_.push_back(
         timing.Get(phase).ToEpochDelta().ToMicroseconds());
   }
+  unreported_timings_.push_back(timing.GetFrameNumber());
 
   // In tests using iPhone 6S with profile mode, sending a batch of 1 frame or a
   // batch of 100 frames have roughly the same cost of less than 0.1ms. Sending
