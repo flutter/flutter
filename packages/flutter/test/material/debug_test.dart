@@ -134,8 +134,6 @@ void main() {
       '     _FadeUpwardsPageTransition\n'
       '     AnimatedBuilder\n'
       '     RepaintBoundary\n'
-      '     Listener\n'
-      '     RawGestureDetector\n'
       '     _FocusTrap\n'
       '     _FocusMarker\n'
       '     Semantics\n'

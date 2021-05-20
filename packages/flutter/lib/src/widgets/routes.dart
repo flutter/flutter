@@ -7,9 +7,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -1986,6 +1988,14 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
 
+/// When a primary pointer makes contact with the screen, this widget determines if that pointer
+/// contacted an existing focused widget. If not, this asks the [FocusScopeNode] to reset the
+/// focus state. This allows [TextField]s and other focusable widgets to give up their focus
+/// state, without creating a gesture detector that competes with others on screen.
+///
+/// See also:
+///   * [RenderFocusArea], which allows a focus node to own a larger render object
+///     subtree.
 class _FocusTrap extends SingleChildRenderObjectWidget {
   const _FocusTrap({
     required this.focusScopeNode,
@@ -2005,16 +2015,13 @@ class _FocusTrap extends SingleChildRenderObjectWidget {
   }
 }
 
-/// When a primary pointer makes contact with the screen, this widget determines if that pointer
-/// contacted an existing focused widget. If not, this asks the [FocusScopeNode] to reset the
-/// focus state. This allows text fields and other focusable widgets to give up their focus
-/// state, without creating a gesture detector that competes with others on screen.
-class _RenderFocusTrap extends RenderProxyBox {
+class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
   _RenderFocusTrap(this._focusScopeNode) {
     focusScopeNode.addListener(_currentFocusListener);
   }
 
   FocusNode? currentFocus;
+  Rect? currentFocusRect;
   Expando<BoxHitTestResult> cachedResults = Expando<BoxHitTestResult>();
 
   FocusScopeNode _focusScopeNode;
@@ -2033,30 +2040,50 @@ class _RenderFocusTrap extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    bool hitTarget = false;
     if (size.contains(position)) {
-      hitTestChildren(result, position: position);
-      final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
-      cachedResults[entry] = result;
-      result.add(entry);
-      return true;
+      hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
+      if (hitTarget) {
+        final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
+        cachedResults[entry] = result;
+        result.add(entry);
+      }
     }
-    return false;
+    return hitTarget;
   }
 
   @override
-  bool hitTestSelf(ui.Offset position) => true;
+  bool hitTestSelf(Offset position) => false;
 
   @override
   Size computeSizeForNoChild(BoxConstraints constraints) {
     return constraints.biggest;
   }
 
+  /// The focus dropping behavior is only present on desktop platforms
+  /// and mobile browsers.
+  bool get _shouldIgnoreEvents {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return !kIsWeb;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+        return false;
+    }
+  }
+
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is! PointerDownEvent || event.buttons != kPrimaryButton)
+    if (event is! PointerDownEvent
+      || event.buttons != kPrimaryButton
+      || event.kind != PointerDeviceKind.mouse
+      || _shouldIgnoreEvents
+      || currentFocus == null)
       return;
-
     final BoxHitTestResult? result = cachedResults[entry];
     final FocusNode? focusNode = currentFocus;
     if (focusNode == null || result == null)
@@ -2065,9 +2092,15 @@ class _RenderFocusTrap extends RenderProxyBox {
     final RenderObject? renderObject = focusNode.context?.findRenderObject();
     if (renderObject == null)
       return;
+
     bool hitCurrentFocus = false;
     for (final HitTestEntry entry in result.path) {
-      if (entry.target == renderObject) {
+      final HitTestTarget target = entry.target;
+      if (target == renderObject) {
+        hitCurrentFocus = true;
+        break;
+      }
+      if (target is RenderFocusArea && target.focusNode == currentFocus) {
         hitCurrentFocus = true;
         break;
       }

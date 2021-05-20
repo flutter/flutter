@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -1042,4 +1043,36 @@ class ExcludeFocus extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// A focus area is used to expand a focus node as part of the render object layer
+/// outside of its descendant render objects.
+///
+/// This is used by the [TextField] widgets to associate the focus node with the input
+/// decorations.
+class FocusArea extends SingleChildRenderObjectWidget {
+  /// Create a new [FocusArea] widget.
+  const FocusArea({required this.focusNode, required Widget child, Key? key}) : super(child: child, key: key);
+
+  /// The focus node this area encompasses.
+  final FocusNode focusNode;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderFocusArea(focusNode);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderFocusArea renderObject) {
+    renderObject.focusNode = focusNode;
+  }
+}
+
+/// The focus area render object is used as a sentinel in routes.dart.
+class RenderFocusArea extends RenderProxyBox {
+  /// Create a new [RenderFocusMarker].
+  RenderFocusArea(this.focusNode);
+
+  /// The current focus node this render object subtree is associated with.
+  FocusNode focusNode;
 }
