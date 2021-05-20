@@ -2058,6 +2058,79 @@ void main() {
     expect(popupMenu, Offset(button.dx - 8.0, button.dy + 8.0));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/82874
+  testWidgets('PopupMenu position test when have unsafe area - left/right padding', (WidgetTester tester) async {
+    final GlobalKey buttonKey = GlobalKey();
+    const EdgeInsets padding = EdgeInsets.only(left: 300.0, top: 32.0, right: 310.0, bottom: 64.0);
+    EdgeInsets? mediaQueryPadding;
+
+    Widget buildFrame(double width, double height) {
+      return MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: const MediaQueryData(
+              padding: padding,
+            ),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('PopupMenu Test'),
+            actions: <Widget>[PopupMenuButton<int>(
+              child: SizedBox(
+                key: buttonKey,
+                height: height,
+                width: width,
+                child: const ColoredBox(
+                  color: Colors.pink,
+                ),
+              ),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        mediaQueryPadding = MediaQuery.of(context).padding;
+                        return Text('-1-' * 500); // A long long text string.
+                      },
+                    ),
+                  ),
+                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                ];
+              },
+            )],
+          ),
+          body: const SizedBox.shrink(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(20.0, 20.0));
+
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    final Offset button = tester.getTopRight(find.byKey(buttonKey));
+    expect(button, Offset(800.0 - padding.right, padding.top)); // The topPadding is 32.0.
+
+    final Offset popupMenuTopRight = tester.getTopRight(find.byType(SingleChildScrollView));
+
+    // The menu should be positioned directly next to the top of the button.
+    // The 8.0 pixels is [_kMenuScreenPadding].
+    expect(popupMenuTopRight, Offset(800.0 - padding.right - 8.0, padding.top + 8.0));
+
+    final Offset popupMenuTopLeft = tester.getTopLeft(find.byType(SingleChildScrollView));
+    expect(popupMenuTopLeft, Offset(padding.left + 8.0, padding.top + 8.0));
+
+    final Offset popupMenuBottomLeft = tester.getBottomLeft(find.byType(SingleChildScrollView));
+    expect(popupMenuBottomLeft, Offset(padding.left + 8.0, 600.0 - padding.bottom - 8.0));
+
+    // The `MediaQueryData.padding` should be removed.
+    expect(mediaQueryPadding, EdgeInsets.zero);
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
