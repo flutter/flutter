@@ -378,7 +378,7 @@ abstract class Repository {
       );
     }
     git.run(
-      <String>['commit', '--message=\'$message\''],
+      <String>['commit', "--message='$message'"],
       'commit changes',
       workingDirectory: checkoutDirectory.path,
     );
@@ -645,7 +645,7 @@ class EngineRepository extends Repository {
     assert(newRevision.length == 40);
     depsFile ??= checkoutDirectory.childFile('DEPS');
     final String fileContent = depsFile.readAsStringSync();
-    final RegExp dartPattern = RegExp('[ ]+\'dart_revision\': \'([a-z0-9]{40})\',');
+    final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
     final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
     if (allMatches.length != 1) {
       throw ConductorException(
@@ -656,7 +656,7 @@ class EngineRepository extends Repository {
     }
     final String updatedFileContent = fileContent.replaceFirst(
       dartPattern,
-      '  \'dart_revision\': \'$newRevision\',',
+      "  'dart_revision': '$newRevision',",
     );
 
     depsFile.writeAsStringSync(updatedFileContent);
