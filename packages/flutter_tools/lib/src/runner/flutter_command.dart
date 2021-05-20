@@ -14,6 +14,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/multi_root_file_system.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -288,6 +289,22 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// This can be overridden by some of its subclasses.
   String get packagesPath => globalResults['packages'] as String;
+
+  /// Path to the Dart's package config file.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get fileSystemScheme =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
+          ? stringArg(FlutterOptions.kFileSystemScheme)
+          : null;
+
+  /// Path to the Dart's package config file.
+  ///
+  /// This can be overridden by some of its subclasses.
+  List<String> get fileSystemRoots =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
+          ? stringsArg(FlutterOptions.kFileSystemRoot)
+          : null;
 
   void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
@@ -1032,12 +1049,8 @@ abstract class FlutterCommand extends Command<void> {
       extraGenSnapshotOptions: extraGenSnapshotOptions?.isNotEmpty ?? false
         ? extraGenSnapshotOptions
         : null,
-      fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? stringsArg(FlutterOptions.kFileSystemRoot)
-          : null,
-      fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? stringArg(FlutterOptions.kFileSystemScheme)
-          : null,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
@@ -1088,9 +1101,23 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> run() {
     final DateTime startTime = globals.systemClock.now();
 
+    FileSystem fileSystemOverride;
+
+    if (fileSystemScheme != null && fileSystemRoots?.isNotEmpty == true) {
+      fileSystemOverride = MultiRootFileSystem(
+        delegate: globals.fs,
+        scheme: fileSystemScheme,
+        roots: fileSystemRoots,
+      );
+    }
+
     return context.run<void>(
       name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
+      overrides: <Type, Generator>{
+        FlutterCommand: () => this,
+        if (fileSystemOverride != null)
+          FileSystem: () => fileSystemOverride,
+      },
       body: () async {
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();

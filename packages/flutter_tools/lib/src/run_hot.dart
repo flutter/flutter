@@ -1242,7 +1242,8 @@ class ProjectFileInvalidator {
       for (final Uri uri in urisToScan) {
         waitList.add(pool.withResource<void>(
           () => _fileSystem
-            .stat(uri.toFilePath(windows: _platform.isWindows))
+            .file(uri)
+            .stat()
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
               if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
@@ -1254,17 +1255,16 @@ class ProjectFileInvalidator {
       await Future.wait<void>(waitList);
     } else {
       for (final Uri uri in urisToScan) {
-        final DateTime updatedAt = _fileSystem.statSync(
-            uri.toFilePath(windows: _platform.isWindows)).modified;
+        final DateTime updatedAt = _fileSystem.file(uri).statSync().modified;
         if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }
       }
     }
     // We need to check the .packages file too since it is not used in compilation.
-    final Uri packageUri = _fileSystem.file(packagesPath).uri;
-    final DateTime updatedAt = _fileSystem.statSync(
-      packageUri.toFilePath(windows: _platform.isWindows)).modified;
+    final File packageFile = _fileSystem.file(packagesPath);
+    final Uri packageUri = packageFile.uri;
+    final DateTime updatedAt = packageFile.statSync().modified;
     if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
       invalidatedFiles.add(packageUri);
       packageConfig = await _createPackageConfig(packagesPath);
