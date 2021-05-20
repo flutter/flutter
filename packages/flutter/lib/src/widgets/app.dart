@@ -7,6 +7,7 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/text_selection_gestures.dart';
 
 import 'actions.dart';
 import 'banner.dart';
@@ -1644,14 +1645,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         child: DefaultTextEditingShortcuts(
           child: Actions(
             actions: widget.actions ?? WidgetsApp.defaultActions,
-            child: DefaultTextEditingActions(
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: _MediaQueryFromWindow(
-                  child: Localizations(
-                    locale: appLocale,
-                    delegates: _localizationsDelegates.toList(),
-                    child: title,
+            child: TextEditingGestures.platformDefaults(
+              child: DefaultTextEditingActions(
+                child: FocusTraversalGroup(
+                  policy: ReadingOrderTraversalPolicy(),
+                  child: _MediaQueryFromWindow(
+                    child: Localizations(
+                      locale: appLocale,
+                      delegates: _localizationsDelegates.toList(),
+                      child: title,
+                    ),
                   ),
                 ),
               ),

@@ -3,22 +3,111 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 
-export 'gesture_detector.dart' show GestureRecognizerFactory;
+class TextEditingGestures extends InheritedWidget {
+  const TextEditingGestures({
+    Key? key,
+    this.gestures = const <Type, GestureRecognizerFactory>{},
+    this.inherit = false,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  TextEditingGestures.platformDefaults({
+    Key? key,
+    required Widget child,
+  }) : this(key: key, gestures: _getPlatformDefaults, child: child);
+
+  final Map<Type, GestureRecognizerFactory> gestures;
+  final bool inherit;
+
+  // context: The BuildContext that will be used as the new start point for
+  // looking up gestures.
+  // dependent: The first 'context'
+  void _addInheritedGesturesToMap(Map<Type, GestureRecognizerFactory> map, BuildContext context, BuildContext dependent) {
+    final InheritedElement? ancestor = context.getElementForInheritedWidgetOfExactType<TextEditingGestures>();
+    if (!inherit || ancestor == null) {
+      map.addAll(gestures);
+      return;
+    }
+
+    // Does this work? Multiple dependencies with the same widget type?
+    dependent.dependOnInheritedElement(ancestor);
+    final TextEditingGestures ancestorWidget = ancestor.widget as TextEditingGestures;
+    ancestorWidget._addInheritedGesturesToMap(map, ancestor, dependent);
+    map.addAll(gestures);
+  }
+
+  static Map<Type, GestureRecognizerFactory>? maybeOf(BuildContext context) {
+    final TextEditingGestures? widget = context.dependOnInheritedWidgetOfExactType<TextEditingGestures>();
+    if (widget == null || !widget.inherit) {
+      return widget?.gestures;
+    }
+    final Map<Type, GestureRecognizerFactory> map = <Type, GestureRecognizerFactory>{};
+    widget._addInheritedGesturesToMap(map, context, context);
+    return map;
+  }
+
+  static Map<Type, GestureRecognizerFactory> _getPlatformDefaults {
+    return <Type, GestureRecognizerFactory>{
+      TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TextEditingTapGestureRecognizer>(
+        () => TextEditingTapGestureRecognizer(maxConsecutiveTaps: 2, notifyStatusChanged: notifyStatusChanged),
+        (TextEditingTapGestureRecognizer instance) {},
+      ),
+      LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+        () => LongPressGestureRecognizer(),
+        (LongPressGestureRecognizer instance) =>
+      ),
+      HorizontalDragGestureRecognizer: _GestureRecognizerFactoryWrapper<HorizontalDragGestureRecognizer>(dragGestureRecognizer),
+      ForcePressGestureRecognizer: _GestureRecognizerFactoryWrapper<ForcePressGestureRecognizer>(forcePressGestureRecognizer),
+    };
+  }
+
+  @override
+  bool updateShouldNotify(TextEditingGestures oldWidget) {
+    return oldWidget.gestures != gestures
+        || oldWidget.inherit != inherit;
+  }
+}
 
 // ---------- Text Editing Gesture Recognizers ----------
+
+class TapTextGestureStatus {
+  TapTextGestureStatus._(this._tapDownDetails);
+
+  int get tapDownCount => _tapDownCount;
+  int _tapDownCount = 1;
+
+  bool get isCancelled => _isCancelled;
+  bool _isCancelled = false;
+
+  TapDownDetails get tapDownDetails => _tapDownDetails;
+  TapDownDetails _tapDownDetails;
+
+  TapUpDetails? get tapUpDetails => _tapUpDetails;
+  TapUpDetails? _tapUpDetails;
+}
+
+class SecondaryTapTextGestureStatus {
+  SecondaryTapTextGestureStatus._(this.tapDownDetails);
+
+  bool get isRecognized => _isRecognized;
+  bool _isRecognized = false;
+
+  bool get isCancelled => _isCancelled;
+  bool _isCancelled = false;
+
+  final TapDownDetails tapDownDetails;
+}
 
 class TextEditingTapGestureRecognizer extends GestureRecognizer {
   TextEditingTapGestureRecognizer({
@@ -35,6 +124,12 @@ class TextEditingTapGestureRecognizer extends GestureRecognizer {
     ..onTapCancel = _onTapCancel;
 
   final int maxConsecutiveTaps;
+
+  TapTextGestureStatus? get tapStatus => _tapStatus;
+  TapTextGestureStatus? _tapStatus;
+
+  SecondaryTapTextGestureStatus? get secondaryTapStatus => _secondaryTapStatus;
+  SecondaryTapTextGestureStatus? _secondaryTapStatus;
 
   int get consecutiveTapDownCount => _consecutiveTapDownCount;
   int _consecutiveTapDownCount = 0;
@@ -157,34 +252,6 @@ class TextEditingTapGestureRecognizer extends GestureRecognizer {
   String get debugDescription => 'consecutive taps on editable text';
 }
 
-class TapTextGestureStatus {
-  TapTextGestureStatus._(this._tapDownDetails);
-
-  int get tapDownCount => _tapDownCount;
-  int _tapDownCount = 1;
-
-  bool get isCancelled => _isCancelled;
-  bool _isCancelled = false;
-
-  TapDownDetails get tapDownDetails => _tapDownDetails;
-  TapDownDetails _tapDownDetails;
-
-  TapUpDetails? get tapUpDetails => _tapUpDetails;
-  TapUpDetails? _tapUpDetails;
-}
-
-class SecondaryTapTextGestureStatus {
-  SecondaryTapTextGestureStatus._(this.tapDownDetails);
-
-  bool get isRecognized => _isRecognized;
-  bool _isRecognized = false;
-
-  bool get isCancelled => _isCancelled;
-  bool _isCancelled = false;
-
-  final TapDownDetails tapDownDetails;
-}
-
 class LongPressTextGestureStatus {
   LongPressTextGestureStatus._(this.longPressStartDetails);
 
@@ -223,50 +290,8 @@ class _GestureRecognizerFactoryWrapper<T extends GestureRecognizer> implements G
   void initializer(T instance) { }
 }
 
-class TextEditingGestures extends InheritedWidget {
-  const TextEditingGestures({
-    Key? key,
-    required Widget child,
-    this.gestures = const <Type, GestureRecognizerFactory>{},
-    this.inherit = false,
-  }) : super(key: key, child: child);
+// ---------- Current Defaults ----------
 
-  final Map<Type, GestureRecognizerFactory> gestures;
-  final bool inherit;
-
-  // context: The BuildContext that will be used as the new start point for
-  // looking up gestures.
-  // dependent: The first 'context'
-  void _addInheritedGesturesToMap(Map<Type, GestureRecognizerFactory> map, BuildContext context, BuildContext dependent) {
-    final InheritedElement? ancestor = context.getElementForInheritedWidgetOfExactType<TextEditingGestures >();
-    if (!inherit || ancestor == null) {
-      map.addAll(gestures);
-      return;
-    }
-
-    // Does this work? Multiple dependencies with the same widget type?
-    dependent.dependOnInheritedElement(ancestor);
-    final TextEditingGestures ancestorWidget = ancestor.widget as TextEditingGestures;
-    ancestorWidget._addInheritedGesturesToMap(map, ancestor, dependent);
-    map.addAll(gestures);
-  }
-
-  static Map<Type, GestureRecognizerFactory>? maybeOf(BuildContext context) {
-    final TextEditingGestures? widget = context.dependOnInheritedWidgetOfExactType<TextEditingGestures>();
-    if (widget == null || !widget.inherit) {
-      return widget?.gestures;
-    }
-    final Map<Type, GestureRecognizerFactory> map = <Type, GestureRecognizerFactory>{};
-    widget._addInheritedGesturesToMap(map, context, context);
-    return map;
-  }
-
-  @override
-  bool updateShouldNotify(TextEditingGestures oldWidget) {
-    return oldWidget.gestures != gestures
-        || oldWidget.inherit != inherit;
-  }
-}
 
 class TextEditingGestureBuilder extends StatefulWidget {
   const TextEditingGestureBuilder({

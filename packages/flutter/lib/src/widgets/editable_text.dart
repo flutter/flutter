@@ -2735,6 +2735,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 }
 
+class _ContextRawGestureDetector extends StatelessWidget {
+}
+
 class _Editable extends LeafRenderObjectWidget {
   const _Editable({
     Key? key,
