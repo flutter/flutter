@@ -118,6 +118,7 @@ class FlutterOptions {
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
+  static const String kAndroidProjectArgs = 'android-project-arg';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -768,6 +769,13 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       hide: hide,
     );
+    argParser.addMultiOption(
+      FlutterOptions.kAndroidProjectArgs,
+      help: 'Additional arguments specified as key=value that are passed directly to the gradle '
+            'project via the -P flag. These can be accesed in build.gradle via the "project.property" API.',
+      splitCommas: false,
+      abbr: 'P',
+    );
   }
 
   void addNativeNullAssertions({ bool hide = false }) {
@@ -971,6 +979,10 @@ abstract class FlutterCommand extends Command<void> {
     final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
       || boolArg(FlutterOptions.kAndroidGradleDaemon);
 
+    final List<String> androidProjectArgs = argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
+      ? stringsArg(FlutterOptions.kAndroidProjectArgs)
+      : <String>[];
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1042,6 +1054,7 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
+      androidProjectArgs: androidProjectArgs,
     );
   }
 
