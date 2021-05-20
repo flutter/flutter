@@ -43,12 +43,10 @@ void main() {
       // root for the app.
       //
       // It's either the shadowRoot within flt-glass-pane, or [driver.webDriver].
-      final SearchContext? shadow = await driver.webDriver.execute(
+      final SearchContext appRoot = await driver.webDriver.execute(
         'return document.querySelector("flt-glass-pane")?.shadowRoot;',
         <dynamic>[],
-      ) as SearchContext?;
-
-      final SearchContext appRoot = shadow ?? driver.webDriver;
+      ) as SearchContext? ?? driver.webDriver;
 
       // Elements with tag "flt-semantics" would show up after enabling
       // accessibility.
