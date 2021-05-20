@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io' as io;
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/browser.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -58,7 +59,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
               'Requested to run bechmark ${benchmarkIterator.current}, but '
               'got results for $benchmarkName.',
             ));
-            server.close();
+            unawaited(server.close());
           }
 
           // Trace data is null when the benchmark is not frame-based, such as RawRecorder.
@@ -80,7 +81,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
           return Response.ok('Stopped performance tracing');
         } else if (request.requestedUri.path.endsWith('/on-error')) {
           final Map<String, dynamic> errorDetails = json.decode(await request.readAsString()) as Map<String, dynamic>;
-          server.close();
+          unawaited(server.close());
           // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
           profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
           return Response.ok('');
@@ -183,7 +184,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       }
       return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
     } finally {
-      server?.close();
+      unawaited(server?.close());
       chrome?.stop();
     }
   });

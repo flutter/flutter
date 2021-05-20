@@ -1835,6 +1835,125 @@ void main() {
     ));
   });
 
+   testWidgets('TabBar with padding isScrollable: false', (WidgetTester tester) async {
+    const double indicatorWeight = 2.0; // default indicator weight
+    const EdgeInsets padding = EdgeInsets.only(left: 3.0, top: 7.0, right: 5.0, bottom: 3.0);
+
+    final List<Widget> tabs = <Widget>[
+      SizedBox(key: UniqueKey(), width: double.infinity, height: 30.0),
+      SizedBox(key: UniqueKey(), width: double.infinity, height: 40.0),
+    ];
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            padding: padding,
+            labelPadding: EdgeInsets.zero,
+            indicatorPadding: EdgeInsets.zero,
+            isScrollable: false,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final double tabBarHeight = 40.0 + indicatorWeight + padding.top + padding.bottom;  // 40 = max tab height
+    expect(tabBarBox.size.height, tabBarHeight);
+
+    final double tabSize = (tabBarBox.size.width - padding.horizontal) / 2.0;
+
+    // Tab0 height = 30
+    double tabLeft = padding.left;
+    double tabRight = tabLeft + tabSize;
+    double tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
+    double tabBottom = tabTop + 30.0;
+    Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
+
+    // Tab1 height = 40
+    tabLeft = tabRight;
+    tabRight = tabLeft + tabSize;
+    tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 40.0) / 2.0;
+    tabBottom = tabTop + 40.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
+
+    tabRight += padding.right;
+    expect(tabBarBox.size.width, tabRight);
+  });
+
+  testWidgets('TabBar with padding isScrollable: true', (WidgetTester tester) async {
+    const double indicatorWeight = 2.0; // default indicator weight
+    const EdgeInsets padding = EdgeInsets.only(left: 3.0, top: 7.0, right: 5.0, bottom: 3.0);
+
+    final List<Widget> tabs = <Widget>[
+      SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
+      SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
+      SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
+    ];
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            padding: padding,
+            labelPadding: EdgeInsets.zero,
+            indicatorPadding: EdgeInsets.zero,
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final double tabBarHeight = 50.0 + indicatorWeight + padding.top + padding.bottom;  // 50 = max tab height
+    expect(tabBarBox.size.height, tabBarHeight);
+
+    // Tab0 width = 130, height = 30
+    double tabLeft = padding.left;
+    double tabRight = tabLeft + 130.0;
+    double tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
+    double tabBottom = tabTop + 30.0;
+    Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
+
+    // Tab1 width = 140, height = 40
+    tabLeft = tabRight;
+    tabRight = tabLeft + 140.0;
+    tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 40.0) / 2.0;
+    tabBottom = tabTop + 40.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
+
+    // Tab2 width = 150, height = 50
+    tabLeft = tabRight;
+    tabRight = tabLeft + 150.0;
+    tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 50.0) / 2.0;
+    tabBottom = tabTop + 50.0;
+    tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+    expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
+
+    tabRight += padding.right;
+    expect(tabBarBox.size.width, tabRight);
+  });
+
   testWidgets('TabBar with labelPadding', (WidgetTester tester) async {
     const double indicatorWeight = 2.0; // default indicator weight
     const EdgeInsets labelPadding = EdgeInsets.only(left: 3.0, right: 7.0);

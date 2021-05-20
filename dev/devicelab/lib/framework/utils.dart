@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -291,10 +292,10 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.then<void>((int exitCode) {
+  unawaited(process.exitCode.then<void>((int exitCode) {
     print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
-  });
+  }));
 
   return process;
 }
