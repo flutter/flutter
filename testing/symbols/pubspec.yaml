@@ -1,6 +1,24 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: verify_exported
+publish_to: none
 environment:
   sdk: '>=2.11.0 <3.0.0'
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party.pkg, //third_party/dart/pkg, or
+# //third_party/dart/third_party/pkg. In particular, package:test is not usable
+# here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
+
 dependencies:
-  path: 1.6.2
-  collection: 1.14.11
+  path: any
+
+dependency_overrides:
+  path:
+    path: ../../../third_party/dart/third_party/pkg/path

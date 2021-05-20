@@ -18,6 +18,7 @@ ALL_PACKAGES = [
   os.path.join("src", "flutter", "flutter_frontend_server"),
   os.path.join("src", "flutter", "testing", "litetest"),
   os.path.join("src", "flutter", "testing", "smoke_test_failure"),
+  os.path.join("src", "flutter", "testing", "symbols"),
   os.path.join("src", "flutter", "tools", "android_lint"),
   os.path.join("src", "flutter", "tools", "const_finder"),
   os.path.join("src", "flutter", "tools", "licenses"),
