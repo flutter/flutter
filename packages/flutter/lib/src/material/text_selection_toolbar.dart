@@ -599,9 +599,9 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    // The x, y parameters have the top left of the node's box as the origin.
     RenderBox? child = lastChild;
     while (child != null) {
+      // The x, y parameters have the top left of the node's box as the origin.
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
 
       // Don't hit test children aren't shown.
