@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 class CardModel {
   CardModel(this.value, this.height) :
     textController = TextEditingController(text: 'Item $value');
-  
+
   int value;
   double height;
   int get color => ((value % 9) + 1) * 100;
