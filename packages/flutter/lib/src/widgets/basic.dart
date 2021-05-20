@@ -6206,6 +6206,10 @@ class DefaultAssetBundle extends InheritedWidget {
 /// A given render object can be placed at most once in the widget tree. This
 /// widget enforces that restriction by keying itself using a [GlobalObjectKey]
 /// for the given render object.
+///
+/// This widget will call [RenderObject.dispose] on the [renderBox] when it is
+/// unmounted. If any children have been added to the [renderBox], they must
+/// be disposed in the [onUnmount callback].
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// Creates an adapter for placing a specific [RenderBox] in the widget tree.
   ///
@@ -6213,6 +6217,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   WidgetToRenderBoxAdapter({
     required this.renderBox,
     this.onBuild,
+    this.onUnmount,
   }) : assert(renderBox != null),
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
@@ -6229,12 +6234,25 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback? onBuild;
 
+  /// Called when it is safe to dispose of the render object and its
+  /// descendants.
+  ///
+  /// Typically, this should dispose of any children attached to the
+  /// [renderBox], but not the [renderBox] itself.
+  final VoidCallback? onUnmount;
+
   @override
   RenderBox createRenderObject(BuildContext context) => renderBox;
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
     onBuild?.call();
+  }
+
+  @override
+  void didUnmountRenderObject(RenderObject renderObject) {
+    assert(renderObject == renderBox);
+    onUnmount?.call();
   }
 }
 

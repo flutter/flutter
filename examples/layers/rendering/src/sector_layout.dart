@@ -201,14 +201,6 @@ class RenderSectorWithChildren extends RenderDecoratedSector with ContainerRende
   RenderSectorWithChildren(BoxDecoration? decoration) : super(decoration);
 
   @override
-  void dispose() {
-    visitChildren((RenderObject child) {
-      child.dispose();
-    });
-    super.dispose();
-  }
-
-  @override
   void hitTestChildren(SectorHitTestResult result, { required double radius, required double theta }) {
     RenderSector? child = lastChild;
     while (child != null) {
@@ -463,16 +455,9 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 }
 
 class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChildMixin<RenderSector> {
-
   RenderBoxToRenderSectorAdapter({ double innerRadius = 0.0, RenderSector? child })
     : _innerRadius = innerRadius {
     this.child = child;
-  }
-
-  @override
-  void dispose() {
-    child?.dispose();
-    super.dispose();
   }
 
   double _innerRadius;
