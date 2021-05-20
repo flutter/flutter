@@ -1374,11 +1374,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/thread.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/thread.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/unique_fdio_ns.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_recorder.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_recorder.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_waiter.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_waiter.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_waiter_unittests.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vulkan_surface.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vulkan_surface.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vulkan_surface_pool.cc

@@ -73,8 +73,9 @@ PlatformView::PlatformView(
     OnDestroyView on_destroy_view_callback,
     OnCreateSurface on_create_surface_callback,
     std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
-    fml::TimeDelta vsync_offset,
-    zx_handle_t vsync_event_handle)
+    AwaitVsyncCallback await_vsync_callback,
+    AwaitVsyncForSecondaryCallbackCallback
+        await_vsync_for_secondary_callback_callback)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
       view_ref_(std::move(view_ref)),
@@ -89,9 +90,10 @@ PlatformView::PlatformView(
       on_create_surface_callback_(std::move(on_create_surface_callback)),
       external_view_embedder_(external_view_embedder),
       ime_client_(this),
-      vsync_offset_(std::move(vsync_offset)),
-      vsync_event_handle_(vsync_event_handle),
       keyboard_listener_binding_(this, std::move(keyboard_listener_request)),
+      await_vsync_callback_(await_vsync_callback),
+      await_vsync_for_secondary_callback_callback_(
+          await_vsync_for_secondary_callback_callback),
       weak_factory_(this) {
   // Register all error handlers.
   SetInterfaceErrorHandler(session_listener_binding_, "SessionListener");
@@ -692,7 +694,8 @@ void PlatformView::DeactivateIme() {
 // |flutter::PlatformView|
 std::unique_ptr<flutter::VsyncWaiter> PlatformView::CreateVSyncWaiter() {
   return std::make_unique<flutter_runner::VsyncWaiter>(
-      debug_label_, vsync_event_handle_, task_runners_, vsync_offset_);
+      await_vsync_callback_, await_vsync_for_secondary_callback_callback_,
+      task_runners_);
 }
 
 // |flutter::PlatformView|

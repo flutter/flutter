@@ -14,27 +14,39 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 
+#include "vsync_waiter.h"
+
+#include <mutex>
+
 namespace flutter_runner {
 
 using on_frame_presented_event =
     std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
 
+struct FlutterFrameTimes {
+  fml::TimePoint frame_start;
+  fml::TimePoint frame_target;
+};
+
+struct VsyncInfo {
+  fml::TimePoint presentation_time;
+  fml::TimeDelta presentation_interval;
+};
+
+// Assume a 60hz refresh rate before we have enough past
+// |fuchsia::scenic::scheduling::PresentationInfo|s to calculate it ourselves.
+static constexpr fml::TimeDelta kDefaultPresentationInterval =
+    fml::TimeDelta::FromSecondsF(1.0 / 60.0);
+
 // The component residing on the raster thread that is responsible for
 // maintaining the Scenic session connection and presenting node updates.
 class DefaultSessionConnection final : public flutter::SessionWrapper {
  public:
-  DefaultSessionConnection(
-      std::string debug_label,
-      fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
-      fml::closure session_error_callback,
-      on_frame_presented_event on_frame_presented_callback,
-      zx_handle_t vsync_event_handle,
-      uint64_t max_frames_in_flight);
-
-  ~DefaultSessionConnection();
-
-  scenic::Session* get() override { return &session_wrapper_; }
-  void Present() override;
+  static FlutterFrameTimes GetTargetTimes(fml::TimeDelta vsync_offset,
+                                          fml::TimeDelta vsync_interval,
+                                          fml::TimePoint last_targeted_vsync,
+                                          fml::TimePoint now,
+                                          fml::TimePoint next_vsync);
 
   static fml::TimePoint CalculateNextLatchPoint(
       fml::TimePoint present_requested_time,
@@ -45,12 +57,53 @@ class DefaultSessionConnection final : public flutter::SessionWrapper {
       std::deque<std::pair<fml::TimePoint, fml::TimePoint>>&
           future_presentation_infos);
 
+  static fml::TimePoint SnapToNextPhase(
+      const fml::TimePoint now,
+      const fml::TimePoint last_frame_presentation_time,
+      const fml::TimeDelta presentation_interval);
+
+  // Update the next Vsync info to |next_presentation_info_|. This is expected
+  // to be called in |scenic::Session::Present2| immedaite callbacks with the
+  // presentation info provided by Scenic.  Only the next vsync
+  // information will be saved (in order to handle edge cases involving
+  // multiple Scenic sessions in the same process). This function is safe to
+  // call from any thread.
+  static fuchsia::scenic::scheduling::PresentationInfo UpdatePresentationInfo(
+      fuchsia::scenic::scheduling::FuturePresentationTimes future_info,
+      fuchsia::scenic::scheduling::PresentationInfo& presentation_info);
+
+  DefaultSessionConnection(
+      std::string debug_label,
+      fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
+      fml::closure session_error_callback,
+      on_frame_presented_event on_frame_presented_callback,
+      uint64_t max_frames_in_flight,
+      fml::TimeDelta vsync_offset);
+
+  ~DefaultSessionConnection();
+
+  // |SessionWrapper|
+  scenic::Session* get() override { return &session_wrapper_; }
+
+  // |SessionWrapper|
+  void Present() override;
+
+  // Used to implement VsyncWaiter functionality.
+  void AwaitVsync(FireCallbackCallback callback);
+  void AwaitVsyncForSecondaryCallback(FireCallbackCallback callback);
+
  private:
+  void PresentSession();
+
+  void FireCallbackMaybe();
+
+  FlutterFrameTimes GetTargetTimesHelper(bool secondary_callback);
+
+  VsyncInfo GetCurrentVsyncInfo() const;
+
   scenic::Session session_wrapper_;
 
   on_frame_presented_event on_frame_presented_callback_;
-
-  zx_handle_t vsync_event_handle_;
 
   fml::TimePoint last_latch_point_targeted_ =
       fml::TimePoint::FromEpochDelta(fml::TimeDelta::Zero());
@@ -74,15 +127,38 @@ class DefaultSessionConnection final : public flutter::SessionWrapper {
   // outstanding at any time. This is equivalent to how many times it has
   // called Present2() before receiving an OnFramePresented() event.
   const int kMaxFramesInFlight;
+
   int frames_in_flight_ = 0;
-
   int frames_in_flight_allowed_ = 0;
-
   bool present_session_pending_ = false;
 
-  void PresentSession();
+  // The time from vsync that the Flutter animator should begin its frames. This
+  // is non-zero so that Flutter and Scenic compete less for CPU and GPU time.
+  fml::TimeDelta vsync_offset_;
 
-  static void ToggleSignal(zx_handle_t handle, bool raise);
+  // Variables for recording past and future vsync info, as reported by Scenic.
+  fml::TimePoint last_presentation_time_ = fml::TimePoint::Now();
+  fuchsia::scenic::scheduling::PresentationInfo next_presentation_info_;
+
+  // Flutter framework pipeline logic.
+
+  // The following fields can be accessed from both the raster and UI threads,
+  // so guard them with this mutex. If performance dictates, this could probably
+  // be made lock-free, but it's much easier to reason about with this mutex.
+  std::mutex mutex_;
+
+  // This is the last Vsync we submitted as the frame_target_time to
+  // FireCallback(). This value should be strictly increasing in order to
+  // guarantee that animation code that relies on target vsyncs works correctly,
+  // and that Flutter is not producing multiple frames in a small interval.
+  fml::TimePoint last_targeted_vsync_;
+
+  // This is true iff AwaitVSync() was called but we could not schedule a frame.
+  bool fire_callback_request_pending_ = false;
+
+  // The callback passed in from VsyncWaiter which eventually runs on the UI
+  // thread.
+  FireCallbackCallback fire_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DefaultSessionConnection);
 };
