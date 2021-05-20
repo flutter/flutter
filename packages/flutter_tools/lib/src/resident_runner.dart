@@ -1802,12 +1802,20 @@ abstract class DevtoolsLauncher {
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
   ///
+  /// [additionalArguments] may be optionally specified and are passed directly
+  /// to the devtools run command.
+  ///
   /// This method must return a future that is guaranteed not to fail, because it
   /// will be used in unawaited contexts.
-  @visibleForTesting
-  Future<void> launch(Uri vmServiceUri);
+  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments});
 
   Future<void> close();
+
+  /// When measuring devtools memory via addtional arguments, the launch process
+  /// will technically never complete.
+  ///
+  /// Us this as an indicator that the process has started.
+  Future<void> processStart;
 
   /// Returns a future that completes when the DevTools server is ready.
   ///

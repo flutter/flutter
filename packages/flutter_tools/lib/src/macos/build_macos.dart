@@ -62,7 +62,6 @@ Future<void> buildMacOS({
     buildInfo: buildInfo,
     targetOverride: targetOverride,
     useMacOSConfig: true,
-    setSymroot: false,
   );
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.

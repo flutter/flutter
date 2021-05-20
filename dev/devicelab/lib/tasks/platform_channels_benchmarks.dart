@@ -31,7 +31,7 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
         '.'
       ];
       print('\nExecuting: $flutterExe $createArgs $appDir');
-      utils.eval(flutterExe, createArgs);
+      await utils.eval(flutterExe, createArgs);
 
       final List<String> options = <String>[
         '-v',

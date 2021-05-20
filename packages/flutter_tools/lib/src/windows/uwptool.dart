@@ -10,7 +10,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 
@@ -23,16 +22,13 @@ import '../base/process.dart';
 class UwpTool {
   UwpTool({
     @required Artifacts artifacts,
-    @required FileSystem fileSystem,
     @required Logger logger,
     @required ProcessManager processManager,
   }) : _artifacts = artifacts,
-       _fileSystem = fileSystem,
        _logger = logger,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Artifacts _artifacts;
-  final FileSystem _fileSystem;
   final Logger _logger;
   final ProcessUtils _processUtils;
 
@@ -86,23 +82,69 @@ class UwpTool {
       return null;
     }
     // Read the process ID from stdout.
-    return int.tryParse(result.stdout.toString().trim());
+    final int processId = int.tryParse(result.stdout.toString().trim());
+    _logger.printTrace('Launched application $packageFamily with process ID $processId');
+    return processId;
+  }
+
+  /// Returns `true` if the specified package signature is valid.
+  Future<bool> isSignatureValid(String packagePath) async {
+    final List<String> launchCommand = <String>[
+      'powershell.exe',
+      '-command',
+      'if ((Get-AuthenticodeSignature "$packagePath").Status -eq "Valid") { exit 0 } else { exit 1 }'
+    ];
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printTrace('Invalid signature found for $packagePath');
+      return false;
+    }
+    _logger.printTrace('Valid signature found for $packagePath');
+    return true;
+  }
+
+  /// Installs a developer signing cerificate.
+  ///
+  /// Returns `true` on success.
+  Future<bool> installCertificate(String certificatePath) async {
+    final List<String> launchCommand = <String>[
+      'powershell.exe',
+      'start',
+      'certutil',
+      '-argumentlist',
+      '\'-addstore TrustedPeople "$certificatePath"\'',
+      '-verb',
+      'runas'
+    ];
+    final RunResult result = await _processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      _logger.printError('Failed to install certificate $certificatePath');
+      return false;
+    }
+    _logger.printTrace('Waiting for certificate store update');
+    // TODO(cbracken): Determine how we can query for success until some timeout.
+    // https://github.com/flutter/flutter/issues/82665
+    await Future<void>.delayed(const Duration(seconds: 1));
+    _logger.printTrace('Installed certificate $certificatePath');
+    return true;
   }
 
   /// Installs the app with the specified build directory.
   ///
   /// Returns `true` on success.
-  Future<bool> installApp(String buildDirectory) async {
+  Future<bool> installApp(String packageUri, List<String> dependencyUris) async {
     final List<String> launchCommand = <String>[
-      'powershell.exe',
-      _fileSystem.path.join(buildDirectory, 'install.ps1'),
-    ];
+      _binaryPath,
+      'install',
+      packageUri,
+    ] + dependencyUris;
     final RunResult result = await _processUtils.run(launchCommand);
     if (result.exitCode != 0) {
-      _logger.printError(result.stdout.toString());
-      _logger.printError(result.stderr.toString());
+      _logger.printError('Failed to install $packageUri');
+      return false;
     }
-    return result.exitCode == 0;
+    _logger.printTrace('Installed application $packageUri');
+    return true;
   }
 
   Future<bool> uninstallApp(String packageFamily) async {
@@ -116,6 +158,7 @@ class UwpTool {
       _logger.printError('Failed to uninstall $packageFamily');
       return false;
     }
+    _logger.printTrace('Uninstalled application $packageFamily');
     return true;
   }
 }
