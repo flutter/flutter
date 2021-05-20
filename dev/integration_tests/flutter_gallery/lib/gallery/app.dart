@@ -45,7 +45,7 @@ class GalleryApp extends StatefulWidget {
 class _GalleryAppState extends State<GalleryApp> {
   GalleryOptions? _options;
   Timer? _timeDilationTimer;
-  late final AppStateModel model = AppStateModel()..loadProducts();
+  late AppStateModel model;
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
@@ -66,6 +66,7 @@ class _GalleryAppState extends State<GalleryApp> {
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
+    model = AppStateModel()..loadProducts();
   }
 
   @override
