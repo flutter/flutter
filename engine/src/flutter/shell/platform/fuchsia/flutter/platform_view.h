@@ -23,6 +23,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h"
 #include "flutter/shell/platform/fuchsia/flutter/keyboard.h"
+#include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 
 #include "accessibility_bridge.h"
 
@@ -71,8 +72,9 @@ class PlatformView final : public flutter::PlatformView,
                OnDestroyView on_destroy_view_callback,
                OnCreateSurface on_create_surface_callback,
                std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
-               fml::TimeDelta vsync_offset,
-               zx_handle_t vsync_event_handle);
+               AwaitVsyncCallback await_vsync_callback,
+               AwaitVsyncForSecondaryCallbackCallback
+                   await_vsync_for_secondary_callback_callback);
 
   ~PlatformView();
 
@@ -217,15 +219,16 @@ class PlatformView final : public flutter::PlatformView,
   // https://github.com/flutter/flutter/issues/55966
   std::set<std::string /* channel */> unregistered_channels_;
 
-  fml::TimeDelta vsync_offset_;
-  zx_handle_t vsync_event_handle_ = 0;
-
   // The registered binding for serving the keyboard listener server endpoint.
   fidl::Binding<fuchsia::ui::input3::KeyboardListener>
       keyboard_listener_binding_;
 
   // The keyboard translation for fuchsia.ui.input3.KeyEvent.
   Keyboard keyboard_;
+
+  AwaitVsyncCallback await_vsync_callback_;
+  AwaitVsyncForSecondaryCallbackCallback
+      await_vsync_for_secondary_callback_callback_;
 
   fml::WeakPtrFactory<PlatformView> weak_factory_;  // Must be the last member.
 

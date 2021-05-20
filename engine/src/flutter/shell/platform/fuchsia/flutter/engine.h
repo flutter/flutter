@@ -74,7 +74,7 @@ class Engine final {
   const std::string thread_label_;
   std::array<Thread, 3> threads_;
 
-  std::optional<DefaultSessionConnection> session_connection_;
+  std::shared_ptr<DefaultSessionConnection> session_connection_;
   std::optional<VulkanSurfaceProducer> surface_producer_;
   std::shared_ptr<FuchsiaExternalViewEmbedder> external_view_embedder_;
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
