@@ -1383,6 +1383,12 @@
       "web": [
         "Tab"
       ],
+      "macOs": [
+        "Tab"
+      ],
+      "ios": [
+        "Tab"
+      ],
       "gtk": [
         "Tab",
         "KP_Tab",
@@ -1396,6 +1402,12 @@
       ]
     },
     "values": {
+      "macOs": [
+        48
+      ],
+      "ios": [
+        43
+      ],
       "gtk": [
         65289,
         65417,
@@ -1420,6 +1432,12 @@
       "web": [
         "Enter"
       ],
+      "macOs": [
+        "Enter"
+      ],
+      "ios": [
+        "Enter"
+      ],
       "gtk": [
         "Return",
         "ISO_Enter",
@@ -1433,6 +1451,12 @@
       ]
     },
     "values": {
+      "macOs": [
+        36
+      ],
+      "ios": [
+        40
+      ],
       "gtk": [
         65293,
         65076,

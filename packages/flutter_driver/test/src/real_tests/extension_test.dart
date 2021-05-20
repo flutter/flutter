@@ -937,9 +937,9 @@ void main() {
             const Text('Foo', key: ValueKey<String>('Text1')),
             const Text('Bar', key: ValueKey<String>('Text2')),
             TextButton(
-              child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
               onPressed: () {},
+              child: const Text('Whatever'),
             ),
           ],
         ),
@@ -1043,9 +1043,9 @@ void main() {
         child: Column(
           children: <Widget>[
             TextButton(
-              child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
               onPressed: stubCallback,
+              child: const Text('Whatever'),
             ),
           ],
         ),

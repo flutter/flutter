@@ -342,7 +342,7 @@ class ReorderableListView extends StatefulWidget {
   final Widget? prototypeItem;
 
   @override
-  _ReorderableListViewState createState() => _ReorderableListViewState();
+  State<ReorderableListView> createState() => _ReorderableListViewState();
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {
@@ -491,8 +491,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         final double animValue = Curves.easeInOut.transform(animation.value);
         final double elevation = lerpDouble(0, 6, animValue)!;
         return Material(
-          child: child,
           elevation: elevation,
+          child: child,
         );
       },
       child: child,
@@ -557,7 +557,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         if (widget.header != null)
           SliverPadding(
             padding: headerPadding,
-            sliver: SliverToBoxAdapter(child: widget.header!),
+            sliver: SliverToBoxAdapter(child: widget.header),
           ),
         SliverPadding(
           padding: listPadding,

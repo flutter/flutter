@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(goderbauer): Remove this ignore when the documentation for the
+//   now private, then public typedefs is clear.
+// ignore_for_file: library_private_types_in_public_api
+
 @JS()
 library js_location_strategy;
 
