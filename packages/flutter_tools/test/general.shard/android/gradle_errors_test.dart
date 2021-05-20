@@ -30,6 +30,7 @@ void main() {
           r8FailureHandler,
           androidXFailureHandler,
           minSdkVersion,
+          transformInputIssue,
         ])
       );
     });
@@ -354,13 +355,13 @@ Command: /home/android/gradlew assembleRelease
         .handler(line: '', project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'app-not-using-plugins',
-          },
+          }),
         ),
       ));
 
@@ -389,13 +390,13 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'app-not-using-androidx',
-          },
+          }),
         ),
       ));
 
@@ -417,13 +418,13 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'using-jetifier',
-          },
+          }),
         ),
       ));
 
@@ -452,13 +453,13 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(testUsage.events, contains(
-        const TestUsageEvent(
+        TestUsageEvent(
           'build',
           'gradle',
           label: 'gradle-android-x-failure',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd43': 'not-using-jetifier',
-          },
+          }),
         ),
       ));
       expect(status, equals(GradleBuildStatus.retryWithAarPlugins));
@@ -676,8 +677,46 @@ assembleProfile
           '  }\n'
           '}\n'
           '\n'
-          'Note that your app won\'t be available to users running Android SDKs below 19.\n'
+          "Note that your app won't be available to users running Android SDKs below 19.\n"
           'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
+          ''
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  // https://issuetracker.google.com/issues/141126614
+  group('transform input issue', () {
+    testWithoutContext('pattern', () {
+      expect(
+        transformInputIssue.test(
+          'https://issuetracker.google.com/issues/158753935'
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await transformInputIssue.handler(
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
+          'Fix this issue by adding the following to the file /android/app/build.gradle:\n'
+          'android {\n'
+          '  lintOptions {\n'
+          '    checkReleaseBuilds false\n'
+          '  }\n'
+          '}\n'
           ''
         )
       );

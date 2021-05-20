@@ -1000,5 +1000,38 @@ void main() {
     expect(table.column(2).last.runtimeType, isNot(toBeReplaced));
   });
 
+  testWidgets('Do not crash if a child that has not been layed out in a previous build is removed', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/60488.
+    Widget buildTable(Key key) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: <TableRow>[
+            TableRow(
+              children: <Widget>[
+                KeyedSubtree(
+                  key: key,
+                  child: const Text('Hello'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildTable(const ValueKey<int>(1)),
+      null, EnginePhase.build, // Children are not layed out!
+    );
+
+    await tester.pumpWidget(
+      buildTable(const ValueKey<int>(2)),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Hello'), findsOneWidget);
+  });
+
   // TODO(ianh): Test handling of TableCell object
 }

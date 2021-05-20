@@ -30,8 +30,6 @@ String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
 /// useMacOSConfig: Optional parameter that controls whether we use the macOS
 /// project file instead. Defaults to false.
 ///
-/// setSymroot: Optional parameter to control whether to set SYMROOT.
-///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
 Future<void> updateGeneratedXcodeProperties({
@@ -39,7 +37,6 @@ Future<void> updateGeneratedXcodeProperties({
   @required BuildInfo buildInfo,
   String targetOverride,
   bool useMacOSConfig = false,
-  bool setSymroot = true,
   String buildDirOverride,
 }) async {
   final List<String> xcodeBuildSettings = _xcodeBuildSettingsLines(
@@ -47,7 +44,6 @@ Future<void> updateGeneratedXcodeProperties({
     buildInfo: buildInfo,
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
-    setSymroot: setSymroot,
     buildDirOverride: buildDirOverride,
   );
 
@@ -149,7 +145,6 @@ List<String> _xcodeBuildSettingsLines({
   @required BuildInfo buildInfo,
   String targetOverride,
   bool useMacOSConfig = false,
-  bool setSymroot = true,
   String buildDirOverride,
 }) {
   final List<String> xcodeBuildSettings = <String>[];
@@ -171,10 +166,6 @@ List<String> _xcodeBuildSettingsLines({
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
-
-  if (setSymroot) {
-    xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
-  }
 
   final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');

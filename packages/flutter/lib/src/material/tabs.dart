@@ -606,13 +606,13 @@ class _TabBarScrollController extends ScrollController {
 ///       body: const TabBarView(
 ///         children: <Widget>[
 ///           Center(
-///             child: Text('It\'s cloudy here'),
+///             child: Text("It's cloudy here"),
 ///           ),
 ///           Center(
-///             child: Text('It\'s rainy here'),
+///             child: Text("It's rainy here"),
 ///           ),
 ///           Center(
-///             child: Text('It\'s sunny here'),
+///             child: Text("It's sunny here"),
 ///           ),
 ///         ],
 ///       ),
@@ -661,13 +661,13 @@ class _TabBarScrollController extends ScrollController {
 ///        controller: _tabController,
 ///        children: const <Widget>[
 ///          Center(
-///            child: Text('It\'s cloudy here'),
+///            child: Text("It's cloudy here"),
 ///          ),
 ///          Center(
-///            child: Text('It\'s rainy here'),
+///            child: Text("It's rainy here"),
 ///          ),
 ///          Center(
-///             child: Text('It\'s sunny here'),
+///             child: Text("It's sunny here"),
 ///          ),
 ///        ],
 ///      ),
@@ -700,6 +700,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     required this.tabs,
     this.controller,
     this.isScrollable = false,
+    this.padding,
     this.indicatorColor,
     this.automaticIndicatorColorAdjustment = true,
     this.indicatorWeight = 2.0,
@@ -742,6 +743,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// and the entire [TabBar] is scrollable. Otherwise each tab gets an equal
   /// share of the available space.
   final bool isScrollable;
+
+  /// The amount of space by which to inset the tab bar.
+  ///
+  /// When [isScrollable] is false, this will yield the same result as if you had wrapped your
+  /// [TabBar] in a [Padding] widget. When [isScrollable] is true, the scrollable itself is inset,
+  /// allowing the padding to scroll with the tab bar, rather than enclosing it.
+  final EdgeInsetsGeometry? padding;
 
   /// The color of the line that appears below the selected tab.
   ///
@@ -1294,7 +1302,13 @@ class _TabBarState extends State<TabBar> {
         dragStartBehavior: widget.dragStartBehavior,
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
+        padding: widget.padding,
         physics: widget.physics,
+        child: tabBar,
+      );
+    } else if (widget.padding != null) {
+      tabBar = Padding(
+        padding: widget.padding!,
         child: tabBar,
       );
     }

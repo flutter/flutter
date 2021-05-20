@@ -210,7 +210,7 @@ class FuchsiaRemoteConnection {
       SshCommandRunner(
         address: address,
         interface: interface,
-        sshConfigPath: sshConfigPath!,
+        sshConfigPath: sshConfigPath,
       ),
     );
   }

@@ -166,7 +166,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     try {
       await flutterDevice.vmService?.findExtensionIsolate(
         extension,
-        webIsolate: flutterDevice.targetPlatform == TargetPlatform.web_javascript,
       );
       return flutterDevice;
     } on VmServiceDisappearedException {

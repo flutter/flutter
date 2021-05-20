@@ -27,14 +27,14 @@ void main () {
 
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+      SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
         final Map<dynamic, dynamic> typedMessage = message as Map<dynamic, dynamic>;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });
     });
 
     tearDown(() {
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+      SystemChannels.accessibility.setMockMessageHandler(null);
     });
 
     testWidgets('forTap', (WidgetTester tester) async {
