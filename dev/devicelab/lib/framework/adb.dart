@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -591,13 +592,13 @@ class AndroidDevice extends Device {
           .listen((String line) {
             print('adb logcat stderr: $line');
           }, onDone: () { stderrDone.complete(); });
-        process.exitCode.then<void>((int exitCode) {
+        unawaited(process.exitCode.then<void>((int exitCode) {
           print('adb logcat process terminated with exit code $exitCode');
           if (!aborted) {
             stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.\n'));
             processDone.complete();
           }
-        });
+        }));
         await Future.any<dynamic>(<Future<dynamic>>[
           Future.wait<void>(<Future<void>>[
             stdoutDone.future,

@@ -1099,10 +1099,10 @@ class WidgetsApp extends StatefulWidget {
   /// Providing a restoration ID inserts a [RootRestorationScope] into the
   /// widget hierarchy, which enables state restoration for descendant widgets.
   ///
-  /// Providing a restoration ID also enables the [Navigator] built by the
-  /// [WidgetsApp] to restore its state (i.e. to restore the history stack of
-  /// active [Route]s). See the documentation on [Navigator] for more details
-  /// around state restoration of [Route]s.
+  /// Providing a restoration ID also enables the [Navigator] or [Router] built
+  /// by the [WidgetsApp] to restore its state (i.e. to restore the history
+  /// stack of active [Route]s). See the documentation on [Navigator] for more
+  /// details around state restoration of [Route]s.
   ///
   /// See also:
   ///
@@ -1518,6 +1518,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (_usesRouter) {
       assert(_effectiveRouteInformationProvider != null);
       routing = Router<Object>(
+        restorationScopeId: 'router',
         routeInformationProvider: _effectiveRouteInformationProvider,
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate!,

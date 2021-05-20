@@ -122,7 +122,7 @@ void main() {
           'build',
           'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -224,7 +224,7 @@ void main() {
           'build',
           'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -311,7 +311,7 @@ void main() {
           'build',
           'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -467,7 +467,7 @@ void main() {
           'build',
           'gradle',
           label: 'gradle-random-event-label-success',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);
@@ -675,7 +675,7 @@ void main() {
           'build',
           'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);

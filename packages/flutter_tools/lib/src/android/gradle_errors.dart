@@ -388,7 +388,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
         '  }\n'
         '}\n\n'
       )+
-      'Note that your app won\'t be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n'
+      "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n"
       'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
     );
     return GradleBuildStatus.exit;

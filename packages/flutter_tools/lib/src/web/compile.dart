@@ -26,6 +26,7 @@ Future<void> buildWeb(
   String serviceWorkerStrategy,
   bool sourceMaps,
   bool nativeNullAssertions,
+  String baseHref,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -49,6 +50,7 @@ Future<void> buildWeb(
         kTargetFile: target,
         kHasWebPlugins: hasWebPlugins.toString(),
         kCspMode: csp.toString(),
+        kBaseHref : baseHref,
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)

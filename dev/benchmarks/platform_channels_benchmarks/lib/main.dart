@@ -74,7 +74,7 @@ Future<double> _runBasicStandardLarge(BasicMessageChannel<Object> basicStandard,
 
   if (size != largeBuffer.length * count) {
     throw Exception(
-      'There is an error with the echo channel, the results don\'t add up: $size',
+      "There is an error with the echo channel, the results don't add up: $size",
     );
   }
 
@@ -94,7 +94,7 @@ Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
   watch.stop();
   if (size != buffer.lengthInBytes * count) {
     throw Exception(
-      'There is an error with the echo channel, the results don\'t add up: $size',
+      "There is an error with the echo channel, the results don't add up: $size",
     );
   }
 

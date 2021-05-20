@@ -64,7 +64,7 @@ linter:
     # - avoid_dynamic_calls # not yet tested
     - avoid_empty_else
     - avoid_equals_and_hash_code_on_mutable_classes
-    # - avoid_escaping_inner_quotes # not yet tested
+    - avoid_escaping_inner_quotes
     - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
     # - avoid_implementing_value_types # not yet tested
