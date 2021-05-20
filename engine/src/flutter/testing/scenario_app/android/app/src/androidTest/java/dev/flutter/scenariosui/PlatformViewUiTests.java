@@ -96,4 +96,10 @@ public class PlatformViewUiTests {
     intent.putExtra("scenario", "platform_view_two_intersecting_overlays");
     ScreenshotUtil.capture(activityRule.launchActivity(intent));
   }
+
+  @Test
+  public void testPlatformViewWithoutOverlayIntersection() throws Exception {
+    intent.putExtra("scenario", "platform_view_no_overlay_intersection");
+    ScreenshotUtil.capture(activityRule.launchActivity(intent));
+  }
 }

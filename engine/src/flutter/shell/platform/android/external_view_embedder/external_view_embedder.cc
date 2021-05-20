@@ -125,22 +125,19 @@ void AndroidExternalViewEmbedder::SubmitFrame(
         joined_rect.join(rect);
       }
     }
-
-    if (joined_rect.isEmpty()) {
-      continue;
+    if (!joined_rect.isEmpty()) {
+      // Subpixels in the platform may not align with the canvas subpixels.
+      //
+      // To workaround it, round the floating point bounds and make the rect
+      // slightly larger.
+      //
+      // For example, {0.3, 0.5, 3.1, 4.7} becomes {0, 0, 4, 5}.
+      joined_rect.set(joined_rect.roundOut());
+      overlay_layers.insert({view_id, joined_rect});
+      // Clip the background canvas, so it doesn't contain any of the pixels
+      // drawn on the overlay layer.
+      background_canvas->clipRect(joined_rect, SkClipOp::kDifference);
     }
-
-    // Subpixels in the platform may not align with the canvas subpixels.
-    //
-    // To workaround it, round the floating point bounds and make the rect
-    // slightly larger.
-    //
-    // For example, {0.3, 0.5, 3.1, 4.7} becomes {0, 0, 4, 5}.
-    joined_rect.set(joined_rect.roundOut());
-    overlay_layers.insert({view_id, joined_rect});
-    // Clip the background canvas, so it doesn't contain any of the pixels
-    // drawn on the overlay layer.
-    background_canvas->clipRect(joined_rect, SkClipOp::kDifference);
     background_canvas->drawPicture(pictures.at(view_id));
   }
   // Submit the background canvas frame before switching the GL context to
