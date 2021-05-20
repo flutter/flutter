@@ -71,5 +71,12 @@ void main() {
       ServicesBinding.instance!.defaultBinaryMessenger
           .setMessageHandler('test_send', null);
     });
+
+    test('throws when trying to set a mock handler', () {
+      expect(
+          () => pluginBinaryMessenger.setMockMessageHandler(
+              'test', (ByteData? data) async => ByteData(0)),
+          throwsFlutterError);
+    });
   });
 }

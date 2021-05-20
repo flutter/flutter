@@ -502,7 +502,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   const HomePage({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _HomePageState createState() => _HomePageState();
+  ///   State<HomePage> createState() => _HomePageState();
   /// }
   ///
   /// class _HomePageState extends State<HomePage> {
@@ -532,7 +532,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   const SecondPage({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _SecondPageState createState() => _SecondPageState();
+  ///   State<SecondPage> createState() => _SecondPageState();
   /// }
   ///
   /// class _SecondPageState extends State<SecondPage> {
@@ -1823,9 +1823,9 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: _pageBuilder(context, animation, secondaryAnimation),
       scopesRoute: true,
       explicitChildNodes: true,
+      child: _pageBuilder(context, animation, secondaryAnimation),
     );
   }
 

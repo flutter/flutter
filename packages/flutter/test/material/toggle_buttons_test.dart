@@ -171,8 +171,8 @@ void main() {
   testWidgets(
     'children and isSelected properties have to be the same length',
     (WidgetTester tester) async {
-      try {
-        await tester.pumpWidget(
+      await expectLater(
+        () => tester.pumpWidget(
           Material(
             child: boilerplate(
               child: ToggleButtons(
@@ -184,13 +184,16 @@ void main() {
               ),
             ),
           ),
-        );
-        fail('Should not be possible to create a toggle button with mismatching '
-            'children.length and isSelected.length.');
-      } on AssertionError catch (e) {
-        expect(e.toString(), contains('children.length'));
-        expect(e.toString(), contains('isSelected.length'));
-      }
+        ),
+        throwsA(isAssertionError.having(
+          (AssertionError error) => error.toString(),
+          '.toString()',
+          allOf(
+            contains('children.length'),
+            contains('isSelected.length'),
+          ),
+        )),
+      );
     },
   );
 
@@ -1576,7 +1579,7 @@ void main() {
       'borderRadius: BorderRadius.circular(7.0)',
       'borderWidth: 3.0',
       'direction: Axis.vertical',
-      'verticalDirection: VerticalDirection.up'
+      'verticalDirection: VerticalDirection.up',
     ]);
   });
 

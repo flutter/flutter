@@ -153,7 +153,7 @@ void main() {
         '           ║ TextSpan:\n'
         '           ║   <all styles inherited>\n'
         '           ║   "1"\n'
-        '           ╚═══════════\n'
+        '           ╚═══════════\n',
       ),
     );
   });

@@ -372,7 +372,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///             ),
 ///             validator: (String? value) {
 ///               if (value == null || value.isEmpty) {
-///                 return 'Can\'t be empty.';
+///                 return "Can't be empty.";
 ///               }
 ///               return null;
 ///             },
@@ -505,7 +505,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert((focusNode == null) == (textEditingController == null)),
        assert(
          !(textEditingController != null && initialValue != null),
-         'textEditingController and initialValue cannot be simultaneously defined.'
+         'textEditingController and initialValue cannot be simultaneously defined.',
        ),
        super(key: key);
 
@@ -703,7 +703,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   }
 
   @override
-  _RawAutocompleteState<T> createState() => _RawAutocompleteState<T>();
+  State<RawAutocomplete<T>> createState() => _RawAutocompleteState<T>();
 }
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {

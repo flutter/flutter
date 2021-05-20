@@ -12,7 +12,7 @@ void main() {
       builder: (BuildContext context) {
         log.add(Directionality.of(context));
         return const Placeholder();
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -74,8 +74,8 @@ void main() {
           child: Container(
             key: hasDirectionality,
           ),
-        )
-      )
+        ),
+      ),
     );
     expect(Directionality.maybeOf(noDirectionality.currentContext!), isNull);
     expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);

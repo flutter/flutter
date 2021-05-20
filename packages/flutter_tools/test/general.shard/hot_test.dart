@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -18,7 +19,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
@@ -144,29 +145,7 @@ void main() {
 
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    final MockDevFs mockDevFs = MockDevFs();
     FileSystem fileSystem;
-
-    when(mockDevFs.update(
-      mainUri: anyNamed('mainUri'),
-      target: anyNamed('target'),
-      bundle: anyNamed('bundle'),
-      firstBuildTime: anyNamed('firstBuildTime'),
-      bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      generator: anyNamed('generator'),
-      fullRestart: anyNamed('fullRestart'),
-      dillOutputPath: anyNamed('dillOutputPath'),
-      trackWidgetCreation: anyNamed('trackWidgetCreation'),
-      projectRootPath: anyNamed('projectRootPath'),
-      pathToReload: anyNamed('pathToReload'),
-      invalidatedFiles: anyNamed('invalidatedFiles'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation _) => Future<UpdateFSReport>.value(
-        UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
-    when(mockDevFs.assetPathsToEvict).thenReturn(<String>{});
-    when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
-    when(mockDevFs.sources).thenReturn(<Uri>[Uri.file('test')]);
-    when(mockDevFs.lastCompiled).thenReturn(DateTime.now());
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -176,12 +155,9 @@ void main() {
       fileSystem.file('.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(true);
-      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
+      final FakeDevice device = FakeDevice();
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = MockDevFs(),
+        FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = FakeDevFs(),
       ];
       final OperationResult result = await HotRunner(
         devices,
@@ -212,12 +188,9 @@ void main() {
         fileSystem.file('.packages')
           ..createSync(recursive: true)
           ..writeAsStringSync('\n');
-        final MockDevice mockDevice = MockDevice();
-        when(mockDevice.supportsHotReload).thenReturn(true);
-        when(mockDevice.supportsHotRestart).thenReturn(true);
-        when(mockDevice.supportsFlutterExit).thenReturn(false);
+        final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
+          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug),
         ];
         await HotRunner(
           devices,
@@ -237,12 +210,9 @@ void main() {
         fileSystem.file('.packages')
           ..createSync(recursive: true)
           ..writeAsStringSync('\n');
-        final MockDevice mockDevice = MockDevice();
-        when(mockDevice.supportsHotReload).thenReturn(true);
-        when(mockDevice.supportsHotRestart).thenReturn(true);
-        when(mockDevice.supportsFlutterExit).thenReturn(false);
+        final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
+          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug),
         ];
         await HotRunner(
           devices,
@@ -274,15 +244,10 @@ void main() {
         ..writeAsStringSync('\n');
 
       final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(false);
-      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
-      when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
-
+      final FakeDevice device = FakeDevice();
       final List<FlutterDevice> devices = <FlutterDevice>[
         TestFlutterDevice(
-          device: mockDevice,
+          device: device,
           generator: residentCompiler,
           exception: const HttpException('Connection closed before full header was received, '
               'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
@@ -306,22 +271,15 @@ void main() {
   });
 
   group('hot cleanupAtFinish()', () {
-    MockFlutterDevice mockFlutterDeviceFactory(Device device) {
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) => Future<void>.value(null));
-      when(mockFlutterDevice.device).thenReturn(device);
-      return mockFlutterDevice;
-    }
-
     testUsingContext('disposes each device', () async {
-      final MockDevice mockDevice1 = MockDevice();
-      final MockDevice mockDevice2 = MockDevice();
-      final MockFlutterDevice mockFlutterDevice1 = mockFlutterDeviceFactory(mockDevice1);
-      final MockFlutterDevice mockFlutterDevice2 = mockFlutterDeviceFactory(mockDevice2);
+      final FakeDevice device1 = FakeDevice();
+      final FakeDevice device2 = FakeDevice();
+      final FakeFlutterDevice flutterDevice1 = FakeFlutterDevice(device1);
+      final FakeFlutterDevice flutterDevice2 = FakeFlutterDevice(device2);
 
       final List<FlutterDevice> devices = <FlutterDevice>[
-        mockFlutterDevice1,
-        mockFlutterDevice2,
+        flutterDevice1,
+        flutterDevice2,
       ];
 
       await HotRunner(devices,
@@ -329,23 +287,74 @@ void main() {
         target: 'main.dart',
       ).cleanupAtFinish();
 
-      verify(mockDevice1.dispose());
-      verify(mockFlutterDevice1.stopEchoingDeviceLog());
-      verify(mockDevice2.dispose());
-      verify(mockFlutterDevice2.stopEchoingDeviceLog());
+      expect(device1.disposed, true);
+      expect(device2.disposed, true);
+
+      expect(flutterDevice1.stoppedEchoingDeviceLog, true);
+      expect(flutterDevice2.stoppedEchoingDeviceLog, true);
     });
   });
 }
 
-class MockDevFs extends Mock implements DevFS {}
+class FakeDevFs extends Fake implements DevFS {
+  @override
+  Future<void> destroy() async { }
+}
 
-class MockDevice extends Mock implements Device {
-  MockDevice() {
-    when(isSupported()).thenReturn(true);
+class FakeDevice extends Fake implements Device {
+  bool disposed = false;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool supportsHotReload = true;
+
+  @override
+  bool supportsHotRestart = true;
+
+  @override
+  bool supportsFlutterExit = true;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'Tester';
+
+  @override
+  Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<bool> stopApp(
+    covariant ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
+    return true;
+  }
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
   }
 }
 
-class MockFlutterDevice extends Mock implements FlutterDevice {}
+class FakeFlutterDevice extends Fake implements FlutterDevice {
+  FakeFlutterDevice(this.device);
+
+  bool stoppedEchoingDeviceLog = false;
+
+  @override
+  final FakeDevice device;
+
+  @override
+  Future<void> stopEchoingDeviceLog() async {
+    stoppedEchoingDeviceLog = true;
+  }
+
+  @override
+  DevFS devFS = FakeDevFs();
+}
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({

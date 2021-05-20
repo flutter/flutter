@@ -520,6 +520,7 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
+// ignore_for_file: directives_ordering
 // ignore_for_file: lines_longer_than_80_chars
 
 {{#plugins}}
@@ -1097,7 +1098,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         if (defaultImplementation == null) {
           if (throwOnPluginPubspecError) {
             globals.printError(
-              'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
+              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor sets "
               'a default implementation in pubspec.yaml.\n\n'
               'To set a default implementation, use:\n'
               'flutter:\n'

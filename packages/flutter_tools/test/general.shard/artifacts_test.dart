@@ -178,7 +178,7 @@ void main() {
         'ios-release',
       );
       expect(
-        artifacts.getEngineType(TargetPlatform.darwin_x64),
+        artifacts.getEngineType(TargetPlatform.darwin),
         'darwin-x64',
       );
     });
@@ -308,7 +308,7 @@ void main() {
         'android_debug_unopt',
       );
       expect(
-        artifacts.getEngineType(TargetPlatform.darwin_x64),
+        artifacts.getEngineType(TargetPlatform.darwin),
         'android_debug_unopt',
       );
     });

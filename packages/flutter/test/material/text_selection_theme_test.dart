@@ -79,7 +79,9 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return materialTextSelectionControls.buildHandle(
-                context, TextSelectionHandleType.left, 10.0
+                context,
+                TextSelectionHandleType.left,
+                10.0,
               );
             },
           ),
@@ -124,7 +126,9 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return materialTextSelectionControls.buildHandle(
-                  context, TextSelectionHandleType.left, 10.0
+                context,
+                TextSelectionHandleType.left,
+                10.0,
               );
             },
           ),
@@ -179,7 +183,9 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return materialTextSelectionControls.buildHandle(
-                    context, TextSelectionHandleType.left, 10.0
+                  context,
+                  TextSelectionHandleType.left,
+                  10.0,
                 );
               },
             ),

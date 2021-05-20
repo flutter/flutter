@@ -218,7 +218,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  _RenderOverflowBar createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return _RenderOverflowBar(
       spacing: spacing,
       overflowSpacing: overflowSpacing,
@@ -230,8 +230,8 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderOverflowBar renderObject) {
-    renderObject
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderOverflowBar)
       ..spacing = spacing
       ..overflowSpacing = overflowSpacing
       ..overflowAlignment = overflowAlignment
@@ -510,17 +510,25 @@ class _RenderOverflowBar extends RenderBox
       }
       size = constraints.constrain(Size(constraints.maxWidth, y - overflowSpacing));
     } else {
-      // Default horizontal layout
-      child = rtl ? lastChild : firstChild;
-      RenderBox? nextChild() => rtl ? childBefore(child!) : childAfter(child!);
-      double x  = 0;
+      // Default horizontal layout.
+      size = constraints.constrain(Size(actualWidth, maxChildHeight));
+      child = firstChild;
+      double x = rtl ? size.width - child!.size.width : 0;
       while (child != null) {
         final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
         childParentData.offset = Offset(x, (maxChildHeight - child.size.height) / 2);
-        x += child.size.width + spacing;
-        child = nextChild();
+        // x is the horizontal origin of child. To advance x to the next child's
+        // origin for LTR: add the width of the current child. To advance x to
+        // the origin of the next child for RTL: subtract the width of the next
+        // child (if there is one).
+        if (!rtl) {
+          x += child.size.width + spacing;
+        }
+        child = childAfter(child);
+        if (rtl && child != null) {
+          x -= child.size.width + spacing;
+        }
       }
-      size = constraints.constrain(Size(actualWidth, maxChildHeight));
     }
   }
 

@@ -674,7 +674,7 @@ void main() {
                     TextFormField(
                       initialValue: initialValue,
                       validator: errorText,
-                    )
+                    ),
                   ],
                 ),
               ),

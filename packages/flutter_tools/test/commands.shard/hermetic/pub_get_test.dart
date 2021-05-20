@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -42,11 +41,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, <CustomDimensions, Object>{
-      CustomDimensions.commandPackagesNumberPlugins: '0',
-      CustomDimensions.commandPackagesProjectModule: 'false',
-      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
-    });
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -67,11 +66,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, <CustomDimensions, Object>{
-      CustomDimensions.commandPackagesNumberPlugins: '0',
-      CustomDimensions.commandPackagesProjectModule: 'false',
-      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
-    });
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -87,11 +86,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, <CustomDimensions, Object>{
-      CustomDimensions.commandPackagesNumberPlugins: '0',
-      CustomDimensions.commandPackagesProjectModule: 'false',
-      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
-    });
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),

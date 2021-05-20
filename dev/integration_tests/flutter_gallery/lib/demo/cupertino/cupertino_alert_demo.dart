@@ -12,7 +12,7 @@ class CupertinoAlertDemo extends StatefulWidget {
   static const String routeName = '/cupertino/alert';
 
   @override
-  _CupertinoAlertDemoState createState() => _CupertinoAlertDemoState();
+  State<CupertinoAlertDemo> createState() => _CupertinoAlertDemoState();
 }
 
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
@@ -70,20 +70,20 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Alert with Title'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Alert with Title'),
                         onPressed: () => _onAlertWithTitlePress(context),
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Alert with Buttons'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Alert with Buttons'),
                         onPressed: () => _onAlertWithButtonsPress(context),
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Alert Buttons Only'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Alert Buttons Only'),
                         onPressed: () {
                           showDemoDialog(
                             context: context,
@@ -93,8 +93,8 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Action Sheet'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Action Sheet'),
                         onPressed: () => _onActionSheetPress(context),
                       ),
                     ],
@@ -120,13 +120,13 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
         title: const Text('Discard draft?'),
         actions: <Widget>[
           CupertinoDialogAction(
-            child: const Text('Discard'),
             isDestructiveAction: true,
+            child: const Text('Discard'),
             onPressed: () => Navigator.pop(context, 'Discard'),
           ),
           CupertinoDialogAction(
-            child: const Text('Cancel'),
             isDefaultAction: true,
+            child: const Text('Cancel'),
             onPressed: () => Navigator.pop(context, 'Cancel'),
           ),
         ],
@@ -188,8 +188,8 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
           isDefaultAction: true,
+          child: const Text('Cancel'),
           onPressed: () => Navigator.pop(context, 'Cancel'),
         ),
       ),
@@ -252,8 +252,8 @@ class CupertinoDessertDialog extends StatelessWidget {
           },
         ),
         CupertinoDialogAction(
-          child: const Text('Cancel'),
           isDestructiveAction: true,
+          child: const Text('Cancel'),
           onPressed: () {
             Navigator.pop(context, 'Cancel');
           },

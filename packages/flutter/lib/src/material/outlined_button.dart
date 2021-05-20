@@ -118,7 +118,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [primary], and [onSurface] colors are used to to create a
+  /// The [primary], and [onSurface] colors are used to create a
   /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
   /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
   /// names. Specify a value for [primary] to specify the color of the button's

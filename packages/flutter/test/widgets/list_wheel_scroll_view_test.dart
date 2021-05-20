@@ -36,8 +36,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
-          children: <Widget>[Container()],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container()],
         ),
       ),
     );
@@ -50,16 +50,18 @@ void main() {
 
   group('construction check', () {
     testWidgets('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
-      try {
-        ListWheelScrollView(
+      expect(
+        () => ListWheelScrollView(
           diameterRatio: nonconst(-2.0),
           itemExtent: 20.0,
           children: const <Widget>[],
-        );
-        fail('Expected failure with negative diameterRatio');
-      } on AssertionError catch (exception) {
-        expect(exception.message, contains("You can't set a diameterRatio of 0"));
-      }
+        ),
+        throwsA(isAssertionError.having(
+          (AssertionError error) => error.message,
+          'message',
+          contains("You can't set a diameterRatio of 0"),
+        )),
+      );
     });
 
     testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {
@@ -784,8 +786,7 @@ void main() {
     });
 
     testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController(
-          initialScrollOffset: 200.0);
+      final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
 
       await tester.pumpWidget(
         Directionality(
@@ -807,27 +808,30 @@ void main() {
       );
 
       final RenderListWheelViewport viewport = tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
-      expect(viewport, paints
-        ..transform(
-          matrix4: equals(<dynamic>[
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            moreOrLessEquals(0.6318744917928063),
-            moreOrLessEquals(0.3420201433256688),
-            moreOrLessEquals(-0.0010260604299770066),
-            0.0,
-            moreOrLessEquals(-1.1877435020329863),
-            moreOrLessEquals(0.9396926207859083),
-            moreOrLessEquals(-0.002819077862357725),
-            0.0,
-            moreOrLessEquals(-62.20844875763376),
-            moreOrLessEquals(-138.79047052615562),
-            moreOrLessEquals(1.4163714115784667),
-          ]),
-        ));
+      expect(
+        viewport,
+        paints
+          ..transform(
+            matrix4: equals(<dynamic>[
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              moreOrLessEquals(0.6318744917928063),
+              moreOrLessEquals(0.3420201433256688),
+              moreOrLessEquals(-0.0010260604299770066),
+              0.0,
+              moreOrLessEquals(-1.1877435020329863),
+              moreOrLessEquals(0.9396926207859083),
+              moreOrLessEquals(-0.002819077862357725),
+              0.0,
+              moreOrLessEquals(-62.20844875763376),
+              moreOrLessEquals(-138.79047052615562),
+              moreOrLessEquals(1.4163714115784667),
+            ]),
+          ),
+      );
 
       controller.jumpTo(0.0);
 
@@ -852,28 +856,30 @@ void main() {
         ),
       );
 
-      expect(viewport, paints
-        ..transform(
-          matrix4: equals(<dynamic>[
-            1.5,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.5,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.5,
-            0.0,
-            0.0,
-            -150.0,
-            0.0,
-            1.0,
-          ]),
-        ));
-
+      expect(
+        viewport,
+        paints
+          ..transform(
+            matrix4: equals(<dynamic>[
+              1.5,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.5,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.5,
+              0.0,
+              0.0,
+              -150.0,
+              0.0,
+              1.0,
+            ]),
+          ),
+      );
     });
   });
 

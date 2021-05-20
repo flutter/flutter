@@ -40,7 +40,7 @@ class Calculator {
         if (key is int && i++ % _NOTIFY_INTERVAL == 0)
           onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
         return value;
-      }
+      },
     );
     try {
       final List<dynamic> result = decoder.convert(_data) as List<dynamic>;
@@ -249,14 +249,14 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
           Opacity(
             opacity: _calculationManager.isRunning ? 1.0 : 0.0,
             child: CircularProgressIndicator(
-              value: _progress
+              value: _progress,
             ),
           ),
           Text(_status),
           Center(
             child: ElevatedButton(
-              child: Text(_label),
               onPressed: _handleButtonPressed,
+              child: Text(_label),
             ),
           ),
           Text(_result),

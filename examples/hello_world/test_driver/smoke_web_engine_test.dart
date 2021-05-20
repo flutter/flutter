@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:webdriver/async_io.dart';
 
 /// The following test is used as a simple smoke test for verifying Flutter
@@ -31,9 +31,8 @@ void main() {
     });
 
     test('enable accessibility', () async {
-      await driver.enableAccessibility();
+      await driver.setSemantics(true);
 
-      // TODO(ianh): this delay violates our style guide. We should instead wait for a triggering event.
       await Future<void>.delayed(const Duration(seconds: 2));
 
       // Elements with tag "flt-semantics" would show up after enabling

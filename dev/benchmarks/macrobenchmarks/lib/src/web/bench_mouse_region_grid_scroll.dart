@@ -21,7 +21,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
 
   static const String benchmarkName = 'bench_mouse_region_grid_scroll';
 
-  final _Tester tester = _Tester();
+  final _Tester _tester = _Tester();
 
   // Use a non-trivial border to force Web to switch painter
   Border _getBorder(int columnIndex, int rowIndex) {
@@ -42,8 +42,8 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        tester.start();
-        registerDidStop(tester.stop);
+        _tester.start();
+        registerDidStop(_tester.stop);
       });
     }
     super.frameDidDraw();

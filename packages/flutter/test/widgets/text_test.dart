@@ -37,7 +37,7 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: Text('Hello', textDirection: TextDirection.ltr))
+      const Center(child: Text('Hello', textDirection: TextDirection.ltr)),
     );
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -65,8 +65,11 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
-      child: Text('Hello',
-        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr),
+      child: Text(
+        'Hello',
+        style: TextStyle(fontSize: 20.0),
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -77,10 +80,12 @@ void main() {
     expect(baseSize.height, equals(20.0));
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello',
+      child: Text(
+        'Hello',
         style: TextStyle(fontSize: 20.0),
         textScaleFactor: 1.3,
-        textDirection: TextDirection.ltr),
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -266,7 +271,7 @@ void main() {
         r'$$',
         semanticsLabel: 'Double dollars',
         textDirection: TextDirection.ltr,
-      )
+      ),
     );
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -289,7 +294,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text(r'$$', semanticsLabel: 'Double dollars')),
+        child: Text(r'$$', semanticsLabel: 'Double dollars'),
+      ),
     );
 
     expect(
@@ -310,16 +316,17 @@ void main() {
       textDirection: TextDirection.ltr,
       child: RichText(
         text: TextSpan(
-        children: <InlineSpan>[
-          const TextSpan(
-            text: 'Some Text',
-            semanticsLabel: '',
-          ),
-          TextSpan(
-            text: 'Clickable',
-            recognizer: TapGestureRecognizer()..onTap = () { },
-          ),
-        ]),
+          children: <InlineSpan>[
+            const TextSpan(
+              text: 'Some Text',
+              semanticsLabel: '',
+            ),
+            TextSpan(
+              text: 'Clickable',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
+          ],
+        ),
       ),
     ));
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -620,7 +627,7 @@ void main() {
               label: 'click me',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[SemanticsAction.tap],
-              flags: <SemanticsFlag>[SemanticsFlag.isLink]
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
         ),
@@ -981,7 +988,9 @@ void main() {
           throw 'paragraph.width (${paragraph.width}) >= 400';
         return true;
       }));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
+    },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44020
+  );
 
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
@@ -1004,7 +1013,7 @@ void main() {
             text: 'HELLO',
             style: const TextStyle(color: Colors.black),
             recognizer: TapGestureRecognizer()..onTap = () {},
-          )
+          ),
         ]),
       ),
     );
@@ -1056,7 +1065,7 @@ void main() {
             const WidgetSpan(child: Text('included2')),
           ]),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1114,7 +1123,7 @@ void main() {
             ),
           ]),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1185,7 +1194,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(

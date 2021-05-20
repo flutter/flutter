@@ -28,6 +28,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/targets/web.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
@@ -42,21 +43,23 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
 
-typedef DwdsLauncher = Future<Dwds> Function(
-    {@required AssetReader assetReader,
-    @required Stream<BuildResult> buildResults,
-    @required ConnectionProvider chromeConnection,
-    @required LoadStrategy loadStrategy,
-    @required bool enableDebugging,
-    ExpressionCompiler expressionCompiler,
-    bool enableDebugExtension,
-    String hostname,
-    bool useSseForDebugProxy,
-    bool useSseForDebugBackend,
-    bool useSseForInjectedClient,
-    bool serveDevTools,
-    UrlEncoder urlEncoder,
-    bool spawnDds});
+typedef DwdsLauncher = Future<Dwds> Function({
+  @required AssetReader assetReader,
+  @required Stream<BuildResult> buildResults,
+  @required ConnectionProvider chromeConnection,
+  @required LoadStrategy loadStrategy,
+  @required bool enableDebugging,
+  ExpressionCompiler expressionCompiler,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool useSseForDebugBackend,
+  bool useSseForInjectedClient,
+  UrlEncoder urlEncoder,
+  bool spawnDds,
+  bool enableDevtoolsLaunch,
+  DevtoolsLauncher devtoolsLauncher,
+});
 
 // A minimal index for projects that do not yet support web.
 const String _kDefaultIndex = '''
@@ -74,9 +77,12 @@ const String _kDefaultIndex = '''
 ///
 /// This is only used in development mode.
 class WebExpressionCompiler implements ExpressionCompiler {
-  WebExpressionCompiler(this._generator);
+  WebExpressionCompiler(this._generator, {
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
 
   final ResidentCompiler _generator;
+  final FileSystem _fileSystem;
 
   @override
   Future<ExpressionCompilationResult> compileExpressionToJs(
@@ -95,13 +101,13 @@ class WebExpressionCompiler implements ExpressionCompiler {
 
     if (compilerOutput != null && compilerOutput.outputFilename != null) {
       final String content = utf8.decode(
-          globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+          _fileSystem.file(compilerOutput.outputFilename).readAsBytesSync());
       return ExpressionCompilationResult(
           content, compilerOutput.errorCount > 0);
     }
 
     return ExpressionCompilationResult(
-        'InternalError: frontend server failed to compile \'$expression\'',
+        "InternalError: frontend server failed to compile '$expression'",
         true);
   }
 
@@ -279,7 +285,6 @@ class WebAssetServer implements AssetReader {
       useSseForDebugProxy: useSseForDebugProxy,
       useSseForDebugBackend: useSseForDebugBackend,
       useSseForInjectedClient: useSseForInjectedClient,
-      serveDevTools: false,
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
@@ -484,6 +489,12 @@ class WebAssetServer implements AssetReader {
         .childFile('index.html');
 
     if (indexFile.existsSync()) {
+      String indexFileContent =  indexFile.readAsStringSync();
+      if (indexFileContent.contains(kBaseHrefPlaceholder)) {
+          indexFileContent =  indexFileContent.replaceAll(kBaseHrefPlaceholder, '/');
+          headers[HttpHeaders.contentLengthHeader] = indexFileContent.length.toString();
+          return shelf.Response.ok(indexFileContent,headers: headers);
+        }
       headers[HttpHeaders.contentLengthHeader] =
           indexFile.lengthSync().toString();
       return shelf.Response.ok(indexFile.openRead(), headers: headers);
@@ -1021,13 +1032,12 @@ String _stripTrailingSlashes(String path) {
 String _parseBasePathFromIndexHtml(File indexHtml) {
   final String htmlContent =
       indexHtml.existsSync() ? indexHtml.readAsStringSync() : _kDefaultIndex;
-
   final Document document = parse(htmlContent);
   final Element baseElement = document.querySelector('base');
   String baseHref =
       baseElement?.attributes == null ? null : baseElement.attributes['href'];
 
-  if (baseHref == null) {
+  if (baseHref == null || baseHref == kBaseHrefPlaceholder) {
     baseHref = '';
   } else if (!baseHref.startsWith('/')) {
     throw ToolExit(

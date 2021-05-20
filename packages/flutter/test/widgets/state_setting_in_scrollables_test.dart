@@ -68,7 +68,7 @@ class FooState extends State<Foo> {
             ],
           ),
         );
-      }
+      },
     );
   }
 }

@@ -232,9 +232,7 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
-  testWidgets('_PackageLicensePage title style without AppBarTheme', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('_PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -281,9 +279,7 @@ void main() {
     expect(subtitle.style, subtitleTextStyle);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
-  testWidgets('_PackageLicensePage title style with AppBarTheme', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('_PackageLicensePage title style with AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -683,7 +679,7 @@ void main() {
                   applicationName: 'MyApp',
                   applicationVersion: '1.0.0',
                 );
-              }
+              },
             ),
           ),
         ),
