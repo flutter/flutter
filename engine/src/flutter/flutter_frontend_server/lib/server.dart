@@ -15,91 +15,10 @@ import 'package:frontend_server/frontend_server.dart' as frontend
         CompilerInterface,
         listenAndCompile,
         argParser,
-        usage,
-        ProgramTransformer,
-        ToStringTransformer;
+        usage;
 import 'package:path/path.dart' as path;
-import 'package:vm/incremental_compiler.dart';
 
-/// Wrapper around [FrontendCompiler] that adds [widgetCreatorTracker] kernel
-/// transformation to the compilation.
-class _FlutterFrontendCompiler implements frontend.CompilerInterface {
-  final frontend.CompilerInterface _compiler;
-
-  _FlutterFrontendCompiler(StringSink output,
-      {bool unsafePackageSerialization,
-      bool useDebuggerModuleNames,
-      bool emitDebugMetadata,
-      frontend.ProgramTransformer transformer})
-      : _compiler = frontend.FrontendCompiler(output,
-            transformer: transformer,
-            useDebuggerModuleNames: useDebuggerModuleNames,
-            emitDebugMetadata: emitDebugMetadata,
-            unsafePackageSerialization: unsafePackageSerialization);
-
-  @override
-  Future<bool> compile(String filename, ArgResults options,
-      {IncrementalCompiler generator}) async {
-    return _compiler.compile(filename, options, generator: generator);
-  }
-
-  @override
-  Future<Null> recompileDelta({String entryPoint}) async { // ignore: prefer_void_to_null
-    return _compiler.recompileDelta(entryPoint: entryPoint);
-  }
-
-  @override
-  void acceptLastDelta() {
-    _compiler.acceptLastDelta();
-  }
-
-  @override
-  Future<void> rejectLastDelta() async {
-    return _compiler.rejectLastDelta();
-  }
-
-  @override
-  void invalidate(Uri uri) {
-    _compiler.invalidate(uri);
-  }
-
-  @override
-  Future<Null> compileExpression( // ignore: prefer_void_to_null
-      String expression,
-      List<String> definitions,
-      List<String> typeDefinitions,
-      String libraryUri,
-      String klass,
-      bool isStatic) {
-    return _compiler.compileExpression(
-        expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
-  }
-
-  @override
-  Future<Null> compileExpressionToJs( // ignore: prefer_void_to_null
-      String libraryUri,
-      int line,
-      int column,
-      Map<String, String> jsModules,
-      Map<String, String> jsFrameValues,
-      String moduleName,
-      String expression) {
-    return _compiler.compileExpressionToJs(libraryUri, line, column, jsModules,
-        jsFrameValues, moduleName, expression);
-  }
-
-  @override
-  void reportError(String msg) {
-    _compiler.reportError(msg);
-  }
-
-  @override
-  void resetIncrementalCompiler() {
-    _compiler.resetIncrementalCompiler();
-  }
-}
-
-/// Entry point for this module, that creates `_FrontendCompiler` instance and
+/// Entry point for this module, that creates `FrontendCompiler` instance and
 /// processes user input.
 /// `compiler` is an optional parameter so it can be replaced with mocked
 /// version for testing.
@@ -108,24 +27,8 @@ Future<int> starter(
   frontend.CompilerInterface compiler,
   Stream<List<int>> input,
   StringSink output,
-  frontend.ProgramTransformer transformer,
 }) async {
   ArgResults options;
-  // TODO(alexmarkov): Remove handling of --delete-tostring-package-uri option
-  //  after it is added to Dart SDK,
-  //  https://github.com/dart-lang/sdk/issues/46022.
-  final bool handleDeleteToString =
-      !frontend.argParser.options.containsKey('delete-tostring-package-uri');
-  if (handleDeleteToString) {
-    frontend.argParser.addMultiOption(
-      'delete-tostring-package-uri',
-      help:
-          'Replaces implementations of `toString` with `super.toString()` for '
-          'specified package',
-      valueHelp: 'dart:ui',
-      defaultsTo: const <String>[],
-    );
-  }
   try {
     options = frontend.argParser.parse(args);
   } catch (error) {
@@ -133,9 +36,6 @@ Future<int> starter(
     print(frontend.usage);
     return 1;
   }
-
-  final Set<String> deleteToStringPackageUris =
-      (options['delete-tostring-package-uri'] as List<String>).toSet();
 
   if (options['train'] as bool) {
     if (!options.rest.isNotEmpty) {
@@ -157,12 +57,7 @@ Future<int> starter(
           '--track-widget-creation',
           '--enable-asserts',
         ]);
-        compiler ??= _FlutterFrontendCompiler(
-          output,
-          transformer: handleDeleteToString
-              ? frontend.ToStringTransformer(null, deleteToStringPackageUris)
-              : null,
-        );
+        compiler ??= frontend.FrontendCompiler(output);
 
         await compiler.compile(input, options);
         compiler.acceptLastDelta();
@@ -180,10 +75,7 @@ Future<int> starter(
     }
   }
 
-  compiler ??= _FlutterFrontendCompiler(output,
-      transformer: handleDeleteToString
-          ? frontend.ToStringTransformer(transformer, deleteToStringPackageUris)
-          : null,
+  compiler ??= frontend.FrontendCompiler(output,
       useDebuggerModuleNames: options['debugger-module-names'] as bool,
       emitDebugMetadata: options['experimental-emit-debug-metadata'] as bool,
       unsafePackageSerialization:

@@ -40,8 +40,4 @@ part of dart.ui;
 ///   }
 /// }
 /// ```
-const _KeepToString keepToString = _KeepToString();
-
-class _KeepToString {
-  const _KeepToString();
-}
+const pragma keepToString = pragma('flutter:keep-to-string');
