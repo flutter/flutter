@@ -732,6 +732,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
+
     final List<Listenable> animations = <Listenable>[
       if (widget.route.animation != null) widget.route.animation!,
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
@@ -842,7 +843,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                             key: widget.route._subtreeKey, // immutable
                             child: Builder(
                               builder: (BuildContext context) {
-                                return SelectionArea(child: widget.route.buildPage(
+                                return SelectionArea(focusNode: focusScopeNode, child: widget.route.buildPage(
                                   context,
                                   widget.route.animation!,
                                   widget.route.secondaryAnimation!,

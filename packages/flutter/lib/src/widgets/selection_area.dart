@@ -4,11 +4,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
-import 'focus_scope.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'shortcuts.dart';
 
 /// A widget that introduces an area that allows for arbitrary text selection.
 class SelectionArea extends StatefulWidget {
@@ -17,6 +15,7 @@ class SelectionArea extends StatefulWidget {
     required this.child,
     Key? key,
     this.enabled = true,
+    required this.focusNode,
   }) : super(key: key);
 
   /// The child widget this selection area applies to.
@@ -30,6 +29,8 @@ class SelectionArea extends StatefulWidget {
   /// unless they are an editable subtype, or if the subtree is wrapped in a separate
   /// selection area widget.
   final bool enabled;
+
+  final FocusNode focusNode;
 
   @override
   State<SelectionArea> createState() => _SelectionAreaState();
@@ -55,8 +56,26 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
   Offset? _start;
   Offset? _end;
 
+  void _handleKeyEvent(RawKeyEvent event) {
+    if (!widget.focusNode.hasFocus)
+      return;
+    if (event.data is! RawKeyDownEvent)
+      return;
+    final RawKeyDownEvent down = event.data as RawKeyDownEvent;
+    if (down.isControlPressed) {
+      if (down.isKeyPressed(LogicalKeyboardKey.keyC)) {
+        _copy();
+      }
+
+      if (down.isKeyPressed(LogicalKeyboardKey.keyA)) {
+        _selectAll();
+      }
+    }
+  }
+
   @override
   void initState() {
+    RawKeyboard.instance.addListener(_handleKeyEvent);
     super.initState();
     _gestureRecognizers[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
       () => PanGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse}),
@@ -72,15 +91,9 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
     _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
         (TapGestureRecognizer instance) {
-          instance
-            .onTapDown = _handleTapDown;
+          instance.onTap = _cancelSelection;
         },
       );
-  }
-
-  @override
-  void didUpdateWidget(covariant SelectionArea oldWidget) {
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -89,6 +102,7 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
       selectable.clear();
     }
     _selectables.clear();
+    RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.dispose();
   }
 
@@ -118,12 +132,6 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
     _updateSelection(offset);
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    if (details.kind != PointerDeviceKind.mouse)
-      return;
-    _cancelSelection();
-  }
-
   void _startSelection(Offset offset) {
     _start = offset;
   }
@@ -143,13 +151,13 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
       selectable.clear();
   }
 
-  void _selectAll(Intent intent) {
+  void _selectAll() {
     _cancelSelection();
     _startSelection(Offset.zero);
     _updateSelection(Offset.infinite);
   }
 
-  Future<void> _copy(Intent intent) async {
+  Future<void> _copy() async {
     final List<Object> selections = <Object>[];
     for (final Selectable selectable in _selectables) {
       final Object? data = selectable.copy();
@@ -163,46 +171,14 @@ class _SelectionAreaState extends State<SelectionArea> implements SelectionServi
     Clipboard.setData(ClipboardData.text(selections.join('\n')));
   }
 
-  static const Map<ShortcutActivator, Intent> _kShortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.keyC, control: true): _CopyIntent(),
-    SingleActivator(LogicalKeyboardKey.keyA, control: true): _SelectAllIntent(),
-  };
-
   @override
   Widget build(BuildContext context) {
-    return Shortcuts(
-      shortcuts: _kShortcuts,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-         _SelectAllIntent: CallbackAction<Intent>(
-           onInvoke: _selectAll,
-         ),
-         _CopyIntent: CallbackAction<Intent>(
-           onInvoke: _copy,
-        ),
-       },
-        child: Focus(
-          autofocus: true,
-          child: RawGestureDetector(
-            key: _gestureDetectorKey,
-            gestures: _gestureRecognizers,
-            behavior: HitTestBehavior.translucent,
-            excludeFromSemantics: true,
-            child: widget.child,
-          ),
-        ),
-      ),
+    return RawGestureDetector(
+      key: _gestureDetectorKey,
+      gestures: _gestureRecognizers,
+      behavior: HitTestBehavior.translucent,
+      excludeFromSemantics: true,
+      child: widget.child,
     );
   }
-}
-
-/// A marker object used to signify the intent to select all visible objects.
-class _SelectAllIntent extends Intent {
-  const _SelectAllIntent();
-}
-
-/// A marker object used to signify the intent to copy all selected objects into
-/// the system clipboard.
-class _CopyIntent extends Intent {
-  const _CopyIntent();
 }
