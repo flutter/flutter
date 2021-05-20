@@ -550,13 +550,12 @@ void main() {
     expect(result.fatal, true);
     expect(result.code, 1);
     expect((globals.flutterUsage as TestUsage).events, contains(
-      TestUsageEvent('hot', 'exception', parameters: <String, String>{
-        cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-        cdKey(CustomDimensions.hotEventSdkName): 'Android',
-        cdKey(CustomDimensions.hotEventEmulator): 'false',
-        cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      }),
+      TestUsageEvent('hot', 'exception', parameters: CustomDimensions(
+        hotEventTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        hotEventSdkName: 'Android',
+        hotEventEmulator: false,
+        hotEventFullRestart: false,
+      )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -623,13 +622,12 @@ void main() {
     expect(result.message, contains('Unable to hot reload application due to an unrecoverable error'));
 
     expect((globals.flutterUsage as TestUsage).events, contains(
-      TestUsageEvent('hot', 'reload-barred', parameters: <String, String>{
-        cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-        cdKey(CustomDimensions.hotEventSdkName): 'Android',
-        cdKey(CustomDimensions.hotEventEmulator): 'false',
-        cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      }),
+      TestUsageEvent('hot', 'reload-barred', parameters: CustomDimensions(
+        hotEventTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        hotEventSdkName: 'Android',
+        hotEventEmulator: false,
+        hotEventFullRestart: false,
+      )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -686,13 +684,12 @@ void main() {
     expect(result.code, 1);
 
     expect((globals.flutterUsage as TestUsage).events, contains(
-      TestUsageEvent('hot', 'exception', parameters: <String, String>{
-        cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-        cdKey(CustomDimensions.hotEventSdkName): 'Android',
-        cdKey(CustomDimensions.hotEventEmulator): 'false',
-        cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      }),
+      TestUsageEvent('hot', 'exception', parameters: CustomDimensions(
+        hotEventTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        hotEventSdkName: 'Android',
+        hotEventEmulator: false,
+        hotEventFullRestart: false,
+      )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -981,10 +978,7 @@ void main() {
     final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
     expect(event.category, 'hot');
     expect(event.parameter, 'reload');
-    expect(event.parameters, containsPair(
-                  cdKey(CustomDimensions.hotEventTargetPlatform),
-                  getNameForTargetPlatform(TargetPlatform.android_arm),
-                ));
+    expect(event.parameters.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
@@ -1089,9 +1083,7 @@ void main() {
     final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
     expect(event.category, 'hot');
     expect(event.parameter, 'reload');
-    expect(event.parameters, containsPair(
-      cdKey(CustomDimensions.fastReassemble), 'true',
-    ));
+    expect(event.parameters.fastReassemble, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
@@ -1157,9 +1149,7 @@ void main() {
     final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
     expect(event.category, 'hot');
     expect(event.parameter, 'restart');
-    expect(event.parameters, containsPair(
-      cdKey(CustomDimensions.hotEventTargetPlatform), getNameForTargetPlatform(TargetPlatform.android_arm),
-    ));
+    expect(event.parameters.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
@@ -1395,13 +1385,12 @@ void main() {
     expect(result.code, 1);
 
     expect((globals.flutterUsage as TestUsage).events, contains(
-      TestUsageEvent('hot', 'exception', parameters: <String, String>{
-        cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-        cdKey(CustomDimensions.hotEventSdkName): 'Android',
-        cdKey(CustomDimensions.hotEventEmulator): 'false',
-        cdKey(CustomDimensions.hotEventFullRestart): 'true',
-      }),
+      TestUsageEvent('hot', 'exception', parameters: CustomDimensions(
+        hotEventTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        hotEventSdkName: 'Android',
+        hotEventEmulator: false,
+        hotEventFullRestart: true,
+      )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{

@@ -1043,7 +1043,7 @@ void main() {
     expect(exception, isAssertionError);
     expect(
       (exception as AssertionError).message,
-      contains('The Scrollbar\'s ScrollController has no ScrollPosition attached.'),
+      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });
 

@@ -606,13 +606,13 @@ class _TabBarScrollController extends ScrollController {
 ///       body: const TabBarView(
 ///         children: <Widget>[
 ///           Center(
-///             child: Text('It\'s cloudy here'),
+///             child: Text("It's cloudy here"),
 ///           ),
 ///           Center(
-///             child: Text('It\'s rainy here'),
+///             child: Text("It's rainy here"),
 ///           ),
 ///           Center(
-///             child: Text('It\'s sunny here'),
+///             child: Text("It's sunny here"),
 ///           ),
 ///         ],
 ///       ),
@@ -661,13 +661,13 @@ class _TabBarScrollController extends ScrollController {
 ///        controller: _tabController,
 ///        children: const <Widget>[
 ///          Center(
-///            child: Text('It\'s cloudy here'),
+///            child: Text("It's cloudy here"),
 ///          ),
 ///          Center(
-///            child: Text('It\'s rainy here'),
+///            child: Text("It's rainy here"),
 ///          ),
 ///          Center(
-///             child: Text('It\'s sunny here'),
+///             child: Text("It's sunny here"),
 ///          ),
 ///        ],
 ///      ),

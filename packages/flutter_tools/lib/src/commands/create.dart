@@ -79,12 +79,12 @@ class CreateCommand extends CreateBase {
   String get invocation => '${runner.executableName} $name <output directory>';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    return <CustomDimensions, String>{
-      CustomDimensions.commandCreateProjectType: stringArg('template'),
-      CustomDimensions.commandCreateAndroidLanguage: stringArg('android-language'),
-      CustomDimensions.commandCreateIosLanguage: stringArg('ios-language'),
-    };
+  Future<CustomDimensions> get usageValues async {
+    return CustomDimensions(
+      commandCreateProjectType: stringArg('template'),
+      commandCreateAndroidLanguage: stringArg('android-language'),
+      commandCreateIosLanguage: stringArg('ios-language'),
+    );
   }
 
   // Lazy-initialize the net utilities with values from the context.

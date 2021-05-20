@@ -441,7 +441,7 @@ void main() {
         command: args,
         stderr: 'Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: '
                 '_dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen '
-                '<= GL(dl_tls_generation)\' failed!',
+                "<= GL(dl_tls_generation)' failed!",
       ));
     }
 
