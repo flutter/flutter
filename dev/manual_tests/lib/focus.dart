@@ -24,16 +24,10 @@ class DemoButton extends StatefulWidget {
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  late FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = FocusNode(
+  late final FocusNode focusNode = FocusNode(
       debugLabel: widget.name,
       canRequestFocus: widget.canRequestFocus,
-    );
-  }
+  );
 
   @override
   void dispose() {

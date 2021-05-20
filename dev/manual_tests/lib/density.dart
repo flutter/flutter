@@ -398,13 +398,12 @@ class _ControlTile extends StatelessWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final OptionModel _model = OptionModel();
-  late TextEditingController textController;
+  final TextEditingController textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _model.addListener(_modelChanged);
-    textController = TextEditingController();
   }
 
   @override

@@ -129,14 +129,13 @@ class Fuzzer extends StatefulWidget {
 
 class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   TextSpan _textSpan = const TextSpan(text: 'Welcome to the Flutter text fuzzer.');
-  late Ticker _ticker;
+  late final Ticker _ticker = createTicker(_updateTextSpan)..start();
   late math.Random _random;
 
   @override
   void initState() {
     super.initState();
     _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_updateTextSpan)..start();
     _updateTextSpan(null);
   }
 
@@ -821,14 +820,13 @@ class Zalgo extends StatefulWidget {
 
 class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   String? _text;
-  late Ticker _ticker;
+  late final Ticker _ticker = createTicker(_update)..start();
   late math.Random _random;
 
   @override
   void initState() {
     super.initState();
     _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_update)..start();
     _update(null);
   }
 
@@ -928,14 +926,13 @@ class Painting extends StatefulWidget {
 
 class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin {
   String? _text;
-  late Ticker _ticker;
+  late final Ticker _ticker = createTicker(_update)..start();
   late math.Random _random;
 
   @override
   void initState() {
     super.initState();
     _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_update)..start();
     _update(null);
   }
 

@@ -303,14 +303,8 @@ class DemoButton extends StatefulWidget {
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  late FocusNode _focusNode;
+  late final FocusNode _focusNode = FocusNode(debugLabel: widget.name);
   final GlobalKey _nameKey = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode(debugLabel: widget.name);
-  }
 
   void _handleOnPressed() {
     print('Button ${widget.name} pressed.');
@@ -355,7 +349,7 @@ class FocusDemo extends StatefulWidget {
 }
 
 class _FocusDemoState extends State<FocusDemo> {
-  late FocusNode outlineFocus;
+  final FocusNode outlineFocus = FocusNode(debugLabel: 'Demo Focus Node');
   late UndoableActionDispatcher dispatcher;
   late bool canUndo;
   late bool canRedo;
@@ -363,7 +357,6 @@ class _FocusDemoState extends State<FocusDemo> {
   @override
   void initState() {
     super.initState();
-    outlineFocus = FocusNode(debugLabel: 'Demo Focus Node');
     dispatcher = UndoableActionDispatcher();
     canUndo = dispatcher.canUndo;
     canRedo = dispatcher.canRedo;
