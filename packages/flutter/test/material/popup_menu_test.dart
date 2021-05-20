@@ -2252,10 +2252,13 @@ void main() {
 
     // The menu should be positioned directly next to the top of the button.
     // The 8.0 pixels is [_kMenuScreenPadding].
-    expect(popupMenuTopRight, Offset(800.0 - padding.right - 8.0, button.dy + 8.0));
+    expect(popupMenuTopRight, Offset(800.0 - padding.right - 8.0, padding.top + 8.0));
 
     final Offset popupMenuTopLeft = tester.getTopLeft(find.byType(SingleChildScrollView));
-    expect(popupMenuTopLeft, Offset(padding.left + 8.0, button.dy + 8.0));
+    expect(popupMenuTopLeft, Offset(padding.left + 8.0, padding.top + 8.0));
+
+    final Offset popupMenuBottomLeft = tester.getBottomLeft(find.byType(SingleChildScrollView));
+    expect(popupMenuBottomLeft, Offset(padding.left + 8.0, 600.0 - padding.bottom - 8.0));
 
     // The `MediaQueryData.padding` should be removed.
     expect(mediaQueryPadding, EdgeInsets.zero);
