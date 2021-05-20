@@ -101,6 +101,11 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
 
   final String src;
   final Uint8List _bytes;
+  int _frameCount = 0;
+  int _repetitionCount = -1;
+
+  /// The index to the next frame to be decoded.
+  int _nextFrameIndex = 0;
 
   @override
   SkAnimatedImage createDefault() {
@@ -112,11 +117,23 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
         'Image source: $src',
       );
     }
+
+    _frameCount = animatedImage.getFrameCount();
+    _repetitionCount = animatedImage.getRepetitionCount();
+
+    // If the object has been deleted then resurrected, it may already have
+    // iterated over some frames. We need to skip over them.
+    for (int i = 0; i < _nextFrameIndex; i++) {
+      animatedImage.decodeNextFrame();
+    }
     return animatedImage;
   }
 
   @override
   SkAnimatedImage resurrect() => createDefault();
+
+  @override
+  bool get isResurrectionExpensive => true;
 
   @override
   void delete() {
@@ -144,13 +161,13 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
   @override
   int get frameCount {
     assert(_debugCheckIsNotDisposed());
-    return skiaObject.getFrameCount();
+    return _frameCount;
   }
 
   @override
   int get repetitionCount {
     assert(_debugCheckIsNotDisposed());
-    return skiaObject.getRepetitionCount();
+    return _repetitionCount;
   }
 
   @override
@@ -159,6 +176,7 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     final int durationMillis = skiaObject.decodeNextFrame();
     final Duration duration = Duration(milliseconds: durationMillis);
     final CkImage image = CkImage(skiaObject.getCurrentFrame());
+    _nextFrameIndex = (_nextFrameIndex + 1) % _frameCount;
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
   }
 }
