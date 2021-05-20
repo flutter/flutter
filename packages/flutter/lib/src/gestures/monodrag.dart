@@ -220,8 +220,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// for framework to be confident that this is a drag gesture. This value
   /// will be ignored when recognizer is the only member in gesture arena.
   ///
-  /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
-  /// what kind of pointer is currently being checked.
+  /// The `pointerDeviceKind` parameter can be used to specify different values
+  /// dependent on what kind of pointer is currently being checked.
   ///
   /// If none specified, [computeDefaultSlop] will be used.
   GestureComputeSlopCallback? computeSlop;
@@ -257,8 +257,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// To specify custom slop, [computeSlop] can be provided.
   ///
-  /// The `pointerDeviceKind` parameter can be used to specify different values dependent on
-  /// what kind of pointer is currently being checked.
+  /// The `pointerDeviceKind` parameter can be used to specify different values
+  /// dependent on what kind of pointer is currently being checked.
   double computeDefaultSlop(PointerDeviceKind pointerDeviceKind);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
