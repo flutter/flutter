@@ -62,7 +62,18 @@ template("impeller_shaders") {
   }
 
   shader_glue_target_name = "glue_$target_name"
+  shader_glue_config_name = "glue_config_$target_name"
+
+  config(shader_glue_config_name) {
+    # Contains the generated header headers.
+    include_dirs = [ target_gen_dir ]
+  }
+
   source_set(shader_glue_target_name) {
+    public_configs = [ ":$shader_glue_config_name" ]
+
+    public =
+        filter_include(get_target_outputs(":$impellerc_target_name"), [ "*.h" ])
     sources = filter_include(get_target_outputs(":$impellerc_target_name"),
                              [
                                "*.h",
@@ -75,7 +86,7 @@ template("impeller_shaders") {
   }
 
   group(target_name) {
-    deps = [
+    public_deps = [
       ":$metal_library_target_name",
       ":$shader_glue_target_name",
     ]

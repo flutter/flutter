@@ -16,16 +16,16 @@ constexpr std::string_view kReflectionHeaderTemplate = R"~~(
 namespace impeller {
 namespace shader {
 
-struct {{camel_case(shader_name)}} {
+struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   static constexpr std::string_view kEntrypointName = "{{entrypoint}}";
-  static constexpr ShaderStage kShaderStage = {{shader_stage}};
+  static constexpr ShaderStage kShaderStage = {{to_shader_stage(shader_stage)}};
 
   // Stage Inputs
 {% for stage_input in stage_inputs %}
   // Stage input {{stage_input.name}}
   static constexpr ShaderStageInput kInput{{camel_case(stage_input.name)}} = {"{{stage_input.name}}", {{stage_input.location}}};
 {% endfor %}
-}; // struct {{camel_case(shader_name)}}
+}; // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info
 
 } // namespace shader
 } // namespace impeller
