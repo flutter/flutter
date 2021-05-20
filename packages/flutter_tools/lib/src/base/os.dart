@@ -351,7 +351,7 @@ class _LinuxUtils extends _PosixUtils {
         final String value =  entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];
-        if (quote == '\'' || quote == '"') {
+        if (quote == "'" || quote == '"') {
           return value.substring(0, value.length - 1).substring(1);
         } else {
           return value;

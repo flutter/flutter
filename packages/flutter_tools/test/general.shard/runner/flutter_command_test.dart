@@ -483,12 +483,12 @@ void main() {
           'runtime-mode',
           label: 'NullSafetyMode.sound',
         ),
-        const TestUsageEvent(
+        TestUsageEvent(
           NullSafetyAnalysisEvent.kNullSafetyCategory,
           'stats',
-          parameters: <String, String>{
+          parameters: CustomDimensions.fromMap(<String, String>{
             'cd49': '1', 'cd50': '1',
-          },
+          }),
         ),
         const TestUsageEvent(
           NullSafetyAnalysisEvent.kNullSafetyCategory,

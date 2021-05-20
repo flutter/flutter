@@ -35,6 +35,12 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
 
+/// Base href to set in index.html in flutter build command
+const String kBaseHref = 'baseHref';
+
+/// Placeholder for base href
+const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
@@ -356,7 +362,7 @@ class WebReleaseBundle extends Target {
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
         final String randomHash = Random().nextInt(4294967296).toString();
-        final String resultString = inputFile.readAsStringSync()
+        String resultString = inputFile.readAsStringSync()
           .replaceFirst(
             'var serviceWorkerVersion = null',
             "var serviceWorkerVersion = '$randomHash'",
@@ -367,6 +373,13 @@ class WebReleaseBundle extends Target {
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
+        if (resultString.contains(kBaseHrefPlaceholder) &&
+            environment.defines[kBaseHref] == null) {
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
+        } else if (resultString.contains(kBaseHrefPlaceholder) &&
+            environment.defines[kBaseHref] != null) {
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, environment.defines[kBaseHref]);
+        }
         outputFile.writeAsStringSync(resultString);
         continue;
       }

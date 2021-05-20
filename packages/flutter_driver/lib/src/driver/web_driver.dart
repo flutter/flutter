@@ -39,7 +39,6 @@ class WebFlutterDriver extends FlutterDriver {
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
-  bool _accessibilityEnabled = false;
   static int _nextDriverId = 0;
 
   /// The unique ID of this driver instance.
@@ -94,22 +93,6 @@ class WebFlutterDriver extends FlutterDriver {
       printCommunication: printCommunication,
       logCommunicationToFile: logCommunicationToFile,
     );
-  }
-
-  @override
-  Future<void> enableAccessibility() async {
-    if (!_accessibilityEnabled) {
-      // Clicks the button to enable accessibility via Javascript for Desktop Web.
-      //
-      // The tag used in the script is based on
-      // https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart#L193
-      //
-      // TODO(angjieli): Support Mobile Web. (https://github.com/flutter/flutter/issues/65192)
-      await webDriver.execute(
-          'document.querySelector(\'flt-semantics-placeholder\').click();',
-          <String>[]);
-      _accessibilityEnabled = true;
-    }
   }
 
   @override

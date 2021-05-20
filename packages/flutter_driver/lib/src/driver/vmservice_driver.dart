@@ -287,10 +287,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
 
-  @override
-  Future<void> enableAccessibility() async {
-    throw UnsupportedError('VMServiceFlutterDriver does not support enableAccessibility');
-  }
 
   @override
   Future<Map<String, dynamic>> sendCommand(Command command) async {

@@ -297,6 +297,7 @@ class ResidentWebRunner extends ResidentRunner {
             kNoneWorker,
             true,
             debuggingOptions.nativeNullAssertions,
+            null,
           );
         }
         await device.device.startApp(
@@ -365,6 +366,7 @@ class ResidentWebRunner extends ResidentRunner {
           kNoneWorker,
           true,
           debuggingOptions.nativeNullAssertions,
+          kBaseHref,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
