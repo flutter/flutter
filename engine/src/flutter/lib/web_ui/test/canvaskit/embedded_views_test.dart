@@ -27,6 +27,11 @@ void testMain() {
       window.debugOverrideDevicePixelRatio(1);
     });
 
+    tearDown(() {
+      EnginePlatformDispatcher.instance.rasterizer?.surface.viewEmbedder
+          .debugCleanupSvgClipPaths();
+    });
+
     test('embeds interactive platform views', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
@@ -122,7 +127,7 @@ void testMain() {
     List<String> getTransformChain(html.Element viewHost) {
       final List<String> chain = <String>[];
       html.Element? element = viewHost;
-      while(element != null && element.tagName.toLowerCase() != 'flt-scene') {
+      while (element != null && element.tagName.toLowerCase() != 'flt-scene') {
         chain.add(element.style.transform);
         element = element.parent;
       }
@@ -145,9 +150,8 @@ void testMain() {
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      final html.Element viewHost = domRenderer.sceneElement!
-        .querySelectorAll('#view-0')
-        .single;
+      final html.Element viewHost =
+          domRenderer.sceneElement!.querySelectorAll('#view-0').single;
 
       expect(
         getTransformChain(viewHost),
@@ -173,9 +177,8 @@ void testMain() {
       sb.pushOffset(9, 9);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      final html.Element viewHost = domRenderer.sceneElement!
-        .querySelectorAll('#view-0')
-        .single;
+      final html.Element viewHost =
+          domRenderer.sceneElement!.querySelectorAll('#view-0').single;
 
       expect(
         getTransformChain(viewHost),
@@ -189,12 +192,10 @@ void testMain() {
 
     test('renders overlays on top of platform views', () async {
       expect(OverlayCache.instance.debugLength, 0);
-      final CkPicture testPicture = paintPicture(
-        ui.Rect.fromLTRB(0, 0, 10, 10),
-        (CkCanvas canvas) {
-          canvas.drawCircle(ui.Offset(5, 5), 5, CkPaint());
-        }
-      );
+      final CkPicture testPicture =
+          paintPicture(ui.Rect.fromLTRB(0, 0, 10, 10), (CkCanvas canvas) {
+        canvas.drawCircle(ui.Offset(5, 5), 5, CkPaint());
+      });
 
       // Initialize all platform views to be used in the test.
       final List<int> platformViewIds = <int>[];
@@ -210,7 +211,7 @@ void testMain() {
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
 
-      void renderTestScene({ required int viewCount }) {
+      void renderTestScene({required int viewCount}) {
         LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
         for (int i = 0; i < viewCount; i++) {
@@ -359,6 +360,44 @@ void testMain() {
         domRenderer.sceneElement!.querySelectorAll('#view-0'),
         hasLength(0),
       );
+    });
+
+    test(
+        'removes old SVG clip definitions from the DOM when the view is recomposited',
+        () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (viewId) => html.DivElement()..id = 'test-view',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      void renderTestScene() {
+        LayerSceneBuilder sb = LayerSceneBuilder();
+        sb.pushOffset(0, 0);
+        sb.pushClipRRect(
+            ui.RRect.fromLTRBR(0, 0, 10, 10, ui.Radius.circular(3)));
+        sb.addPlatformView(0, width: 10, height: 10);
+        dispatcher.rasterizer!.draw(sb.build().layerTree);
+      }
+
+      final html.Node skPathDefs =
+          domRenderer.sceneElement!.querySelector('#sk_path_defs')!;
+
+      expect(skPathDefs.childNodes, hasLength(0));
+
+      renderTestScene();
+      expect(skPathDefs.childNodes, hasLength(1));
+
+      await Future<void>.delayed(Duration.zero);
+      renderTestScene();
+      expect(skPathDefs.childNodes, hasLength(1));
+
+      await Future<void>.delayed(Duration.zero);
+      renderTestScene();
+      expect(skPathDefs.childNodes, hasLength(1));
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
