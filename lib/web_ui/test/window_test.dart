@@ -44,10 +44,15 @@ void testMain() {
     expect(window.defaultRouteName, '/initial');
   });
 
+  // window.defaultRouteName is now permanently decoupled from the history,
+  // even in subsequent tests, because the PlatformDispatcher caches it.
+
   test('window.defaultRouteName should reset after navigation platform message',
       () async {
     await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
-      TestHistoryEntry('initial state', null, '/initial'),
+      // The URL here does not set the PlatformDispatcher's defaultRouteName,
+      // since it got cached as soon as we read it above.
+      TestHistoryEntry('initial state', null, '/not-really-inital/THIS_IS_IGNORED'),
     ), useSingle: true);
     // Reading it multiple times should return the same value.
     expect(window.defaultRouteName, '/initial');
@@ -62,17 +67,48 @@ void testMain() {
       )),
       (_) { callback.complete(); },
     );
-    // After a navigation platform message, [window.defaultRouteName] should
-    // reset to "/".
+    await callback.future;
+    // After a navigation platform message, the PlatformDispatcher's
+    // defaultRouteName resets to "/".
     expect(window.defaultRouteName, '/');
   });
 
-  test('should throw when using nav1 and nav2 together',
+  // window.defaultRouteName is now '/'.
+
+  test('can switch history mode', () async {
+    Completer<void> callback;
+    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+      TestHistoryEntry('initial state', null, '/initial'),
+    ), useSingle: false);
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+
+    Future<void> check<T>(String method, Map<String, Object?> arguments) async {
+      callback = Completer<void>();
+      window.sendPlatformMessage(
+        'flutter/navigation',
+        JSONMethodCodec().encodeMethodCall(MethodCall(method, arguments)),
+        (_) { callback.complete(); },
+      );
+      await callback.future;
+      expect(window.browserHistory, isA<T>());
+    }
+
+    await check<SingleEntryBrowserHistory>('selectSingleEntryHistory', <String, dynamic>{}); // -> single
+    await check<MultiEntriesBrowserHistory>('selectMultiEntryHistory', <String, dynamic>{}); // -> multi
+    await check<SingleEntryBrowserHistory>('routeUpdated', <String, dynamic>{'routeName': '/bar'}); // -> single
+    await check<SingleEntryBrowserHistory>('routeInformationUpdated', <String, dynamic>{'location': '/bar'}); // does not change mode
+    await check<MultiEntriesBrowserHistory>('selectMultiEntryHistory', <String, dynamic>{}); // -> multi
+    await check<MultiEntriesBrowserHistory>('routeInformationUpdated', <String, dynamic>{'location': '/bar'}); // does not change mode
+  });
+
+  test('should not throw when using nav1 and nav2 together',
       () async {
     await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
       TestHistoryEntry('initial state', null, '/initial'),
     ), useSingle: false);
-    // Receive nav1 update first.
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+
+    // routeUpdated resets the history type
     Completer<void> callback = Completer<void>();
     window.sendPlatformMessage(
       'flutter/navigation',
@@ -83,10 +119,10 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory is SingleEntryBrowserHistory, true);
+    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
     expect(window.browserHistory.urlStrategy!.getPath(), '/bar');
 
-    // We can still receive nav2 update.
+    // routeInformationUpdated does not
     callback = Completer<void>();
     window.sendPlatformMessage(
       'flutter/navigation',
@@ -100,29 +136,18 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory is MultiEntriesBrowserHistory, true);
+    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
     expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
 
-    // Throws assertion error if it receives nav1 update after nav2 update.
-    late AssertionError caughtAssertion;
+    // they can be interleaved safely
     await window.handleNavigationMessage(
       JSONMethodCodec().encodeMethodCall(MethodCall(
         'routeUpdated',
         <String, dynamic>{'routeName': '/foo'},
       ))
-    ).catchError((Object e) {
-      caughtAssertion = e as AssertionError;
-    });
-
-    expect(
-      caughtAssertion.message,
-      'Receives old navigator update in a router application. This can '
-      'happen if you use non-router versions of '
-      'MaterialApp/CupertinoApp/WidgetsApp together with the router versions of them.'
     );
-    // The history does not change.
-    expect(window.browserHistory is MultiEntriesBrowserHistory, true);
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
+    expect(window.browserHistory.urlStrategy!.getPath(), '/foo');
   });
 
   test('initialize browser history with default url strategy (single)', () async {
@@ -143,7 +168,7 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory is SingleEntryBrowserHistory, true);
+    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
     // The url strategy should've been set to the default, and the path
     // should've been correctly set to "/bar".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
@@ -171,7 +196,7 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory is MultiEntriesBrowserHistory, true);
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
     // The url strategy should've been set to the default, and the path
     // should've been correctly set to "/baz".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
