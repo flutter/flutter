@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   test('PlatformView layers do not emit errors from tester', () async {

@@ -6,7 +6,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 const Color red = Color(0xFFAA0000);
 const Color green = Color(0xFF00AA00);

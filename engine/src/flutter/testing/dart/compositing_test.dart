@@ -6,7 +6,7 @@
 import 'dart:typed_data' show Float64List;
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   test('pushTransform validates the matrix', () {
@@ -28,7 +28,7 @@ void main() {
     assert(() {
       expect(
         () => builder.pushTransform(matrix4WrongLength),
-        throwsA(const TypeMatcher<AssertionError>()),
+        expectAssertion,
       );
       return true;
     }());
@@ -42,7 +42,7 @@ void main() {
     assert(() {
       expect(
         () => builder.pushTransform(matrix4NaN),
-        throwsA(const TypeMatcher<AssertionError>()),
+        expectAssertion,
       );
       return true;
     }());
@@ -56,7 +56,7 @@ void main() {
     assert(() {
       expect(
         () => builder.pushTransform(matrix4Infinity),
-        throwsA(const TypeMatcher<AssertionError>()),
+        expectAssertion,
       );
       return true;
     }());

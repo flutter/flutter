@@ -5,7 +5,7 @@
 // @dart = 2.6
 import 'dart:async';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:litetest/litetest.dart';
 
 void main() {
   test('Message loop flushes microtasks between iterations', () async {

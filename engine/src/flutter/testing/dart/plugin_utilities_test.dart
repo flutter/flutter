@@ -5,7 +5,7 @@
 // @dart = 2.6
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 String top() => 'top';
 
@@ -22,7 +22,7 @@ void main() {
     // Top level callback.
     final CallbackHandle hTop = PluginUtilities.getCallbackHandle(top);
     expect(hTop, isNotNull);
-    expect(hTop, isNot(0));
+    expect(hTop, notEquals(0));
     expect(PluginUtilities.getCallbackHandle(top), hTop);
     final Function topClosure = PluginUtilities.getCallbackFromHandle(hTop);
     expect(topClosure, isNotNull);
@@ -31,7 +31,7 @@ void main() {
     // Static method callback.
     final CallbackHandle hGetInt = PluginUtilities.getCallbackHandle(Foo.getInt);
     expect(hGetInt, isNotNull);
-    expect(hGetInt, isNot(0));
+    expect(hGetInt, notEquals(0));
     expect(PluginUtilities.getCallbackHandle(Foo.getInt), hGetInt);
     final Function getIntClosure = PluginUtilities.getCallbackFromHandle(hGetInt);
     expect(getIntClosure, isNotNull);

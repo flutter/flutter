@@ -2,14 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:isolate';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   test('Invalid isolate URI', () async {
-    final Future<Isolate> isolate = Isolate.spawnUri(Uri.parse('http://127.0.0.1/foo.dart'), <String>[], null);
-    expect(() async => isolate, throwsA(const TypeMatcher<IsolateSpawnException>()));
+    bool threw = false;
+    try {
+      await Isolate.spawnUri(
+        Uri.parse('http://127.0.0.1/foo.dart'),
+        <String>[],
+        null,
+      );
+    } on IsolateSpawnException {
+      threw = true;
+    }
+    expect(threw, true);
   });
 }

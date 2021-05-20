@@ -5,7 +5,7 @@
 // @dart = 2.6
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   test('Gradient.radial with no focal point', () {
@@ -67,7 +67,7 @@ void main() {
                 Offset.zero,
                 1.0,
               ),
-          throwsA(const TypeMatcher<AssertionError>()),
+          expectAssertion,
         );
         return true;
       }());
