@@ -401,12 +401,6 @@ deps = {
   'src/third_party/pkg/file':
   Var('github_git') + '/google/file.dart.git' + '@' + '427bb20ccc852425d67f2880da2a9b4707c266b4', # 6.1.0
 
-  'src/third_party/pkg/image':
-  Var('github_git') + '/brendan-duncan/image.git' + '@' + '3.0.2',
-
-  'src/third_party/pkg/petitparser':
-  Var('github_git') + '/petitparser/dart-petitparser' + '@' + '4.1.0',
-
   'src/third_party/pkg/platform':
   Var('github_git') + '/google/platform.dart.git' + '@' + 'f63fd0bc3021354a0687dc935962c9acc003f47e', # 3.0.1
 
@@ -415,9 +409,6 @@ deps = {
 
   'src/third_party/pkg/when':
   Var('dart_git') + '/when.git' + '@' + '0.2.0',
-
-  'src/third_party/pkg/xml':
-  Var('github_git') + '/renggli/dart-xml' + '@' + '22a9e95c07c51429da368301047ffeba945b72a7', # 5.1.0
 
   'src/third_party/android_tools/ndk': {
      'packages': [
