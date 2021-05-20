@@ -495,7 +495,6 @@ void testMain() {
     // Renders a `string` by breaking it up into individual characters and
     // rendering each character into its own layer.
     Future<void> testCase(String string, String description, { int deletions = 0, int additions = 0, int moves = 0 }) {
-      print('Testing "$string" - $description');
       final Set<html.Node> actualDeletions = <html.Node>{};
       final Set<html.Node> actualAdditions = <html.Node>{};
 
