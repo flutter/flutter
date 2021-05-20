@@ -4,7 +4,7 @@
 
 import("//flutter/impeller/tools/impeller.gni")
 
-impeller_shaders("shaders") {
+impeller_shaders("impeller_shaders") {
   name = "impeller"
   shaders = [
     "box.vert",
@@ -20,5 +20,5 @@ impeller_component("primitives") {
 
   public_deps = [ "../compositor" ]
 
-  deps = [ ":shaders" ]
+  deps = [ ":impeller_shaders" ]
 }
