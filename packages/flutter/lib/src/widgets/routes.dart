@@ -813,42 +813,45 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
-                      child: RepaintBoundary(
-                        child: AnimatedBuilder(
-                          animation: _listenable, // immutable
-                          builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildTransitions(
-                              context,
-                              widget.route.animation!,
-                              widget.route.secondaryAnimation!,
-                              // This additional AnimatedBuilder is include because if the
-                              // value of the userGestureInProgressNotifier changes, it's
-                              // only necessary to rebuild the IgnorePointer widget and set
-                              // the focus node's ability to focus.
-                              AnimatedBuilder(
-                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                                builder: (BuildContext context, Widget? child) {
-                                  final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                                  focusScopeNode.canRequestFocus = !ignoreEvents;
-                                  return IgnorePointer(
-                                    ignoring: ignoreEvents,
-                                    child: child,
+                      child: _FocusTrap(
+                        focusScopeNode: focusScopeNode,
+                        child: RepaintBoundary(
+                          child: AnimatedBuilder(
+                            animation: _listenable, // immutable
+                            builder: (BuildContext context, Widget? child) {
+                              return widget.route.buildTransitions(
+                                context,
+                                widget.route.animation!,
+                                widget.route.secondaryAnimation!,
+                                // This additional AnimatedBuilder is include because if the
+                                // value of the userGestureInProgressNotifier changes, it's
+                                // only necessary to rebuild the IgnorePointer widget and set
+                                // the focus node's ability to focus.
+                                AnimatedBuilder(
+                                  animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                                  builder: (BuildContext context, Widget? child) {
+                                    final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                                    focusScopeNode.canRequestFocus = !ignoreEvents;
+                                    return IgnorePointer(
+                                      ignoring: ignoreEvents,
+                                      child: child,
+                                    );
+                                  },
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _page ??= RepaintBoundary(
+                              key: widget.route._subtreeKey, // immutable
+                              child: Builder(
+                                builder: (BuildContext context) {
+                                  return widget.route.buildPage(
+                                    context,
+                                    widget.route.animation!,
+                                    widget.route.secondaryAnimation!,
                                   );
                                 },
-                                child: child,
                               ),
-                            );
-                          },
-                          child: _page ??= RepaintBoundary(
-                            key: widget.route._subtreeKey, // immutable
-                            child: Builder(
-                              builder: (BuildContext context) {
-                                return _FocusTrap(child: widget.route.buildPage(
-                                  context,
-                                  widget.route.animation!,
-                                  widget.route.secondaryAnimation!,
-                                ));
-                              },
                             ),
                           ),
                         ),
@@ -1983,21 +1986,18 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
 
-/// A widget that steals focus from other focusable nodes.
-///
-/// This is used to allow clicking outside of a textfield or other
-/// editable text to "de-select" the text field without needing to
-/// jump to another focusable widget.
+/// A widget that resets the focus scope when primary button tap gestures do
+/// not hit another focusable element.
 class _FocusTrap extends StatefulWidget {
   /// Create a new [FocusTrap] widget.
   const _FocusTrap({
     required this.child,
-    this.focusNode,
+    required this.focusScopeNode,
     Key? key
   }) : super(key: key);
 
   final Widget child;
-  final FocusNode? focusNode;
+  final FocusScopeNode focusScopeNode;
 
   @override
   State<_FocusTrap> createState() => _FocusTrapState();
@@ -2005,38 +2005,28 @@ class _FocusTrap extends StatefulWidget {
 
 class _FocusTrapState extends State<_FocusTrap> {
   final Map<Type, GestureRecognizerFactory> _gestures = <Type, GestureRecognizerFactory>{};
-  late FocusNode _focusNode;
 
-  FocusNode get focusNode => widget.focusNode ?? _focusNode;
-
-  void _stealFocus(TapDownDetails details) {
-    if (details.kind != PointerDeviceKind.mouse)
-      return;
-    focusNode.requestFocus();
+  void _stealFocus() {
+    widget.focusScopeNode.unfocus(disposition: UnfocusDisposition.scope);
   }
 
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
     _gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
         (TapGestureRecognizer instance) {
-          instance
-            .onTapDown = _stealFocus;
+          instance.onTap = _stealFocus;
         },
       );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: true,
-      child: RawGestureDetector(
-        child: widget.child,
-        gestures: _gestures,
-      ),
-      focusNode: focusNode,
+    return RawGestureDetector(
+      child: widget.child,
+      gestures: _gestures,
+      excludeFromSemantics: true,
     );
   }
 }
