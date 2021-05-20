@@ -104,6 +104,12 @@ analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$FLUTTER_DIR/testing/scenario_app"
 
+echo "Analyzing testing/symbols..."
+analyze \
+  --packages="$FLUTTER_DIR/testing/symbols/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/testing/symbols"
+
 # Check that dart libraries conform.
 echo "Checking web_ui api conformance..."
 (cd "$FLUTTER_DIR/web_sdk"; pub get)
