@@ -19,37 +19,22 @@ environment:
 dependencies:
   litetest: any
   path: any
-  image: any
   vm_service: any
 
 dependency_overrides:
-  archive:
-    path: ../../../third_party/pkg/archive
   async_helper:
     path: ../../../third_party/dart/pkg/async_helper
-  collection:
-    path: ../../../third_party/dart/third_party/pkg/collection
-  crypto:
-    path: ../../../third_party/dart/third_party/pkg/crypto
   expect:
     path: ../../../third_party/dart/pkg/expect
-  image:
-    path: ../../../third_party/pkg/image
   litetest:
     path: ../litetest
   meta:
     path: ../../../third_party/dart/pkg/meta
   path:
     path: ../../../third_party/dart/third_party/pkg/path
-  petitparser:
-    path: ../../../third_party/pkg/petitparser/petitparser
   sky_engine:
     path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
   sky_services:
     path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
-  typed_data:
-    path: ../../../third_party/dart/third_party/pkg/typed_data
   vm_service:
     path: ../../../third_party/dart/pkg/vm_service
-  xml:
-    path: ../../../third_party/pkg/xml
