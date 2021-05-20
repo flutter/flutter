@@ -1070,7 +1070,7 @@ class FocusArea extends SingleChildRenderObjectWidget {
 
 /// The focus area render object is used as a sentinel in routes.dart.
 class RenderFocusArea extends RenderProxyBox {
-  /// Create a new [RenderFocusMarker].
+  /// Create a new [RenderFocusArea].
   RenderFocusArea(this.focusNode);
 
   /// The current focus node this render object subtree is associated with.
