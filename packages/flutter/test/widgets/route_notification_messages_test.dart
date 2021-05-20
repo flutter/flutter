@@ -63,46 +63,46 @@ void main() {
       routes: routes,
     ));
 
-    expect(log, hasLength(1));
-    expect(
-      log.last,
-      isMethodCall(
-        'routeUpdated',
+    expect(log, <Object>[
+      isMethodCall('selectSingleEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'previousRouteName': null,
-          'routeName': '/',
+          'location': '/',
+          'state': null,
         },
       ),
-    );
+    ]);
+    log.clear();
 
     await tester.tap(find.text('/'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, hasLength(2));
+    expect(log, hasLength(1));
     expect(
       log.last,
       isMethodCall(
-        'routeUpdated',
+        'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'previousRouteName': '/',
-          'routeName': '/A',
+          'location': '/A',
+          'state': null,
         },
       ),
     );
+    log.clear();
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, hasLength(3));
+    expect(log, hasLength(1));
     expect(
       log.last,
       isMethodCall(
-        'routeUpdated',
+        'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'previousRouteName': '/A',
-          'routeName': '/',
+          'location': '/',
+          'state': null,
         },
       ),
     );
@@ -168,46 +168,46 @@ void main() {
       routes: routes,
     ));
 
-    expect(log, hasLength(1));
-    expect(
-      log.last,
-      isMethodCall(
-        'routeUpdated',
+    expect(log, <Object>[
+      isMethodCall('selectSingleEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'previousRouteName': null,
-          'routeName': '/',
+          'location': '/',
+          'state': null,
         },
       ),
-    );
+    ]);
+    log.clear();
 
     await tester.tap(find.text('/'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, hasLength(2));
+    expect(log, hasLength(1));
     expect(
       log.last,
       isMethodCall(
-        'routeUpdated',
+        'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'previousRouteName': '/',
-          'routeName': '/A',
+          'location': '/A',
+          'state': null,
         },
       ),
     );
+    log.clear();
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, hasLength(3));
+    expect(log, hasLength(1));
     expect(
       log.last,
       isMethodCall(
-        'routeUpdated',
+        'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'previousRouteName': '/A',
-          'routeName': '/B',
+          'location': '/B',
+          'state': null,
         },
       ),
     );
@@ -237,27 +237,22 @@ void main() {
       },
     ));
 
-    expect(log, hasLength(1));
-    expect(
-      log.last,
-      isMethodCall('routeUpdated', arguments: <String, dynamic>{
-        'previousRouteName': null,
-        'routeName': '/home',
-      }),
-    );
+    expect(log, <Object>[
+      isMethodCall('selectSingleEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated',
+        arguments: <String, dynamic>{
+          'location': '/home',
+          'state': null,
+        },
+      ),
+    ]);
+    log.clear();
 
     await tester.tap(find.text('Home'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, hasLength(2));
-    expect(
-      log.last,
-      isMethodCall('routeUpdated', arguments: <String, dynamic>{
-        'previousRouteName': '/home',
-        'routeName': null,
-      }),
-    );
+    expect(log, isEmpty);
   });
 
   testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
@@ -294,16 +289,13 @@ void main() {
     await tester.pump();
     expect(find.text('update'), findsOneWidget);
 
-    expect(log, hasLength(1));
-    // TODO(chunhtai): check routeInformationUpdated instead once the engine
-    // side is done.
-    expect(
-      log.last,
+    expect(log, <Object>[
+      isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
         'location': 'update',
         'state': 'state',
       }),
-    );
+    ]);
   });
 }
 

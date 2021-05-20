@@ -1624,6 +1624,13 @@ class Navigator extends StatefulWidget {
   /// route update message to the engine when it detects top-most route changes.
   /// The messages are used by the web engine to update the browser URL bar.
   ///
+  /// If the property is set to true when the [Navigator] is first created,
+  /// single-entry history mode is requested using
+  /// [SystemNavigator.selectSingleEntryHistory]. This means this property
+  /// should not be used at the same time as [PlatformRouteInformationProvider]
+  /// is used with a [Router] (including when used with [MaterialApp.router],
+  /// for example).
+  ///
   /// If there are multiple navigators in the widget tree, at most one of them
   /// can set this property to true (typically, the top-most one created from
   /// the [WidgetsApp]). Otherwise, the web engine may receive multiple route
@@ -3397,6 +3404,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       .getElementForInheritedWidgetOfExactType<HeroControllerScope>()
       ?.widget as HeroControllerScope?;
     _updateHeroController(heroControllerScope?.controller);
+
+    if (widget.reportsRouteUpdateToEngine) {
+      SystemNavigator.selectSingleEntryHistory();
+    }
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
@@ -4062,17 +4073,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // notifications.
     _flushRouteAnnouncement();
 
-    // Announces route name changes.
+    // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
       final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
         (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e), orElse: () => null,
       );
       final String? routeName = lastEntry?.route.settings.name;
-      if (routeName != _lastAnnouncedRouteName) {
-        SystemNavigator.routeUpdated(
-          routeName: routeName,
-          previousRouteName: _lastAnnouncedRouteName,
-        );
+      if (routeName != null && routeName != _lastAnnouncedRouteName) {
+        SystemNavigator.routeInformationUpdated(location: routeName);
         _lastAnnouncedRouteName = routeName;
       }
     }
