@@ -630,14 +630,30 @@ void main() {
       });
     });
 
-    group('VMServiceFlutterDriver Unsupported error', () {
-      test('enableAccessibility', () async {
-        expect(driver.enableAccessibility(), throwsUnsupportedError);
+    group('setSemantics', () {
+      test('can be enabled', () async {
+        fakeClient.responses['set_semantics'] = makeFakeResponse(<String, Object>{
+          'changedState': true,
+        });
+        await driver.setSemantics(true, timeout: _kTestTimeout);
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: set_semantics, timeout: $_kSerializedTestTimeout, enabled: true}',
+        ]);
       });
 
-      test('webDriver', () async {
-        expect(() => driver.webDriver, throwsUnsupportedError);
+      test('can be disabled', () async {
+        fakeClient.responses['set_semantics'] = makeFakeResponse(<String, Object>{
+          'changedState': false,
+        });
+        await driver.setSemantics(false, timeout: _kTestTimeout);
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: set_semantics, timeout: $_kSerializedTestTimeout, enabled: false}',
+        ]);
       });
+    });
+
+    test('VMServiceFlutterDriver does not support webDriver', () async {
+      expect(() => driver.webDriver, throwsUnsupportedError);
     });
   });
 

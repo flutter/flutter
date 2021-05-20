@@ -31,7 +31,7 @@ void main() {
     });
 
     test('enable accessibility', () async {
-      await driver.enableAccessibility();
+      await driver.setSemantics(true);
 
       await Future<void>.delayed(const Duration(seconds: 2));
 
