@@ -43,6 +43,34 @@ void testMain() {
       testCollector.collectNow();
     });
 
+    test('CkAnimatedImage remembers last animation position after resurrection', () async {
+      browserSupportsFinalizationRegistry = false;
+
+      Future<void> expectFrameData(ui.FrameInfo frame, List<int> data) async {
+        final ByteData frameData = await frame.image.toByteData();
+        expect(frameData.buffer.asUint8List(), Uint8List.fromList(data));
+      }
+
+      final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
+      expect(image.frameCount, 3);
+      expect(image.repetitionCount, -1);
+
+      final ui.FrameInfo frame1 = await image.getNextFrame();
+      expectFrameData(frame1, <int>[0, 255, 0, 255]);
+      final ui.FrameInfo frame2 = await image.getNextFrame();
+      expectFrameData(frame2, <int>[0, 0, 255, 255]);
+
+      // Pretend that the image is temporarily deleted.
+      image.delete();
+      image.didDelete();
+
+      // Check that we got the 3rd frame after resurrection.
+      final ui.FrameInfo frame3 = await image.getNextFrame();
+      expectFrameData(frame3, <int>[255, 0, 0, 255]);
+
+      testCollector.collectNow();
+    });
+
     test('CkImage toString', () {
       final SkImage skImage =
           canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
