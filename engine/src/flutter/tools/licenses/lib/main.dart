@@ -1670,6 +1670,7 @@ class _RepositoryPkgDirectory extends _RepositoryDirectory {
       && entry.name != 'petitparser'
       && entry.name != 'platform'
       && entry.name != 'process'
+      && entry.name != 'vector_math'
       && entry.name != 'xml';
   }
 
