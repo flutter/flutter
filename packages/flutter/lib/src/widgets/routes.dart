@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
@@ -15,7 +16,6 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -814,7 +814,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     child: FocusScope(
                       node: focusScopeNode, // immutable
                       child: _FocusTrap(
-                        focusScopeNode: focusScopeNode,
+                      focusScopeNode: focusScopeNode,
                         child: RepaintBoundary(
                           child: AnimatedBuilder(
                             animation: _listenable, // immutable
@@ -1986,47 +1986,93 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
 
-/// A widget that resets the focus scope when primary button tap gestures do
-/// not hit another focusable element.
-class _FocusTrap extends StatefulWidget {
-  /// Create a new [FocusTrap] widget.
+class _FocusTrap extends SingleChildRenderObjectWidget {
   const _FocusTrap({
-    required this.child,
     required this.focusScopeNode,
-    Key? key
-  }) : super(key: key);
+    required Widget child,
+  }) : super(child: child);
 
-  final Widget child;
   final FocusScopeNode focusScopeNode;
 
   @override
-  State<_FocusTrap> createState() => _FocusTrapState();
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFocusTrap(focusScopeNode);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderFocusTrap renderObject) {
+    renderObject.focusScopeNode = focusScopeNode;
+  }
 }
 
-class _FocusTrapState extends State<_FocusTrap> {
-  final Map<Type, GestureRecognizerFactory> _gestures = <Type, GestureRecognizerFactory>{};
+/// When a primary pointer makes contact with the screen, this widget determines if that pointer
+/// contacted an existing focused widget. If not, this asks the [FocusScopeNode] to reset the
+/// focus state. This allows text fields and other focusable widgets to give up their focus
+/// state, without creating a gesture detector that competes with others on screen.
+class _RenderFocusTrap extends RenderProxyBox {
+  _RenderFocusTrap(this._focusScopeNode) {
+    focusScopeNode.addListener(_currentFocusListener);
+  }
 
-  void _stealFocus() {
-    widget.focusScopeNode.unfocus(disposition: UnfocusDisposition.scope);
+  FocusNode? currentFocus;
+  Expando<BoxHitTestResult> cachedResults = Expando<BoxHitTestResult>();
+
+  FocusScopeNode _focusScopeNode;
+  FocusScopeNode get focusScopeNode => _focusScopeNode;
+  set focusScopeNode(FocusScopeNode value) {
+    if (focusScopeNode == value)
+      return;
+    focusScopeNode.removeListener(_currentFocusListener);
+    _focusScopeNode = value;
+    focusScopeNode.addListener(_currentFocusListener);
+  }
+
+  void _currentFocusListener() {
+    currentFocus = focusScopeNode.focusedChild;
   }
 
   @override
-  void initState() {
-    super.initState();
-    _gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-        () => TapGestureRecognizer(debugOwner: this),
-        (TapGestureRecognizer instance) {
-          instance.onTap = _stealFocus;
-        },
-      );
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    if (size.contains(position)) {
+      hitTestChildren(result, position: position);
+      final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
+      cachedResults[entry] = result;
+      result.add(entry);
+      return true;
+    }
+    return false;
   }
 
   @override
-  Widget build(BuildContext context) {
-    return RawGestureDetector(
-      child: widget.child,
-      gestures: _gestures,
-      excludeFromSemantics: true,
-    );
+  bool hitTestSelf(ui.Offset position) => true;
+
+  @override
+  Size computeSizeForNoChild(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
+    if (event is! PointerDownEvent || event.buttons != kPrimaryButton)
+      return;
+
+    final BoxHitTestResult? result = cachedResults[entry];
+    final FocusNode? focusNode = currentFocus;
+    if (focusNode == null || result == null)
+      return;
+
+    final RenderObject? renderObject = focusNode.context?.findRenderObject();
+    if (renderObject == null)
+      return;
+    bool hitCurrentFocus = false;
+    for (final HitTestEntry entry in result.path) {
+      if (entry.target == renderObject) {
+        hitCurrentFocus = true;
+        break;
+      }
+    }
+    if (!hitCurrentFocus)
+      focusScopeNode.unfocus(disposition: UnfocusDisposition.scope);
   }
 }
