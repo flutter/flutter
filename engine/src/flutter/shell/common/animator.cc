@@ -130,6 +130,7 @@ void Animator::BeginFrame(
       // If we still don't have valid continuation, the pipeline is currently
       // full because the consumer is being too slow. Try again at the next
       // frame interval.
+      TRACE_EVENT0("flutter", "PipelineFull");
       RequestFrame();
       return;
     }
