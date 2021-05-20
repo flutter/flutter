@@ -377,7 +377,7 @@ class RangeSlider extends StatefulWidget {
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
   @override
-  _RangeSliderState createState() => _RangeSliderState();
+  State<RangeSlider> createState() => _RangeSliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

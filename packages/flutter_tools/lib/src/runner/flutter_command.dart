@@ -211,7 +211,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
       'when using the Web Server device and Dart Debug extension. '
       'This is useful for editors/debug adapters that do not support debugging '
@@ -220,7 +220,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-backend-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
       'backend service when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -229,7 +229,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-injected-client-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the injected client '
       'when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -1063,8 +1063,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Additional usage values to be sent with the usage ping.
-  Future<Map<CustomDimensions, String>> get usageValues async =>
-      const <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async => const CustomDimensions();
 
   /// Runs this command.
   ///
@@ -1231,12 +1230,9 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<CustomDimensions, Object> additionalUsageValues =
-        <CustomDimensions, Object>{
-          ...?await usageValues,
-          CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
-        };
-      Usage.command(commandPath, parameters: additionalUsageValues);
+      Usage.command(commandPath, parameters: CustomDimensions(
+        commandHasTerminal: globals.stdio.hasTerminal,
+      ).merge(await usageValues));
     }
 
     return runCommand();
@@ -1466,7 +1462,9 @@ DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.windows_uwp_x64:
-      // No artifacts currently supported.
+      if (featureFlags.isWindowsUwpEnabled) {
+        return DevelopmentArtifact.windowsUwp;
+      }
       return null;
   }
   return null;

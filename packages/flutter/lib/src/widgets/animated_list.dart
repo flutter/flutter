@@ -65,7 +65,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///   const AnimatedListSample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _AnimatedListSampleState createState() => _AnimatedListSampleState();
+///   State<AnimatedListSample> createState() => _AnimatedListSampleState();
 /// }
 ///
 /// class _AnimatedListSampleState extends State<AnimatedListSample> {
@@ -545,7 +545,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///   const SliverAnimatedListSample({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _SliverAnimatedListSampleState createState() => _SliverAnimatedListSampleState();
+///   State<SliverAnimatedListSample>  createState() => _SliverAnimatedListSampleState();
 /// }
 ///
 /// class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {

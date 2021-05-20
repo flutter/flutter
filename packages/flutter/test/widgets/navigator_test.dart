@@ -1285,7 +1285,7 @@ void main() {
     expect(log, <String>['building B', 'building C', 'found C', 'building D']);
   });
 
-  testWidgets('Routes don\'t rebuild just because their animations ended', (WidgetTester tester) async {
+  testWidgets("Routes don't rebuild just because their animations ended", (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final List<String> log = <String>[];
     Route<dynamic>? nextRoute = PageRouteBuilder<int>(
@@ -2537,8 +2537,7 @@ void main() {
         '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
         '   Please create a HeroControllerScope for each Navigator or use a\n'
         '   HeroControllerScope.none to prevent subtree from receiving a\n'
-        '   HeroController.\n'
-        '',
+        '   HeroController.\n',
       ),
     );
   });
@@ -2640,8 +2639,7 @@ void main() {
         equalsIgnoringHashCodes(
           'FlutterError\n'
           '   The Navigator.onPopPage must be provided to use the\n'
-          '   Navigator.pages API\n'
-          '',
+          '   Navigator.pages API\n',
         ),
       );
     });
@@ -2676,8 +2674,7 @@ void main() {
           'FlutterError\n'
           '   A page-based route should not be added using the imperative api.\n'
           '   Provide a new list with the corresponding Page to Navigator.pages\n'
-          '   instead.\n'
-          '',
+          '   instead.\n',
         ),
       );
     }

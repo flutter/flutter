@@ -183,7 +183,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 /// }
 ///
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
@@ -344,9 +344,9 @@ class CupertinoAlertDialog extends StatelessWidget {
     );
     if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
-        children: actions,
         scrollController: actionScrollController,
         isActionSheet: false,
+        children: actions,
       );
     }
 
@@ -495,7 +495,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
+///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 /// }
 ///
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
@@ -646,10 +646,10 @@ class CupertinoActionSheet extends StatelessWidget {
       );
     }
     return _CupertinoAlertActionSection(
-      children: actions!,
       scrollController: actionScrollController,
       hasCancelButton: cancelButton != null,
       isActionSheet: true,
+      children: actions!,
     );
   }
 
@@ -708,9 +708,9 @@ class CupertinoActionSheet extends StatelessWidget {
               vertical: _kActionSheetEdgeVerticalPadding,
             ),
             child: Column(
-              children: children,
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
             ),
           ),
         ),
@@ -788,8 +788,8 @@ class CupertinoActionSheetAction extends StatelessWidget {
             ),
             child: DefaultTextStyle(
               style: style,
-              child: child,
               textAlign: TextAlign.center,
+              child: child,
             ),
           ),
         ),
