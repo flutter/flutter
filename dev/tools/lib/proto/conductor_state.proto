@@ -79,9 +79,6 @@ message Repository {
 
   // Desired cherrypicks.
   repeated Cherrypick cherrypicks = 7;
-
-  // Only for engine repositories.
-  string dartRevision = 8;
 }
 
 message ConductorState {
