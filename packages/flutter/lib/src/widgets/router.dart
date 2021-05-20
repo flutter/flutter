@@ -1318,6 +1318,11 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
 /// This provider also reports the new route information from the [Router] widget
 /// back to engine using message channel method, the
 /// [SystemNavigator.routeInformationUpdated].
+///
+/// Each time [SystemNavigator.routeInformationUpdated] is called, the
+/// [SystemNavigator.selectMultiEntryHistory] method is also called. This
+/// overrides the initialization behavior of
+/// [Navigator.reportsRouteUpdateToEngine].
 class PlatformRouteInformationProvider extends RouteInformationProvider with WidgetsBindingObserver, ChangeNotifier {
   /// Create a platform route information provider.
   ///
@@ -1329,6 +1334,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {
+    SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       location: routeInformation.location!,
       state: routeInformation.state,
