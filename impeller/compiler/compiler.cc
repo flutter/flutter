@@ -263,7 +263,6 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
           source_options.entry_point_name.c_str(),  // entry_point_name
           options                                   // options
           ));
-
   if (spv_result_->GetCompilationStatus() !=
       shaderc_compilation_status::shaderc_compilation_status_success) {
     COMPILER_ERROR << "GLSL to SPIRV failed; "

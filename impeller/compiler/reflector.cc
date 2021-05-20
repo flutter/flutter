@@ -150,12 +150,24 @@ static bool ReflectUniformBuffer(Writer& writer,
 static std::string ExecutionModelToString(spv::ExecutionModel model) {
   switch (model) {
     case spv::ExecutionModel::ExecutionModelVertex:
-      return "ShaderStage::kVertex";
+      return "vertex";
     case spv::ExecutionModel::ExecutionModelFragment:
-      return "ShaderStage::kFragment";
+      return "fragment";
     default:
-      return "ShaderStage::kUnsupported";
+      return "unsupported";
   }
+}
+
+static std::string StringToShaderStage(std::string str) {
+  if (str == "vertex") {
+    return "ShaderStage::kVertex";
+  }
+
+  if (str == "fragment") {
+    return "ShaderStage::kFragment";
+  }
+
+  return "ShaderStage::kUnknown";
 }
 
 static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
@@ -233,6 +245,10 @@ static std::shared_ptr<fml::Mapping> InflateTemplate(
 
   env.add_callback("camel_case", 1u, [](inja::Arguments& args) {
     return ConvertToCamelCase(args.at(0u)->get<std::string>());
+  });
+
+  env.add_callback("to_shader_stage", 1u, [](inja::Arguments& args) {
+    return StringToShaderStage(args.at(0u)->get<std::string>());
   });
 
   auto template_data = inja::json::parse(
