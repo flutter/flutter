@@ -1666,8 +1666,11 @@ class _RepositoryPkgDirectory extends _RepositoryDirectory {
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'archive'  // contains nothing that ends up in the binary executable
       && entry.name != 'file'
+      && entry.name != 'image'
+      && entry.name != 'petitparser'
       && entry.name != 'platform'
-      && entry.name != 'process';
+      && entry.name != 'process'
+      && entry.name != 'xml';
   }
 
   @override

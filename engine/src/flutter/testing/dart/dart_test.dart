@@ -5,7 +5,7 @@
 // @dart = 2.6
 import 'dart:async';
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:litetest/litetest.dart';
 
 /// Verifies Dart semantics governed by flags set by Flutter tooling.
 void main() {

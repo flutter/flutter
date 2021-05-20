@@ -7,7 +7,7 @@ import 'dart:math' as math show sqrt;
 import 'dart:math' show pi;
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   group('Offset', () {
@@ -46,8 +46,8 @@ void main() {
 
     test('OffsetBase.==', () {
       expect(const Offset(0, 0), equals(const Offset(0, 0)));
-      expect(const Offset(0, 0), isNot(equals(const Offset(1, 0))));
-      expect(const Offset(0, 0), isNot(equals(const Offset(0, 1))));
+      expect(const Offset(0, 0), notEquals(const Offset(1, 0)));
+      expect(const Offset(0, 0), notEquals(const Offset(0, 1)));
     });
 
     test('Offset.direction', () {

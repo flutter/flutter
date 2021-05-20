@@ -1,16 +1,55 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: engine_tests
+publish_to: none
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
+# In particular, package:test is not usable here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
 
 environment:
   sdk: '>=2.8.0 <3.0.0'
 
 dependencies:
-  test: 1.16.8
-  path: 1.8.0
-  image: 3.0.2
-  vm_service: 6.2.0
+  litetest: any
+  path: any
+  image: any
+  vm_service: any
 
 dependency_overrides:
- sky_engine:
-   path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
- sky_services:
-   path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
+  archive:
+    path: ../../../third_party/pkg/archive
+  async_helper:
+    path: ../../../third_party/dart/pkg/async_helper
+  collection:
+    path: ../../../third_party/dart/third_party/pkg/collection
+  crypto:
+    path: ../../../third_party/dart/third_party/pkg/crypto
+  expect:
+    path: ../../../third_party/dart/pkg/expect
+  image:
+    path: ../../../third_party/pkg/image
+  litetest:
+    path: ../litetest
+  meta:
+    path: ../../../third_party/dart/pkg/meta
+  path:
+    path: ../../../third_party/dart/third_party/pkg/path
+  petitparser:
+    path: ../../../third_party/pkg/petitparser/petitparser
+  sky_engine:
+    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
+  sky_services:
+    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
+  typed_data:
+    path: ../../../third_party/dart/third_party/pkg/typed_data
+  vm_service:
+    path: ../../../third_party/dart/pkg/vm_service
+  xml:
+    path: ../../../third_party/pkg/xml

@@ -5,7 +5,7 @@
 // @dart = 2.6
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 class NotAColor extends Color {
   const NotAColor(int value) : super(value);
@@ -50,9 +50,9 @@ void main() {
   test('two colors are only == if they have the same runtime type', () {
     expect(const Color(0x12345678), equals(const Color(0x12345678)));
     expect(const Color(0x12345678), equals(Color(0x12345678))); // ignore: prefer_const_constructors
-    expect(const Color(0x12345678), isNot(equals(const Color(0x87654321))));
-    expect(const Color(0x12345678), isNot(equals(const NotAColor(0x12345678))));
-    expect(const NotAColor(0x12345678), isNot(equals(const Color(0x12345678))));
+    expect(const Color(0x12345678), notEquals(const Color(0x87654321)));
+    expect(const Color(0x12345678), notEquals(const NotAColor(0x12345678)));
+    expect(const NotAColor(0x12345678), notEquals(const Color(0x12345678)));
     expect(const NotAColor(0x12345678), equals(const NotAColor(0x12345678)));
   });
 

@@ -7,7 +7,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 
 void main() {
@@ -28,10 +28,12 @@ void main() {
 
   test('Fails with invalid data', () async {
     final Uint8List data = Uint8List.fromList(<int>[1, 2, 3]);
-    expect(
-      () => ui.instantiateImageCodec(data),
-      throwsA(exceptionWithMessage('Invalid image data'))
-    );
+    try {
+      await ui.instantiateImageCodec(data);
+      fail('exception not thrown');
+    } on Exception catch (e) {
+      expect(e.toString(), contains('Invalid image data'));
+    }
   });
 
   test('getNextFrame fails with invalid data', () async {
@@ -41,8 +43,8 @@ void main() {
     try {
       await codec.getNextFrame();
       fail('exception not thrown');
-    } catch(e) {
-      expect(e, exceptionWithMessage('Codec failed'));
+    } on Exception catch (e) {
+      expect(e.toString(), contains('Codec failed'));
     }
   });
 
@@ -96,10 +98,4 @@ File _getSkiaResource(String fileName) {
   final String assetPath =
     path.join('third_party', 'skia', 'resources', 'images', fileName);
   return File(assetPath);
-}
-
-Matcher exceptionWithMessage(String m) {
-  return predicate<Exception>((Exception e) {
-    return e is Exception && e.toString().contains(m);
-  });
 }
