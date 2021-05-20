@@ -317,8 +317,8 @@ abstract class Repository {
     );
 
     git.run(
-      <String>['cherry-pick', '--no-commit', commit],
-      'attempt to cherry-pick $commit without committing',
+      <String>['cherry-pick', commit],
+      'cherry-pick $commit',
       workingDirectory: checkoutDirectory.path,
     );
   }
@@ -377,7 +377,7 @@ abstract class Repository {
         'commit',
         '--allow-empty',
         '-m',
-        '\'$message\'',
+        "'$message'",
       ],
       'create an empty commit',
       workingDirectory: checkoutDirectory.path,

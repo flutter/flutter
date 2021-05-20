@@ -144,6 +144,22 @@ void main() {
       await emulator.launch(startupDuration: Duration.zero);
     });
 
+    testWithoutContext('succeeds with coldboot launch', () async {
+      final List<String> kEmulatorLauchColdBootCommand = <String>[
+        ...kEmulatorLaunchCommand,
+        '-no-snapshot-load'
+      ];
+      final AndroidEmulator emulator = AndroidEmulator(emulatorID,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(command: kEmulatorLauchColdBootCommand),
+        ]),
+        androidSdk: mockSdk,
+        logger: BufferLogger.test(),
+      );
+
+      await emulator.launch(startupDuration: Duration.zero, coldBoot: true);
+    });
+
     testWithoutContext('prints error on failure', () async {
       final BufferLogger logger =  BufferLogger.test();
       final AndroidEmulator emulator = AndroidEmulator(emulatorID,
