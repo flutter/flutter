@@ -9,8 +9,9 @@ import 'package:ui/ui.dart' as ui;
 
 /// Whether the current browser is Safari on iOS.
 // TODO: https://github.com/flutter/flutter/issues/60040
-bool get isIosSafari => browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs;
+bool get isIosSafari =>
+    browserEngine == BrowserEngine.webkit &&
+    operatingSystem == OperatingSystem.iOs;
 
 /// Whether the current browser is Firefox.
 bool get isFirefox => browserEngine == BrowserEngine.firefox;
@@ -24,8 +25,7 @@ late TestCollector testCollector;
 /// Common test setup for all CanvasKit unit-tests.
 void setUpCanvasKitTest() {
   setUpAll(() async {
-    expect(useCanvasKit, true,
-      reason: 'This test must run in CanvasKit mode.');
+    expect(useCanvasKit, true, reason: 'This test must run in CanvasKit mode.');
     debugResetBrowserSupportsFinalizationRegistry();
     await ui.webOnlyInitializePlatform(assetManager: WebOnlyMockAssetManager());
   });
@@ -81,8 +81,10 @@ class _TestCollection {
 ///
 /// Tests should use [collectNow] and [collectAfterTest] to trigger collections.
 class TestCollector implements Collector {
-  final List<_TestFinalizerRegistration> _activeRegistrations = <_TestFinalizerRegistration>[];
-  final List<_TestFinalizerRegistration> _collectedRegistrations = <_TestFinalizerRegistration>[];
+  final List<_TestFinalizerRegistration> _activeRegistrations =
+      <_TestFinalizerRegistration>[];
+  final List<_TestFinalizerRegistration> _collectedRegistrations =
+      <_TestFinalizerRegistration>[];
 
   final List<_TestCollection> _pendingCollections = <_TestCollection>[];
   final List<_TestCollection> _completedCollections = <_TestCollection>[];
@@ -113,7 +115,8 @@ class TestCollector implements Collector {
       }
       if (activeRegistration == null) {
         late final _TestFinalizerRegistration? collectedRegistration;
-        for (_TestFinalizerRegistration registration in _collectedRegistrations) {
+        for (_TestFinalizerRegistration registration
+            in _collectedRegistrations) {
           if (identical(registration.deletable, collection.deletable)) {
             collectedRegistration = registration;
             break;
@@ -121,16 +124,15 @@ class TestCollector implements Collector {
         }
         if (collectedRegistration == null) {
           fail(
-            'Attempted to collect an object that was never registered for finalization.\n'
-            'The collection was requested here:\n'
-            '${collection.stackTrace}'
-          );
+              'Attempted to collect an object that was never registered for finalization.\n'
+              'The collection was requested here:\n'
+              '${collection.stackTrace}');
         } else {
-          final _TestCollection firstCollection = _completedCollections.firstWhere(
-            (_TestCollection completedCollection) {
-              return identical(completedCollection.deletable, collection.deletable);
-            }
-          );
+          final _TestCollection firstCollection = _completedCollections
+              .firstWhere((_TestCollection completedCollection) {
+            return identical(
+                completedCollection.deletable, collection.deletable);
+          });
           fail(
             'Attempted to collect an object that was previously collected.\n'
             'The object was registered for finalization here:\n'
@@ -138,7 +140,7 @@ class TestCollector implements Collector {
             'The first collection was requested here:\n'
             '${firstCollection.stackTrace}\n\n'
             'The second collection was requested here:\n'
-            '${collection.stackTrace}'
+            '${collection.stackTrace}',
           );
         }
       } else {
