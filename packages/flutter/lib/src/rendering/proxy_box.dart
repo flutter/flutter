@@ -501,7 +501,7 @@ class RenderAspectRatio extends RenderProxyBox {
           '$runtimeType has unbounded constraints.\n'
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
-          'constraints were unbounded, this render object doesn\'t know how much '
+          "constraints were unbounded, this render object doesn't know how much "
           'size to consume.',
         );
       }

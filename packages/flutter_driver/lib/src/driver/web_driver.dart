@@ -106,7 +106,7 @@ class WebFlutterDriver extends FlutterDriver {
       //
       // TODO(angjieli): Support Mobile Web. (https://github.com/flutter/flutter/issues/65192)
       await webDriver.execute(
-          'document.querySelector(\'flt-semantics-placeholder\').click();',
+          "document.querySelector('flt-semantics-placeholder').click();",
           <String>[]);
       _accessibilityEnabled = true;
     }

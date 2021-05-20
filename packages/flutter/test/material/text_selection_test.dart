@@ -153,7 +153,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
+    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);

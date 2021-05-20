@@ -326,13 +326,13 @@ void main() {
       )
     );
     expect(testUsage.events, contains(
-      const TestUsageEvent(
+      TestUsageEvent(
         'build',
         'gradle',
         label: 'gradle-expected-file-not-found',
-        parameters: <String, String> {
+        parameters: CustomDimensions.fromMap(<String, String> {
           'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
-        },
+        }),
       ),
     ));
   });

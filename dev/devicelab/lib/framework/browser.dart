@@ -292,7 +292,7 @@ class BlinkTraceSummary {
       Exception noMeasuredFramesFound() => Exception(
         'No measured frames found in benchmark tracing data. This likely '
         'indicates a bug in the benchmark. For example, the benchmark failed '
-        'to pump enough frames. It may also indicate a change in Chrome\'s '
+        "to pump enough frames. It may also indicate a change in Chrome's "
         'tracing data format. Check if Chrome version changed recently and '
         'adjust the parsing code accordingly.',
       );
