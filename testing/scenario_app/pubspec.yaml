@@ -1,18 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: scenario_app
 publish_to: none
 environment:
   sdk: '>=2.12.0-0 <3.0.0'
 
+# Do not add any dependencies that require more than what is provided in
+# //third_party/dart/pkg, //third_party/dart/third_party/pkg, or
+# //third_party/pkg. In particular, package:test is not usable here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart, or //third_party/pkg
 
 # These are for convenience during local development. Changing them will not
 # impact the build.
 dependencies:
-  sky_engine:
-    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
-  sky_services:
-    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
-  vector_math: ^2.0.8
+  sky_engine: any
+  sky_services: any
+  vector_math: any
 
 dependency_overrides:
   meta:
     path: ../../../third_party/dart/pkg/meta
+  sky_engine:
+    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
+  sky_services:
+    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
+  vector_math:
+    path: ../../../third_party/pkg/vector_math

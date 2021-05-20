@@ -407,6 +407,9 @@ deps = {
   'src/third_party/pkg/process':
   Var('github_git') + '/google/process.dart.git' + '@' + '0c9aeac86dcc4e3a6cf760b76fed507107e244d5', # 4.2.1
 
+  'src/third_party/pkg/vector_math':
+  Var('github_git') + '/google/vector_math.dart.git' + '@' + 'v2.1.0',
+
   'src/third_party/pkg/when':
   Var('dart_git') + '/when.git' + '@' + '0.2.0',
 

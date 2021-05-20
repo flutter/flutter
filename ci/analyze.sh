@@ -98,7 +98,7 @@ analyze \
   "$FLUTTER_DIR/testing/dart"
 
 echo "Analyzing testing/scenario_app..."
-(cd "$FLUTTER_DIR/testing/scenario_app" && "$PUB" get)
+(cd "$FLUTTER_DIR/testing/scenario_app" && "$PUB" get --offline)
 analyze \
   --packages="$FLUTTER_DIR/testing/scenario_app/.dart_tool/package_config.json" \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
