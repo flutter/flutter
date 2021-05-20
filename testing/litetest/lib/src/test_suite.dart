@@ -1,0 +1,133 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// @dart = 2.12
+
+import 'dart:async';
+import 'dart:collection';
+import 'dart:io' show exit, stdout;
+import 'dart:isolate';
+
+import 'package:async_helper/async_minitest.dart' as m;
+
+import 'test.dart';
+
+/// A suite of tests, added with the [group] and [test] methods, which will be
+/// run in a following event.
+class TestSuite {
+  /// Creates a new [TestSuite] with logs written to [logger] and callbacks
+  /// given by [lifecycle].
+  TestSuite({
+    StringSink? logger,
+    Lifecycle? lifecycle,
+  }) :
+    _logger = logger ?? stdout,
+    _lifecycle = lifecycle ?? _DefaultLifecycle();
+
+
+  final Lifecycle _lifecycle;
+  final StringSink _logger;
+  final Queue<String> _groupStack = Queue<String>();
+  bool _testQueuePrimed = false;
+  final Queue<Test> _testQueue = Queue<Test>();
+  final Map<String, Test> _runningTests = <String, Test>{};
+
+  /// Adds a test to the test suite.
+  void test(
+    String name,
+    dynamic Function() body, {
+    bool skip = false,
+  }) {
+    if (_runningTests.isNotEmpty) {
+      throw StateError(
+        'Test "$name" added after tests have started to run. '
+        'Calls to test() must be synchronous with main().',
+      );
+    }
+    if (skip) {
+      _logger.writeln('Test $name: Skipped');
+      return;
+    }
+    final String groupName = _groupStack.isEmpty
+      ? name
+      : '${_groupStack.first} $name';
+    _pushTest(groupName, body);
+  }
+
+  /// Adds a group of tests to the test suite.
+  void group(String name, void Function() body) {
+    final String current = _groupStack.isEmpty ? '' : '${_groupStack.first} ';
+    _groupStack.addFirst('$current$name');
+    m.group(name, body);
+    _groupStack.removeFirst();
+  }
+
+  void _pushTest(
+    String name,
+    dynamic Function() body,
+  ) {
+    final Test newTest = Test(name, body, logger: _logger);
+    _testQueue.add(newTest);
+    newTest.state = TestState.queued;
+    if (!_testQueuePrimed) {
+      // All groups() and tests() should be added synchronously with main, so
+      // we can enqueue an event to start all tests to run after main() is done.
+      Timer.run(_startAllTests);
+      _testQueuePrimed = true;
+    }
+  }
+
+  void _startAllTests() {
+    for (final Test t in _testQueue) {
+      _runningTests[t.name] = t;
+      t.run(onDone: () {
+        _runningTests.remove(t.name);
+        if (_runningTests.isEmpty) {
+          _lifecycle.onDone(_testQueue);
+        }
+      });
+    }
+    _lifecycle.onStart();
+  }
+}
+
+/// Callbacks for the lifecycle of a [TestSuite].
+abstract class Lifecycle {
+  /// Called after a test suite has started.
+  void onStart();
+
+  /// Called after the last test in a test suite has completed.
+  void onDone(Queue<Test> tests);
+}
+
+class _DefaultLifecycle implements Lifecycle {
+  final ReceivePort _suitePort = ReceivePort('Suite port');
+  Queue<Test>? _tests;
+
+  @override
+  void onStart() {
+    _suitePort.listen((dynamic msg) {
+      _suitePort.close();
+      _processResults();
+    });
+  }
+
+  @override
+  void onDone(Queue<Test> tests) {
+    _tests = tests;
+    _suitePort.sendPort.send(null);
+  }
+
+  void _processResults() {
+    bool testsSucceeded = true;
+    for (final Test t in _tests!) {
+      testsSucceeded = testsSucceeded && (t.state == TestState.succeeded);
+    }
+    if (testsSucceeded) {
+      exit(0);
+    } else {
+      exit(1);
+    }
+  }
+}

@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   group('FontWeight.lerp', () {

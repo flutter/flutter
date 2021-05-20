@@ -11,7 +11,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 ByteData _makeByteData(String str) {
   final Uint8List list = utf8.encode(str) as Uint8List;
@@ -160,7 +160,7 @@ void main() {
       didCallCallback = true;
     }
     void twoCallback(ByteData responseData) {
-      throw TestFailure('wrong callback called');
+      fail('wrong callback called');
     }
     _resize(buffers, channel, 100);
     buffers.push(channel, one, oneCallback);
@@ -181,7 +181,7 @@ void main() {
       didCallCallback = true;
     }
     void twoCallback(ByteData responseData) {
-      throw TestFailure('wrong callback called');
+      fail('wrong callback called');
     }
     _resize(buffers, channel, 1);
     buffers.push(channel, one, oneCallback);

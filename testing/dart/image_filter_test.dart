@@ -6,7 +6,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 const Color red = Color(0xFFAA0000);
 const Color green = Color(0xFF00AA00);
@@ -127,9 +127,9 @@ void main() {
           expect(a[i].hashCode, equals(b[j].hashCode));
           expect(a[i].toString(), equals(b[j].toString()));
         } else {
-          expect(a[i], isNot(b[j]));
+          expect(a[i], notEquals(b[j]));
           // No expectations on hashCode if objects are not equal
-          expect(a[i].toString(), isNot(b[j].toString()));
+          expect(a[i].toString(), notEquals(b[j].toString()));
         }
       }
     }

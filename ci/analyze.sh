@@ -71,16 +71,27 @@ analyze \
   "$FLUTTER_DIR/flutter_frontend_server"
 
 echo "Analyzing tools/licenses..."
-(cd "$FLUTTER_DIR/tools/licenses" && "$PUB" get)
 analyze \
   --packages="$FLUTTER_DIR/tools/licenses/.dart_tool/package_config.json" \
   --options "$FLUTTER_DIR/tools/licenses/analysis_options.yaml" \
   "$FLUTTER_DIR/tools/licenses"
 
+echo "Analyzing testing/litetest"
+analyze \
+  --packages="$FLUTTER_DIR/testing/litetest/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/testing/litetest"
+
+echo "Analyzing testing/smoke_test_failure"
+analyze \
+  --packages="$FLUTTER_DIR/testing/smoke_test_failure/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/testing/smoke_test_failure"
+
 echo "Analyzing testing/dart..."
 "$FLUTTER_DIR/tools/gn" --unoptimized
 autoninja -C "$SRC_DIR/out/host_debug_unopt" sky_engine sky_services
-(cd "$FLUTTER_DIR/testing/dart" && "$PUB" get)
+(cd "$FLUTTER_DIR/testing/dart" && "$PUB" get --offline)
 analyze \
   --packages="$FLUTTER_DIR/testing/dart/.dart_tool/package_config.json" \
   --options "$FLUTTER_DIR/analysis_options.yaml" \

@@ -6,7 +6,7 @@
 import 'dart:typed_data' show Float64List;
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   test('path getBounds', () {

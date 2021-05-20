@@ -5,7 +5,7 @@
 // @dart = 2.6
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   // The actual values for font measurements will vary by platform slightly.

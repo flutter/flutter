@@ -4,7 +4,8 @@
 
 // @dart = 2.6
 import 'dart:ui';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+
+import 'package:litetest/litetest.dart';
 
 /// Verifies Semantics flags and actions.
 void main() {

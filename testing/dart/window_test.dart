@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
 
 void main() {
   test('window.sendPlatformMessage preserves callback zone', () {
