@@ -526,7 +526,7 @@ class CachedArtifacts implements Artifacts {
     }
   }
 
-  String _getFlutterPatchedSdkPath(BuildMode mode) {
+  String _getFlutterPatchedSdkPath(BuildMode? mode) {
     final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
     return _fileSystem.path.join(engineArtifactsPath, 'common',
         mode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
@@ -552,11 +552,11 @@ class CachedArtifacts implements Artifacts {
         final String platformDirName = _enginePlatformDirectoryName(platform);
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.platformKernelDill:
-        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode!), _artifactToFileName(artifact));
+        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode!), 'lib', _artifactToFileName(artifact));
+        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
-        return _getFlutterPatchedSdkPath(mode!);
+        return _getFlutterPatchedSdkPath(mode);
       case Artifact.flutterMacOSFramework:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
@@ -825,9 +825,9 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
           return _fileSystem.path.join(engineOutPath, 'flutter_runner_patched_sdk', artifactFileName);
         }
-        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode!), artifactFileName);
+        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), artifactFileName);
       case Artifact.platformLibrariesJson:
-        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode!), 'lib', artifactFileName);
+        return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
       case Artifact.flutterFramework:
         return _getIosEngineArtifactPath(
             engineOutPath, environmentType, _fileSystem);
@@ -875,7 +875,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
     return _fileSystem.path.basename(engineOutPath);
   }
 
-  String _getFlutterPatchedSdkPath(BuildMode buildMode) {
+  String _getFlutterPatchedSdkPath(BuildMode? buildMode) {
     return _fileSystem.path.join(engineOutPath,
         buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
   }
