@@ -9,3 +9,4 @@ testing_tests-0.far
 txt_tests-0.far
 ui_tests-0.far
 embedder_tests-0.far
+dart_utils_tests-0.far

@@ -166,6 +166,15 @@ fuchsia_ctl test \
     --packages-directory packages
 echo "$(date) DONE:embedder_tests --------------------------------------"
 
+echo "$(date) START:dart_utils_tests -------------------------------------"
+fuchsia_ctl test \
+    -f dart_utils_tests-0.far  \
+    -t dart_utils_tests \
+    --identity-file $pkey \
+    --timeout-seconds $test_timeout_seconds \
+    --packages-directory packages
+echo "$(date) DONE:dart_utils_tests --------------------------------------"
+
 # TODO(gw280): Enable tests using JIT runner
 echo "$(date) START:flutter_runner_tests ----------------------------"
 fuchsia_ctl test \
