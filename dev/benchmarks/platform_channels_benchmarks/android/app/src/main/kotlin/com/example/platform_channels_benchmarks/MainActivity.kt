@@ -12,15 +12,21 @@ import io.flutter.plugin.common.StandardMessageCodec
 import java.nio.ByteBuffer
 
 class MainActivity: FlutterActivity() {
-
+    private var byteBufferCache : ByteBuffer? = null
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        val reset = BasicMessageChannel(flutterEngine.dartExecutor, "dev.flutter.echo.reset", StandardMessageCodec.INSTANCE)
+        reset.setMessageHandler { message, reply -> run {
+            byteBufferCache = null
+        } }
         val basicStandard = BasicMessageChannel(flutterEngine.dartExecutor, "dev.flutter.echo.basic.standard", StandardMessageCodec.INSTANCE)
         basicStandard.setMessageHandler { message, reply -> reply.reply(message) }
         val basicBinary = BasicMessageChannel(flutterEngine.dartExecutor, "dev.flutter.echo.basic.binary", BinaryCodec.INSTANCE)
         basicBinary.setMessageHandler { message, reply -> run {
-            val result = ByteBuffer.allocateDirect(message!!.capacity())
-            result.put(message)
-            reply.reply(result)
+            if (byteBufferCache == null) {
+                byteBufferCache = ByteBuffer.allocateDirect(message!!.capacity())
+                byteBufferCache!!.put(message)
+            }
+            reply.reply(byteBufferCache)
         } }
         super.configureFlutterEngine(flutterEngine)
     }
