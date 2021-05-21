@@ -69,14 +69,11 @@ void testMain() {
     });
 
     group('createElement', () {
-      test('adds reset to stylesheet', () {
+      test('creates slot element that can receive pointer events', () {
         final element = view.createElement();
-        _assertShadowRootStylesheetContains(element, 'all: initial;');
-      });
 
-      test('creates element transparent to "cursor" property', () {
-        final element = view.createElement();
-        _assertShadowRootStylesheetContains(element, 'cursor: inherit;');
+        expect(element.tagName, equalsIgnoringCase('flt-platform-view-slot'));
+        expect(element.style.pointerEvents, 'auto');
       });
     });
   });
@@ -97,15 +94,4 @@ Future<void> _createPlatformView(int id, String viewType) {
     (dynamic _) => completer.complete(),
   );
   return completer.future;
-}
-
-void _assertShadowRootStylesheetContains(html.Element element, String rule) {
-  final shadow = element.shadowRoot;
-
-  expect(shadow, isNotNull);
-
-  final html.StyleElement style = shadow.children.first;
-
-  expect(style, isNotNull);
-  expect(style.innerHtml, contains(rule));
 }

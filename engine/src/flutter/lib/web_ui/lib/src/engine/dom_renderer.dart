@@ -12,7 +12,10 @@ class DomRenderer {
 
     reset();
 
-    TextMeasurementService.initialize(rulerCacheCapacity: 10);
+    TextMeasurementService.initialize(
+      rulerCacheCapacity: 10,
+      root: _glassPaneShadow!,
+    );
 
     assert(() {
       _setupHotRestart();
@@ -25,6 +28,9 @@ class DomRenderer {
   static const int vibrateMediumImpact = 20;
   static const int vibrateHeavyImpact = 30;
   static const int vibrateSelectionClick = 10;
+
+  // The tag name for the root view of the flutter app (glass-pane)
+  static const String _glassPaneTagName = 'flt-glass-pane';
 
   /// Fires when browser language preferences change.
   static const html.EventStreamProvider<html.Event> languageChangeEvent =
@@ -154,6 +160,10 @@ class DomRenderer {
   html.Element? get glassPaneElement => _glassPaneElement;
   html.Element? _glassPaneElement;
 
+  /// The ShadowRoot of the [glassPaneElement].
+  html.ShadowRoot? get glassPaneShadow => _glassPaneShadow;
+  html.ShadowRoot? _glassPaneShadow;
+
   final html.Element rootElement = html.document.body!;
 
   void addElementClass(html.Element element, String className) {
@@ -252,11 +262,8 @@ class DomRenderer {
   static const String defaultCssFont =
       '$defaultFontStyle $defaultFontWeight ${defaultFontSize}px $defaultFontFamily';
 
-  void reset() {
-    _styleElement?.remove();
-    _styleElement = html.StyleElement();
-    html.document.head!.append(_styleElement!);
-    final html.CssStyleSheet sheet = _styleElement!.sheet as html.CssStyleSheet;
+  // Applies the required global CSS to an incoming [html.CssStyleSheet] `sheet`.
+  void _applyCssRulesToSheet(html.CssStyleSheet sheet) {
     final bool isWebKit = browserEngine == BrowserEngine.webkit;
     final bool isFirefox = browserEngine == BrowserEngine.firefox;
     // TODO(butterfly): use more efficient CSS selectors; descendant selectors
@@ -341,7 +348,7 @@ flt-semantics [contentEditable="true"] {
     // on using gray background. This CSS rule disables that.
     if (isWebKit) {
       sheet.insertRule('''
-flt-glass-pane * {
+$_glassPaneTagName * {
   -webkit-tap-highlight-color: transparent;
 }
 ''', sheet.cssRules.length);
@@ -360,6 +367,16 @@ flt-glass-pane * {
 }
 ''', sheet.cssRules.length);
     }
+  }
+
+  void reset() {
+    final bool isWebKit = browserEngine == BrowserEngine.webkit;
+
+    _styleElement?.remove();
+    _styleElement = html.StyleElement();
+    html.document.head!.append(_styleElement!);
+    final html.CssStyleSheet sheet = _styleElement!.sheet as html.CssStyleSheet;
+    _applyCssRulesToSheet(sheet);
 
     final html.BodyElement bodyElement = html.document.body!;
 
@@ -432,7 +449,7 @@ flt-glass-pane * {
     // IMPORTANT: the glass pane element must come after the scene element in the DOM node list so
     //            it can intercept input events.
     _glassPaneElement?.remove();
-    final html.Element glassPaneElement = createElement('flt-glass-pane');
+    final html.Element glassPaneElement = createElement(_glassPaneTagName);
     _glassPaneElement = glassPaneElement;
     glassPaneElement.style
       ..position = 'absolute'
@@ -440,9 +457,28 @@ flt-glass-pane * {
       ..right = '0'
       ..bottom = '0'
       ..left = '0';
+
+    // Create a Shadow Root under the glass panel, and attach everything there,
+    // instead of directly underneath the glass panel.
+    final html.ShadowRoot glassPaneElementShadowRoot = glassPaneElement.attachShadow(<String, String>{
+      'mode': 'open',
+      'delegatesFocus': 'true',
+    });
+    _glassPaneShadow = glassPaneElementShadowRoot;
+
     bodyElement.append(glassPaneElement);
 
-    _sceneHostElement = createElement('flt-scene-host');
+    final html.StyleElement shadowRootStyleElement = html.StyleElement();
+    // The shadowRootStyleElement must be appended to the DOM, or its `sheet` will be null later...
+    glassPaneElementShadowRoot.append(shadowRootStyleElement);
+
+    final html.CssStyleSheet shadowRootStyleSheet = shadowRootStyleElement.sheet as html.CssStyleSheet;
+    _applyCssRulesToSheet(shadowRootStyleSheet); // TODO: Apply only rules for the shadow root
+
+    // Don't allow the scene to receive pointer events.
+    _sceneHostElement = createElement('flt-scene-host')
+      ..style
+        .pointerEvents = 'none';
 
     final html.Element semanticsHostElement =
         createElement('flt-semantics-host');
@@ -451,23 +487,16 @@ flt-glass-pane * {
       ..transformOrigin = '0 0 0';
     _semanticsHostElement = semanticsHostElement;
     updateSemanticsScreenProperties();
-    glassPaneElement.append(semanticsHostElement);
 
-    // Don't allow the scene to receive pointer events.
-    _sceneHostElement!.style.pointerEvents = 'none';
-
-    glassPaneElement.append(_sceneHostElement!);
-
-    final html.Element _accesibilityPlaceholder = EngineSemanticsOwner
+    final html.Element _accessibilityPlaceholder = EngineSemanticsOwner
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
-    // Insert the semantics placeholder after the scene host. For all widgets
-    // in the scene, except for platform widgets, the scene host will pass the
-    // pointer events through to the semantics tree. However, for platform
-    // views, the pointer events will not pass through, and will be handled
-    // by the platform view.
-    glassPaneElement.insertBefore(_accesibilityPlaceholder, _sceneHostElement);
+    glassPaneElementShadowRoot.nodes.addAll([
+      semanticsHostElement,
+      _accessibilityPlaceholder,
+      _sceneHostElement!,
+    ]);
 
     // When debugging semantics, make the scene semi-transparent so that the
     // semantics tree is visible.
