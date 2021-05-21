@@ -543,6 +543,9 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/onscreen_logging.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_dispatcher.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_views.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_views/content_manager.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_views/message_handler.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_views/slots.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/plugins.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_converter.dart
