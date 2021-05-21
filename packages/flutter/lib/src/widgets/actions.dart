@@ -1035,7 +1035,9 @@ class Actions extends StatefulWidget {
         action = result;
         return true;
       }
-      return false;
+      // If we're looking at the registered actions, we just look at the first one
+      // we find, not the others, so terminate the search early.
+      return registered;
     }
 
     _visitAncestorsOfType<_ActionsMarker>(context, searchActions);
@@ -1079,14 +1081,15 @@ class Actions extends StatefulWidget {
         actions.add(result);
         return true;
       }
-      return false;
+      // If we're looking at the registered actions, we just look at the first one
+      // we find, not the ancestors, so terminate the search early.
+      return registered;
     }
 
     // First search for non-registered actions, and collect the registered actions.
     _visitAncestorsOfType<_ActionsMarker>(context, searchActions);
 
-    // If a non-registered action is found, then use that, otherwise collect any
-    // registered actions as well.
+    // Collect any registered actions as well.
     final Iterable<BuildContext> contexts = ActionsRegistry.registeredContextsOf<T>(context, intent: intent);
     for (final BuildContext registeredContext in contexts) {
       _visitAncestorsOfType<_ActionsMarker>(registeredContext, (InheritedElement element) => searchActions(element, true));
@@ -1129,32 +1132,11 @@ class Actions extends StatefulWidget {
     assert(intent != null);
     assert(context != null);
 
-    final Map<Action<T>, InheritedElement> actions = <Action<T>, InheritedElement>{};
-    InheritedElement? actionElement;
-    bool searchActions(InheritedElement element, [bool registered = false]) {
-      final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
-      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[intent.runtimeType] as Action<T>?;
-      if (result != null) {
-        actionElement = element;
-        if (result.isEnabled(intent)) {
-          actions[result] = element;
-          return true;
-        }
-      }
-      return false;
-    }
-
-    _visitAncestorsOfType<_ActionsMarker>(context, searchActions);
-
-    if (actions.isEmpty) {
-      final Iterable<BuildContext> contexts = ActionsRegistry.registeredContextsOf<T>(context, intent: intent);
-      for (final BuildContext registeredContext in contexts) {
-        _visitAncestorsOfType<_ActionsMarker>(registeredContext, (InheritedElement element) =>  searchActions(element, true));
-      }
-    }
+    final List<Object?> results = <Object?>[];
+    final bool success = _doInvoke<T>(context, intent, results);
 
     assert(() {
-      if (actionElement == null) {
+      if (!success) {
         throw FlutterError(
           'Unable to find an action for an Intent with type '
           '${intent.runtimeType} in an $Actions widget in the given context.\n'
@@ -1171,17 +1153,10 @@ class Actions extends StatefulWidget {
       return true;
     }());
 
-    if (actionElement == null || actions.isEmpty) {
+    if (!success) {
       return null;
     }
 
-    // Invoke the action we found using the relevant dispatcher from the Actions
-    // Element we found.
-    final List<Object?> results = <Object?>[];
-    for (final Action<T> action in actions.keys) {
-      final ActionDispatcher dispatcher = _findDispatcher(actions[action]!);
-      results.add(dispatcher.invokeAction(action, intent, context));
-    }
     if (results.length > 1) {
       return results;
     }
@@ -1206,30 +1181,63 @@ class Actions extends StatefulWidget {
     BuildContext context,
     T intent,
   ) {
+    final List<Object?> results = <Object?>[];
+    if (_doInvoke<T>(context, intent, results)) {
+      if (results.length > 1) {
+        return results;
+      }
+      return results.first;
+    }
+    return null;
+  }
+
+  // A helper that both invoke and maybeInvoke use, that returns true if the
+  // invoke succeeded, and adds the results to the given results list.
+  static bool _doInvoke<T extends Intent>(
+    BuildContext context,
+    T intent,
+    List<Object?> results,
+  ) {
     assert(intent != null);
     assert(context != null);
-    Action<T>? action;
     InheritedElement? actionElement;
 
-    _visitAncestorsOfType<_ActionsMarker>(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
+    final Map<Action<T>, InheritedElement> actions = <Action<T>, InheritedElement>{};
+    bool searchActions(InheritedElement element, [bool registered = false]) {
+      final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
+      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[intent.runtimeType] as Action<T>?;
       if (result != null) {
         actionElement = element;
         if (result.isEnabled(intent)) {
-          action = result;
+          actions[result] = element;
           return true;
         }
       }
-      return false;
-    });
-
-    if (actionElement == null || action == null) {
-      return null;
+      // If we're looking at the registered actions, we just look at the first one
+      // we find, not the others, so terminate the search early.
+      return registered;
     }
+    _visitAncestorsOfType<_ActionsMarker>(context, searchActions);
+
+    if (actions.isEmpty) {
+      final Iterable<BuildContext> contexts = ActionsRegistry.registeredContextsOf<T>(context, intent: intent);
+      for (final BuildContext registeredContext in contexts) {
+        _visitAncestorsOfType<_ActionsMarker>(registeredContext, (InheritedElement element) =>  searchActions(element, true));
+      }
+    }
+
+    if (actionElement == null || actions.isEmpty) {
+      return false;
+    }
+
     // Invoke the action we found using the relevant dispatcher from the Actions
     // Element we found.
-    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+    for (final Action<T> action in actions.keys) {
+      final ActionDispatcher dispatcher = _findDispatcher(actions[action]!);
+      results.add(dispatcher.invokeAction(action, intent, context));
+    }
+
+    return true;
   }
 
   @override

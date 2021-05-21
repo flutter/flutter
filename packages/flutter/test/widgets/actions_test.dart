@@ -664,7 +664,7 @@ void main() {
         ),
       );
 
-      Object? result = Actions.invoke(
+      Object? result = Actions.maybeInvoke<TestIntent>(
         containerKey.currentContext!,
         const TestIntent(),
       );
@@ -673,7 +673,7 @@ void main() {
       expect(invoked1, isFalse);
 
       action1.enabled = true;
-      result = Actions.invoke(
+      result = Actions.invoke<TestIntent>(
         containerKey.currentContext!,
         const TestIntent(),
       );
@@ -702,7 +702,7 @@ void main() {
       );
 
       await tester.pump();
-      result = Actions.invoke<TestIntent>(
+      result = Actions.maybeInvoke<TestIntent>(
         containerKey.currentContext!,
         const SecondTestIntent(),
       );
