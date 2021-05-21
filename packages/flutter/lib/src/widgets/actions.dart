@@ -1029,7 +1029,7 @@ class Actions extends StatefulWidget {
 
     bool searchActions(InheritedElement element, [bool registered = false]) {
       final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
-      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[intent.runtimeType] as Action<T>?;
+      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[type] as Action<T>?;
       if (result != null) {
         context.dependOnInheritedElement(element);
         action = result;
@@ -1065,15 +1065,15 @@ class Actions extends StatefulWidget {
     // concrete type of the intent at compile time.
     final Type type = intent?.runtimeType ?? T;
     assert(
-    type != Intent,
-    'The type passed to "find" resolved to "Intent": either a non-Intent '
-        'generic type argument or an example intent derived from Intent must be '
-        'specified. Intent may be used as the generic type as long as the optional '
-        '"intent" argument is passed.',
+      type != Intent,
+      'The type passed to "find" resolved to "Intent": either a non-Intent '
+      'generic type argument or an example intent derived from Intent must be '
+      'specified. Intent may be used as the generic type as long as the optional '
+      '"intent" argument is passed.',
     );
     bool searchActions(InheritedElement element, [bool registered = false]) {
       final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
-      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[intent.runtimeType] as Action<T>?;
+      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[type] as Action<T>?;
       if (result != null) {
         context.dependOnInheritedElement(element);
         actions.add(result);
@@ -1128,6 +1128,7 @@ class Actions extends StatefulWidget {
   ) {
     assert(intent != null);
     assert(context != null);
+
     final Map<Action<T>, InheritedElement> actions = <Action<T>, InheritedElement>{};
     InheritedElement? actionElement;
     bool searchActions(InheritedElement element, [bool registered = false]) {
@@ -1244,7 +1245,7 @@ class Actions extends StatefulWidget {
 
 class _ActionsState extends State<Actions> {
   // The set of actions that this Actions widget is current listening to.
-  final Set<Action<Intent>> listenedActions = <Action<Intent>>{};
+  Set<Action<Intent>> listenedActions = <Action<Intent>>{};
   // Used to tell the marker to rebuild its dependencies when the state of an
   // action in the map changes.
   Object rebuildKey = Object();
@@ -1282,14 +1283,18 @@ class _ActionsState extends State<Actions> {
     for (final Action<Intent> action in addedActions) {
       action.addActionListener(_handleActionChanged);
     }
-    listenedActions.clear();
-    listenedActions.addAll(widgetActions);
+    listenedActions = widgetActions;
+  }
+
+  @override
+  void didUpdateWidget(Actions oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _udpateAllActionListeners();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _udpateAllActionListeners();
     if (widget.registeredActions != null) {
       registry = ActionsRegistry.maybeRegistryOf(context);
       registry?.registerActions(context);
@@ -1298,12 +1303,12 @@ class _ActionsState extends State<Actions> {
 
   @override
   void dispose() {
+    super.dispose();
     for (final Action<Intent> action in listenedActions) {
       action.removeActionListener(_handleActionChanged);
     }
     listenedActions.clear();
     registry?.unregisterActions(context);
-    super.dispose();
   }
 
   @override

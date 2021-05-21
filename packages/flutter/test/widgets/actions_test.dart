@@ -26,11 +26,14 @@ class ThirdTestIntent extends SecondTestIntent {
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
     required OnInvokeCallback onInvoke,
+    this.label = '',
   })  : assert(onInvoke != null),
         super(onInvoke: onInvoke);
 
   @override
   bool isEnabled(TestIntent intent) => enabled;
+
+  String label;
 
   bool get enabled => _enabled;
   bool _enabled = true;
@@ -56,6 +59,13 @@ class TestAction extends CallbackAction<TestIntent> {
   List<ActionListenerCallback> listeners = <ActionListenerCallback>[];
 
   void _testInvoke(TestIntent intent) => invoke(intent);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('label', label, defaultValue: ''));
+    properties.add(IntProperty('listeners', listeners.length, defaultValue: 0));
+  }
 }
 
 class TestDispatcher extends ActionDispatcher {
@@ -604,18 +614,21 @@ void main() {
       bool invoked2 = false;
       bool invoked3 = false;
       final TestAction action1 = TestAction(
+        label: 'action1',
         onInvoke: (Intent intent) {
           invoked1 = true;
           return invoked1;
         },
       );
       final TestAction action2 = TestAction(
+        label: 'action2',
         onInvoke: (Intent intent) {
           invoked2 = true;
           return invoked2;
         },
       );
       final TestAction action3 = TestAction(
+        label: 'action3',
         onInvoke: (Intent intent) {
           invoked3 = true;
           return invoked3;
@@ -707,6 +720,10 @@ void main() {
       expect(enabled2, isTrue);
       expect(result, isTrue);
       expect(invoked2, isTrue);
+
+      expect(action1.listeners.length, equals(2));
+      expect(action2.listeners.length, equals(3));
+      expect(action3.listeners.length, equals(2));
 
       await tester.pumpWidget(
         Actions(
