@@ -1,4 +1,4 @@
-Signature: 9bd488ee73a724c378b2a1a90861e89d
+Signature: 2a0a22f0e850d569ed69f35aafbc3649
 
 UNUSED LICENSES:
 
@@ -3961,6 +3961,7 @@ FILE: ../../../third_party/skia/modules/androidkit/src/Surface.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Surface.h
 FILE: ../../../third_party/skia/modules/androidkit/src/SurfaceThread.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/SurfaceThread.h
+FILE: ../../../third_party/skia/modules/androidkit/src/Utils.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Utils.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
@@ -5119,7 +5120,6 @@ FILE: ../../../third_party/skia/gm/fpcoordinateoverride.cpp
 FILE: ../../../third_party/skia/gm/inverseclip.cpp
 FILE: ../../../third_party/skia/gm/labyrinth.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
-FILE: ../../../third_party/skia/gm/sample_matrix_constant.cpp
 FILE: ../../../third_party/skia/gm/swizzle.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
 FILE: ../../../third_party/skia/include/core/SkPathTypes.h
