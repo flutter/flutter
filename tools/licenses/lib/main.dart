@@ -1665,13 +1665,14 @@ class _RepositoryPkgDirectory extends _RepositoryDirectory {
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'archive'  // contains nothing that ends up in the binary executable
+      && entry.name != 'equatable'
       && entry.name != 'file'
-      && entry.name != 'image'
-      && entry.name != 'petitparser'
+      && entry.name != 'flutter_packages'
+      && entry.name != 'gcloud'
+      && entry.name != 'googleapis'
       && entry.name != 'platform'
       && entry.name != 'process'
-      && entry.name != 'vector_math'
-      && entry.name != 'xml';
+      && entry.name != 'vector_math';
   }
 
   @override

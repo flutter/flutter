@@ -398,8 +398,20 @@ deps = {
   'src/third_party/pkg/archive':
   Var('github_git') + '/brendan-duncan/archive.git' + '@' + '3.1.2',
 
+  'src/third_party/pkg/equatable':
+  Var('github_git') + '/felangel/equatable.git' + '@' + '0ba67c72db8bed75877fc1caafa74112ee0bd921', # 2.0.2
+
   'src/third_party/pkg/file':
   Var('github_git') + '/google/file.dart.git' + '@' + '427bb20ccc852425d67f2880da2a9b4707c266b4', # 6.1.0
+
+  'src/third_party/pkg/flutter_packages':
+  Var('github_git') + '/flutter/packages.git' + '@' + '5617d089f26dd52da3bf05c9fa4620ef11a7419b', # various
+
+  'src/third_party/pkg/gcloud':
+  Var('github_git') + '/dart-lang/gcloud.git' + '@' + '92a33a9d95ea94a4354b052a28b98088d660e0e7', # 0.8.0-dev
+
+  'src/third_party/pkg/googleapis':
+  Var('github_git') + '/google/googleapis.dart.git' + '@' + '07f01b7aa6985e4cafd0fd4b98724841bc9e85a1', # various
 
   'src/third_party/pkg/platform':
   Var('github_git') + '/google/platform.dart.git' + '@' + 'f63fd0bc3021354a0687dc935962c9acc003f47e', # 3.0.1
