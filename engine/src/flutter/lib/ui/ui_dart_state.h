@@ -36,6 +36,67 @@ class UIDartState : public tonic::DartState {
  public:
   static UIDartState* Current();
 
+  /// @brief  The subset of state which is owned by the shell or engine
+  ///         and passed through the RuntimeController into DartIsolates.
+  ///         If a shell-owned resource needs to be exposed to the framework via
+  ///         UIDartState, a pointer to the resource can be added to this
+  ///         struct with appropriate default construction.
+  struct Context {
+    Context(const TaskRunners& task_runners);
+
+    Context(const TaskRunners& task_runners,
+            fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+            fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
+            fml::WeakPtr<IOManager> io_manager,
+            fml::RefPtr<SkiaUnrefQueue> unref_queue,
+            fml::WeakPtr<ImageDecoder> image_decoder,
+            fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+            std::string advisory_script_uri,
+            std::string advisory_script_entrypoint,
+            std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+
+    /// The task runners used by the shell hosting this runtime controller. This
+    /// may be used by the isolate to scheduled asynchronous texture uploads or
+    /// post tasks to the platform task runner.
+    const TaskRunners task_runners;
+
+    /// The snapshot delegate used by the
+    /// isolate to gather raster snapshots
+    /// of Flutter view hierarchies.
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate;
+
+    /// The delegate used by the isolate to hint the Dart VM when additional
+    /// memory may be freed if a GC ran at the next NotifyIdle.
+    fml::WeakPtr<HintFreedDelegate> hint_freed_delegate;
+
+    /// The IO manager used by the isolate for asynchronous texture uploads.
+    fml::WeakPtr<IOManager> io_manager;
+
+    /// The unref queue used by the isolate to collect resources that may
+    /// reference resources on the GPU.
+    fml::RefPtr<SkiaUnrefQueue> unref_queue;
+
+    /// The image decoder.
+    fml::WeakPtr<ImageDecoder> image_decoder;
+
+    /// Cascading registry of image generator builders. Given compressed image
+    /// bytes as input, this is used to find and create image generators, which
+    /// can then be used for image decoding.
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry;
+
+    /// The advisory script URI (only used for debugging). This does not affect
+    /// the code being run in the isolate in any way.
+    std::string advisory_script_uri;
+
+    /// The advisory script entrypoint (only used for debugging). This does not
+    /// affect the code being run in the isolate in any way. The isolate must be
+    /// transitioned to the running state explicitly by the caller.
+    std::string advisory_script_entrypoint;
+
+    /// Cache for tracking path volatility.
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker;
+  };
+
   Dart_Port main_port() const { return main_port_; }
   // Root isolate of the VM application
   bool IsRootIsolate() const { return is_root_isolate_; }
@@ -102,24 +163,15 @@ class UIDartState : public tonic::DartState {
   };
 
  protected:
-  UIDartState(TaskRunners task_runners,
-              TaskObserverAdd add_callback,
+  UIDartState(TaskObserverAdd add_callback,
               TaskObserverRemove remove_callback,
-              fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-              fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
-              fml::WeakPtr<IOManager> io_manager,
-              fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
-              fml::WeakPtr<ImageDecoder> image_decoder,
-              fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
-              std::string advisory_script_uri,
-              std::string advisory_script_entrypoint,
               std::string logger_prefix,
               UnhandledExceptionCallback unhandled_exception_callback,
               LogMessageCallback log_message_callback,
               std::shared_ptr<IsolateNameServer> isolate_name_server,
               bool is_root_isolate_,
-              std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
-              bool enable_skparagraph);
+              bool enable_skparagraph,
+              const UIDartState::Context& context);
 
   ~UIDartState() override;
 
@@ -133,18 +185,8 @@ class UIDartState : public tonic::DartState {
  private:
   void DidSetIsolate() override;
 
-  const TaskRunners task_runners_;
   const TaskObserverAdd add_callback_;
   const TaskObserverRemove remove_callback_;
-  fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
-  fml::WeakPtr<HintFreedDelegate> hint_freed_delegate_;
-  fml::WeakPtr<IOManager> io_manager_;
-  fml::RefPtr<SkiaUnrefQueue> skia_unref_queue_;
-  fml::WeakPtr<ImageDecoder> image_decoder_;
-  fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry_;
-  std::shared_ptr<VolatilePathTracker> volatile_path_tracker_;
-  const std::string advisory_script_uri_;
-  const std::string advisory_script_entrypoint_;
   const std::string logger_prefix_;
   Dart_Port main_port_ = ILLEGAL_PORT;
   const bool is_root_isolate_;
@@ -155,6 +197,7 @@ class UIDartState : public tonic::DartState {
   LogMessageCallback log_message_callback_;
   const std::shared_ptr<IsolateNameServer> isolate_name_server_;
   const bool enable_skparagraph_;
+  UIDartState::Context context_;
 
   void AddOrRemoveTaskObserver(bool add);
 };
