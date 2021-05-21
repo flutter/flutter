@@ -1860,7 +1860,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
-  /// [debugCannotComputeDryLayout] from within an assert and and return a dummy
+  /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
   @protected
   Size computeDryLayout(BoxConstraints constraints) {

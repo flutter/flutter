@@ -22,14 +22,15 @@ import './state.dart';
 import './stdio.dart';
 
 const String kCandidateOption = 'candidate-branch';
-const String kReleaseOption = 'release-channel';
-const String kStateOption = 'state-file';
-const String kFrameworkMirrorOption = 'framework-mirror';
-const String kEngineMirrorOption = 'engine-mirror';
-const String kFrameworkUpstreamOption = 'framework-upstream';
+const String kDartRevisionOption = 'dart-revision';
+const String kEngineCherrypicksOption = 'engine-cherrypicks';
 const String kEngineUpstreamOption = 'engine-upstream';
 const String kFrameworkCherrypicksOption = 'framework-cherrypicks';
-const String kEngineCherrypicksOption = 'engine-cherrypicks';
+const String kFrameworkMirrorOption = 'framework-mirror';
+const String kFrameworkUpstreamOption = 'framework-upstream';
+const String kEngineMirrorOption = 'engine-mirror';
+const String kReleaseOption = 'release-channel';
+const String kStateOption = 'state-file';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -85,6 +86,10 @@ class StartCommand extends Command<void> {
       kFrameworkCherrypicksOption,
       help: 'Framework cherrypick hashes to be applied.',
       defaultsTo: <String>[],
+    );
+    argParser.addOption(
+      kDartRevisionOption,
+      help: 'New Dart revision to cherrypick.',
     );
     final Git git = Git(processManager);
     conductorVersion = git.getOutput(
@@ -172,10 +177,17 @@ class StartCommand extends Command<void> {
       argResults,
       platform.environment,
     );
+    final String dartRevision = getValueFromEnvOrArgs(
+      kDartRevisionOption,
+      argResults,
+      platform.environment,
+      allowNull: true,
+    );
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
-          'Invalid release candidate branch "$candidateBranch". '
-          'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.');
+        'Invalid release candidate branch "$candidateBranch". Text should '
+        'match the regex pattern /${releaseCandidateBranchRegex.pattern}/.',
+      );
     }
 
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
@@ -197,9 +209,15 @@ class StartCommand extends Command<void> {
         url: engineMirror,
       ),
     );
+
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
     engine.newBranch('cherrypicks-$candidateBranch');
+
+    if (dartRevision != null && dartRevision.isNotEmpty) {
+      engine.updateDartRevision(dartRevision);
+      engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
+    }
     final List<pb.Cherrypick> engineCherrypicks = _sortCherrypicks(
       repository: engine,
       cherrypicks: engineCherrypickRevisions,
@@ -230,6 +248,7 @@ class StartCommand extends Command<void> {
       currentGitHead: engineHead,
       checkoutPath: engine.checkoutDirectory.path,
       cherrypicks: engineCherrypicks,
+      dartRevision: dartRevision,
     );
     final FrameworkRepository framework = FrameworkRepository(
       checkouts,

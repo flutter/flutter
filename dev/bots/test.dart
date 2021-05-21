@@ -904,6 +904,7 @@ Future<void> _runFlutterDriverWebTest({
   await runCommand(
     flutter,
     <String>[
+      ...?flutterTestArgs,
       'drive',
       '--target=$target',
       '--browser-name=chrome',
@@ -1080,6 +1081,7 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
   await runCommand(
     flutter,
     <String>[
+      ...?flutterTestArgs,
       'drive',
       if (canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
@@ -1163,6 +1165,7 @@ Future<void> _runWebReleaseTest(String target, {
   await runCommand(
     flutter,
     <String>[
+      ...?flutterTestArgs,
       'build',
       'web',
       '--release',

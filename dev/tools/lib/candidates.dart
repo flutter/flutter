@@ -82,14 +82,18 @@ class CandidatesCommand extends Command<void> {
       final int y = int.parse(candidateMatch.group(2)!);
       final int m = int.parse(candidateMatch.group(3)!);
 
-      final RegExpMatch match = remotePattern.firstMatch(branchName)!;
+      final RegExpMatch? match = remotePattern.firstMatch(branchName);
+      // If this is not the correct remote
+      if (match == null) {
+        continue;
+      }
       if (x < currentVersion.x) {
         continue;
       }
       if (x == currentVersion.x && y < currentVersion.y) {
         continue;
       }
-      if (x == currentX && y == currentY && currentZ == 0 && m < currentM) {
+      if (x == currentX && y == currentY && currentZ == 0 && m <= currentM) {
         continue;
       }
       stdio.printStatus(match.group(1)!);

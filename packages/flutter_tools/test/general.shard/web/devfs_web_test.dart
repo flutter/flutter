@@ -985,7 +985,7 @@ void main() {
     expect(response.statusCode, 404);
   }));
 
-  test('WebAssetServer strips leading base href off off asset requests', () => testbed.run(() async {
+  test('WebAssetServer strips leading base href off of asset requests', () => testbed.run(() async {
     const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
     globals.fs.currentDirectory
       .childDirectory('web')
