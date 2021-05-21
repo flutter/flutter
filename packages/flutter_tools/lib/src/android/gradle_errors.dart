@@ -75,7 +75,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
-  androidXFailureHandler,
+  androidXFailureHandler, // Keep last since the pattern is broader.
 ];
 
 // Permission defined error message.

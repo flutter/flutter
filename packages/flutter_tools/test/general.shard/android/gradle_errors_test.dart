@@ -34,6 +34,7 @@ void main() {
           androidXFailureHandler,
         ])
       );
+      expect(gradleErrors.last, equals(androidXFailureHandler));
     });
   });
 
