@@ -3,13 +3,44 @@
 # found in the LICENSE file.
 
 name: ci_scripts
-
-dependencies:
-  args: ^2.0.0
-  meta: ^1.3.0
-  path: ^1.8.0
-  isolate: ^2.0.3
-  process_runner: ^4.0.0
-
+publish_to: none
 environment:
   sdk: '>=2.12.0-0 <3.0.0'
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/pkg, //third_party/dart/pkg, or
+# //third_party/dart/third_party/pkg. In particular, package:test is not usable
+# here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
+
+dependencies:
+  args: any
+  meta: any
+  path: any
+  isolate: any
+  process_runner: any
+
+dependency_overrides:
+  args:
+    path: ../../third_party/dart/third_party/pkg/args
+  async:
+    path: ../../third_party/dart/third_party/pkg/async
+  collection:
+    path: ../../third_party/dart/third_party/pkg/collection
+  file:
+    path: ../../third_party/pkg/file/packages/file
+  isolate:
+    path: ../../third_party/pkg/isolate
+  meta:
+    path: ../../third_party/dart/pkg/meta
+  path:
+    path: ../../third_party/dart/third_party/pkg/path
+  platform:
+    path: ../../third_party/pkg/platform
+  process:
+    path: ../../third_party/pkg/process
+  process_runner:
+    path: ../../third_party/pkg/process_runner

@@ -8,7 +8,7 @@ environment:
   sdk: '>=2.11.0 <3.0.0'
 
 # Do not add any dependencies that require more than what is provided in
-# //third_party.pkg, //third_party/dart/pkg, or
+# //third_party/pkg, //third_party/dart/pkg, or
 # //third_party/dart/third_party/pkg. In particular, package:test is not usable
 # here.
 

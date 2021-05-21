@@ -136,11 +136,11 @@ Future<LintAction> getLintAction(File file) async {
   }
 
   // Check for FlUTTER_NOLINT at top of file.
-  final RegExp exp = RegExp('\/\/\\s*FLUTTER_NOLINT(: $issueUrlPrefix/\\d+)?');
+  final RegExp exp = RegExp(r'//\s*FLUTTER_NOLINT(: $issueUrlPrefix/\d+)?');
   final Stream<String> lines = file.openRead()
     .transform(utf8.decoder)
     .transform(const LineSplitter());
-  await for (String line in lines) {
+  await for (final String line in lines) {
     final RegExpMatch? match = exp.firstMatch(line);
     if (match != null) {
       return match.group(1) != null
@@ -174,7 +174,7 @@ void _usage(ArgParser parser, {int exitCode = 1}) {
 
 bool verbose = false;
 
-void main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final ArgParser parser = ArgParser();
   parser.addFlag('help', help: 'Print help.');
   parser.addFlag('lint-all',
@@ -262,7 +262,7 @@ void main(List<String> arguments) async {
   }
 
   final List<WorkerJob> jobs = <WorkerJob>[];
-  for (Command command in changedFileBuildCommands) {
+  for (final Command command in changedFileBuildCommands) {
     final String relativePath = path.relative(command.file.path, from: repoPath.parent.path);
     final LintAction action = await getLintAction(command.file);
     switch (action) {
