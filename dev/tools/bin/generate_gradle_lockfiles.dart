@@ -113,8 +113,7 @@ void exec(
   List<String> args, {
   String? workingDirectory,
 }) {
-  final ProcessResult result =
-      Process.runSync(cmd, args, workingDirectory: workingDirectory);
+  final ProcessResult result = Process.runSync(cmd, args, workingDirectory: workingDirectory);
   if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty)
     throw ProcessException(
         cmd, args, '${result.stdout}${result.stderr}', result.exitCode);
