@@ -77,13 +77,14 @@ void main() {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(FutureBuilder<String>(
         key: key, future: null, builder: snapshotText,
+        initialData:'1'
       ));
-      expect(find.text('AsyncSnapshot<String>(ConnectionState.none, null, null, null)'), findsOneWidget);
+      expect(find.text('AsyncSnapshot<String>(ConnectionState.none, 1, null, null)'), findsOneWidget);
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(FutureBuilder<String>(
         key: key, future: completer.future, builder: snapshotText,
       ));
-      expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, null, null, null)'), findsOneWidget);
+      expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, 1, null, null)'), findsOneWidget);
     });
     testWidgets('gracefully handles transition to null future', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
@@ -94,6 +95,7 @@ void main() {
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, null, null, null)'), findsOneWidget);
       await tester.pumpWidget(FutureBuilder<String>(
         key: key, future: null, builder: snapshotText,
+        initialData:'1'
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.none, null, null, null)'), findsOneWidget);
       completer.complete('hello');
@@ -289,12 +291,8 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, trace)'), findsNWidgets(2));
     });
-    testWidgets('when Future is null', (WidgetTester tester) async {
-      await tester.pumpWidget(Column(children: <Widget>[
-        FutureBuilder<String>(future: null, builder: snapshotText),
-        StreamBuilder<String>(stream: null, builder: snapshotText),
-      ]));
-      expect(find.text('AsyncSnapshot<String>(ConnectionState.none, null, null, null)'), findsNWidgets(2));
+    testWidgets('When Future and InitialData both are null',(WidgetTester tester) async{
+      expect(()=>FutureBuilder<String>(builder: snapshotText,),throwsAssertionError);
     });
     testWidgets('when initialData is used with null Future and Stream', (WidgetTester tester) async {
       await tester.pumpWidget(Column(children: <Widget>[
