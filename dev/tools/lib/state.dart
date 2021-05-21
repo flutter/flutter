@@ -57,6 +57,9 @@ String presentState(pb.ConductorState state) {
   } else {
     buffer.writeln('0 Engine cherrypicks.');
   }
+  if (state.engine.dartRevision != null && state.engine.dartRevision.isNotEmpty) {
+    buffer.writeln('New Dart SDK revision: ${state.engine.dartRevision}');
+  }
   buffer.writeln('Framework Repo');
   buffer.writeln('\tCandidate branch: ${state.framework.candidateBranch}');
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');

@@ -16,7 +16,6 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
-    addTreeShakeIconsFlag();
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -48,6 +47,13 @@ class BuildBundleCommand extends BuildSubCommand {
         defaultsTo: getAssetBuildDirectory(),
         help: 'The output directory for the kernel_blob.bin file, the native snapshet, the assets, etc. '
               'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
+      )
+      ..addFlag(
+        'tree-shake-icons',
+        negatable: true,
+        defaultsTo: false,
+        hide: !verboseHelp,
+        help: '(deprecated) Icon font tree shaking is not supported by this command.',
       );
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -69,16 +75,24 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
+  Future<CustomDimensions> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
     final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
     if (flutterProject == null) {
-      return const <CustomDimensions, String>{};
+      return const CustomDimensions();
     }
-    return <CustomDimensions, String>{
-      CustomDimensions.commandBuildBundleTargetPlatform: stringArg('target-platform'),
-      CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
-    };
+    return CustomDimensions(
+      commandBuildBundleTargetPlatform: stringArg('target-platform'),
+      commandBuildBundleIsModule: flutterProject.isModule,
+    );
+  }
+
+  @override
+  Future<void> validateCommand() async {
+    if (argResults['tree-shake-icons'] as bool) {
+      throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
+    }
+    return super.validateCommand();
   }
 
   @override

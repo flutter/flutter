@@ -202,6 +202,8 @@ class Repository extends $pb.GeneratedMessage {
     ..pc<Cherrypick>(
         7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cherrypicks', $pb.PbFieldType.PM,
         subBuilder: Cherrypick.create)
+    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dartRevision',
+        protoName: 'dartRevision')
     ..hasRequiredFields = false;
 
   Repository._() : super();
@@ -213,6 +215,7 @@ class Repository extends $pb.GeneratedMessage {
     Remote upstream,
     Remote mirror,
     $core.Iterable<Cherrypick> cherrypicks,
+    $core.String dartRevision,
   }) {
     final _result = create();
     if (candidateBranch != null) {
@@ -235,6 +238,9 @@ class Repository extends $pb.GeneratedMessage {
     }
     if (cherrypicks != null) {
       _result.cherrypicks.addAll(cherrypicks);
+    }
+    if (dartRevision != null) {
+      _result.dartRevision = dartRevision;
     }
     return _result;
   }
@@ -338,6 +344,18 @@ class Repository extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(7)
   $core.List<Cherrypick> get cherrypicks => $_getList(6);
+
+  @$pb.TagNumber(8)
+  $core.String get dartRevision => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set dartRevision($core.String v) {
+    $_setString(7, v);
+  }
+
+  @$pb.TagNumber(8)
+  $core.bool hasDartRevision() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearDartRevision() => clearField(8);
 }
 
 class ConductorState extends $pb.GeneratedMessage {

@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -217,7 +218,8 @@ Future<void> main() async {
         });
 
         section('Configure');
-        project.addPlugin('plugin_under_test', value: '$platformLineSep    path: ${pluginDir.path}');
+        unawaited(project.addPlugin('plugin_under_test',
+            value: '$platformLineSep    path: ${pluginDir.path}'));
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.getPackages();
 

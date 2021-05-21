@@ -528,7 +528,7 @@ class AlertDialog extends StatelessWidget {
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1!,
           child: Semantics(
             container: true,
-            child: content!,
+            child: content,
           ),
         ),
       );

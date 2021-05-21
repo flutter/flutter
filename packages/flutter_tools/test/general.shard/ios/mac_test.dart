@@ -160,10 +160,10 @@ void main() {
           'build',
           'ios',
           label: 'xcode-bitcode-failure',
-          parameters: <String, String>{
-            cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
-            cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
-          },
+          parameters: CustomDimensions(
+            buildEventCommand: buildCommands.toString(),
+            buildEventSettings: buildSettings.toString(),
+          ),
         ),
       ));
     });

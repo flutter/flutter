@@ -15,10 +15,22 @@ import 'package:web_e2e_tests/text_editing_main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  /// Locate elements in the correct root of the application, whether it is
+  /// `document` or the new `shadowRoot` of `flt-class-pane`.
+  List<Node> findElements(String selector) {
+    final ShadowRoot? shadowRoot = document.querySelector('flt-glass-pane')?.shadowRoot;
+    return (shadowRoot != null) ?
+      shadowRoot.querySelectorAll(selector):
+      document.querySelectorAll(selector);
+  }
+
   testWidgets('Focused text field creates a native input element',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -26,10 +38,9 @@ void main() {
     await tester.tap(find.byKey(const Key('input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = document.getElementsByTagName('input');
+    final List<Node> nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input =
-        document.getElementsByTagName('input')[0] as InputElement;
+    final InputElement input = nodeList[0] as InputElement;
     // The element's value will be the same as the textFormField's value.
     expect(input.value, 'Text1');
 
@@ -38,12 +49,15 @@ void main() {
     textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Input field with no initial value works',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('empty-input'));
@@ -51,10 +65,9 @@ void main() {
     await tester.tap(find.byKey(const Key('empty-input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = document.getElementsByTagName('input');
+    final List<Node> nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input =
-        document.getElementsByTagName('input')[0] as InputElement;
+    final InputElement input = nodeList[0] as InputElement;
     // The element's value will be empty.
     expect(input.value, '');
 
@@ -63,12 +76,15 @@ void main() {
     textFormField.controller?.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Pressing enter on the text field triggers submit',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // This text will show no-enter initially. It will have 'enter-pressed'
     // after `onFieldSubmitted` of TextField is triggered.
@@ -83,8 +99,7 @@ void main() {
     await tester.tap(find.byKey(const Key('input2')));
 
     // // Press Tab. This should trigger `onFieldSubmitted` of TextField.
-    final InputElement input =
-        document.getElementsByTagName('input')[0] as InputElement;
+    final InputElement input = findElements('input')[0] as InputElement;
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
       'keyCode': 13, // Enter.
       'cancelable': true,
@@ -96,12 +111,15 @@ void main() {
     expect(textFinder2, findsOneWidget);
     final Text text2 = tester.widget(textFinder2);
     expect(text2.data, 'enter pressed');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Jump between TextFormFields with tab key',
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -109,10 +127,9 @@ void main() {
     await tester.tap(find.byKey(const Key('input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = document.getElementsByTagName('input');
+    final List<Node> nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input =
-        document.getElementsByTagName('input')[0] as InputElement;
+    final InputElement input = nodeList[0] as InputElement;
 
     // Press Tab. The focus should move to the next TextFormField.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
@@ -120,20 +137,23 @@ void main() {
       'code': 'Tab',
       'bubbles': true,
       'cancelable': true,
+      'composed': true,
     });
 
     await tester.pumpAndSettle();
 
     // A native input element for the next TextField should be attached to the
     // DOM.
-    final InputElement input2 =
-        document.getElementsByTagName('input')[0] as InputElement;
+    final InputElement input2 = findElements('input')[0] as InputElement;
     expect(input2.value, 'Text2');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
@@ -141,10 +161,9 @@ void main() {
     await tester.tap(find.byKey(const Key('input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = document.getElementsByTagName('input');
+    final List<Node> nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input =
-    document.getElementsByTagName('input')[0] as InputElement;
+    final InputElement input = nodeList[0] as InputElement;
 
     // Press and release CapsLock.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
@@ -152,12 +171,14 @@ void main() {
       'code': 'CapsLock',
       'bubbles': true,
       'cancelable': true,
+      'composed': true,
     });
     dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
       'key': 'CapsLock',
       'code': 'CapsLock',
       'bubbles': true,
       'cancelable': true,
+      'composed': true,
     });
 
     // Press Tab. The focus should move to the next TextFormField.
@@ -166,21 +187,24 @@ void main() {
       'code': 'Tab',
       'bubbles': true,
       'cancelable': true,
+      'composed': true,
     });
 
     await tester.pumpAndSettle();
 
     // A native input element for the next TextField should be attached to the
     // DOM.
-    final InputElement input2 =
-    document.getElementsByTagName('input')[0] as InputElement;
+    final InputElement input2 = findElements('input')[0] as InputElement;
     expect(input2.value, 'Text2');
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Read-only fields work', (WidgetTester tester) async {
     const String text = 'Lorem ipsum dolor sit amet';
     app.main();
     await tester.pumpAndSettle();
+
+    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
+    SystemChannels.textInput.setMockMethodCallHandler(null);
 
     // Select something from the selectable text.
     final Finder finder = find.byKey(const Key('selectable'));
@@ -198,7 +222,7 @@ void main() {
     await gesture.up();
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = document.getElementsByTagName('textarea');
+    final List<Node> nodeList = findElements('textarea');
     expect(nodeList.length, equals(1));
     final TextAreaElement input = nodeList[0] as TextAreaElement;
     // The element's value should contain the selectable text.
@@ -235,7 +259,7 @@ void main() {
     await gesture.up();
     range = TextRange(start: input.selectionStart!, end: input.selectionEnd!);
     expect(range.textInside(text), 'amet');
-  });
+  }, semanticsEnabled: false);
 }
 
 KeyboardEvent dispatchKeyboardEvent(

@@ -12,11 +12,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestRenderBinding binding = TestRenderBinding();
   test('Flutter dispatches first frame event on the web only', () async {
     final Completer<void> completer = Completer<void>();
+    final TestRenderBinding binding = TestRenderBinding();
     const MethodChannel firstFrameChannel = MethodChannel('flutter/service_worker');
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(firstFrameChannel, (MethodCall methodCall) async {
+    firstFrameChannel.setMockMethodCallHandler((MethodCall methodCall) async {
       completer.complete();
     });
 
@@ -27,10 +27,4 @@ void main() {
   }, skip: !kIsWeb);
 }
 
-class TestRenderBinding extends BindingBase
-  with SchedulerBinding,
-       ServicesBinding,
-       GestureBinding,
-       SemanticsBinding,
-       RendererBinding,
-       TestDefaultBinaryMessengerBinding { }
+class TestRenderBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {}
