@@ -72,10 +72,10 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8FailureHandler,
-  androidXFailureHandler,
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
+  androidXFailureHandler,
 ];
 
 // Permission defined error message.

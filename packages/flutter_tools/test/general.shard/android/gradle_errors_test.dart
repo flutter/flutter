@@ -28,10 +28,10 @@ void main() {
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
           r8FailureHandler,
-          androidXFailureHandler,
           minSdkVersion,
           transformInputIssue,
           lockFileDepMissing,
+          androidXFailureHandler,
         ])
       );
     });
