@@ -292,7 +292,7 @@ void _imageTests() {
     expect(nonAnimated.width(), 1);
     expect(nonAnimated.height(), 1);
 
-    final SkImage frame = nonAnimated.getCurrentFrame();
+    final SkImage frame = nonAnimated.makeImageAtCurrentFrame();
     expect(frame.width(), 1);
     expect(frame.height(), 1);
 
@@ -317,7 +317,7 @@ void _imageTests() {
     expect(animated.width(), 1);
     expect(animated.height(), 1);
     for (int i = 0; i < 100; i++) {
-      final SkImage frame = animated.getCurrentFrame();
+      final SkImage frame = animated.makeImageAtCurrentFrame();
       expect(frame.width(), 1);
       expect(frame.height(), 1);
       expect(animated.decodeNextFrame(), 100);
@@ -956,7 +956,7 @@ void _canvasTests() {
     final SkAnimatedImage image =
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawAtlas(
-      image.getCurrentFrame(),
+      image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
       Float32List.fromList([1, 0, 2, 3]),
       SkPaint(),
@@ -985,7 +985,7 @@ void _canvasTests() {
     final SkAnimatedImage image =
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImageOptions(
-      image.getCurrentFrame(),
+      image.makeImageAtCurrentFrame(),
       10,
       20,
       canvasKit.FilterMode.Linear,
@@ -998,7 +998,7 @@ void _canvasTests() {
     final SkAnimatedImage image =
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImageCubic(
-      image.getCurrentFrame(),
+      image.makeImageAtCurrentFrame(),
       10,
       20,
       0.3,
@@ -1011,7 +1011,7 @@ void _canvasTests() {
     final SkAnimatedImage image =
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImageRectOptions(
-      image.getCurrentFrame(),
+      image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
       Float32List.fromList([0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
@@ -1024,7 +1024,7 @@ void _canvasTests() {
     final SkAnimatedImage image =
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImageRectCubic(
-      image.getCurrentFrame(),
+      image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
       Float32List.fromList([0, 0, 1, 1]),
       0.3,
@@ -1037,7 +1037,7 @@ void _canvasTests() {
     final SkAnimatedImage image =
         canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage);
     canvas.drawImageNine(
-      image.getCurrentFrame(),
+      image.makeImageAtCurrentFrame(),
       Float32List.fromList([0, 0, 1, 1]),
       Float32List.fromList([0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
@@ -1152,10 +1152,6 @@ void _canvasTests() {
 
   test('translate', () {
     canvas.translate(4, 5);
-  });
-
-  test('flush', () {
-    canvas.flush();
   });
 
   test('drawPicture', () {

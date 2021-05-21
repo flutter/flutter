@@ -175,7 +175,7 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     assert(_debugCheckIsNotDisposed());
     final int durationMillis = skiaObject.decodeNextFrame();
     final Duration duration = Duration(milliseconds: durationMillis);
-    final CkImage image = CkImage(skiaObject.getCurrentFrame());
+    final CkImage image = CkImage(skiaObject.makeImageAtCurrentFrame());
     _nextFrameIndex = (_nextFrameIndex + 1) % _frameCount;
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
   }
