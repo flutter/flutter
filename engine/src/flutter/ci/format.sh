@@ -32,11 +32,10 @@ SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 DART_SDK_DIR="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk"
 DART="${DART_SDK_DIR}/bin/dart"
-PUB="${DART_SDK_DIR}/bin/pub"
 
 # TODO(gspencergoog): Remove --no-sound-null-safety once isolate package is null-safe.
 cd "$SCRIPT_DIR"
-"$PUB" get && "$DART" \
+"$DART" \
   --disable-dart-dev \
   --no-sound-null-safety \
   bin/format.dart \

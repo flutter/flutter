@@ -1670,8 +1670,10 @@ class _RepositoryPkgDirectory extends _RepositoryDirectory {
       && entry.name != 'flutter_packages'
       && entry.name != 'gcloud'
       && entry.name != 'googleapis'
+      && entry.name != 'isolate'
       && entry.name != 'platform'
       && entry.name != 'process'
+      && entry.name != 'process_runner'
       && entry.name != 'vector_math';
   }
 
