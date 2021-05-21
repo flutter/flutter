@@ -778,7 +778,7 @@ class SkAnimatedImage {
   /// Returns duration in milliseconds.
   external int getRepetitionCount();
   external int decodeNextFrame();
-  external SkImage getCurrentFrame();
+  external SkImage makeImageAtCurrentFrame();
   external int width();
   external int height();
 
@@ -1523,7 +1523,6 @@ class SkCanvas {
   external void skew(double x, double y);
   external void concat(Float32List matrix);
   external void translate(double x, double y);
-  external void flush();
   external void drawPicture(SkPicture picture);
   external void drawParagraph(
     SkParagraph paragraph,
