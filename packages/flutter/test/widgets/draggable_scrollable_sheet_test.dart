@@ -16,37 +16,43 @@ void main() {
     Key? containerKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
   }) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Stack(
-          children: <Widget>[
-            TextButton(
-              onPressed: onButtonPressed,
-              child: const Text('TapHere'),
-            ),
-            DraggableScrollableSheet(
-              maxChildSize: maxChildSize,
-              minChildSize: minChildSize,
-              initialChildSize: initialChildSize,
-              builder: (BuildContext context, ScrollController scrollController) {
-                return NotificationListener<ScrollNotification>(
-                  onNotification: onScrollNotification,
-                  child: Container(
-                    key: containerKey,
-                    color: const Color(0xFFABCDEF),
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemExtent: itemExtent,
-                      itemCount: itemCount,
-                      itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+    return Localizations(
+      locale: const Locale('en', 'us'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Stack(
+            children: <Widget>[
+              TextButton(
+                onPressed: onButtonPressed,
+                child: const Text('TapHere'),
+              ),
+              DraggableScrollableSheet(
+                maxChildSize: maxChildSize,
+                minChildSize: minChildSize,
+                initialChildSize: initialChildSize,
+                builder: (BuildContext context, ScrollController scrollController) {
+                  return NotificationListener<ScrollNotification>(
+                    onNotification: onScrollNotification,
+                    child: Container(
+                      key: containerKey,
+                      color: const Color(0xFFABCDEF),
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemExtent: itemExtent,
+                        itemCount: itemCount,
+                        itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

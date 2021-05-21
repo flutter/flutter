@@ -1227,24 +1227,30 @@ void main() {
       final List<double> scrolledPositions = <double>[];
 
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification)
-                scrolledPositions.add(notification.metrics.pixels);
-              return false;
-            },
-            child: ListWheelScrollView(
-              controller: controller,
-              physics: const FixedExtentScrollPhysics(),
-              itemExtent: 100.0,
-              children: List<Widget>.generate(100, (int index) {
-                return const Placeholder();
-              }),
+        Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification notification) {
+                if (notification is ScrollUpdateNotification)
+                  scrolledPositions.add(notification.metrics.pixels);
+                return false;
+              },
+              child: ListWheelScrollView(
+                controller: controller,
+                physics: const FixedExtentScrollPhysics(),
+                itemExtent: 100.0,
+                children: List<Widget>.generate(100, (int index) {
+                  return const Placeholder();
+                }),
+              ),
             ),
           ),
-        ),
+        )
       );
 
       await tester.fling(

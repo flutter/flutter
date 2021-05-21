@@ -239,6 +239,11 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       defaultsTo: false,
     )
     ..addFlag(
+      'widgets',
+      help: 'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
+      defaultsTo: false,
+    )
+    ..addFlag(
       'material',
       help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
       defaultsTo: false,
@@ -250,10 +255,11 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   final bool writeToFile = args['overwrite'] as bool;
+  final bool widgetsOnly = args['widgets'] as bool;
   final bool materialOnly = args['material'] as bool;
   final bool cupertinoOnly = args['cupertino'] as bool;
 
-  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
+  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly, widgetsOnly: widgetsOnly);
 }
 
 class GeneratorOptions {

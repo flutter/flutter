@@ -22,9 +22,6 @@ import 'l10n/generated_widgets_localizations.dart';
 abstract class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
   /// library for the given `locale`.
-  ///
-  /// [LocalizationsDelegate] implementations typically call the static [load]
-  /// function, rather than constructing this class directly.
   const GlobalWidgetsLocalizations({
     required this.textDirection,
   });
@@ -32,8 +29,7 @@ abstract class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   @override
   final TextDirection textDirection;
 
-  /// A [LocalizationsDelegate] that uses [GlobalWidgetsLocalizations.load]
-  /// to create an instance of this class.
+  /// A [LocalizationsDelegate] for [WidgetsLocalizations].
   ///
   /// [WidgetsApp] automatically adds this value to [WidgetsApp.localizationsDelegates].
   static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
