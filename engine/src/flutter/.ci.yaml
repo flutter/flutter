@@ -1,0 +1,122 @@
+# Describes the targets run in continuous integration environment.
+#
+# Flutter infra uses this file to generate a checklist of tasks to be performed
+# for every commit.
+#
+# More information at:
+#  * https://github.com/flutter/cocoon/blob/master/scheduler/README.md
+enabled_branches:
+  - master
+
+targets:
+  - name: Linux Android AOT Engine
+    builder: Linux Android AOT Engine
+    scheduler: luci
+
+  - name: Linux Android Debug Engine
+    builder: Linux Android Debug Engine
+    scheduler: luci
+
+  - name: Linux Android Scenarios
+    builder: Linux Android Scenarios
+    postsubmit: false
+    scheduler: luci
+
+  - name: Linux Fuchsia
+    builder: Linux Fuchsia
+    scheduler: luci
+
+  - name: Linux Fuchsia FEMU
+    builder: Linux Fuchsia FEMU
+    scheduler: luci
+
+  - name: Linux Host Engine
+    builder: Linux Host Engine
+    scheduler: luci
+
+  - name: Linux Arm Host Engine
+    builder: Linux Arm Host Engine
+    scheduler: luci
+
+  - name: Linux Web Engine
+    builder: Linux Web Engine
+    scheduler: luci
+    runIf:
+      - DEPS
+      - lib/web_ui/**
+      - web_sdk/**
+      - e2etests/web/**
+      - tools/**
+      - ci/**
+      - flutter_frontend_server/**
+
+  - name: Linux Web Framework tests
+    builder: Linux Web Framework tests
+    scheduler: luci
+    runIf:
+      - DEPS
+      - lib/web_ui/**
+      - web_sdk/**
+      - e2etests/web/**
+      - tools/**
+      - ci/**
+      - flutter_frontend_server/**
+
+  - name: Mac Android AOT Engine
+    builder: Mac Android AOT Engine
+    scheduler: luci
+
+  - name: Mac Android Debug Engine
+    builder: Mac Android Debug Engine
+    scheduler: luci
+
+  - name: Mac Host Engine
+    builder: Mac Host Engine
+    scheduler: luci
+
+  - name: Mac iOS Engine
+    builder: Mac iOS Engine
+    scheduler: luci
+
+  - name: Mac Web Engine
+    builder: Mac Web Engine
+    scheduler: luci
+    runIf:
+      - DEPS
+      - lib/web_ui/**
+      - web_sdk/**
+      - e2etests/web/**
+      - tools/**
+      - ci/**
+      - flutter_frontend_server/**
+
+  - name: Windows Android AOT Engine
+    builder: Windows Android AOT Engine
+    scheduler: luci
+
+  - name: Windows Host Engine
+    builder: Windows Host Engine
+    scheduler: luci
+
+  - name: Windows UWP Engine
+    builder: Windows UWP Engine
+    scheduler: luci
+
+  - name: Windows Web Engine
+    builder: Windows Web Engine
+    scheduler: luci
+    runIf:
+      - DEPS
+      - lib/web_ui/**
+      - web_sdk/**
+
+  - name: Mac iOS Engine Profile
+    builder: Mac iOS Engine Profile
+    presubmit: false
+    scheduler: luci
+
+  - name: Mac iOS Engine Release
+    builder: Mac iOS Engine Release
+    presubmit: false
+    scheduler: luci
+
