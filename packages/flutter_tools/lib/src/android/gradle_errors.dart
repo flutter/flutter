@@ -75,6 +75,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   androidXFailureHandler,
   minSdkVersion,
   transformInputIssue,
+  lockFileDepMissing,
 ];
 
 // Permission defined error message.
@@ -428,4 +429,32 @@ final GradleHandledError transformInputIssue = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'transform-input-issue',
+);
+
+/// Handler when a dependency is missing in the lockfile.
+@visibleForTesting
+final GradleHandledError lockFileDepMissing = GradleHandledError(
+  test: (String line) {
+    return line.contains('which is not part of the dependency lock state');
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+
+    globals.printStatus(
+      '\nYou need to update the lockfile, or disable Gradle dependency locking.\n'+
+      globals.logger.terminal.bolden(
+        'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+        'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
+      )
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'lock-dep-issue',
 );
