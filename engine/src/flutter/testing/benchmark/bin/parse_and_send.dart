@@ -3,30 +3,55 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:git/git.dart';
 import 'package:metrics_center/metrics_center.dart';
+import 'package:path/path.dart' as p;
 
-Future<String> _getGitRevision() async {
-  final GitDir gitDir = await GitDir.fromExisting('../../');
+Future<ProcessResult> runGit(
+  List<String> args, {
+  String processWorkingDir,
+}) async {
+  return Process.run(
+    'git',
+    args,
+    workingDirectory: processWorkingDir,
+    runInShell: true,
+  );
+}
+
+Future<List<String>> getGitLog() async {
+  final String gitRoot = p.absolute('../..');
   // Somehow gitDir.currentBranch() doesn't work in Cirrus with "fatal: 'HEAD' -
   // not a valid ref". Therefore, we use "git log" to get the revision manually.
-  final ProcessResult logResult =
-      await gitDir.runCommand(<String>['log', '--pretty=format:%H', '-n', '1']);
+  final ProcessResult logResult = await runGit(
+    <String>['log', '--pretty=format:%H %ct', '-n', '1'],
+    processWorkingDir: gitRoot,
+  );
   if (logResult.exitCode != 0) {
     throw 'Unexpected exit code ${logResult.exitCode}';
   }
-  return logResult.stdout.toString();
+  return logResult.stdout.toString().trim().split(' ');
 }
 
-Future<List<FlutterEngineMetricPoint>> _parse(String jsonFileName) async {
-  final String gitRevision = await _getGitRevision();
-  final List<MetricPoint> rawPoints =
-      await GoogleBenchmarkParser.parse(jsonFileName);
+class PointsAndDate {
+  PointsAndDate(this.points, this.date);
+
+  final List<FlutterEngineMetricPoint> points;
+  final String date;
+}
+
+Future<PointsAndDate> parse(String jsonFileName) async {
+  final List<String> gitLog = await getGitLog();
+  final String gitRevision = gitLog[0];
+  final String gitCommitDate = gitLog[1];
+  final List<MetricPoint> rawPoints = await GoogleBenchmarkParser.parse(
+    jsonFileName,
+  );
   final List<FlutterEngineMetricPoint> points = <FlutterEngineMetricPoint>[];
-  for (MetricPoint rawPoint in rawPoints) {
+  for (final MetricPoint rawPoint in rawPoints) {
     points.add(FlutterEngineMetricPoint(
       rawPoint.tags[kNameKey],
       rawPoint.value,
@@ -34,7 +59,7 @@ Future<List<FlutterEngineMetricPoint>> _parse(String jsonFileName) async {
       moreTags: rawPoint.tags,
     ));
   }
-  return points;
+  return PointsAndDate(points, gitCommitDate);
 }
 
 Future<FlutterDestination> connectFlutterDestination() async {
@@ -49,7 +74,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
       isTesting: isTesting,
     );
   }
-  return await FlutterDestination.makeFromCredentialsJson(
+  return FlutterDestination.makeFromCredentialsJson(
     jsonDecode(Platform.environment['BENCHMARK_GCP_CREDENTIALS'])
         as Map<String, dynamic>,
     isTesting: isTesting,
@@ -60,7 +85,7 @@ Future<void> main(List<String> args) async {
   if (args.length != 1) {
     throw 'Must have one argument: <benchmark_json_file>';
   }
-  final List<FlutterEngineMetricPoint> points = await _parse(args[0]);
+  final PointsAndDate pointsAndDate = await parse(args[0]);
 
   // The data will be sent to the Datastore of the GCP project specified through
   // environment variable BENCHMARK_GCP_CREDENTIALS, or TOKEN_PATH/GCP_PROJECT.
@@ -68,5 +93,11 @@ Future<void> main(List<String> args) async {
   // flutter-cirrus for test. We'll eventually migrate to flutter-infra project
   // once the test is done.
   final FlutterDestination destination = await connectFlutterDestination();
-  await destination.update(points);
+  await destination.update(
+    pointsAndDate.points,
+    DateTime.fromMillisecondsSinceEpoch(
+      int.parse(pointsAndDate.date) * 1000,
+      isUtc: true,
+    ),
+  );
 }
