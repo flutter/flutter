@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h"
 
+#include <lib/inspect/cpp/inspector.h>
+#include <lib/zx/process.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
 
@@ -11,13 +13,240 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "runtime/dart/utils/root_inspect_node.h"
 
 namespace flutter_runner {
+namespace {
+
+// Returns the ViewRef's koid.
+zx_koid_t GetKoid(const fuchsia::ui::views::ViewRef& view_ref) {
+  zx_handle_t handle = view_ref.reference.get();
+  zx_info_handle_basic_t info;
+  zx_status_t status = zx_object_get_info(handle, ZX_INFO_HANDLE_BASIC, &info,
+                                          sizeof(info), nullptr, nullptr);
+  return status == ZX_OK ? info.koid : ZX_KOID_INVALID;
+}
+
+#if !FLUTTER_RELEASE
+static constexpr char kTreeDumpInspectRootName[] = "semantic_tree_root";
+
+// Converts flutter semantic node flags to a string representation.
+std::string NodeFlagsToString(const flutter::SemanticsNode& node) {
+  std::string output;
+  if (node.HasFlag(flutter::SemanticsFlags::kHasCheckedState)) {
+    output += "kHasCheckedState|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kHasEnabledState)) {
+    output += "kHasEnabledState|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kHasImplicitScrolling)) {
+    output += "kHasImplicitScrolling|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kHasToggledState)) {
+    output += "kHasToggledState|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsButton)) {
+    output += "kIsButton|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsChecked)) {
+    output += "kIsChecked|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsEnabled)) {
+    output += "kIsEnabled|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsFocusable)) {
+    output += "kIsFocusable|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsFocused)) {
+    output += "kIsFocused|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsHeader)) {
+    output += "kIsHeader|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsHidden)) {
+    output += "kIsHidden|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsImage)) {
+    output += "kIsImage|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup)) {
+    output += "kIsInMutuallyExclusiveGroup|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsKeyboardKey)) {
+    output += "kIsKeyboardKey|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsLink)) {
+    output += "kIsLink|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsLiveRegion)) {
+    output += "kIsLiveRegion|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsObscured)) {
+    output += "kIsObscured|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsReadOnly)) {
+    output += "kIsReadOnly|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsSelected)) {
+    output += "kIsSelected|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsSlider)) {
+    output += "kIsSlider|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsTextField)) {
+    output += "kIsTextField|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kIsToggled)) {
+    output += "kIsToggled|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kNamesRoute)) {
+    output += "kNamesRoute|";
+  }
+  if (node.HasFlag(flutter::SemanticsFlags::kScopesRoute)) {
+    output += "kScopesRoute|";
+  }
+
+  return output;
+}
+
+// Converts flutter semantic node actions to a string representation.
+std::string NodeActionsToString(const flutter::SemanticsNode& node) {
+  std::string output;
+
+  if (node.HasAction(flutter::SemanticsAction::kCopy)) {
+    output += "kCopy|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kCustomAction)) {
+    output += "kCustomAction|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kCut)) {
+    output += "kCut|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kDecrease)) {
+    output += "kDecrease|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kDidGainAccessibilityFocus)) {
+    output += "kDidGainAccessibilityFocus|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kDidLoseAccessibilityFocus)) {
+    output += "kDidLoseAccessibilityFocus|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kDismiss)) {
+    output += "kDismiss|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kIncrease)) {
+    output += "kIncrease|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kLongPress)) {
+    output += "kLongPress|";
+  }
+  if (node.HasAction(
+          flutter::SemanticsAction::kMoveCursorBackwardByCharacter)) {
+    output += "kMoveCursorBackwardByCharacter|";
+  }
+  if (node.HasAction(
+          flutter::SemanticsAction::kMoveCursorBackwardByWordIndex)) {
+    output += "kMoveCursorBackwardByWordIndex|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kMoveCursorForwardByCharacter)) {
+    output += "kMoveCursorForwardByCharacter|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kMoveCursorForwardByWordIndex)) {
+    output += "kMoveCursorForwardByWordIndex|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kPaste)) {
+    output += "kPaste|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kScrollDown)) {
+    output += "kScrollDown|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kScrollLeft)) {
+    output += "kScrollLeft|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kScrollRight)) {
+    output += "kScrollRight|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kScrollUp)) {
+    output += "kScrollUp|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kSetSelection)) {
+    output += "kSetSelection|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kSetText)) {
+    output += "kSetText|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kShowOnScreen)) {
+    output += "kShowOnScreen|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kTap)) {
+    output += "kTap|";
+  }
+
+  return output;
+}
+
+// Returns a string representation of the flutter semantic node absolut
+// location.
+std::string NodeLocationToString(const SkRect& rect) {
+  auto min_x = rect.fLeft;
+  auto min_y = rect.fTop;
+  auto max_x = rect.fRight;
+  auto max_y = rect.fBottom;
+  std::string location =
+      "min(" + std::to_string(min_x) + ", " + std::to_string(min_y) + ") max(" +
+      std::to_string(max_x) + ", " + std::to_string(max_y) + ")";
+
+  return location;
+}
+
+// Returns a string representation of the node's different types of children.
+std::string NodeChildrenToString(const flutter::SemanticsNode& node) {
+  std::stringstream output;
+  if (!node.childrenInTraversalOrder.empty()) {
+    output << "children in traversal order:[";
+    for (const auto child_id : node.childrenInTraversalOrder) {
+      output << child_id << ", ";
+    }
+    output << "]\n";
+  }
+  if (!node.childrenInHitTestOrder.empty()) {
+    output << "children in hit test order:[";
+    for (const auto child_id : node.childrenInHitTestOrder) {
+      output << child_id << ", ";
+    }
+    output << ']';
+  }
+
+  return output.str();
+}
+#endif  // !FLUTTER_RELEASE
+
+}  // namespace
+
 AccessibilityBridge::AccessibilityBridge(
-    Delegate& delegate,
+    SetSemanticsEnabledCallback set_semantics_enabled_callback,
+    DispatchSemanticsActionCallback dispatch_semantics_action_callback,
     const std::shared_ptr<sys::ServiceDirectory> services,
     fuchsia::ui::views::ViewRef view_ref)
-    : delegate_(delegate), binding_(this) {
+    : AccessibilityBridge(std::move(set_semantics_enabled_callback),
+                          std::move(dispatch_semantics_action_callback),
+                          services,
+                          dart_utils::RootInspectNode::CreateRootChild(
+                              std::to_string(GetKoid(view_ref))),
+                          std::move(view_ref)) {}
+
+AccessibilityBridge::AccessibilityBridge(
+    SetSemanticsEnabledCallback set_semantics_enabled_callback,
+    DispatchSemanticsActionCallback dispatch_semantics_action_callback,
+    const std::shared_ptr<sys::ServiceDirectory> services,
+    inspect::Node inspect_node,
+    fuchsia::ui::views::ViewRef view_ref)
+    : set_semantics_enabled_callback_(
+          std::move(set_semantics_enabled_callback)),
+      dispatch_semantics_action_callback_(
+          std::move(dispatch_semantics_action_callback)),
+      binding_(this),
+      inspect_node_(std::move(inspect_node)) {
   services->Connect(fuchsia::accessibility::semantics::SemanticsManager::Name_,
                     fuchsia_semantics_manager_.NewRequest().TakeChannel());
   fuchsia_semantics_manager_.set_error_handler([](zx_status_t status) {
@@ -27,6 +256,27 @@ AccessibilityBridge::AccessibilityBridge(
   fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticListener>
       listener_handle;
   binding_.Bind(listener_handle.NewRequest());
+
+#if !FLUTTER_RELEASE
+  // The first argument to |CreateLazyValues| is the name of the lazy node, and
+  // will only be displayed if the callback used to generate the node's content
+  // fails. Therefore, we use an error message for this node name.
+  inspect_node_tree_dump_ =
+      inspect_node_.CreateLazyValues("dump_fail", [this]() {
+        inspect::Inspector inspector;
+        if (auto it = nodes_.find(kRootNodeId); it == nodes_.end()) {
+          inspector.GetRoot().CreateString(
+              "empty_tree", "this semantic tree is empty", &inspector);
+        } else {
+          FillInspectTree(
+              kRootNodeId, /*current_level=*/1,
+              inspector.GetRoot().CreateChild(kTreeDumpInspectRootName),
+              &inspector);
+        }
+        return fit::make_ok_promise(std::move(inspector));
+      });
+#endif  // !FLUTTER_RELEASE
+
   fuchsia_semantics_manager_->RegisterViewForSemantics(
       std::move(view_ref), std::move(listener_handle), tree_ptr_.NewRequest());
 }
@@ -224,14 +474,16 @@ std::unordered_set<int32_t> AccessibilityBridge::GetDescendants(
 
     auto it = nodes_.find(id);
     if (it != nodes_.end()) {
-      const auto& node = it->second;
-      for (const auto& child : node.children_in_hit_test_order) {
+      const auto& node = it->second.data;
+      for (const auto& child : node.childrenInHitTestOrder) {
         if (descendents.find(child) == descendents.end()) {
           to_process.push_back(child);
         } else {
           // This indicates either a cycle or a child with multiple parents.
           // Flutter should never let this happen, but the engine API does not
           // explicitly forbid it right now.
+          // TODO(http://fxbug.dev/75905): Crash flutter accessibility bridge
+          // when a cycle in the tree is found.
           FML_LOG(ERROR) << "Semantics Node " << child
                          << " has already been listed as a child of another "
                             "node, ignoring for parent "
@@ -295,7 +547,7 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
       << "AccessibilityBridge received an update with out ever getting a root "
          "node.";
 
-  std::vector<fuchsia::accessibility::semantics::Node> nodes;
+  std::vector<fuchsia::accessibility::semantics::Node> fuchsia_nodes;
   size_t current_size = 0;
   bool has_root_node_update = false;
   // TODO(MI4-2498): Actions, Roles, hit test children, additional
@@ -303,26 +555,22 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
 
   // TODO(MI4-1478): Support for partial updates for nodes > 64kb
   // e.g. if a node has a long label or more than 64k children.
-  for (const auto& value : update) {
+  for (const auto& [flutter_node_id, flutter_node] : update) {
     size_t this_node_size = sizeof(fuchsia::accessibility::semantics::Node);
-    const auto& flutter_node = value.second;
     // We handle root update separately in GetRootNodeUpdate.
     // TODO(chunhtai): remove this special case after we remove the inverse
     // view pixel ratio transformation in scenic view.
+    // TODO(http://fxbug.dev/75908): Investigate flutter a11y bridge refactor
+    // after removal of the inverse view pixel ratio transformation in scenic
+    // view).
     if (flutter_node.id == kRootNodeId) {
       root_flutter_semantics_node_ = flutter_node;
       has_root_node_update = true;
       continue;
     }
-    // Store the nodes for later hit testing.
-    nodes_[flutter_node.id] = {
-        .id = flutter_node.id,
-        .flags = flutter_node.flags,
-        .is_focusable = IsFocusable(flutter_node),
-        .rect = flutter_node.rect,
-        .transform = flutter_node.transform,
-        .children_in_hit_test_order = flutter_node.childrenInHitTestOrder,
-    };
+    // Store the nodes for later hit testing and logging.
+    nodes_[flutter_node.id].data = flutter_node;
+
     fuchsia::accessibility::semantics::Node fuchsia_node;
     std::vector<uint32_t> child_ids;
     // Send the nodes in traversal order, so the manager can figure out
@@ -330,6 +578,8 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
     for (int32_t flutter_child_id : flutter_node.childrenInTraversalOrder) {
       child_ids.push_back(FlutterIdToFuchsiaId(flutter_child_id));
     }
+    // TODO(http://fxbug.dev/75910): check the usage of FlutterIdToFuchsiaId in
+    // the flutter accessibility bridge.
     fuchsia_node.set_node_id(flutter_node.id)
         .set_role(GetNodeRole(flutter_node))
         .set_location(GetNodeLocation(flutter_node))
@@ -337,7 +587,6 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
         .set_attributes(GetNodeAttributes(flutter_node, &this_node_size))
         .set_states(GetNodeStates(flutter_node, &this_node_size))
         .set_actions(GetNodeActions(flutter_node, &this_node_size))
-        .set_role(GetNodeRole(flutter_node))
         .set_child_ids(child_ids);
     this_node_size +=
         kNodeIdSize * flutter_node.childrenInTraversalOrder.size();
@@ -354,15 +603,15 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
     // If we would exceed the max FIDL message size by appending this node,
     // we should delete/update/commit now.
     if (current_size >= kMaxMessageSize) {
-      tree_ptr_->UpdateSemanticNodes(std::move(nodes));
-      nodes.clear();
+      tree_ptr_->UpdateSemanticNodes(std::move(fuchsia_nodes));
+      fuchsia_nodes.clear();
       current_size = this_node_size;
     }
-    nodes.push_back(std::move(fuchsia_node));
+    fuchsia_nodes.push_back(std::move(fuchsia_node));
   }
 
   if (current_size > kMaxMessageSize) {
-    PrintNodeSizeError(nodes.back().node_id());
+    PrintNodeSizeError(fuchsia_nodes.back().node_id());
   }
 
   // Handles root node update.
@@ -382,16 +631,16 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
     // If we would exceed the max FIDL message size by appending this node,
     // we should delete/update/commit now.
     if (current_size >= kMaxMessageSize) {
-      tree_ptr_->UpdateSemanticNodes(std::move(nodes));
-      nodes.clear();
+      tree_ptr_->UpdateSemanticNodes(std::move(fuchsia_nodes));
+      fuchsia_nodes.clear();
     }
-    nodes.push_back(std::move(root_update));
+    fuchsia_nodes.push_back(std::move(root_update));
   }
 
   PruneUnreachableNodes();
   UpdateScreenRects();
 
-  tree_ptr_->UpdateSemanticNodes(std::move(nodes));
+  tree_ptr_->UpdateSemanticNodes(std::move(fuchsia_nodes));
   // TODO(dnfield): Implement the callback here
   // https://bugs.fuchsia.dev/p/fuchsia/issues/detail?id=35718.
   tree_ptr_->CommitUpdates([]() {});
@@ -414,15 +663,10 @@ fuchsia::accessibility::semantics::Node AccessibilityBridge::GetRootNodeUpdate(
 
   SkM44 result = root_flutter_semantics_node_.transform *
                  inverse_view_pixel_ratio_transform;
-  nodes_[root_flutter_semantics_node_.id] = {
-      .id = root_flutter_semantics_node_.id,
-      .flags = root_flutter_semantics_node_.flags,
-      .is_focusable = IsFocusable(root_flutter_semantics_node_),
-      .rect = root_flutter_semantics_node_.rect,
-      .transform = result,
-      .children_in_hit_test_order =
-          root_flutter_semantics_node_.childrenInHitTestOrder,
-  };
+  nodes_[root_flutter_semantics_node_.id].data = root_flutter_semantics_node_;
+
+  // TODO(http://fxbug.dev/75910): check the usage of FlutterIdToFuchsiaId in
+  // the flutter accessibility bridge.
   root_fuchsia_node.set_node_id(root_flutter_semantics_node_.id)
       .set_role(GetNodeRole(root_flutter_semantics_node_))
       .set_location(GetNodeLocation(root_flutter_semantics_node_))
@@ -461,9 +705,9 @@ void AccessibilityBridge::UpdateScreenRects(
     return;
   }
   auto& node = it->second;
-  const auto& current_transform = parent_transform * node.transform;
+  const auto& current_transform = parent_transform * node.data.transform;
 
-  const auto& rect = node.rect;
+  const auto& rect = node.data.rect;
   SkV4 dst[2] = {
       current_transform.map(rect.left(), rect.top(), 0, 1),
       current_transform.map(rect.right(), rect.bottom(), 0, 1),
@@ -473,7 +717,7 @@ void AccessibilityBridge::UpdateScreenRects(
 
   visited_nodes->emplace(node_id);
 
-  for (uint32_t child_id : node.children_in_hit_test_order) {
+  for (uint32_t child_id : node.data.childrenInHitTestOrder) {
     if (visited_nodes->find(child_id) == visited_nodes->end()) {
       UpdateScreenRects(child_id, current_transform, visited_nodes);
     }
@@ -525,6 +769,8 @@ void AccessibilityBridge::OnAccessibilityActionRequested(
     fuchsia::accessibility::semantics::Action action,
     fuchsia::accessibility::semantics::SemanticListener::
         OnAccessibilityActionRequestedCallback callback) {
+  // TODO(http://fxbug.dev/75910): check the usage of FlutterIdToFuchsiaId in
+  // the flutter accessibility bridge.
   if (nodes_.find(node_id) == nodes_.end()) {
     FML_LOG(ERROR) << "Attempted to send accessibility action "
                    << static_cast<int32_t>(action)
@@ -539,8 +785,8 @@ void AccessibilityBridge::OnAccessibilityActionRequested(
     callback(false);
     return;
   }
-  delegate_.DispatchSemanticsAction(static_cast<int32_t>(node_id),
-                                    flutter_action.value());
+  dispatch_semantics_action_callback_(static_cast<int32_t>(node_id),
+                                      flutter_action.value());
   callback(true);
 }
 
@@ -552,6 +798,8 @@ void AccessibilityBridge::HitTest(
   auto hit_node_id = GetHitNode(kRootNodeId, local_point.x, local_point.y);
   FML_DCHECK(hit_node_id.has_value());
   fuchsia::accessibility::semantics::Hit hit;
+  // TODO(http://fxbug.dev/75910): check the usage of FlutterIdToFuchsiaId in
+  // the flutter accessibility bridge.
   hit.set_node_id(hit_node_id.value_or(kRootNodeId));
   callback(std::move(hit));
 }
@@ -565,19 +813,19 @@ std::optional<int32_t> AccessibilityBridge::GetHitNode(int32_t node_id,
     return {};
   }
   auto const& node = it->second;
-  if (node.flags &
+  if (node.data.flags &
           static_cast<int32_t>(flutter::SemanticsFlags::kIsHidden) ||  //
       !node.screen_rect.contains(x, y)) {
     return {};
   }
-  for (int32_t child_id : node.children_in_hit_test_order) {
+  for (int32_t child_id : node.data.childrenInHitTestOrder) {
     auto candidate = GetHitNode(child_id, x, y);
     if (candidate) {
       return candidate;
     }
   }
 
-  if (node.is_focusable) {
+  if (IsFocusable(node.data)) {
     return node_id;
   }
 
@@ -599,7 +847,7 @@ bool AccessibilityBridge::IsFocusable(
     return true;
   }
 
-  // Always conider actionable nodes focusable.
+  // Always consider actionable nodes focusable.
   if (node.actions != 0) {
     return true;
   }
@@ -612,7 +860,76 @@ bool AccessibilityBridge::IsFocusable(
 void AccessibilityBridge::OnSemanticsModeChanged(
     bool enabled,
     OnSemanticsModeChangedCallback callback) {
-  delegate_.SetSemanticsEnabled(enabled);
+  set_semantics_enabled_callback_(enabled);
 }
+
+#if !FLUTTER_RELEASE
+void AccessibilityBridge::FillInspectTree(int32_t flutter_node_id,
+                                          int32_t current_level,
+                                          inspect::Node inspect_node,
+                                          inspect::Inspector* inspector) const {
+  const auto it = nodes_.find(flutter_node_id);
+  if (it == nodes_.end()) {
+    inspect_node.CreateString(
+        "missing_child",
+        "This node has a parent in the semantic tree but has no value",
+        inspector);
+    inspector->emplace(std::move(inspect_node));
+    return;
+  }
+  const auto& semantic_node = it->second;
+  const auto& data = semantic_node.data;
+
+  inspect_node.CreateInt("id", data.id, inspector);
+
+  // Even with an empty label, we still want to create the property to
+  // explicetly show that it is empty.
+  inspect_node.CreateString("label", data.label, inspector);
+  if (!data.hint.empty()) {
+    inspect_node.CreateString("hint", data.hint, inspector);
+  }
+  if (!data.value.empty()) {
+    inspect_node.CreateString("value", data.value, inspector);
+  }
+  if (!data.increasedValue.empty()) {
+    inspect_node.CreateString("increased_value", data.increasedValue,
+                              inspector);
+  }
+  if (!data.decreasedValue.empty()) {
+    inspect_node.CreateString("decreased_value", data.decreasedValue,
+                              inspector);
+  }
+
+  if (data.textDirection) {
+    inspect_node.CreateString(
+        "text_direction", data.textDirection == 1 ? "RTL" : "LTR", inspector);
+  }
+
+  if (data.flags) {
+    inspect_node.CreateString("flags", NodeFlagsToString(data), inspector);
+  }
+  if (data.actions) {
+    inspect_node.CreateString("actions", NodeActionsToString(data), inspector);
+  }
+
+  inspect_node.CreateString(
+      "location", NodeLocationToString(semantic_node.screen_rect), inspector);
+  if (!data.childrenInTraversalOrder.empty() ||
+      !data.childrenInHitTestOrder.empty()) {
+    inspect_node.CreateString("children", NodeChildrenToString(data),
+                              inspector);
+  }
+
+  inspect_node.CreateInt("current_level", current_level, inspector);
+
+  for (int32_t flutter_child_id : semantic_node.data.childrenInTraversalOrder) {
+    const auto inspect_name = "node_" + std::to_string(flutter_child_id);
+    FillInspectTree(flutter_child_id, current_level + 1,
+                    inspect_node.CreateChild(inspect_name), inspector);
+  }
+
+  inspector->emplace(std::move(inspect_node));
+}
+#endif  // !FLUTTER_RELEASE
 
 }  // namespace flutter_runner

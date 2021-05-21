@@ -21,6 +21,7 @@
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h"
 
 #include "default_session_connection.h"
 #include "flutter_runner_product_configuration.h"
@@ -83,6 +84,7 @@ class Engine final {
 
   std::unique_ptr<IsolateConfigurator> isolate_configurator_;
   std::unique_ptr<flutter::Shell> shell_;
+  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
 
   fuchsia::intl::PropertyProviderPtr intl_property_provider_;
 
