@@ -224,3 +224,44 @@ void _invoke3<A1, A2, A3>(void Function(A1 a1, A2 a2, A3 a3)? callback, Zone zon
     });
   }
 }
+
+bool _isLoopback(String host) {
+  if (host.isEmpty) {
+    return false;
+  }
+  if ('localhost' == host) {
+    return true;
+  }
+  try {
+    return InternetAddress(host).isLoopback;
+  } on ArgumentError {
+    return false;
+  }
+}
+
+/// Loopback connections are always allowed.
+/// Zone override with 'flutter.io.allow_http' takes first priority.
+/// If zone override is not provided, engine setting is checked.
+@pragma('vm:entry-point')
+// ignore: unused_element
+void Function(Uri) _getHttpConnectionHookClosure(bool mayInsecurelyConnectToAllDomains) {
+  return (Uri uri) {
+      if (_isLoopback(uri.host)) {
+        return;
+      }
+      final dynamic zoneOverride = Zone.current[#flutter.io.allow_http];
+      if (zoneOverride == true) {
+        return;
+      }
+      if (zoneOverride == false && uri.isScheme('http')) {
+        // Going to throw
+      } else if (mayInsecurelyConnectToAllDomains || uri.isScheme('https')) {
+        // In absence of zone override, if engine setting allows the connection
+        // or if connection is to `https`, allow the connection.
+        return;
+      }
+      throw UnsupportedError(
+        'Non-https connection "$uri" is not supported by the platform. '
+        'Refer to https://flutter.dev/docs/release/breaking-changes/network-policy-ios-android.');
+    };
+}
