@@ -64,6 +64,12 @@ analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$SRC_DIR/out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart"
 
+echo "Analyzing ci/"
+analyze \
+  --packages="$FLUTTER_DIR/ci/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/ci"
+
 echo "Analyzing flutter_frontend_server..."
 analyze \
   --packages="$FLUTTER_DIR/flutter_frontend_server/.dart_tool/package_config.json" \

@@ -31,7 +31,6 @@ SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 DART_BIN="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk/bin"
 DART="${DART_BIN}/dart"
-PUB="${DART_BIN}/pub"
 
 COMPILE_COMMANDS="$SRC_DIR/out/host_debug/compile_commands.json"
 if [ ! -f "$COMPILE_COMMANDS" ]; then
@@ -39,7 +38,7 @@ if [ ! -f "$COMPILE_COMMANDS" ]; then
 fi
 
 cd "$SCRIPT_DIR"
-"$PUB" get && "$DART" \
+"$DART" \
   --disable-dart-dev \
   bin/lint.dart \
   --compile-commands="$COMPILE_COMMANDS" \

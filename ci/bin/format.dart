@@ -344,7 +344,7 @@ class ClangFormatChecker extends FormatChecker {
     if (failures.isEmpty) {
       return true;
     }
-    return await applyPatch(failures);
+    return applyPatch(failures);
   }
 
   Future<String> _getClangFormatVersion() async {
@@ -373,7 +373,7 @@ class ClangFormatChecker extends FormatChecker {
       message('Using ${await _getClangFormatVersion()}');
     }
     final List<WorkerJob> clangJobs = <WorkerJob>[];
-    for (String file in files) {
+    for (final String file in files) {
       if (file.trim().isEmpty) {
         continue;
       }
@@ -475,7 +475,7 @@ class JavaFormatChecker extends FormatChecker {
     if (failures.isEmpty) {
       return true;
     }
-    return await applyPatch(failures);
+    return applyPatch(failures);
   }
 
   Future<String> _getJavaVersion() async {
@@ -509,7 +509,7 @@ class JavaFormatChecker extends FormatChecker {
     if (verbose) {
       message('Using $javaFormatVersion with Java $javaVersion');
     }
-    for (String file in files) {
+    for (final String file in files) {
       if (file.trim().isEmpty) {
         continue;
       }
@@ -696,7 +696,7 @@ class WhitespaceFormatChecker extends FormatChecker {
   Future<bool> fixFormatting() async {
     final List<File> failures = await _getWhitespaceFailures();
     if (failures.isNotEmpty) {
-      for (File file in failures) {
+      for (final File file in failures) {
         stderr.writeln('Fixing $file');
         String contents = file.readAsStringSync();
         contents = contents.replaceAll(trailingWsRegEx, '');
