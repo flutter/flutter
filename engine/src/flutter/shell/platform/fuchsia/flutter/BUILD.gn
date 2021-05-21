@@ -456,7 +456,7 @@ executable("flutter_runner_unittests") {
   ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
-  libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   # The use of these dependencies is temporary and will be moved behind the
   # embedder API.
@@ -486,7 +486,7 @@ executable("flutter_runner_tzdata_unittests") {
   sources = [ "runner_tzdata_unittest.cc" ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
-  libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   # The use of these dependencies is temporary and will be moved behind the
   # embedder API.
@@ -511,7 +511,7 @@ executable("flutter_runner_scenic_unittests") {
   sources = [ "tests/default_session_connection_unittests.cc" ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
-  libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   # The use of these dependencies is temporary and will be moved behind the
   # embedder API.
@@ -846,12 +846,21 @@ fuchsia_test_archive("embedder_tests") {
   ]
 }
 
+fuchsia_test_archive("dart_utils_tests") {
+  deps = [
+    "//flutter/shell/platform/fuchsia/runtime/dart/utils:dart_utils_unittests",
+  ]
+
+  binary = "dart_utils_unittests"
+}
+
 # When adding a new dep here, please also ensure the dep is added to
 # testing/fuchsia/run_tests.sh and testing/fuchsia/test_fars
 group("tests") {
   testonly = true
 
   deps = [
+    ":dart_utils_tests",
     ":embedder_tests",
     ":flow_tests",
     ":flutter_runner_scenic_tests",

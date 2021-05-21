@@ -1386,6 +1386,9 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/vulkan_surface_pool.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vulkan_surface_producer.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vulkan_surface_producer.h
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols/dart_profiler_symbols.dart
+FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/build_info.h
+FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/build_info_in.cc
+FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/build_info_unittests.cc
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/files.cc
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/files.h
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/handle_exception.cc

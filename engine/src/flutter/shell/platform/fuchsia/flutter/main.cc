@@ -12,6 +12,7 @@
 #include "loop.h"
 #include "platform/utils.h"
 #include "runner.h"
+#include "runtime/dart/utils/build_info.h"
 #include "runtime/dart/utils/root_inspect_node.h"
 #include "runtime/dart/utils/tempfs.h"
 
@@ -21,6 +22,8 @@ int main(int argc, char const* argv[]) {
   // Create our component context which is served later.
   auto context = sys::ComponentContext::Create();
   dart_utils::RootInspectNode::Initialize(context.get());
+  auto build_info = dart_utils::RootInspectNode::CreateRootChild("build_info");
+  dart_utils::BuildInfo::Dump(build_info);
 
   // We inject the 'vm' node into the dart vm so that it can add any inspect
   // data that it needs to the inspect tree.

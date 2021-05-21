@@ -14,6 +14,7 @@
 #include "flutter/fml/trace_event.h"
 #include "logging.h"
 #include "platform/utils.h"
+#include "runtime/dart/utils/build_info.h"
 #include "runtime/dart/utils/files.h"
 #include "runtime/dart/utils/root_inspect_node.h"
 #include "runtime/dart/utils/tempfs.h"
@@ -39,6 +40,8 @@ int main(int argc, const char** argv) {
   // Create our component context which is served later.
   auto context = sys::ComponentContext::Create();
   dart_utils::RootInspectNode::Initialize(context.get());
+  auto build_info = dart_utils::RootInspectNode::CreateRootChild("build_info");
+  dart_utils::BuildInfo::Dump(build_info);
 
   dart::SetDartVmNode(std::make_unique<inspect::Node>(
       dart_utils::RootInspectNode::CreateRootChild("vm")));
