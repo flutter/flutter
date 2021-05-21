@@ -14,6 +14,8 @@ config("utils_config") {
 template("make_utils") {
   source_set(target_name) {
     sources = [
+      "$target_gen_dir/build_info.cc",
+      "build_info.h",
       "files.cc",
       "files.h",
       "handle_exception.cc",
@@ -33,6 +35,7 @@ template("make_utils") {
     ]
 
     deps = invoker.deps + [
+             ":generate_build_info_cc_file",
              "$fuchsia_sdk_root/fidl:fuchsia.feedback",
              "$fuchsia_sdk_root/fidl:fuchsia.mem",
              "$fuchsia_sdk_root/pkg:async-loop",
@@ -53,8 +56,45 @@ template("make_utils") {
   }
 }
 
+action("generate_build_info_cc_file") {
+  inputs = [
+    "build_info_in.cc",
+    "//flutter/.git/logs/HEAD",
+    "//fuchsia/sdk/linux/meta/manifest.json",
+    "//third_party/dart/.git/logs/HEAD",
+  ]
+  outputs = [ "$target_gen_dir/build_info.cc" ]
+
+  script = "//flutter/tools/fuchsia/make_build_info.py"
+  args = [
+    "--input",
+    rebase_path("build_info_in.cc", root_build_dir),
+    "--output",
+    rebase_path(outputs[0], root_build_dir),
+    "--buildroot",
+    rebase_path("//", root_build_dir),
+  ]
+}
+
 make_utils("utils") {
   deps = [ "//third_party/dart/runtime/bin:elf_loader" ]
+}
+
+executable("dart_utils_unittests") {
+  testonly = true
+
+  output_name = "dart_utils_unittests"
+
+  sources = [ "build_info_unittests.cc" ]
+
+  # This is needed for //third_party/googletest for linking zircon symbols.
+  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+
+  deps = [
+    ":utils",
+    "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
+    "//flutter/testing",
+  ]
 }
 
 make_utils("utils_product") {

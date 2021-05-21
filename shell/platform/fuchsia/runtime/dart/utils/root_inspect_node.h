@@ -32,6 +32,9 @@ class RootInspectNode {
   // node with the provided |name|.
   static inspect::Node CreateRootChild(const std::string& name);
 
+  // Gets an instance to the component's inspector.
+  static inspect::Inspector* GetInspector();
+
  private:
   static std::unique_ptr<sys::ComponentInspector> inspector_;
   static std::mutex mutex_;
