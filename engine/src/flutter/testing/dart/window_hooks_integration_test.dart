@@ -13,6 +13,7 @@ import 'dart:collection' as collection;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
+import 'dart:io' show InternetAddress;
 import 'dart:nativewrappers';
 import 'dart:typed_data';
 
