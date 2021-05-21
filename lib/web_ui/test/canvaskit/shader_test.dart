@@ -62,7 +62,7 @@ void testMain() {
     });
 
     test('Image shader', () {
-      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage).getCurrentFrame();
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage).makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final CkImageShader imageShader = ui.ImageShader(
         image,
