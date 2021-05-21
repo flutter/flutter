@@ -1645,17 +1645,18 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
         // fall through to the defaultShortcuts.
         child: DefaultTextEditingShortcuts(
-          child: Actions(
-            registry: actionRegistry,
-            actions: widget.actions ?? WidgetsApp.defaultActions,
-            child: DefaultTextEditingActions(
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: _MediaQueryFromWindow(
-                  child: Localizations(
-                    locale: appLocale,
-                    delegates: _localizationsDelegates.toList(),
-                    child: title,
+          child: ActionsRegistry(
+            child: Actions(
+              actions: widget.actions ?? WidgetsApp.defaultActions,
+              child: DefaultTextEditingActions(
+                child: FocusTraversalGroup(
+                  policy: ReadingOrderTraversalPolicy(),
+                  child: _MediaQueryFromWindow(
+                    child: Localizations(
+                      locale: appLocale,
+                      delegates: _localizationsDelegates.toList(),
+                      child: title,
+                    ),
                   ),
                 ),
               ),

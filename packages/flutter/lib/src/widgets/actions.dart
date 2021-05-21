@@ -29,6 +29,24 @@ BuildContext _getParent(BuildContext context) {
   return parent;
 }
 
+// Visits the widget ancestors of the given element using
+// getElementForInheritedWidgetOfExactType. Returns true if the visitor found
+// what it was looking for.
+bool _visitAncestorsOfType<T extends InheritedWidget>(BuildContext context, bool Function(InheritedElement element) visitor) {
+  InheritedElement? element = context.getElementForInheritedWidgetOfExactType<T>();
+  while (element != null) {
+    if (visitor(element) == true) {
+      break;
+    }
+    // _getParent is needed here because
+    // context.getElementForInheritedWidgetOfExactType will return itself if it
+    // happens to be of the correct type.
+    final BuildContext parent = _getParent(element);
+    element = parent.getElementForInheritedWidgetOfExactType<T>();
+  }
+  return element != null;
+}
+
 /// An abstract class representing a particular configuration of an [Action].
 ///
 /// This class is what the [Shortcuts.shortcuts] map has as values, and is used
@@ -484,31 +502,143 @@ class CallbackAction<T extends Intent> extends Action<T> {
 /// A registry of actions that is checked by the [Actions] widget
 /// for actions to be invoked in addition to its own [Actions.actions].
 ///
-/// Assign one of these to the [Actions.registry] attribute of the [Actions]
-/// widget you wish to serve as the highest level in the widget hierarchy that
-/// will be searched for the actions of its subtree.
+/// Assign one of these to the [ActionsRegistry.registry] attribute of the
+/// [ActionsRegistry] widget you wish to serve as the highest level in the
+/// widget hierarchy that will be searched for the actions of its subtree.
 ///
 /// Actions in a subtree are then automatically registered by the
-/// [RegisteredActions] widget, which is the preferred way to register actions,
+/// [Actions] widget, which is the preferred way to register actions,
 /// although you can also do it manually by looking up the registry for a
-/// context with [Actions.maybeRegistryOf].
+/// context with [ActionsRegistry.maybeRegistryOf].
 class ActionRegistry with Diagnosticable {
-  final Set<GlobalKey> _registeredActions = <GlobalKey>{};
+  /// Creates a const ActionRegistry.
+  ActionRegistry() : _registeredActions = <BuildContext>{};
 
-  /// Allows registering an action that don't need to be in the current
-  /// BuildContext in order to be found.
-  ///
-  /// If an action is already registered for the given `type`, this method
-  /// asserts.
-  void registerActions(GlobalKey key) {
-    _registeredActions.add(key);
+  /// Gets an iterable over the actions registered with this [ActionRegistry].
+  Iterable<BuildContext> get registeredActions => _registeredActions;
+  final Set<BuildContext> _registeredActions;
+
+  /// Allows registering a build context that should be searched for actions.
+  void registerActions(BuildContext context) {
+    _registeredActions.add(context);
+    print('Registered $context, ${_registeredActions.length} registered');
   }
 
-  /// Unregisters an action registered in [registerAction].
+  /// Unregisters a context registered in [registerActions].
+  void unregisterActions(BuildContext context) {
+    _registeredActions.remove(context);
+    print('Unregistered $context');
+  }
+}
+
+/// A widget that owns an [ActionRegistry] for [Actions] to register their
+/// [Actions.registeredActions] with.
+///
+/// Place one of these wherever you would like to collect registered actions for
+/// a subtree in order to restrict them to running only when the context
+/// supplied to [Actions.invoke] is in that subtree.
+///
+/// Since [Shortcuts] uses [Actions.invoke] with the context of the
+/// [primaryFocus] to invoke its actions, this widget will restrict the
+/// registered actions from a subtree so that shortcuts will only activate these
+/// actions if the focus is within that subtree.
+class ActionsRegistry extends StatefulWidget {
+  /// Create a const [ActionsRegistry] widget.
   ///
-  /// If the action wasn't registered before, then this method asserts.
-  void unregisterActions(GlobalKey key) {
-    _registeredActions.remove(key);
+  /// The [child] attribute is required.
+  const ActionsRegistry({
+    Key? key,
+    this.registry,
+    required this.child,
+  }) : super(key: key);
+
+  /// A registry of actions to be added to the list of actions to be searched by
+  /// the [Actions] widget when invoking an [Action].
+  ///
+  /// The action mappings registered with this registry will be searched in
+  /// addition to those found in the [Actions.actions] map. Actions can be
+  /// registered with this registry by adding actions to an [Actions] widget's
+  /// [Actions.registeredActions] map.
+  ///
+  /// Defaults to a default-constructed [ActionRegistry].
+  final ActionRegistry? registry;
+
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  ///
+  /// The [child] attribute is required.
+  final Widget child;
+
+  // Finds the nearest valid ActionRegistry, if any.
+  static ActionRegistry? _findRegistry(BuildContext context) {
+    ActionRegistry? registry;
+    _visitAncestorsOfType<_ActionsRegistryMarker>(context, (InheritedElement element) {
+      registry = (element.widget as _ActionsRegistryMarker).registry;
+      return true;
+    });
+    return registry;
+  }
+
+  /// Returns an iterable of the registered contexts found by looking at all of
+  /// the [ActionsRegistry] ancestors of the given context, starting at the
+  /// given context, in the order of discovery.
+  static Iterable<BuildContext> registeredContextsOf<T extends Intent>(BuildContext context, {Intent? intent}) {
+    final List<BuildContext> registeredContexts =  <BuildContext>[];
+    _visitAncestorsOfType<_ActionsRegistryMarker>(context, (InheritedElement element) {
+      final _ActionsRegistryMarker actionsRegistry = element.widget as _ActionsRegistryMarker;
+      registeredContexts.addAll(actionsRegistry.registry.registeredActions);
+      return false;
+    });
+    return registeredContexts;
+  }
+
+  /// Returns the [ActionRegistry] associated with the [ActionsRegistry] widget that
+  /// most tightly encloses the given [BuildContext], if any.
+  ///
+  /// Will return null if no ambient [ActionsRegistry] widget is found.
+  static ActionRegistry? maybeRegistryOf(BuildContext context) {
+    assert(context != null);
+    final _ActionsRegistryMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsRegistryMarker>();
+    return marker?.registry ?? _findRegistry(context);
+  }
+
+  @override
+  State<ActionsRegistry> createState() => _ActionsRegistryState();
+}
+
+class _ActionsRegistryState extends State<ActionsRegistry> {
+  ActionRegistry? _localRegistry;
+  ActionRegistry get registry => widget.registry ?? (_localRegistry ??= ActionRegistry());
+
+  @override
+  void didUpdateWidget(ActionsRegistry oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Clear out the local registry if the widget now has one.
+    if (widget.registry != null) {
+      _localRegistry = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _ActionsRegistryMarker(registry: registry, child: widget.child);
+  }
+}
+
+// An inherited widget used by ActionsRegistry widget for fast lookup of the
+// ActionsRegistry widget information.
+class _ActionsRegistryMarker extends InheritedWidget {
+  const _ActionsRegistryMarker({
+    required this.registry,
+    Key? key,
+    required Widget child,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final ActionRegistry registry;
+
+  @override
+  bool updateShouldNotify(_ActionsRegistryMarker oldWidget) {
+    return oldWidget.registry != registry;
   }
 }
 
@@ -736,12 +866,12 @@ class Actions extends StatefulWidget {
   const Actions({
     Key? key,
     this.dispatcher,
-    this.registry,
-    this.registerActions = false,
-    required this.actions,
     required this.child,
-  })  : assert(actions != null),
-        assert(child != null),
+    this.actions,
+    this.registeredActions,
+  })  : assert(child != null),
+        assert(actions != null || registeredActions != null,
+          'At least one of actions or registeredActions must be specified'),
         super(key: key);
 
   /// {@template flutter.widgets.actions.dispatcher}
@@ -764,16 +894,7 @@ class Actions extends StatefulWidget {
   /// passed in here (e.g. a final variable from your widget class) instead of
   /// defining it inline in the build function.
   /// {@endtemplate}
-  final Map<Type, Action<Intent>> actions;
-
-  /// {@template flutter.widgets.actions.registry}
-  /// A registry of actions to be added to the list of actions to be searched.
-  ///
-  /// The action mappings registered with the registry will be searched in
-  /// addition to the [actions] map, and can be added to by creating a
-  /// [RegisteredActions] widget as a descendant of this [Actions] widget.
-  /// {@endtemplate}
-  final ActionRegistry? registry;
+  final Map<Type, Action<Intent>>? actions;
 
   /// Register the actions here with the nearest ancestor with a [registry] set.
   ///
@@ -790,34 +911,16 @@ class Actions extends StatefulWidget {
   ///
   /// If more than one action is registered as responding to the same [Intent]
   /// type, all of the actions will be invoked.
-  final bool registerActions;
+  final Map<Type, Action<Intent>>? registeredActions;
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
-
-  // Visits the Actions widget ancestors of the given element using
-  // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
-  // what it was looking for.
-  static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
-    InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
-    while (actionsElement != null) {
-      if (visitor(actionsElement) == true) {
-        break;
-      }
-      // _getParent is needed here because
-      // context.getElementForInheritedWidgetOfExactType will return itself if it
-      // happens to be of the correct type.
-      final BuildContext parent = _getParent(actionsElement);
-      actionsElement = parent.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
-    }
-    return actionsElement != null;
-  }
 
   // Finds the nearest valid ActionDispatcher, or creates a new one if it
   // doesn't find one.
   static ActionDispatcher _findDispatcher(BuildContext context) {
     ActionDispatcher? dispatcher;
-    _visitActionsAncestors(context, (InheritedElement element) {
+    _visitAncestorsOfType<_ActionsMarker>(context, (InheritedElement element) {
       final ActionDispatcher? found = (element.widget as _ActionsMarker).dispatcher;
       if (found != null) {
         dispatcher = found;
@@ -826,20 +929,6 @@ class Actions extends StatefulWidget {
       return false;
     });
     return dispatcher ?? const ActionDispatcher();
-  }
-
-  // Finds the nearest valid ActionRegistry, if any.
-  static ActionRegistry? _findRegistry(BuildContext context) {
-    ActionRegistry? registry;
-    _visitActionsAncestors(context, (InheritedElement element) {
-      final ActionRegistry? found = (element.widget as _ActionsMarker).registry;
-      if (found != null) {
-        registry = found;
-        return true;
-      }
-      return false;
-    });
-    return registry;
   }
 
   /// Returns a [VoidCallback] handler that invokes the bound action for the
@@ -937,34 +1026,29 @@ class Actions extends StatefulWidget {
       'specified. Intent may be used as the generic type as long as the optional '
       '"intent" argument is passed.',
     );
-    final List<GlobalKey> registeredKeys = <GlobalKey>[];
 
-    bool searchActions(InheritedElement element, bool collect) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = actions.actions[type] as Action<T>?;
+    bool searchActions(InheritedElement element, [bool registered = false]) {
+      final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
+      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[intent.runtimeType] as Action<T>?;
       if (result != null) {
         context.dependOnInheritedElement(element);
         action = result;
-        if (collect) {
-          // If we're collecting, and we find an action, we can stop looking.
-          return true;
-        }
-      }
-      if (collect && actions.registry != null) {
-        registeredKeys.addAll(actions.registry!._registeredActions);
+        return true;
       }
       return false;
     }
 
-    _visitActionsAncestors(context, (InheritedElement element) => searchActions(element, true));
+    _visitAncestorsOfType<_ActionsMarker>(context, searchActions);
 
     if (action == null) {
-      for (final GlobalKey key in registeredKeys) {
-        if (key.currentContext != null) {
-          _visitActionsAncestors(key.currentContext!, (InheritedElement element) => searchActions(element, false));
-          if (action != null) {
-            break;
-          }
+      // We didn't find an action in this context, so find the first registered action and return it.
+      // "First" means: the first matching action found in the first registered
+      // context that contains one.
+      final Iterable<BuildContext> contexts = ActionsRegistry.registeredContextsOf<T>(context, intent: intent);
+      for (final BuildContext registeredContext in contexts) {
+        _visitAncestorsOfType<_ActionsMarker>(registeredContext, (InheritedElement element) => searchActions(element, true));
+        if (action != null) {
+          break;
         }
       }
     }
@@ -987,36 +1071,25 @@ class Actions extends StatefulWidget {
         'specified. Intent may be used as the generic type as long as the optional '
         '"intent" argument is passed.',
     );
-    final List<GlobalKey> registeredKeys = <GlobalKey>[];
-
-    bool searchActions(InheritedElement element, bool collect) {
+    bool searchActions(InheritedElement element, [bool registered = false]) {
       final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
-      final Action<T>? result = actionsMarker.actions[type] as Action<T>?;
+      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[intent.runtimeType] as Action<T>?;
       if (result != null) {
         context.dependOnInheritedElement(element);
         actions.add(result);
-        if (collect) {
-          // If we're collecting, and we find an action, we can stop looking.
-          return true;
-        }
-      }
-      if (collect && actionsMarker.registry != null) {
-        registeredKeys.addAll(actionsMarker.registry!._registeredActions);
+        return true;
       }
       return false;
     }
 
     // First search for non-registered actions, and collect the registered actions.
-    _visitActionsAncestors(context, (InheritedElement element) => searchActions(element, true));
+    _visitAncestorsOfType<_ActionsMarker>(context, searchActions);
 
     // If a non-registered action is found, then use that, otherwise collect any
     // registered actions as well.
-    if (actions.isEmpty) {
-      for (final GlobalKey key in registeredKeys) {
-        if (key.currentContext != null) {
-          _visitActionsAncestors(key.currentContext!, (InheritedElement element) => searchActions(element, false));
-        }
-      }
+    final Iterable<BuildContext> contexts = ActionsRegistry.registeredContextsOf<T>(context, intent: intent);
+    for (final BuildContext registeredContext in contexts) {
+      _visitAncestorsOfType<_ActionsMarker>(registeredContext, (InheritedElement element) => searchActions(element, true));
     }
 
     return actions;
@@ -1031,17 +1104,6 @@ class Actions extends StatefulWidget {
     assert(context != null);
     final _ActionsMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsMarker>();
     return marker?.dispatcher ?? _findDispatcher(context);
-  }
-
-  /// Returns the [ActionRegistry] associated with the [Actions] widget that
-  /// most tightly encloses the given [BuildContext], if any.
-  ///
-  /// Will return null if no ambient [Actions] widget is found, or if no
-  /// [Actions] widget has the [Actions.registry] attribute set.
-  static ActionRegistry? maybeRegistryOf(BuildContext context) {
-    assert(context != null);
-    final _ActionsMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsMarker>();
-    return marker?.registry ?? _findRegistry(context);
   }
 
   /// Invokes the action associated with the given [Intent] using the
@@ -1068,34 +1130,25 @@ class Actions extends StatefulWidget {
     assert(context != null);
     final Map<Action<T>, InheritedElement> actions = <Action<T>, InheritedElement>{};
     InheritedElement? actionElement;
-    final List<GlobalKey> registeredKeys = <GlobalKey>[];
-
-    bool searchActions(InheritedElement element, bool collect) {
+    bool searchActions(InheritedElement element, [bool registered = false]) {
       final _ActionsMarker actionsMarker = element.widget as _ActionsMarker;
-      final Action<T>? result = actionsMarker.actions[intent.runtimeType] as Action<T>?;
+      final Action<T>? result = (registered ? actionsMarker.registeredActions : actionsMarker.actions)[intent.runtimeType] as Action<T>?;
       if (result != null) {
         actionElement = element;
         if (result.isEnabled(intent)) {
           actions[result] = element;
-          if (collect) {
-            // If we're collecting, and we find an action, we can stop looking.
-            return true;
-          }
+          return true;
         }
-      }
-      if (collect && actionsMarker.registry != null) {
-        registeredKeys.addAll(actionsMarker.registry!._registeredActions);
       }
       return false;
     }
 
-    _visitActionsAncestors(context, (InheritedElement element) => searchActions(element, true));
+    _visitAncestorsOfType<_ActionsMarker>(context, searchActions);
 
     if (actions.isEmpty) {
-      for (final GlobalKey key in registeredKeys) {
-        if (key.currentContext != null) {
-          _visitActionsAncestors(key.currentContext!, (InheritedElement element) => searchActions(element, false));
-        }
+      final Iterable<BuildContext> contexts = ActionsRegistry.registeredContextsOf<T>(context, intent: intent);
+      for (final BuildContext registeredContext in contexts) {
+        _visitAncestorsOfType<_ActionsMarker>(registeredContext, (InheritedElement element) =>  searchActions(element, true));
       }
     }
 
@@ -1157,7 +1210,7 @@ class Actions extends StatefulWidget {
     Action<T>? action;
     InheritedElement? actionElement;
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    _visitAncestorsOfType<_ActionsMarker>(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
       if (result != null) {
@@ -1191,17 +1244,17 @@ class Actions extends StatefulWidget {
 
 class _ActionsState extends State<Actions> {
   // The set of actions that this Actions widget is current listening to.
-  Set<Action<Intent>>? listenedActions = <Action<Intent>>{};
+  final Set<Action<Intent>> listenedActions = <Action<Intent>>{};
   // Used to tell the marker to rebuild its dependencies when the state of an
   // action in the map changes.
   Object rebuildKey = Object();
-  GlobalKey registeredActionSubtreeKey = GlobalKey(debugLabel: 'Registered Actions');
+  // A handle to the current action registry, so that we can call it in dispose.
   ActionRegistry? registry;
 
   @override
   void initState() {
     super.initState();
-    _updateActionListeners();
+    _udpateAllActionListeners();
   }
 
   void _handleActionChanged(Action<Intent> action) {
@@ -1211,10 +1264,17 @@ class _ActionsState extends State<Actions> {
     });
   }
 
-  void _updateActionListeners() {
-    final Set<Action<Intent>> widgetActions = widget.actions.values.toSet();
-    final Set<Action<Intent>> removedActions = listenedActions!.difference(widgetActions);
-    final Set<Action<Intent>> addedActions = widgetActions.difference(listenedActions!);
+  void _udpateAllActionListeners() {
+    _updateActionListeners(<Action<Intent>>[
+      if (widget.actions != null)...widget.actions!.values,
+      if (widget.registeredActions != null)...widget.registeredActions!.values,
+    ]);
+  }
+
+  void _updateActionListeners(Iterable<Action<Intent>> actions) {
+    final Set<Action<Intent>> widgetActions = actions.toSet();
+    final Set<Action<Intent>> removedActions = listenedActions.difference(widgetActions);
+    final Set<Action<Intent>> addedActions = widgetActions.difference(listenedActions);
 
     for (final Action<Intent> action in removedActions) {
       action.removeActionListener(_handleActionChanged);
@@ -1222,60 +1282,38 @@ class _ActionsState extends State<Actions> {
     for (final Action<Intent> action in addedActions) {
       action.addActionListener(_handleActionChanged);
     }
-    listenedActions = widgetActions;
+    listenedActions.clear();
+    listenedActions.addAll(widgetActions);
   }
-  
-  void _registerActions() => registry?.registerActions(registeredActionSubtreeKey);
-
-  void _unregisterActions() => registry?.unregisterActions(registeredActionSubtreeKey);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    registry = Actions.maybeRegistryOf(context);
-    if (widget.registerActions) {
-  _registerActions();
-    }
-  }
-
-  @override
-  void didUpdateWidget(Actions oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateActionListeners();
-    if (widget.registerActions != oldWidget.registerActions) {
-      if (widget.registerActions) {
-        _registerActions();
-      } else {
-        _unregisterActions();
-      }
+    _udpateAllActionListeners();
+    if (widget.registeredActions != null) {
+      registry = ActionsRegistry.maybeRegistryOf(context);
+      registry?.registerActions(context);
     }
   }
 
   @override
   void dispose() {
-    for (final Action<Intent> action in listenedActions!) {
+    for (final Action<Intent> action in listenedActions) {
       action.removeActionListener(_handleActionChanged);
     }
-    if (widget.registerActions) {
-      _unregisterActions();
-    }
-    listenedActions = null;
+    listenedActions.clear();
+    registry?.unregisterActions(context);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return _ActionsMarker(
-      actions: widget.actions,
       dispatcher: widget.dispatcher,
-      registry: widget.registry,
+      actions: widget.actions ?? <Type, Action<Intent>>{},
+      registeredActions: widget.registeredActions ?? <Type, Action<Intent>>{},
       rebuildKey: rebuildKey,
-      child: widget.registerActions
-          ? KeyedSubtree(
-            key: registeredActionSubtreeKey,
-            child: widget.child,
-          )
-          : widget.child,
+      child: widget.child,
     );
   }
 }
@@ -1285,8 +1323,8 @@ class _ActionsState extends State<Actions> {
 class _ActionsMarker extends InheritedWidget {
   const _ActionsMarker({
     required this.dispatcher,
-    required this.registry,
     required this.actions,
+    required this.registeredActions,
     required this.rebuildKey,
     Key? key,
     required Widget child,
@@ -1295,15 +1333,15 @@ class _ActionsMarker extends InheritedWidget {
         super(key: key, child: child);
 
   final ActionDispatcher? dispatcher;
-  final ActionRegistry? registry;
   final Map<Type, Action<Intent>> actions;
+  final Map<Type, Action<Intent>> registeredActions;
   final Object rebuildKey;
 
   @override
   bool updateShouldNotify(_ActionsMarker oldWidget) {
     return rebuildKey != oldWidget.rebuildKey
         || oldWidget.dispatcher != dispatcher
-        || oldWidget.registry != registry
+        || !mapEquals<Type, Action<Intent>>(oldWidget.registeredActions, registeredActions)
         || !mapEquals<Type, Action<Intent>>(oldWidget.actions, actions);
   }
 }
@@ -1691,7 +1729,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       ),
     );
     if (widget.enabled && widget.actions != null && widget.actions!.isNotEmpty) {
-      child = Actions(actions: widget.actions!, child: child);
+      child = Actions(actions: widget.actions, child: child);
     }
     if (widget.enabled && widget.shortcuts != null && widget.shortcuts!.isNotEmpty) {
       child = Shortcuts(shortcuts: widget.shortcuts!, child: child);

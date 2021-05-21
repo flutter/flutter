@@ -75,17 +75,10 @@ void main() {
 ///
 /// Shortcuts can be defined here, and they will be in effect for the whole app,
 /// although different widgets may fulfill them differently.
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   static const String title = 'Shortcuts and Actions Demo';
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  final ActionRegistry registry = ActionRegistry();
 
   @override
   Widget build(BuildContext context) {
@@ -109,13 +102,43 @@ class _MyAppState extends State<MyApp> {
             SingleActivator(LogicalKeyboardKey.digit5): ToggleSelectIntent(4),
           },
           child: Actions(
+            dispatcher: LoggingActionDispatcher(),
             actions: const <Type, Action<Intent>>{},
-            registry: registry,
             child: FocusScope(
               child: Row(
-                children: const <Widget>[
-                  Expanded(flex: 1, child: MyMenu()),
-                  Expanded(flex: 5, child: MyGrid()),
+                children: <Widget>[
+                  const Expanded(flex: 1, child: MyMenu()),
+                  Expanded(
+                    flex: 5,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      /// Adding this ActionsRegistry means that "select all"
+                      /// will not be registered above here, so only the other
+                      /// grid will be selected by the buttons or the shortcut
+                      /// if the focus is on the buttons. If the keyboard focus
+                      /// enters the first grid, then select all will apply
+                      /// there, AND in the second grid.
+                      child: ActionsRegistry(
+                        child: MyGrid(
+                          label: 'First',
+                          items: model.items.getRange(0, model.items.length ~/ 2).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const VerticalDivider(),
+                  Expanded(
+                    flex: 5,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: MyGrid(
+                        label: 'Second',
+                        items: model.items
+                            .getRange(model.items.length ~/ 2, model.items.length)
+                            .toList(),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -127,34 +150,34 @@ class _MyAppState extends State<MyApp> {
 }
 
 class MyGrid extends StatelessWidget {
-  const MyGrid({Key? key}) : super(key: key);
+  const MyGrid({Key? key, required this.label, required this.items}) : super(key: key);
+
+  final String label;
+  final List<Item> items;
 
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return FocusTraversalGroup(
       child: Actions(
-        registerActions: true,
-        dispatcher: LoggingActionDispatcher(),
-        actions: <Type, Action<Intent>>{
-          SelectAllIntent: SelectAllAction(model),
-          SelectNoneIntent: SelectNoneAction(model),
+        registeredActions: <Type, Action<Intent>>{
+          SelectAllIntent: SelectAllAction(items),
+          SelectNoneIntent: SelectNoneAction(items),
         },
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            ToggleSelectIntent: ToggleSelectAction(model),
-            ToggleSelectItemIntent: ToggleSelectItemAction(model),
-          },
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 200,
-            ),
-            itemCount: model.items.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ItemBox(
-                item: model.items[index],
-              );
-            },
+        actions: <Type, Action<Intent>>{
+          ToggleSelectIntent: ToggleSelectAction(model),
+          ToggleSelectItemIntent: ToggleSelectItemAction(model),
+        },
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 200,
           ),
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ItemBox(
+              label: label,
+              item: items[index],
+            );
+          },
         ),
       ),
     );
@@ -210,15 +233,15 @@ class _MyMenuState extends State<MyMenu> {
 }
 
 class ItemBox extends StatelessWidget {
-  const ItemBox({Key? key, required this.item}) : super(key: key);
+  const ItemBox({Key? key, required this.item, required this.label}) : super(key: key);
 
+  final String label;
   final Item item;
 
   @override
   Widget build(BuildContext context) {
     return Actions(
-      registerActions: true,
-      actions: <Type, Action<Intent>>{
+      registeredActions: <Type, Action<Intent>>{
         ToggleIndividualSelectIntent: ToggleIndividualSelectAction(model, item),
       },
       child: AnimatedBuilder(
@@ -242,7 +265,7 @@ class ItemBox extends StatelessWidget {
                 Actions.maybeInvoke(context, ToggleSelectItemIntent(item));
               },
               child: Center(
-                child: Text(item.name),
+                child: Text('$label ${item.name}'),
               ),
             ),
           );
@@ -257,13 +280,13 @@ class SelectAllIntent extends Intent {
 }
 
 class SelectAllAction extends Action<SelectAllIntent> {
-  SelectAllAction(this.model);
+  SelectAllAction(this.items);
 
-  final Model model;
+  final Iterable<Item> items;
 
   @override
   Object? invoke(covariant SelectAllIntent intent) {
-    model.selectAll();
+    items.forEach(model.select);
   }
 }
 
@@ -272,13 +295,13 @@ class SelectNoneIntent extends Intent {
 }
 
 class SelectNoneAction extends Action<SelectNoneIntent> {
-  SelectNoneAction(this.model);
+  SelectNoneAction(this.items);
 
-  final Model model;
+  final Iterable<Item> items;
 
   @override
   Object? invoke(covariant SelectNoneIntent intent) {
-    model.selectNone();
+    items.forEach(model.deselect);
   }
 }
 
@@ -382,10 +405,10 @@ class LoggingShortcutManager extends ShortcutManager {
 class LoggingActionDispatcher extends ActionDispatcher {
   @override
   Object? invokeAction(
-      covariant Action<Intent> action,
-      covariant Intent intent, [
-        BuildContext? context,
-      ]) {
+    covariant Action<Intent> action,
+    covariant Intent intent, [
+    BuildContext? context,
+  ]) {
     print('Action invoked: $action($intent) from $context');
     super.invokeAction(action, intent, context);
   }
