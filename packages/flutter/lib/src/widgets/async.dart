@@ -694,6 +694,7 @@ class FutureBuilder<T> extends StatefulWidget {
     this.initialData,
     required this.builder,
   }) : assert(builder != null),
+       assert(!(future == null && initialData == null),'Future and initialData cannot be null at same time'),
        super(key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
