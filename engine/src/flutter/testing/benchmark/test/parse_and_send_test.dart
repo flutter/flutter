@@ -3,50 +3,52 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-import 'dart:convert';
+
 import 'dart:io';
 
-import 'package:gcloud/src/datastore_impl.dart';
-import 'package:googleapis_auth/auth_io.dart';
-import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
+import 'package:litetest/litetest.dart';
+import 'package:metrics_center/metrics_center.dart';
+import 'package:path/path.dart' as p;
+
+import '../bin/parse_and_send.dart' as pas;
 
 void main() {
-  // In order to run these tests, one should download a service account
-  // credentials json from a test GCP project, and put that json as
-  // `secret/test_gcp_credentials.json`. There's a `flutter-test` project for
-  // Flutter team members.
-  test('parse_and_send with example json does not crash.', () async {
-    final String testCred =
-        File('secret/test_gcp_credentials.json').readAsStringSync();
-    Process.runSync('dart', <String>[
-      'bin/parse_and_send.dart',
-      'example/txt_benchmarks.json',
-    ], environment: <String, String>{
-      'BENCHMARK_GCP_CREDENTIALS': testCred,
-      'IS_TESTING': 'true',
-    });
+  test('runGit() succeeds', () async {
+    // Check that git --version runs successfully
+    final ProcessResult result = await pas.runGit(<String>['--version']);
+    expect(result.exitCode, equals(0));
   });
 
-  test('parse_and_send succeeds with access token.', () async {
-    final dynamic testCred =
-        jsonDecode(File('secret/test_gcp_credentials.json').readAsStringSync())
-            as Map<String, dynamic>;
-    final AutoRefreshingAuthClient client = await clientViaServiceAccount(
-      ServiceAccountCredentials.fromJson(testCred),
-      DatastoreImpl.SCOPES,
+  test('getGitLog() succeeds', () async {
+    final List<String> gitLog = await pas.getGitLog();
+
+    // Check that gitLog[0] is a hash
+    final RegExp sha1re = RegExp(r'[a-f0-9]{40}');
+    expect(sha1re.hasMatch(gitLog[0]), true);
+
+    // Check that gitLog[1] is an int
+    final int secondsSinceEpoch = int.tryParse(gitLog[1]);
+    expect(secondsSinceEpoch, isNotNull);
+
+    // Check that gitLog[1] is a sensible Unix Epoch
+    final int millisecondsSinceEpoch = secondsSinceEpoch * 1000;
+    final DateTime commitDate = DateTime.fromMillisecondsSinceEpoch(
+      millisecondsSinceEpoch,
+      isUtc: true,
     );
-    final String tokenPath =
-        path.join(Directory.systemTemp.absolute.path, 'parse_and_send_token');
-    File(tokenPath).writeAsStringSync(client.credentials.accessToken.data);
-    final ProcessResult result = Process.runSync('dart', <String>[
-      'bin/parse_and_send.dart',
-      'example/txt_benchmarks.json',
-    ], environment: <String, String>{
-      'TOKEN_PATH': tokenPath,
-      'GCP_PROJECT': testCred['project_id'] as String,
-      'IS_TESTING': 'true',
-    });
-    expect(result.exitCode, 0);
+    expect(commitDate.year > 2000, true);
+    expect(commitDate.year < 3000, true);
+  });
+
+  test('parse() succeeds', () async {
+    // Check that the results of parse() on ../example/txt_benchmarks.json
+    //   is as expeted.
+    final String exampleJson = p.join('example', 'txt_benchmarks.json');
+    final pas.PointsAndDate pad = await pas.parse(exampleJson);
+    final List<FlutterEngineMetricPoint> points = pad.points;
+
+    expect(points[0].value, equals(101.0));
+    expect(points[2].value, equals(4460.0));
+    expect(points[4].value, equals(6548.0));
   });
 }

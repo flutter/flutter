@@ -82,6 +82,12 @@ analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$FLUTTER_DIR/testing/litetest"
 
+echo "Analyzing testing/benchmark"
+analyze \
+  --packages="$FLUTTER_DIR/testing/benchmark/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/testing/benchmark"
+
 echo "Analyzing testing/smoke_test_failure"
 analyze \
   --packages="$FLUTTER_DIR/testing/smoke_test_failure/.dart_tool/package_config.json" \

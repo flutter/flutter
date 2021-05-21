@@ -1,13 +1,72 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: flutter_engine_benchmark
-
-dependencies:
-  git: any
-
-  metrics_center: 0.0.9
-
-dev_dependencies:
-  test: any
-  pedantic: ^1.8.0
-
+publish_to: none
 environment:
   sdk: ">=2.2.2 <3.0.0"
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/pkg, //third_party/dart/pkg, or
+# //third_party/dart/third_party/pkg. In particular, package:test is not usable
+# here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
+
+dependencies:
+  metrics_center: any
+  path: any
+
+dev_dependencies:
+  litetest: any
+
+dependency_overrides:
+  _discoveryapis_commons:
+    path: ../../../third_party/pkg/googleapis/discoveryapis_commons
+  async_helper:
+    path: ../../../third_party/dart/pkg/async_helper
+  async:
+    path: ../../../third_party/dart/third_party/pkg/async
+  charcode:
+    path: ../../../third_party/dart/third_party/pkg/charcode
+  collection:
+    path: ../../../third_party/dart/third_party/pkg/collection
+  convert:
+    path: ../../../third_party/dart/third_party/pkg/convert
+  crypto :
+    path: ../../../third_party/dart/third_party/pkg/crypto
+  equatable:
+    path: ../../../third_party/pkg/equatable
+  expect:
+    path: ../../../third_party/dart/pkg/expect
+  gcloud:
+    path: ../../../third_party/pkg/gcloud
+  googleapis:
+    path: ../../../third_party/pkg/googleapis/generated/googleapis
+  googleapis_auth:
+    path: ../../../third_party/pkg/googleapis/googleapis_auth
+  http:
+    path: ../../../third_party/dart/third_party/pkg/http
+  http_parser:
+    path: ../../../third_party/dart/third_party/pkg/http_parser
+  litetest:
+    path: ../litetest
+  meta:
+    path: ../../../third_party/dart/pkg/meta
+  metrics_center:
+    path: ../../../third_party/pkg/flutter_packages/packages/metrics_center
+  path:
+    path: ../../../third_party/dart/third_party/pkg/path
+  pedantic:
+    path: ../../../third_party/dart/third_party/pkg/pedantic
+  source_span:
+    path: ../../../third_party/dart/third_party/pkg/source_span
+  string_scanner:
+    path: ../../../third_party/dart/third_party/pkg/string_scanner
+  term_glyph:
+    path: ../../../third_party/dart/third_party/pkg/term_glyph
+  typed_data:
+    path: ../../../third_party/dart/third_party/pkg/typed_data
