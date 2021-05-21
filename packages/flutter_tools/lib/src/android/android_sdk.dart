@@ -48,6 +48,9 @@ class AndroidSdk {
   AndroidSdkVersion? _latestVersion;
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
+  ///
+  /// This is required to use the newest SDK manager which only works with
+  /// the newer JDK.
   bool get cmdlineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
 
   /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
@@ -265,7 +268,7 @@ class AndroidSdk {
     return null;
   }
 
-  String? getCmdlineToolsPath(String binaryName, {bool skipTools = false}) {
+  String? getCmdlineToolsPath(String binaryName, {bool skipOldTools = false}) {
     // First look for the latest version of the command-line tools
     final File cmdlineToolsLatestBinary = directory
       .childDirectory('cmdline-tools')
@@ -304,7 +307,7 @@ class AndroidSdk {
         }
       }
     }
-    if (skipTools) {
+    if (skipOldTools) {
       return null;
     }
 
@@ -396,7 +399,7 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final String? path = getCmdlineToolsPath(executable, skipTools: true);
+    final String? path = getCmdlineToolsPath(executable, skipOldTools: true);
     if (path != null) {
       return path;
     }

@@ -185,12 +185,13 @@ class AndroidValidator extends DoctorValidator {
       }
       return ValidationResult(ValidationType.missing, messages);
     }
+    if (!androidSdk.cmdlineToolsAvailable) {
+      messages.add(const ValidationMessage.error('cmdline-tools component is missing'));
+      return ValidationResult(ValidationType.missing, messages);
+    }
 
     if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(_userMessages.androidSdkLicenseOnly(kAndroidHome)));
-      if (!androidSdk.cmdlineToolsAvailable) {
-        messages.add(const ValidationMessage.error('cmdline-tools component is missing'));
-      }
       return ValidationResult(ValidationType.partial, messages);
     }
 

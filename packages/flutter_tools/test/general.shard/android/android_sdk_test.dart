@@ -99,6 +99,40 @@ void main() {
       Config: () => config,
     });
 
+    testUsingContext('Does not return sdkmanager under deprecated tools component', () {
+      sdkDir = createSdkDirectory(fileSystem: fileSystem, withSdkManager: false);
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'tools/bin/sdkmanager')
+      ).createSync(recursive: true);
+
+      expect(sdk.sdkManagerPath, null);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Config: () => config,
+    });
+
+    testUsingContext('Can look up cmdline tool from deprecated tools path', () {
+      sdkDir = createSdkDirectory(fileSystem: fileSystem, withSdkManager: false);
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'tools/bin/foo')
+      ).createSync(recursive: true);
+
+      expect(sdk.getCmdlineToolsPath('foo', skipOldTools: false), '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/foo');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Config: () => config,
+    });
+
     testUsingContext('Caches adb location after first access', () {
       sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
