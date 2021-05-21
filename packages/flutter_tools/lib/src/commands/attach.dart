@@ -27,6 +27,7 @@ import '../ios/simulators.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../remote_device.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -72,13 +73,6 @@ class AttachCommand extends FlutterCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     argParser
       ..addOption(
-        'debug-port',
-        hide: !verboseHelp,
-        help: '(deprecated) Device port where the observatory is listening. Requires '
-              '"--disable-service-auth-codes" to also be provided to the Flutter '
-              'application at launch, otherwise this command will fail to connect to '
-              'the application. In general, "--debug-url" should be used instead.',
-      )..addOption(
         'debug-url',
         aliases: <String>[ 'debug-uri' ], // supported for historical reasons
         help: 'The URL at which the observatory is listening.',
@@ -142,16 +136,6 @@ If the app or module is already running and the specific observatory port is
 known, it can be explicitly provided to attach via the command-line, e.g.
 `$ flutter attach --debug-port 12345`''';
 
-  int get debugPort {
-    if (argResults['debug-port'] == null) {
-      return null;
-    }
-    try {
-      return int.parse(stringArg('debug-port'));
-    } on Exception catch (error) {
-      throwToolExit('Invalid port for `--debug-port`: $error');
-    }
-  }
 
   Uri get debugUri {
     if (argResults['debug-url'] == null) {
@@ -176,27 +160,18 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   @override
   Future<void> validateCommand() async {
     await super.validateCommand();
-    if (await findTargetDevice() == null) {
-      throwToolExit(null);
-    }
-    debugPort;
-    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
+    if (debugUri == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
-        'When the --debug-port or --debug-url is unknown, this command determines '
+        'When the -debug-url is unknown, this command determines '
         'the value of --ipv6 on its own.',
       );
     }
-    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
+    if (debugUri == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
       throwToolExit(
         'When the --debug-port or --debug-url is unknown, this command does not use '
         'the value of --observatory-port.',
       );
     }
-    if (debugPort != null && debugUri != null) {
-      throwToolExit(
-        'Either --debugPort or --debugUri can be provided, not both.');
-    }
-
     if (userIdentifier != null) {
       final Device device = await findTargetDevice();
       if (device is! AndroidDevice) {
@@ -209,34 +184,20 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<FlutterCommandResult> runCommand() async {
     await _validateArguments();
 
-    final Device device = await findTargetDevice();
-
-    final Artifacts overrideArtifacts = device.artifactOverrides ?? globals.artifacts;
+    // Only attempt to discover a device if a full debug url was not provided.
+    final Device device = debugUri == null ? await findTargetDevice() : null;
+    final Artifacts overrideArtifacts = device?.artifactOverrides ?? globals.artifacts;
     await context.run<void>(
       body: () => _attachToDevice(device),
       overrides: <Type, Generator>{
         Artifacts: () => overrideArtifacts,
       },
     );
-
     return FlutterCommandResult.success();
   }
 
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
-
-    Future<int> getDevicePort() async {
-      if (debugPort != null) {
-        return debugPort;
-      }
-      // This call takes a non-trivial amount of time, and only iOS devices and
-      // simulators support it.
-      // If/when we do this on Android or other platforms, we can update it here.
-      if (device is IOSDevice || device is IOSSimulator) {
-      }
-      return null;
-    }
-    final int devicePort = await getDevicePort();
 
     final Daemon daemon = boolArg('machine')
       ? Daemon(
@@ -255,7 +216,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
 
-    if (devicePort == null && debugUri == null) {
+    if (debugUri == null) {
       if (device is FuchsiaDevice) {
         final String module = stringArg('module');
         if (module == null) {
@@ -305,12 +266,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         usesIpv6 = observatoryDiscovery.ipv6;
       }
     } else {
+      device ??= RemoteDevice();
       observatoryUri = Stream<Uri>
         .fromFuture(
           buildObservatoryUri(
             device,
             debugUri?.host ?? hostname,
-            devicePort ?? debugUri.port,
+            debugUri.port,
             hostVmservicePort,
             debugUri?.path,
           )

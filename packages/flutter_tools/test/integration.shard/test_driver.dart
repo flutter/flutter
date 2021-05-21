@@ -55,7 +55,7 @@ abstract class FlutterTestDriver {
   final StringBuffer _errorBuffer = StringBuffer();
   String _lastResponse;
   Uri _vmServiceWsUri;
-  int _attachPort;
+  Uri _attachUrl;
   bool _hasExited = false;
 
   VmService _vmService;
@@ -63,7 +63,10 @@ abstract class FlutterTestDriver {
   Stream<String> get stdout => _stdout.stream;
   int get vmServicePort => _vmServiceWsUri.port;
   bool get hasExited => _hasExited;
+
   Uri get vmServiceWsUri => _vmServiceWsUri;
+
+  Uri get vmServiceHttp => _vmServiceWsUri.replace(scheme: 'http', path: _vmServiceWsUri.path.replaceFirst('ws', ''));
 
   String lastTime = '';
   void _debugPrint(String message, { String topic = '' }) {
@@ -173,8 +176,7 @@ abstract class FlutterTestDriver {
     String extension, {
     Map<String, dynamic> args = const <String, dynamic>{},
   }) async {
-    final int port = _vmServiceWsUri != null ? vmServicePort : _attachPort;
-    final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
+    final VmService vmService = await vmServiceConnectUri(_vmServiceWsUri?.toString() ?? _attachUrl.replace(scheme: 'ws', path: _attachUrl.path + 'ws/').toString());
     final Isolate isolate = await waitForExtension(vmService, extension);
     return vmService.callServiceExtension(
       extension,
@@ -498,14 +500,14 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   Future<void> attach(
-    int port, {
+    Uri url, {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool singleWidgetReloads = false,
     List<String> additionalCommandArgs,
   }) async {
-    _attachPort = port;
+    _attachUrl = url;
     await _setupProcess(
       <String>[
         'attach',
@@ -513,17 +515,14 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         if (!spawnDdsInstance)
           '--no-dds',
-        '-d',
-        'flutter-tester',
-        '--debug-port',
-        '$port',
+        '--debug-url',
+        url.toString(),
         ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       singleWidgetReloads: singleWidgetReloads,
-      attachPort: port,
     );
   }
 
@@ -577,13 +576,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           if (!startPaused) {
             await resume(waitForNextPause: false);
           }
-        }
-
-        // In order to call service extensions from test runners started with
-        // attach, we need to store the port that the test runner was attached
-        // to.
-        if (_vmServiceWsUri == null && attachPort != null) {
-          _attachPort = attachPort;
         }
 
         // Now await the started event; if it had already happened the future will
@@ -730,7 +722,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     await _setupProcess(<String>[
       'test',
        ...getLocalEngineArguments(),
-      '--disable-service-auth-codes',
       '--machine',
       if (coverage)
         '--coverage',
