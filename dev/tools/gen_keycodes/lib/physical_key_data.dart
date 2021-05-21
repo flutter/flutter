@@ -87,7 +87,7 @@ class PhysicalKeyData {
   /// # key 101 "KEY_LINEFEED"
   /// key 477   F12               FUNCTION
   ///
-  /// We parse the commented out lines as well as the non-commented lines, so so
+  /// We parse the commented out lines as well as the non-commented lines, so
   /// that we can get names for all of the available scan codes, not just ones
   /// defined for the generic profile.
   ///
