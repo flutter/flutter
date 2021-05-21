@@ -161,57 +161,34 @@ class DartIsolate : public UIDartState {
   ///
   /// @param[in]  settings                    The settings used to create the
   ///                                         isolate.
-  /// @param[in]  isolate_snapshot            The isolate snapshot. This is
-  ///                                         usually obtained from the
-  ///                                         DartVMData associated with the
-  ///                                         running Dart VM instance.
-  /// @param[in]  task_runners                The task runners used by the
-  ///                                         isolate. Via UI bindings, the
-  ///                                         isolate will use the IO task
-  ///                                         runner to scheduled texture
-  ///                                         decompression jobs and post tasks
-  ///                                         back to the UI task runner.
-  /// @param[in]  window                      The weak pointer to the window
-  ///                                         associated with this root isolate.
-  /// @param[in]  io_manager                  The i/o manager.
-  /// @param[in]  unref_queue                 The Skia unref queue.
-  /// @param[in]  image_decoder               The image decoder.
-  /// @param[in]  image_generator_registry    Cascading registry of image
-  ///                                         generator builders. Given
-  ///                                         compressed image bytes as input,
-  ///                                         this is used to find and create
-  ///                                         image generators, which can then
-  ///                                         be used for image decoding.
-  /// @param[in]  advisory_script_uri         The advisory script uri. This is
-  ///                                         only used in instrumentation.
-  /// @param[in]  advisory_script_entrypoint  The advisory script entrypoint.
-  ///                                         This is only used in
-  ///                                         instrumentation. Notably, this is
-  ///                                         NOT the main entrypoint of Dart
-  ///                                         code in the isolate. That is
-  ///                                         specified when making one of the
-  ///                                         `Run` calls.
+  /// @param[in]  platform_configuration      The platform configuration for
+  ///                                         handling communication with the
+  ///                                         framework.
   /// @param[in]  flags                       The Dart isolate flags for this
   ///                                         isolate instance.
+  /// @param[in]  dart_entrypoint             The name of the dart entrypoint
+  ///                                         function to invoke.
+  /// @param[in]  dart_entrypoint_library     The name of the dart library
+  ///                                         containing the entrypoint.
+  /// @param[in]  isolate_configuration       The isolate configuration used to
+  ///                                         configure the isolate before
+  ///                                         invoking the entrypoint.
   /// @param[in]  isolate_create_callback     The isolate create callback. This
   ///                                         will be called when the before the
   ///                                         main Dart entrypoint is invoked in
   ///                                         the root isolate. The isolate is
   ///                                         already in the running state at
   ///                                         this point and an isolate scope is
-  ///                                         current. This callback is made for
-  ///                                         all isolate launches (including
-  ///                                         the children of the root isolate).
+  ///                                         current.
   /// @param[in]  isolate_shutdown_callback   The isolate shutdown callback.
   ///                                         This will be called before the
   ///                                         isolate is about to transition
   ///                                         into the Shutdown phase. The
   ///                                         isolate is still running at this
   ///                                         point and an isolate scope is
-  ///                                         current.  This callback is made
-  ///                                         for all isolate shutdowns
-  ///                                         (including the children of the
-  ///                                         root isolate).
+  ///                                         current.
+  /// @param[in]  context              Engine-owned state which is
+  ///                                         accessed by the root dart isolate.
   /// @param[in]  spawning_isolate            The isolate that is spawning the
   ///                                         new isolate. See also
   ///                                         DartIsolate::SpawnIsolate.
@@ -224,23 +201,14 @@ class DartIsolate : public UIDartState {
   static std::weak_ptr<DartIsolate> CreateRunningRootIsolate(
       const Settings& settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      TaskRunners task_runners,
       std::unique_ptr<PlatformConfiguration> platform_configuration,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
-      fml::WeakPtr<IOManager> io_manager,
-      fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
-      fml::WeakPtr<ImageDecoder> image_decoder,
-      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
-      std::string advisory_script_uri,
-      std::string advisory_script_entrypoint,
       Flags flags,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
       std::unique_ptr<IsolateConfiguration> isolate_configration,
-      std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+      const UIDartState::Context& context,
       const DartIsolate* spawning_isolate = nullptr);
 
   //----------------------------------------------------------------------------
@@ -460,34 +428,16 @@ class DartIsolate : public UIDartState {
   static std::weak_ptr<DartIsolate> CreateRootIsolate(
       const Settings& settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      TaskRunners task_runners,
       std::unique_ptr<PlatformConfiguration> platform_configuration,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
-      fml::WeakPtr<IOManager> io_manager,
-      fml::RefPtr<SkiaUnrefQueue> skia_unref_queue,
-      fml::WeakPtr<ImageDecoder> image_decoder,
-      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
-      std::string advisory_script_uri,
-      std::string advisory_script_entrypoint,
       Flags flags,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
-      std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+      const UIDartState::Context& context,
       const DartIsolate* spawning_isolate = nullptr);
 
   DartIsolate(const Settings& settings,
-              TaskRunners task_runners,
-              fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-              fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
-              fml::WeakPtr<IOManager> io_manager,
-              fml::RefPtr<SkiaUnrefQueue> unref_queue,
-              fml::WeakPtr<ImageDecoder> image_decoder,
-              fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
-              std::string advisory_script_uri,
-              std::string advisory_script_entrypoint,
               bool is_root_isolate,
-              std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+              const UIDartState::Context& context);
 
   [[nodiscard]] bool Initialize(Dart_Isolate isolate);
 
