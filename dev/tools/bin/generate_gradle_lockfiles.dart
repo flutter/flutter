@@ -13,14 +13,17 @@ import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
   print(
-      "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n\n");
+    "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
+    'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
+    "enter the absolute paths to the app's android directory, then press CTRL-D\n"
+  );
 
   const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
 
   for (final String androidDirectoryPath in androidDirectories) {
-    final Directory androidDirectory =
-        fileSystem.directory(path.normalize(androidDirectoryPath));
+    final Directory androidDirectory = fileSystem.directory(path.normalize(androidDirectoryPath));
+
     if (!androidDirectory.existsSync())
       throw '$androidDirectory does not exist';
 
@@ -42,8 +45,7 @@ void main(List<String> arguments) {
     }
 
     if (!androidDirectory.parent.childFile('pubspec.yaml').existsSync()) {
-      print(
-          '${rootBuildGradle.path} no pubspec.yaml in parent directory - skipping');
+      print('${rootBuildGradle.path} no pubspec.yaml in parent directory - skipping');
       continue;
     }
 
@@ -60,9 +62,10 @@ void main(List<String> arguments) {
     rootBuildGradle.writeAsStringSync(rootGradleFileContent);
     settingsGradle.writeAsStringSync(settingGradleFile);
 
+    final String appDirectory = androidDirectory.parent.absolute.path;
+
     // Fetch pub dependencies.
-    exec('flutter', <String>['pub', 'get'],
-        workingDirectory: androidDirectory.parent.absolute.path);
+    exec('flutter', <String>['pub', 'get'], workingDirectory: appDirectory);
 
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
@@ -70,14 +73,19 @@ void main(List<String> arguments) {
     // This logic is embededed within the Flutter tool.
     // To generate the wrapper, build a flavor that doesn't exist.
     if (!gradleWrapper.existsSync()) {
-      Process.runSync('flutter',
-          <String>['build', 'apk', '--debug', '--flavor=does-not-exist'],
-          workingDirectory: androidDirectory.parent.absolute.path);
+      Process.runSync(
+        'flutter',
+        <String>['build', 'apk', '--debug', '--flavor=does-not-exist'],
+        workingDirectory: appDirectory,
+      );
     }
 
     // Generate lock files.
-    exec(gradleWrapper.absolute.path, <String>[':generateLockfiles'],
-        workingDirectory: androidDirectory.absolute.path);
+    exec(
+      gradleWrapper.absolute.path,
+      <String>[':generateLockfiles'],
+      workingDirectory: androidDirectory.absolute.path,
+    );
 
     print('Processed');
   }
