@@ -87,25 +87,26 @@ Engine::Engine(Delegate& delegate,
              std::make_shared<FontCollection>(),
              nullptr) {
   runtime_controller_ = std::make_unique<RuntimeController>(
-      *this,                                   // runtime delegate
-      &vm,                                     // VM
-      std::move(isolate_snapshot),             // isolate snapshot
-      task_runners_,                           // task runners
-      std::move(snapshot_delegate),            // snapshot delegate
-      GetWeakPtr(),                            // hint freed delegate
-      std::move(io_manager),                   // io manager
-      std::move(unref_queue),                  // Skia unref queue
-      image_decoder_.GetWeakPtr(),             // image decoder
-      image_generator_registry_.GetWeakPtr(),  // image generator registry
-      settings_.advisory_script_uri,           // advisory script uri
-      settings_.advisory_script_entrypoint,    // advisory script entrypoint
-      settings_.idle_notification_callback,    // idle notification callback
-      platform_data,                           // platform data
-      settings_.isolate_create_callback,       // isolate create callback
-      settings_.isolate_shutdown_callback,     // isolate shutdown callback
-      settings_.persistent_isolate_data,       // persistent isolate data
-      std::move(volatile_path_tracker)         // volatile path tracker
-  );
+      *this,                                 // runtime delegate
+      &vm,                                   // VM
+      std::move(isolate_snapshot),           // isolate snapshot
+      settings_.idle_notification_callback,  // idle notification callback
+      platform_data,                         // platform data
+      settings_.isolate_create_callback,     // isolate create callback
+      settings_.isolate_shutdown_callback,   // isolate shutdown callback
+      settings_.persistent_isolate_data,     // persistent isolate data
+      UIDartState::Context{
+          task_runners_,                           // task runners
+          std::move(snapshot_delegate),            // snapshot delegate
+          GetWeakPtr(),                            // hint freed delegate
+          std::move(io_manager),                   // io manager
+          std::move(unref_queue),                  // Skia unref queue
+          image_decoder_.GetWeakPtr(),             // image decoder
+          image_generator_registry_.GetWeakPtr(),  // image generator registry
+          settings_.advisory_script_uri,           // advisory script uri
+          settings_.advisory_script_entrypoint,    // advisory script entrypoint
+          std::move(volatile_path_tracker),        // volatile path tracker
+      });
 }
 
 std::unique_ptr<Engine> Engine::Spawn(

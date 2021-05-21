@@ -17,63 +17,48 @@
 
 namespace flutter {
 
-RuntimeController::RuntimeController(RuntimeDelegate& client,
-                                     TaskRunners p_task_runners)
-    : client_(client), vm_(nullptr), task_runners_(p_task_runners) {}
+RuntimeController::RuntimeController(RuntimeDelegate& p_client,
+                                     TaskRunners task_runners)
+    : client_(p_client), vm_(nullptr), context_(task_runners) {}
 
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
     DartVM* p_vm,
     fml::RefPtr<const DartSnapshot> p_isolate_snapshot,
-    TaskRunners p_task_runners,
-    fml::WeakPtr<SnapshotDelegate> p_snapshot_delegate,
-    fml::WeakPtr<HintFreedDelegate> p_hint_freed_delegate,
-    fml::WeakPtr<IOManager> p_io_manager,
-    fml::RefPtr<SkiaUnrefQueue> p_unref_queue,
-    fml::WeakPtr<ImageDecoder> p_image_decoder,
-    fml::WeakPtr<ImageGeneratorRegistry> p_image_generator_registry,
-    std::string p_advisory_script_uri,
-    std::string p_advisory_script_entrypoint,
-    const std::function<void(int64_t)>& idle_notification_callback,
+    const std::function<void(int64_t)>& p_idle_notification_callback,
     const PlatformData& p_platform_data,
     const fml::closure& p_isolate_create_callback,
     const fml::closure& p_isolate_shutdown_callback,
     std::shared_ptr<const fml::Mapping> p_persistent_isolate_data,
-    std::shared_ptr<VolatilePathTracker> p_volatile_path_tracker)
+    const UIDartState::Context& p_context)
     : client_(p_client),
       vm_(p_vm),
-      isolate_snapshot_(std::move(p_isolate_snapshot)),
-      task_runners_(p_task_runners),
-      snapshot_delegate_(p_snapshot_delegate),
-      hint_freed_delegate_(p_hint_freed_delegate),
-      io_manager_(p_io_manager),
-      unref_queue_(p_unref_queue),
-      image_decoder_(p_image_decoder),
-      image_generator_registry_(p_image_generator_registry),
-      advisory_script_uri_(p_advisory_script_uri),
-      advisory_script_entrypoint_(p_advisory_script_entrypoint),
-      idle_notification_callback_(idle_notification_callback),
+      isolate_snapshot_(p_isolate_snapshot),
+      idle_notification_callback_(p_idle_notification_callback),
       platform_data_(std::move(p_platform_data)),
       isolate_create_callback_(p_isolate_create_callback),
       isolate_shutdown_callback_(p_isolate_shutdown_callback),
       persistent_isolate_data_(std::move(p_persistent_isolate_data)),
-      volatile_path_tracker_(std::move(p_volatile_path_tracker)) {}
+      context_(p_context) {}
 
 std::unique_ptr<RuntimeController> RuntimeController::Spawn(
-    RuntimeDelegate& client,
+    RuntimeDelegate& p_client,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
-    const std::function<void(int64_t)>& idle_notification_callback,
-    const fml::closure& isolate_create_callback,
-    const fml::closure& isolate_shutdown_callback,
-    std::shared_ptr<const fml::Mapping> persistent_isolate_data) const {
-  auto result = std::make_unique<RuntimeController>(
-      client, vm_, isolate_snapshot_, task_runners_, snapshot_delegate_,
-      hint_freed_delegate_, io_manager_, unref_queue_, image_decoder_,
-      image_generator_registry_, advisory_script_uri,
-      advisory_script_entrypoint, idle_notification_callback, platform_data_,
-      isolate_create_callback, isolate_shutdown_callback,
-      persistent_isolate_data, volatile_path_tracker_);
+    const std::function<void(int64_t)>& p_idle_notification_callback,
+    const fml::closure& p_isolate_create_callback,
+    const fml::closure& p_isolate_shutdown_callback,
+    std::shared_ptr<const fml::Mapping> p_persistent_isolate_data) const {
+  auto result =
+      std::make_unique<RuntimeController>(p_client,                      //
+                                          vm_,                           //
+                                          isolate_snapshot_,             //
+                                          p_idle_notification_callback,  //
+                                          platform_data_,                //
+                                          p_isolate_create_callback,     //
+                                          p_isolate_shutdown_callback,   //
+                                          p_persistent_isolate_data,     //
+                                          context_);                     //
   result->spawning_isolate_ = root_isolate_;
   return result;
 }
@@ -100,26 +85,16 @@ bool RuntimeController::IsRootIsolateRunning() {
 }
 
 std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
-  return std::unique_ptr<RuntimeController>(new RuntimeController(
-      client_,                      //
-      vm_,                          //
-      isolate_snapshot_,            //
-      task_runners_,                //
-      snapshot_delegate_,           //
-      hint_freed_delegate_,         //
-      io_manager_,                  //
-      unref_queue_,                 //
-      image_decoder_,               //
-      image_generator_registry_,    //
-      advisory_script_uri_,         //
-      advisory_script_entrypoint_,  //
-      idle_notification_callback_,  //
-      platform_data_,               //
-      isolate_create_callback_,     //
-      isolate_shutdown_callback_,   //
-      persistent_isolate_data_,     //
-      volatile_path_tracker_        //
-      ));
+  return std::make_unique<RuntimeController>(client_,                      //
+                                             vm_,                          //
+                                             isolate_snapshot_,            //
+                                             idle_notification_callback_,  //
+                                             platform_data_,               //
+                                             isolate_create_callback_,     //
+                                             isolate_shutdown_callback_,   //
+                                             persistent_isolate_data_,     //
+                                             context_                      //
+  );
 }
 
 bool RuntimeController::FlushRuntimeStateToIsolate() {
@@ -394,25 +369,15 @@ bool RuntimeController::LaunchRootIsolate(
       DartIsolate::CreateRunningRootIsolate(
           settings,                                       //
           isolate_snapshot_,                              //
-          task_runners_,                                  //
           std::make_unique<PlatformConfiguration>(this),  //
-          snapshot_delegate_,                             //
-          hint_freed_delegate_,                           //
-          io_manager_,                                    //
-          unref_queue_,                                   //
-          image_decoder_,                                 //
-          image_generator_registry_,                      //
-          advisory_script_uri_,                           //
-          advisory_script_entrypoint_,                    //
           DartIsolate::Flags{},                           //
           isolate_create_callback_,                       //
           isolate_shutdown_callback_,                     //
           dart_entrypoint,                                //
           dart_entrypoint_library,                        //
           std::move(isolate_configuration),               //
-          volatile_path_tracker_,                         //
-          spawning_isolate_.lock().get()                  //
-          )
+          context_,                                       //
+          spawning_isolate_.lock().get())                 //
           .lock();
 
   if (!strong_root_isolate) {

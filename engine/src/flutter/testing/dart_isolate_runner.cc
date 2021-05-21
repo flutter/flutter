@@ -119,27 +119,23 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
   auto isolate_configuration =
       IsolateConfiguration::InferFromSettings(settings);
 
+  UIDartState::Context context(std::move(task_runners));
+  context.io_manager = io_manager;
+  context.advisory_script_uri = "main.dart";
+  context.advisory_script_entrypoint = entrypoint.c_str();
+
   auto isolate =
       DartIsolate::CreateRunningRootIsolate(
           settings,                            // settings
           vm_data->GetIsolateSnapshot(),       // isolate snapshot
-          std::move(task_runners),             // task runners
-          nullptr,                             // window
-          {},                                  // snapshot delegate
-          {},                                  // hint freed delegate
-          io_manager,                          // io manager
-          {},                                  // unref queue
-          {},                                  // image decoder
-          {},                                  // image generator registry
-          "main.dart",                         // advisory uri
-          entrypoint.c_str(),                  // advisory entrypoint
+          nullptr,                             // platform configuration
           DartIsolate::Flags{},                // flags
           settings.isolate_create_callback,    // isolate create callback
           settings.isolate_shutdown_callback,  // isolate shutdown callback
           entrypoint,                          // entrypoint
           std::nullopt,                        // library
           std::move(isolate_configuration),    // isolate configuration
-          std::move(volatile_path_tracker)     // volatile path tracker
+          context                              // engine context
           )
           .lock();
 
