@@ -15,7 +15,7 @@ void main(List<String> arguments) {
   print(
       "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n\n");
 
-  final FileSystem fileSystem = const LocalFileSystem();
+  const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
 
   for (final String androidDirectoryPath in androidDirectories) {
