@@ -20,9 +20,9 @@ ShaderLibrary::ShaderLibrary(id<MTLLibrary> library) : library_(library) {}
 ShaderLibrary::~ShaderLibrary() = default;
 
 std::shared_ptr<ShaderFunction> ShaderLibrary::GetFunction(
-    const std::string& name,
+    const std::string_view& name,
     ShaderStage stage) {
-  auto function = [library_ newFunctionWithName:@(name.c_str())];
+  auto function = [library_ newFunctionWithName:@(name.data())];
   if (!function) {
     return nullptr;
   }
