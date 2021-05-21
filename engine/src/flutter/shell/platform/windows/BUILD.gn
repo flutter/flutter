@@ -316,9 +316,13 @@ source_set("uwptool_utils") {
   }
 
   sources = [
+    "uwptool_commands.cc",
+    "uwptool_commands.h",
     "uwptool_utils.cc",
     "uwptool_utils.h",
   ]
+
+  deps = [ ":string_conversion" ]
 }
 
 # Command-line tool used by the flutter tool that serves a similar purpose to
