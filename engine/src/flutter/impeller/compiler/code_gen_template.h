@@ -17,6 +17,7 @@ namespace impeller {
 namespace shader {
 
 struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
+  static constexpr std::string_view kLabel = "{{camel_case(shader_name)}}";
   static constexpr std::string_view kEntrypointName = "{{entrypoint}}";
   static constexpr ShaderStage kShaderStage = {{to_shader_stage(shader_stage)}};
 
