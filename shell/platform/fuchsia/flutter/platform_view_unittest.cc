@@ -268,8 +268,10 @@ class PlatformViewBuilder {
         std::move(on_create_view_callback_),
         std::move(on_update_view_callback_),
         std::move(on_destroy_view_callback_),
-        std::move(on_create_surface_callback_), view_embedder_, [](auto...) {},
-        [](auto...) {});
+        std::move(on_create_surface_callback_),
+        std::move(on_semantics_node_update_callback_),
+        std::move(on_request_announce_callback_), view_embedder_,
+        [](auto...) {}, [](auto...) {});
   }
 
  private:
@@ -298,6 +300,8 @@ class PlatformViewBuilder {
   OnUpdateView on_update_view_callback_{nullptr};
   OnDestroyView on_destroy_view_callback_{nullptr};
   OnCreateSurface on_create_surface_callback_{nullptr};
+  OnSemanticsNodeUpdate on_semantics_node_update_callback_{nullptr};
+  OnRequestAnnounce on_request_announce_callback_{nullptr};
   std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder_{nullptr};
   fml::TimeDelta vsync_offset_{fml::TimeDelta::Zero()};
 };
