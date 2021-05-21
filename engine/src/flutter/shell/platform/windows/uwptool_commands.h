@@ -73,7 +73,11 @@ class UninstallCommand : public Command {
   int Run(const std::vector<std::string>& args) const override;
 };
 
-// Command that launches the specified application package.
+// Launches the app installed on the system with the specified package.
+//
+// Returns -1 if no matching app, or multiple matching apps are found, or if
+// the app fails to launch. Otherwise, the process ID of the launched app is
+// returned.
 class LaunchCommand : public Command {
  public:
   LaunchCommand()
