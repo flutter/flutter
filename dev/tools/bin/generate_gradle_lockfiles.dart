@@ -7,15 +7,15 @@
 // To regenerate these files, run `find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart`
 
 import 'dart:io';
-import 'package:file/local.dart';
 import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
   print(
       "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n\n");
 
-  final FileSystem fileSystem = LocalFileSystem();
+  final FileSystem fileSystem = const LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
 
   for (final String androidDirectoryPath in androidDirectories) {
@@ -158,13 +158,13 @@ task clean(type: Delete) {
 }
 ''';
 
-const settingGradleFile = r'''
+const String settingGradleFile = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 // This file is auto generated.
-// To update all the build.gradle files in the Flutter repo,
+// To update all the settings.gradle files in the Flutter repo,
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 include ':app'
