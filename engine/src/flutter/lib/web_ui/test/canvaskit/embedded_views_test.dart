@@ -45,14 +45,25 @@ void testMain() {
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      expect(
-        domRenderer.sceneElement!
-            .querySelectorAll('#view-0')
-            .single
-            .style
-            .pointerEvents,
-        'auto',
-      );
+
+      // The platform view is now split in two parts. The contents live
+      // as a child of the glassPane, and the slot lives in the glassPane
+      // shadow root. The slot is the one that has pointer events auto.
+      final contents = domRenderer.glassPaneElement!.querySelector('#view-0')!;
+      final slot = domRenderer.sceneElement!.querySelector('slot')!;
+      final contentsHost = contents.parent!;
+      final slotHost = slot.parent!;
+
+      expect(contents, isNotNull,
+          reason: 'The view from the factory is injected in the DOM.');
+
+      expect(contentsHost.tagName, equalsIgnoringCase('flt-platform-view'));
+      expect(slotHost.tagName, equalsIgnoringCase('flt-platform-view-slot'));
+
+      expect(slotHost.style.pointerEvents, 'auto',
+          reason: 'The slot reenables pointer events.');
+      expect(contentsHost.getAttribute('slot'), slot.getAttribute('name'),
+          reason: 'The contents and slot are correctly related.');
     });
 
     test('clips platform views with RRects', () async {
@@ -69,6 +80,7 @@ void testMain() {
       sb.pushClipRRect(ui.RRect.fromLTRBR(0, 0, 10, 10, ui.Radius.circular(3)));
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
+
       expect(
         domRenderer.sceneElement!.querySelectorAll('#sk_path_defs').single,
         isNotNull,
@@ -109,12 +121,12 @@ void testMain() {
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      // Transformations happen on the slot element.
+      final html.Element slotHost = domRenderer.sceneElement!.querySelector('flt-platform-view-slot')!;
+
       expect(
-        domRenderer.sceneElement!
-            .querySelectorAll('#view-0')
-            .single
-            .style
-            .transform,
+        slotHost.style.transform,
         // We should apply the scale matrix first, then the offset matrix.
         // So the translate should be 515 (5 * 100 + 5 * 3), and not
         // 503 (5 * 100 + 3).
@@ -150,11 +162,12 @@ void testMain() {
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      final html.Element viewHost =
-          domRenderer.sceneElement!.querySelectorAll('#view-0').single;
+
+      // Transformations happen on the slot element.
+      final html.Element slotHost = domRenderer.sceneElement!.querySelector('flt-platform-view-slot')!;
 
       expect(
-        getTransformChain(viewHost),
+        getTransformChain(slotHost),
         <String>['matrix(0.25, 0, 0, 0.25, 1.5, 1.5)'],
       );
     });
@@ -177,11 +190,12 @@ void testMain() {
       sb.pushOffset(9, 9);
       sb.addPlatformView(0, width: 10, height: 10);
       dispatcher.rasterizer!.draw(sb.build().layerTree);
-      final html.Element viewHost =
-          domRenderer.sceneElement!.querySelectorAll('#view-0').single;
+
+      // Transformations happen on the slot element.
+      final html.Element slotHost = domRenderer.sceneElement!.querySelector('flt-platform-view-slot')!;
 
       expect(
-        getTransformChain(viewHost),
+        getTransformChain(slotHost),
         <String>[
           'matrix(1, 0, 0, 1, 9, 9)',
           'matrix(1, 0, 0, 1, 6, 6)',
@@ -314,8 +328,12 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelectorAll('#view-0'),
-        hasLength(1),
+        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        isNotNull,
+      );
+      expect(
+        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        isNotNull,
       );
 
       await _disposePlatformView(0);
@@ -325,8 +343,12 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelectorAll('#view-0'),
-        hasLength(0),
+        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        isNull,
+      );
+      expect(
+        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        isNull,
       );
     });
 
@@ -346,8 +368,12 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelectorAll('#view-0'),
-        hasLength(1),
+        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        isNotNull,
+      );
+      expect(
+        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        isNotNull,
       );
 
       // Render a frame without a platform view, but also without disposing of
@@ -357,8 +383,14 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelectorAll('#view-0'),
-        hasLength(0),
+        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        isNull,
+      );
+      // The actual contents of the platform view are kept in the dom, until
+      // it's actually disposed of!
+      expect(
+        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        isNotNull,
       );
     });
 

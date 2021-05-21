@@ -111,9 +111,11 @@ void testMain() {
           browserEngine == BrowserEngine.edge));
 
   test('accesibility placeholder is attached after creation', () {
-    DomRenderer();
+    final DomRenderer renderer = DomRenderer();
 
-    expect(html.document.getElementsByTagName('flt-semantics-placeholder'),
-        isNotEmpty);
+    expect(
+      renderer.glassPaneShadow?.querySelectorAll('flt-semantics-placeholder'),
+      isNotEmpty,
+    );
   });
 }

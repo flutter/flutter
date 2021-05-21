@@ -22,9 +22,11 @@ bool _newlinePredicate(int char) {
       prop == LineCharProperty.CR;
 }
 
-/// Hosts ruler DOM elements in a hidden container.
+/// Hosts ruler DOM elements in a hidden container under a `root` [html.Node].
+///
+/// The `root` [html.Node] is optional. Defaults to [domRenderer.glassPaneShadow].
 class RulerHost {
-  RulerHost() {
+  RulerHost({html.Node? root}) {
     _rulerHost.style
       ..position = 'fixed'
       ..visibility = 'hidden'
@@ -33,7 +35,8 @@ class RulerHost {
       ..left = '0'
       ..width = '0'
       ..height = '0';
-    html.document.body!.append(_rulerHost);
+
+    (root ?? domRenderer.glassPaneShadow!).append(_rulerHost);
     registerHotRestartListener(dispose);
   }
 
@@ -62,8 +65,14 @@ class RulerHost {
 /// [ParagraphGeometricStyle].
 ///
 /// All instances of [ParagraphRuler] should be created through this class.
+///
+/// An optional `root` [html.Node] can be passed, under which the DOM required
+/// to perform measurements will be hosted.
 class RulerManager extends RulerHost {
-  RulerManager({required this.rulerCacheCapacity}): super();
+  RulerManager({
+    required this.rulerCacheCapacity,
+    html.Node? root,
+  }) : super(root: root);
 
   final int rulerCacheCapacity;
 
@@ -174,10 +183,16 @@ abstract class TextMeasurementService {
 
   /// Initializes the text measurement service with a specific
   /// [rulerCacheCapacity] that gets passed to the [RulerManager].
-  static void initialize({required int rulerCacheCapacity}) {
+  ///
+  /// An optional `root` [html.Node] can be passed, under which the DOM required
+  /// to perform measurements will be hosted. Defaults to [domRenderer.glassPaneShadow].
+  static void initialize({required int rulerCacheCapacity, html.Node? root}) {
     rulerManager?.dispose();
     rulerManager = null;
-    rulerManager = RulerManager(rulerCacheCapacity: rulerCacheCapacity);
+    rulerManager = RulerManager(
+      rulerCacheCapacity: rulerCacheCapacity,
+      root: root,
+    );
   }
 
   @visibleForTesting
