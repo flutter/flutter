@@ -39,6 +39,11 @@ void main(List<String> arguments) {
       continue;
     }
 
+    if (settingsGradle.readAsStringSync().contains('include_flutter.groovy')) {
+      print('${settingsGradle.path} add to app - skipping');
+      continue;
+    }
+
     if (!androidDirectory.childDirectory('app').existsSync()) {
       print('${rootBuildGradle.path} is not an app - skipping');
       continue;
