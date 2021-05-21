@@ -129,6 +129,11 @@ class SystemChannels {
   /// they apply, so that stale messages referencing past transactions can be
   /// ignored.
   ///
+  /// In debug builds, messages sent with a client ID of -1 are always accepted.
+  /// This allows tests to smuggle messages without having to mock the engine's
+  /// text handling (for example, allowing the engine to still handle the text
+  /// input messages in an integration test).
+  ///
   /// The methods described below are wrapped in a more convenient form by the
   /// [TextInput] and [TextInputConnection] class.
   ///
@@ -161,9 +166,15 @@ class SystemChannels {
   /// is a transaction identifier. Calls for stale transactions should be ignored.
   ///
   ///  * `TextInputClient.updateEditingState`: The user has changed the contents
-  ///    of the text control. The second argument is a [String] containing a
-  ///    JSON-encoded object with seven keys, in the form expected by
-  ///    [TextEditingValue.fromJSON].
+  ///    of the text control. The second argument is an object with seven keys,
+  ///    in the form expected by [TextEditingValue.fromJSON].
+  ///
+  ///  * `TextInputClient.updateEditingStateWithTag`: One or more text controls
+  ///    were autofilled by the platform's autofill service. The first argument
+  ///    (the client ID) is ignored, the second argument is a map of tags to
+  ///    objects in the form expected by [TextEditingValue.fromJSON]. See
+  ///    [AutofillScope.getAutofillClient] for details on the interpretation of
+  ///    the tag.
   ///
   ///  * `TextInputClient.performAction`: The user has triggered an action. The
   ///    second argument is a [String] consisting of the stringification of one
@@ -174,7 +185,8 @@ class SystemChannels {
   ///    one. The framework should call `TextInput.setClient` and
   ///    `TextInput.setEditingState` again with its most recent information. If
   ///    there is no existing state on the framework side, the call should
-  ///    fizzle.
+  ///    fizzle. (This call is made without a client ID; indeed, without any
+  ///    arguments at all.)
   ///
   ///  * `TextInputClient.onConnectionClosed`: The text input connection closed
   ///    on the platform side. For example the application is moved to
