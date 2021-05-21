@@ -1,4 +1,4 @@
-Signature: 75219e652de8d0a7f3c3b935d098a303
+Signature: ca88da230e3a10205891353731d7f036
 
 UNUSED LICENSES:
 
@@ -1594,7 +1594,6 @@ FILE: ../../../third_party/skia/samplecode/SampleSlides.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStrokePath.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStrokeRect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextBox.cpp
-FILE: ../../../third_party/skia/samplecode/SampleTextEffects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleVertices.cpp
 FILE: ../../../third_party/skia/samplecode/SampleWritePixels.cpp
 FILE: ../../../third_party/skia/samplecode/SampleXfermodesBlur.cpp
@@ -3877,10 +3876,7 @@ FILE: ../../../third_party/skia/src/gpu/GrHashMapWithCache.h
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/GrThreadSafeCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrThreadSafeCache.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrArithmeticProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDitherEffect.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrWangsFormula.h
@@ -3955,6 +3951,7 @@ FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h
 FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/Image.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Matrix.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Paint.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/RuntimeShaderBuilder.cpp
