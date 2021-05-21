@@ -15,7 +15,7 @@ void main(List<String> arguments) {
   print(
     "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
     'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
-    "enter the absolute paths to the app's android directory, then press CTRL-D\n"
+    "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
   );
 
   const FileSystem fileSystem = LocalFileSystem();
