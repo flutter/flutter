@@ -14,8 +14,8 @@ impeller_shaders("impeller_shaders") {
 
 impeller_component("primitives") {
   sources = [
-    "box.cc",
     "box.h",
+    "box.mm",
   ]
 
   public_deps = [ "../compositor" ]

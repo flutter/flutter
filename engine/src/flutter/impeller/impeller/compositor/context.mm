@@ -64,4 +64,8 @@ id<MTLCommandQueue> Context::GetTransferQueue() const {
   return transfer_queue_;
 }
 
+std::shared_ptr<ShaderLibrary> Context::GetShaderLibrary() const {
+  return shader_library_;
+}
+
 }  // namespace impeller

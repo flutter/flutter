@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "flutter/fml/macros.h"
 #include "impeller/shader_glue/shader_types.h"
@@ -37,7 +38,7 @@ class ShaderLibrary {
  public:
   ~ShaderLibrary();
 
-  std::shared_ptr<ShaderFunction> GetFunction(const std::string& name,
+  std::shared_ptr<ShaderFunction> GetFunction(const std::string_view& name,
                                               ShaderStage stage);
 
  private:
