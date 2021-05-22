@@ -25,7 +25,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';

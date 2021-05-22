@@ -21,7 +21,7 @@ import '../compile.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../mdns_discovery.dart';

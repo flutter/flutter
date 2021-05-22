@@ -6,6 +6,7 @@ import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -31,6 +32,7 @@ import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
 
+Artifacts? get artifacts => context.get<Artifacts>();
 Cache get cache => context.get<Cache>()!;
 Config get config => context.get<Config>()!;
 HttpClientFactory? get httpClientFactory => context.get<HttpClientFactory>();

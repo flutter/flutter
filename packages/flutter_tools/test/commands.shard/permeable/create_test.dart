@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';

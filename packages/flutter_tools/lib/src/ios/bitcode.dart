@@ -10,7 +10,7 @@ import '../base/context.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../macos/xcode.dart';
 
 const bool kBitcodeEnabledDefault = false;
