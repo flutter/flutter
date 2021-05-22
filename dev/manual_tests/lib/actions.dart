@@ -230,11 +230,11 @@ class RedoAction extends Action<RedoIntent> {
 /// An action that can be undone.
 abstract class UndoableAction<T extends Intent> extends Action<T> {
   /// The [Intent] this action was originally invoked with.
-  Intent get invocationIntent => _invocationTag;
-  late Intent _invocationTag;
+  Intent? get invocationIntent => _invocationTag;
+  Intent? _invocationTag;
 
   @protected
-  set invocationIntent(Intent value) => _invocationTag = value;
+  set invocationIntent(Intent? value) => _invocationTag = value;
 
   @override
   @mustCallSuper
