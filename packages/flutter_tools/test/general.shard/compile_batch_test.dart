@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -24,10 +22,10 @@ void main() {
 
     stdoutHandler.reset();
     'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'.split('\n').forEach(stdoutHandler.handler);
-    final CompilerOutput output = await  stdoutHandler.compilerOutput.future;
+    final CompilerOutput? output = await stdoutHandler.compilerOutput?.future;
 
     expect(logger.errorText, equals('line1\nline2\n'));
-    expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+    expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
   });
 
   testWithoutContext('StdoutHandler can parse output for failed batch compilation', () async {
@@ -36,7 +34,7 @@ void main() {
 
     stdoutHandler.reset();
     'result abc\nline1\nline2\nabc\nabc'.split('\n').forEach(stdoutHandler.handler);
-    final CompilerOutput output = await stdoutHandler.compilerOutput.future;
+    final CompilerOutput? output = await stdoutHandler.compilerOutput?.future;
 
     expect(logger.errorText, equals('line1\nline2\n'));
     expect(output, equals(null));
@@ -73,7 +71,7 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -81,10 +79,10 @@ void main() {
       packageConfig: PackageConfig.empty,
       packagesPath: '.packages',
     );
-    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
 
-    expect((await output).outputFilename, '');
+    expect((await output)?.outputFilename, '');
   });
 
   testWithoutContext('KernelCompiler returns null if StdoutHandler returns null', () async {
@@ -118,7 +116,7 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -126,7 +124,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       packagesPath: '.packages',
     );
-    stdoutHandler.compilerOutput.complete(null);
+    stdoutHandler.compilerOutput?.complete(null);
     completer.complete();
 
     expect(await output, null);
@@ -163,7 +161,7 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -171,7 +169,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       packagesPath: '.packages',
     );
-    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
 
     expect(await output, null);
@@ -209,7 +207,7 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.profile,
       trackWidgetCreation: false,
@@ -218,10 +216,10 @@ void main() {
       packageConfig: PackageConfig.empty,
       packagesPath: '.packages',
     );
-    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
 
-    expect((await output).outputFilename, '');
+    expect((await output)?.outputFilename, '');
   });
 
   testWithoutContext('passes correct AOT config to kernel compiler in aot/release mode', () async {
@@ -256,7 +254,7 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.release,
       trackWidgetCreation: false,
@@ -265,10 +263,10 @@ void main() {
       packageConfig: PackageConfig.empty,
       packagesPath: '.packages',
     );
-    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
 
-    expect((await output).outputFilename, '');
+    expect((await output)?.outputFilename, '');
   });
 
   testWithoutContext('KernelCompiler passes dartDefines to the frontend_server', () async {
@@ -305,7 +303,7 @@ void main() {
       stdoutHandler: stdoutHandler,
     );
 
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -314,10 +312,10 @@ void main() {
       packagesPath: '.packages',
     );
 
-    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
 
-    expect((await output).outputFilename, '');
+    expect((await output)?.outputFilename, '');
   });
 
   testWithoutContext('KernelCompiler maps a file to a multi-root scheme if provided', () async {
@@ -354,7 +352,7 @@ void main() {
       stdoutHandler: stdoutHandler,
     );
 
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/foo/bar/fizz/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -363,10 +361,10 @@ void main() {
       packagesPath: '.packages',
     );
 
-    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
 
-    expect((await output).outputFilename, '');
+    expect((await output)?.outputFilename, '');
   });
 
   testWithoutContext('KernelCompiler uses generated entrypoint', () async {
@@ -409,7 +407,7 @@ void main() {
 
     buildDir.parent.childFile('generated_main.dart').createSync(recursive: true);
 
-    final Future<CompilerOutput> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/foo/bar/fizz/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -420,7 +418,7 @@ void main() {
       checkDartPluginRegistry: true,
     );
 
-    stdoutHandler.compilerOutput.complete(const CompilerOutput('', 0, <Uri>[]));
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
     await output;
   });
