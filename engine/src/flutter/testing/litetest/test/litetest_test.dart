@@ -97,57 +97,6 @@ Test "Test3": Passed
     expect(output.contains('Test "Test3": Passed'), true);
   });
 
-  test('group', () async {
-    final StringBuffer buffer = StringBuffer();
-    final TestLifecycle lifecycle = TestLifecycle();
-    final TestSuite ts = TestSuite(
-      logger: buffer,
-      lifecycle: lifecycle,
-    );
-
-    ts.group('Group', () {
-      ts.test('Test', () {
-        expect(1, equals(1));
-      });
-    });
-    final bool result = await lifecycle.result;
-
-    expect(result, true);
-    expect(buffer.toString(), equals(
-      'Test "Group Test": Started\nTest "Group Test": Passed\n',
-    ));
-  });
-
-  test('nested group', () async {
-    final StringBuffer buffer = StringBuffer();
-    final TestLifecycle lifecycle = TestLifecycle();
-    final TestSuite ts = TestSuite(
-      logger: buffer,
-      lifecycle: lifecycle,
-    );
-
-    ts.group('Outer group', () {
-      ts.group('Inner group', () {
-        ts.test('Test1', () {
-          expect(1, equals(1));
-        });
-      });
-      ts.test('Test2', () {
-        expect(1, equals(1));
-      });
-    });
-    final bool result = await lifecycle.result;
-
-    expect(result, true);
-    expect(buffer.toString(), equals('''
-Test "Outer group Inner group Test1": Started
-Test "Outer group Inner group Test1": Passed
-Test "Outer group Test2": Started
-Test "Outer group Test2": Passed
-''',
-    ));
-  });
-
   test('test fail', () async {
     final StringBuffer buffer = StringBuffer();
     final TestLifecycle lifecycle = TestLifecycle();

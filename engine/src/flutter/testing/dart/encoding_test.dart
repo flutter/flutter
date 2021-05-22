@@ -18,47 +18,39 @@ const Color _kBlack = Color.fromRGBO(0, 0, 0, 1.0);
 const Color _kGreen = Color.fromRGBO(0, 255, 0, 1.0);
 
 void main() {
-  group('Image.toByteData', () {
-    group('RGBA format', () {
-      test('works with simple image', () async {
-        final Image image = await Square4x4Image.image;
-        final ByteData data = await image.toByteData();
-        expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
-      });
+  test('Image.toByteData RGBA format works with simple image', () async {
+    final Image image = await Square4x4Image.image;
+    final ByteData data = await image.toByteData();
+    expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
+  });
 
-      test('converts grayscale images', () async {
-        final Image image = await GrayscaleImage.load();
-        final ByteData data = await image.toByteData();
-        final Uint8List bytes = data.buffer.asUint8List();
-        expect(bytes, hasLength(16));
-        expect(bytes, GrayscaleImage.bytesAsRgba);
-      });
-    });
+  test('Image.toByteData RGBA format converts grayscale images', () async {
+    final Image image = await GrayscaleImage.load();
+    final ByteData data = await image.toByteData();
+    final Uint8List bytes = data.buffer.asUint8List();
+    expect(bytes, hasLength(16));
+    expect(bytes, GrayscaleImage.bytesAsRgba);
+  });
 
-    group('Unmodified format', () {
-      test('works with simple image', () async {
-        final Image image = await Square4x4Image.image;
-        final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
-        expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
-      });
+  test('Image.toByteData Unmodified format works with simple image', () async {
+    final Image image = await Square4x4Image.image;
+    final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
+    expect(Uint8List.view(data.buffer), Square4x4Image.bytes);
+  });
 
-      test('works with grayscale images', () async {
-        final Image image = await GrayscaleImage.load();
-        final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
-        final Uint8List bytes = data.buffer.asUint8List();
-        expect(bytes, hasLength(4));
-        expect(bytes, GrayscaleImage.bytesUnmodified);
-      });
-    });
+  test('Image.toByteData Unmodified format works with grayscale images', () async {
+    final Image image = await GrayscaleImage.load();
+    final ByteData data = await image.toByteData(format: ImageByteFormat.rawUnmodified);
+    final Uint8List bytes = data.buffer.asUint8List();
+    expect(bytes, hasLength(4));
+    expect(bytes, GrayscaleImage.bytesUnmodified);
+  });
 
-    group('PNG format', () {
-      test('works with simple image', () async {
-        final Image image = await Square4x4Image.image;
-        final ByteData data = await image.toByteData(format: ImageByteFormat.png);
-        final List<int> expected = await readFile('square.png');
-        expect(Uint8List.view(data.buffer), expected);
-      });
-    });
+  test('Image.toByteData PNG format works with simple image', () async {
+    final Image image = await Square4x4Image.image;
+    final ByteData data = await image.toByteData(format: ImageByteFormat.png);
+    final List<int> expected = await readFile('square.png');
+    expect(Uint8List.view(data.buffer), expected);
   });
 }
 
