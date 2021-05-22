@@ -27,11 +27,3 @@ void test(
 }) {
   _testSuite.test(name, body, skip: skip);
 }
-
-/// Describes a group of tests whose names will be prefixed with [name].
-///
-/// All calls to [group] must be made in the same event as the program's
-/// `main()` function.
-void group(String name, void Function() body) {
-  _testSuite.group(name, body);
-}
