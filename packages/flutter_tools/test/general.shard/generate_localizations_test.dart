@@ -2346,20 +2346,16 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     l10nDirectory.childFile(defaultTemplateArbFileName)
         .writeAsStringSync(arbFile);
 
-    try {
-      LocalizationsGenerator(
-        fileSystem: fs,
-        inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
-        templateArbFileName: defaultTemplateArbFileName,
-        outputFileString: defaultOutputFileString,
-        classNameString: defaultClassNameString,
-      )
-        ..loadResources()
-        ..writeOutputFiles(BufferLogger.test());
-    } on L10nException catch (e) {
-      fail('Generating output should not fail: \n${e.message}');
-    }
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+    )
+      ..loadResources()
+      ..writeOutputFiles(BufferLogger.test());
 
     final String localizationsFile = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
