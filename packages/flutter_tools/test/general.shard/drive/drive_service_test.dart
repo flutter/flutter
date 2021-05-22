@@ -384,7 +384,7 @@ void main() {
       <String, String>{},
       PackageConfig(<Package>[Package('test', Uri.base)]),
       browserName: 'chrome',
-    ), throwsToolExit(message: RegExp(' $link ')));
+    ), throwsToolExit(message: RegExp('\nFor more information see: $link\n')));
   });
 }
 
