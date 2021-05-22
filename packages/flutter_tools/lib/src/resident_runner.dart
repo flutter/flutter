@@ -1135,7 +1135,8 @@ abstract class ResidentRunner extends ResidentHandlers {
     });
   }
 
-  String get dillOutputPath => _dillOutputPath ?? globals.fs.path.join(artifactDirectory.path, 'app.dill');
+  String get dillOutputPath => _dillOutputPath;
+
   String getReloadPath({
     bool fullRestart = false,
     @required bool swap,
@@ -1295,7 +1296,9 @@ abstract class ResidentRunner extends ResidentHandlers {
       return;
     }
     globals.logger.printTrace('Caching compiled dill');
-    final File outputDill = globals.fs.file(dillOutputPath);
+    final File outputDill = globals.fs.file(getDefaultApplicationKernelPath(
+      trackWidgetCreation: trackWidgetCreation,
+    ));
     if (outputDill.existsSync()) {
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,

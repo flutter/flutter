@@ -39,6 +39,7 @@ import 'src/commands/logs.dart';
 import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
+import 'src/commands/preview.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
@@ -177,6 +178,7 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     featureFlags: featureFlags,
   ),
+  PreviewCommand(),
   RunCommand(verboseHelp: verboseHelp),
   ScreenshotCommand(),
   ShellCompletionCommand(),

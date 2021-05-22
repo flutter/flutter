@@ -335,10 +335,11 @@ class HotRunner extends ResidentRunner {
             // the native build step. If there is a Dart compilation error, it
             // should only be displayed once.
             suppressErrors: applicationBinary == null,
-            outputPath: dillOutputPath ??
-              getDefaultApplicationKernelPath(
-                trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
-              ),
+            outputPath: dillOutputPath ?? getDefaultCachedKernelPath(
+              trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
+              extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+              dartDefines: debuggingOptions.buildInfo.dartDefines,
+            ),
             packageConfig: debuggingOptions.buildInfo.packageConfig,
             projectRootPath: FlutterProject.current().directory.absolute.path,
             fs: globals.fs,

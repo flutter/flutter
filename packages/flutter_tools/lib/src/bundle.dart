@@ -33,7 +33,7 @@ String getDefaultApplicationKernelPath({
   @required bool trackWidgetCreation,
 }) {
   return getKernelPathForTransformerOptions(
-    globals.fs.path.join(getBuildDirectory(), 'app.dill'),
+    globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
@@ -45,9 +45,11 @@ String getDefaultCachedKernelPath({
   FileSystem fileSystem,
   Config config,
 }) {
+  final List<String> cacheFrontEndOptions = (extraFrontEndOptions  ?? <String>[]).toList()
+    ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
   final StringBuffer buffer = StringBuffer();
   buffer.writeAll(dartDefines);
-  buffer.writeAll(extraFrontEndOptions ?? <String>[]);
+  buffer.writeAll(cacheFrontEndOptions);
   String buildPrefix = '';
   if (buffer.isNotEmpty) {
     final String output = buffer.toString();
@@ -72,8 +74,6 @@ String getKernelPathForTransformerOptions(
   }
   return path;
 }
-
-const String defaultPrivateKeyPath = 'privatekey.der';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
