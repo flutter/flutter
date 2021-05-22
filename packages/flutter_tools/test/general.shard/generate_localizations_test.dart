@@ -1507,20 +1507,16 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
           ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleDateMessageArbFileString);
 
-        try {
-          LocalizationsGenerator(
-            fileSystem: fs,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          )
-            ..loadResources()
-            ..writeOutputFiles(BufferLogger.test());
-        } on Exception catch (e) {
-          fail('Generating output files should not fail: $e');
-        }
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
 
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
@@ -1626,20 +1622,16 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           ..childFile(defaultTemplateArbFileName).writeAsStringSync(
               singleDateMessageArbFileString);
 
-        try {
-          LocalizationsGenerator(
-            fileSystem: fs,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          )
-            ..loadResources()
-            ..writeOutputFiles(BufferLogger.test());
-        } on Exception catch (e) {
-          fail('Generating output files should not fail: $e');
-        }
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
 
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
