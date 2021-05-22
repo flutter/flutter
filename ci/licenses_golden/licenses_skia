@@ -1,4 +1,4 @@
-Signature: 2661ad8e7333d676250dc07477dd48cf
+Signature: c6e2339d1255a89c9d4c33d4cf40cf25
 
 UNUSED LICENSES:
 
@@ -5201,7 +5201,6 @@ FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
 FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
-FILE: ../../../third_party/skia/src/core/SkPathEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.cpp
@@ -6166,6 +6165,7 @@ FILE: ../../../third_party/skia/src/core/SkOSFile.h
 FILE: ../../../third_party/skia/src/core/SkPaint.cpp
 FILE: ../../../third_party/skia/src/core/SkPath.cpp
 FILE: ../../../third_party/skia/src/core/SkPathEffect.cpp
+FILE: ../../../third_party/skia/src/core/SkPathEffectBase.h
 FILE: ../../../third_party/skia/src/core/SkPointPriv.h
 FILE: ../../../third_party/skia/src/core/SkRect.cpp
 FILE: ../../../third_party/skia/src/core/SkRegion.cpp
