@@ -8,8 +8,8 @@ impeller_component("compositor") {
   sources = [
     "context.h",
     "context.mm",
-    "pipeline_builder.h",
-    "pipeline_builder.mm",
+    "pipeline.h",
+    "pipeline.mm",
     "pipeline_descriptor.h",
     "pipeline_descriptor.mm",
     "pipeline_library.h",

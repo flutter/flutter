@@ -9,7 +9,9 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
+#include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
 #include "impeller/shader_glue/shader_types.h"
 
@@ -22,6 +24,8 @@ class ShaderFunction {
   ~ShaderFunction();
 
   ShaderStage GetStage() const;
+
+  id<MTLFunction> GetMTLFunction() const;
 
  private:
   friend class ShaderLibrary;
@@ -38,13 +42,40 @@ class ShaderLibrary {
  public:
   ~ShaderLibrary();
 
-  std::shared_ptr<ShaderFunction> GetFunction(const std::string_view& name,
-                                              ShaderStage stage);
+  std::shared_ptr<const ShaderFunction> GetFunction(
+      const std::string_view& name,
+      ShaderStage stage);
 
  private:
   friend class Context;
 
+  struct ShaderKey {
+    std::string name;
+    ShaderStage stage = ShaderStage::kUnknown;
+
+    ShaderKey(const std::string_view& p_name, ShaderStage p_stage)
+        : name({p_name.data(), p_name.size()}), stage(p_stage) {}
+
+    struct Hash {
+      size_t operator()(const ShaderKey& key) const {
+        return fml::HashCombine(key.name, key.stage);
+      }
+    };
+
+    struct Equal {
+      constexpr bool operator()(const ShaderKey& k1,
+                                const ShaderKey& k2) const {
+        return k1.stage == k2.stage && k1.name == k2.name;
+      }
+    };
+  };
+
   id<MTLLibrary> library_ = nullptr;
+  using Functions = std::unordered_map<ShaderKey,
+                                       std::shared_ptr<const ShaderFunction>,
+                                       ShaderKey::Hash,
+                                       ShaderKey::Equal>;
+  Functions functions_;
 
   ShaderLibrary(id<MTLLibrary> library);
 
