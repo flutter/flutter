@@ -166,6 +166,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
+    this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.initialValue,
   }) : assert(displayStringForOption != null),
@@ -193,6 +194,14 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
+  /// The maximum height used for the default Material options list widget.
+  ///
+  /// When [optionsViewBuilder] is `null`, this property sets the maximum height
+  /// that the options widget can occupy.
+  ///
+  /// The default value is set to 200.
+  final double optionsMaxHeight;
+
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
@@ -216,6 +225,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
+          maxOptionsHeight: optionsMaxHeight,
         );
       },
       onSelected: onSelected,
@@ -257,6 +267,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
+    required this.maxOptionsHeight,
   }) : super(key: key);
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -264,6 +275,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final AutocompleteOnSelected<T> onSelected;
 
   final Iterable<T> options;
+  final double maxOptionsHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -271,10 +283,11 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         elevation: 4.0,
-        child: SizedBox(
-          height: 200.0,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxOptionsHeight),
           child: ListView.builder(
             padding: EdgeInsets.zero,
+            shrinkWrap: true,
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);

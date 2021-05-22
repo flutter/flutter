@@ -257,7 +257,7 @@ void main() {
         rootBucket2 = bucket;
       });
       expect(rootBucket2, isNotNull);
-      expect(rootBucket2!, isNot(same(rootBucket)));
+      expect(rootBucket2, isNot(same(rootBucket)));
       expect(manager.isReplacing, isTrue);
       expect(rootBucket2!.isReplacing, isTrue);
       await tester.idle();

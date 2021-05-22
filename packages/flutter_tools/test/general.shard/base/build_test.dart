@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/build.dart';
@@ -72,22 +70,16 @@ const List<String> kBitcodeClang = <String>[
 
 void main() {
   group('SnapshotType', () {
-    test('throws, if build mode is null', () {
-      expect(
-        () => SnapshotType(TargetPlatform.android_x64, null),
-        throwsA(anything),
-      );
-    });
     test('does not throw, if target platform is null', () {
       expect(() => SnapshotType(null, BuildMode.release), returnsNormally);
     });
   });
 
   group('GenSnapshot', () {
-    GenSnapshot genSnapshot;
-    Artifacts artifacts;
-    FakeProcessManager processManager;
-    BufferLogger logger;
+    late GenSnapshot genSnapshot;
+    late Artifacts artifacts;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
 
     setUp(() async {
       artifacts = Artifacts.test();
@@ -179,10 +171,10 @@ void main() {
   });
 
   group('AOTSnapshotter', () {
-    MemoryFileSystem fileSystem;
-    AOTSnapshotter snapshotter;
-    Artifacts artifacts;
-    FakeProcessManager processManager;
+    late MemoryFileSystem fileSystem;
+    late AOTSnapshotter snapshotter;
+    late Artifacts artifacts;
+    late FakeProcessManager processManager;
 
     setUp(() async {
       fileSystem = MemoryFileSystem.test();
@@ -210,7 +202,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       ), isNot(equals(0)));
     });
@@ -224,7 +216,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       ), isNot(0));
     });
@@ -238,7 +230,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       ), isNot(0));
     });
@@ -291,7 +283,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         sdkRoot: 'path/to/sdk',
         bitcode: true,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       );
 
@@ -405,7 +397,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: true,
       );
 
@@ -460,7 +452,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       );
 
@@ -512,7 +504,7 @@ void main() {
         darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       );
 
@@ -541,7 +533,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       );
 
@@ -603,7 +595,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: true,
       );
 
@@ -659,7 +651,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
       );
 
@@ -685,7 +677,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         bitcode: false,
-        splitDebugInfo: null,
+        splitDebugInfo: '',
         dartObfuscation: false,
         extraGenSnapshotOptions: const <String>['--no-strip'],
       );

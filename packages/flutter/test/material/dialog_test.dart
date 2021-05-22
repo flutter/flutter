@@ -32,7 +32,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
               },
             ),
           );
-        }
+        },
       ),
     ),
   );
@@ -180,8 +180,8 @@ void main() {
 
   testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
     const SimpleDialog dialog = SimpleDialog(
-      children: <Widget>[],
       clipBehavior: Clip.antiAlias,
+      children: <Widget>[],
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -327,8 +327,8 @@ void main() {
       children: <Widget>[
         SimpleDialogOption(
           onPressed: () {},
-          child: const Text('First option'),
           padding: customPadding,
+          child: const Text('First option'),
         ),
       ],
     );
@@ -1263,8 +1263,8 @@ void main() {
           viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
-          child: Placeholder(),
           insetPadding: null,
+          child: Placeholder(),
         ),
       ),
     );
@@ -1284,13 +1284,15 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(Placeholder)),
-        Rect.fromLTRB(
-          screenRect.left + 10.0,
-          screenRect.top + 20.0,
-          screenRect.right - 30.0,
-          screenRect.bottom - 40.0,
-        ));
+    expect(
+      tester.getRect(find.byType(Placeholder)),
+      Rect.fromLTRB(
+        screenRect.left + 10.0,
+        screenRect.top + 20.0,
+        screenRect.right - 30.0,
+        screenRect.bottom - 40.0,
+      ),
+    );
   });
 
   testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
@@ -1326,8 +1328,8 @@ void main() {
     );
 
     expect(semantics, isNot(includesNodeWith(
-        label: 'Title',
-        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
 
     await tester.tap(find.text('X'));
@@ -1346,14 +1348,14 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const AlertDialog(
-            title: Text('title'),
-            content: Text('content'),
-            actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
-          ),
-        )
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const AlertDialog(
+          title: Text('title'),
+          content: Text('content'),
+          actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1387,8 +1389,10 @@ void main() {
                         ),
                         TestSemantics(
                           id: 7,
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton,
-                            SemanticsFlag.hasEnabledState],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                          ],
                           label: 'action',
                           textDirection: TextDirection.ltr,
                         ),
@@ -1509,16 +1513,16 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const SimpleDialog(
-            title: Text('title'),
-            children: <Widget>[
-              Text('content'),
-              TextButton(onPressed: null, child: Text('action'))
-            ],
-          ),
-        )
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const SimpleDialog(
+          title: Text('title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1556,8 +1560,10 @@ void main() {
                             ),
                             TestSemantics(
                               id: 8,
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                              ],
                               label: 'action',
                               textDirection: TextDirection.ltr,
                             ),
@@ -1946,7 +1952,7 @@ void main() {
         navigatorObservers: <NavigatorObserver>[
           _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
             currentRouteSetting = newRoute.settings;
-          })
+          }),
         ],
         home: const Material(
           child: Center(

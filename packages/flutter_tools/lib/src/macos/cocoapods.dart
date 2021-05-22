@@ -248,6 +248,7 @@ class CocoaPods {
     } else {
       final bool isSwift = (await _xcodeProjectInterpreter.getBuildSettings(
         runnerProject.path,
+        buildContext: const XcodeProjectBuildContext(),
       )).containsKey('SWIFT_VERSION');
       podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
     }
@@ -407,7 +408,7 @@ class CocoaPods {
     // the old parsed .flutter-plugins file, prompt the regeneration. Old line was:
     // plugin_pods = parse_KV_file('../.flutter-plugins')
     if (xcodeProject.podfile.existsSync() &&
-      xcodeProject.podfile.readAsStringSync().contains('.flutter-plugins\'')) {
+      xcodeProject.podfile.readAsStringSync().contains(".flutter-plugins'")) {
       const String error = 'Warning: Podfile is out of date\n'
           '$outOfDatePluginsPodfileConsequence\n'
           'To regenerate the Podfile, run:\n';

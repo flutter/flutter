@@ -30,7 +30,7 @@ void main() {
       fileSystem = const LocalFileSystem();
       processManager = const LocalProcessManager();
       stdio = TestStdio(verbose: true);
-      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_checkouts');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_checkouts.');
       checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: tempDir,
@@ -82,46 +82,6 @@ void main() {
         true,
         reason: 'initialVersion = $initialVersion; finalVersion = $finalVersion',
       );
-      expect(finalVersion.n, 0);
-      expect(finalVersion.commits, null);
-    });
-
-    test('increment y', () {
-      final Version initialVersion = framework.flutterVersion();
-
-      final String latestCommit = framework.authorEmptyCommit();
-
-      final FakeArgResults fakeArgResults = FakeArgResults(
-        level: 'y',
-        commit: latestCommit,
-        // Ensure this test passes after a dev release with hotfixes
-        force: true,
-        remote: 'upstream',
-      );
-
-      expect(
-        rollDev(
-          usage: usageString,
-          argResults: fakeArgResults,
-          stdio: stdio,
-          repository: framework,
-        ),
-        true,
-      );
-      expect(
-        stdio.stdout,
-        contains(RegExp(r'Publishing Flutter \d+\.\d+\.\d+-\d+\.\d+\.pre \(')),
-      );
-
-      final Version finalVersion = framework.flutterVersion();
-      expect(
-        initialVersion.toString() != finalVersion.toString(),
-        true,
-        reason: 'initialVersion = $initialVersion; finalVersion = $finalVersion',
-      );
-      expect(finalVersion.y, initialVersion.y + 1);
-      expect(finalVersion.z, 0);
-      expect(finalVersion.m, 0);
       expect(finalVersion.n, 0);
       expect(finalVersion.commits, null);
     });

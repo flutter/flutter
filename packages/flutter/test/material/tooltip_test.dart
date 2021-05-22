@@ -1061,7 +1061,7 @@ void main() {
                       ),
                     ),
                   );
-                }
+                },
               );
             },
           ),
@@ -1159,8 +1159,8 @@ void main() {
         home: Center(
           child: Tooltip(
             message: 'Foo',
-            child: Text('Bar'),
             excludeFromSemantics: true,
+            child: Text('Bar'),
           ),
         ),
       ),

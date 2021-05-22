@@ -79,12 +79,12 @@ class CreateCommand extends CreateBase {
   String get invocation => '${runner.executableName} $name <output directory>';
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    return <CustomDimensions, String>{
-      CustomDimensions.commandCreateProjectType: stringArg('template'),
-      CustomDimensions.commandCreateAndroidLanguage: stringArg('android-language'),
-      CustomDimensions.commandCreateIosLanguage: stringArg('ios-language'),
-    };
+  Future<CustomDimensions> get usageValues async {
+    return CustomDimensions(
+      commandCreateProjectType: stringArg('template'),
+      commandCreateAndroidLanguage: stringArg('android-language'),
+      commandCreateIosLanguage: stringArg('ios-language'),
+    );
   }
 
   // Lazy-initialize the net utilities with values from the context.
@@ -423,9 +423,10 @@ Your $application code is in $relativeAppMain.
     final String androidPluginIdentifier = templateContext['androidIdentifier'] as String;
     final String exampleProjectName = projectName + '_example';
     templateContext['projectName'] = exampleProjectName;
-    templateContext['androidIdentifier'] = createAndroidIdentifier(organization, exampleProjectName);
-    templateContext['iosIdentifier'] = createUTIIdentifier(organization, exampleProjectName);
-    templateContext['macosIdentifier'] = createUTIIdentifier(organization, exampleProjectName);
+    templateContext['androidIdentifier'] = CreateBase.createAndroidIdentifier(organization, exampleProjectName);
+    templateContext['iosIdentifier'] = CreateBase.createUTIIdentifier(organization, exampleProjectName);
+    templateContext['macosIdentifier'] = CreateBase.createUTIIdentifier(organization, exampleProjectName);
+    templateContext['windowsIdentifier'] = CreateBase.createWindowsIdentifier(organization, exampleProjectName);
     templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;

@@ -132,7 +132,7 @@ flutter:
       'C:/build/flutter_assets/assets/foo.png',
       'C:/build/flutter_assets/AssetManifest.json',
       'C:/build/flutter_assets/FontManifest.json',
-      'C:/build/flutter_assets/NOTICES',
+      'C:/build/flutter_assets/NOTICES.Z',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll',
       'C:/winuwp/flutter/ephemeral/flutter_windows_winuwp.dll.pdb',
       'C:/winuwp/flutter/ephemeral/icudtl.dat'

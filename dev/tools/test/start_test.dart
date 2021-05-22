@@ -120,6 +120,14 @@ void main() {
     test('creates state file if provided correct inputs', () async {
       const String revision2 = 'def789';
       const String revision3 = '123abc';
+      const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+
+      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+          .childDirectory('flutter_conductor_checkouts')
+          .childDirectory('engine');
+
+      final File depsFile = engine.childFile('DEPS');
 
       final List<FakeCommand> engineCommands = <FakeCommand>[
         FakeCommand(
@@ -130,12 +138,13 @@ void main() {
             'upstream',
             '--',
             EngineRepository.defaultUpstream,
-            fileSystem.path.join(
-              checkoutsParentDirectory,
-              'flutter_conductor_checkouts',
-              'engine',
-            ),
+            engine.path,
           ],
+          onRun: () {
+            // Create the DEPS file which the tool will update
+            engine.createSync(recursive: true);
+            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+          }
         ),
         const FakeCommand(
           command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
@@ -157,6 +166,16 @@ void main() {
             '-b',
             'cherrypicks-$candidateBranch',
           ],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'add', '--all'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision2,
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -233,6 +252,8 @@ void main() {
         releaseChannel,
         '--$kStateOption',
         stateFilePath,
+        '--$kDartRevisionOption',
+        nextDartRevision,
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
@@ -246,6 +267,7 @@ void main() {
       expect(state.releaseChannel, releaseChannel);
       expect(state.engine.candidateBranch, candidateBranch);
       expect(state.engine.startingGitHead, revision2);
+      expect(state.engine.dartRevision, nextDartRevision);
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
       expect(state.lastPhase, ReleasePhase.INITIALIZE);
@@ -254,4 +276,22 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
+}
+
+String generateMockDeps(String dartRevision) {
+  return '''
+vars = {
+  'chromium_git': 'https://chromium.googlesource.com',
+  'swiftshader_git': 'https://swiftshader.googlesource.com',
+  'dart_git': 'https://dart.googlesource.com',
+  'flutter_git': 'https://flutter.googlesource.com',
+  'fuchsia_git': 'https://fuchsia.googlesource.com',
+  'github_git': 'https://github.com',
+  'skia_git': 'https://skia.googlesource.com',
+  'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
+  'skia_revision': '4e9d5e2bdf04c58bc0bff57be7171e469e5d7175',
+
+  'dart_revision': '$dartRevision',
+  'dart_boringssl_gen_rev': '7322fc15cc065d8d2957fccce6b62a509dc4d641',
+}''';
 }

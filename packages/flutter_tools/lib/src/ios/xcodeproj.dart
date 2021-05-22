@@ -166,10 +166,12 @@ class XcodeProjectInterpreter {
   /// target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    String? scheme,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = _logger.startSpinner();
+    final String? scheme = buildContext.scheme;
+    final String? configuration = buildContext.configuration;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -177,7 +179,12 @@ class XcodeProjectInterpreter {
       _fileSystem.path.absolute(projectPath),
       if (scheme != null)
         ...<String>['-scheme', scheme],
+      if (configuration != null)
+        ...<String>['-configuration', configuration],
+      if (buildContext.environmentType == EnvironmentType.simulator)
+        ...<String>['-sdk', 'iphonesimulator'],
       '-showBuildSettings',
+      'BUILD_DIR=${_fileSystem.path.absolute(getIosBuildDirectory())}',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ];
     try {
@@ -201,7 +208,7 @@ class XcodeProjectInterpreter {
           flutterUsage: _usage,
         ).send();
       }
-      _logger.printTrace('Unexpected failure to get the build settings: $error.');
+      _logger.printTrace('Unexpected failure to get Xcode build settings: $error.');
       return const <String, String>{};
     } finally {
       status.stop();
@@ -228,6 +235,9 @@ class XcodeProjectInterpreter {
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
     const int missingProjectExitCode = 66;
+    // The exit code returned by 'xcodebuild -list' when the project is corrupted.
+    const int corruptedProjectExitCode = 74;
+    bool _allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
         ...xcrunCommand(),
@@ -236,10 +246,11 @@ class XcodeProjectInterpreter {
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
       throwOnError: true,
-      allowedFailures: (int c) => c == missingProjectExitCode,
+      allowedFailures: _allowedFailures,
       workingDirectory: projectPath,
     );
-    if (result.exitCode == missingProjectExitCode) {
+    if (_allowedFailures(result.exitCode)) {
+      // User configuration error, tool exit instead of crashing.
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString(), _logger);
@@ -280,6 +291,29 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
   }
 
   return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]!] ?? m[0]!);
+}
+
+@immutable
+class XcodeProjectBuildContext {
+  const XcodeProjectBuildContext({this.scheme, this.configuration, this.environmentType = EnvironmentType.physical});
+
+  final String? scheme;
+  final String? configuration;
+  final EnvironmentType environmentType;
+
+  @override
+  int get hashCode => scheme.hashCode ^ configuration.hashCode ^ environmentType.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) {
+      return true;
+    }
+    return other is XcodeProjectBuildContext &&
+        other.scheme == scheme &&
+        other.configuration == configuration &&
+        other.environmentType == environmentType;
+  }
 }
 
 /// Information about an Xcode project.
@@ -365,7 +399,7 @@ class XcodeProjectInfo {
     });
   }
 
-  void reportFlavorNotFoundAndExit() {
+  Never reportFlavorNotFoundAndExit() {
     _logger.printError('');
     if (definesCustomSchemes) {
       _logger.printError('The Xcode project defines schemes: ${schemes.join(', ')}');
@@ -377,7 +411,10 @@ class XcodeProjectInfo {
 
   /// Returns unique build configuration matching [buildInfo] and [scheme], or
   /// null, if there is no unique best match.
-  String? buildConfigurationFor(BuildInfo buildInfo, String scheme) {
+  String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) {
+    if (buildInfo == null) {
+      return null;
+    }
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
     if (hasBuildConfigurationForBuildMode(expectedConfiguration)) {
       return expectedConfiguration;

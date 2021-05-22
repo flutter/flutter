@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -84,7 +85,7 @@ void main() {
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     // The width includes the width of the cursor (1.0).
-    expect(editable.getMaxIntrinsicWidth(double.infinity), 51.0);
+    expect(editable.getMaxIntrinsicWidth(double.infinity), 52.0);
     expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
     expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
 
@@ -320,7 +321,11 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+
+    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
+    //                sensitive to browser/OS when running in web mode:
+    //                https://github.com/flutter/flutter/issues/83129
+  }, skip: kIsWeb);
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -3329,6 +3334,217 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
           ..paragraph(),
       );
+    });
+
+    group('hit testing', () {
+      test('hits correct TextSpan when not scrolled', () {
+        final TextSelectionDelegate delegate = FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          offset: ViewportOffset.fixed(0.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        BoxHitTestResult result = BoxHitTestResult();
+        editable.hitTest(result, position: Offset.zero);
+        // We expect two hit test entries in the path because the RenderEditable
+        // will add itself as well.
+        expect(result.path, hasLength(2));
+        HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'A');
+        // Only testing the RenderEditable entry here once, not anymore below.
+        expect(result.path.last.target, isA<RenderEditable>());
+
+        result = BoxHitTestResult();
+        editable.hitTest(result, position: const Offset(15.0, 0.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B');
+      });
+
+      test('hits correct TextSpan when scrolled vertically', () {
+        final TextSelectionDelegate delegate = FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B\n'),
+              TextSpan(text: 'C'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          // Given maxLines of null and an offset of 5, the editable will be
+          // scrolled vertically by 5 pixels.
+          maxLines: null,
+          offset: ViewportOffset.fixed(5.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        BoxHitTestResult result = BoxHitTestResult();
+        editable.hitTest(result, position: Offset.zero);
+        expect(result.path, hasLength(2));
+        HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'A');
+
+        result = BoxHitTestResult();
+        editable.hitTest(result, position: const Offset(15.0, 0.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B\n');
+
+        result = BoxHitTestResult();
+        // When we hit at y=6 and are scrolled by -5 vertically, we expect "C"
+        // to be hit because the font size is 10.
+        editable.hitTest(result, position: const Offset(0.0, 6.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'C');
+      });
+
+      test('hits correct TextSpan when scrolled horizontally', () {
+        final TextSelectionDelegate delegate = FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          // Given maxLines of 1 and an offset of 5, the editable will be
+          // scrolled by 5 pixels to the left.
+          maxLines: 1,
+          offset: ViewportOffset.fixed(5.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        final BoxHitTestResult result = BoxHitTestResult();
+        // At x=6, we should hit "B" as we are scrolled to the left by 6
+        // pixels.
+        editable.hitTest(result, position: const Offset(6.0, 0));
+        expect(result.path, hasLength(2));
+        final HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B');
+      });
+    });
+  });
+
+  group('delete API implementations', () {
+    // Regression test for: https://github.com/flutter/flutter/issues/80226.
+    //
+    // This textSelectionDelegate has different text and selection from the
+    // render editable.
+    final FakeEditableTextState delegate = FakeEditableTextState();
+
+    late RenderEditable editable;
+
+    setUp(() {
+      editable = RenderEditable(
+        text: TextSpan(
+          text: 'A ' * 50,
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 50),
+      );
+
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'BBB',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    });
+
+    void verifyDoesNotCrashWithInconsistentTextEditingValue(void Function(SelectionChangedCause) method) {
+      editable = RenderEditable(
+        text: TextSpan(
+          text: 'A ' * 50,
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 50),
+      );
+
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      dynamic error;
+      try {
+        method(SelectionChangedCause.tap);
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isNull);
+    }
+
+    test('delete is not racy and handles composing region correctly', () {
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'ABCDEF',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 1, end: 6),
+      );
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.delete);
+      final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
+      expect(textEditingValue.text, 'ACDEF');
+      expect(textEditingValue.selection.isCollapsed, isTrue);
+      expect(textEditingValue.selection.baseOffset, 1);
+      expect(textEditingValue.composing, const TextRange(start: 1, end: 5));
+    });
+
+    test('deleteForward is not racy and handles composing region correctly', () {
+      delegate.textEditingValue = const TextEditingValue(
+        text: 'ABCDEF',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 2, end: 6),
+      );
+      verifyDoesNotCrashWithInconsistentTextEditingValue(editable.deleteForward);
+      final TextEditingValue textEditingValue = editable.textSelectionDelegate.textEditingValue;
+      expect(textEditingValue.text, 'ABDEF');
+      expect(textEditingValue.selection.isCollapsed, isTrue);
+      expect(textEditingValue.selection.baseOffset, 2);
+      expect(textEditingValue.composing, const TextRange(start: 2, end: 5));
     });
   });
 }

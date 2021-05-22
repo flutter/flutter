@@ -21,7 +21,6 @@ import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'globals.dart' as globals;
-import 'runner/flutter_command.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
@@ -184,9 +183,7 @@ class FlutterWebSdk extends CachedArtifact {
       platformName += 'windows-x64';
     }
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
-    if (location.existsSync()) {
-      location.deleteSync(recursive: true);
-    }
+    ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
     final FileSystem fileSystem = location.fileSystem;
@@ -420,9 +417,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     if (globals.androidSdk == null) {
       return;
     }
-    final Directory tempDir = cache.getRoot().createTempSync(
-      'flutter_gradle_wrapper.',
-    );
+    final Directory tempDir = cache.getRoot().createTempSync('flutter_gradle_wrapper.');
     globals.gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...');

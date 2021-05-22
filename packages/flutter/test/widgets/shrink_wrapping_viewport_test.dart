@@ -18,10 +18,10 @@ void main() {
     }
 
     await tester.pumpWidget(build(
-        ShrinkWrappingViewport(
-          offset: ViewportOffset.zero(),
-          slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
-        )
+      ShrinkWrappingViewport(
+        offset: ViewportOffset.zero(),
+        slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
+      ),
     ));
 
     // 1st, check that the render object has received the default clip behavior.
@@ -35,11 +35,11 @@ void main() {
 
     // 3rd, pump a new widget to check that the render object can update its clip behavior.
     await tester.pumpWidget(build(
-        ShrinkWrappingViewport(
-          offset: ViewportOffset.zero(),
-          slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
-          clipBehavior: Clip.antiAlias,
-        )
+      ShrinkWrappingViewport(
+        offset: ViewportOffset.zero(),
+        slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
+        clipBehavior: Clip.antiAlias,
+      ),
     ));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
 

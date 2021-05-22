@@ -18,7 +18,6 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for "useLegacyNames" only
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
@@ -119,6 +118,7 @@ class FlutterOptions {
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
+  static const String kAndroidProjectArgs = 'android-project-arg';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -212,7 +212,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
       'when using the Web Server device and Dart Debug extension. '
       'This is useful for editors/debug adapters that do not support debugging '
@@ -221,7 +221,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-backend-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
       'backend service when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -230,7 +230,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-injected-client-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the injected client '
       'when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -527,9 +527,10 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesDartDefineOption({ bool useLegacyNames = false }) {
+  void usesDartDefineOption() {
     argParser.addMultiOption(
-      useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption,
+      FlutterOptions.kDartDefinesOption,
+      aliases: <String>[ kDartDefines ], // supported for historical reasons
       help: 'Additional key-value pairs that will be available as constants '
             'from the String.fromEnvironment, bool.fromEnvironment, int.fromEnvironment, '
             'and double.fromEnvironment constructors.\n'
@@ -700,15 +701,17 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Enables support for the hidden options --extra-front-end-options and
   /// --extra-gen-snapshot-options.
-  void usesExtraDartFlagOptions({ @required bool verboseHelp, bool useLegacyNames = false }) {
-    argParser.addMultiOption(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions,
+  void usesExtraDartFlagOptions({ @required bool verboseHelp }) {
+    argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      aliases: <String>[ kExtraFrontEndOptions ], // supported for historical reasons
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart front end. '
             'For example, "--${FlutterOptions.kExtraFrontEndOptions}=--enable-experiment=nonfunction-type-aliases".',
       valueHelp: '--foo,--bar',
       splitCommas: true,
       hide: !verboseHelp,
     );
-    argParser.addMultiOption(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions,
+    argParser.addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
+      aliases: <String>[ kExtraGenSnapshotOptions ], // supported for historical reasons
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
             '(Only used in "--profile" or "--release" builds.) '
             'For example, "--${FlutterOptions.kExtraGenSnapshotOptions}=--no-strip".',
@@ -765,6 +768,13 @@ abstract class FlutterCommand extends Command<void> {
             'process to terminate after the build is completed.',
       defaultsTo: true,
       hide: hide,
+    );
+    argParser.addMultiOption(
+      FlutterOptions.kAndroidProjectArgs,
+      help: 'Additional arguments specified as key=value that are passed directly to the gradle '
+            'project via the -P flag. These can be accesed in build.gradle via the "project.property" API.',
+      splitCommas: false,
+      abbr: 'P',
     );
   }
 
@@ -969,6 +979,10 @@ abstract class FlutterCommand extends Command<void> {
     final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
       || boolArg(FlutterOptions.kAndroidGradleDaemon);
 
+    final List<String> androidProjectArgs = argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
+      ? stringsArg(FlutterOptions.kAndroidProjectArgs)
+      : <String>[];
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1040,6 +1054,7 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
+      androidProjectArgs: androidProjectArgs,
     );
   }
 
@@ -1061,8 +1076,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Additional usage values to be sent with the usage ping.
-  Future<Map<CustomDimensions, String>> get usageValues async =>
-      const <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async => const CustomDimensions();
 
   /// Runs this command.
   ///
@@ -1229,12 +1243,9 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<CustomDimensions, Object> additionalUsageValues =
-        <CustomDimensions, Object>{
-          ...?await usageValues,
-          CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
-        };
-      Usage.command(commandPath, parameters: additionalUsageValues);
+      Usage.command(commandPath, parameters: CustomDimensions(
+        commandHasTerminal: globals.stdio.hasTerminal,
+      ).merge(await usageValues));
     }
 
     return runCommand();
@@ -1444,7 +1455,7 @@ DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return DevelopmentArtifact.web;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
-    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin:
       if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
@@ -1464,7 +1475,9 @@ DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.windows_uwp_x64:
-      // No artifacts currently supported.
+      if (featureFlags.isWindowsUwpEnabled) {
+        return DevelopmentArtifact.windowsUwp;
+      }
       return null;
   }
   return null;

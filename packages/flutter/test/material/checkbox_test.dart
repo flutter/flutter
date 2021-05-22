@@ -495,7 +495,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: Colors.orange[500], radius: splashRadius)
+      paints..circle(color: Colors.orange[500], radius: splashRadius),
     );
   });
 
@@ -902,8 +902,7 @@ void main() {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
                 value: false,
                 onChanged: (bool? newValue) {},
@@ -919,8 +918,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape,
-        roundedRectangleBorder);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, roundedRectangleBorder);
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),

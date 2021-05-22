@@ -130,7 +130,7 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
     try {
-      final Object decodeResult = json.decode(results.stdout?.toString())[section.name];
+      final Object decodeResult = json.decode(results.stdout)[section.name];
       if (decodeResult is Map<String, dynamic>) {
         return decodeResult;
       }

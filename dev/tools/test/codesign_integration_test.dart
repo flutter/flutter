@@ -20,9 +20,7 @@ void main() {
       () async {
     const Platform platform = LocalPlatform();
     const FileSystem fileSystem = LocalFileSystem();
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-      'conductor_integration_test',
-    );
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
     const ProcessManager processManager = LocalProcessManager();
     final TestStdio stdio = TestStdio(verbose: true);
     final Checkouts checkouts = Checkouts(

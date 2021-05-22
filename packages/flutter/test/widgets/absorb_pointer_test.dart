@@ -41,8 +41,7 @@ void main() {
         ),
       ),
     );
-    expect(semantics, hasSemantics(
-      TestSemantics.root(), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+    expect(semantics, hasSemantics(TestSemantics.root(), ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
     await tester.pumpWidget(
       AbsorbPointer(
@@ -63,7 +62,10 @@ void main() {
           ),
         ],
       ),
-      ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
     semantics.dispose();
   });
 }

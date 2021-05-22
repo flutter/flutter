@@ -45,7 +45,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', 'bar', null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), null),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -58,7 +58,11 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
+      ),
     );
     await completer.future;
   });
@@ -90,7 +94,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', 'bar', null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), null),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -103,7 +107,11 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
+      ),
     );
     await completer.future;
   });
@@ -133,7 +141,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', 'bar', null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), null),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -146,7 +154,11 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
+      ),
     );
     await completer.future;
   });

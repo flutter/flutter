@@ -83,7 +83,7 @@ or
       '-dTreeShakeIcons="$treeShakeIcons"',
       '-dDartObfuscation=$dartObfuscation',
       if (bundleSkSLPath != null)
-        '-iBundleSkSLPath=$bundleSkSLPath',
+        '-dBundleSkSLPath=$bundleSkSLPath',
       if (codeSizeDirectory != null)
         '-dCodeSizeDirectory=$codeSizeDirectory',
       if (splitDebugInfo != null)

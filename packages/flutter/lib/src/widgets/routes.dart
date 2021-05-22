@@ -377,7 +377,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// If false, this route's [ModalRoute.buildTransitions] `secondaryAnimation` parameter
   /// value will be [kAlwaysDismissedAnimation]. In other words, this route
-  /// will not animate when when [nextRoute] is pushed on top of it or when
+  /// will not animate when [nextRoute] is pushed on top of it or when
   /// [nextRoute] is popped off of it.
   ///
   /// Returns true by default.
@@ -502,7 +502,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   const HomePage({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _HomePageState createState() => _HomePageState();
+  ///   State<HomePage> createState() => _HomePageState();
   /// }
   ///
   /// class _HomePageState extends State<HomePage> {
@@ -532,7 +532,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   const SecondPage({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _SecondPageState createState() => _SecondPageState();
+  ///   State<SecondPage> createState() => _SecondPageState();
   /// }
   ///
   /// class _SecondPageState extends State<SecondPage> {
@@ -577,7 +577,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///               child: const Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
-  ///                 // visible then it will will pop our local history entry, which
+  ///                 // visible then it will pop our local history entry, which
   ///                 // will hide the red rectangle. Otherwise, the SecondPage will
   ///                 // navigate back to the HomePage.
   ///                 Navigator.of(context).pop();
@@ -1823,9 +1823,9 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: _pageBuilder(context, animation, secondaryAnimation),
       scopesRoute: true,
       explicitChildNodes: true,
+      child: _pageBuilder(context, animation, secondaryAnimation),
     );
   }
 
