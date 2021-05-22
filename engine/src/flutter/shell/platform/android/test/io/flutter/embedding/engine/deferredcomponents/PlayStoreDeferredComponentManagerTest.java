@@ -307,4 +307,14 @@ public class PlayStoreDeferredComponentManagerTest {
     assertTrue(playStoreManager.uninstallDeferredComponent(2, null));
     assertFalse(playStoreManager.uninstallDeferredComponent(3, null));
   }
+
+  @Test
+  public void assetOnlyMappingParses() throws NameNotFoundException {
+    TestFlutterJNI jni = new TestFlutterJNI();
+    Bundle bundle = new Bundle();
+    bundle.putString(PlayStoreDeferredComponentManager.MAPPING_KEY, "");
+    Context spyContext = createSpyContext(bundle);
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+  }
 }

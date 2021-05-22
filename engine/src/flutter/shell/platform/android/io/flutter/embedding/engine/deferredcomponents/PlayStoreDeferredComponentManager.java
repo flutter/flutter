@@ -269,15 +269,19 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
               "No loading unit to dynamic feature module name found. Ensure '"
                   + MAPPING_KEY
                   + "' is defined in the base module's AndroidManifest.");
-        } else {
-          for (String entry : rawMappingString.split(",")) {
-            // Split with -1 param to include empty string following trailing ":"
-            String[] splitEntry = entry.split(":", -1);
-            int loadingUnitId = Integer.parseInt(splitEntry[0]);
-            loadingUnitIdToComponentNames.put(loadingUnitId, splitEntry[1]);
-            if (splitEntry.length > 2) {
-              loadingUnitIdToSharedLibraryNames.put(loadingUnitId, splitEntry[2]);
-            }
+          return;
+        }
+        if (rawMappingString.equals("")) {
+          // Asset-only components, so no loading units to map.
+          return;
+        }
+        for (String entry : rawMappingString.split(",")) {
+          // Split with -1 param to include empty string following trailing ":"
+          String[] splitEntry = entry.split(":", -1);
+          int loadingUnitId = Integer.parseInt(splitEntry[0]);
+          loadingUnitIdToComponentNames.put(loadingUnitId, splitEntry[1]);
+          if (splitEntry.length > 2) {
+            loadingUnitIdToSharedLibraryNames.put(loadingUnitId, splitEntry[2]);
           }
         }
       }
