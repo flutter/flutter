@@ -112,7 +112,7 @@ class AOTSnapshotter {
     String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
     required bool bitcode,
-    required String splitDebugInfo,
+    String? splitDebugInfo,
     required bool dartObfuscation,
     bool quiet = false,
   }) async {
@@ -182,8 +182,8 @@ class AOTSnapshotter {
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
-    final bool shouldSplitDebugInfo = splitDebugInfo.isNotEmpty;
-    if (shouldSplitDebugInfo) {
+    final bool? shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty;
+    if (shouldSplitDebugInfo == true) {
       _fileSystem.directory(splitDebugInfo)
         .createSync(recursive: true);
     }
@@ -191,9 +191,9 @@ class AOTSnapshotter {
     // Optimization arguments.
     genSnapshotArgs.addAll(<String>[
       // Faster async/await
-      if (shouldSplitDebugInfo) ...<String>[
+      if (shouldSplitDebugInfo == true) ...<String>[
         '--dwarf-stack-traces',
-        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo, debugFilename)}'
+        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}'
       ],
       if (dartObfuscation)
         '--obfuscate',
