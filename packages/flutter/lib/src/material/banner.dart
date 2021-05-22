@@ -40,7 +40,7 @@ enum MaterialBannerClosedReason {
   /// or by calling [ScaffoldMessengerState.hideCurrentMaterialBanner] directly.
   hide,
 
-  /// The material banner was closed by an call to [ScaffoldMessengerState.removeCurrentMaterialBanner].
+  /// The material banner was closed by a call to [ScaffoldMessengerState.removeCurrentMaterialBanner].
   remove,
 }
 
