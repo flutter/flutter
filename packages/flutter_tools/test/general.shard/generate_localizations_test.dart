@@ -1489,6 +1489,41 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('DateTime tests', () {
+      testWithoutContext('imports package:intl', () {
+        const String singleDateMessageArbFileString = '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+      "description": "The first day of spring",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMd"
+          }
+      }
+  }
+}''';
+        fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+          ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleDateMessageArbFileString);
+
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains(intlImportDartCode));
+      });
+
       testWithoutContext('throws an exception when improperly formatted date is passed in', () {
         const String singleDateMessageArbFileString = '''
 {
@@ -1564,6 +1599,44 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         }
 
         fail('Improper date formatting should throw an exception');
+      });
+    });
+
+    group('NumberFormat tests', () {
+      testWithoutContext('imports package:intl', () {
+        const String singleDateMessageArbFileString = '''
+{
+  "courseCompletion": "You have completed {progress} of the course.",
+  "@courseCompletion": {
+    "description": "The amount of progress the student has made in their class.",
+    "placeholders": {
+      "progress": {
+        "type": "double",
+        "format": "percentPattern"
+      }
+    }
+  }
+}''';
+        fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true)
+          ..childFile(defaultTemplateArbFileName).writeAsStringSync(
+              singleDateMessageArbFileString);
+
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains(intlImportDartCode));
       });
 
       testWithoutContext('throws an exception when improperly formatted number is passed in', () {
