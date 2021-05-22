@@ -28,12 +28,13 @@ void main() {
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
           r8FailureHandler,
-          androidXFailureHandler,
           minSdkVersion,
           transformInputIssue,
           lockFileDepMissing,
+          androidXFailureHandler,
         ])
       );
+      expect(gradleErrors.last, equals(androidXFailureHandler));
     });
   });
 
