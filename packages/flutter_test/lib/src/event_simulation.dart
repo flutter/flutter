@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-
-import 'binding.dart';
 import 'test_async_utils.dart';
 
 // TODO(gspencergoog): Replace this with more robust key simulation code once
@@ -643,22 +640,22 @@ class KeyEventSimulator {
       platform ??= Platform.operatingSystem;
       assert(_osIsSupported(platform!), 'Platform $platform not supported for key simulation');
 
-
       final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
-      final Completer<bool> result = Completer<bool>();
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      bool result = false;
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
           if (data == null) {
-            result.complete(false);
             return;
           }
           final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
-          result.complete(decoded['handled'] as bool);
+          if (decoded['handled'] as bool) {
+            result = true;
+          }
         }
       );
-      return result.future;
+      return result;
     });
   }
 
@@ -684,7 +681,7 @@ class KeyEventSimulator {
 
       final Map<String, dynamic> data = getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
       bool result = false;
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {

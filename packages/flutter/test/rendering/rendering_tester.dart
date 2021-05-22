@@ -9,12 +9,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart' show TestDefaultBinaryMessengerBinding, EnginePhase, fail;
+import 'package:flutter_test/flutter_test.dart' show EnginePhase, fail;
 
 export 'package:flutter/foundation.dart' show FlutterError, FlutterErrorDetails;
-export 'package:flutter_test/flutter_test.dart' show TestDefaultBinaryMessengerBinding, EnginePhase;
+export 'package:flutter_test/flutter_test.dart' show EnginePhase;
 
-class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, TestDefaultBinaryMessengerBinding {
+class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding {
   /// Creates a binding for testing rendering library functionality.
   ///
   /// If [onErrors] is not null, it is called if [FlutterError] caught any errors
