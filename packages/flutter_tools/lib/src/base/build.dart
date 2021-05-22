@@ -70,7 +70,7 @@ class GenSnapshot {
 
     return _processUtils.stream(
       <String>[snapshotterPath, ...args],
-      mapFunction: (String? line) =>  (kIgnoredWarnings.contains(line) ? null : line)!,
+      mapFunction: (String? line) =>  (kIgnoredWarnings.contains(line) ? null : line) ?? '',
     );
   }
 }
