@@ -4,9 +4,8 @@
 
 import 'dart:io';
 
+import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
-
-import 'utils.dart';
 
 Future<void> main(List<String> args) async {
   if (args.length != 2) {
@@ -15,84 +14,68 @@ Future<void> main(List<String> args) async {
     exit(-1);
   }
 
-  group('Integration tests',  () {
-    final String dart = Platform.resolvedExecutable;
-    final String frontendServer = args[0];
-    final String sdkRoot = args[1];
-    final String basePath = path.canonicalize(path.join(path.dirname(Platform.script.path), '..'));
-    final String fixtures = path.join(basePath, 'test', 'fixtures');
-    final String mainDart = path.join(fixtures, 'lib', 'main.dart');
-    final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
-    final String regularDill = path.join(fixtures, 'toString.dill');
-    final String transformedDill = path.join(fixtures, 'toStringTransformed.dill');
+  final String dart = Platform.resolvedExecutable;
+  final String frontendServer = args[0];
+  final String sdkRoot = args[1];
+  final String basePath = path.canonicalize(path.join(path.dirname(Platform.script.path), '..'));
+  final String fixtures = path.join(basePath, 'test', 'fixtures');
+  final String mainDart = path.join(fixtures, 'lib', 'main.dart');
+  final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
+  final String regularDill = path.join(fixtures, 'toString.dill');
+  final String transformedDill = path.join(fixtures, 'toStringTransformed.dill');
 
 
-    void _checkProcessResult(ProcessResult result) {
-      if (result.exitCode != 0) {
-        stdout.writeln(result.stdout);
-        stderr.writeln(result.stderr);
-      }
-      expect(result.exitCode == 0, 'Expected result.exitCode to be 0');
+  void _checkProcessResult(ProcessResult result) {
+    if (result.exitCode != 0) {
+      stdout.writeln(result.stdout);
+      stderr.writeln(result.stderr);
+    }
+    expect(result.exitCode, 0);
+  }
+
+  test('Without flag', () {
+    _checkProcessResult(Process.runSync(dart, <String>[
+      frontendServer,
+      '--sdk-root=$sdkRoot',
+      '--target=flutter',
+      '--packages=$packageConfig',
+      '--output-dill=$regularDill',
+      mainDart,
+    ]));
+    final ProcessResult runResult = Process.runSync(dart, <String>[regularDill]);
+    _checkProcessResult(runResult);
+    String paintString = '"Paint.toString":"Paint(Color(0xffffffff))"';
+    if (const bool.fromEnvironment('dart.vm.product', defaultValue: false)) {
+      paintString = '"Paint.toString":"Instance of \'Paint\'"';
     }
 
-    test('Without flag', () {
-      _checkProcessResult(Process.runSync(dart, <String>[
-        frontendServer,
-        '--sdk-root=$sdkRoot',
-        '--target=flutter',
-        '--packages=$packageConfig',
-        '--output-dill=$regularDill',
-        mainDart,
-      ]));
-      final ProcessResult runResult = Process.runSync(dart, <String>[regularDill]);
-      _checkProcessResult(runResult);
-      String paintString = '"Paint.toString":"Paint(Color(0xffffffff))"';
-      if (const bool.fromEnvironment('dart.vm.product', defaultValue: false)) {
-        paintString = '"Paint.toString":"Instance of \'Paint\'"';
-      }
-
-      final String expectedStdout = '{$paintString,'
-        '"Brightness.toString":"Brightness.dark",'
-        '"Foo.toString":"I am a Foo",'
-        '"Keep.toString":"I am a Keep"}';
-      final String actualStdout = runResult.stdout.trim() as String;
-      expect(
-        actualStdout == expectedStdout,
-        'Expected "$expectedStdout" but got "$actualStdout"',
-      );
-    });
-
-    test('With flag', () {
-      _checkProcessResult(Process.runSync(dart, <String>[
-        frontendServer,
-        '--sdk-root=$sdkRoot',
-        '--target=flutter',
-        '--packages=$packageConfig',
-        '--output-dill=$transformedDill',
-        '--delete-tostring-package-uri', 'dart:ui',
-        '--delete-tostring-package-uri', 'package:flutter_frontend_fixtures',
-        mainDart,
-      ]));
-      final ProcessResult runResult = Process.runSync(dart, <String>[transformedDill]);
-      _checkProcessResult(runResult);
-
-      const String expectedStdout = '{"Paint.toString":"Instance of \'Paint\'",'
-        '"Brightness.toString":"Brightness.dark",'
-        '"Foo.toString":"Instance of \'Foo\'",'
-        '"Keep.toString":"I am a Keep"}';
-      final String actualStdout = runResult.stdout.trim() as String;
-      expect(
-        actualStdout == expectedStdout,
-        'Expected "$expectedStdout" but got "$actualStdout"',
-      );
-    });
+    final String expectedStdout = '{$paintString,'
+      '"Brightness.toString":"Brightness.dark",'
+      '"Foo.toString":"I am a Foo",'
+      '"Keep.toString":"I am a Keep"}';
+    final String actualStdout = runResult.stdout.trim() as String;
+    expect(actualStdout, equals(expectedStdout));
   });
 
-  if (TestFailure.testFailures == 0) {
-    print('All tests passed!');
-    exit(0);
-  } else {
-    print('${TestFailure.testFailures} test expectations failed');
-    exit(1);
-  }
+  test('With flag', () {
+    _checkProcessResult(Process.runSync(dart, <String>[
+      frontendServer,
+      '--sdk-root=$sdkRoot',
+      '--target=flutter',
+      '--packages=$packageConfig',
+      '--output-dill=$transformedDill',
+      '--delete-tostring-package-uri', 'dart:ui',
+      '--delete-tostring-package-uri', 'package:flutter_frontend_fixtures',
+      mainDart,
+    ]));
+    final ProcessResult runResult = Process.runSync(dart, <String>[transformedDill]);
+    _checkProcessResult(runResult);
+
+    const String expectedStdout = '{"Paint.toString":"Instance of \'Paint\'",'
+      '"Brightness.toString":"Brightness.dark",'
+      '"Foo.toString":"Instance of \'Foo\'",'
+      '"Keep.toString":"I am a Keep"}';
+    final String actualStdout = runResult.stdout.trim() as String;
+    expect(actualStdout, equals(expectedStdout));
+  });
 }

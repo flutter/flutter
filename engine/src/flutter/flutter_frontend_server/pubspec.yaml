@@ -1,3 +1,7 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: flutter_frontend_server
 publish_to: none
 version: 0.1.1-dev
@@ -6,8 +10,9 @@ homepage: https://flutter.dev
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
 # Do not add any dependencies that require more than what is provided in
-# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
-# In particular, package:test is not usable here.
+# //third_party/pkg, //third_party/dart/pkg or
+# //third_party/dart/third_party/pkg. In particular, package:test is not usable
+# here.
 
 # If you do add packages here, make sure you can run `pub get --offline`, and
 # check the .packages and .package_config to make sure all the paths are
@@ -35,6 +40,9 @@ dependencies:
   usage: any
   vm: any
 
+dev_dependencies:
+  litetest: any
+
 dependency_overrides:
   _fe_analyzer_shared:
     path: ../../third_party/dart/pkg/_fe_analyzer_shared
@@ -44,6 +52,8 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/args
   async:
     path: ../../third_party/dart/third_party/pkg/async
+  async_helper:
+    path: ../../third_party/dart/pkg/async_helper
   bazel_worker:
     path: ../../third_party/dart/third_party/pkg/bazel_worker
   build_integration:
@@ -60,6 +70,8 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/crypto
   dev_compiler:
     path: ../../third_party/dart/pkg/dev_compiler
+  expect:
+    path: ../../third_party/dart/pkg/expect
   fixnum:
     path: ../../third_party/dart/third_party/pkg/fixnum
   front_end:
@@ -68,6 +80,8 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/frontend_server
   kernel:
     path: ../../third_party/dart/pkg/kernel
+  litetest:
+    path: ../testing/litetest
   logging:
     path: ../../third_party/dart/third_party/pkg/logging
   matcher:
