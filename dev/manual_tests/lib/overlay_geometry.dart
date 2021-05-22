@@ -95,9 +95,9 @@ class OverlayGeometryApp extends StatefulWidget {
 typedef CardTapCallback = void Function(GlobalKey targetKey, Offset globalPosition);
 
 class CardBuilder extends SliverChildDelegate {
-  CardBuilder({ this.cardModels, this.onTapUp });
+  CardBuilder({List<CardModel>? cardModels, this.onTapUp }) : cardModels = cardModels ?? <CardModel>[];
 
-  final List<CardModel>? cardModels;
+  final List<CardModel> cardModels;
   final CardTapCallback? onTapUp;
 
   static const TextStyle cardLabelStyle =
@@ -105,9 +105,9 @@ class CardBuilder extends SliverChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (index >= cardModels!.length)
+    if (index >= cardModels.length)
       return null;
-    final CardModel cardModel = cardModels![index];
+    final CardModel cardModel = cardModels[index];
     return GestureDetector(
       key: cardModel.key,
       onTapUp: (TapUpDetails details) { onTapUp!(cardModel.targetKey, details.globalPosition); },
@@ -124,7 +124,7 @@ class CardBuilder extends SliverChildDelegate {
   }
 
   @override
-  int get estimatedChildCount => cardModels!.length;
+  int get estimatedChildCount => cardModels.length;
 
   @override
   bool shouldRebuild(CardBuilder oldDelegate) {
@@ -133,7 +133,7 @@ class CardBuilder extends SliverChildDelegate {
 }
 
 class OverlayGeometryAppState extends State<OverlayGeometryApp> {
-  List<CardModel>? cardModels;
+  List<CardModel> cardModels = <CardModel>[];
   Map<MarkerType, Offset> markers = <MarkerType, Offset>{};
   double markersScrollOffset = 0.0;
 
