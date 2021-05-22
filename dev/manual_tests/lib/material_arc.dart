@@ -413,26 +413,20 @@ class AnimationDemo extends StatefulWidget {
 }
 
 class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {
-  late List<_ArcDemo>? _allDemos;
-
-  @override
-  void initState() {
-    super.initState();
-    _allDemos = <_ArcDemo>[
-      _ArcDemo('POINT', (_ArcDemo demo) {
-        return _PointDemo(
-          key: demo.key,
-          controller: demo.controller,
-        );
-      }, this),
-      _ArcDemo('RECTANGLE', (_ArcDemo demo) {
-        return _RectangleDemo(
-          key: demo.key,
-          controller: demo.controller,
-        );
-      }, this),
-    ];
-  }
+  late final List<_ArcDemo> _allDemos = <_ArcDemo>[
+    _ArcDemo('POINT', (_ArcDemo demo) {
+      return _PointDemo(
+        key: demo.key,
+        controller: demo.controller,
+      );
+    }, this),
+    _ArcDemo('RECTANGLE', (_ArcDemo demo) {
+      return _RectangleDemo(
+        key: demo.key,
+        controller: demo.controller,
+      );
+    }, this),
+  ];
 
   Future<void> _play(_ArcDemo demo) async {
     await demo.controller.forward();
@@ -443,12 +437,12 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: _allDemos!.length,
+      length: _allDemos.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Animation'),
           bottom: TabBar(
-            tabs: _allDemos!.map<Tab>((_ArcDemo demo) => Tab(text: demo.title)).toList(),
+            tabs: _allDemos.map<Tab>((_ArcDemo demo) => Tab(text: demo.title)).toList(),
           ),
         ),
         floatingActionButton: Builder(
@@ -456,13 +450,13 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
             return FloatingActionButton(
               child: const Icon(Icons.refresh),
               onPressed: () {
-                _play(_allDemos![DefaultTabController.of(context)!.index]);
+                _play(_allDemos[DefaultTabController.of(context)!.index]);
               },
             );
           },
         ),
         body: TabBarView(
-          children: _allDemos!.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList(),
+          children: _allDemos.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList(),
         ),
       ),
     );

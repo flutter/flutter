@@ -211,7 +211,11 @@ class RedoIntent extends Intent {
 class RedoAction extends Action<RedoIntent> {
   @override
   bool isEnabled(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus!.context!) as UndoableActionDispatcher;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return false;
+    }
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 
@@ -350,16 +354,13 @@ class FocusDemo extends StatefulWidget {
 
 class _FocusDemoState extends State<FocusDemo> {
   final FocusNode outlineFocus = FocusNode(debugLabel: 'Demo Focus Node');
-  late UndoableActionDispatcher dispatcher;
-  late bool canUndo;
-  late bool canRedo;
+  late final UndoableActionDispatcher dispatcher = UndoableActionDispatcher();
+  late bool canUndo = dispatcher.canUndo;
+  late bool canRedo = dispatcher.canRedo;
 
   @override
   void initState() {
     super.initState();
-    dispatcher = UndoableActionDispatcher();
-    canUndo = dispatcher.canUndo;
-    canRedo = dispatcher.canRedo;
     dispatcher.addListener(_handleUndoStateChange);
   }
 

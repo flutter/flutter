@@ -39,7 +39,7 @@ class IconSampleRow extends StatefulWidget {
 }
 
 class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderStateMixin {
-  late AnimationController progress;
+  late final AnimationController progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,6 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   @override
   void initState() {
     super.initState();
-    progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     progress.addListener(_handleChange);
   }
 
