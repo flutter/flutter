@@ -205,25 +205,25 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     VisitObjectsRecursivelyAndRemove(root, doomed_uids);
   [objects_ removeObjectsForKeys:doomed_uids];
 
-  layoutChanged = layoutChanged || [doomed_uids count] > 0;
+  if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_)) {
+    layoutChanged = layoutChanged || [doomed_uids count] > 0;
 
-  if (routeChanged) {
-    if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_)) {
+    if (routeChanged) {
       NSString* routeName = [lastAdded routeName];
       ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
                                                    routeName);
     }
-  }
 
-  if (layoutChanged) {
-    ios_delegate_->PostAccessibilityNotification(UIAccessibilityLayoutChangedNotification,
-                                                 FindNextFocusableIfNecessary());
-  } else if (scrollOccured) {
-    // TODO(chunhtai): figure out what string to use for notification. At this
-    // point, it is guarantee the previous focused object is still in the tree
-    // so that we don't need to worry about focus lost. (e.g. "Screen 0 of 3")
-    ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification,
-                                                 FindNextFocusableIfNecessary());
+    if (layoutChanged) {
+      ios_delegate_->PostAccessibilityNotification(UIAccessibilityLayoutChangedNotification,
+                                                   FindNextFocusableIfNecessary());
+    } else if (scrollOccured) {
+      // TODO(chunhtai): figure out what string to use for notification. At this
+      // point, it is guarantee the previous focused object is still in the tree
+      // so that we don't need to worry about focus lost. (e.g. "Screen 0 of 3")
+      ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification,
+                                                   FindNextFocusableIfNecessary());
+    }
   }
 }
 
