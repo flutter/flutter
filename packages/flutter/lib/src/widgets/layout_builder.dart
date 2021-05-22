@@ -115,11 +115,8 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   void _layout(ConstraintType constraints) {
-    // TODO(goderbauer): When https://github.com/dart-lang/sdk/issues/45710 is
-    //   fixed: refactor the anonymous closure below into a named one, apply the
-    //   @pragma('vm:notify-debugger-on-exception') to it and enable the
-    //   corresponding test in break_on_framework_exceptions_test.dart.
-    owner!.buildScope(this, () {
+    @pragma('vm:notify-debugger-on-exception')
+    void layoutCallback() {
       Widget built;
       try {
         built = widget.builder(this, constraints);
@@ -152,7 +149,9 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
         );
         _child = updateChild(null, built, slot);
       }
-    });
+    }
+
+    owner!.buildScope(this, layoutCallback);
   }
 
   @override
