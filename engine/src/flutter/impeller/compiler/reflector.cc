@@ -26,47 +26,43 @@ static std::string BaseTypeToString(spirv_cross::SPIRType::BaseType type) {
   using Type = spirv_cross::SPIRType::BaseType;
   switch (type) {
     case Type::Void:
-      return "Void";
+      return "ShaderType::kVoid";
     case Type::Boolean:
-      return "Boolean";
+      return "ShaderType::kBoolean";
     case Type::SByte:
-      return "SByte";
+      return "ShaderType::kSignedByte";
     case Type::UByte:
-      return "UByte";
+      return "ShaderType::kUnsignedByte";
     case Type::Short:
-      return "Short";
+      return "ShaderType::kSignedShort";
     case Type::UShort:
-      return "UShort";
+      return "ShaderType::kUnsignedShort";
     case Type::Int:
-      return "Int";
+      return "ShaderType::kSignedInt";
     case Type::UInt:
-      return "UInt";
+      return "ShaderType::kUnsignedInt";
     case Type::Int64:
-      return "Int64";
+      return "ShaderType::kSignedInt64";
     case Type::UInt64:
-      return "UInt64";
+      return "ShaderType::kUnsignedInt64";
     case Type::AtomicCounter:
-      return "AtomicCounter";
+      return "ShaderType::kAtomicCounter";
     case Type::Half:
-      return "Half";
+      return "ShaderType::kHalfFloat";
     case Type::Float:
-      return "Float";
+      return "ShaderType::kFloat";
     case Type::Double:
-      return "Double";
+      return "ShaderType::kDouble";
     case Type::Struct:
-      return "Struct";
+      return "ShaderType::kStruct";
     case Type::Image:
-      return "Image";
+      return "ShaderType::kImage";
     case Type::SampledImage:
-      return "SampledImage";
+      return "ShaderType::kSampledImage";
     case Type::Sampler:
-      return "Sampler";
-    case Type::AccelerationStructure:
-      return "AccelerationStructure";
-    case Type::RayQuery:
-      return "RayQuery";
+      return "ShaderType::kSampler";
     default:
-      return "unknown";
+      return "ShaderType::kUnknown";
   }
 }
 
@@ -78,6 +74,15 @@ static bool ReflectType(Writer& writer,
 
   writer.Key("type_name");
   writer.String(BaseTypeToString(type.basetype));
+
+  writer.Key("bit_width");
+  writer.Uint64(type.width);
+
+  writer.Key("vec_size");
+  writer.Uint64(type.vecsize);
+
+  writer.Key("columns");
+  writer.Uint64(type.columns);
 
   writer.Key("member_types");
   writer.StartArray();

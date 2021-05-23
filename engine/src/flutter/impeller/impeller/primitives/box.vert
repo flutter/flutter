@@ -10,8 +10,15 @@ uniform UniformBuffer2 {
   uniform mat4 longGOP;
 } uniforms2;
 
+struct Position {
+  vec3 position;
+  vec3 color;
+};
+
 in vec3 vertexPosition;
 in vec3 vertexColor;
+in dvec4 hello;
+in uvec4 hello2;
 
 out vec3 color;
 
