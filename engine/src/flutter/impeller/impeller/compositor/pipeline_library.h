@@ -27,8 +27,8 @@ class PipelineLibrary {
  private:
   using Pipelines = std::unordered_map<PipelineDescriptor,
                                        std::shared_ptr<const Pipeline>,
-                                       PipelineDescriptor::HashEqual,
-                                       PipelineDescriptor::HashEqual>;
+                                       ComparableHash<PipelineDescriptor>,
+                                       ComparableEqual<PipelineDescriptor>>;
   id<MTLDevice> device_;
   Pipelines pipelines_;
 
