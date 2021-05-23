@@ -225,19 +225,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    Future<int> getDevicePort() async {
-      if (debugPort != null) {
-        return debugPort;
-      }
-      // This call takes a non-trivial amount of time, and only iOS devices and
-      // simulators support it.
-      // If/when we do this on Android or other platforms, we can update it here.
-      if (device is IOSDevice || device is IOSSimulator) {
-      }
-      return null;
-    }
-    final int devicePort = await getDevicePort();
-
     final Daemon daemon = boolArg('machine')
       ? Daemon(
           stdinCommandStream,
@@ -255,7 +242,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
 
-    if (devicePort == null && debugUri == null) {
+    if (debugPort == null && debugUri == null) {
       if (device is FuchsiaDevice) {
         final String module = stringArg('module');
         if (module == null) {
@@ -310,7 +297,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           buildObservatoryUri(
             device,
             debugUri?.host ?? hostname,
-            devicePort ?? debugUri.port,
+            debugPort ?? debugUri.port,
             hostVmservicePort,
             debugUri?.path,
           )
