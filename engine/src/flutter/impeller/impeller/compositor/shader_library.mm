@@ -6,19 +6,6 @@
 
 namespace impeller {
 
-ShaderFunction::ShaderFunction(id<MTLFunction> function, ShaderStage stage)
-    : function_(function), stage_(stage) {}
-
-ShaderFunction::~ShaderFunction() = default;
-
-id<MTLFunction> ShaderFunction::GetMTLFunction() const {
-  return function_;
-}
-
-ShaderStage ShaderFunction::GetStage() const {
-  return stage_;
-}
-
 ShaderLibrary::ShaderLibrary(id<MTLLibrary> library) : library_(library) {}
 
 ShaderLibrary::~ShaderLibrary() = default;
