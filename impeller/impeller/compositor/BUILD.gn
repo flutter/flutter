@@ -6,6 +6,8 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("compositor") {
   sources = [
+    "comparable.cc",
+    "comparable.h",
     "context.h",
     "context.mm",
     "pipeline.h",

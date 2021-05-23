@@ -5,14 +5,21 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/comparable.h"
 
 namespace impeller {
 
-class VertexDescriptor {
+class VertexDescriptor : public Comparable<VertexDescriptor> {
  public:
   VertexDescriptor();
 
-  ~VertexDescriptor();
+  virtual ~VertexDescriptor();
+
+  // Comparable<VertexDescriptor>
+  std::size_t GetHash() const override;
+
+  // Comparable<VertexDescriptor>
+  bool IsEqual(const VertexDescriptor& other) const override;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptor);

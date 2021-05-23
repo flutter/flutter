@@ -14,6 +14,7 @@
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/comparable.h"
 #include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
@@ -21,14 +22,8 @@ namespace impeller {
 class ShaderFunction;
 class VertexDescriptor;
 
-class PipelineDescriptor {
+class PipelineDescriptor : public Comparable<PipelineDescriptor> {
  public:
-  struct HashEqual {
-    std::size_t operator()(const PipelineDescriptor& des) const;
-    bool operator()(const PipelineDescriptor& d1,
-                    const PipelineDescriptor& d2) const;
-  };
-
   PipelineDescriptor();
 
   ~PipelineDescriptor();
@@ -45,13 +40,17 @@ class PipelineDescriptor {
 
   MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor() const;
 
+  // Comparable<PipelineDescriptor>
+  std::size_t GetHash() const override;
+
+  // Comparable<PipelineDescriptor>
+  bool IsEqual(const PipelineDescriptor& other) const override;
+
  private:
   std::string label_;
   size_t sample_count_ = 1;
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
   std::shared_ptr<VertexDescriptor> vertex_descriptor_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineDescriptor);
 };
 
 }  // namespace impeller
