@@ -24,8 +24,8 @@ std::shared_ptr<const ShaderFunction> ShaderLibrary::GetFunction(
     return nullptr;
   }
 
-  auto func =
-      std::shared_ptr<ShaderFunction>(new ShaderFunction(function, stage));
+  auto func = std::shared_ptr<ShaderFunction>(new ShaderFunction(
+      library_id_, function, {name.data(), name.size()}, stage));
   functions_[key] = func;
   return func;
 }

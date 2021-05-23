@@ -7,6 +7,7 @@
 #include <Metal/Metal.h>
 
 #include <future>
+#include <memory>
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
@@ -15,10 +16,8 @@
 
 namespace impeller {
 
-class PipelineLibrary {
+class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
  public:
-  PipelineLibrary(id<MTLDevice> device);
-
   ~PipelineLibrary();
 
   std::future<std::shared_ptr<Pipeline>> GetRenderPipeline(
@@ -31,6 +30,11 @@ class PipelineLibrary {
                                        ComparableEqual<PipelineDescriptor>>;
   id<MTLDevice> device_;
   Pipelines pipelines_;
+
+  PipelineLibrary(id<MTLDevice> device);
+
+  void SavePipeline(PipelineDescriptor descriptor,
+                    std::shared_ptr<const Pipeline> pipeline);
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibrary);
 };

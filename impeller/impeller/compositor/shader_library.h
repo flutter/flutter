@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/comparable.h"
 #include "impeller/compositor/shader_function.h"
 
 namespace impeller {
@@ -50,11 +51,13 @@ class ShaderLibrary {
     };
   };
 
-  id<MTLLibrary> library_ = nullptr;
   using Functions = std::unordered_map<ShaderKey,
                                        std::shared_ptr<const ShaderFunction>,
                                        ShaderKey::Hash,
                                        ShaderKey::Equal>;
+
+  UniqueID library_id_;
+  id<MTLLibrary> library_ = nullptr;
   Functions functions_;
 
   ShaderLibrary(id<MTLLibrary> library);

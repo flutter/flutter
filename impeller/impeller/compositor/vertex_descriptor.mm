@@ -4,10 +4,24 @@
 
 #include "impeller/compositor/vertex_descriptor.h"
 
+#include "flutter/fml/logging.h"
+
 namespace impeller {
 
 VertexDescriptor::VertexDescriptor() = default;
 
 VertexDescriptor::~VertexDescriptor() = default;
+
+//| Comparable<VertexDescriptor>|
+std::size_t VertexDescriptor::GetHash() const {
+  FML_CHECK(false);
+  return 0;
+}
+
+// |Comparable<VertexDescriptor>|
+bool VertexDescriptor::IsEqual(const VertexDescriptor& other) const {
+  FML_CHECK(false);
+  return false;
+}
 
 }  // namespace impeller
