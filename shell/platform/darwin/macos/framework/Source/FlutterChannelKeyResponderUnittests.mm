@@ -170,6 +170,16 @@ TEST(FlutterChannelKeyResponderUnittests, BasicKeyEvent) {
 
   [messages removeAllObjects];
   [responses removeAllObjects];
+
+  // RShift up again, should be ignored and not produce a keydown event.
+  next_response = false;
+  [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", FALSE, 60)
+                callback:^(BOOL handled) {
+                  [responses addObject:@(handled)];
+                }];
+
+  EXPECT_EQ([messages count], 0u);
+  EXPECT_EQ([responses count], 0u);
 }
 
 TEST(FlutterChannelKeyResponderUnittests, EmptyResponseIsTakenAsHandled) {
