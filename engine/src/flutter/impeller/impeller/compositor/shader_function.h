@@ -21,19 +21,24 @@ class ShaderFunction : public Comparable<ShaderFunction> {
 
   id<MTLFunction> GetMTLFunction() const;
 
-  // Comparable<ShaderFunction>
+  // |Comparable<ShaderFunction>|
   std::size_t GetHash() const override;
 
-  // Comparable<ShaderFunction>
+  // |Comparable<ShaderFunction>|
   bool IsEqual(const ShaderFunction& other) const override;
 
  private:
   friend class ShaderLibrary;
 
+  UniqueID parent_library_id_;
   id<MTLFunction> function_ = nullptr;
+  std::string name_;
   ShaderStage stage_;
 
-  ShaderFunction(id<MTLFunction> function, ShaderStage stage);
+  ShaderFunction(UniqueID parent_library_id,
+                 id<MTLFunction> function,
+                 std::string name,
+                 ShaderStage stage);
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderFunction);
 };

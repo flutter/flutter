@@ -6,6 +6,7 @@
 
 namespace impeller {
 
-//
+static std::atomic_size_t sLastID;
+UniqueID::UniqueID() : id(++sLastID) {}
 
 }  // namespace impeller

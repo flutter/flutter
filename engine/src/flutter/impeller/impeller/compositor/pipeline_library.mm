@@ -23,9 +23,7 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibrary::GetRenderPipeline(
     return future;
   }
 
-  // WIP Pipeline is not saved.
-
-  pipelines_[descriptor] = nullptr;
+  auto thiz = shared_from_this();
 
   auto completion_handler =
       ^(id<MTLRenderPipelineState> _Nullable render_pipeline_state,
@@ -35,8 +33,10 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibrary::GetRenderPipeline(
                          << error.localizedDescription.UTF8String;
           promise->set_value(nullptr);
         } else {
-          promise->set_value(
-              std::shared_ptr<Pipeline>(new Pipeline(render_pipeline_state)));
+          auto new_pipeline =
+              std::shared_ptr<Pipeline>(new Pipeline(render_pipeline_state));
+          promise->set_value(new_pipeline);
+          this->SavePipeline(descriptor, new_pipeline);
         }
       };
   [device_
@@ -44,6 +44,11 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibrary::GetRenderPipeline(
                                                .GetMTLRenderPipelineDescriptor()
                          completionHandler:completion_handler];
   return future;
+}
+
+void PipelineLibrary::SavePipeline(PipelineDescriptor descriptor,
+                                   std::shared_ptr<const Pipeline> pipeline) {
+  pipelines_[descriptor] = std::move(pipeline);
 }
 
 }  // namespace impeller

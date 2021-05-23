@@ -15,10 +15,10 @@ class VertexDescriptor : public Comparable<VertexDescriptor> {
 
   virtual ~VertexDescriptor();
 
-  // Comparable<VertexDescriptor>
+  //| Comparable<VertexDescriptor>|
   std::size_t GetHash() const override;
 
-  // Comparable<VertexDescriptor>
+  // |Comparable<VertexDescriptor>|
   bool IsEqual(const VertexDescriptor& other) const override;
 
  private:
