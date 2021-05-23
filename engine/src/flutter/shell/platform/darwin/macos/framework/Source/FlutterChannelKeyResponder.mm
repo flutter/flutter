@@ -50,8 +50,12 @@
     case NSEventTypeFlagsChanged:
       if (event.modifierFlags < _previouslyPressedFlags) {
         type = @"keyup";
-      } else {
+      } else if (event.modifierFlags > _previouslyPressedFlags) {
         type = @"keydown";
+      } else {
+        // ignore duplicate modifiers; This can happen in situations like switching
+        // between application windows when MacOS only sends the up event to new window.
+        return;
       }
       break;
     default:
