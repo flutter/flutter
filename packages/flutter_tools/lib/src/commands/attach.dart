@@ -297,7 +297,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           buildObservatoryUri(
             device,
             debugUri?.host ?? hostname,
-            devicePort ?? debugUri.port,
+            debugPort ?? debugUri.port,
             hostVmservicePort,
             debugUri?.path,
           )
