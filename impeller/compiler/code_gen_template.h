@@ -24,7 +24,14 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   // Stage Inputs
 {% for stage_input in stage_inputs %}
   // Stage input {{stage_input.name}}
-  static constexpr ShaderStageInput kInput{{camel_case(stage_input.name)}} = {"{{stage_input.name}}", {{stage_input.location}}};
+  static constexpr ShaderStageInput kInput{{camel_case(stage_input.name)}} = {
+    "{{stage_input.name}}",          // name
+    {{stage_input.location}}u,        // attribute location
+    {{stage_input.type.type_name}},  // type
+    {{stage_input.type.bit_width}}u, // bit width
+    {{stage_input.type.vec_size}}u, // vec size
+    {{stage_input.type.columns}}u   // number of columns
+  };
 {% endfor %}
 }; // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info
 
