@@ -23,6 +23,10 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibrary::GetRenderPipeline(
     return future;
   }
 
+  // WIP Pipeline is not saved.
+
+  pipelines_[descriptor] = nullptr;
+
   auto completion_handler =
       ^(id<MTLRenderPipelineState> _Nullable render_pipeline_state,
         NSError* _Nullable error) {

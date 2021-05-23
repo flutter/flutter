@@ -4,8 +4,8 @@
 
 #include "impeller/compositor/pipeline_descriptor.h"
 
-#include "flutter/fml/hash_combine.h"
 #include "impeller/compositor/shader_library.h"
+#include "impeller/compositor/vertex_descriptor.h"
 
 namespace impeller {
 
@@ -13,18 +13,29 @@ PipelineDescriptor::PipelineDescriptor() = default;
 
 PipelineDescriptor::~PipelineDescriptor() = default;
 
-std::size_t PipelineDescriptor::HashEqual::operator()(
-    const PipelineDescriptor& des) const {
+// Comparable<PipelineDescriptor>
+std::size_t PipelineDescriptor::GetHash() const {
   auto seed = fml::HashCombine();
-  fml::HashCombineSeed(seed, des.label_);
-  for (const auto& entry : des.entrypoints_) {
-    fml::HashCombineSeed(seed, entry)
+  fml::HashCombineSeed(seed, label_);
+  fml::HashCombineSeed(seed, sample_count_);
+  for (const auto& entry : entrypoints_) {
+    fml::HashCombineSeed(seed, entry.first);
+    if (auto second = entry.second) {
+      fml::HashCombineSeed(seed, second->GetHash());
+    }
   }
+  if (vertex_descriptor_) {
+    fml::HashCombineSeed(seed, vertex_descriptor_->GetHash());
+  }
+  return seed;
 }
 
-bool PipelineDescriptor::HashEqual::operator()(
-    const PipelineDescriptor& d1,
-    const PipelineDescriptor& d2) const {}
+// Comparable<PipelineDescriptor>
+bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
+  return label_ == other.label_ && sample_count_ == other.sample_count_ &&
+         DeepCompareMap(entrypoints_, other.entrypoints_) &&
+         DeepComparePointer(vertex_descriptor_, other.vertex_descriptor_);
+}
 
 PipelineDescriptor& PipelineDescriptor::SetLabel(
     const std::string_view& label) {

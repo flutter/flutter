@@ -13,19 +13,26 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
+#include "impeller/compositor/comparable.h"
 #include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
 
 class Context;
 
-class ShaderFunction {
+class ShaderFunction : public Comparable<ShaderFunction> {
  public:
-  ~ShaderFunction();
+  virtual ~ShaderFunction();
 
   ShaderStage GetStage() const;
 
   id<MTLFunction> GetMTLFunction() const;
+
+  // Comparable<ShaderFunction>
+  std::size_t GetHash() const override;
+
+  // Comparable<ShaderFunction>
+  bool IsEqual(const ShaderFunction& other) const override;
 
  private:
   friend class ShaderLibrary;
