@@ -15,6 +15,16 @@
 
 namespace impeller {
 
+struct UniqueID {
+  size_t id;
+
+  UniqueID();
+
+  constexpr bool operator==(const UniqueID& other) const {
+    return id == other.id;
+  }
+};
+
 class ComparableBase {};
 
 template <class Type>
@@ -83,3 +93,14 @@ bool DeepCompareMap(const std::map<Key, std::shared_ptr<ComparableType>>& lhs,
 }
 
 }  // namespace impeller
+
+namespace std {
+
+template <>
+struct hash<impeller::UniqueID> {
+  constexpr std::size_t operator()(const impeller::UniqueID& id) {
+    return id.id;
+  }
+};
+
+}  // namespace std
