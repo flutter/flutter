@@ -12,7 +12,7 @@ VertexDescriptor::VertexDescriptor() = default;
 
 VertexDescriptor::~VertexDescriptor() = default;
 
-//| Comparable<VertexDescriptor>|
+// |Comparable<VertexDescriptor>|
 std::size_t VertexDescriptor::GetHash() const {
   FML_CHECK(false);
   return 0;
