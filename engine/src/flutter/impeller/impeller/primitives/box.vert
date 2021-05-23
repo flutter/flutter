@@ -18,6 +18,7 @@ struct Position {
 in vec3 vertexPosition;
 in vec3 vertexColor;
 in dvec4 hello;
+in dmat4x2 hello12;
 in uvec4 hello2;
 
 out vec3 color;
