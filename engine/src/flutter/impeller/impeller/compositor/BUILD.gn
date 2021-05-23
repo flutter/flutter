@@ -18,6 +18,8 @@ impeller_component("compositor") {
     "pipeline_library.mm",
     "renderer.h",
     "renderer.mm",
+    "shader_function.h",
+    "shader_function.mm",
     "shader_library.h",
     "shader_library.mm",
     "surface.h",
