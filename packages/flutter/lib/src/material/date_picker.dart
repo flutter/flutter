@@ -1143,6 +1143,9 @@ Future<DateTimeRange?> showDateRangePicker({
   );
 }
 
+/// Returns a string describing a date
+///
+/// If `dateFormat` is null, then it uses `localizations` to format the date
 String _formatDate(MaterialLocalizations localizations, DateTime date, intl.DateFormat? dateFormat, bool sameYear){
   return dateFormat == null ? (sameYear ? localizations.formatShortMonthDay(date) : localizations.formatShortDate(date)) : dateFormat.format(date);
 }
@@ -1229,6 +1232,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// If `null`, the date of `DateTime.now()` will be used.
   final DateTime? currentDate;
 
+  /// The optional [DateFormat] to be used for the text input.
   final intl.DateFormat? dateFormat;
 
   /// The initial date range picker entry mode.
