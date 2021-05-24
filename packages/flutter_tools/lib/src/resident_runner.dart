@@ -35,7 +35,7 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
