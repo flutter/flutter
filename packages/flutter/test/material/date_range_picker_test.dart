@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart' as intl;
 
 import 'feedback_tester.dart';
 
@@ -54,6 +55,7 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTimeRange?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
+    intl.DateFormat? dateFormat,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
@@ -80,6 +82,7 @@ void main() {
       firstDate: firstDate,
       lastDate: lastDate,
       currentDate: currentDate,
+      dateFormat: dateFormat,
       initialEntryMode: initialEntryMode,
       cancelText: cancelText,
       confirmText: confirmText,
@@ -851,6 +854,19 @@ void main() {
       // Test the end date text field
       _testInputDecorator(tester.widget(borderContainers.last), border, Colors.transparent);
     });
+
+    testWidgets('Parses dates in proper format', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        await tester.enterText(find.byType(TextField).at(0), '2016/12/25');
+        await tester.enterText(find.byType(TextField).at(1), '2016/12/27');
+        await tester.tap(find.text('OK'));
+
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.december, 25),
+          end: DateTime(2016, DateTime.december, 27),
+        ));
+      }, dateFormat: intl.DateFormat('yyyy/MM/dd'));
+    });
   });
 
   testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
@@ -1047,3 +1063,4 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
     );
   }
 }
+

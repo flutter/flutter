@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart' as intl;
 
 import 'app_bar.dart';
 import 'back_button.dart';
@@ -201,6 +202,7 @@ Future<DateTime?> showDatePicker({
   DateTime? currentDate,
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar,
   SelectableDayPredicate? selectableDayPredicate,
+  intl.DateFormat? dateFormat,
   String? helpText,
   String? cancelText,
   String? confirmText,
@@ -304,6 +306,7 @@ class DatePickerDialog extends StatefulWidget {
     DateTime? currentDate,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.selectableDayPredicate,
+    this.dateFormat,
     this.cancelText,
     this.confirmText,
     this.helpText,
@@ -361,6 +364,9 @@ class DatePickerDialog extends StatefulWidget {
 
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  /// Describes what format will be used to display the date in the input box.
+  final intl.DateFormat? dateFormat;
 
   /// The text that is displayed on the cancel button.
   final String? cancelText;
@@ -571,6 +577,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   onDateSubmitted: _handleDateChanged,
                   onDateSaved: _handleDateChanged,
                   selectableDayPredicate: widget.selectableDayPredicate,
+                  dateFormat: widget.dateFormat,
                   errorFormatText: widget.errorFormatText,
                   errorInvalidText: widget.errorInvalidText,
                   fieldHintText: widget.fieldHintText,
@@ -1031,6 +1038,7 @@ Future<DateTimeRange?> showDateRangePicker({
   DateTimeRange? initialDateRange,
   required DateTime firstDate,
   required DateTime lastDate,
+  intl.DateFormat? dateFormat,
   DateTime? currentDate,
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar,
   String? helpText,
@@ -1094,6 +1102,7 @@ Future<DateTimeRange?> showDateRangePicker({
     firstDate: firstDate,
     lastDate: lastDate,
     currentDate: currentDate,
+    dateFormat: dateFormat,
     initialEntryMode: initialEntryMode,
     helpText: helpText,
     cancelText: cancelText,
@@ -1134,18 +1143,20 @@ Future<DateTimeRange?> showDateRangePicker({
   );
 }
 
+String _formatDate(MaterialLocalizations localizations, DateTime date, intl.DateFormat? dateFormat, bool sameYear){
+  return dateFormat == null ? (sameYear ? localizations.formatShortMonthDay(date) : localizations.formatShortDate(date)) : dateFormat.format(date);
+}
+
 /// Returns a locale-appropriate string to describe the start of a date range.
 ///
 /// If `startDate` is null, then it defaults to 'Start Date', otherwise if it
 /// is in the same year as the `endDate` then it will use the short month
 /// day format (i.e. 'Jan 21'). Otherwise it will return the short date format
 /// (i.e. 'Jan 21, 2020').
-String _formatRangeStartDate(MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate) {
+String _formatRangeStartDate(MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate, intl.DateFormat? dateFormat) {
   return startDate == null
     ? localizations.dateRangeStartLabel
-    : (endDate == null || startDate.year == endDate.year)
-      ? localizations.formatShortMonthDay(startDate)
-      : localizations.formatShortDate(startDate);
+    : _formatDate(localizations, startDate, dateFormat, endDate == null || startDate.year == endDate.year);
 }
 
 /// Returns an locale-appropriate string to describe the end of a date range.
@@ -1154,12 +1165,10 @@ String _formatRangeStartDate(MaterialLocalizations localizations, DateTime? star
 /// is in the same year as the `startDate` and the `currentDate` then it will
 /// just use the short month day format (i.e. 'Jan 21'), otherwise it will
 /// include the year (i.e. 'Jan 21, 2020').
-String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate, DateTime currentDate) {
+String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate, DateTime currentDate, intl.DateFormat? dateFormat) {
   return endDate == null
     ? localizations.dateRangeEndLabel
-    : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)
-      ? localizations.formatShortMonthDay(endDate)
-      : localizations.formatShortDate(endDate);
+    : _formatDate(localizations, endDate, dateFormat, startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year);
 }
 
 /// A Material-style date range picker dialog.
@@ -1179,6 +1188,7 @@ class DateRangePickerDialog extends StatefulWidget {
     required this.firstDate,
     required this.lastDate,
     this.currentDate,
+    this.dateFormat,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.helpText,
     this.cancelText,
@@ -1218,6 +1228,8 @@ class DateRangePickerDialog extends StatefulWidget {
   ///
   /// If `null`, the date of `DateTime.now()` will be used.
   final DateTime? currentDate;
+
+  final intl.DateFormat? dateFormat;
 
   /// The initial date range picker entry mode.
   ///
@@ -1429,6 +1441,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           currentDate: widget.currentDate,
+          dateFormat: widget.dateFormat,
           onStartDateChanged: _handleStartDateChanged,
           onEndDateChanged: _handleEndDateChanged,
           onConfirm: _hasSelectedDateRange ? _handleOk : null,
@@ -1457,6 +1470,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           selectedStartDate: _selectedStart.value,
           selectedEndDate: _selectedEnd.value,
           currentDate: widget.currentDate,
+          dateFormat: widget.dateFormat,
           picker: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             height: orientation == Orientation.portrait
@@ -1471,6 +1485,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                   initialEndDate: _selectedEnd.value,
                   firstDate: widget.firstDate,
                   lastDate: widget.lastDate,
+                  dateFormat: widget.dateFormat,
                   onStartDateChanged: _handleStartDateChanged,
                   onEndDateChanged: _handleEndDateChanged,
                   autofocus: true,
@@ -1542,6 +1557,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     required this.firstDate,
     required this.lastDate,
     required this.currentDate,
+    required this.dateFormat,
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     required this.onConfirm,
@@ -1556,6 +1572,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final DateTime? currentDate;
+  final intl.DateFormat? dateFormat;
   final ValueChanged<DateTime> onStartDateChanged;
   final ValueChanged<DateTime?> onEndDateChanged;
   final VoidCallback? onConfirm;
@@ -1575,8 +1592,8 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         ? colorScheme.onPrimary
         : colorScheme.onSurface;
     final Color headerDisabledForeground = headerForeground.withOpacity(0.38);
-    final String startDateText = _formatRangeStartDate(localizations, selectedStartDate, selectedEndDate);
-    final String endDateText = _formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now());
+    final String startDateText = _formatRangeStartDate(localizations, selectedStartDate, selectedEndDate, dateFormat);
+    final String endDateText = _formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now(), dateFormat);
     final TextStyle? headlineStyle = textTheme.headline5;
     final TextStyle? startDateStyle = headlineStyle?.apply(
         color: selectedStartDate != null ? headerForeground : headerDisabledForeground,
@@ -2654,6 +2671,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     required this.selectedStartDate,
     required this.selectedEndDate,
     required this.currentDate,
+    required this.dateFormat,
     required this.picker,
     required this.onConfirm,
     required this.onCancel,
@@ -2666,6 +2684,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final DateTime? selectedStartDate;
   final DateTime? selectedEndDate;
   final DateTime? currentDate;
+  final intl.DateFormat? dateFormat;
   final Widget picker;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
@@ -2674,10 +2693,10 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String? helpText;
   final Widget? entryModeButton;
 
-  String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
+  String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now, intl.DateFormat? dateFormat) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String startText = _formatRangeStartDate(localizations, start, end);
-    final String endText = _formatRangeEndDate(localizations, start, end, now);
+    final String startText = _formatRangeStartDate(localizations, start, end, dateFormat);
+    final String endText = _formatRangeEndDate(localizations, start, end, now, dateFormat);
     if (start == null || end == null) {
       return localizations.unspecifiedDateRange;
     }
@@ -2702,7 +2721,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final TextStyle? dateStyle = orientation == Orientation.landscape
         ? textTheme.headline5?.apply(color: onPrimarySurfaceColor)
         : textTheme.headline4?.apply(color: onPrimarySurfaceColor);
-    final String dateText = _formatDateRange(context, selectedStartDate, selectedEndDate, currentDate!);
+    final String dateText = _formatDateRange(context, selectedStartDate, selectedEndDate, currentDate!, dateFormat);
     final String semanticDateText = selectedStartDate != null && selectedEndDate != null
         ? '${localizations.formatMediumDate(selectedStartDate!)} – ${localizations.formatMediumDate(selectedEndDate!)}'
         : '';
@@ -2781,6 +2800,7 @@ class _InputDateRangePicker extends StatefulWidget {
     DateTime? initialEndDate,
     required DateTime firstDate,
     required DateTime lastDate,
+    this.dateFormat,
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     this.helpText,
@@ -2816,6 +2836,8 @@ class _InputDateRangePicker extends StatefulWidget {
 
   /// The latest allowable [DateTime] that the user can select.
   final DateTime lastDate;
+
+  final intl.DateFormat? dateFormat;
 
   /// Called when the user changes the start date of the selected range.
   final ValueChanged<DateTime?>? onStartDateChanged;
@@ -2930,9 +2952,17 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     return startError == null && endError == null;
   }
 
-  DateTime? _parseDate(String? text) {
+  DateTime? _parseDate(String? text, intl.DateFormat? dateFormat) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return localizations.parseCompactDate(text);
+    DateTime? date;
+    if(dateFormat != null){
+      try{
+        date = dateFormat.parse(text!);
+      } on FormatException {
+        date = null;
+      }
+    }
+    return dateFormat == null ? localizations.parseCompactDate(text) : date;
   }
 
   String? _validateDate(DateTime? date) {
@@ -2958,7 +2988,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   void _handleStartChanged(String text) {
     setState(() {
       _startInputText = text;
-      _startDate = _parseDate(text);
+      _startDate = _parseDate(text, widget.dateFormat);
       widget.onStartDateChanged?.call(_startDate);
     });
     if (widget.autovalidate) {
@@ -2969,7 +2999,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   void _handleEndChanged(String text) {
     setState(() {
       _endInputText = text;
-      _endDate = _parseDate(text);
+      _endDate = _parseDate(text, widget.dateFormat);
       widget.onEndDateChanged?.call(_endDate);
     });
     if (widget.autovalidate) {
