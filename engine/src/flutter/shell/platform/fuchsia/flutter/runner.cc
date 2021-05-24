@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
+#include <lib/inspect/cpp/inspect.h>
 #include <lib/trace-engine/instrumentation.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
@@ -20,6 +21,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "lib/sys/cpp/component_context.h"
 #include "runtime/dart/utils/files.h"
+#include "runtime/dart/utils/root_inspect_node.h"
 #include "runtime/dart/utils/vmo.h"
 #include "runtime/dart/utils/vmservice_object.h"
 #include "third_party/icu/source/common/unicode/udata.h"
@@ -155,6 +157,22 @@ Runner::Runner(async::Loop* loop, sys::ComponentContext* context)
   context_->outgoing()->debug_dir()->AddEntry(
       dart_utils::VMServiceObject::kPortDirName,
       std::make_unique<dart_utils::VMServiceObject>());
+
+  inspect::Inspector* inspector = dart_utils::RootInspectNode::GetInspector();
+  inspector->GetRoot().CreateLazyValues(
+      "vmservice_port",
+      [&]() {
+        inspect::Inspector inspector;
+        dart_utils::VMServiceObject::LazyEntryVector out;
+        dart_utils::VMServiceObject().GetContents(&out);
+        std::string name = "";
+        if (out.size() > 0) {
+          name = out[0].name;
+        }
+        inspector.GetRoot().CreateString("vm_service_port", name, &inspector);
+        return fit::make_ok_promise(inspector);
+      },
+      inspector);
 
   SetupTraceObserver();
 #endif  // !defined(DART_PRODUCT)
