@@ -799,7 +799,6 @@ targets:
 
   - name: linux_complex_layout_scroll_perf__devtools_memory
     builder: Linux complex_layout_scroll_perf__devtools_memory
-    bringup: true
     presubmit: false
     scheduler: luci
 
