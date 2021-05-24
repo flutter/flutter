@@ -964,7 +964,6 @@ targets:
 
   - name: linux_platform_channels_benchmarks
     builder: Linux platform_channels_benchmarks
-    bringup: true
     presubmit: false
     scheduler: luci
 
