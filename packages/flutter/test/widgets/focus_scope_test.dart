@@ -1625,6 +1625,61 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(keyEventHandled, isTrue);
     });
+
+    testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/83023
+    testWidgets("Do not override the node's `onKey` when `Focus.onKey` is null", (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      bool? keyEventHandled;
+      final FocusNode focusNode = FocusNode(
+        onKey: (FocusNode node, RawKeyEvent event) {
+          keyEventHandled = true;
+          return KeyEventResult.handled;
+        }
+      );
+
+      await tester.pumpWidget(
+        Focus(
+          onKey: null,
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      Focus.of(key1.currentContext!).requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, true);
+
+      keyEventHandled = null;
+      // Update the Focus widget.
+      await tester.pumpWidget(
+        Focus(
+          onKey: null,
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, true);
+
+      keyEventHandled = null;
+      await tester.pumpWidget(
+        Focus(
+          onKey: (_, __) => KeyEventResult.ignored, // This one does nothing.
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+      expect(keyEventHandled, null);
+    });
   });
   group('ExcludeFocus', () {
     testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {

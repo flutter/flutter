@@ -269,11 +269,12 @@ enum UnfocusDisposition {
 ///
 /// The [FocusManager] receives key events from [RawKeyboard] and will pass them
 /// to the focused nodes. It starts with the node with the primary focus, and
-/// will call the [onKey] callback for that node. If the callback returns false,
-/// indicating that it did not handle the event, the [FocusManager] will move to
-/// the parent of that node and call its [onKey]. If that [onKey] returns true,
-/// then it will stop propagating the event. If it reaches the root
-/// [FocusScopeNode], [FocusManager.rootScope], the event is discarded.
+/// will call the [onKey] callback for that node. If the callback returns
+/// [KeyEventResult.ignored], indicating that it did not handle the event,
+/// the [FocusManager] will move to the parent of that node and call its
+/// [onKey]. If that [onKey] returns [KeyEventResult.handled], then it will stop
+/// propagating the event. If it reaches the root [FocusScopeNode],
+/// [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
 /// ## Focus Traversal
@@ -1027,7 +1028,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
     _context = context;
-    this.onKey = onKey ?? this.onKey;
+    if (onKey != null)
+      this.onKey = onKey;
     _attachment = FocusAttachment._(this);
     return _attachment!;
   }
