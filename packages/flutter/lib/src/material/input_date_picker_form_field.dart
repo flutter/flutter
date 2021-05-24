@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import 'date.dart';
 import 'input_border.dart';
@@ -52,6 +53,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.onDateSubmitted,
     this.onDateSaved,
     this.selectableDayPredicate,
+    this.dateFormat,
     this.errorFormatText,
     this.errorInvalidText,
     this.fieldHintText,
@@ -103,6 +105,8 @@ class InputDatePickerFormField extends StatefulWidget {
 
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  final DateFormat? dateFormat;
 
   /// The error text displayed if the entered date is not in the correct format.
   final String? errorFormatText;
@@ -172,8 +176,13 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
-      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      _inputText = localizations.formatCompactDate(_selectedDate!);
+      if (widget.dateFormat != null){
+        _inputText = widget.dateFormat!.format(_selectedDate!);
+      }
+      else {
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        _inputText = localizations.formatCompactDate(_selectedDate!);
+      }
       TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
@@ -204,7 +213,13 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   }
 
   String? _validateDate(String? text) {
-    final DateTime? date = _parseDate(text);
+    final DateTime? date;
+    if (widget.dateFormat != null && text != null){
+      date = widget.dateFormat!.parse(text);
+    }
+    else {
+      date = _parseDate(text);
+    }
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (!_isValidAcceptableDate(date)) {

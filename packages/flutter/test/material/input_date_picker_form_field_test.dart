@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,7 @@ void main() {
     ValueChanged<DateTime>? onDateSubmitted,
     ValueChanged<DateTime>? onDateSaved,
     SelectableDayPredicate? selectableDayPredicate,
+    DateFormat? dateFormat,
     String? errorFormatText,
     String? errorInvalidText,
     String? fieldHintText,
@@ -39,6 +41,7 @@ void main() {
             onDateSubmitted: onDateSubmitted,
             onDateSaved: onDateSaved,
             selectableDayPredicate: selectableDayPredicate,
+            dateFormat: dateFormat,
             errorFormatText: errorFormatText,
             errorInvalidText: errorInvalidText,
             fieldHintText: fieldHintText,
@@ -108,6 +111,16 @@ void main() {
       ));
 
       _textFieldController(tester).text = '02/21/2016';
+      formKey.currentState!.save();
+      expect(inputDate, equals(DateTime(2016, DateTime.february, 21)));
+
+      await tester.pumpWidget(_inputDatePickerField(
+        onDateSaved: (DateTime date) => inputDate = date,
+        formKey: formKey,
+        dateFormat: DateFormat('yyyy/MM/dd'),
+      ));
+
+      _textFieldController(tester).text = '2016/02/21';
       formKey.currentState!.save();
       expect(inputDate, equals(DateTime(2016, DateTime.february, 21)));
     });
@@ -293,6 +306,17 @@ void main() {
 
       // It shouldn't be filled, so the color should be transparent
       expect(containerColor, equals(Colors.transparent));
+    });
+
+    testWidgets('DateFormat is followed when provided', (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      final DateTime initialDate = DateTime(2016, DateTime.february, 21);
+      await tester.pumpWidget(_inputDatePickerField(
+        initialDate: initialDate,
+        formKey: formKey,
+        dateFormat: DateFormat('yyyy/MM/dd')
+      ));
+      expect(_textFieldController(tester).value.text, equals('2016/02/21'));
     });
 
   });
