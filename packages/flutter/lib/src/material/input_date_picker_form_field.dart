@@ -106,6 +106,8 @@ class InputDatePickerFormField extends StatefulWidget {
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
 
+  /// An optional [DateFormat] to determine what format the date will be displayed in, as well
+  /// as what format the input will require.
   final DateFormat? dateFormat;
 
   /// The error text displayed if the entered date is not in the correct format.
