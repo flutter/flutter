@@ -166,7 +166,7 @@ class Scrollbar extends StatefulWidget {
   final ScrollNotificationPredicate? notificationPredicate;
 
   @override
-  _ScrollbarState createState() => _ScrollbarState();
+  State<Scrollbar> createState() => _ScrollbarState();
 }
 
 class _ScrollbarState extends State<Scrollbar> {
@@ -176,7 +176,6 @@ class _ScrollbarState extends State<Scrollbar> {
   Widget build(BuildContext context) {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
-        child: widget.child,
         isAlwaysShown: widget.isAlwaysShown ?? false,
         thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
@@ -184,10 +183,10 @@ class _ScrollbarState extends State<Scrollbar> {
         radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: widget.controller,
         notificationPredicate: widget.notificationPredicate,
+        child: widget.child,
       );
     }
     return _MaterialScrollbar(
-      child: widget.child,
       controller: widget.controller,
       isAlwaysShown: widget.isAlwaysShown,
       showTrackOnHover: widget.showTrackOnHover,
@@ -196,6 +195,7 @@ class _ScrollbarState extends State<Scrollbar> {
       radius: widget.radius,
       notificationPredicate: widget.notificationPredicate,
       interactive: widget.interactive,
+      child: widget.child,
     );
   }
 }
@@ -399,7 +399,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   void handleHover(PointerHoverEvent event) {
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
-    if (isPointerOverScrollbar(event.position, event.kind)) {
+    if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
       // Pointer is hovering over the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();

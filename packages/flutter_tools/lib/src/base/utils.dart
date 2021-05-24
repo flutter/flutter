@@ -183,9 +183,6 @@ const int kMinColumnWidth = 10;
 ///          [arguments]
 /// ```
 ///
-/// If [columnWidth] is not specified, then the column width will be the
-/// [outputPreferences.wrapColumn], which is set with the --wrap-column option.
-///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// unchanged. If [shouldWrap] is specified, then it overrides the
 /// [outputPreferences.wrapText] setting.
@@ -347,7 +344,7 @@ List<String> _wrapTextAsLines(String text, {
     int? lastWhitespace;
     // Find the start of the current line.
     for (int index = 0; index < splitLine.length; ++index) {
-      if (splitLine[index].character.isNotEmpty && isWhitespace(splitLine[index])) {
+      if (splitLine[index].character.isNotEmpty && _isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
 
@@ -361,7 +358,7 @@ List<String> _wrapTextAsLines(String text, {
         result.add(joinRun(splitLine, currentLineStart, index));
 
         // Skip any intervening whitespace.
-        while (index < splitLine.length && isWhitespace(splitLine[index])) {
+        while (index < splitLine.length && _isWhitespace(splitLine[index])) {
           index++;
         }
 
@@ -378,7 +375,7 @@ List<String> _wrapTextAsLines(String text, {
 /// character.
 ///
 /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
-bool isWhitespace(_AnsiRun run) {
+bool _isWhitespace(_AnsiRun run) {
   final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
   return rune >= 0x0009 && rune <= 0x000D ||
       rune == 0x0020 ||

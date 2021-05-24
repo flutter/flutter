@@ -181,7 +181,7 @@ class ExpansionTile extends StatefulWidget {
   final Color? collapsedTextColor;
 
   @override
-  _ExpansionTileState createState() => _ExpansionTileState();
+  State<ExpansionTile> createState() => _ExpansionTileState();
 }
 
 class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
@@ -309,7 +309,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final bool shouldRemoveChildren = closed && !widget.maintainState;
 
     final Widget result = Offstage(
+      offstage: closed,
       child: TickerMode(
+        enabled: !closed,
         child: Padding(
           padding: widget.childrenPadding ?? EdgeInsets.zero,
           child: Column(
@@ -317,9 +319,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
             children: widget.children,
           ),
         ),
-        enabled: !closed,
       ),
-      offstage: closed,
     );
 
     return AnimatedBuilder(

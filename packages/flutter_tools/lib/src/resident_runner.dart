@@ -405,18 +405,6 @@ class FlutterDevice {
     return devFS.create();
   }
 
-  Future<List<vm_service.IsolateRef>> _getCurrentIsolates() async {
-    if (targetPlatform == TargetPlatform.web_javascript) {
-      final vm_service.VM vm = await vmService.service.getVM();
-      return vm.isolates;
-    }
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    return <vm_service.IsolateRef>[
-      for (FlutterView view in views)
-        view.uiIsolate,
-    ];
-  }
-
   Future<void> startEchoingDeviceLog() async {
     if (_loggingSubscription != null) {
       return;
@@ -672,6 +660,8 @@ abstract class ResidentHandlers {
   /// Whether all of the connected devices support hot reload.
   bool get canHotReload;
 
+  ResidentDevtoolsHandler get residentDevtoolsHandler;
+
   @protected
   Logger get logger;
 
@@ -697,9 +687,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpApp(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -713,9 +704,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpRenderTree(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -729,9 +721,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpLayerTree(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -747,9 +740,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -765,9 +759,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         final String data = await device.vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
       }
@@ -781,9 +776,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleDebugPaintSizeEnabled(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -796,9 +792,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleDebugCheckElevationsEnabled(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -816,9 +813,10 @@ abstract class ResidentHandlers {
       if (device.targetPlatform == TargetPlatform.web_javascript) {
         continue;
       }
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterTogglePerformanceOverlayOverride(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -831,9 +829,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleWidgetInspector(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -846,9 +845,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleInvertOversizedImages(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -861,9 +861,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterToggleProfileWidgetBuilds(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -875,9 +876,9 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    final List<vm_service.IsolateRef> views = await flutterDevices.first._getCurrentIsolates();
+    final List<FlutterView> views = await flutterDevices.first.vmService.getFlutterViews();
     final Brightness current = await flutterDevices.first.vmService.flutterBrightnessOverride(
-      isolateId: views.first.id,
+      isolateId: views.first.uiIsolate.id,
     );
     Brightness next;
     if (current == Brightness.light) {
@@ -886,9 +887,10 @@ abstract class ResidentHandlers {
       next = Brightness.light;
     }
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterBrightnessOverride(
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
           brightness: next,
         );
       }
@@ -902,17 +904,18 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    final List<vm_service.IsolateRef> views = await flutterDevices.first._getCurrentIsolates();
+    final List<FlutterView> views = await flutterDevices.first.vmService.getFlutterViews();
     final String from = await flutterDevices
       .first.vmService.flutterPlatformOverride(
-        isolateId: views.first.id,
+        isolateId: views.first.uiIsolate.id,
       );
     final String to = nextPlatform(from);
     for (final FlutterDevice device in flutterDevices) {
-      for (final vm_service.IsolateRef view in await device._getCurrentIsolates()) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterPlatformOverride(
           platform: to,
-          isolateId: view.id,
+          isolateId: view.uiIsolate.id,
         );
       }
     }
@@ -1001,17 +1004,17 @@ abstract class ResidentHandlers {
   }
 
   Future<bool> _toggleDebugBanner(FlutterDevice device, Future<void> Function() cb) async {
-    List<vm_service.IsolateRef> views = <vm_service.IsolateRef>[];
+    List<FlutterView> views = <FlutterView>[];
     if (supportsServiceProtocol) {
-      views = await device._getCurrentIsolates();
+      views = await device.vmService.getFlutterViews();
     }
 
     Future<bool> setDebugBanner(bool value) async {
       try {
-        for (final vm_service.IsolateRef view in views) {
+        for (final FlutterView view in views) {
           await device.vmService.flutterDebugAllowBanner(
             value,
-            isolateId: view.id,
+            isolateId: view.uiIsolate.id,
           );
         }
         return true;
@@ -1113,6 +1116,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   final CommandHelp commandHelp;
   final bool machine;
 
+  @override
   ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
   ResidentDevtoolsHandler _residentDevtoolsHandler;
 
@@ -1454,6 +1458,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   void printHelpDetails() {
+    commandHelp.v.print();
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       commandHelp.s.print();
     }
@@ -1694,6 +1699,9 @@ class TerminalHandler {
         return residentRunner.debugDumpRenderTree();
       case 'U':
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+      case 'v':
+      case 'V':
+        return residentRunner.residentDevtoolsHandler.launchDevToolsInBrowser(flutterDevices: residentRunner.flutterDevices);
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
@@ -1795,12 +1803,20 @@ abstract class DevtoolsLauncher {
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
   ///
+  /// [additionalArguments] may be optionally specified and are passed directly
+  /// to the devtools run command.
+  ///
   /// This method must return a future that is guaranteed not to fail, because it
   /// will be used in unawaited contexts.
-  @visibleForTesting
-  Future<void> launch(Uri vmServiceUri);
+  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments});
 
   Future<void> close();
+
+  /// When measuring devtools memory via addtional arguments, the launch process
+  /// will technically never complete.
+  ///
+  /// Us this as an indicator that the process has started.
+  Future<void> processStart;
 
   /// Returns a future that completes when the DevTools server is ready.
   ///

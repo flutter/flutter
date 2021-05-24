@@ -41,6 +41,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   final Platform _platform;
   final PersistentToolState _persistentToolState;
   final io.HttpClient _httpClient;
+  final Completer<void> _processStartCompleter = Completer<void>();
 
   io.Process _devToolsProcess;
 
@@ -49,7 +50,10 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   static const String _pubHostedUrlKey = 'PUB_HOSTED_URL';
 
   @override
-  Future<void> launch(Uri vmServiceUri) async {
+  Future<void> get processStart => _processStartCompleter.future;
+
+  @override
+  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments}) async {
     // Place this entire method in a try/catch that swallows exceptions because
     // this method is guaranteed not to return a Future that throws.
     try {
@@ -67,9 +71,16 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         final io.HttpClientResponse response = await request.close();
         await response.drain<void>();
         if (response.statusCode != io.HttpStatus.ok) {
+          _logger.printTrace(
+            'Skipping devtools launch because pub.dev responded with HTTP '
+            'status code ${response.statusCode} instead of ${io.HttpStatus.ok}.',
+          );
           offline = true;
         }
-      } on Exception {
+      } on Exception catch (e) {
+        _logger.printTrace(
+          'Skipping devtools launch because connecting to pub.dev failed with $e',
+        );
         offline = true;
       } on ArgumentError {
         if (!useOverrideUrl) {
@@ -109,7 +120,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'devtools',
         '--no-launch-browser',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
+        ...?additionalArguments,
       ]);
+      _processStartCompleter.complete();
       final Completer<Uri> completer = Completer<Uri>();
       _devToolsProcess.stdout
           .transform(utf8.decoder)

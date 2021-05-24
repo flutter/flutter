@@ -213,10 +213,49 @@ Future<void> main() async {
       r'The following message was thrown:\n'
       r'exception - empty stack\n'
       r'\n'
-      r'When the exception was thrown, this was the stack:\n'
-      r'...\n'
+      r'When the exception was thrown, this was the stack\n'
       r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
+    FlutterError.resetErrorCount();
+  });
+
+  test('Stack traces are not truncated', () async {
+    const String stackString = '''
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
+#2      new Text (package:flutter/src/widgets/text.dart:287:10)
+#3      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
+#4      StatefulElement.build (package:flutter/src/widgets/framework.dart:4414:27)
+#5      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)
+#6      Element.rebuild (package:flutter/src/widgets/framework.dart:4027:5)
+#7      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:4286:5)
+#8      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
+#9      ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)
+#10      Element.inflateWidget (package:flutter/src/widgets/framework.dart:3276:14)''';
+
+    expect(console, isEmpty);
+    FlutterError.dumpErrorToConsole(FlutterErrorDetails(
+      exception: AssertionError('Test assertion'),
+      stack: StackTrace.fromString(stackString),
+    ));
+    final String x = console.join('\n');
+    expect(x, startsWith('''
+══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════
+The following assertion was thrown:
+Assertion failed: "Test assertion"
+
+When the exception was thrown, this was the stack:
+#2      new Text (package:flutter/src/widgets/text.dart:287:10)
+#3      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
+#4      StatefulElement.build (package:flutter/src/widgets/framework.dart:4414:27)
+#5      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)
+#6      Element.rebuild (package:flutter/src/widgets/framework.dart:4027:5)
+#7      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:4286:5)
+#8      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
+#9      ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)''',
+    ));
+    console.clear();
+    FlutterError.resetErrorCount();
   });
 }

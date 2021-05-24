@@ -95,20 +95,25 @@ bool assertsEnabled() {
 ///
 /// The environment is favored over CLI args since the latter can have a default
 /// value, which the environment should be able to override.
-String getValueFromEnvOrArgs(
+String? getValueFromEnvOrArgs(
   String name,
   ArgResults argResults,
-  Map<String, String> env,
+  Map<String, String> env, {
+    bool allowNull = false,
+  }
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null ) {
-    return env[envName]!;
+    return env[envName];
   }
   final String? argValue = argResults[name] as String?;
   if (argValue != null) {
     return argValue;
   }
 
+  if (allowNull) {
+    return null;
+  }
   throw ConductorException(
     'Expected either the CLI arg --$name or the environment variable $envName '
     'to be provided!');

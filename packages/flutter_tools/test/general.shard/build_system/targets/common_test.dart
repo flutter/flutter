@@ -104,8 +104,7 @@ void main() {
       ], exitCode: 1),
     ]);
 
-    await expectLater(() => const KernelSnapshot().build(androidEnvironment),
-      throwsA(isA<Exception>()));
+    await expectLater(() => const KernelSnapshot().build(androidEnvironment), throwsException);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -434,8 +433,7 @@ void main() {
   });
 
   testUsingContext('AotAssemblyProfile throws error if built for non-iOS platform', () async {
-    expect(const AotAssemblyProfile().build(androidEnvironment),
-      throwsA(isA<Exception>()));
+    expect(const AotAssemblyProfile().build(androidEnvironment), throwsException);
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,

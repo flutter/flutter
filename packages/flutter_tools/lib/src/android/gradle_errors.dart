@@ -72,7 +72,10 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8FailureHandler,
-  androidXFailureHandler,
+  minSdkVersion,
+  transformInputIssue,
+  lockFileDepMissing,
+  androidXFailureHandler, // Keep last since the pattern is broader.
 ];
 
 // Permission defined error message.
@@ -351,4 +354,107 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'flavor-undefined',
+);
+
+
+final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[\:(.+)\]');
+
+/// Handler when a plugin requires a higher Android API level.
+@visibleForTesting
+final GradleHandledError minSdkVersion = GradleHandledError(
+  test: (String line) {
+    return _minSdkVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+
+    final Match minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
+    assert(minSdkVersionMatch.groupCount == 3);
+
+    globals.printStatus(
+      '\nThe plugin ${minSdkVersionMatch.group(3)} requires a higher Android SDK version.\n'+
+      globals.logger.terminal.bolden(
+        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+        'android {\n'
+        '  defaultConfig {\n'
+        '    minSdkVersion ${minSdkVersionMatch.group(2)}\n'
+        '  }\n'
+        '}\n\n'
+      )+
+      "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n"
+      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'plugin-min-sdk',
+);
+
+/// Handler when https://issuetracker.google.com/issues/141126614 or
+/// https://github.com/flutter/flutter/issues/58247 is triggered.
+@visibleForTesting
+final GradleHandledError transformInputIssue = GradleHandledError(
+  test: (String line) {
+    return line.contains('https://issuetracker.google.com/issues/158753935');
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+
+    globals.printStatus(
+      '\nThis issue appears to be https://github.com/flutter/flutter/issues/58247.\n'+
+      globals.logger.terminal.bolden(
+        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+        'android {\n'
+        '  lintOptions {\n'
+        '    checkReleaseBuilds false\n'
+        '  }\n'
+        '}'
+      )
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'transform-input-issue',
+);
+
+/// Handler when a dependency is missing in the lockfile.
+@visibleForTesting
+final GradleHandledError lockFileDepMissing = GradleHandledError(
+  test: (String line) {
+    return line.contains('which is not part of the dependency lock state');
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+
+    globals.printStatus(
+      '\nYou need to update the lockfile, or disable Gradle dependency locking.\n'+
+      globals.logger.terminal.bolden(
+        'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+        'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
+      )
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'lock-dep-issue',
 );

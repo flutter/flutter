@@ -663,7 +663,7 @@ class MaterialApp extends StatefulWidget {
   final bool debugShowMaterialGrid;
 
   @override
-  _MaterialAppState createState() => _MaterialAppState();
+  State<MaterialApp> createState() => _MaterialAppState();
 
   /// The [HeroController] used for Material page transitions.
   ///
@@ -713,8 +713,8 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
             return Scrollbar(
-              child: child,
               controller: details.controller,
+              child: child,
             );
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -737,9 +737,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return GlowingOverscrollIndicator(
-          child: child,
           axisDirection: details.direction,
           color: Theme.of(context).colorScheme.secondary,
+          child: child,
         );
     }
   }
@@ -770,9 +770,9 @@ class _MaterialAppState extends State<MaterialApp> {
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
     return FloatingActionButton(
-      child: const Icon(Icons.search),
       onPressed: onPressed,
       mini: true,
+      child: const Icon(Icons.search),
     );
   }
 
@@ -815,7 +815,7 @@ class _MaterialAppState extends State<MaterialApp> {
                 return widget.builder!(context, child);
               },
             )
-          : child!,
+          : child ?? const SizedBox.shrink(),
       ),
     );
   }

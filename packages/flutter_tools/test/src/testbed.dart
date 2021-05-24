@@ -36,7 +36,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   FileSystem: () => MemoryFileSystem(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   ProcessManager: () => FakeProcessManager.any(),
   Logger: () => BufferLogger(
-    terminal: AnsiTerminal(stdio: globals.stdio, platform: globals.platform),  // Danger, using real stdio.
+    terminal: AnsiTerminal(stdio: globals.stdio, platform: globals.platform), // Danger, using real stdio.
     outputPreferences: OutputPreferences.test(),
   ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),

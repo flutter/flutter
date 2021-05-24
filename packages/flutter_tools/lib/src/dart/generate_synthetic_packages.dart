@@ -9,6 +9,7 @@ import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 
@@ -62,7 +63,14 @@ Future<void> generateLocalizationsSyntheticPackage({
     environment,
   );
 
-  if (result == null || result.hasException) {
-    throwToolExit('Generating synthetic localizations package has failed.');
+  if (result == null) {
+    throwToolExit('Generating synthetic localizations package failed: result is null.');
+  }
+  if (result.hasException) {
+    throwToolExit(
+      'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
+      '\n\n'
+      '${result.exceptions.values.map<Object>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
+    );
   }
 }

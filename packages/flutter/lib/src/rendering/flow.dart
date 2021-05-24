@@ -70,7 +70,7 @@ abstract class FlowDelegate {
   /// respecting the constraints.
   ///
   /// If this function depends on information other than the given constraints,
-  /// override [shouldRelayout] to indicate when when the container should
+  /// override [shouldRelayout] to indicate when the container should
   /// relayout.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
@@ -85,7 +85,7 @@ abstract class FlowDelegate {
   /// let them be larger or smaller than 100.0 by 100.0.
   ///
   /// If this function depends on information other than the given constraints,
-  /// override [shouldRelayout] to indicate when when the container should
+  /// override [shouldRelayout] to indicate when the container should
   /// relayout.
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) => constraints;
 
@@ -103,7 +103,7 @@ abstract class FlowDelegate {
   /// matrices for the children.
   ///
   /// If this function depends on information other than the given context,
-  /// override [shouldRepaint] to indicate when when the container should
+  /// override [shouldRepaint] to indicate when the container should
   /// relayout.
   void paintChildren(FlowPaintingContext context);
 

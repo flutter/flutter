@@ -214,7 +214,7 @@ void main() {
       );
       expect(
         () async => portDiscovery.query(),
-        throwsA(isA<Exception>()),
+        throwsException,
       );
     });
 
