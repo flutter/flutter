@@ -14,6 +14,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -238,6 +239,42 @@ public class AccessibilityBridgeTest {
     sentences = event.getText();
     assertEquals(sentences.size(), 1);
     assertEquals(sentences.get(0).toString(), "new_node2");
+  }
+
+  @Test
+  public void itSetsTraversalAfter() {
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    TestSemanticsNode node1 = new TestSemanticsNode();
+    node1.id = 1;
+    node1.label = "node1";
+    root.children.add(node1);
+    TestSemanticsNode node2 = new TestSemanticsNode();
+    node2.id = 2;
+    node2.label = "node2";
+    root.children.add(node2);
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
+
+    AccessibilityBridge spyAccessibilityBridge = spy(accessibilityBridge);
+    AccessibilityNodeInfo mockNodeInfo2 = mock(AccessibilityNodeInfo.class);
+
+    when(spyAccessibilityBridge.obtainAccessibilityNodeInfo(mockRootView, 2))
+        .thenReturn(mockNodeInfo2);
+    spyAccessibilityBridge.createAccessibilityNodeInfo(2);
+    verify(mockNodeInfo2, times(1)).setTraversalAfter(eq(mockRootView), eq(1));
   }
 
   @Test
