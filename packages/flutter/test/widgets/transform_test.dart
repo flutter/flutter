@@ -430,7 +430,7 @@ void main() {
         filterQuality: FilterQuality.low,
       ),
     );
-    expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+    expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
 
     await tester.pumpWidget(
       Transform.rotate(
@@ -438,7 +438,7 @@ void main() {
         child: const SizedBox(width: 100, height: 100),
       ),
     );
-    expect(tester.layers.whereType<ImageFilterLayer>().length, 0);
+    expect(tester.layers.whereType<ImageFilterLayer>(), isEmpty);
 
     await tester.pumpWidget(
       Transform.rotate(
@@ -446,7 +446,7 @@ void main() {
         filterQuality: FilterQuality.low,
       ),
     );
-    expect(tester.layers.whereType<ImageFilterLayer>().length, 0);
+    expect(tester.layers.whereType<ImageFilterLayer>(), isEmpty);
 
     await tester.pumpWidget(
       Transform.rotate(
@@ -455,7 +455,7 @@ void main() {
         filterQuality: FilterQuality.low,
       ),
     );
-    expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+    expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
   });
 
   testWidgets('Transform layers with filterQuality golden', (WidgetTester tester) async {
