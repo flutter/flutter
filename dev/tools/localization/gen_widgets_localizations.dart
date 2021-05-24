@@ -19,7 +19,6 @@ String generateWidgetsHeader(String regenerateInstructions) {
 import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart' as intl;
 
 import '../widgets_localizations.dart';
 
