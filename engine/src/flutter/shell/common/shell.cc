@@ -427,8 +427,8 @@ Shell::~Shell() {
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([engine = std::move(engine_), &ui_latch]() mutable {
-        engine.reset();
+      fml::MakeCopyable([this, &ui_latch]() mutable {
+        engine_.reset();
         ui_latch.Signal();
       }));
   ui_latch.Wait();
