@@ -147,7 +147,6 @@ void main() {
 
       setUp(() {
         artifacts = Artifacts.test();
-        //mockCache = MockCache();
         usage = TestUsage();
         fs = MemoryFileSystem.test();
 
