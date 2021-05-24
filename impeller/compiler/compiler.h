@@ -14,6 +14,7 @@
 #include "flutter/impeller/compiler/reflector.h"
 #include "shaderc/shaderc.hpp"
 #include "third_party/spirv_cross/spirv_msl.hpp"
+#include "third_party/spirv_cross/spirv_parser.hpp"
 
 namespace impeller {
 namespace compiler {
