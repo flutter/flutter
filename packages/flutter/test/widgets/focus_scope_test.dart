@@ -1626,13 +1626,6 @@ void main() {
       expect(keyEventHandled, isTrue);
     });
 
-    testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
-      final TestSemantics expectedSemantics = TestSemantics.root();
-      expect(semantics, hasSemantics(expectedSemantics));
-    });
-
     // Regression test for https://github.com/flutter/flutter/issues/83023
     testWidgets("Do not override the node's `onKey` when `Focus.onKey` is null", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
