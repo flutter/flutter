@@ -14,6 +14,11 @@ import UIKit
     GeneratedPluginRegistrant.register(with: self)
 
     let registrar = self.registrar(forPlugin: "Echo")!
+    let reset = FlutterBasicMessageChannel(
+      name: "dev.flutter.echo.reset", binaryMessenger: registrar.messenger())
+    reset.setMessageHandler { (input, reply) in
+      // noop
+    }
     let basicStandard = FlutterBasicMessageChannel(
       name: "dev.flutter.echo.basic.standard", binaryMessenger: registrar.messenger(),
       codec: FlutterStandardMessageCodec.sharedInstance())
