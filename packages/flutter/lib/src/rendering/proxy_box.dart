@@ -1122,6 +1122,7 @@ class RenderShaderMask extends RenderProxyBox {
     if (child != null) {
       assert(needsCompositing);
       layer ??= ShaderMaskLayer();
+      assert(!layer!.debugDisposed!);
       layer!
         ..shader = _shaderCallback(Offset.zero & size)
         ..maskRect = offset & size
@@ -1190,6 +1191,7 @@ class RenderBackdropFilter extends RenderProxyBox {
     if (child != null) {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
+      assert(!layer!.debugDisposed!);
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
@@ -1932,6 +1934,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         return true;
       }());
       layer ??= PhysicalModelLayer();
+      assert(!layer!.debugDisposed!);
       layer!
         ..clipPath = offsetRRectAsPath
         ..clipBehavior = clipBehavior
@@ -2031,6 +2034,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         return true;
       }());
       layer ??= PhysicalModelLayer();
+      assert(!layer!.debugDisposed!);
       layer!
         ..clipPath = offsetPath
         ..clipBehavior = clipBehavior
@@ -3117,7 +3121,6 @@ class RenderRepaintBoundary extends RenderProxyBox {
     final OffsetLayer offsetLayer = layer! as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
-
 
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child

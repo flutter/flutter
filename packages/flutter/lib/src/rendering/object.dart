@@ -128,6 +128,7 @@ class PaintingContext extends ClipContext {
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
       childLayer.removeAllChildren();
+      childLayer.dispose();
     }
     assert(identical(childLayer, child._layer));
     assert(child._layer is OffsetLayer);
@@ -214,6 +215,7 @@ class PaintingContext extends ClipContext {
       }());
     }
     assert(child._layer is OffsetLayer);
+    assert(!child._layer!.debugDisposed!, '${child._layer}');
     final OffsetLayer childOffsetLayer = child._layer! as OffsetLayer;
     childOffsetLayer.offset = offset;
     appendLayer(child._layer!);
@@ -231,6 +233,7 @@ class PaintingContext extends ClipContext {
   @protected
   void appendLayer(Layer layer) {
     assert(!_isRecording);
+    assert(!layer.debugDisposed!);
     layer.remove();
     _containerLayer.append(layer);
   }
@@ -275,6 +278,7 @@ class PaintingContext extends ClipContext {
     _recorder = ui.PictureRecorder();
     _canvas = Canvas(_recorder!);
     _containerLayer.append(_currentLayer!);
+    _containerLayer.addDisposalHandle(_currentLayer!.createDisposalHandle(_containerLayer.runtimeType.toString()));
   }
 
   /// Stop recording to a canvas if recording has started.
@@ -1230,6 +1234,45 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     });
   }
 
+  /// Whether this has been disposed.
+  ///
+  /// If asserts are disabled, this property is always null.
+  bool? get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _debugDisposed;
+      return true;
+    }());
+    return disposed;
+  }
+
+  bool _debugDisposed = false;
+
+  /// Release any resources held by this render object.
+  ///
+  /// If this render object has created any children directly, it should dispose
+  /// of those children in this method as well. However, it should not
+  /// dispose of children that were created by some other object, such as
+  /// a [RenderObjectElement].
+  ///
+  /// If [isRepaintBoundary] returns true, the layer tree rooted at this
+  /// object's layer will also dispose.
+  @mustCallSuper
+  void dispose() {
+    assert(!_debugDisposed);
+    _layer?.dispose();
+    _layer = null;
+    _disposalHandle?.dispose();
+    _disposalHandle = null;
+    assert(() {
+      visitChildren((RenderObject child) {
+        assert(child._debugDisposed);
+      });
+      _debugDisposed = true;
+      return true;
+    }());
+  }
+
   // LAYOUT
 
   /// Data for use by the parent render object.
@@ -1367,6 +1410,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool get _debugCanPerformMutations {
     late bool result;
     assert(() {
+      if (_debugDisposed) {
+        result = false;
+        return true;
+      }
       if (owner != null && !owner!.debugDoingLayout) {
         result = true;
         return true;
@@ -1996,12 +2043,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   @protected
   set layer(ContainerLayer? newLayer) {
+    assert(newLayer == null || !newLayer.debugDisposed!);
     assert(
       !isRepaintBoundary,
       'Attempted to set a layer to a repaint boundary render object.\n'
       'The framework creates and assigns an OffsetLayer to a repaint '
       'boundary automatically.',
     );
+    _layer?.dispose();
     _layer = newLayer;
   }
   ContainerLayer? _layer;
@@ -2228,12 +2277,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layer != null); // use scheduleInitialPaint the first time
-    _layer!.detach();
+    _layer!..detach()..dispose();
     _layer = rootLayer;
     markNeedsPaint();
   }
 
+  DisposalHandle? _disposalHandle;
+
   void _paintWithContext(PaintingContext context, Offset offset) {
+    assert(!_debugDisposed);
     assert(() {
       if (_debugDoingThisPaint) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2326,6 +2378,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       paint(context, offset);
       assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
       assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
+      _disposalHandle?.dispose();
+      _disposalHandle = context._currentLayer?.createDisposalHandle(toStringShort());
     } catch (e, stack) {
       _debugReportException('paint', e, stack);
     }
@@ -2841,6 +2895,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       header += ' NEEDS-COMPOSITING-BITS-UPDATE';
     if (!attached)
       header += ' DETACHED';
+    if (_debugDisposed)
+      header += ' DISPOSED';
     return header;
   }
 

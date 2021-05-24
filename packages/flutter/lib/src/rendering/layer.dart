@@ -93,6 +93,46 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+
+  bool _debugDisposed = false;
+
+  /// If asserts are enabled, this returns true if [dispose] has been called.
+  ///
+  /// When asserts are disabled, this returns null.
+  bool? get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _debugDisposed;
+      return true;
+    }());
+    return disposed;
+  }
+
+  bool _disposedEngineLayer = false;
+  StackTrace? stack;
+
+  bool assertNotDisposedEngineLayer() {
+    // assert(!_disposedEngineLayer, 'Expected to not be disposed but got disposed here: $stack');
+    return true;
+  }
+
+  /// Release any underlying resources from this layer.
+  ///
+  /// Once this method is called, this object should not be used further. If
+  /// asserts are enabled, the [debugDisposed] property is set to true after
+  /// this is called.
+  @mustCallSuper
+  void dispose() {
+    _engineLayer?.dispose();
+    _engineLayer = null;
+    _disposedEngineLayer = true;
+    stack = StackTrace.current;
+    // assert(() {
+    //   _debugDisposed = true;
+    //   return true;
+    // }());
+  }
+
   /// This layer's parent in the layer tree.
   ///
   /// The [parent] of the root node in the layer tree is null.
@@ -139,7 +179,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     if (_needsAddToScene) {
       return;
     }
-
     _needsAddToScene = true;
   }
 
@@ -187,7 +226,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// layer. The web engine could, for example, update the properties of
   /// previously rendered HTML DOM nodes rather than creating new nodes.
   @protected
-  ui.EngineLayer? get engineLayer => _engineLayer;
+  ui.EngineLayer? get engineLayer {
+    assert(assertNotDisposedEngineLayer());
+    return _engineLayer;
+  }
 
   /// Sets the engine layer used to render this layer.
   ///
@@ -196,6 +238,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// "push" methods, such as [ui.SceneBuilder.pushOpacity].
   @protected
   set engineLayer(ui.EngineLayer? value) {
+    _disposedEngineLayer = false;
+    _engineLayer?.dispose();
     _engineLayer = value;
     if (!alwaysNeedsAddToScene) {
       // The parent must construct a new engine layer to add this layer to, and
@@ -222,6 +266,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         parent!.markNeedsAddToScene();
       }
     }
+    assert(_engineLayer == value);
   }
   ui.EngineLayer? _engineLayer;
 
@@ -269,6 +314,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This has no effect if the layer's parent is already null.
   @mustCallSuper
   void remove() {
+    assert(parent?.debugDisposed != true);
     parent?._removeChild(this);
   }
 
@@ -391,6 +437,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
+    assert(_needsAddToScene || !_disposedEngineLayer);
     // There can't be a loop by adding a retained layer subtree whose
     // _needsAddToScene is false.
     //
@@ -425,7 +472,24 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
+    properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer), level: _engineLayer == null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
+    properties.add(DiagnosticsProperty<bool>('disposed', _debugDisposed, level: _debugDisposed ? DiagnosticLevel.warning : DiagnosticLevel.hidden));
+  }
+}
+
+class DisposalHandle {
+  DisposalHandle._(PictureLayer this._layer, this.info) : _id = _layer._ids++;
+
+
+  final int _id;
+  final String info;
+
+  PictureLayer? _layer;
+
+  void dispose() {
+    assert(_layer != null);
+    _layer!._removeHandle(this);
+    _layer = null;
   }
 }
 
@@ -435,6 +499,41 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 class PictureLayer extends Layer {
   /// Creates a leaf layer for the layer tree.
   PictureLayer(this.canvasBounds);
+
+  int _ids = 0;
+  int handleCount = 0;
+  DisposalHandle createDisposalHandle(String info) {
+    final DisposalHandle handle = DisposalHandle._(this, info);
+    if (_picture != null) {
+      _picture!.addDartReferent(handle._id, info);
+    }
+    _handles.add(handle);
+    handleCount++;
+    return handle;
+  }
+
+  final List<DisposalHandle> _handles = <DisposalHandle>[];
+
+  void _removeHandle(DisposalHandle handle) {
+    _handles.remove(handle);
+    if (_picture == null) {
+      print('OH NO ${handle.info}');
+    } else {
+      _picture!.removeDartReferent(handle._id);
+    }
+
+    if (_handles.isEmpty) {
+      dispose();
+    }
+  }
+
+  @override
+  void dispose() {
+    assert(picture != null);
+    _picture?.dispose();
+    _picture = null;
+    super.dispose();
+  }
 
   /// The bounds that were used for the canvas that drew this layer's [picture].
   ///
@@ -450,11 +549,19 @@ class PictureLayer extends Layer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  ui.Picture? get picture => _picture;
+  ui.Picture? get picture {
+    assert(_picture != null);
+    return _picture;
+  }
+
   ui.Picture? _picture;
   set picture(ui.Picture? picture) {
     markNeedsAddToScene();
+    _picture?.dispose();
     _picture = picture;
+    for (final info in _handles) {
+      _picture?.addDartReferent(info._id, info.info);
+    }
   }
 
   /// Hints that the painting in this layer is complex and would benefit from
@@ -468,6 +575,7 @@ class PictureLayer extends Layer {
   bool get isComplexHint => _isComplexHint;
   bool _isComplexHint = false;
   set isComplexHint(bool value) {
+    assert(_picture != null);
     if (value != _isComplexHint) {
       _isComplexHint = value;
       markNeedsAddToScene();
@@ -486,6 +594,7 @@ class PictureLayer extends Layer {
   bool get willChangeHint => _willChangeHint;
   bool _willChangeHint = false;
   set willChangeHint(bool value) {
+    assert(_picture != null);
     if (value != _willChangeHint) {
       _willChangeHint = value;
       markNeedsAddToScene();
@@ -494,6 +603,7 @@ class PictureLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(picture != null);
     builder.addPicture(layerOffset, picture!, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
   }
@@ -573,6 +683,7 @@ class TextureLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addTexture(
       textureId,
@@ -612,6 +723,7 @@ class PlatformViewLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addPlatformView(
       viewId,
@@ -683,6 +795,7 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(optionsMask != null);
     final Rect shiftedOverlayRect = layerOffset == Offset.zero ? overlayRect : overlayRect.shift(layerOffset);
     builder.addPerformanceOverlay(optionsMask, shiftedOverlayRect);
@@ -703,6 +816,22 @@ class PerformanceOverlayLayer extends Layer {
 /// into the composited rendering in order. There are subclasses of
 /// [ContainerLayer] which apply more elaborate effects in the process.
 class ContainerLayer extends Layer {
+
+  List<DisposalHandle> _handles = <DisposalHandle>[];
+
+  void addDisposalHandle(DisposalHandle handle) {
+    _handles.add(handle);
+  }
+
+  @override
+  void dispose() {
+    for (DisposalHandle handle in _handles) {
+      handle.dispose();
+    }
+    _handles.clear();
+    super.dispose();
+  }
+
   /// The first composited layer in this layer's child list.
   Layer? get firstChild => _firstChild;
   Layer? _firstChild;
@@ -893,6 +1022,7 @@ class ContainerLayer extends Layer {
     super.attach(owner);
     Layer? child = firstChild;
     while (child != null) {
+      assert(!child._debugDisposed);
       child.attach(owner);
       child = child.nextSibling;
     }
@@ -910,6 +1040,7 @@ class ContainerLayer extends Layer {
 
   /// Adds the given layer to the end of this layer's child list.
   void append(Layer child) {
+    assert(!child._debugDisposed);
     assert(child != this);
     assert(child != firstChild);
     assert(child != lastChild);
@@ -979,6 +1110,7 @@ class ContainerLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     addChildrenToScene(builder, layerOffset);
   }
 
@@ -1120,6 +1252,7 @@ class OffsetLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     // Skia has a fast path for concatenating scale/translation only matrices.
     // Hence pushing a translation-only transform layer should be fast. For
     // retained rendering, we don't want to push the offset down to each leaf
@@ -1242,6 +1375,7 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(clipRect != null);
     assert(clipBehavior != null);
     bool enabled = true;
@@ -1326,6 +1460,7 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(clipRRect != null);
     assert(clipBehavior != null);
     bool enabled = true;
@@ -1410,6 +1545,7 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(clipPath != null);
     assert(clipBehavior != null);
     bool enabled = true;
@@ -1465,6 +1601,7 @@ class ColorFilterLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(colorFilter != null);
     engineLayer = builder.pushColorFilter(
       colorFilter!,
@@ -1507,6 +1644,7 @@ class ImageFilterLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(imageFilter != null);
     engineLayer = builder.pushImageFilter(
       imageFilter!,
@@ -1564,6 +1702,7 @@ class TransformLayer extends OffsetLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(transform != null);
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
@@ -1674,6 +1813,7 @@ class OpacityLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(alpha != null);
     bool enabled = firstChild != null;  // don't add this layer if there's no child
     assert(() {
@@ -1773,6 +1913,7 @@ class ShaderMaskLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(shader != null);
     assert(maskRect != null);
     assert(blendMode != null);
@@ -1843,6 +1984,7 @@ class BackdropFilterLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(filter != null);
     engineLayer = builder.pushBackdropFilter(
       filter!,
@@ -1966,6 +2108,7 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(clipPath != null);
     assert(clipBehavior != null);
     assert(elevation != null);
@@ -2101,6 +2244,7 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
@@ -2369,6 +2513,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(assertNotDisposedEngineLayer());
     assert(link != null);
     assert(showWhenUnlinked != null);
     if (link.leader == null && !showWhenUnlinked!) {

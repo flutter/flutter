@@ -208,4 +208,19 @@ Future<void> main() async {
     image.dispose();
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // Web doesn't track open image handles.
+
+  test('Render image disposes its image when it is disposed', () async {
+    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+
+    final RenderImage renderImage = RenderImage(image: image.clone());
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
+
+    renderImage.dispose();
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+    expect(renderImage.image, null);
+
+    image.dispose();
+    expect(image.debugGetOpenHandleStackTraces()!.length, 0);
+  }, skip: kIsWeb); // Web doesn't track open image handles.
 }
