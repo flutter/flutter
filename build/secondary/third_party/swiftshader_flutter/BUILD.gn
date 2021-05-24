@@ -143,12 +143,12 @@ source_set("subzero") {
     cflags += [ "-Wno-macro-redefined" ]
   }
 
-  if (target_cpu == "x64") {
+  if (current_cpu == "x64") {
     defines += [
       "SZTARGET=X8664",
       "SUBZERO_TARGET=X8664",
     ]
-  } else if (target_cpu == "x86") {
+  } else if (current_cpu == "x86") {
     defines += [
       "SZTARGET=X8632",
       "SUBZERO_TARGET=X8632",
@@ -230,12 +230,12 @@ source_set("subzero") {
     "$source_root/third_party/subzero/src/IceVariableSplitting.cpp",
   ]
 
-  if (target_cpu == "x64") {
+  if (current_cpu == "x64") {
     sources += [
       "$source_root/third_party/subzero/src/IceInstX8664.cpp",
       "$source_root/third_party/subzero/src/IceTargetLoweringX8664.cpp",
     ]
-  } else if (target_cpu == "x86") {
+  } else if (current_cpu == "x86") {
     sources += [
       "$source_root/third_party/subzero/src/IceInstX8632.cpp",
       "$source_root/third_party/subzero/src/IceTargetLoweringX8632.cpp",
