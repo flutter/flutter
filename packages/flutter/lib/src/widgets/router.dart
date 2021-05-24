@@ -632,7 +632,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   void _handleRouteInformationProviderNotification() {
     assert(widget.routeInformationProvider!.value != null);
-    _processRouteInformation(widget.routeInformationProvider!.value!, () => widget.routerDelegate.setNewRoutePath);
+    _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
   }
 
   Future<bool> _handleBackButtonDispatcherNotification() {
