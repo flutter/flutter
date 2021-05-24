@@ -41,6 +41,7 @@ import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
+import 'src/commands/setup.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
@@ -186,6 +187,7 @@ List<FlutterCommand> generateCommands({
     stdio: globals.stdio,
     fileSystem: globals.fs,
   ),
+  SetupCommand(),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(),
