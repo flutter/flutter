@@ -664,27 +664,20 @@ class WebDevFS implements DevFS {
   StreamSubscription<void> _connectedApps;
 
   /// Connect and retrieve the [DebugConnection] for the current application.
-  ///
-  /// Only calls [AppConnection.runMain] on the subsequent connections.
   Future<ConnectionResult> connect(bool useDebugExtension) {
-    final Completer<ConnectionResult> firstConnection =
-        Completer<ConnectionResult>();
-    _connectedApps =
-        dwds.connectedApps.listen((AppConnection appConnection) async {
+    final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
+    _connectedApps = dwds.connectedApps.listen((AppConnection appConnection) async {
       try {
         final DebugConnection debugConnection = useDebugExtension
             ? await (_cachedExtensionFuture ??=
                 dwds.extensionDebugConnections.stream.first)
             : await dwds.debugConnection(appConnection);
-        if (firstConnection.isCompleted) {
-          appConnection.runMain();
-        } else {
+        if (!firstConnection.isCompleted) {
           final vm_service.VmService vmService = await createVmServiceDelegate(
             Uri.parse(debugConnection.uri),
             logger: globals.logger,
           );
-          firstConnection
-              .complete(ConnectionResult(appConnection, debugConnection, vmService));
+          firstConnection.complete(ConnectionResult(appConnection, debugConnection, vmService));
         }
       } on Exception catch (error, stackTrace) {
         if (!firstConnection.isCompleted) {
@@ -692,8 +685,7 @@ class WebDevFS implements DevFS {
         }
       }
     }, onError: (dynamic error, StackTrace stackTrace) {
-      globals.printError(
-          'Unknown error while waiting for debug connection:$error\n$stackTrace');
+      globals.printError('Unknown error while waiting for debug connection:$error\n$stackTrace');
       if (!firstConnection.isCompleted) {
         firstConnection.completeError(error, stackTrace);
       }
