@@ -956,7 +956,6 @@ targets:
 
   - name: linux_new_gallery__crane_perf
     builder: Linux new_gallery__crane_perf
-    bringup: true
     presubmit: false
     scheduler: luci
 
