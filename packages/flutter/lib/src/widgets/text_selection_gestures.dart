@@ -263,7 +263,7 @@ class TextEditingGestures extends InheritedWidget {
           SelectTextAtPositionIntent(
             fromPosition: details.globalPosition,
             textBoundaryType: TextBoundary.word,
-            cause: SelectionChangedCause.longPress,
+            cause: SelectionChangedCause.tap,
           ),
         );
         Actions.maybeInvoke(context, SelectionToolbarControlIntent.show);
