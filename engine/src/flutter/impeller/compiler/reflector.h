@@ -9,6 +9,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "third_party/spirv_cross/spirv_msl.hpp"
+#include "third_party/spirv_cross/spirv_parser.hpp"
 
 namespace impeller {
 namespace compiler {
@@ -20,7 +21,9 @@ class Reflector {
     std::string header_file_name;
   };
 
-  Reflector(Options options, const spirv_cross::CompilerMSL& compiler);
+  Reflector(Options options,
+            const spirv_cross::ParsedIR& ir,
+            const spirv_cross::CompilerMSL& compiler);
 
   ~Reflector();
 

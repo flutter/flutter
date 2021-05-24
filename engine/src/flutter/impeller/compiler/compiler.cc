@@ -278,8 +278,13 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   }
 
   // MSL Generation.
-  spirv_cross::CompilerMSL msl_compiler(
-      spv_result_->cbegin(), spv_result_->cend() - spv_result_->cbegin());
+  spirv_cross::Parser parser(spv_result_->cbegin(),
+                             spv_result_->cend() - spv_result_->cbegin());
+  // The parser and compiler must be run separately because the parser contains
+  // meta information (like type member names) that are useful for reflection.
+  parser.parse();
+  const auto& parsed_ir = parser.get_parsed_ir();
+  spirv_cross::CompilerMSL msl_compiler(parsed_ir);
 
   {
     msl_compiler.rename_entry_point("main", options_.entry_point_name,
@@ -299,8 +304,8 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  reflector_ =
-      std::make_unique<Reflector>(std::move(reflector_options), msl_compiler);
+  reflector_ = std::make_unique<Reflector>(std::move(reflector_options),
+                                           parsed_ir, msl_compiler);
 
   if (!reflector_->IsValid()) {
     COMPILER_ERROR << "Could not complete reflection on generated shader.";

@@ -4,6 +4,7 @@
 
 #include "flutter/impeller/compiler/reflector.h"
 
+#include <atomic>
 #include <optional>
 #include <sstream>
 
@@ -66,9 +67,47 @@ static std::string BaseTypeToString(spirv_cross::SPIRType::BaseType type) {
   }
 }
 
+static std::optional<std::string> GetMemberNameAtIndexIfExists(
+    const spirv_cross::ParsedIR& ir,
+    const spirv_cross::CompilerMSL& compiler,
+    const spirv_cross::SPIRType& type,
+    size_t index) {
+  if (type.type_alias != 0) {
+    return GetMemberNameAtIndexIfExists(
+        ir, compiler, compiler.get_type(type.type_alias), index);
+  }
+
+  if (auto found = ir.meta.find(type.self); found != ir.meta.end()) {
+    const auto& members = found->second.members;
+    if (index < members.size() && !members[index].alias.empty()) {
+      return members[index].alias;
+    }
+  }
+  return std::nullopt;
+}
+
+static std::string GetMemberNameAtIndex(
+    const spirv_cross::ParsedIR& ir,
+    const spirv_cross::CompilerMSL& compiler,
+    const spirv_cross::SPIRType& type,
+    size_t index) {
+  if (auto name = GetMemberNameAtIndexIfExists(ir, compiler, type, index);
+      name.has_value()) {
+    return name.value();
+  }
+
+  static std::atomic_size_t sUnnamedMembersID;
+  std::stringstream stream;
+  stream << "unnamed_" << sUnnamedMembersID++;
+  return stream.str();
+}
+
 static bool ReflectType(Writer& writer,
+                        const spirv_cross::ParsedIR& ir,
                         const spirv_cross::CompilerMSL& compiler,
-                        const spirv_cross::SPIRType& type) {
+                        const spirv_cross::TypeID& type_id) {
+  const auto type = compiler.get_type(type_id);
+
   writer.Key("type");
   writer.StartObject();
 
@@ -84,24 +123,32 @@ static bool ReflectType(Writer& writer,
   writer.Key("columns");
   writer.Uint64(type.columns);
 
-  writer.Key("member_types");
-  writer.StartArray();
-  for (const auto& member : type.member_types) {
-    if (!ReflectType(writer, compiler, compiler.get_type(member))) {
-      return false;
+  if (!type.member_types.empty()) {
+    writer.Key("member");
+    writer.StartArray();
+    for (size_t i = 0; i < type.member_types.size(); i++) {
+      writer.StartObject();
+      {
+        writer.Key("type_id");
+        writer.Uint64(type.member_types[i]);
+        writer.Key("member_name");
+        writer.String(GetMemberNameAtIndex(ir, compiler, type, i));
+      }
+      writer.EndObject();
     }
+    writer.EndArray();
   }
-  writer.EndArray();
 
   writer.EndObject();
   return true;
 }
 
 static bool ReflectBaseResource(Writer& writer,
+                                const spirv_cross::ParsedIR& ir,
                                 const spirv_cross::CompilerMSL& compiler,
                                 const spirv_cross::Resource& res) {
   writer.Key("name");
-  writer.String(compiler.get_name(res.id));
+  writer.String(res.name);
 
   writer.Key("descriptor_set");
   writer.Uint64(compiler.get_decoration(
@@ -115,19 +162,20 @@ static bool ReflectBaseResource(Writer& writer,
   writer.Uint64(
       compiler.get_decoration(res.id, spv::Decoration::DecorationLocation));
 
-  if (!ReflectType(writer, compiler, compiler.get_type(res.type_id))) {
+  if (!ReflectType(writer, ir, compiler, res.type_id)) {
     return false;
   }
 
   return true;
 }
 
-static bool ReflectStageInput(Writer& writer,
-                              const spirv_cross::CompilerMSL& compiler,
-                              const spirv_cross::Resource& input) {
+static bool ReflectStageIO(Writer& writer,
+                           const spirv_cross::ParsedIR& ir,
+                           const spirv_cross::CompilerMSL& compiler,
+                           const spirv_cross::Resource& io) {
   writer.StartObject();
 
-  if (!ReflectBaseResource(writer, compiler, input)) {
+  if (!ReflectBaseResource(writer, ir, compiler, io)) {
     return false;
   }
 
@@ -136,11 +184,12 @@ static bool ReflectStageInput(Writer& writer,
 }
 
 static bool ReflectUniformBuffer(Writer& writer,
+                                 const spirv_cross::ParsedIR& ir,
                                  const spirv_cross::CompilerMSL& compiler,
                                  const spirv_cross::Resource& buffer) {
   writer.StartObject();
 
-  if (!ReflectBaseResource(writer, compiler, buffer)) {
+  if (!ReflectBaseResource(writer, ir, compiler, buffer)) {
     return false;
   }
 
@@ -177,6 +226,7 @@ static std::string StringToShaderStage(std::string str) {
 
 static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
     const Reflector::Options& options,
+    const spirv_cross::ParsedIR& ir,
     const spirv_cross::CompilerMSL& compiler) {
   auto buffer = std::make_shared<rapidjson::StringBuffer>();
   Writer writer(*buffer);
@@ -209,7 +259,7 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
     writer.StartArray();
     for (const auto& uniform_buffer :
          compiler.get_shader_resources().uniform_buffers) {
-      if (!ReflectUniformBuffer(writer, compiler, uniform_buffer)) {
+      if (!ReflectUniformBuffer(writer, ir, compiler, uniform_buffer)) {
         FML_LOG(ERROR) << "Could not reflect uniform buffer.";
         return nullptr;
       }
@@ -221,7 +271,7 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
     writer.Key("stage_inputs");
     writer.StartArray();
     for (const auto& input : compiler.get_shader_resources().stage_inputs) {
-      if (!ReflectStageInput(writer, compiler, input)) {
+      if (!ReflectStageIO(writer, ir, compiler, input)) {
         FML_LOG(ERROR) << "Could not reflect stage input.";
         return nullptr;
       }
@@ -233,7 +283,7 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
     writer.Key("stage_outputs");
     writer.StartArray();
     for (const auto& output : compiler.get_shader_resources().stage_outputs) {
-      if (!ReflectStageInput(writer, compiler, output)) {
+      if (!ReflectStageIO(writer, ir, compiler, output)) {
         FML_LOG(ERROR) << "Could not reflect stage output.";
         return nullptr;
       }
@@ -279,9 +329,11 @@ static std::shared_ptr<fml::Mapping> InflateTemplate(
       inflated_template->size(), [inflated_template](auto, auto) {});
 }
 
-Reflector::Reflector(Options options, const spirv_cross::CompilerMSL& compiler)
+Reflector::Reflector(Options options,
+                     const spirv_cross::ParsedIR& ir,
+                     const spirv_cross::CompilerMSL& compiler)
     : options_(std::move(options)),
-      template_arguments_(ReflectTemplateArguments(options_, compiler)),
+      template_arguments_(ReflectTemplateArguments(options_, ir, compiler)),
       reflection_header_(InflateTemplate(compiler,
                                          kReflectionHeaderTemplate,
                                          template_arguments_.get())),
