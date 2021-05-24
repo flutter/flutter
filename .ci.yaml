@@ -935,7 +935,6 @@ targets:
 
   - name: linux_large_image_changer_perf_android
     builder: Linux large_image_changer_perf_android
-    bringup: true
     presubmit: false
     scheduler: luci
 
