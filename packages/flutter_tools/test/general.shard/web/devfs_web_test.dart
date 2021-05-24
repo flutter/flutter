@@ -23,12 +23,12 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/testbed.dart';
-import '../cold_test.dart';
 
 const List<int> kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
@@ -1163,3 +1163,5 @@ class FakeDebugConnection extends Fake implements DebugConnection {
   @override
   String get uri => '';
 }
+
+class FakeVmService extends Fake implements vm_service.VmService {}
