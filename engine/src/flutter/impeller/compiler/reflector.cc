@@ -222,7 +222,19 @@ static std::shared_ptr<fml::Mapping> ReflectTemplateArguments(
     writer.StartArray();
     for (const auto& input : compiler.get_shader_resources().stage_inputs) {
       if (!ReflectStageInput(writer, compiler, input)) {
-        FML_LOG(ERROR) << "Could not reflect uniform buffer.";
+        FML_LOG(ERROR) << "Could not reflect stage input.";
+        return nullptr;
+      }
+    }
+    writer.EndArray();
+  }
+
+  {
+    writer.Key("stage_outputs");
+    writer.StartArray();
+    for (const auto& output : compiler.get_shader_resources().stage_outputs) {
+      if (!ReflectStageInput(writer, compiler, output)) {
+        FML_LOG(ERROR) << "Could not reflect stage output.";
         return nullptr;
       }
     }
