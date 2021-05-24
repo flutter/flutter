@@ -687,13 +687,13 @@ if (is_win) {
     default_warning_flags += [
       "-Wno-implicit-int-float-conversion",
       "-Wno-c99-designator",
+      "-Wno-deprecated-copy",
       # Needed for compiling Skia with clang-12
       "-Wno-psabi",
     ]
     if (!is_fuchsia) {
       default_warning_flags += [
         "-Wno-non-c-typedef-for-linkage",
-        "-Wno-deprecated-copy",
         "-Wno-range-loop-construct",
       ]
     }
