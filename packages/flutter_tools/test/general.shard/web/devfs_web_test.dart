@@ -4,10 +4,14 @@
 
 // @dart = 2.8
 
+import 'dart:async';
 import 'dart:io' hide Directory, File;
 
+import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
@@ -21,7 +25,10 @@ import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/testbed.dart';
+import '../cold_test.dart';
 
 const List<int> kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
@@ -1053,6 +1060,48 @@ void main() {
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
   }));
+
+  testWithoutContext('connectToApplication completes the future', () async {
+    final FakeDwds dwds = FakeDwds();
+    final FakeDevFS devfs = FakeDevFS()..dwds = dwds;
+    final BufferLogger logger = BufferLogger.test();
+
+    final Future<void> result = connectToApplication(false, devfs, logger, (Uri uri, {Logger logger}) async {
+      return FakeVmService();
+    });
+
+    dwds.controller.add(FakeAppConnection());
+
+    await expectLater(result, completes);
+  });
+
+  testWithoutContext('Multiple runs of connectToApplication does not complete the future more than once', () async {
+    final FakeDwds dwds = FakeDwds();
+    final FakeDevFS devfs = FakeDevFS()..dwds = dwds;
+    final BufferLogger logger = BufferLogger.test();
+    final Future<void> result = connectToApplication(false, devfs, logger, (Uri uri, {Logger logger}) async {
+      return FakeVmService();
+    });
+
+    dwds.controller.add(FakeAppConnection());
+    dwds.controller.add(FakeAppConnection());
+    unawaited(dwds.controller.close());
+
+    await expectLater(result, completes);
+  });
+
+  testWithoutContext('connectToApplication surfaces errors', () async {
+    final FakeDwds dwds = FakeDwds();
+    final FakeDevFS devfs = FakeDevFS()..dwds = dwds;
+    final BufferLogger logger = BufferLogger.test();
+    final Future<void> result = connectToApplication(false, devfs, logger, (Uri uri, {Logger logger}) async {
+      return FakeVmService();
+    });
+
+    dwds.controller.addError(Exception('test'));
+
+    await expectLater(() => result, throwsException);
+  });
 }
 
 class FakeHttpServer extends Fake implements HttpServer {
@@ -1080,4 +1129,37 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   }) async {
     return output;
   }
+}
+
+class FakeDevFS extends Fake implements WebDevFS {
+  @override
+  StreamSubscription<void> connectedApps;
+
+  @override
+  Future<DebugConnection> cachedExtensionFuture;
+
+  @override
+  Dwds dwds;
+
+  void dispose() {
+    connectedApps.cancel();
+  }
+}
+
+class FakeDwds extends Fake implements Dwds {
+  final StreamController<AppConnection> controller = StreamController<AppConnection>();
+
+  @override
+  Stream<AppConnection> get connectedApps => controller.stream;
+
+  @override
+  Future<DebugConnection> debugConnection(AppConnection appConnection) async {
+    return FakeDebugConnection();
+  }
+}
+
+class FakeAppConnection extends Fake implements AppConnection {}
+class FakeDebugConnection extends Fake implements DebugConnection {
+  @override
+  String get uri => '';
 }
