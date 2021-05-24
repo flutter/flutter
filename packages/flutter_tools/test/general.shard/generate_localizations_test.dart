@@ -2399,4 +2399,45 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     // The original pubspec file should not be overwritten.
     expect(pubspecFile.readAsStringSync(), 'abcd');
   });
+
+  testWithoutContext('can use type: int without specifying a format', () {
+    const String arbFile = '''
+{
+  "orderNumber": "This is order #{number}.",
+  "@orderNumber": {
+    "description": "The title for an order with a given number.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  }
+}''';
+
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(arbFile);
+
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+    )
+      ..loadResources()
+      ..writeOutputFiles(BufferLogger.test());
+
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+    ).readAsStringSync();
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String orderNumber(int number) {
+  return 'This is order #$number.';
+}
+'''));
+    expect(localizationsFile, isNot(contains(intlImportDartCode)));
+  });
 }

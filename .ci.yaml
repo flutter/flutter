@@ -224,10 +224,6 @@ targets:
       - packages/flutter_tools/
       - bin/
 
-  - name: linux_validate_ci_config
-    builder: Linux validate_ci_config
-    scheduler: luci
-
   - name: linux_web_tool_tests
     builder: Linux web_tool_tests
     scheduler: luci
