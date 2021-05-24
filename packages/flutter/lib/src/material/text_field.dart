@@ -878,7 +878,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool _showSelectionHandles = false;
 
-  late _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+  late final _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
@@ -970,7 +970,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1302,30 +1301,38 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    return MouseRegion(
-      cursor: effectiveMouseCursor,
-      onEnter: (PointerEnterEvent event) => _handleHover(true),
-      onExit: (PointerExitEvent event) => _handleHover(false),
-      child: IgnorePointer(
-        ignoring: !_isEnabled,
-        child: AnimatedBuilder(
-          animation: controller, // changes the _currentLength
-          builder: (BuildContext context, Widget? child) {
-            return Semantics(
-              maxValueLength: semanticsMaxValueLength,
-              currentValueLength: _currentLength,
-              onTap: widget.readOnly ? null : () {
-                if (!_effectiveController.selection.isValid)
-                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                _requestKeyboard();
-              },
-              onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+    return Actions(
+      actions: <Type, Action<Intent>> {
+        SelectionToolbarControlIntent: TextEditingCallbackAction<SelectionToolbarControlIntent>(
+          (SelectionToolbarControlIntent intent) => _editableText?.showToolbar(),
+          enabledPredicate: (SelectionToolbarControlIntent intent) => _selectionGestureDetectorBuilder.shouldShowSelectionToolbar,
+        ),
+      },
+      child: MouseRegion(
+        cursor: effectiveMouseCursor,
+        onEnter: (PointerEnterEvent event) => _handleHover(true),
+        onExit: (PointerExitEvent event) => _handleHover(false),
+        child: IgnorePointer(
+          ignoring: !_isEnabled,
+          child: AnimatedBuilder(
+            animation: controller, // changes the _currentLength
+            builder: (BuildContext context, Widget? child) {
+              return Semantics(
+                maxValueLength: semanticsMaxValueLength,
+                currentValueLength: _currentLength,
+                onTap: widget.readOnly ? null : () {
+                  if (!_effectiveController.selection.isValid)
+                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  _requestKeyboard();
+                },
+                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                child: child,
+              );
+            },
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
               child: child,
-            );
-          },
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: child,
+            ),
           ),
         ),
       ),

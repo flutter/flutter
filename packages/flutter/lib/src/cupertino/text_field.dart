@@ -832,8 +832,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   bool _showSelectionHandles = false;
 
-  late _CupertinoTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
-
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   bool get forcePressEnabled => true;
@@ -848,7 +846,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _CupertinoTextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -931,6 +928,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       _editableText.bringIntoView(selection.base);
     }
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
+
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
         _showSelectionHandles = willShowSelectionHandles;
@@ -1229,14 +1227,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         child: Container(
           decoration: effectiveDecoration,
           color: !enabled && effectiveDecoration == null ? disabledColor : null,
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: Align(
-              alignment: Alignment(-1.0, _textAlignVertical.y),
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
-            ),
+          child: Align(
+            alignment: Alignment(-1.0, _textAlignVertical.y),
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
           ),
         ),
       ),

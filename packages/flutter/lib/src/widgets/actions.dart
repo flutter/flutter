@@ -40,6 +40,7 @@ BuildContext _getParent(BuildContext context) {
 ///  * [Actions.invoke], which invokes the action associated with a specified
 ///    [Intent] using the [Actions] widget that most tightly encloses the given
 ///    [BuildContext].
+@immutable
 abstract class Intent with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

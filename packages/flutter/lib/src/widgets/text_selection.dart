@@ -892,29 +892,6 @@ class _TextSelectionHandleOverlayState
   }
 }
 
-// class _TextSelectionMultiTapGestureRecognizer extends GestureRecognizer {
-//   _TextSelectionMultiTapGestureRecognizer({
-//     Object? debugOwner,
-//     Set<PointerDeviceKind>? supportedDevices,
-//     required this.maxConsecutiveTaps,
-//   }) : super(
-//          debugOwner: debugOwner,
-//          supportedDevices: supportedDevices,
-//        );
-//
-//   Timer? _tapSequenceTimer;
-//   TapTextGestureStatus? gestureStatus;
-//
-//   final int maxConsecutiveTaps;
-//
-//   @override
-//   bool isPointerAllowed(PointerDownEvent event) {
-//     final PointerDeviceKind? previousKind = gestureStatus?.tapDownDetails.kind;
-//     return super.isPointerAllowed(event)
-//         && (previousKind == null || previousKind == event.kind);
-//   }
-// }
-
 /// Delegate interface for the [TextSelectionGestureDetectorBuilder].
 ///
 /// The interface is usually implemented by textfield implementations wrapping

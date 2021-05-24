@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'actions.dart';
 import 'editable_text.dart';
-import 'text_selection.dart';
-import 'text_selection_gestures.dart';
 
 /// An [Intent] to delete a character in the backwards direction.
 ///
@@ -274,99 +273,53 @@ class MoveSelectionUpTextIntent extends Intent {
 
 // ---------- Gesture Intents ----------
 
-/// An [Intent] that represents a gesture, or a potential gesture that has yet
-/// to be recognized.
-abstract class TextEditingGestureIntent extends Intent {
-  /// Creates an [Intent] that represents a gesture, or a potential gesture that
-  /// has yet to be recognized, that happened in a text field associated with
-  /// [gestureDelegate].
-  const TextEditingGestureIntent({
-    required this.gestureDelegate,
+class SelectTextAtPositionIntent extends Intent {
+  const SelectTextAtPositionIntent({
+    required this.fromPosition,
+    this.toPosition,
+    this.textBoundaryType = TextBoundary.character,
+    required this.cause,
   });
 
-  /// The [TextSelectionGestureDetectorBuilderDelegate] that received the
-  /// gesture event, which may be part of the gesture this [Intent] represents.
-  final TextSelectionGestureDetectorBuilderDelegate gestureDelegate;
+  final Offset fromPosition;
+  final Offset? toPosition;
+  final TextBoundary textBoundaryType;
+  final SelectionChangedCause cause;
 }
 
-abstract class _TextEditingGestureIntent<GestureStatus> extends TextEditingGestureIntent {
-  const _TextEditingGestureIntent({
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-    required this.gestureStatus,
-  }) : super(gestureDelegate: gestureDelegate);
+class ExtendSelectionToPointIntent extends Intent {
+  const ExtendSelectionToPointIntent({
+    required this.toPosition,
+    this.textBoundaryType = TextBoundary.character,
+    required this.cause,
+  });
 
-  /// The current status of the gesture recognition process.
-  final GestureStatus gestureStatus;
+  final Offset toPosition;
+  final TextBoundary textBoundaryType;
+  final SelectionChangedCause cause;
 }
 
-class ForcePressTextGestureIntent extends _TextEditingGestureIntent<ForcePressTextGestureStatus> {
-  const ForcePressTextGestureIntent({
-    required ForcePressTextGestureStatus gestureStatus,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
+class SelectWordEdgeIntent extends Intent {
+  const SelectWordEdgeIntent({ required this.cause });
+
+  final SelectionChangedCause cause;
 }
 
-class TapTextGestureIntent extends _TextEditingGestureIntent<TapTextGestureStatus> {
-  const TapTextGestureIntent({
-    required  TapTextGestureStatus gestureStatus,
-    required this.maxTapCount,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : assert(maxTapCount > 0),
-       super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
+class SelectionToolbarControlIntent extends Intent {
+  const SelectionToolbarControlIntent._(this.shouldShowSelectionToolbar);
 
-  final int maxTapCount;
+  static const SelectionToolbarControlIntent show = SelectionToolbarControlIntent._(true);
+  static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(false);
 
-  bool get shouldShowSelectionBar {
-    // The selection overlay should only be shown when the user is interacting
-    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
-    // trigger the selection overlay.
-    // For backwards-compatibility, we treat a null kind the same as touch.
-    switch (gestureStatus.tapDownDetails.kind) {
-      case null:
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.stylus:
-      case PointerDeviceKind.invertedStylus:
-        return true;
-      case PointerDeviceKind.mouse:
-      case PointerDeviceKind.unknown:
-        return false;
-    }
-  }
+  final bool shouldShowSelectionToolbar;
 }
 
-class SecondaryTapTextGestureIntent extends _TextEditingGestureIntent<SecondaryTapTextGestureStatus > {
-  const SecondaryTapTextGestureIntent({
-    required SecondaryTapTextGestureStatus gestureStatus,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
+class KeyboardControlIntent extends Intent {
+  const KeyboardControlIntent._();
+
+  static const KeyboardControlIntent showKeyboard = KeyboardControlIntent._();
 }
 
-class LongPressTextGestureIntent extends _TextEditingGestureIntent<LongPressTextGestureStatus> {
-  const LongPressTextGestureIntent({
-    required LongPressTextGestureStatus gestureStatus,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
+class InvokeTextEditingComponentOnTapCallbackIntent extends Intent {
+  const InvokeTextEditingComponentOnTapCallbackIntent();
 }
-
-class DragTextGestureIntent extends _TextEditingGestureIntent<DragTextGestureStatus> {
-  DragTextGestureIntent({
-    required DragTextGestureStatus gestureStatus,
-    required TextSelectionGestureDetectorBuilderDelegate gestureDelegate,
-  }) : super(gestureDelegate: gestureDelegate, gestureStatus: gestureStatus);
-
-  TextPosition? selectionBase;
-
-  bool get shouldShowSelectionBar {
-    switch (gestureStatus.dragStartDetails.kind) {
-      case null:
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.stylus:
-      case PointerDeviceKind.invertedStylus:
-        return true;
-      case PointerDeviceKind.mouse:
-      case PointerDeviceKind.unknown:
-        return false;
-    }
-  }
-}
-
