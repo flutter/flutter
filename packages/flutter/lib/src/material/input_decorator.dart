@@ -323,7 +323,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       duration: _kTransitionDuration,
       vsync: this,
     );
-    if (widget.errorText != null) {
+    if (widget.errorText != null && widget.errorText != '') {
       _error = _buildError();
       _controller.value = 1.0;
     } else if (widget.helperText != null) {
