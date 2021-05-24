@@ -1328,28 +1328,28 @@ void main() {
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 1);
     expect(state.deactivatedCount, 0);
-    expect(state.reactivatedCount, 0);
+    expect(state.activatedCount, 0);
 
     /// Rebuild with updated value - should call didChangeDependencies
     await tester.pumpWidget(Inherited(2, child: DependentStatefulWidget(key: key)));
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 2);
     expect(state.deactivatedCount, 0);
-    expect(state.reactivatedCount, 0);
+    expect(state.activatedCount, 0);
 
     // reparent it - should call deactivate, reactivate, didChangeDependencies
     await tester.pumpWidget(Inherited(3, child: SizedBox(child: DependentStatefulWidget(key: key))));
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 3);
     expect(state.deactivatedCount, 1);
-    expect(state.reactivatedCount, 1);
+    expect(state.activatedCount, 1);
 
     // Remove it - should call deactivate, but not reactivate or didChangeDependencies
     await tester.pumpWidget(const Inherited(4, child: SizedBox()));
     expect(key.currentState, isNull);
     expect(state.didChangeDependenciesCount, 3);
     expect(state.deactivatedCount, 2);
-    expect(state.reactivatedCount, 1);
+    expect(state.activatedCount, 1);
   });
 
   testWidgets('StatefulElement subclass can decorate State.build', (WidgetTester tester) async {
@@ -1793,7 +1793,7 @@ class DependentStatefulWidget extends StatefulWidget {
 class DependentState extends State<DependentStatefulWidget> {
   int didChangeDependenciesCount = 0;
   int deactivatedCount = 0;
-  int reactivatedCount = 0;
+  int activatedCount = 0;
 
   @override
   void didChangeDependencies() {
@@ -1814,9 +1814,9 @@ class DependentState extends State<DependentStatefulWidget> {
   }
 
   @override
-  void reactivate() {
-    super.reactivate();
-    reactivatedCount += 1;
+  void activate() {
+    super.activate();
+    activatedCount += 1;
   }
 }
 

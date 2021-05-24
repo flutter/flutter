@@ -638,7 +638,7 @@ abstract class InkFeature {
   /// frame.
   ///
   /// For this InkFeature to render properly, it should usually be change in
-  /// [State.deactivate] and [State.reactivate].
+  /// [State.deactivate] and [State.activate].
   bool visible = true;
 
   /// Free up the resources associated with this ink feature.

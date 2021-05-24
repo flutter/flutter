@@ -1258,7 +1258,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/6751
   testWidgets('When InkWell has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
-    final GlobalKey<_TestAppState> testAppKey = GlobalKey();
+    final GlobalKey<TestAppState> testAppKey = GlobalKey();
     int frames;
 
     await tester.pumpWidget(TestApp(key: testAppKey));
@@ -1439,10 +1439,10 @@ class TestApp extends StatefulWidget {
   const TestApp({Key? key}) : super(key: key);
 
   @override
-  _TestAppState createState() => _TestAppState();
+  TestAppState createState() => TestAppState();
 }
 
-class _TestAppState extends State<TestApp> {
+class TestAppState extends State<TestApp> {
   bool wrap = false;
   bool tapDownChangeWrap = false;
   bool tapChangeWrap = false;

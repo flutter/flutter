@@ -781,7 +781,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     final InkFeature? validInkFeature = _getSingleInkFeature();
-    if (validInkFeature != null && !identical(validInkFeature.controller, Material.of(context)!)) {
+    if (validInkFeature != null && !identical(validInkFeature.controller, Material.of(context))) {
       _removeAllFeatures();
       if (_hovering && enabled)
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
@@ -1073,11 +1073,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   @override
-  void reactivate() {
+  void activate() {
     _active = !_active;
     _setAllFeaturesVisible(true);
     updateKeepAlive();
-    super.reactivate();
+    super.activate();
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {
