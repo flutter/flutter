@@ -259,11 +259,6 @@ def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, mult
   if not enable_observatory:
     command_args.append('--disable-observatory')
 
-  dart_file_contents = open(dart_file, 'r')
-  custom_options = re.findall("// FlutterTesterOptions=(.*)", dart_file_contents.read())
-  dart_file_contents.close()
-  command_args.extend(custom_options)
-
   command_args += [
     '--use-test-fonts',
     kernel_file_output
