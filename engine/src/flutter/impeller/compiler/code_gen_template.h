@@ -24,7 +24,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   // Stage Inputs
 {% for stage_input in stage_inputs %}
   // Stage input {{stage_input.name}}
-  static constexpr ShaderStageInput kInput{{camel_case(stage_input.name)}} = {
+  static constexpr auto kInput{{camel_case(stage_input.name)}} = ShaderStageInput {
     "{{stage_input.name}}",             // name
     {{stage_input.location}}u,          // attribute location
     {{stage_input.type.type_name}},     // type
@@ -33,6 +33,13 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
     {{stage_input.type.columns}}u       // number of columns
   };
 {% endfor %}
+
+  static constexpr const ShaderStageInput* kAllShaderStageInputs[] = {
+{% for stage_input in stage_inputs %}
+    &kInput{{camel_case(stage_input.name)}}, // {{stage_input.name}}
+{% endfor %}
+  };
+
 }; // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info
 
 } // namespace shader
