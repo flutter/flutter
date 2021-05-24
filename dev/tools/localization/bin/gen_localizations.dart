@@ -566,7 +566,7 @@ void main(List<String> rawArgs) {
     exitWithError('$exception');
   }
 
-  final String widgetsLocalizations = options.writeToFile || !options.widgetsOnly
+  final String widgetsLocalizations = options.writeToFile || options.widgetsOnly
       ? generateArbBasedLocalizationSubclasses(
           localeToResources: widgetsLocaleToResources,
           localeToResourceAttributes: widgetsLocaleToResourceAttributes,
@@ -581,7 +581,7 @@ void main(List<String> rawArgs) {
           supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
         )
       : null;
-  final String materialLocalizations = options.writeToFile || !options.cupertinoOnly
+  final String materialLocalizations = options.writeToFile || options.materialOnly
       ? generateArbBasedLocalizationSubclasses(
         localeToResources: materialLocaleToResources,
         localeToResourceAttributes: materialLocaleToResourceAttributes,
@@ -596,7 +596,7 @@ void main(List<String> rawArgs) {
         supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
       )
       : null;
-  final String cupertinoLocalizations = options.writeToFile || !options.materialOnly
+  final String cupertinoLocalizations = options.writeToFile || options.cupertinoOnly
       ? generateArbBasedLocalizationSubclasses(
         localeToResources: cupertinoLocaleToResources,
         localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
@@ -620,13 +620,13 @@ void main(List<String> rawArgs) {
     final File cupertinoLocalizationsFile = File(path.join(directory.path, 'generated_cupertino_localizations.dart'));
     cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations, flush: true);
   } else {
-    if (!options.widgetsOnly) {
+    if (options.widgetsOnly) {
       stdout.write(widgetsLocalizations);
     }
-    if (!options.cupertinoOnly) {
+    if (options.materialOnly) {
       stdout.write(materialLocalizations);
     }
-    if (!options.materialOnly) {
+    if (options.cupertinoOnly) {
       stdout.write(cupertinoLocalizations);
     }
   }

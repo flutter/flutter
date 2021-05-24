@@ -398,6 +398,14 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
 }
 
 Future<void> verifyInternationalizations() async {
+  final EvalResult widgetsGenResult = await _evalCommand(
+    dart,
+    <String>[
+      path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
+      '--widgets',
+    ],
+    workingDirectory: flutterRoot,
+  );
   final EvalResult materialGenResult = await _evalCommand(
     dart,
     <String>[
@@ -415,11 +423,25 @@ Future<void> verifyInternationalizations() async {
     workingDirectory: flutterRoot,
   );
 
+  final String widgetsLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_widgets_localizations.dart');
   final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
   final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String expectedWidgetsResult = await File(widgetsLocalizationsFile).readAsString();
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
+  if (widgetsGenResult.stdout.trim() != expectedWidgetsResult.trim()) {
+    exitWithError(<String>[
+      '<<<<<<< $widgetsLocalizationsFile',
+      expectedWidgetsResult.trim(),
+      '=======',
+      widgetsGenResult.stdout.trim(),
+      '>>>>>>> gen_localizations',
+      'The contents of $widgetsLocalizationsFile are different from that produced by gen_localizations.',
+      '',
+      'Did you forget to run gen_localizations.dart after updating a .arb file?',
+    ]);
+  }
   if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
     exitWithError(<String>[
       '<<<<<<< $materialLocalizationsFile',
