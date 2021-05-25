@@ -6,6 +6,12 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("testing.gni")
 
+config("dynamic_symbols") {
+  if (is_clang && is_linux) {
+    ldflags = [ "-rdynamic" ]
+  }
+}
+
 source_set("testing_lib") {
   testonly = true
 
@@ -37,6 +43,7 @@ source_set("testing") {
   ]
 
   public_deps = [ ":testing_lib" ]
+  public_configs = [ ":dynamic_symbols" ]
 }
 
 source_set("dart") {
