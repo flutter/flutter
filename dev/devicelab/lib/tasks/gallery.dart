@@ -49,10 +49,14 @@ class GalleryTransitionTest {
     this.timelineTraceFile = 'transitions.timeline',
     this.transitionDurationFile = 'transition_durations.timeline',
     this.driverFile,
+    this.measureCpuGpu = true,
+    this.measureMemory = true,
   });
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
+  final bool measureCpuGpu;
+  final bool measureMemory;
   final String testFile;
   final String timelineSummaryFile;
   final String timelineTraceFile;
@@ -123,6 +127,9 @@ class GalleryTransitionTest {
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
 
+    // TODO(liyuqian): Remove isAndroid restriction once
+    // https://github.com/flutter/flutter/issues/61567 is fixed.
+    final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
     return TaskResult.success(summary,
       detailFiles: <String>[
         if (transitionDurationFile != null)
@@ -141,6 +148,17 @@ class GalleryTransitionTest {
         'worst_frame_rasterizer_time_millis',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        if (measureCpuGpu && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (summary['average_cpu_usage'] != null) 'average_cpu_usage',
+          if (summary['average_gpu_usage'] != null) 'average_gpu_usage',
+        ],
+        if (measureMemory && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (summary['average_memory_usage'] != null) 'average_memory_usage',
+          if (summary['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
+          if (summary['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
+        ],
       ],
     );
   }
