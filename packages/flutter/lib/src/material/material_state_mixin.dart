@@ -5,16 +5,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Provides a flexible callback and consistent API for [State] objects to track
-/// which [MaterialState] values are in effect for their portion of the user
-/// interface.
+/// Mixin for [State] classes that require knowledge of changing [MaterialState]
+/// values for their child widgets.
 ///
-/// This mixin does nothing by merely applying it to a [State] class, but is
+/// This mixin does nothing by mere application it to a [State] class, but is
 /// helpful when writing `build` methods that include child [InkWell],
 /// [GestureDetector], [MouseRegion], or [Focus] widgets. Instead of manually
 /// creating handlers for each type of user interaction, such [State] classes can
 /// instead provide a `ValueChanged<bool>` function and allow [MaterialStateMixin]
-/// to manage the set of active [MaterialState]s, and the calling of `setState()`
+/// to manage the set of active [MaterialState]s, and the calling of [setState]
 /// as necessary.
 ///
 /// {@tool snippet}
@@ -35,10 +34,10 @@ import 'package:flutter/material.dart';
 /// {@end-tool}
 @optionalTypeArgs
 mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
-  /// Managed set of active [MaterialState] values designed to be passed to
+  /// Managed set of active [MaterialState] values; designed to be passed to
   /// [MaterialStateProperty.resolve] methods.
   ///
-  /// To mutate this set and have [setState] called automatically for you, use
+  /// To mutate and have [setState] called automatically for you, use
   /// [setMaterialState], [addMaterialState], or [removeMaterialState]. Directly
   /// mutating the set is possible, and may be necessary if you need to alter its
   /// list without calling [setState] (and thus triggering a re-render).
