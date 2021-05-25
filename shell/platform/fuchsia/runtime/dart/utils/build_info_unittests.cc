@@ -35,7 +35,6 @@ class BuildInfoTest : public ::testing::Test {
 };
 
 TEST_F(BuildInfoTest, AllPropertiesAreDefined) {
-  EXPECT_NE(BuildInfo::BuildTimestamp(), "{{BUILD_TIMESTAMP}}");
   EXPECT_NE(BuildInfo::DartSdkGitRevision(), "{{DART_SDK_GIT_REVISION}}");
   EXPECT_NE(BuildInfo::DartSdkSemanticVersion(),
             "{{DART_SDK_SEMANTIC_VERSION}}");
@@ -53,7 +52,6 @@ TEST_F(BuildInfoTest, AllPropertiesAreDumped) {
           std::move(
               dart_utils::RootInspectNode::GetInspector()->DuplicateVmo()))
           .take_value();
-  checkProperty(root, "build_timestamp", BuildInfo::BuildTimestamp());
   checkProperty(root, "dart_sdk_git_revision", BuildInfo::DartSdkGitRevision());
   checkProperty(root, "dart_sdk_semantic_version",
                 BuildInfo::DartSdkSemanticVersion());
