@@ -36,6 +36,19 @@ void DartIO::InitForIsolate(bool may_insecurely_connect_to_all_domains,
   Dart_Handle set_domain_network_policy_result = Dart_Invoke(
       embedder_config_type, ToDart("_setDomainPolicies"), 1, dart_args);
   FML_CHECK(!LogIfError(set_domain_network_policy_result));
+
+  Dart_Handle ui_lib = Dart_LookupLibrary(ToDart("dart:ui"));
+  Dart_Handle dart_validate_args[1];
+  dart_validate_args[0] = ToDart(may_insecurely_connect_to_all_domains);
+  Dart_Handle http_connection_hook_closure =
+      Dart_Invoke(ui_lib, ToDart("_getHttpConnectionHookClosure"),
+                  /*number_of_arguments=*/1, dart_validate_args);
+  FML_CHECK(!LogIfError(http_connection_hook_closure));
+  Dart_Handle http_lib = Dart_LookupLibrary(ToDart("dart:_http"));
+  FML_CHECK(!LogIfError(http_lib));
+  Dart_Handle set_http_connection_hook_result = Dart_SetField(
+      http_lib, ToDart("_httpConnectionHook"), http_connection_hook_closure);
+  FML_CHECK(!LogIfError(set_http_connection_hook_result));
 }
 
 }  // namespace flutter
