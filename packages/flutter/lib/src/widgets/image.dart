@@ -1083,6 +1083,7 @@ class Image extends StatefulWidget {
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
