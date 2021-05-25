@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 @TestOn('!chrome')
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -4760,31 +4758,26 @@ void main() {
     expect(selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
-  testWidgets('Ellipsis is passed to the inner TextPainter when provided', (WidgetTester tester) async {
+  testWidgets('Ellipsis is painted when TextOverflow.ellipsis is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
-          child: SelectableText(
-            '',
-            maxLines: 1,
-            style: TextStyle(
-                overflow: TextOverflow.ellipsis,
+          child: RepaintBoundary(
+            child: SelectableText(
+              'This is a big text that cannot fit in two line.' * 10,
+              maxLines: 2,
+              style: const TextStyle(
+                  overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ),
       ),
     );
 
-    // Testing this by comparing the resulting ParagraphStyle output.
-    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
-    final ui.ParagraphStyle actualStyle = editableTextState.renderEditable.textPainter.text!.style!.getParagraphStyle();
-
-    final ui.ParagraphStyle expectedParagraphStyle = const TextStyle(
-        fontWeight: FontWeight.w400,
-        fontFamily: 'Roboto',
-        overflow: TextOverflow.ellipsis,
-    ).getParagraphStyle();
-
-    expect(actualStyle, expectedParagraphStyle);
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('selectable_text.ellipsis.png'),
+    );
   });
 }
