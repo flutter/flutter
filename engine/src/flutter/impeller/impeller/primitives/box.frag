@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 in vec3 color;
+in vec3 color2;
 
 out vec3 fragColor;
 
 void main() {
-  fragColor = color;
+  fragColor = color * color2;
 }

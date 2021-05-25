@@ -17,14 +17,19 @@ namespace impeller {
 namespace shader {
 
 struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
+  // ===========================================================================
+  // Stage Info ================================================================
+  // ===========================================================================
   static constexpr std::string_view kLabel = "{{camel_case(shader_name)}}";
   static constexpr std::string_view kEntrypointName = "{{entrypoint}}";
   static constexpr ShaderStage kShaderStage = {{to_shader_stage(shader_stage)}};
 
-  // Stage Inputs
+  // ===========================================================================
+  // Stage Inputs ==============================================================
+  // ===========================================================================
 {% for stage_input in stage_inputs %}
-  // Stage input {{stage_input.name}}
-  static constexpr auto kInput{{camel_case(stage_input.name)}} = ShaderStageInput {
+
+  static constexpr auto kInput{{camel_case(stage_input.name)}} = ShaderStageIOSlot { // {{stage_input.name}}
     "{{stage_input.name}}",             // name
     {{stage_input.location}}u,          // attribute location
     {{stage_input.type.type_name}},     // type
@@ -34,9 +39,29 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   };
 {% endfor %}
 
-  static constexpr std::array<const ShaderStageInput*, {{length(stage_inputs)}}> kAllShaderStageInputs[] = {
+  static constexpr std::array<const ShaderStageIOSlot*, {{length(stage_inputs)}}> kAllShaderStageInputs = {
 {% for stage_input in stage_inputs %}
-    { &kInput{{camel_case(stage_input.name)}} }, // {{stage_input.name}}
+    &kInput{{camel_case(stage_input.name)}}, // {{stage_input.name}}
+{% endfor %}
+  };
+
+  // ===========================================================================
+  // Stage Outputs =============================================================
+  // ===========================================================================
+{% for stage_output in stage_outputs %}
+  static constexpr auto kOutput{{camel_case(stage_output.name)}} = ShaderStageIOSlot { // {{stage_output.name}}
+    "{{stage_output.name}}",             // name
+    {{stage_output.location}}u,          // attribute location
+    {{stage_output.type.type_name}},     // type
+    {{stage_output.type.bit_width}}u,    // bit width of type
+    {{stage_output.type.vec_size}}u,     // vec size
+    {{stage_output.type.columns}}u       // number of columns
+  };
+{% endfor %}
+
+  static constexpr std::array<const ShaderStageIOSlot*, {{length(stage_outputs)}}> kAllShaderStageOutputs = {
+{% for stage_output in stage_outputs %}
+    &kOutput{{camel_case(stage_output.name)}}, // {{stage_output.name}}
 {% endfor %}
   };
 

@@ -38,7 +38,7 @@ enum class ShaderType {
   kSampler,
 };
 
-struct ShaderStageInput {
+struct ShaderStageIOSlot {
   const char* name;
   size_t location;
   ShaderType type;
