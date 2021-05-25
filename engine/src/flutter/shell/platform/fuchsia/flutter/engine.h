@@ -109,6 +109,7 @@ class Engine final {
 
   void DebugWireframeSettingsChanged(bool enabled);
   void CreateView(int64_t view_id,
+                  ViewCallback on_view_created,
                   ViewIdCallback on_view_bound,
                   bool hit_testable,
                   bool focusable);
