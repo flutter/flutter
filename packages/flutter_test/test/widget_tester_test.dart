@@ -759,6 +759,8 @@ void main() {
 
       expect(flutterErrorDetails.exception, isA<AssertionError>());
       expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
+      expect(binding.inTest, true);
+      binding.postTest();
     });
   });
 
@@ -766,8 +768,11 @@ void main() {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200));
     final Widget target = animationSheet.record(
       MaterialApp(
-        home: ColoredBox(
-          color: const Color.fromARGB(255, 128, 128, 128),
+        home: Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 128, 128, 128),
+            border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+          ),
           child: Center(
             child: GestureDetector(
               onTap: () {},
@@ -779,11 +784,11 @@ void main() {
     );
 
     final TestGesture gesture = await tester.createGesture();
-    gesture.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
+    await gesture.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
 
     await tester.pumpFrames(target, const Duration(seconds: 1));
 
-    gesture.up(timeStamp: const Duration(seconds: 1));
+    await gesture.up(timeStamp: const Duration(seconds: 1));
 
     await tester.pumpFrames(target, const Duration(seconds: 1));
 
