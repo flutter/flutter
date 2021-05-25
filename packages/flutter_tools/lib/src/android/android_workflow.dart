@@ -187,8 +187,8 @@ class AndroidValidator extends DoctorValidator {
     }
     if (!androidSdk.cmdlineToolsAvailable) {
       messages.add(const ValidationMessage.error('cmdline-tools component is missing'));
-      messages.add(const ValidationMessage.error('execute `path/to/sdkmanager --install "cmdline-tools;latest"`'));
-      messages.add(const ValidationMessage.error('See https://developer.android.com/studio/command-line for more details.'));
+      messages.add(const ValidationMessage.hint('execute `path/to/sdkmanager --install "cmdline-tools;latest"`'));
+      messages.add(const ValidationMessage.hint('See https://developer.android.com/studio/command-line for more details.'));
       return ValidationResult(ValidationType.missing, messages);
     }
 
