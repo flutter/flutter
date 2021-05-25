@@ -17,7 +17,7 @@ import("//build/config/profiler.gni")
 config("symbol_visibility_hidden") {
   # Note that -fvisibility-inlines-hidden is set globally in the compiler
   # config since that can almost always be applied.
-  if (!enable_profiling) {
+  if (!enable_profiling && !disable_hidden_visibility) {
     defines = [ "_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS" ]
     cflags = [ "-fvisibility=hidden" ]
   }

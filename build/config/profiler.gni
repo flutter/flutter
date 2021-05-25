@@ -7,6 +7,11 @@ declare_args() {
   # example, don't omit the frame pointer and leave in symbols.
   enable_profiling = false
 
+  # Use default visibility for all symbols.
+  # Without this, any symbol that is not specifically exported will have
+  # hidden visibility.
+  disable_hidden_visibility = false
+
   # Compile in such a way as to make it possible for the profiler to unwind full
   # stack frames. Setting this flag has a large effect on the performance of the
   # generated code than just setting profiling, but gives the profiler more
