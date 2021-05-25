@@ -11,7 +11,6 @@ namespace dart_utils {
 
 class BuildInfo {
  public:
-  static const char* BuildTimestamp();
   static const char* DartSdkGitRevision();
   static const char* DartSdkSemanticVersion();
   static const char* FlutterEngineGitRevision();

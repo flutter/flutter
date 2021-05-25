@@ -6,10 +6,6 @@
 
 namespace dart_utils {
 
-const char* BuildInfo::BuildTimestamp() {
-  return "{{BUILD_TIMESTAMP}}";
-}
-
 const char* BuildInfo::DartSdkGitRevision() {
   return "{{DART_SDK_GIT_REVISION}}";
 }
@@ -27,8 +23,6 @@ const char* BuildInfo::FuchsiaSdkVersion() {
 }
 
 void BuildInfo::Dump(inspect::Node& node) {
-  node.CreateString("build_timestamp", BuildTimestamp(),
-                    RootInspectNode::GetInspector());
   node.CreateString("dart_sdk_git_revision", DartSdkGitRevision(),
                     RootInspectNode::GetInspector());
   node.CreateString("dart_sdk_semantic_version", DartSdkSemanticVersion(),

@@ -14,10 +14,6 @@ import sys
 import json
 
 
-def GetBuildTimestamp():
-    return datetime.now().strftime('%Y-%m-%d %H:%M')
-
-
 def GetDartSdkGitRevision(buildroot):
     project_root = path.join(buildroot, 'third_party', 'dart')
     return subprocess.check_output(
@@ -66,7 +62,6 @@ def main():
     with open(args.input, 'r') as i, open(args.output, 'w') as o:
         o.write(
             i.read()
-            .replace('{{BUILD_TIMESTAMP}}', GetBuildTimestamp())
             .replace(
                 '{{DART_SDK_GIT_REVISION}}',
                 GetDartSdkGitRevision(args.buildroot))
