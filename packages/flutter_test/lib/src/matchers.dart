@@ -12,7 +12,7 @@ import 'package:flutter/material.dart' show Card;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // This import is discouraged in general, but we need it to implement flutter_test.
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart';
