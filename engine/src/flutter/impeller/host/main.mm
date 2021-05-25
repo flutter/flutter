@@ -29,8 +29,7 @@
   return self;
 }
 
-- (void)applicationWillFinishLaunching:(NSNotification*)notification {
-  [window_ makeMainWindow];
+- (void)applicationDidFinishLaunching:(NSNotification*)notification {
   [window_ setTitle:@"Impeller Host"];
   [window_ makeKeyAndOrderFront:self];
 }

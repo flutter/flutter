@@ -12,7 +12,7 @@ VertexDescriptor::VertexDescriptor() = default;
 
 VertexDescriptor::~VertexDescriptor() = default;
 
-static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
+static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
   if (input.columns != 1) {
     // All matrix types are unsupported as vertex inputs.
     return MTLVertexFormatInvalid;
@@ -169,12 +169,12 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
 }
 
 bool VertexDescriptor::SetStageInputs(
-    const ShaderStageInput* const stage_inputs[],
+    const ShaderStageIOSlot* const stage_inputs[],
     size_t count) {
   stage_inputs_.clear();
 
   for (size_t i = 0; i < count; i++) {
-    const ShaderStageInput* input = stage_inputs[i];
+    const ShaderStageIOSlot* input = stage_inputs[i];
     auto vertex_format = ReadStageInputFormat(*input);
     if (vertex_format == MTLVertexFormatInvalid) {
       FML_LOG(ERROR) << "Format for input " << input->name << " not supported.";

@@ -20,7 +20,7 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
 
   virtual ~VertexDescriptor();
 
-  bool SetStageInputs(const ShaderStageInput* const stage_inputs[],
+  bool SetStageInputs(const ShaderStageIOSlot* const stage_inputs[],
                       size_t count);
 
   MTLVertexDescriptor* GetMTLVertexDescriptor() const;
