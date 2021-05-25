@@ -7,7 +7,6 @@ import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, S
 
 import 'package:flutter/foundation.dart';
 
-import '../../rendering.dart' show kDefaultEllipsis;
 import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
@@ -28,6 +27,9 @@ const double _kDefaultFontSize = 14.0;
 
 // Examples can assume:
 // late BuildContext context;
+
+/// The default value to display as ellipsis.
+const String kDefaultEllipsis = '\u2026';
 
 /// An immutable style describing how to format and paint text.
 ///

@@ -16,9 +16,6 @@ import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 
-/// The default value to display as ellipsis.
-const String kDefaultEllipsis = '\u2026';
-
 /// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
   /// The scaling of the text.
