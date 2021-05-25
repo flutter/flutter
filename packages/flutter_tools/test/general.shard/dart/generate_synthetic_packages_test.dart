@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/dart/generate_synthetic_packages.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -45,7 +44,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), FakeStackTrace()),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -94,7 +93,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), FakeStackTrace()),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -141,7 +140,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), FakeStackTrace()),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -262,5 +261,3 @@ void main() {
     );
   });
 }
-
-class FakeStackTrace extends Fake implements StackTrace {}
