@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dev_tools/repository.dart';
-import 'package:dev_tools/roll_dev.dart' show rollDev;
-import 'package:dev_tools/version.dart';
+import 'package:conductor/repository.dart';
+import 'package:conductor/roll_dev.dart' show rollDev;
+import 'package:conductor/version.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
