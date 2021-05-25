@@ -302,6 +302,10 @@ FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
 FILE: ../../../flutter/lib/snapshot/libraries.json
 FILE: ../../../flutter/lib/snapshot/snapshot.h
+FILE: ../../../flutter/lib/spirv/lib/spirv.dart
+FILE: ../../../flutter/lib/spirv/lib/src/constants.dart
+FILE: ../../../flutter/lib/spirv/lib/src/transpiler.dart
+FILE: ../../../flutter/lib/spirv/lib/src/types.dart
 FILE: ../../../flutter/lib/ui/annotations.dart
 FILE: ../../../flutter/lib/ui/channel_buffers.dart
 FILE: ../../../flutter/lib/ui/compositing.dart
