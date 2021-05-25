@@ -36,14 +36,14 @@ void _renderTemplateToFile(String template, dynamic context, File file, Template
 
 Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies, {FileSystem fileSystem}) {
   final FileSystem fs = fileSystem ?? globals.fs;
-  final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!fs.isFileSync(pubspecPath)) {
+  final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
+  if (!pubspecFile.existsSync()) {
     return null;
   }
   dynamic pubspec;
 
   try {
-    pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
+    pubspec = loadYaml(pubspecFile.readAsStringSync());
   } on YamlException catch (err) {
     globals.printTrace('Failed to parse plugin manifest for $name: $err');
     // Do nothing, potentially not a plugin.
