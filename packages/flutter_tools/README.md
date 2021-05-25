@@ -73,9 +73,21 @@ $ flutter test
 ```
 
 The tests in `test/integration.shard` are slower to run than the tests in
-`test/general.shard`. They also require the `FLUTTER_ROOT` environment variable
-to be set and pointing to the root of the Flutter SDK. To run only the tests in `test/general.shard`, in this
-directory run:
+`test/general.shard`. Depending on your development computer, you might
+want to increase timeouts and limit concurrency.
+The integration tests also require the `FLUTTER_ROOT` environment variable
+to be set.
+The full invocation to run everything might therefore look something like:
+
+```shell
+$ FLUTTER_ROOT=~/path/to/flutter-sdk
+$ flutter test --timeout 2x --concurrency 1
+```
+
+This will take about an hour to complete.
+
+To run only the tests in `test/general.shard` (which takes about a minute),
+in this directory run:
 ```shell
 $ flutter test test/general.shard
 ```
