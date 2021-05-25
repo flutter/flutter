@@ -25,6 +25,8 @@ class Renderer {
 
   bool Render();
 
+  std::shared_ptr<Context> GetContext() const;
+
  private:
   std::shared_ptr<Context> context_;
   std::unique_ptr<Surface> surface_;
