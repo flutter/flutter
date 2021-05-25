@@ -16,6 +16,8 @@
 
 namespace impeller {
 
+class Context;
+
 class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
  public:
   ~PipelineLibrary();
@@ -24,6 +26,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
       PipelineDescriptor descriptor);
 
  private:
+  friend Context;
+
   using Pipelines = std::unordered_map<PipelineDescriptor,
                                        std::shared_ptr<const Pipeline>,
                                        ComparableHash<PipelineDescriptor>,

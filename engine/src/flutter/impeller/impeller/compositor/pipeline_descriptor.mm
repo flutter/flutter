@@ -83,6 +83,11 @@ PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
       descriptor.fragmentFunction = entry.second->GetMTLFunction();
     }
   }
+
+  if (vertex_descriptor_) {
+    descriptor.vertexDescriptor = vertex_descriptor_->GetMTLVertexDescriptor();
+  }
+
   return descriptor;
 }
 

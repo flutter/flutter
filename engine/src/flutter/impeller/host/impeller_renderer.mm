@@ -8,9 +8,9 @@
 #import "assets_location.h"
 #include "flutter/fml/logging.h"
 #import "impeller/compositor/renderer.h"
+#import "impeller/primitives/box.h"
 #import "impeller_renderer.h"
 #import "shaders_location.h"
-
 // Include header shared between C code here, which executes Metal API commands,
 // and .metal files
 #import "ShaderTypes.h"
@@ -55,8 +55,13 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
   renderer_ = std::make_unique<impeller::Renderer>(
       impeller::ImpellerShadersDirectory());
+
   if (!renderer_->IsValid()) {
     FML_LOG(ERROR) << "Impeller Renderer is not valid.";
+  }
+
+  if (!impeller::RenderBox(renderer_->GetContext())) {
+    FML_LOG(ERROR) << "Could not render box.";
   }
 
   return self;

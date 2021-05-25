@@ -6,6 +6,6 @@
 
 namespace impeller {
 
-void RenderBox(std::shared_ptr<Context> context);
+bool RenderBox(std::shared_ptr<Context> context);
 
 }  // namespace impeller

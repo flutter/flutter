@@ -20,7 +20,8 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
 
   virtual ~VertexDescriptor();
 
-  bool SetStageInputs(const ShaderStageInput* stage_inputs[], size_t count);
+  bool SetStageInputs(const ShaderStageInput* const stage_inputs[],
+                      size_t count);
 
   MTLVertexDescriptor* GetMTLVertexDescriptor() const;
 
@@ -34,9 +35,10 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   struct StageInput {
     size_t location;
     MTLVertexFormat format;
+    size_t stride;
 
-    StageInput(size_t p_location, MTLVertexFormat p_format)
-        : location(p_location), format(p_format) {}
+    StageInput(size_t p_location, MTLVertexFormat p_format, size_t p_stride)
+        : location(p_location), format(p_format), stride(p_stride) {}
 
     constexpr bool operator==(const StageInput& other) const {
       return location == other.location && format == other.format;

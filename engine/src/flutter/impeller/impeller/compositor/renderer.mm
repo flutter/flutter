@@ -49,4 +49,8 @@ bool Renderer::Render() {
   return surface_->Render();
 }
 
+std::shared_ptr<Context> Renderer::GetContext() const {
+  return context_;
+}
+
 }  // namespace impeller

@@ -20,7 +20,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
 
   switch (input.type) {
     case ShaderType::kFloat: {
-      if (input.bit_width == sizeof(float)) {
+      if (input.bit_width == 8 * sizeof(float)) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatFloat;
@@ -35,7 +35,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kHalfFloat: {
-      if (input.bit_width == sizeof(float) / 2) {
+      if (input.bit_width == 8 * sizeof(float) / 2) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatHalf;
@@ -54,13 +54,13 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kBoolean: {
-      if (input.bit_width == sizeof(bool) && input.vec_size == 1) {
+      if (input.bit_width == 8 * sizeof(bool) && input.vec_size == 1) {
         return MTLVertexFormatChar;
       }
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kSignedByte: {
-      if (input.bit_width == sizeof(char)) {
+      if (input.bit_width == 8 * sizeof(char)) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatChar;
@@ -75,7 +75,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kUnsignedByte: {
-      if (input.bit_width == sizeof(char)) {
+      if (input.bit_width == 8 * sizeof(char)) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatUChar;
@@ -90,7 +90,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kSignedShort: {
-      if (input.bit_width == sizeof(short)) {
+      if (input.bit_width == 8 * sizeof(short)) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatShort;
@@ -105,7 +105,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kUnsignedShort: {
-      if (input.bit_width == sizeof(ushort)) {
+      if (input.bit_width == 8 * sizeof(ushort)) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatUShort;
@@ -120,7 +120,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kSignedInt: {
-      if (input.bit_width == sizeof(int32_t)) {
+      if (input.bit_width == 8 * sizeof(int32_t)) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatInt;
@@ -135,7 +135,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
       return MTLVertexFormatInvalid;
     }
     case ShaderType::kUnsignedInt: {
-      if (input.bit_width == sizeof(uint32_t)) {
+      if (input.bit_width == 8 * sizeof(uint32_t)) {
         switch (input.vec_size) {
           case 1:
             return MTLVertexFormatUInt;
@@ -168,8 +168,9 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageInput& input) {
   }
 }
 
-bool VertexDescriptor::SetStageInputs(const ShaderStageInput* stage_inputs[],
-                                      size_t count) {
+bool VertexDescriptor::SetStageInputs(
+    const ShaderStageInput* const stage_inputs[],
+    size_t count) {
   stage_inputs_.clear();
 
   for (size_t i = 0; i < count; i++) {
@@ -179,7 +180,8 @@ bool VertexDescriptor::SetStageInputs(const ShaderStageInput* stage_inputs[],
       FML_LOG(ERROR) << "Format for input " << input->name << " not supported.";
       return false;
     }
-    stage_inputs_.emplace_back(StageInput{input->location, vertex_format});
+    stage_inputs_.emplace_back(
+        StageInput{input->location, vertex_format, input->bit_width / 8});
   }
 
   return true;
@@ -188,12 +190,20 @@ bool VertexDescriptor::SetStageInputs(const ShaderStageInput* stage_inputs[],
 MTLVertexDescriptor* VertexDescriptor::GetMTLVertexDescriptor() const {
   auto descriptor = [MTLVertexDescriptor vertexDescriptor];
 
+  size_t stride = 0u;
   for (const auto& input : stage_inputs_) {
     auto attrib = descriptor.attributes[input.location];
     attrib.format = input.format;
-    attrib.offset = 0u;
+    attrib.offset = stride;
+    // All vertex inputs are interleaved and tightly packed in one buffer at
+    // zero index.
     attrib.bufferIndex = 0u;
+    stride += input.stride;
   }
+
+  descriptor.layouts[0].stride = stride;
+  descriptor.layouts[0].stepRate = 1u;
+  descriptor.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
 
   return descriptor;
 }
