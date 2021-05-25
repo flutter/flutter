@@ -180,7 +180,7 @@ class TextPainter {
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
-        _locale = locale,
+       _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
        _textHeightBehavior = textHeightBehavior;
