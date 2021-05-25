@@ -120,6 +120,8 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
     std::vector<Layer*> layers;
   };
 
+  using ViewCallback = std::function<void()>;
+
   SceneUpdateContext(std::string debug_label,
                      fuchsia::ui::views::ViewToken view_token,
                      scenic::ViewRefPair view_ref_pair,
@@ -170,7 +172,8 @@ class SceneUpdateContext : public flutter::ExternalViewEmbedder {
 
   // View manipulation.
   void CreateView(int64_t view_id,
-                  ViewHolder::ViewIdCallback on_view_created,
+                  ViewCallback on_view_created,
+                  ViewHolder::ViewIdCallback on_view_bound,
                   bool hit_testable,
                   bool focusable);
   void DestroyView(int64_t view_id,

@@ -953,6 +953,18 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     }
 
     const int64_t view_id_raw = view_id->value.GetUint64();
+    auto on_view_created = fml::MakeCopyable(
+        [weak = weak_factory_.GetWeakPtr(),
+         platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+         message = std::move(message)]() {
+          // The client is waiting for view creation. Send an empty response
+          // back to signal the view was created.
+          if (message->response().get()) {
+            message->response()->Complete(
+                std::make_unique<fml::NonOwnedMapping>((const uint8_t*)"[0]",
+                                                       3u));
+          }
+        });
     auto on_view_bound =
         [weak = weak_factory_.GetWeakPtr(),
          platform_task_runner = task_runners_.GetPlatformTaskRunner(),
@@ -969,16 +981,9 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
             weak->child_view_ids_[resource_id] = view_id;
           });
         };
-    on_create_view_callback_(view_id_raw, std::move(on_view_bound),
-                             hit_testable->value.GetBool(),
-                             focusable->value.GetBool());
-
-    // The client is waiting for view creation. Send an empty response back
-    // to signal the view was created.
-    if (message->response().get()) {
-      message->response()->Complete(
-          std::make_unique<fml::NonOwnedMapping>((const uint8_t*)"[0]", 3u));
-    }
+    on_create_view_callback_(
+        view_id_raw, std::move(on_view_created), std::move(on_view_bound),
+        hit_testable->value.GetBool(), focusable->value.GetBool());
   } else if (method->value == "View.update") {
     auto args_it = root.FindMember("args");
     if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {

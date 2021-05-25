@@ -202,7 +202,7 @@ Engine::Engine(Delegate& delegate,
 
   OnCreateView on_create_view_callback = std::bind(
       &Engine::CreateView, this, std::placeholders::_1, std::placeholders::_2,
-      std::placeholders::_3, std::placeholders::_4);
+      std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
 
   OnUpdateView on_update_view_callback = std::bind(
       &Engine::UpdateView, this, std::placeholders::_1, std::placeholders::_2,
@@ -626,6 +626,7 @@ void Engine::DebugWireframeSettingsChanged(bool enabled) {
 }
 
 void Engine::CreateView(int64_t view_id,
+                        ViewCallback on_view_created,
                         ViewIdCallback on_view_bound,
                         bool hit_testable,
                         bool focusable) {
@@ -633,18 +634,20 @@ void Engine::CreateView(int64_t view_id,
 
   shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
       [this, view_id, hit_testable, focusable,
+       on_view_created = std::move(on_view_created),
        on_view_bound = std::move(on_view_bound)]() {
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
         if (use_legacy_renderer_) {
           FML_CHECK(legacy_external_view_embedder_);
           legacy_external_view_embedder_->CreateView(
-              view_id, std::move(on_view_bound), hit_testable, focusable);
+              view_id, std::move(on_view_created), std::move(on_view_bound),
+              hit_testable, focusable);
         } else
 #endif
         {
           FML_CHECK(external_view_embedder_);
-          external_view_embedder_->CreateView(view_id,
-                                              std::move(on_view_bound));
+          external_view_embedder_->CreateView(
+              view_id, std::move(on_view_created), std::move(on_view_bound));
           external_view_embedder_->SetViewProperties(
               view_id, SkRect::MakeEmpty(), hit_testable, focusable);
         }
