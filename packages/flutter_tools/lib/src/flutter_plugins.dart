@@ -108,15 +108,15 @@ List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin> plugins, String
   });
 
   final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
-  final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
+  final List<Map<String, dynamic>> pluginInfo = <Map<String, dynamic>>[];
   for (final Plugin plugin in platformPlugins) {
-    list.add(<String, dynamic>{
+    pluginInfo.add(<String, dynamic>{
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
-  return list;
+  return pluginInfo;
 }
 
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
