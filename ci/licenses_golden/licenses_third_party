@@ -1,4 +1,4 @@
-Signature: bdc64cafe09845e5ffa354e7cdaa5311
+Signature: d323a7b8abe5f0443ec681d2d5c89a4b
 
 UNUSED LICENSES:
 
@@ -9783,10 +9783,10 @@ FILE: ../../../third_party/dart/runtime/vm/thread_state.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_state.h
 FILE: ../../../third_party/dart/samples/ffi/coordinate.dart
 FILE: ../../../third_party/dart/samples/ffi/dylib_utils.dart
-FILE: ../../../third_party/dart/samples/ffi/resource_management/pool.dart
-FILE: ../../../third_party/dart/samples/ffi/resource_management/pool_isolate_shutdown_sample.dart
-FILE: ../../../third_party/dart/samples/ffi/resource_management/pool_sample.dart
-FILE: ../../../third_party/dart/samples/ffi/resource_management/pool_zoned_sample.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/arena.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_isolate_shutdown_sample.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_sample.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_zoned_sample.dart
 FILE: ../../../third_party/dart/samples/ffi/resource_management/resource_management_test.dart
 FILE: ../../../third_party/dart/samples/ffi/resource_management/unmanaged_sample.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_bitfield.dart
@@ -9809,10 +9809,10 @@ FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/arena.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/samples_2/ffi/coordinate.dart
 FILE: ../../../third_party/dart/samples_2/ffi/dylib_utils.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/pool.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/pool_isolate_shutdown_sample.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/pool_sample.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/pool_zoned_sample.dart
+FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena.dart
+FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_isolate_shutdown_sample.dart
+FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_sample.dart
+FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_zoned_sample.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/resource_management_test.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/unmanaged_sample.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_bitfield.dart
@@ -11890,7 +11890,9 @@ FILE: ../../../third_party/dart/runtime/vm/pending_deopts.cc
 FILE: ../../../third_party/dart/runtime/vm/pending_deopts.h
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
+FILE: ../../../third_party/dart/samples/ffi/resource_management/arena_test.dart
 FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
+FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_test.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/late_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
