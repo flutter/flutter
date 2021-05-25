@@ -58,6 +58,7 @@ vars = {
   'dart_stream_channel_tag': 'd7251e61253ec389ee6e045ee1042311bced8f1d',
   'dart_typed_data_tag': 'f94fc57b8e8c0e4fe4ff6cfd8290b94af52d3719',
   'dart_watcher_rev': '3924194385fb215cef483193ed2879a618a3d69c',
+  'dart_webdev_rev': 'b0aae7b6944d484722e6af164abedd864a2a0afa',
 
   'ocmock_tag': 'v3.7.1',
 
@@ -327,6 +328,9 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/web_socket_channel':
    Var('dart_git') + '/web_socket_channel.git@6448ce532445a8a458fa191d9346df071ae0acad',
+
+  'src/third_party/dart/third_party/pkg/webdev':
+   Var('dart_git') + '/webdev.git' + '@' + Var('dart_webdev_rev'),
 
   'src/third_party/dart/third_party/pkg/yaml':
    Var('dart_git') + '/yaml.git@b4c4411631bda556ce9a45af1ab0eecaf9f3ac53',
