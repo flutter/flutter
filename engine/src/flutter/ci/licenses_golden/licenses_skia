@@ -1,4 +1,4 @@
-Signature: d5f2ac4c10df8c45dbdc2b579074bd55
+Signature: e748540f6b6f6fcd1add52398fb38cca
 
 UNUSED LICENSES:
 
@@ -5518,74 +5518,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/experimental/ddlbench/ddlbench.cpp + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/experimental/ddlbench/ddlbench.cpp
-FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
-FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
-FILE: ../../../third_party/skia/include/sksl/DSLBlock.h
-FILE: ../../../third_party/skia/include/sksl/DSLCase.h
-FILE: ../../../third_party/skia/include/sksl/DSLErrorHandling.h
-FILE: ../../../third_party/skia/include/sksl/DSLFunction.h
-FILE: ../../../third_party/skia/include/sksl/DSLLayout.h
-FILE: ../../../third_party/skia/include/sksl/DSLRuntimeEffects.h
-FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
-FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
-FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
-FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLParsedModule.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLLayout.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLRuntimeEffects.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.h
-FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSL_priv.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.cpp
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2021 Google LLC.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of the copyright holder nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
 ORIGIN: ../../../third_party/skia/experimental/ffmpeg/SkVideoDecoder.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/ffmpeg/SkVideoDecoder.cpp
@@ -5749,6 +5681,79 @@ FILE: ../../../third_party/skia/src/utils/SkShaperJSONWriter.h
 FILE: ../../../third_party/skia/src/utils/win/SkObjBase.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/experimental/ngatoy/Cmds.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/experimental/ngatoy/Cmds.cpp
+FILE: ../../../third_party/skia/experimental/ngatoy/Cmds.h
+FILE: ../../../third_party/skia/experimental/ngatoy/Fake.cpp
+FILE: ../../../third_party/skia/experimental/ngatoy/Fake.h
+FILE: ../../../third_party/skia/experimental/ngatoy/SortKey.h
+FILE: ../../../third_party/skia/experimental/ngatoy/ngatoy.cpp
+FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
+FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
+FILE: ../../../third_party/skia/include/sksl/DSLBlock.h
+FILE: ../../../third_party/skia/include/sksl/DSLCase.h
+FILE: ../../../third_party/skia/include/sksl/DSLErrorHandling.h
+FILE: ../../../third_party/skia/include/sksl/DSLFunction.h
+FILE: ../../../third_party/skia/include/sksl/DSLLayout.h
+FILE: ../../../third_party/skia/include/sksl/DSLRuntimeEffects.h
+FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
+FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
+FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeFixedCountTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellator.h
+FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLParsedModule.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLLayout.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLRuntimeEffects.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.h
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSL_priv.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2021 Google LLC.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
