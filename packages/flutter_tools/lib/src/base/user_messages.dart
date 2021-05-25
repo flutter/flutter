@@ -121,7 +121,7 @@ class UserMessages {
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String get androidMissingCmdTools => 'cmdline-tools component is missing\n'
-      'execute path/to/sdkmanager --install "cmdline-tools;latest"\n'
+      'Run `path/to/sdkmanager --install "cmdline-tools;latest"`\n'
       'See https://developer.android.com/studio/command-line for more details.';
 
   // Messages used in AndroidStudioValidator
