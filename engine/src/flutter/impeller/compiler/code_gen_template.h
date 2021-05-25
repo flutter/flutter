@@ -34,9 +34,9 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Info {
   };
 {% endfor %}
 
-  static constexpr const ShaderStageInput* kAllShaderStageInputs[] = {
+  static constexpr std::array<const ShaderStageInput*, {{length(stage_inputs)}}> kAllShaderStageInputs[] = {
 {% for stage_input in stage_inputs %}
-    &kInput{{camel_case(stage_input.name)}}, // {{stage_input.name}}
+    { &kInput{{camel_case(stage_input.name)}} }, // {{stage_input.name}}
 {% endfor %}
   };
 

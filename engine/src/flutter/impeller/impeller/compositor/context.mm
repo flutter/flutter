@@ -47,6 +47,12 @@ Context::Context(std::string shaders_directory)
         std::shared_ptr<ShaderLibrary>(new ShaderLibrary(library));
   }
 
+  // Setup the pipeline library.
+  {  //
+    pipeline_library_ =
+        std::shared_ptr<PipelineLibrary>(new PipelineLibrary(device_));
+  }
+
   is_valid_ = true;
 }
 
@@ -66,6 +72,10 @@ id<MTLCommandQueue> Context::GetTransferQueue() const {
 
 std::shared_ptr<ShaderLibrary> Context::GetShaderLibrary() const {
   return shader_library_;
+}
+
+std::shared_ptr<PipelineLibrary> Context::GetPipelineLibrary() const {
+  return pipeline_library_;
 }
 
 }  // namespace impeller
