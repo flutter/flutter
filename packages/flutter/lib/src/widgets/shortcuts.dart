@@ -298,7 +298,8 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   @override
   Iterable<LogicalKeyboardKey> get triggers => _triggers;
   late final Set<LogicalKeyboardKey> _triggers = keys.expand(
-    (LogicalKeyboardKey key) => _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key]).toSet();
+    (LogicalKeyboardKey key) => _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key],
+  ).toSet();
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
@@ -475,18 +476,20 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
        // since const constructors can not call functions such as `==` or
        // `Set.contains`. Checking with `identical` is sufficient since
        // `LogicalKeyboardKey` only provides cached values.
-       assert(!identical(trigger, LogicalKeyboardKey.control)
-           && !identical(trigger, LogicalKeyboardKey.controlLeft)
-           && !identical(trigger, LogicalKeyboardKey.controlRight)
-           && !identical(trigger, LogicalKeyboardKey.shift)
-           && !identical(trigger, LogicalKeyboardKey.shiftLeft)
-           && !identical(trigger, LogicalKeyboardKey.shiftRight)
-           && !identical(trigger, LogicalKeyboardKey.alt)
-           && !identical(trigger, LogicalKeyboardKey.altLeft)
-           && !identical(trigger, LogicalKeyboardKey.altRight)
-           && !identical(trigger, LogicalKeyboardKey.meta)
-           && !identical(trigger, LogicalKeyboardKey.metaLeft)
-           && !identical(trigger, LogicalKeyboardKey.metaRight));
+       assert(
+         !identical(trigger, LogicalKeyboardKey.control) &&
+             !identical(trigger, LogicalKeyboardKey.controlLeft) &&
+             !identical(trigger, LogicalKeyboardKey.controlRight) &&
+             !identical(trigger, LogicalKeyboardKey.shift) &&
+             !identical(trigger, LogicalKeyboardKey.shiftLeft) &&
+             !identical(trigger, LogicalKeyboardKey.shiftRight) &&
+             !identical(trigger, LogicalKeyboardKey.alt) &&
+             !identical(trigger, LogicalKeyboardKey.altLeft) &&
+             !identical(trigger, LogicalKeyboardKey.altRight) &&
+             !identical(trigger, LogicalKeyboardKey.meta) &&
+             !identical(trigger, LogicalKeyboardKey.metaLeft) &&
+             !identical(trigger, LogicalKeyboardKey.metaRight),
+       );
 
   /// The non-modifier key of the shortcut that is pressed after all modifiers
   /// to activate the shortcut.

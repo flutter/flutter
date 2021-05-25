@@ -309,19 +309,17 @@ include ':app'
 
   group('Gradle local.properties', () {
     Artifacts localEngineArtifacts;
-    FakePlatform android;
     FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
       localEngineArtifacts = Artifacts.test(localEngine: 'out/android_arm');
-      android = fakePlatform('android');
     });
 
     void testUsingAndroidContext(String description, dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localEngineArtifacts,
-        Platform: () => android,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
@@ -626,12 +624,15 @@ flutter:
     FakeAndroidSdk androidSdk;
     AndroidGradleBuilder builder;
     BufferLogger logger;
+    Platform platform;
 
     setUp(() {
       logger = BufferLogger.test();
       fs = MemoryFileSystem.test();
       fakeProcessManager = FakeProcessManager.empty();
       androidSdk = FakeAndroidSdk();
+      platform = FakePlatform(operatingSystem: 'linux');
+
       builder = AndroidGradleBuilder(
         logger: logger,
         processManager: fakeProcessManager,
@@ -639,7 +640,7 @@ flutter:
         artifacts: Artifacts.test(),
         usage: TestUsage(),
         gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
+        platform: platform,
       );
     });
 
@@ -704,8 +705,8 @@ plugin2=${plugin2.path}
         'aar_init_script.gradle',
       );
 
-      fakeProcessManager
-        ..addCommand(FakeCommand(
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
           command: <String>[
             'gradlew',
             '-I=$initScript',
@@ -721,8 +722,8 @@ plugin2=${plugin2.path}
             'assembleAarRelease',
           ],
           workingDirectory: plugin1.childDirectory('android').path,
-        ))
-        ..addCommand(FakeCommand(
+        ),
+        FakeCommand(
           command: <String>[
             'gradlew',
             '-I=$initScript',
@@ -738,7 +739,7 @@ plugin2=${plugin2.path}
             'assembleAarRelease',
           ],
           workingDirectory: plugin2.childDirectory('android').path,
-        ));
+        )]);
 
       await builder.buildPluginsAsAar(
         FlutterProject.fromDirectoryTest(androidDirectory),
@@ -755,6 +756,7 @@ plugin2=${plugin2.path}
     }, overrides: <Type, Generator>{
       AndroidSdk: () => androidSdk,
       FileSystem: () => fs,
+      Platform: () => platform,
       ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
     });
@@ -1006,14 +1008,6 @@ plugin1=${plugin1.path}
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
     );
   }, skip: true); // TODO(jonahwilliams): This is an integration test and should be moved to the integration shard.
-}
-
-FakePlatform fakePlatform(String name) {
-  return FakePlatform(
-    environment: <String, String>{'HOME': '/path/to/home'},
-    operatingSystem: name,
-    stdoutSupportsAnsi: false,
-  );
 }
 
 class FakeGradleUtils extends GradleUtils {

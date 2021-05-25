@@ -23,10 +23,11 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
+import 'package:meta/meta.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/context.dart' hide FakeXcodeProjectInterpreter;
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -84,35 +85,14 @@ void main() {
     FakeProcessManager processManager;
     BufferLogger logger;
     Xcode xcode;
-    MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+    FakeXcodeProjectInterpreter fakeXcodeProjectInterpreter;
 
     setUp(() {
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.empty();
-
-      mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.version).thenReturn(Version(1000, 0, 0));
-      when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
-      when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer(
-          (_) {
-          return Future<XcodeProjectInfo>.value(XcodeProjectInfo(
-            <String>['Runner'],
-            <String>['Debug', 'Release'],
-            <String>['Runner'],
-            logger,
-          ));
-        }
-      );
-      when(mockXcodeProjectInterpreter.getBuildSettings(any, buildContext: anyNamed('buildContext')))
-          .thenAnswer((_) async => <String, String>{
-                'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
-                'WRAPPER_NAME': 'My Super Awesome App.app',
-                'DEVELOPMENT_TEAM': '3333CCCC33',
-              });
-
-      xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: mockXcodeProjectInterpreter);
+      fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+      xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: fakeXcodeProjectInterpreter);
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
@@ -172,7 +152,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
     });
 
@@ -232,7 +212,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
     }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
   });
@@ -289,4 +269,37 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  @override
+  final bool isInstalled = true;
+
+  @override
+  final Version version = Version(1000, 0, 0);
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<XcodeProjectInfo> getInfo(
+    String projectPath, {
+    String projectFilename,
+  }) async =>
+      XcodeProjectInfo(
+        <String>['Runner'],
+        <String>['Debug', 'Release'],
+        <String>['Runner'],
+        BufferLogger.test(),
+      );
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+    String projectPath, {
+    @required XcodeProjectBuildContext buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async =>
+      <String, String>{
+        'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
+        'WRAPPER_NAME': 'My Super Awesome App.app',
+        'DEVELOPMENT_TEAM': '3333CCCC33',
+      };
+}

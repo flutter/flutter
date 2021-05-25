@@ -6,14 +6,10 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -153,32 +149,4 @@ _ProcessFactory flakyProcessFactory({
       stderr: stderr(),
     );
   };
-}
-
-class MockAndroidDevice extends Mock implements AndroidDevice {
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
-
-  @override
-  bool isSupported() => true;
-
-  @override
-  bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsFlutterExit => false;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
-}
-
-class MockIOSDevice extends Mock implements IOSDevice {
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
-
-  @override
-  bool isSupported() => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }

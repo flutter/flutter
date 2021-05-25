@@ -148,8 +148,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 
     // Equivalent to assert(divisorForValueMask == (1 << valueMaskWidth)).
     const int _firstDivisorWidth = 28;
-    assert(divisorForValueMask ==
-      (1 << _firstDivisorWidth) * (1 << (valueMaskWidth - _firstDivisorWidth)));
+    assert(divisorForValueMask == (1 << _firstDivisorWidth) * (1 << (valueMaskWidth - _firstDivisorWidth)));
 
     // JS only supports up to 2^53 - 1, therefore non-value bits can only
     // contain (maxSafeIntegerWidth - valueMaskWidth) bits.

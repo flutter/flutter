@@ -107,18 +107,18 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'devtools 0.9.6',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'Activated DevTools 0.9.6',
         ),
         FakeCommand(
           command: const <String>[
@@ -152,6 +152,14 @@ void main() {
           command: <String>[
             'pub',
             'global',
+            'list',
+          ],
+          stdout: '',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
             'activate',
             'devtools',
           ],
@@ -163,7 +171,7 @@ void main() {
             'global',
             'list',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'devtools 0.9.5',
         ),
         FakeCommand(
           command: const <String>[
@@ -197,18 +205,18 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'devtools 0.9.5',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'Activated DevTools 0.9.5',
         ),
         FakeCommand(
           command: const <String>[
@@ -279,19 +287,19 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stderr: 'Error - could not activate devtools',
-          exitCode: 1,
+          stdout: 'devtools 0.9.6',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stderr: 'Error - could not activate devtools',
+          exitCode: 1,
         ),
         const FakeCommand(
           command: <String>[
@@ -324,18 +332,18 @@ void main() {
           command: <String>[
             'pub',
             'global',
-            'activate',
-            'devtools',
+            'list',
           ],
-          stdout: 'Activated DevTools 0.9.5',
+          stdout: 'devtools 0.9.5',
         ),
         const FakeCommand(
           command: <String>[
             'pub',
             'global',
-            'list',
+            'activate',
+            'devtools',
           ],
-          stdout: 'devtools 0.9.6',
+          stdout: 'Activated DevTools 0.9.6',
         ),
         const FakeCommand(
           command: <String>[

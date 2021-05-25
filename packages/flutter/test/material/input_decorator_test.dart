@@ -1744,7 +1744,7 @@ void main() {
                 constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
               ),
             ),
-          )
+          ),
       );
 
       // Theme settings should make it 300x40 pixels
@@ -1762,7 +1762,7 @@ void main() {
           decoration: const InputDecoration(
             constraints: BoxConstraints(maxWidth: 200, maxHeight: 32),
           ),
-        )
+        ),
       );
 
       // InputDecoration.constraints should override the theme. It should be

@@ -842,8 +842,10 @@ void main() {
         ),
       ));
       expect(find.text('BottomSheet'), findsOneWidget);
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(0, 586, 154, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(0, 586, 154, 600),
+      );
     });
 
     testWidgets('No constraints by default for showBottomSheet', (WidgetTester tester) async {
@@ -855,7 +857,7 @@ void main() {
                 child: const Text('Press me'),
                 onPressed: () {
                   Scaffold.of(context).showBottomSheet<void>(
-                    (BuildContext context) => const Text('BottomSheet')
+                    (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
               ),
@@ -867,8 +869,10 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(0, 586, 154, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(0, 586, 154, 600),
+      );
     });
 
     testWidgets('No constraints by default for showModalBottomSheet', (WidgetTester tester) async {
@@ -893,8 +897,10 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(0, 586, 800, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(0, 586, 800, 600),
+      );
     });
 
     testWidgets('Theme constraints used for bottomSheet property', (WidgetTester tester) async {
@@ -902,7 +908,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: const Scaffold(
           body: Center(child: Text('body')),
@@ -911,8 +917,10 @@ void main() {
       ));
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(360, 558, 440, 600),
+      );
     });
 
     testWidgets('Theme constraints used for showBottomSheet', (WidgetTester tester) async {
@@ -920,7 +928,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -929,7 +937,7 @@ void main() {
                 child: const Text('Press me'),
                 onPressed: () {
                   Scaffold.of(context).showBottomSheet<void>(
-                    (BuildContext context) => const Text('BottomSheet')
+                    (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
               ),
@@ -942,8 +950,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(360, 558, 440, 600),
+      );
     });
 
     testWidgets('Theme constraints used for showModalBottomSheet', (WidgetTester tester) async {
@@ -951,7 +961,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -974,8 +984,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(360, 558, 440, 600),
+      );
     });
 
     testWidgets('constraints param overrides theme for showBottomSheet', (WidgetTester tester) async {
@@ -983,7 +995,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -1006,8 +1018,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 100dp wide instead of 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(350, 572, 450, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(350, 572, 450, 600),
+      );
     });
 
     testWidgets('constraints param overrides theme for showModalBottomSheet', (WidgetTester tester) async {
@@ -1015,7 +1029,7 @@ void main() {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
-          )
+          ),
         ),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -1039,8 +1053,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       // Should be centered and only 100dp instead of 80dp wide
-      expect(tester.getRect(find.text('BottomSheet')),
-          const Rect.fromLTRB(350, 572, 450, 600));
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(350, 572, 450, 600),
+      );
     });
 
   });

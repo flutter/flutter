@@ -85,7 +85,8 @@ BuildApp() {
       assemble                                                                \
       --no-version-check                                                      \
       ${performance_measurement_option}                                       \
-      -dTargetPlatform=darwin-x64                                             \
+      -dTargetPlatform=darwin                                                 \
+      -dDarwinArchs=x86_64                                                    \
       -dTargetFile="${target_path}"                                           \
       -dBuildMode="${build_mode}"                                             \
       -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                  \
