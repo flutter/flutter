@@ -330,6 +330,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -389,6 +390,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -451,6 +453,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -612,6 +615,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -681,6 +685,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -921,6 +926,13 @@ class Image extends StatefulWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
+
+  /// If non-null, the value from the [Animation] is multiplied with the opacity
+  /// of each image pixel before painting onto the canvas.
+  ///
+  /// This is more efficient that using [FadeTransition] to change the opacity
+  /// of an image.
+  final Animation<double>? opacity;
 
   /// The rendering quality of the image.
   ///
@@ -1326,6 +1338,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       height: widget.height,
       scale: _imageInfo?.scale ?? 1.0,
       color: widget.color,
+      opacity: widget.opacity,
       colorBlendMode: widget.colorBlendMode,
       fit: widget.fit,
       alignment: widget.alignment,
