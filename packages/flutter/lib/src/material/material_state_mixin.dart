@@ -35,12 +35,20 @@ import 'package:flutter/material.dart';
 /// {@end-tool}
 @optionalTypeArgs
 mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
-
-  /// Managed set of active [MaterialState] values.
+  /// Managed set of active [MaterialState] values designed to be passed to
+  /// [MaterialStateProperty.resolve] methods.
+  ///
+  /// To mutate this set and have [setState] called automatically for you, use
+  /// [setMaterialState], [addMaterialState], or [removeMaterialState]. Directly
+  /// mutating the set is possible, and may be necessary if you need to alter its
+  /// list without calling [setState] (and thus triggering a re-render).
+  ///
+  /// To check for a single condition, convenience getters [isPressed], [isHovered],
+  /// [isFocused], etc, are available for each [MaterialState] value.
   Set<MaterialState> materialStates = <MaterialState>{};
 
   /// Callback factory which accepts a [MaterialState] value and returns a
-  /// closure to mutate `self.materialStates` and call `setState()`.
+  /// closure to mutate [materialStates] and call [setState].
   ///
   /// {@tool snippet}
   /// Usage:
