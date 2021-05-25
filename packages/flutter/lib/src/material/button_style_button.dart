@@ -177,7 +177,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 ///  * [TextButton], a simple button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
-class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin<ButtonStyleButton>, TickerProviderStateMixin {
+class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin, TickerProviderStateMixin {
   AnimationController? _controller;
   double? _elevation;
   Color? _backgroundColor;

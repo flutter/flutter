@@ -315,7 +315,7 @@ class RawMaterialButton extends StatefulWidget {
   State<RawMaterialButton> createState() => _RawMaterialButtonState();
 }
 
-class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStateMixin<RawMaterialButton> {
+class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStateMixin {
 
   @override
   void initState() {
