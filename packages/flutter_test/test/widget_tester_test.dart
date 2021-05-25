@@ -761,6 +761,40 @@ void main() {
       expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
     });
   });
+
+  testWidgets('Should render on pointer events', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200));
+    final Widget target = animationSheet.record(
+      MaterialApp(
+        home: ColoredBox(
+          color: const Color.fromARGB(255, 128, 128, 128),
+          child: Center(
+            child: GestureDetector(
+              onTap: () {},
+              child: const Text('Test'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    gesture.down(tester.getCenter(find.byType(Text)) + const Offset(10, 10));
+
+    await tester.pumpFrames(target, const Duration(seconds: 1));
+
+    gesture.up(timeStamp: const Duration(seconds: 1));
+
+    await tester.pumpFrames(target, const Duration(seconds: 1));
+
+    tester.binding.setSurfaceSize(animationSheet.sheetSize());
+    final Widget display = await animationSheet.display();
+    await tester.pumpWidget(display);
+    await expectLater(
+      find.byWidget(display),
+      matchesGoldenFile('WidgetTester.press.animation.png'),
+    );
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {

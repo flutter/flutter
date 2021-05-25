@@ -15,7 +15,6 @@ void main() {
 
   testWidgets('Should print message on pointer events', (WidgetTester tester) async {
     final List<String?> printedMessages = <String?>[];
-    binding.storeDebugPrints = printedMessages;
 
     int invocations = 0;
     await tester.pumpWidget(
@@ -41,7 +40,9 @@ void main() {
     expect(widgetCenter.dx, windowCenterX);
     expect(widgetCenter.dy, windowCenterY);
 
-    await tester.tap(find.byType(Text));
+    await binding.collectDebugPrints(printedMessages, () async {
+      await tester.tap(find.byType(Text));
+    });
     await tester.pump();
     expect(invocations, 0);
 
@@ -59,8 +60,6 @@ Some possible finders for the widgets at Offset(400.0, 300.0):
   find.widgetWithText(PageStorage, 'Test')
   find.widgetWithText(Offstage, 'Test')
 '''.trim().split('\n')));
-
-    binding.storeDebugPrints = null;
   });
 }
 
@@ -68,12 +67,21 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
   @override
   TestBindingEventSource get pointerEventSource => TestBindingEventSource.device;
 
-  List<String?>? storeDebugPrints;
+  List<String?>? _storeDebugPrints;
 
   @override
   DebugPrintCallback get debugPrintOverride {
-    return storeDebugPrints == null ?
+    return _storeDebugPrints == null ?
       super.debugPrintOverride :
-      ((String? message, { int? wrapWidth }) => storeDebugPrints!.add(message));
+      ((String? message, { int? wrapWidth }) => _storeDebugPrints!.add(message));
+  }
+
+  Future<void> collectDebugPrints(List<String?>? store, AsyncValueGetter<void> task) async {
+    _storeDebugPrints = store;
+    try {
+      await task();
+    } finally {
+      _storeDebugPrints = null;
+    }
   }
 }

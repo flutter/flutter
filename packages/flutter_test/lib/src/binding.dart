@@ -479,7 +479,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final TestBindingEventSource previousSource = source;
     _pointerEventSource = source;
     try {
-      handlePointerEvent(event);
+      super.handlePointerEvent(event);
     } finally {
       _pointerEventSource = previousSource;
     }
