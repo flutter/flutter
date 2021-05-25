@@ -1,0 +1,17 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+import("//flutter/testing/testing.gni")
+
+if (enable_unittests) {
+  executable("spirv_assembler") {
+    sources = [ "spirv_assembler.cc" ]
+
+    configs += [ "//third_party/swiftshader_flutter:spvtools_public_config" ]
+
+    deps = [
+      "//third_party/swiftshader_flutter:spvtools",
+      "//third_party/swiftshader_flutter:spvtools_val",
+    ]
+  }
+}

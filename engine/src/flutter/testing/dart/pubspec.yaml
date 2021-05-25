@@ -32,6 +32,8 @@ dependency_overrides:
     path: ../../../third_party/dart/pkg/meta
   path:
     path: ../../../third_party/dart/third_party/pkg/path
+  spirv:
+    path: ../../lib/spirv
   sky_engine:
     path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
   sky_services:

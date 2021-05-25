@@ -64,6 +64,12 @@ analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
   "$SRC_DIR/out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart"
 
+echo "Analyzing spirv library..."
+analyze \
+  --packages="$FLUTTER_DIR/lib/spirv/.dart_tool/package_config.json" \
+  --options "$FLUTTER_DIR/analysis_options.yaml" \
+  "$FLUTTER_DIR/lib/spirv"
+
 echo "Analyzing ci/"
 analyze \
   --packages="$FLUTTER_DIR/ci/.dart_tool/package_config.json" \

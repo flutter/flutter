@@ -1,0 +1,37 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+import("//build/compiled_action.gni")
+import("//flutter/testing/testing.gni")
+
+if (enable_unittests) {
+  compiled_action_foreach("spirv_compile_exception_shaders") {
+    tool = "//flutter/lib/spirv/test:spirv_assembler"
+
+    sources = [
+      "unassigned_function_type.spvasm",
+      "unassigned_pointer_type.spvasm",
+      "unassigned_type.spvasm",
+      "unassigned_variable_type.spvasm",
+      "unsupported_addressing_model.spvasm",
+      "unsupported_capability.spvasm",
+      "unsupported_execution_mode.spvasm",
+      "unsupported_ext_inst_import.spvasm",
+      "unsupported_float_width.spvasm",
+      "unsupported_glsl_inst.spvasm",
+      "unsupported_matrix_column_count.spvasm",
+      "unsupported_matrix_non_square.spvasm",
+      "unsupported_memory_model.spvasm",
+      "unsupported_variable_storage_class.spvasm",
+      "unsupported_vector_component_count.spvasm",
+      "unsupported_vector_type.spvasm",
+    ]
+
+    outputs = [ "$target_gen_dir/{{source_name_part}}.spv" ]
+
+    args = [
+      "{{source}}",
+      rebase_path(target_gen_dir, root_build_dir) + "/{{source_name_part}}.spv",
+    ]
+  }
+}
