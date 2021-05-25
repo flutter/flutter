@@ -20,6 +20,12 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
 
   virtual ~VertexDescriptor();
 
+  template <size_t Size>
+  bool SetStageInputs(
+      const std::array<const ShaderStageIOSlot*, Size>& inputs) {
+    return SetStageInputs(inputs.data(), inputs.size());
+  }
+
   bool SetStageInputs(const ShaderStageIOSlot* const stage_inputs[],
                       size_t count);
 
