@@ -508,6 +508,7 @@ void FuchsiaExternalViewEmbedder::EnableWireframe(bool enable) {
 }
 
 void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
+                                             ViewCallback on_view_created,
                                              ViewIdCallback on_view_bound) {
   FML_CHECK(scenic_views_.find(view_id) == scenic_views_.end());
 
@@ -519,6 +520,7 @@ void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
           scenic::ToViewHolderToken(zx::eventpair((zx_handle_t)view_id)),
           "Flutter::PlatformView"),
   };
+  on_view_created();
   on_view_bound(new_view.view_holder.id());
 
   new_view.opacity_node.SetLabel("flutter::PlatformView::OpacityMutator");

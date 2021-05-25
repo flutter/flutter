@@ -607,9 +607,11 @@ TEST_F(PlatformViewTests, CreateViewTest) {
   bool create_view_called = false;
   auto CreateViewCallback = [&create_view_called](
                                 int64_t view_id,
+                                flutter_runner::ViewCallback on_view_created,
                                 flutter_runner::ViewIdCallback on_view_bound,
                                 bool hit_testable, bool focusable) {
     create_view_called = true;
+    on_view_created();
     on_view_bound(0);
   };
 
@@ -843,9 +845,11 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
       );
 
   auto on_create_view = [kViewId](int64_t view_id,
+                                  flutter_runner::ViewCallback on_view_created,
                                   flutter_runner::ViewIdCallback on_view_bound,
                                   bool hit_testable, bool focusable) {
     ASSERT_EQ(view_id, kViewId);
+    on_view_created();
     on_view_bound(kViewHolderId);
   };
 

@@ -32,6 +32,7 @@
 
 namespace flutter_runner {
 
+using ViewCallback = std::function<void()>;
 using ViewIdCallback = std::function<void(scenic::ResourceId)>;
 
 // This class orchestrates interaction with the Scenic compositor on Fuchsia. It
@@ -93,7 +94,9 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   // |SetViewProperties| doesn't manipulate the view directly -- it sets pending
   // properties for the next |UpdateView| call.
   void EnableWireframe(bool enable);
-  void CreateView(int64_t view_id, ViewIdCallback on_view_bound);
+  void CreateView(int64_t view_id,
+                  ViewCallback on_view_created,
+                  ViewIdCallback on_view_bound);
   void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
   void SetViewProperties(int64_t view_id,
                          const SkRect& occlusion_hint,

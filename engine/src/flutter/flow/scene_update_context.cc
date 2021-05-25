@@ -218,16 +218,18 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
 }
 
 void SceneUpdateContext::CreateView(int64_t view_id,
-                                    ViewHolder::ViewIdCallback on_view_created,
+                                    ViewCallback on_view_created,
+                                    ViewHolder::ViewIdCallback on_view_bound,
                                     bool hit_testable,
                                     bool focusable) {
   FML_LOG(INFO) << "CreateView for view holder: " << view_id;
   zx_handle_t handle = (zx_handle_t)view_id;
-  flutter::ViewHolder::Create(handle, std::move(on_view_created),
+  flutter::ViewHolder::Create(handle, std::move(on_view_bound),
                               scenic::ToViewHolderToken(zx::eventpair(handle)));
+  on_view_created();
+
   auto* view_holder = ViewHolder::FromId(view_id);
   FML_DCHECK(view_holder);
-
   view_holder->set_hit_testable(hit_testable);
   view_holder->set_focusable(focusable);
 }
