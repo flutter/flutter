@@ -31,8 +31,8 @@ bool RenderBox(std::shared_ptr<Context> context) {
   {
     auto vertex_descriptor = std::make_shared<VertexDescriptor>();
     if (!vertex_descriptor->SetStageInputs(
-            shader::BoxVertexInfo::kAllShaderStageInputs->data(),
-            shader::BoxVertexInfo::kAllShaderStageInputs->size())) {
+            shader::BoxVertexInfo::kAllShaderStageInputs.data(),
+            shader::BoxVertexInfo::kAllShaderStageInputs.size())) {
       return false;
     }
     desc.SetVertexDescriptor(std::move(vertex_descriptor));
