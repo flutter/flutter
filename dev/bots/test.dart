@@ -54,6 +54,10 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 /// configuration) -- prefilled with the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
 
+/// Environment variables to override the local engine when running `pub test`,
+/// if such flags are provided to `test.dart`.
+final Map<String,String> localEngineEnv = <String, String>{};
+
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
 const String kShardKey = 'SHARD';
@@ -95,6 +99,12 @@ Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
   try {
     flutterTestArgs.addAll(args);
+    for (final String arg in args) {
+      if (arg.startsWith('--local-engine='))
+        localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+      if (arg.startsWith('--local-engine-src-path='))
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
+    }
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
@@ -283,6 +293,7 @@ Future<void> _runWebToolTests() async {
     testPaths: <String>[path.join('test', 'web.shard')],
     enableFlutterToolAsserts: true,
     perTestTimeout: const Duration(minutes: 3),
+    includeLocalEngineEnv: true,
   );
 }
 
@@ -1273,6 +1284,11 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
   );
 }
 
+// TODO(sigmund): includeLocalEngineEnv should default to true. Currently we
+// only enable it on flutter-web test because some test suites do not work
+// properly when overriding the local engine (for example, because some platform
+// dependent targets are only built on some engines).
+// See https://github.com/flutter/flutter/issues/72368
 Future<void> _pubRunTest(String workingDirectory, {
   List<String> testPaths,
   bool enableFlutterToolAsserts = true,
@@ -1280,6 +1296,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   String coverage,
   bool forceSingleCore = false,
   Duration perTestTimeout,
+  bool includeLocalEngineEnv = false,
 }) async {
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1319,6 +1336,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
+    if (includeLocalEngineEnv) ...localEngineEnv,
   };
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
