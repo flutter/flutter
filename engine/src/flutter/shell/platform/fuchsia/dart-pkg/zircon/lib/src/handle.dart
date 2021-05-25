@@ -42,6 +42,8 @@ class Handle extends NativeFieldWrapperClass2 {
       native 'Handle_AsyncWait';
 
   Handle duplicate(int rights) native 'Handle_Duplicate';
+
+  Handle replace(int rights) native 'Handle_Replace';
 }
 
 @pragma('vm:entry-point')

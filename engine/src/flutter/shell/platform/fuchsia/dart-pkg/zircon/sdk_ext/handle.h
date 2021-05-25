@@ -67,6 +67,8 @@ class Handle : public fml::RefCountedThreadSafe<Handle>,
 
   Dart_Handle Duplicate(uint32_t rights);
 
+  Dart_Handle Replace(uint32_t rights);
+
   void ScheduleCallback(tonic::DartPersistentValue callback,
                         zx_status_t status,
                         const zx_packet_signal_t* signal);
