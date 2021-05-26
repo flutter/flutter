@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:dev_tools/codesign.dart' show CodesignCommand;
-import 'package:dev_tools/globals.dart';
-import 'package:dev_tools/repository.dart' show Checkouts;
+import 'package:conductor/codesign.dart' show CodesignCommand;
+import 'package:conductor/globals.dart';
+import 'package:conductor/repository.dart' show Checkouts;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';

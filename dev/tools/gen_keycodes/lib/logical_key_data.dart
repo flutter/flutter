@@ -207,13 +207,13 @@ class LogicalKeyData {
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
       final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
-      assert(physicalEntry.macOsScanCode != null,
-        'Physical entry $physicalKeyName does not have a macOsScanCode.');
+      assert(physicalEntry.macOSScanCode != null,
+        'Physical entry $physicalKeyName does not have a macOSScanCode.');
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
       assert(logicalEntry != null,
         'Unable to find logical entry by name $logicalKeyName.');
-      logicalEntry!.macOsKeyCodeNames.add(physicalEntry.name);
-      logicalEntry.macOsKeyCodeValues.add(physicalEntry.macOsScanCode!);
+      logicalEntry!.macOSKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.macOSKeyCodeValues.add(physicalEntry.macOSScanCode!);
     });
   }
 
@@ -227,13 +227,13 @@ class LogicalKeyData {
 
     physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
       final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
-      assert(physicalEntry.iosScanCode != null,
+      assert(physicalEntry.iOSScanCode != null,
         'Physical entry $physicalKeyName does not have an iosScanCode.');
       final LogicalKeyEntry? logicalEntry = data[logicalKeyName];
       assert(logicalEntry != null,
         'Unable to find logical entry by name $logicalKeyName.');
-      logicalEntry!.iosKeyCodeNames.add(physicalEntry.name);
-      logicalEntry.iosKeyCodeValues.add(physicalEntry.iosScanCode!);
+      logicalEntry!.iOSKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.iOSKeyCodeValues.add(physicalEntry.iOSScanCode!);
     });
   }
 
@@ -414,10 +414,10 @@ class LogicalKeyEntry {
     required this.name,
     this.keyLabel,
   })  : webNames = <String>[],
-        macOsKeyCodeNames = <String>[],
-        macOsKeyCodeValues = <int>[],
-        iosKeyCodeNames = <String>[],
-        iosKeyCodeValues = <int>[],
+        macOSKeyCodeNames = <String>[],
+        macOSKeyCodeValues = <int>[],
+        iOSKeyCodeNames = <String>[],
+        iOSKeyCodeValues = <int>[],
         gtkNames = <String>[],
         gtkValues = <int>[],
         windowsNames = <String>[],
@@ -441,10 +441,10 @@ class LogicalKeyEntry {
     : value = map['value'] as int,
       name = map['name'] as String,
       webNames = _toNonEmptyArray<String>(map['names']['web']),
-      macOsKeyCodeNames = _toNonEmptyArray<String>(map['names']['macOs']),
-      macOsKeyCodeValues = _toNonEmptyArray<int>(map['values']?['macOs']),
-      iosKeyCodeNames = _toNonEmptyArray<String>(map['names']['ios']),
-      iosKeyCodeValues = _toNonEmptyArray<int>(map['values']?['ios']),
+      macOSKeyCodeNames = _toNonEmptyArray<String>(map['names']['macos']),
+      macOSKeyCodeValues = _toNonEmptyArray<int>(map['values']?['macos']),
+      iOSKeyCodeNames = _toNonEmptyArray<String>(map['names']['ios']),
+      iOSKeyCodeValues = _toNonEmptyArray<int>(map['values']?['ios']),
       gtkNames = _toNonEmptyArray<String>(map['names']['gtk']),
       gtkValues = _toNonEmptyArray<int>(map['values']?['gtk']),
       windowsNames = _toNonEmptyArray<String>(map['names']['windows']),
@@ -470,19 +470,19 @@ class LogicalKeyEntry {
 
   /// The names of the key codes that corresponds to this logical key on macOS,
   /// created from the corresponding physical keys.
-  final List<String> macOsKeyCodeNames;
+  final List<String> macOSKeyCodeNames;
 
   /// The key codes that corresponds to this logical key on macOS, created from
   /// the physical key list substituted with the key mapping.
-  final List<int> macOsKeyCodeValues;
+  final List<int> macOSKeyCodeValues;
 
   /// The names of the key codes that corresponds to this logical key on iOS,
   /// created from the corresponding physical keys.
-  final List<String> iosKeyCodeNames;
+  final List<String> iOSKeyCodeNames;
 
   /// The key codes that corresponds to this logical key on iOS, created from the
   /// physical key list substituted with the key mapping.
-  final List<int> iosKeyCodeValues;
+  final List<int> iOSKeyCodeValues;
 
   /// The list of names that GTK gives to this key (symbol names minus the
   /// prefix).
@@ -528,15 +528,15 @@ class LogicalKeyEntry {
       'keyLabel': keyLabel,
       'names': <String, dynamic>{
         'web': webNames,
-        'macOs': macOsKeyCodeNames,
-        'ios': iosKeyCodeNames,
+        'macos': macOSKeyCodeNames,
+        'ios': iOSKeyCodeNames,
         'gtk': gtkNames,
         'windows': windowsNames,
         'android': androidNames,
       },
       'values': <String, List<int>>{
-        'macOs': macOsKeyCodeValues,
-        'ios': iosKeyCodeValues,
+        'macos': macOSKeyCodeValues,
+        'ios': iOSKeyCodeValues,
         'gtk': gtkValues,
         'windows': windowsValues,
         'android': androidValues,
