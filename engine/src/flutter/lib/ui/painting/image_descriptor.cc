@@ -7,26 +7,11 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/lib/ui/painting/codec.h"
-#include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/lib/ui/painting/single_frame_codec.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/logging/dart_invoke.h"
-
-#ifdef OS_MACOSX
-#include "third_party/skia/include/ports/SkImageGeneratorCG.h"
-#define PLATFORM_IMAGE_GENERATOR(data) \
-  SkImageGeneratorCG::MakeFromEncodedCG(data)
-#elif OS_WIN
-#include "third_party/skia/include/ports/SkImageGeneratorWIC.h"
-#define PLATFORM_IMAGE_GENERATOR(data) \
-  SkImageGeneratorWIC::MakeFromEncodedWIC(data)
-#else
-#define PLATFORM_IMAGE_GENERATOR(data) \
-  std::unique_ptr<SkImageGenerator>(nullptr)
-#endif
 
 namespace flutter {
 
@@ -48,13 +33,8 @@ void ImageDescriptor::RegisterNatives(tonic::DartLibraryNatives* natives) {
 }
 
 const SkImageInfo ImageDescriptor::CreateImageInfo() const {
-  if (generator_) {
-    return generator_->getInfo();
-  }
-  if (platform_image_generator_) {
-    return platform_image_generator_->getInfo();
-  }
-  return SkImageInfo::MakeUnknown();
+  FML_DCHECK(generator_);
+  return generator_->GetInfo();
 }
 
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
@@ -62,26 +42,13 @@ ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
                                  std::optional<size_t> row_bytes)
     : buffer_(std::move(buffer)),
       generator_(nullptr),
-      platform_image_generator_(nullptr),
       image_info_(std::move(image_info)),
       row_bytes_(row_bytes) {}
 
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
-                                 std::unique_ptr<SkCodec> codec)
+                                 std::unique_ptr<ImageGenerator> generator)
     : buffer_(std::move(buffer)),
-      generator_(std::shared_ptr<SkCodecImageGenerator>(
-          static_cast<SkCodecImageGenerator*>(
-              SkCodecImageGenerator::MakeFromCodec(std::move(codec))
-                  .release()))),
-      platform_image_generator_(nullptr),
-      image_info_(CreateImageInfo()),
-      row_bytes_(std::nullopt) {}
-
-ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
-                                 std::unique_ptr<SkImageGenerator> generator)
-    : buffer_(std::move(buffer)),
-      generator_(nullptr),
-      platform_image_generator_(std::move(generator)),
+      generator_(std::move(generator)),
       image_info_(CreateImageInfo()),
       row_bytes_(std::nullopt) {}
 
@@ -103,26 +70,29 @@ void ImageDescriptor::initEncoded(Dart_NativeArguments args) {
     return;
   }
 
-  // This call will succeed if Skia has a built-in codec for this.
-  // If it fails, we will check if the platform knows how to decode this image.
-  std::unique_ptr<SkCodec> codec =
-      SkCodec::MakeFromData(immutable_buffer->data());
-  fml::RefPtr<ImageDescriptor> descriptor;
-  if (!codec) {
-    std::unique_ptr<SkImageGenerator> generator =
-        PLATFORM_IMAGE_GENERATOR(immutable_buffer->data());
-    if (!generator) {
-      // We don't have a Skia codec for this image, and the platform doesn't
-      // know how to decode it.
-      Dart_SetReturnValue(args, tonic::ToDart("Invalid image data"));
-      return;
-    }
-    descriptor = fml::MakeRefCounted<ImageDescriptor>(immutable_buffer->data(),
-                                                      std::move(generator));
-  } else {
-    descriptor = fml::MakeRefCounted<ImageDescriptor>(immutable_buffer->data(),
-                                                      std::move(codec));
+  // This has to be valid because this method is called from Dart.
+  auto dart_state = UIDartState::Current();
+  auto registry = dart_state->GetImageGeneratorRegistry();
+
+  if (!registry) {
+    Dart_SetReturnValue(
+        args, tonic::ToDart("Failed to access the internal image decoder "
+                            "registry on this isolate. Please file a bug on "
+                            "https://github.com/flutter/flutter/issues."));
+    return;
   }
+
+  std::unique_ptr<ImageGenerator> generator =
+      registry->CreateCompatibleGenerator(immutable_buffer->data());
+
+  if (!generator) {
+    // No compatible image decoder was found.
+    Dart_SetReturnValue(args, tonic::ToDart("Invalid image data"));
+    return;
+  }
+
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
+      immutable_buffer->data(), std::move(generator));
 
   FML_DCHECK(descriptor);
 
@@ -158,7 +128,7 @@ void ImageDescriptor::instantiateCodec(Dart_Handle codec_handle,
                                        int target_width,
                                        int target_height) {
   fml::RefPtr<Codec> ui_codec;
-  if (!generator_ || generator_->getFrameCount() == 1) {
+  if (!generator_ || generator_->GetFrameCount() == 1) {
     ui_codec = fml::MakeRefCounted<SingleFrameCodec>(
         static_cast<fml::RefPtr<ImageDescriptor>>(this), target_width,
         target_height);
@@ -186,12 +156,9 @@ sk_sp<SkImage> ImageDescriptor::image() const {
 }
 
 bool ImageDescriptor::get_pixels(const SkPixmap& pixmap) const {
-  if (generator_) {
-    return generator_->getPixels(pixmap.info(), pixmap.writable_addr(),
-                                 pixmap.rowBytes());
-  }
-  FML_DCHECK(platform_image_generator_);
-  return platform_image_generator_->getPixels(pixmap);
+  FML_DCHECK(generator_);
+  return generator_->GetPixels(pixmap.info(), pixmap.writable_addr(),
+                               pixmap.rowBytes());
 }
 
 }  // namespace flutter
