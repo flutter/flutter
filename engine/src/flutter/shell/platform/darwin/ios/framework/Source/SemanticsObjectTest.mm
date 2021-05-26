@@ -252,35 +252,36 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   XCTAssertNil(weakObject);
 }
 
-- (void)testFlutterSwitchSemanticsObjectForwardsCalls {
-  SemanticsObject* mockSemanticsObject = OCMClassMock([SemanticsObject class]);
-  FlutterSwitchSemanticsObject* switchObj =
-      [[FlutterSwitchSemanticsObject alloc] initWithSemanticsObject:mockSemanticsObject];
-  OCMStub([mockSemanticsObject accessibilityActivate]).andReturn(YES);
-  OCMStub([mockSemanticsObject accessibilityScroll:UIAccessibilityScrollDirectionRight])
-      .andReturn(NO);
-  OCMStub([mockSemanticsObject accessibilityPerformEscape]).andReturn(YES);
+- (void)testFlutterSwitchSemanticsObjectMatchesUISwitch {
+  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  FlutterSwitchSemanticsObject* object = [[FlutterSwitchSemanticsObject alloc] initWithBridge:bridge
+                                                                                          uid:1];
 
-  XCTAssertTrue([switchObj accessibilityActivate]);
-  OCMVerify([mockSemanticsObject accessibilityActivate]);
+  // Handle initial setting of node with header.
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasToggledState) |
+               static_cast<int32_t>(flutter::SemanticsFlags::kIsToggled);
+  node.label = "foo";
+  [object setSemanticsNode:&node];
+  // Create ab real UISwitch to compare the FlutterSwitchSemanticsObject with.
+  UISwitch* nativeSwitch = [[UISwitch alloc] init];
+  nativeSwitch.on = YES;
 
-  [switchObj accessibilityIncrement];
-  OCMVerify([mockSemanticsObject accessibilityIncrement]);
+  XCTAssertEqual(object.accessibilityTraits, nativeSwitch.accessibilityTraits);
+  XCTAssertEqual(object.accessibilityValue, nativeSwitch.accessibilityValue);
 
-  [switchObj accessibilityDecrement];
-  OCMVerify([mockSemanticsObject accessibilityDecrement]);
+  // Set the toggled to false;
+  flutter::SemanticsNode update;
+  update.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasToggledState);
+  update.label = "foo";
+  [object setSemanticsNode:&update];
 
-  XCTAssertFalse([switchObj accessibilityScroll:UIAccessibilityScrollDirectionRight]);
-  OCMVerify([mockSemanticsObject accessibilityScroll:UIAccessibilityScrollDirectionRight]);
+  nativeSwitch.on = NO;
 
-  XCTAssertTrue([switchObj accessibilityPerformEscape]);
-  OCMVerify([mockSemanticsObject accessibilityPerformEscape]);
-
-  [switchObj accessibilityElementDidBecomeFocused];
-  OCMVerify([mockSemanticsObject accessibilityElementDidBecomeFocused]);
-
-  [switchObj accessibilityElementDidLoseFocus];
-  OCMVerify([mockSemanticsObject accessibilityElementDidLoseFocus]);
+  XCTAssertEqual(object.accessibilityTraits, nativeSwitch.accessibilityTraits);
+  XCTAssertEqual(object.accessibilityValue, nativeSwitch.accessibilityValue);
 }
 
 @end

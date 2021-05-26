@@ -149,11 +149,10 @@ constexpr int32_t kRootNodeId = 0;
 
 @end
 
-/// A proxy class for SemanticsObject and UISwitch.  For most Accessibility and
-/// SemanticsObject methods it delegates to the semantics object, otherwise it
-/// sends messages to the UISwitch.
-@interface FlutterSwitchSemanticsObject : UISwitch
-- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject;
+/// The semantics object for switch buttons. This class creates an UISwitch to interact with the
+/// iOS.
+@interface FlutterSwitchSemanticsObject : SemanticsObject
+
 @end
 
 /**
