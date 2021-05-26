@@ -115,7 +115,7 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required Rect rect,
     required String label,
     // TODO(chunhtai): change the Object? to List<StringAttribute> when engine
-    // change lands.
+    // pr lands: https://github.com/flutter/engine/pull/25373.
     // https://github.com/flutter/flutter/issues/79318.
     Object? labelAttributes,
     required String value,
