@@ -20,11 +20,19 @@ import 'material_state.dart';
 ///
 /// {@tool snippet}
 /// ```dart
-/// class MyWidgetState extends State<MyWidget> with MaterialStateMixin {
+/// class MyWidget extends StatefulWidget {
+///   const MyWidget(this.color, {required this.child, Key? key}) : super(key: key);
+///   final MaterialStateColor color;
+///   final Widget child;
+///   @override
+///   State createState() => MyWidgetState();
+/// }
+///
+/// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return InkWell(
-///       onFocusChange: () => updateMaterialState(MaterialState.focused),
+///       onFocusChange: updateMaterialState(MaterialState.focused),
 ///       child: Container(
 ///         color: widget.color.resolve(materialStates),
 ///         child: widget.child,
@@ -54,7 +62,13 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// {@tool snippet}
   /// Usage:
   /// ```dart
-  /// class MyWidgetState extends State<MyWidget> with MaterialStateMixin {
+  /// class MyWidget extends StatefulWidget {
+  ///   const MyWidget({Key? key}) : super(key: key);
+  ///   @override
+  ///   State createState() => MyWidgetState();
+  /// }
+  ///
+  /// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Container(
