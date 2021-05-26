@@ -373,7 +373,7 @@ class XcodeProjectInfo {
     if (buildInfo.flavor == null) {
       return baseConfiguration;
     }
-    return baseConfiguration + '-$scheme';
+    return '$baseConfiguration-$scheme';
   }
 
   /// Checks whether the [buildConfigurations] contains the specified string, without

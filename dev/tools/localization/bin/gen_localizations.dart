@@ -95,7 +95,7 @@ String generateArbBasedLocalizationSubclasses({
       languageToScriptCodes[locale.languageCode].add(locale.scriptCode);
     }
     if (locale.countryCode != null && locale.scriptCode != null) {
-      final LocaleInfo key = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
+      final LocaleInfo key = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
       languageAndScriptToCountryCodes[key] ??= <String>{};
       languageAndScriptToCountryCodes[key].add(locale.countryCode);
     }
@@ -150,7 +150,7 @@ String generateArbBasedLocalizationSubclasses({
       // Language has scriptCodes, so we need to properly fallback countries to corresponding
       // script default values before language default values.
       for (final String scriptCode in languageToScriptCodes[languageName]) {
-        final LocaleInfo scriptBaseLocale = LocaleInfo.fromString(languageName + '_' + scriptCode);
+        final LocaleInfo scriptBaseLocale = LocaleInfo.fromString('${languageName}_$scriptCode');
         output.writeln(generateClassDeclaration(
           scriptBaseLocale,
           generatedClassPrefix,
@@ -170,7 +170,7 @@ String generateArbBasedLocalizationSubclasses({
         for (final LocaleInfo locale in localeCodes) {
           if (locale.originalString == languageName)
             continue;
-          if (locale.originalString == languageName + '_' + scriptCode)
+          if (locale.originalString == '${languageName}_$scriptCode')
             continue;
           if (locale.scriptCode != scriptCode)
             continue;
@@ -217,12 +217,12 @@ String generateArbBasedLocalizationSubclasses({
       }
     }
 
-    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
+    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
     if (countryCodeCount == 0) {
       if (scriptCodeCount == 0)
         supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
       else
-        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's') + ')');
+        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'})');
 
     } else if (countryCodeCount == 1) {
       supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)');
@@ -295,7 +295,7 @@ $factoryDeclaration
     case '$language': {
       switch (locale.scriptCode) {''');
       for (final String scriptCode in languageToScriptCodes[language]) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString(language + '_' + scriptCode);
+        final LocaleInfo scriptLocale = LocaleInfo.fromString('${language}_$scriptCode');
         output.writeln('''
         case '$scriptCode': {''');
         if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
@@ -458,7 +458,7 @@ String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo l
           throw Exception(
             '"$value" is not one of the ICU short time patterns supported '
             'by the material library. Here is the list of supported '
-            'patterns:\n  ' + _icuTimeOfDayToEnum.keys.join('\n  ')
+            'patterns:\n  ${_icuTimeOfDayToEnum.keys.join('\n  ')}'
           );
         }
         return _icuTimeOfDayToEnum[value];
@@ -467,7 +467,7 @@ String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo l
           throw Exception(
             '"$value" is not one of the scriptCategory values supported '
             'by the material library. Here is the list of supported '
-            'values:\n  ' + _scriptCategoryToEnum.keys.join('\n  ')
+            'values:\n  ${_scriptCategoryToEnum.keys.join('\n  ')}'
           );
         }
         return _scriptCategoryToEnum[value];

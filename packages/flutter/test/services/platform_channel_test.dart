@@ -14,14 +14,14 @@ void main() {
     test('can send string message and get reply', () async {
       TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(
         'ch',
-        (ByteData? message) async => string.encodeMessage(string.decodeMessage(message)! + ' world'),
+        (ByteData? message) async => string.encodeMessage('${string.decodeMessage(message)!} world'),
       );
       final String? reply = await channel.send('hello');
       expect(reply, equals('hello world'));
     });
 
     test('can receive string message and send reply', () async {
-      channel.setMessageHandler((String? message) async => message! + ' world');
+      channel.setMessageHandler((String? message) async => '${message!} world');
       String? reply;
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         'ch',
@@ -279,8 +279,8 @@ void main() {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'listen') {
             final String argument = methodCall['args'] as String;
-            emitEvent(jsonMethod.encodeSuccessEnvelope(argument + '1'));
-            emitEvent(jsonMethod.encodeSuccessEnvelope(argument + '2'));
+            emitEvent(jsonMethod.encodeSuccessEnvelope('${argument}1'));
+            emitEvent(jsonMethod.encodeSuccessEnvelope('${argument}2'));
             emitEvent(null);
             return jsonMethod.encodeSuccessEnvelope(null);
           } else if (methodCall['method'] == 'cancel') {

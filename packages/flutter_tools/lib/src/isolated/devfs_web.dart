@@ -841,7 +841,7 @@ class WebDevFS implements DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       Uri(
         scheme: 'org-dartlang-app',
-        path: '/' + mainUri.pathSegments.last,
+        path: '/${mainUri.pathSegments.last}',
       ),
       invalidatedFiles,
       outputPath: dillOutputPath,

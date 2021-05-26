@@ -650,7 +650,7 @@ abstract class Device {
 
     // Join columns into lines of text
     for (final List<String> row in table) {
-      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
+      yield indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • ');
     }
   }
 

@@ -217,7 +217,7 @@ class GoogleChromeDevice extends ChromiumDevice {
         if (result.exitCode == 0) {
           final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
           if (parts.length > 2) {
-            version = 'Google Chrome ' + parts[parts.length - 2];
+            version = 'Google Chrome ${parts[parts.length - 2]}';
           }
         }
       }
@@ -278,7 +278,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
       if (result.exitCode == 0) {
         final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
         if (parts.length > 2) {
-          return 'Microsoft Edge ' + parts[parts.length - 2];
+          return 'Microsoft Edge ${parts[parts.length - 2]}';
         }
       }
     }

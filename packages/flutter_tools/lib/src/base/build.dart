@@ -67,7 +67,7 @@ class GenSnapshot {
     // iOS has a separate gen_snapshot for armv7 and arm64 in the same,
     // directory. So we need to select the right one.
     if (snapshotType.platform == TargetPlatform.ios) {
-      snapshotterPath += '_' + getNameForDarwinArch(darwinArch!);
+      snapshotterPath += '_${getNameForDarwinArch(darwinArch!)}';
     }
 
     return _processUtils.stream(

@@ -1004,7 +1004,7 @@ class WebCompileTest {
     sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
 
     await Process.run('gzip',<String>['-k', '9', fileName]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', fileName + '.gz']);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', '$fileName.gz']);
     sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
 
     return sizeMetrics;
