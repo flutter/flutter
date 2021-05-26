@@ -113,7 +113,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
 
   Future<bool> handleNavigationMessage(ByteData? data) async {
     final MethodCall decoded = JSONMethodCodec().decodeMethodCall(data);
-    final Map<String, dynamic> arguments = decoded.arguments;
+    final Map<String, dynamic>? arguments = decoded.arguments;
     switch (decoded.method) {
       case 'selectMultiEntryHistory':
         await _useMultiEntryBrowserHistory();
@@ -121,13 +121,16 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
       case 'selectSingleEntryHistory':
         await _useSingleEntryBrowserHistory();
         return true;
+      // the following cases assert that arguments are not null
       case 'routeUpdated': // deprecated
+        assert(arguments != null);
         await _useSingleEntryBrowserHistory();
-        browserHistory.setRouteName(arguments['routeName']);
+        browserHistory.setRouteName(arguments!['routeName']);
         return true;
       case 'routeInformationUpdated':
+        assert(arguments != null);
         browserHistory.setRouteName(
-          arguments['location'],
+          arguments!['location'],
           state: arguments['state'],
         );
         return true;
