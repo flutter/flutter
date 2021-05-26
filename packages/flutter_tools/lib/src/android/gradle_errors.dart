@@ -18,8 +18,8 @@ typedef GradleErrorTest = bool Function(String);
 /// A Gradle error handled by the tool.
 class GradleHandledError {
   const GradleHandledError({
-    this.test,
-    this.handler,
+    @required this.test,
+    @required this.handler,
     this.eventLabel,
   });
 
@@ -29,10 +29,10 @@ class GradleHandledError {
 
   /// The handler function.
   final Future<GradleBuildStatus> Function({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) handler;
 
   /// The [BuildEvent] label is named gradle-[eventLabel].
@@ -85,10 +85,10 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     'Permission denied',
   ]),
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} Gradle does not have execution permission.', emphasis: true);
     globals.printStatus(
@@ -122,10 +122,10 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     'Gateway Time-out'
   ]),
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
@@ -152,10 +152,10 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     'com.android.tools.r8',
   ]),
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
     globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
@@ -191,10 +191,10 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
            _androidXFailureRegex.hasMatch(line);
   },
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     final bool hasPlugins = project.flutterPluginsFile.existsSync();
     if (!hasPlugins) {
@@ -259,10 +259,10 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     'You have not accepted the license agreements of the following SDK components',
   ]),
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     const String licenseNotAcceptedMatcher =
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
@@ -293,10 +293,10 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     return _undefinedTaskPattern.hasMatch(line);
   },
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
@@ -366,10 +366,10 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     return _minSdkVersionPattern.hasMatch(line);
   },
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -405,10 +405,10 @@ final GradleHandledError transformInputIssue = GradleHandledError(
     return line.contains('https://issuetracker.google.com/issues/158753935');
   },
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -438,10 +438,10 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     return line.contains('which is not part of the dependency lock state');
   },
   handler: ({
-    String line,
-    FlutterProject project,
-    bool usesAndroidX,
-    bool shouldBuildPluginAsAar,
+    @required String line,
+    @required FlutterProject project,
+    @required bool usesAndroidX,
+    @required bool shouldBuildPluginAsAar,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
