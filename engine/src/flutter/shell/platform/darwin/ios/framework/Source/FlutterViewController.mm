@@ -1096,26 +1096,33 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 }
 
-- (void)pressesBegan:(NSSet<UIPress*>*)presses withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+- (void)pressesBegan:(NSSet<UIPress*>*)presses
+           withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
+  [super pressesBegan:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
     [self dispatchPresses:presses];
   }
 }
 
-- (void)pressesChanged:(NSSet<UIPress*>*)presses withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+- (void)pressesChanged:(NSSet<UIPress*>*)presses
+             withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
+  [super pressesChanged:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
     [self dispatchPresses:presses];
   }
 }
 
-- (void)pressesEnded:(NSSet<UIPress*>*)presses withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+- (void)pressesEnded:(NSSet<UIPress*>*)presses
+           withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
+  [super pressesEnded:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
     [self dispatchPresses:presses];
   }
 }
 
 - (void)pressesCancelled:(NSSet<UIPress*>*)presses
-               withEvent:(UIEvent*)event API_AVAILABLE(ios(9.0)) {
+               withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
+  [super pressesCancelled:presses withEvent:event];
   if (@available(iOS 13.4, *)) {
     [self dispatchPresses:presses];
   }
