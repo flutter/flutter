@@ -119,6 +119,8 @@
         "templates/app/web/favicon.png.copy.tmpl",
         "templates/app/web/icons/Icon-192.png.copy.tmpl",
         "templates/app/web/icons/Icon-512.png.copy.tmpl",
+        "templates/app/web/icons/Icon-maskable-192.png.img.tmpl",
+        "templates/app/web/icons/Icon-maskable-512.png.img.tmpl",
         "templates/app/web/index.html.tmpl",
         "templates/app/web/manifest.json.tmpl",
         "templates/app/windows.tmpl/.gitignore",
