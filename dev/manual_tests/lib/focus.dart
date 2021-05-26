@@ -13,9 +13,9 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key? key, this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
+  const DemoButton({Key? key, required this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
 
-  final String? name;
+  final String name;
   final bool canRequestFocus;
   final bool autofocus;
 
@@ -62,7 +62,7 @@ class _DemoButtonState extends State<DemoButton> {
         }),
       ),
       onPressed: () => _handleOnPressed(),
-      child: Text(widget.name ?? ''),
+      child: Text(widget.name),
     );
   }
 }

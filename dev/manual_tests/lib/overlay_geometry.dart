@@ -20,17 +20,17 @@ enum MarkerType { topLeft, bottomRight, touch }
 
 class _MarkerPainter extends CustomPainter {
   const _MarkerPainter({
-    this.size,
-    this.type,
+    required this.size,
+    required this.type,
   });
 
-  final double? size;
-  final MarkerType? type;
+  final double size;
+  final MarkerType type;
 
   @override
   void paint(Canvas canvas, _) {
     final Paint paint = Paint()..color = const Color(0x8000FF00);
-    final double r = size! / 2.0;
+    final double r = size / 2.0;
     canvas.drawCircle(Offset(r, r), r, paint);
 
     paint
@@ -156,10 +156,9 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       setState(() {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;
-        for (final MarkerType type in markers.keys) {
-          final Offset? oldPosition = markers[type];
-          markers[type] = oldPosition!.translate(0.0, dy);
-        }
+        markers.forEach((MarkerType type, Offset oldPosition) {
+          markers[type] = oldPosition.translate(0.0, dy);          
+        });
       });
     }
     return false;

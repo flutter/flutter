@@ -193,12 +193,20 @@ class UndoIntent extends Intent {
 class UndoAction extends Action<UndoIntent> {
   @override
   bool isEnabled(UndoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return false;
+    }
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 
   @override
   void invoke(UndoIntent intent) {
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return;
+    }
     final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
     manager.undo();
   }
@@ -221,7 +229,11 @@ class RedoAction extends Action<RedoIntent> {
 
   @override
   RedoAction invoke(RedoIntent intent) {
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus!.context!) as UndoableActionDispatcher;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    if (buildContext == null) {
+      return this;
+    }
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     manager.redo();
     return this;
   }
@@ -298,9 +310,9 @@ class UndoableDirectionalFocusAction extends UndoableFocusActionBase<Directional
 
 /// A button class that takes focus when clicked.
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key? key, this.name}) : super(key: key);
+  const DemoButton({Key? key, required this.name}) : super(key: key);
 
-  final String? name;
+  final String name;
 
   @override
   State<DemoButton> createState() => _DemoButtonState();
@@ -338,7 +350,7 @@ class _DemoButtonState extends State<DemoButton> {
         }),
       ),
       onPressed: () => _handleOnPressed(),
-      child: Text(widget.name ?? '', key: _nameKey),
+      child: Text(widget.name, key: _nameKey),
     );
   }
 }
@@ -355,12 +367,14 @@ class FocusDemo extends StatefulWidget {
 class _FocusDemoState extends State<FocusDemo> {
   final FocusNode outlineFocus = FocusNode(debugLabel: 'Demo Focus Node');
   late final UndoableActionDispatcher dispatcher = UndoableActionDispatcher();
-  late bool canUndo = dispatcher.canUndo;
-  late bool canRedo = dispatcher.canRedo;
+  bool canUndo = false;
+  bool canRedo = false;
 
   @override
   void initState() {
     super.initState();
+    canUndo = dispatcher.canUndo;
+    canRedo = dispatcher.canRedo;
     dispatcher.addListener(_handleUndoStateChange);
   }
 

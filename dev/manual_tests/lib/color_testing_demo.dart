@@ -52,10 +52,10 @@ class ColorDemoHome extends StatelessWidget {
 }
 
 class GradientRow extends StatelessWidget {
-  const GradientRow({ Key? key, this.rightColor, this.leftColor }) : super(key: key);
+  const GradientRow({ Key? key, required this.rightColor, required this.leftColor }) : super(key: key);
 
-  final Color? leftColor;
-  final Color? rightColor;
+  final Color leftColor;
+  final Color rightColor;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class GradientRow extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[ leftColor!, rightColor! ],
+          colors: <Color>[ leftColor, rightColor ],
         ),
       ),
     );
@@ -73,9 +73,9 @@ class GradientRow extends StatelessWidget {
 }
 
 class ColorRow extends StatelessWidget {
-  const ColorRow({ Key? key, this.color }) : super(key: key);
+  const ColorRow({ Key? key, required this.color }) : super(key: key);
 
-  final Color? color;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {

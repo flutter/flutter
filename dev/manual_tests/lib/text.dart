@@ -119,9 +119,9 @@ class _HomeState extends State<Home> {
 }
 
 class Fuzzer extends StatefulWidget {
-  const Fuzzer({ Key? key, this.seed }) : super(key: key);
+  const Fuzzer({ Key? key, required this.seed }) : super(key: key);
 
-  final int? seed;
+  final int seed;
 
   @override
   State<Fuzzer> createState() => _FuzzerState();
@@ -179,22 +179,22 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (_random.nextInt(200) == 0)
       return null;
     return TextStyle(
-      color: _fiddleWithColor(style.color!),
-      decoration: _fiddleWithDecoration(style.decoration!),
-      decorationColor: _fiddleWithColor(style.decorationColor!),
-      decorationStyle: _fiddleWithDecorationStyle(style.decorationStyle!),
-      fontWeight: _fiddleWithFontWeight(style.fontWeight!),
-      fontStyle: _fiddleWithFontStyle(style.fontStyle!),
+      color: _fiddleWithColor(style.color),
+      decoration: _fiddleWithDecoration(style.decoration),
+      decorationColor: _fiddleWithColor(style.decorationColor),
+      decorationStyle: _fiddleWithDecorationStyle(style.decorationStyle),
+      fontWeight: _fiddleWithFontWeight(style.fontWeight),
+      fontStyle: _fiddleWithFontStyle(style.fontStyle),
       // TODO(ianh): Check textBaseline once we support that
-      fontFamily: _fiddleWithFontFamily(style.fontFamily!),
-      fontSize: _fiddleWithDouble(style.fontSize!, 14.0, 100.0),
-      letterSpacing: _fiddleWithDouble(style.letterSpacing!, 0.0, 30.0),
-      wordSpacing: _fiddleWithDouble(style.wordSpacing!, 0.0, 30.0),
-      height: _fiddleWithDouble(style.height!, 1.0, 1.9),
+      fontFamily: _fiddleWithFontFamily(style.fontFamily),
+      fontSize: _fiddleWithDouble(style.fontSize, 14.0, 100.0),
+      letterSpacing: _fiddleWithDouble(style.letterSpacing, 0.0, 30.0),
+      wordSpacing: _fiddleWithDouble(style.wordSpacing, 0.0, 30.0),
+      height: _fiddleWithDouble(style.height, 1.0, 1.9),
     );
   }
 
-  Color? _fiddleWithColor(Color value) {
+  Color? _fiddleWithColor(Color? value) {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null)
@@ -216,7 +216,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  TextDecoration? _fiddleWithDecoration(TextDecoration value) {
+  TextDecoration? _fiddleWithDecoration(TextDecoration? value) {
     if (_random.nextInt(10) > 0)
       return value;
     switch (_random.nextInt(100)) {
@@ -244,7 +244,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return null;
   }
 
-  TextDecorationStyle? _fiddleWithDecorationStyle(TextDecorationStyle value) {
+  TextDecorationStyle? _fiddleWithDecorationStyle(TextDecorationStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -254,7 +254,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontWeight? _fiddleWithFontWeight(FontWeight value) {
+  FontWeight? _fiddleWithFontWeight(FontWeight? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -264,7 +264,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontStyle? _fiddleWithFontStyle(FontStyle value) {
+  FontStyle? _fiddleWithFontStyle(FontStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -274,7 +274,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  String? _fiddleWithFontFamily(String value) {
+  String? _fiddleWithFontFamily(String? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -298,7 +298,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  double? _fiddleWithDouble(double value, double defaultValue, double max) {
+  double? _fiddleWithDouble(double? value, double defaultValue, double max) {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null)
@@ -338,7 +338,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   int depthOf(TextSpan node) {
-    if (node.children == null || node.children!.isEmpty)
+    if (node.children == null || node.children?.isEmpty == true)
       return 0;
     int result = 0;
     for (final TextSpan child in node.children!.cast<TextSpan>())
@@ -809,9 +809,9 @@ class _BidiState extends State<Bidi> {
 }
 
 class Zalgo extends StatefulWidget {
-  const Zalgo({ Key? key, this.seed }) : super(key: key);
+  const Zalgo({ Key? key, required this.seed }) : super(key: key);
 
-  final int? seed;
+  final int seed;
 
   @override
   State<Zalgo> createState() => _ZalgoState();
@@ -914,9 +914,9 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 }
 
 class Painting extends StatefulWidget {
-  const Painting({ Key? key, this.seed }) : super(key: key);
+  const Painting({ Key? key, required this.seed }) : super(key: key);
 
-  final int? seed;
+  final int seed;
 
   @override
   State<Painting> createState() => _PaintingState();

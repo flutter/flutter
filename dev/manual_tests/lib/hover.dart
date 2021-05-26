@@ -12,9 +12,9 @@ void main() {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({Key? key, this.name}) : super(key: key);
+  const DemoButton({Key? key, required this.name}) : super(key: key);
 
-  final String? name;
+  final String name;
 
   void _handleOnPressed() {
     print('Button $name pressed.');
@@ -24,7 +24,7 @@ class DemoButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () => _handleOnPressed(),
-      child: Text(name ?? ''),
+      child: Text(name),
     );
   }
 }

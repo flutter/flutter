@@ -36,9 +36,9 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
-  final String? title;
+  final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -112,9 +112,9 @@ class OptionModel extends ChangeNotifier {
 }
 
 class LabeledCheckbox extends StatelessWidget {
-  const LabeledCheckbox({Key? key, this.label, this.onChanged, this.value}) : super(key: key);
+  const LabeledCheckbox({Key? key, required this.label, this.onChanged, this.value}) : super(key: key);
 
-  final String? label;
+  final String label;
   final ValueChanged<bool?>? onChanged;
   final bool? value;
 
@@ -127,7 +127,7 @@ class LabeledCheckbox extends StatelessWidget {
           onChanged: onChanged,
           value: value,
         ),
-        Text(label ?? ''),
+        Text(label),
       ],
     );
   }
@@ -181,7 +181,7 @@ class _OptionsState extends State<Options> {
     return 'custom';
   }
 
-  VisualDensity _profileToDensity(String profile) {
+  VisualDensity _profileToDensity(String? profile) {
     switch (profile) {
       case 'standard':
         return VisualDensity.standard;
@@ -305,7 +305,7 @@ class _OptionsState extends State<Options> {
                       style: TextStyle(color: Colors.grey[50]),
                       isDense: true,
                       onChanged: (String? value) {
-                        widget.model.density = _profileToDensity(value!);
+                        widget.model.density = _profileToDensity(value);
                       },
                       items: const <DropdownMenuItem<String>>[
                         DropdownMenuItem<String>(
@@ -322,14 +322,14 @@ class _OptionsState extends State<Options> {
                   LabeledCheckbox(
                     label: 'Enabled',
                     onChanged: (bool? checked) {
-                      widget.model.enable = checked!;
+                      widget.model.enable = checked == true;
                     },
                     value: widget.model.enable,
                   ),
                   LabeledCheckbox(
                     label: 'Slow',
                     onChanged: (bool? checked) {
-                      widget.model.slowAnimations = checked!;
+                      widget.model.slowAnimations = checked == true;
                       Future<void>.delayed(const Duration(milliseconds: 150)).then((_) {
                         if (widget.model.slowAnimations) {
                           timeDilation = 20.0;
@@ -343,7 +343,7 @@ class _OptionsState extends State<Options> {
                   LabeledCheckbox(
                     label: 'RTL',
                     onChanged: (bool? checked) {
-                      widget.model.rtl = checked!;
+                      widget.model.rtl = checked == true;
                     },
                     value: widget.model.rtl,
                   ),
@@ -566,7 +566,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onChanged: _model.enable
                   ? (bool? value) {
                       setState(() {
-                        checkboxValues[index] = value!;
+                        checkboxValues[index] = value == true;
                       });
                     }
                   : null,

@@ -41,7 +41,7 @@ class CardCollectionState extends State<CardCollection> {
   ];
 
   MaterialColor _primaryColor = Colors.deepPurple;
-  List<CardModel>? _cardModels;
+  List<CardModel> _cardModels = <CardModel>[];
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextAlign _textAlign = TextAlign.center;
   bool _editable = false;
@@ -53,10 +53,10 @@ class CardCollectionState extends State<CardCollection> {
     if (_fixedSizeCards)
       return;
     _cardModels = List<CardModel>.generate(
-      _cardModels!.length,
+      _cardModels.length,
       (int i) {
-        _cardModels?[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
-        return _cardModels![i];
+        _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
+        return _cardModels[i];
       },
     );
   }
@@ -90,9 +90,9 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   void dismissCard(CardModel card) {
-    if (_cardModels?.contains(card) == true) {
+    if (_cardModels.contains(card) == true) {
       setState(() {
-        _cardModels?.remove(card);
+        _cardModels.remove(card);
       });
     }
   }
@@ -241,13 +241,13 @@ class CardCollectionState extends State<CardCollection> {
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
         alignment: const Alignment(-1.0, 0.5),
-        child: Text('Swipe Away: ${_cardModels?.length}', style: Theme.of(context).primaryTextTheme.headline6),
+        child: Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.headline6),
       ),
     );
   }
 
   Widget _buildCard(BuildContext context, int index) {
-    final CardModel cardModel = _cardModels![index];
+    final CardModel cardModel = _cardModels[index];
     final Widget card = Dismissible(
       key: ObjectKey(cardModel),
       direction: _dismissDirection,
@@ -358,7 +358,7 @@ class CardCollectionState extends State<CardCollection> {
   Widget build(BuildContext context) {
     Widget cardCollection = ListView.builder(
       itemExtent: _fixedSizeCards ? kFixedCardHeight : null,
-      itemCount: _cardModels?.length,
+      itemCount: _cardModels.length,
       itemBuilder: _buildCard,
     );
 

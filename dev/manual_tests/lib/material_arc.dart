@@ -46,10 +46,10 @@ class _IgnoreDrag extends Drag {
 class _PointDemoPainter extends CustomPainter {
   _PointDemoPainter({
     Animation<double>? repaint,
-    this.arc,
+    required this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
-  final MaterialPointArcTween? arc;
+  final MaterialPointArcTween arc;
   final Animation<double>? _repaint;
 
   void drawPoint(Canvas canvas, Offset point, Color color) {
@@ -68,32 +68,32 @@ class _PointDemoPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint();
 
-    if (arc?.center != null)
-      drawPoint(canvas, arc!.center!, Colors.grey.shade400);
+    if (arc.center != null)
+      drawPoint(canvas, arc.center!, Colors.grey.shade400);
 
     paint
       ..isAntiAlias = false // Work-around for github.com/flutter/flutter/issues/5720
       ..color = Colors.green.withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
-    if (arc?.center != null && arc?.radius != null)
-      canvas.drawCircle(arc!.center!, arc!.radius!, paint);
+    if (arc.center != null && arc.radius != null)
+      canvas.drawCircle(arc.center!, arc.radius!, paint);
     else
-      canvas.drawLine(arc!.begin!, arc!.end!, paint);
+      canvas.drawLine(arc.begin!, arc.end!, paint);
 
-    drawPoint(canvas, arc!.begin!, Colors.green);
-    drawPoint(canvas, arc!.end!, Colors.red);
+    drawPoint(canvas, arc.begin!, Colors.green);
+    drawPoint(canvas, arc.end!, Colors.red);
 
     paint
       ..color = Colors.green
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(arc!.lerp(_repaint!.value), _kPointRadius, paint);
+    canvas.drawCircle(arc.lerp(_repaint!.value), _kPointRadius, paint);
   }
 
   @override
   bool hitTest(Offset position) {
-    return (arc!.begin! - position).distanceSquared < _kTargetSlop
-        || (arc!.end! - position).distanceSquared < _kTargetSlop;
+    return (arc.begin! - position).distanceSquared < _kTargetSlop
+        || (arc.end! - position).distanceSquared < _kTargetSlop;
   }
 
   @override
@@ -101,9 +101,9 @@ class _PointDemoPainter extends CustomPainter {
 }
 
 class _PointDemo extends StatefulWidget {
-  const _PointDemo({ Key? key, this.controller }) : super(key: key);
+  const _PointDemo({ Key? key, required this.controller }) : super(key: key);
 
-  final AnimationController? controller;
+  final AnimationController controller;
 
   @override
   _PointDemoState createState() => _PointDemoState();
@@ -121,12 +121,12 @@ class _PointDemoState extends State<_PointDemo> {
   @override
   void initState() {
     super.initState();
-    _animation = CurvedAnimation(parent: widget.controller!, curve: Curves.fastOutSlowIn);
+    _animation = CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
   void dispose() {
-    widget.controller?.value = 0.0;
+    widget.controller.value = 0.0;
     super.dispose();
   }
 
@@ -167,7 +167,7 @@ class _PointDemoState extends State<_PointDemo> {
 
   void _handleDragCancel() {
     _dragTarget = null;
-    widget.controller?.value = 0.0;
+    widget.controller.value = 0.0;
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -222,12 +222,12 @@ class _PointDemoState extends State<_PointDemo> {
 
 class _RectangleDemoPainter extends CustomPainter {
   _RectangleDemoPainter({
-    Animation<double>? repaint,
-    this.arc,
+    required Animation<double> repaint,
+    required this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
-  final MaterialRectArcTween? arc;
-  final Animation<double>? _repaint;
+  final MaterialRectArcTween arc;
+  final Animation<double> _repaint;
 
   void drawPoint(Canvas canvas, Offset p, Color color) {
     final Paint paint = Paint()
@@ -252,15 +252,15 @@ class _RectangleDemoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawRect(canvas, arc!.begin!, Colors.green);
-    drawRect(canvas, arc!.end!, Colors.red);
-    drawRect(canvas, arc!.lerp(_repaint!.value), Colors.blue);
+    drawRect(canvas, arc.begin!, Colors.green);
+    drawRect(canvas, arc.end!, Colors.red);
+    drawRect(canvas, arc.lerp(_repaint.value), Colors.blue);
   }
 
   @override
   bool hitTest(Offset position) {
-    return (arc!.begin!.center - position).distanceSquared < _kTargetSlop
-        || (arc!.end!.center - position).distanceSquared < _kTargetSlop;
+    return (arc.begin!.center - position).distanceSquared < _kTargetSlop
+        || (arc.end!.center - position).distanceSquared < _kTargetSlop;
   }
 
   @override
@@ -268,9 +268,9 @@ class _RectangleDemoPainter extends CustomPainter {
 }
 
 class _RectangleDemo extends StatefulWidget {
-  const _RectangleDemo({ Key? key, this.controller }) : super(key: key);
+  const _RectangleDemo({ Key? key, required this.controller }) : super(key: key);
 
-  final AnimationController? controller;
+  final AnimationController controller;
 
   @override
   _RectangleDemoState createState() => _RectangleDemoState();
@@ -279,21 +279,15 @@ class _RectangleDemo extends StatefulWidget {
 class _RectangleDemoState extends State<_RectangleDemo> {
   final GlobalKey _painterKey = GlobalKey();
 
-  CurvedAnimation? _animation;
+  late final CurvedAnimation _animation = CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
   _DragTarget? _dragTarget;
   Size? _screenSize;
   Rect? _begin;
   Rect? _end;
 
   @override
-  void initState() {
-    super.initState();
-    _animation = CurvedAnimation(parent: widget.controller!, curve: Curves.fastOutSlowIn);
-  }
-
-  @override
   void dispose() {
-    widget.controller?.value = 0.0;
+    widget.controller.value = 0.0;
     super.dispose();
   }
 
@@ -333,7 +327,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   void _handleDragCancel() {
     _dragTarget = null;
-    widget.controller?.value = 0.0;
+    widget.controller.value = 0.0;
   }
 
   void _handleDragEnd(DragEndDetails details) {
