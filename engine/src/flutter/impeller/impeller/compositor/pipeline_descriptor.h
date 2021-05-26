@@ -13,8 +13,10 @@
 #include <string_view>
 #include <type_traits>
 
+#include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
 #include "impeller/compositor/comparable.h"
+#include "impeller/compositor/formats.h"
 #include "impeller/shader_glue/shader_types.h"
 
 namespace impeller {
@@ -38,6 +40,10 @@ class PipelineDescriptor : public Comparable<PipelineDescriptor> {
   PipelineDescriptor& SetVertexDescriptor(
       std::shared_ptr<VertexDescriptor> vertex_descriptor);
 
+  PipelineDescriptor& SetColorAttachmentDescriptor(
+      size_t index,
+      ColorAttachmentDescriptor desc);
+
   MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor() const;
 
   // Comparable<PipelineDescriptor>
@@ -50,6 +56,7 @@ class PipelineDescriptor : public Comparable<PipelineDescriptor> {
   std::string label_;
   size_t sample_count_ = 1;
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
+  std::map<size_t, ColorAttachmentDescriptor> color_attachment_descriptors_;
   std::shared_ptr<VertexDescriptor> vertex_descriptor_;
 };
 
