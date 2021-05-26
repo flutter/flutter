@@ -1244,8 +1244,8 @@ class ProjectFileInvalidator {
           // Calling fs.stat() is more performant than fs.file().stat(), but
           // uri.toFilePath() does not work with MultiRootFileSystem.
           () => (uri.hasScheme && uri.scheme != 'file'
-            ?  _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows))
-            : _fileSystem.file(uri).stat())
+            ? _fileSystem.file(uri).stat()
+            :  _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
               if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {

@@ -4,15 +4,21 @@
 
 // @dart = 2.8
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
+
+class MockFile extends Mock implements File {}
+class MockFileSystem extends Mock implements FileSystem {}
+class MockFileStat extends Mock implements FileStat {}
 
 // assumption: tests have a timeout less than 100 days
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
@@ -163,6 +169,56 @@ void main() {
       // The PackagConfig should have been recreated too
       expect(nextInvalidationResult.packageConfig,
         isNot(invalidationResult.packageConfig));
+    });
+
+    testWithoutContext('Uses fs.file().stat() for multischeme URI, and fs.stat() for regular uris, asyncScanning: $asyncScanning', () async {
+      final FileSystem fileSystem = MockFileSystem();
+      final FileStat mockStat = MockFileStat();
+      final File mockFile = MockFile();
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+
+      when(mockStat.modified).thenReturn(DateTime.now());
+      when(mockFile.stat()).thenAnswer((_) async => mockStat);
+      when(mockFile.statSync()).thenReturn(mockStat);
+
+      when(fileSystem.file(captureAny)).thenReturn(mockFile);
+      when(fileSystem.stat(captureAny)).thenAnswer((_) async => mockStat);
+      when(fileSystem.statSync(captureAny)).thenReturn(mockStat);
+
+      expect(
+        (await projectFileInvalidator.findInvalidated(
+          lastCompiled: inFuture,
+          urisToMonitor: <Uri>[
+            Uri.parse('/normal_path'),
+            Uri.parse('file:///file_path'),
+            Uri.parse('scheme:///scheme_path'),
+          ],
+          packagesPath: '.packages',
+          asyncScanning: asyncScanning,
+          packageConfig: PackageConfig.empty,
+        )).uris,
+        isEmpty,
+      );
+
+      if (asyncScanning) {
+        expect(
+          verify(fileSystem.stat(captureAny)).captured,
+          ['/normal_path', '/file_path'],
+        );
+      } else {
+        expect(
+          verify(fileSystem.statSync(captureAny)).captured,
+          ['/normal_path', '/file_path'],
+        );
+      }
+      expect(
+        verify(fileSystem.file(captureAny)).captured,
+        [Uri.parse('scheme:///scheme_path'), '.packages'],
+      );
     });
   }
 }
