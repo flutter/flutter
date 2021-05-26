@@ -30,10 +30,6 @@ targets:
     builder: Linux Fuchsia FEMU
     scheduler: luci
 
-  - name: Linux Framework Smoke Tests
-    builder: Linux Framework Smoke Tests
-    scheduler: luci
-
   - name: Linux Host Engine
     builder: Linux Host Engine
     scheduler: luci
