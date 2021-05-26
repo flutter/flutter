@@ -6,10 +6,18 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("compositor") {
   sources = [
+    "allocator.h",
+    "allocator.mm",
+    "buffer.h",
+    "buffer.mm",
     "comparable.cc",
     "comparable.h",
     "context.h",
     "context.mm",
+    "formats.cc",
+    "formats.h",
+    "formats_metal.h",
+    "formats_metal.mm",
     "pipeline.h",
     "pipeline.mm",
     "pipeline_descriptor.h",

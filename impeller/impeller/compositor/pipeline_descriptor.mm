@@ -4,6 +4,7 @@
 
 #include "impeller/compositor/pipeline_descriptor.h"
 
+#include "impeller/compositor/formats_metal.h"
 #include "impeller/compositor/shader_library.h"
 #include "impeller/compositor/vertex_descriptor.h"
 
@@ -27,6 +28,10 @@ std::size_t PipelineDescriptor::GetHash() const {
   if (vertex_descriptor_) {
     fml::HashCombineSeed(seed, vertex_descriptor_->GetHash());
   }
+  for (const auto& des : color_attachment_descriptors_) {
+    fml::HashCombineSeed(seed, des.first);
+    fml::HashCombineSeed(seed, des.second.Hash());
+  }
   return seed;
 }
 
@@ -34,7 +39,8 @@ std::size_t PipelineDescriptor::GetHash() const {
 bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
   return label_ == other.label_ && sample_count_ == other.sample_count_ &&
          DeepCompareMap(entrypoints_, other.entrypoints_) &&
-         DeepComparePointer(vertex_descriptor_, other.vertex_descriptor_);
+         DeepComparePointer(vertex_descriptor_, other.vertex_descriptor_) &&
+         color_attachment_descriptors_ == other.color_attachment_descriptors_;
 }
 
 PipelineDescriptor& PipelineDescriptor::SetLabel(
@@ -69,6 +75,13 @@ PipelineDescriptor& PipelineDescriptor::SetVertexDescriptor(
   return *this;
 }
 
+PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptor(
+    size_t index,
+    ColorAttachmentDescriptor desc) {
+  color_attachment_descriptors_[index] = std::move(desc);
+  return *this;
+}
+
 MTLRenderPipelineDescriptor*
 PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
   auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
@@ -86,6 +99,11 @@ PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
 
   if (vertex_descriptor_) {
     descriptor.vertexDescriptor = vertex_descriptor_->GetMTLVertexDescriptor();
+  }
+
+  for (const auto& item : color_attachment_descriptors_) {
+    descriptor.colorAttachments[item.first] =
+        ToMTLRenderPipelineColorAttachmentDescriptor(item.second);
   }
 
   return descriptor;
