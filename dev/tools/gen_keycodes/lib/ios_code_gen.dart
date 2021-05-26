@@ -5,50 +5,121 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'constants.dart';
+import 'logical_key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
-/// Generates the key mapping of iOS, based on the information in the key
+const List<String> kModifiersOfInterest = <String>[
+  'ShiftLeft',
+  'ShiftRight',
+  'ControlLeft',
+  'ControlRight',
+  'AltLeft',
+  'AltRight',
+  'MetaLeft',
+  'MetaRight',
+];
+
+// The name of keys that require special attention.
+const List<String> kSpecialPhysicalKeys = <String>['CapsLock'];
+const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
+
+String _toConstantVariableName(String variableName) {
+  return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';
+}
+
+/// Generates the key mapping for iOS, based on the information in the key
 /// data structure given to it.
-class IosCodeGenerator extends PlatformCodeGenerator {
-  IosCodeGenerator(KeyData keyData) : super(keyData);
+class IOSCodeGenerator extends PlatformCodeGenerator {
+  IOSCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+      : super(keyData, logicalData);
 
   /// This generates the map of iOS key codes to physical keys.
-  String get _iosScanCodeMap {
-    final StringBuffer iosScanCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
-      if (entry.iosScanCode != null) {
-        iosScanCodeMap.writeln('  { ${toHex(entry.iosScanCode)}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
+  String get _scanCodeMap {
+    final StringBuffer scanCodeMap = StringBuffer();
+    for (final PhysicalKeyEntry entry in keyData.entries) {
+      if (entry.iOSScanCode != null) {
+        scanCodeMap.writeln('  {${toHex(entry.iOSScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
     }
-    return iosScanCodeMap.toString().trimRight();
+    return scanCodeMap.toString().trimRight();
   }
 
-  /// This generates the map of iOS number pad key codes to logical keys.
-  String get _iosNumpadMap {
-    final StringBuffer iosNumPadMap = StringBuffer();
-    for (final Key entry in numpadKeyData) {
-      if (entry.iosScanCode != null) {
-        iosNumPadMap.writeln('  { ${toHex(entry.iosScanCode)}, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
-      }
+  String get _keyCodeToLogicalMap {
+    final StringBuffer result = StringBuffer();
+    for (final LogicalKeyEntry entry in logicalData.entries) {
+      zipStrict(entry.iOSKeyCodeValues, entry.iOSKeyCodeNames, (int iOSValue, String iOSName) {
+        result.writeln('  {${toHex(iOSValue)}, ${toHex(entry.value, digits: 11)}},  // $iOSName');
+      });
     }
-    return iosNumPadMap.toString().trimRight();
+    return result.toString().trimRight();
+  }
+
+  /// This generates the mask values for the part of a key code that defines its plane.
+  String get _maskConstants {
+    final StringBuffer buffer = StringBuffer();
+    for (final MaskConstant constant in maskConstants) {
+      buffer.writeln('/**');
+      buffer.write(constant.description
+          .map((String line) => wrapString(line, prefix: ' * '))
+          .join(' *\n'));
+      buffer.writeln(' */');
+      buffer.writeln('const uint64_t ${_toConstantVariableName(constant.name)} = ${toHex(constant.value, digits: 11)};');
+      buffer.writeln('');
+    }
+    return buffer.toString().trimRight();
+  }
+
+  /// This generates a map from the key code to a modifier flag.
+  String get _keyToModifierFlagMap {
+    final StringBuffer modifierKeyMap = StringBuffer();
+    for (final String name in kModifiersOfInterest) {
+      modifierKeyMap.writeln('  {${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},');
+    }
+    return modifierKeyMap.toString().trimRight();
+  }
+
+  /// This generates a map from the modifier flag to the key code.
+  String get _modifierFlagToKeyMap {
+    final StringBuffer modifierKeyMap = StringBuffer();
+    for (final String name in kModifiersOfInterest) {
+      modifierKeyMap.writeln('  {kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},');
+    }
+    return modifierKeyMap.toString().trimRight();
+  }
+
+  /// This generates some keys that needs special attention.
+  String get _specialKeyConstants {
+    final StringBuffer specialKeyConstants = StringBuffer();
+    for (final String keyName in kSpecialPhysicalKeys) {
+      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.entryByName(keyName).usbHidCode)};');
+    }
+    for (final String keyName in kSpecialLogicalKeys) {
+      specialKeyConstants.writeln('const uint64_t k${lowerCamelToUpperCamel(keyName)}LogicalKey = ${toHex(logicalData.entryByName(keyName).value)};');
+    }
+    return specialKeyConstants.toString().trimRight();
   }
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_map_ios_cc.tmpl');
+  String get templatePath => path.join(dataRoot, 'ios_key_code_map_cc.tmpl');
 
   @override
-  String outputPath(String platform) => path.joinAll(<String>[flutterRoot.path, '..', 'engine', 'src', 'flutter', 'shell', 'platform', 'darwin', platform, 'keycodes', 'keyboard_map_$platform.h']);
+  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+      'shell', 'platform', 'darwin', 'ios', 'framework', 'Source', 'KeyCodeMap.mm');
 
   @override
   Map<String, String> mappings() {
     // There is no iOS keycode map since iOS uses keycode to represent a physical key.
-    // The LogicalKeyboardKey is generated by raw_keyboard_macos.dart from the unmodified characters
+    // The LogicalKeyboardKey is generated by raw_keyboard_ios.dart from the unmodified characters
     // from NSEvent.
     return <String, String>{
-      'IOS_SCAN_CODE_MAP': _iosScanCodeMap,
-      'IOS_NUMPAD_MAP': _iosNumpadMap
+      'MASK_CONSTANTS': _maskConstants,
+      'IOS_SCAN_CODE_MAP': _scanCodeMap,
+      'IOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
+      'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
+      'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
+      'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
     };
   }
 }

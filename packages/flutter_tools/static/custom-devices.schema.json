@@ -107,6 +107,18 @@
             "format": "regex",
             "default": "Linux",
             "required": false
+          },
+          "screenshot": {
+            "description": "Take a screenshot of the app as a png image. This command should take the screenshot, convert it to png, then base64 encode it and echo to stdout. Any stderr output will be ignored. If this command is not given, screenshotting will be disabled for this device.",
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": [
+              "ssh", "pi@raspberrypi", "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+            ],
+            "required": false
           }
         }
       }

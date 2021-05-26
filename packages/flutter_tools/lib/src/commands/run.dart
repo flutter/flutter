@@ -261,7 +261,7 @@ class RunCommand extends RunCommandBase {
               'or just dump the trace as soon as the application is running. The first frame '
               'is detected by looking for a Timeline event with the name '
               '"${Tracing.firstUsefulFrameEventName}". '
-              'By default, the widgets library\'s binding takes care of sending this event.',
+              "By default, the widgets library's binding takes care of sending this event.",
       )
       ..addFlag('use-test-fonts',
         negatable: true,
@@ -357,7 +357,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
+  Future<CustomDimensions> get usageValues async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
     bool anyAndroidDevices = false;
@@ -410,16 +410,15 @@ class RunCommand extends RunCommandBase {
 
     final BuildInfo buildInfo = await getBuildInfo();
     final String modeName = buildInfo.modeName;
-    return <CustomDimensions, String>{
-      CustomDimensions.commandRunIsEmulator: '$isEmulator',
-      CustomDimensions.commandRunTargetName: deviceType,
-      CustomDimensions.commandRunTargetOsVersion: deviceOsVersion,
-      CustomDimensions.commandRunModeName: modeName,
-      CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
-      CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
-      if (androidEmbeddingVersion != null)
-        CustomDimensions.commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
-    };
+    return CustomDimensions(
+      commandRunIsEmulator: isEmulator,
+      commandRunTargetName: deviceType,
+      commandRunTargetOsVersion: deviceOsVersion,
+      commandRunModeName: modeName,
+      commandRunProjectModule: FlutterProject.current().isModule,
+      commandRunProjectHostLanguage: hostLanguage.join(','),
+      commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
+    );
   }
 
   @override
@@ -609,8 +608,8 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices)
         await FlutterDevice.create(
           device,
-          fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-          fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
+          fileSystemRoots: fileSystemRoots,
+          fileSystemScheme: fileSystemScheme,
           experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,

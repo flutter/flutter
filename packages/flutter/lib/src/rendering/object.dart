@@ -2397,8 +2397,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
     final List<RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
-      assert(renderer != null); // Failed to find ancestor in parent chain.
       renderers.add(renderer);
+      assert(renderer.parent != null); // Failed to find ancestor in parent chain.
     }
     if (ancestorSpecified)
       renderers.add(ancestor!);
@@ -2439,7 +2439,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// or just after the trailing edge. These nodes have to be included in the
   /// semantics tree to implement implicit accessibility scrolling on iOS where
   /// the viewport scrolls implicitly when moving the accessibility focus from
-  /// a the last visible node in the viewport to the first hidden one.
+  /// the last visible node in the viewport to the first hidden one.
   ///
   /// See also:
   ///

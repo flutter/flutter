@@ -202,7 +202,7 @@ class Placeholder {
   final String? format;
   final List<OptionalParameter> optionalParameters;
 
-  bool get requiresFormatting => <String>['DateTime', 'double', 'int', 'num'].contains(type);
+  bool get requiresFormatting => <String>['DateTime', 'double', 'num'].contains(type) || (type == 'int' && format != null);
   bool get isNumber => <String>['double', 'int', 'num'].contains(type);
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);

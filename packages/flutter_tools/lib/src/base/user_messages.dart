@@ -120,6 +120,9 @@ class UserMessages {
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+  String get androidMissingCmdTools => 'cmdline-tools component is missing\n'
+      'Run `path/to/sdkmanager --install "cmdline-tools;latest"`\n'
+      'See https://developer.android.com/studio/command-line for more details.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -226,7 +229,7 @@ class UserMessages {
       'can be downloaded from https://github.com/ninja-build/ninja/releases';
   String ninjaTooOld(String minimumVersion) => 'ninja $minimumVersion or later is required.';
   String pkgConfigVersion(String version) => 'pkg-config version $version';
-  String get pkgConfigMissing => 'pgk-config is required for Linux development.\n'
+  String get pkgConfigMissing => 'pkg-config is required for Linux development.\n'
       'It is likely available from your distribution (e.g.: apt install pkg-config), or '
       'can be downloaded from https://www.freedesktop.org/wiki/Software/pkg-config/';
   String pkgConfigTooOld(String minimumVersion) => 'pkg-config $minimumVersion or later is required.';

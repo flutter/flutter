@@ -124,7 +124,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   const String kThreeLines =
       'First line of text is\n'
@@ -1417,6 +1417,45 @@ void main() {
     expect(controller.selection, equals(TextRange.empty));
   });
 
+    testWidgets('Selectable text is skipped during focus traversal',
+      (WidgetTester tester) async {
+    final FocusNode firstFieldFocus = FocusNode();
+    final FocusNode lastFieldFocus = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  focusNode: firstFieldFocus,
+                  autofocus: true,
+                ),
+                const SelectableText('some text'),
+                TextField(
+                  focusNode: lastFieldFocus,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(firstFieldFocus.hasFocus, isTrue);
+    expect(lastFieldFocus.hasFocus, isFalse);
+
+    firstFieldFocus.nextFocus();
+    await tester.pump();
+
+    // expecting focus to skip straight to the second field
+    expect(firstFieldFocus.hasFocus, isFalse);
+    expect(lastFieldFocus.hasFocus, isTrue);
+  });
+
   testWidgets('Selectable text identifies as text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -1626,7 +1665,7 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     String clipboardContent = '';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
