@@ -12,16 +12,18 @@
 
 namespace flutter {
 
-MultiFrameCodec::MultiFrameCodec(
-    std::shared_ptr<SkCodecImageGenerator> generator)
+MultiFrameCodec::MultiFrameCodec(std::shared_ptr<ImageGenerator> generator)
     : state_(new State(std::move(generator))) {}
 
 MultiFrameCodec::~MultiFrameCodec() = default;
 
-MultiFrameCodec::State::State(std::shared_ptr<SkCodecImageGenerator> generator)
+MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator)
     : generator_(std::move(generator)),
-      frameCount_(generator_->getFrameCount()),
-      repetitionCount_(generator_->getRepetitionCount()),
+      frameCount_(generator_->GetFrameCount()),
+      repetitionCount_(generator_->GetPlayCount() ==
+                               ImageGenerator::kInfinitePlayCount
+                           ? -1
+                           : generator_->GetPlayCount() - 1),
       nextFrameIndex_(0) {}
 
 static void InvokeNextFrameCallback(
@@ -76,18 +78,20 @@ static bool CopyToBitmap(SkBitmap* dst,
 sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     fml::WeakPtr<GrDirectContext> resourceContext) {
   SkBitmap bitmap = SkBitmap();
-  SkImageInfo info = generator_->getInfo().makeColorType(kN32_SkColorType);
+  SkImageInfo info = generator_->GetInfo().makeColorType(kN32_SkColorType);
   if (info.alphaType() == kUnpremul_SkAlphaType) {
     SkImageInfo updated = info.makeAlphaType(kPremul_SkAlphaType);
     info = updated;
   }
   bitmap.allocPixels(info);
 
-  SkCodec::Options options;
-  options.fFrameIndex = nextFrameIndex_;
-  SkCodec::FrameInfo frameInfo{0};
-  generator_->getFrameInfo(nextFrameIndex_, &frameInfo);
-  const int requiredFrameIndex = frameInfo.fRequiredFrame;
+  ImageGenerator::FrameInfo frameInfo =
+      generator_->GetFrameInfo(nextFrameIndex_);
+
+  const int requiredFrameIndex =
+      frameInfo.required_frame.value_or(SkCodec::kNoFrame);
+  std::optional<unsigned int> prior_frame_index = std::nullopt;
+
   if (requiredFrameIndex != SkCodec::kNoFrame) {
     if (lastRequiredFrame_ == nullptr) {
       FML_LOG(ERROR) << "Frame " << nextFrameIndex_ << " depends on frame "
@@ -103,18 +107,18 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     if (lastRequiredFrame_->getPixels() &&
         CopyToBitmap(&bitmap, lastRequiredFrame_->colorType(),
                      *lastRequiredFrame_)) {
-      options.fPriorFrame = requiredFrameIndex;
+      prior_frame_index = requiredFrameIndex;
     }
   }
 
-  if (!generator_->getPixels(info, bitmap.getPixels(), bitmap.rowBytes(),
-                             &options)) {
+  if (!generator_->GetPixels(info, bitmap.getPixels(), bitmap.rowBytes(),
+                             nextFrameIndex_, requiredFrameIndex)) {
     FML_LOG(ERROR) << "Could not getPixels for frame " << nextFrameIndex_;
     return nullptr;
   }
 
   // Hold onto this if we need it to decode future frames.
-  if (frameInfo.fDisposalMethod == SkCodecAnimation::DisposalMethod::kKeep) {
+  if (frameInfo.disposal_method == SkCodecAnimation::DisposalMethod::kKeep) {
     lastRequiredFrame_ = std::make_unique<SkBitmap>(bitmap);
     lastRequiredFrameIndex_ = nextFrameIndex_;
   }
@@ -144,9 +148,9 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
   if (skImage) {
     image = CanvasImage::Create();
     image->set_image({skImage, std::move(unref_queue)});
-    SkCodec::FrameInfo skFrameInfo{0};
-    generator_->getFrameInfo(nextFrameIndex_, &skFrameInfo);
-    duration = skFrameInfo.fDuration;
+    ImageGenerator::FrameInfo frameInfo =
+        generator_->GetFrameInfo(nextFrameIndex_);
+    duration = frameInfo.duration;
   }
   nextFrameIndex_ = (nextFrameIndex_ + 1) % frameCount_;
 

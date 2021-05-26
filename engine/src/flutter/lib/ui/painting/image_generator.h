@@ -5,9 +5,10 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_H_
 
+#include <optional>
 #include "flutter/fml/macros.h"
-#include "flutter/lib/ui/painting/codec.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
+#include "third_party/skia/src/codec/SkCodecImageGenerator.h"
 
 namespace flutter {
 
@@ -20,6 +21,10 @@ namespace flutter {
 /// @see    `ImageGenerator::GetScaledDimensions`
 class ImageGenerator {
  public:
+  /// Frame count value to denote infinite looping.
+  const static unsigned int kInfinitePlayCount =
+      std::numeric_limits<unsigned int>::max();
+
   /// @brief  Info about a single frame in the context of a multi-frame image,
   ///         useful for animation and blending.
   struct FrameInfo {
@@ -52,6 +57,14 @@ class ImageGenerator {
   /// @return  The number of frames that the encoded image stores. This will
   ///          always be 1 for single-frame images.
   virtual unsigned int GetFrameCount() const = 0;
+
+  /// @brief  The number of times an animated image should play through before
+  ///         playback stops.
+  /// @return If this image is animated, the number of times the animation
+  ///         should play through is returned, otherwise it'll just return 1.
+  ///         If the animation should loop forever, `kInfinitePlayCount` is
+  ///         returned.
+  virtual unsigned int GetPlayCount() const = 0;
 
   /// @brief      Get information about a single frame in the context of a
   ///             multi-frame image, useful for animation and frame blending.
@@ -122,6 +135,9 @@ class BuiltinSkiaImageGenerator : public ImageGenerator {
   unsigned int GetFrameCount() const override;
 
   // |ImageGenerator|
+  unsigned int GetPlayCount() const override;
+
+  // |ImageGenerator|
   const ImageGenerator::FrameInfo GetFrameInfo(
       unsigned int frame_index) const override;
 
@@ -157,6 +173,9 @@ class BuiltinSkiaCodecImageGenerator : public ImageGenerator {
 
   // |ImageGenerator|
   unsigned int GetFrameCount() const override;
+
+  // |ImageGenerator|
+  unsigned int GetPlayCount() const override;
 
   // |ImageGenerator|
   const ImageGenerator::FrameInfo GetFrameInfo(

@@ -54,6 +54,15 @@ void ImageGeneratorRegistry::AddFactory(ImageGeneratorFactory factory,
 
 std::unique_ptr<ImageGenerator>
 ImageGeneratorRegistry::CreateCompatibleGenerator(sk_sp<SkData> buffer) {
+  if (!image_generator_factories_.size()) {
+    FML_LOG(WARNING)
+        << "There are currently no image decoders installed. If you're writing "
+           "your own platform embedding, you can register new image decoders "
+           "via `ImageGeneratorRegistry::AddFactory` on the "
+           "`ImageGeneratorRegistry` provided by the engine. Otherwise, please "
+           "file a bug on https://github.com/flutter/flutter/issues.";
+  }
+
   for (auto& factory : image_generator_factories_) {
     std::unique_ptr<ImageGenerator> result = factory.callback(buffer);
     if (result) {
