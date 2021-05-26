@@ -9,6 +9,7 @@ import 'package:args/args.dart';
 import 'package:gen_keycodes/android_code_gen.dart';
 import 'package:gen_keycodes/base_code_gen.dart';
 import 'package:gen_keycodes/gtk_code_gen.dart';
+import 'package:gen_keycodes/ios_code_gen.dart';
 import 'package:gen_keycodes/keyboard_keys_code_gen.dart';
 import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/logical_key_data.dart';
@@ -210,7 +211,11 @@ Future<void> main(List<String> rawArguments) async {
       physicalData,
       logicalData,
     ),
-    'macos': MacOsCodeGenerator(
+    'macos': MacOSCodeGenerator(
+      physicalData,
+      logicalData,
+    ),
+    'ios': IOSCodeGenerator(
       physicalData,
       logicalData,
     ),

@@ -237,7 +237,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext('Exits with code 2 when when HttpException is thrown '
+    testUsingContext('Exits with code 2 when HttpException is thrown '
       'during VM service connection', () async {
       fileSystem.file('.packages')
         ..createSync(recursive: true)

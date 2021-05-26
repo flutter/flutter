@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -103,9 +104,9 @@ Future<TaskResult> runTask(
 
   bool runnerFinished = false;
 
-  runner.exitCode.whenComplete(() {
+  unawaited(runner.exitCode.whenComplete(() {
     runnerFinished = true;
-  });
+  }));
 
   final Completer<Uri> uri = Completer<Uri>();
 

@@ -845,7 +845,7 @@ class FlutterVmService {
   ///
   /// Throws a [VmServiceDisappearedException] should the VM Service disappear
   /// while making calls to it.
-  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName, {bool webIsolate = false}) async {
+  Future<vm_service.IsolateRef> findExtensionIsolate(String extensionName) async {
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
@@ -863,7 +863,7 @@ class FlutterVmService {
     });
 
     try {
-      final List<vm_service.IsolateRef> refs = await _getIsolateRefs(webIsolate);
+      final List<vm_service.IsolateRef> refs = await _getIsolateRefs();
       for (final vm_service.IsolateRef ref in refs) {
         final vm_service.Isolate isolate = await getIsolateOrNull(ref.id);
         if (isolate != null && isolate.extensionRPCs.contains(extensionName)) {
@@ -881,14 +881,7 @@ class FlutterVmService {
     }
   }
 
-  Future<List<vm_service.IsolateRef>> _getIsolateRefs(bool webIsolate) async {
-    if (webIsolate) {
-      final List<vm_service.IsolateRef> refs = (await service.getVM()).isolates;
-      if (refs.isEmpty) {
-        throw VmServiceDisappearedException();
-      }
-      return refs;
-    }
+  Future<List<vm_service.IsolateRef>> _getIsolateRefs() async {
     final List<FlutterView> flutterViews = await getFlutterViews();
     if (flutterViews.isEmpty) {
       throw VmServiceDisappearedException();

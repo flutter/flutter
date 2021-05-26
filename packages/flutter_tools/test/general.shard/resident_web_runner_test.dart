@@ -580,8 +580,8 @@ void main() {
     verify(mockResidentCompiler.accept()).called(2);
 
     // ensure that analytics are sent.
-    expect(testUsage.events, const <TestUsageEvent>[
-      TestUsageEvent('hot', 'restart', parameters: <String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'}),
+    expect(testUsage.events, <TestUsageEvent>[
+      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'})),
     ]);
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
@@ -658,8 +658,8 @@ void main() {
     verify(mockResidentCompiler.accept()).called(2);
 
 	  // ensure that analytics are sent.
-    expect(testUsage.events, const <TestUsageEvent>[
-      TestUsageEvent('hot', 'restart', parameters: <String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'}),
+    expect(testUsage.events, <TestUsageEvent>[
+      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'})),
     ]);
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),

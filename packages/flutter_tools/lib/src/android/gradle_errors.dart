@@ -72,9 +72,10 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8FailureHandler,
-  androidXFailureHandler,
   minSdkVersion,
   transformInputIssue,
+  lockFileDepMissing,
+  androidXFailureHandler, // Keep last since the pattern is broader.
 ];
 
 // Permission defined error message.
@@ -388,7 +389,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
         '  }\n'
         '}\n\n'
       )+
-      'Note that your app won\'t be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n'
+      "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch.group(2)}.\n"
       'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
     );
     return GradleBuildStatus.exit;
@@ -428,4 +429,32 @@ final GradleHandledError transformInputIssue = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'transform-input-issue',
+);
+
+/// Handler when a dependency is missing in the lockfile.
+@visibleForTesting
+final GradleHandledError lockFileDepMissing = GradleHandledError(
+  test: (String line) {
+    return line.contains('which is not part of the dependency lock state');
+  },
+  handler: ({
+    String line,
+    FlutterProject project,
+    bool usesAndroidX,
+    bool shouldBuildPluginAsAar,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+
+    globals.printStatus(
+      '\nYou need to update the lockfile, or disable Gradle dependency locking.\n'+
+      globals.logger.terminal.bolden(
+        'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+        'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
+      )
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'lock-dep-issue',
 );

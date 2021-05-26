@@ -104,8 +104,8 @@ abstract class BindingBase {
   /// A number of additional bindings are defined as extensions of
   /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
   /// [WidgetsBinding]. Each of these bindings define behaviors that interact
-  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers a
-  /// [ui.PlatformDispatcher.onPlatformMessage] handler, and [RendererBinding]
+  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers
+  /// listeners with the [ChannelBuffers], and [RendererBinding]
   /// registers [ui.PlatformDispatcher.onMetricsChanged],
   /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
   /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and

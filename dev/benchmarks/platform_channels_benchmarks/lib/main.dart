@@ -74,7 +74,7 @@ Future<double> _runBasicStandardLarge(BasicMessageChannel<Object> basicStandard,
 
   if (size != largeBuffer.length * count) {
     throw Exception(
-      'There is an error with the echo channel, the results don\'t add up: $size',
+      "There is an error with the echo channel, the results don't add up: $size",
     );
   }
 
@@ -94,7 +94,7 @@ Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
   watch.stop();
   if (size != buffer.lengthInBytes * count) {
     throw Exception(
-      'There is an error with the echo channel, the results don\'t add up: $size',
+      "There is an error with the echo channel, the results don't add up: $size",
     );
   }
 
@@ -108,6 +108,10 @@ Future<void> _runTests() async {
     );
   }
 
+  const BasicMessageChannel<Object> resetChannel = BasicMessageChannel<Object>(
+    'dev.flutter.echo.reset',
+    StandardMessageCodec(),
+  );
   const BasicMessageChannel<Object> basicStandard = BasicMessageChannel<Object>(
     'dev.flutter.echo.basic.standard',
     StandardMessageCodec(),
@@ -129,6 +133,7 @@ Future<void> _runTests() async {
   const int numMessages = 2500;
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  resetChannel.send(true);
   await _runBasicStandardSmall(basicStandard, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Small',
@@ -136,6 +141,7 @@ Future<void> _runTests() async {
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_small',
   );
+  resetChannel.send(true);
   await _runBasicStandardLarge(basicStandard, largeBuffer, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Large',
@@ -144,6 +150,7 @@ Future<void> _runTests() async {
     unit: 'µs',
     name: 'platform_channel_basic_standard_2host_large',
   );
+  resetChannel.send(true);
   await _runBasicBinary(basicBinary, largeBufferBytes, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/Large',
@@ -151,6 +158,7 @@ Future<void> _runTests() async {
     unit: 'µs',
     name: 'platform_channel_basic_binary_2host_large',
   );
+  resetChannel.send(true);
   await _runBasicBinary(basicBinary, oneMB, 1); // Warmup.
   printer.addResult(
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/1MB',

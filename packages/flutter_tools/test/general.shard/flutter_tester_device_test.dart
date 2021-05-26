@@ -186,7 +186,7 @@ void main() {
       device = createDevice(enableObservatory: true);
     });
 
-    testUsingContext('skips setting observatory port and uses the input port for for DDS instead', () async {
+    testUsingContext('skips setting observatory port and uses the input port for DDS instead', () async {
       await device.start('example.dill');
       await device.observatoryUri;
 
