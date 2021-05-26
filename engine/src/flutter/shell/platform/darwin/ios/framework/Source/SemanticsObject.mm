@@ -37,96 +37,53 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 }  // namespace
 
 @implementation FlutterSwitchSemanticsObject {
-  SemanticsObject* _semanticsObject;
+  UISwitch* _nativeSwitch;
 }
 
-- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject {
-  self = [super init];
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
+                           uid:(int32_t)uid {
+  self = [super initWithBridge:bridge uid:uid];
   if (self) {
-    _semanticsObject = [semanticsObject retain];
+    _nativeSwitch = [[[UISwitch alloc] init] retain];
   }
   return self;
 }
 
 - (void)dealloc {
-  [_semanticsObject release];
+  [_nativeSwitch release];
   [super dealloc];
 }
 
 - (NSMethodSignature*)methodSignatureForSelector:(SEL)sel {
   NSMethodSignature* result = [super methodSignatureForSelector:sel];
   if (!result) {
-    result = [_semanticsObject methodSignatureForSelector:sel];
+    result = [_nativeSwitch methodSignatureForSelector:sel];
   }
   return result;
 }
 
 - (void)forwardInvocation:(NSInvocation*)anInvocation {
-  [anInvocation setTarget:_semanticsObject];
+  [anInvocation setTarget:_nativeSwitch];
   [anInvocation invoke];
 }
 
-// The following methods are explicitly forwarded to the wrapped SemanticsObject because the
-// forwarding logic above doesn't apply to them since they are also implemented in the UISwitch
-// class, the base class.
-
-- (CGRect)accessibilityFrame {
-  return [_semanticsObject accessibilityFrame];
-}
-
-- (id)accessibilityContainer {
-  return [_semanticsObject accessibilityContainer];
-}
-
-- (NSString*)accessibilityLabel {
-  return [_semanticsObject accessibilityLabel];
-}
-
-- (NSString*)accessibilityHint {
-  return [_semanticsObject accessibilityHint];
-}
-
 - (NSString*)accessibilityValue {
-  if ([_semanticsObject node].HasFlag(flutter::SemanticsFlags::kIsToggled) ||
-      [_semanticsObject node].HasFlag(flutter::SemanticsFlags::kIsChecked)) {
-    self.on = YES;
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsToggled) ||
+      [self node].HasFlag(flutter::SemanticsFlags::kIsChecked)) {
+    _nativeSwitch.on = YES;
   } else {
-    self.on = NO;
+    _nativeSwitch.on = NO;
   }
 
-  if (![_semanticsObject isAccessibilityBridgeAlive]) {
+  if (![self isAccessibilityBridgeAlive]) {
     return nil;
   } else {
-    return [super accessibilityValue];
+    return _nativeSwitch.accessibilityValue;
   }
 }
 
-- (BOOL)accessibilityActivate {
-  return [_semanticsObject accessibilityActivate];
-}
-
-- (void)accessibilityIncrement {
-  [_semanticsObject accessibilityIncrement];
-}
-
-- (void)accessibilityDecrement {
-  [_semanticsObject accessibilityDecrement];
-}
-
-- (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
-  return [_semanticsObject accessibilityScroll:direction];
-}
-
-- (BOOL)accessibilityPerformEscape {
-  return [_semanticsObject accessibilityPerformEscape];
-}
-
-- (void)accessibilityElementDidBecomeFocused {
-  [_semanticsObject accessibilityElementDidBecomeFocused];
-}
-
-- (void)accessibilityElementDidLoseFocus {
-  [_semanticsObject accessibilityElementDidLoseFocus];
+- (UIAccessibilityTraits)accessibilityTraits {
+  return _nativeSwitch.accessibilityTraits;
 }
 
 @end  // FlutterSwitchSemanticsObject
