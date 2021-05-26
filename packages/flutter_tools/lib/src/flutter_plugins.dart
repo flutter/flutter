@@ -101,23 +101,23 @@ const String _kFlutterPluginsNameKey = 'name';
 const String _kFlutterPluginsPathKey = 'path';
 const String _kFlutterPluginsDependenciesKey = 'dependencies';
 
-  /// Filters [plugins] to those supported by [platformKey].
-  List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin>plugins, String platformKey) {
-    final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
-      return p.platforms.containsKey(platformKey);
-    });
+/// Filters [plugins] to those supported by [platformKey].
+List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
+  final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
+    return p.platforms.containsKey(platformKey);
+  });
 
-    final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
-    final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
-    for (final Plugin plugin in platformPlugins) {
-      list.add(<String, dynamic>{
-        _kFlutterPluginsNameKey: plugin.name,
-        _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
-        _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
-      });
-    }
-    return list;
+  final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
+  final List<Map<String, dynamic>> pluginInfo = <Map<String, dynamic>>[];
+  for (final Plugin plugin in platformPlugins) {
+    pluginInfo.add(<String, dynamic>{
+      _kFlutterPluginsNameKey: plugin.name,
+      _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
+      _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
+    });
   }
+  return pluginInfo;
+}
 
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
@@ -815,28 +815,43 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
   }).toList();
 }
 
+/// Returns only the plugins with the given platform variant.
+List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, PluginPlatformVariant variant) {
+  return plugins.where((Plugin element) {
+    final PluginPlatform platformPlugin = element.platforms[platformKey];
+    if (platformPlugin == null) {
+      return false;
+    }
+    assert(variant == null || platformPlugin is VariantPlatformPlugin);
+    return variant == null ||
+        (platformPlugin as VariantPlatformPlugin).supportedVariants.contains(variant);
+  }).toList();
+}
+
 @visibleForTesting
 Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
   final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> win32Plugins = _filterPluginsByVariant(nativePlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.win32);
+  final List<Map<String, dynamic>> pluginInfo = _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'windows',
-    'plugins': windowsPlugins,
+    'plugins': pluginInfo,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windows),
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context, templateRenderer);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context, templateRenderer);
 }
 
-/// The tooling currently treats UWP and win32 as identical for the
-/// purposes of tooling support and initial UWP bootstrap.
+/// The tooling currently treats UWP and win32 as identical, other than variant
+/// filtering, for the purposes of tooling support and initial UWP bootstrap.
 @visibleForTesting
 Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
   final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> uwpPlugins = _filterPluginsByVariant(nativePlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
+  final List<Map<String, dynamic>> pluginInfo = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'windows',
-    'plugins': windowsPlugins,
+    'plugins': pluginInfo,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
   };
   await _writeCppPluginRegistrant(project.windowsUwp.managedDirectory, context, templateRenderer);
