@@ -3,7 +3,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-""" Generate a Fuchsia FAR Archive from an asset manifest and a signing key.
+""" Generate a Fuchsia FAR Archive from an asset manifest.
 """
 
 import argparse
@@ -15,7 +15,6 @@ import sys
 
 from gather_flutter_runner_artifacts import CreateMetaPackage
 
-
 # Generates the manifest and returns the file.
 def GenerateManifest(package_dir):
   full_paths = []
@@ -26,6 +25,7 @@ def GenerateManifest(package_dir):
       from_package = os.path.abspath(os.path.join(package_dir, rel_path))
       assert from_package, 'Failed to create from_package for %s' % os.path.join(root, f)
       full_paths.append('%s=%s' % (rel_path, from_package))
+
   parent_dir = os.path.abspath(os.path.join(package_dir, os.pardir))
   manifest_file_name = os.path.basename(package_dir) + '.manifest'
   manifest_path = os.path.join(parent_dir, manifest_file_name)
@@ -58,8 +58,6 @@ def main():
   parser.add_argument(
       '--package-dir', dest='package_dir', action='store', required=True)
   parser.add_argument(
-      '--signing-key', dest='signing_key', action='store', required=True)
-  parser.add_argument(
       '--manifest-file', dest='manifest_file', action='store', required=False)
   parser.add_argument(
       '--manifest-json-file', dest='manifest_json_file', action='store', required=True)
@@ -70,7 +68,6 @@ def main():
 
   assert os.path.exists(args.pm_bin)
   assert os.path.exists(args.package_dir)
-  assert os.path.exists(args.signing_key)
 
   pkg_dir = args.package_dir
   if not os.path.exists(os.path.join(pkg_dir, 'meta', 'package')):
@@ -93,8 +90,6 @@ def main():
       output_dir,
       '-n',
       args.far_name,
-      '-k',
-      args.signing_key,
       '-m',
       manifest_file,
   ]
