@@ -171,6 +171,102 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
+  testWidgets('AnimatedScale onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        callback: mockOnEndFunction.handler,
+        switchKey: switchKey,
+        state: _TestAnimatedScaleWidgetState(),
+      ),
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedScale transition test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        switchKey: switchKey,
+        state: _TestAnimatedScaleWidgetState(),
+      ),
+    ));
+
+    final Finder switchFinder = find.byKey(switchKey);
+    final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
+      find.ancestor(
+        of: find.byType(Placeholder),
+        matching: find.byType(ScaleTransition),
+      ).first,
+    );
+
+    await tester.tap(switchFinder);
+    await tester.pump();
+    expect(scaleWidget.scale.value, equals(1.0));
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(scaleWidget.scale.value, equals(1.5));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(scaleWidget.scale.value, equals(1.75));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(scaleWidget.scale.value, equals(2.0));
+  });
+
+  testWidgets('AnimatedRotation onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        callback: mockOnEndFunction.handler,
+        switchKey: switchKey,
+        state: _TestAnimatedRotationWidgetState(),
+      ),
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedRotation transition test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        switchKey: switchKey,
+        state: _TestAnimatedRotationWidgetState(),
+      ),
+    ));
+
+    final Finder switchFinder = find.byKey(switchKey);
+    final RotationTransition rotationWidget = tester.widget<RotationTransition>(
+      find.ancestor(
+        of: find.byType(Placeholder),
+        matching: find.byType(RotationTransition),
+      ).first,
+    );
+
+    await tester.tap(switchFinder);
+    await tester.pump();
+    expect(rotationWidget.turns.value, equals(0.0));
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(rotationWidget.turns.value, equals(0.75));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(rotationWidget.turns.value, equals(1.125));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(rotationWidget.turns.value, equals(1.5));
+  });
+
   testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
@@ -511,6 +607,30 @@ class _TestAnimatedPositionedDirectionalWidgetState extends _TestAnimatedWidgetS
       duration: duration,
       onEnd: widget.callback,
       start: toggle ? 10 : 20,
+      child: child,
+    );
+  }
+}
+
+class _TestAnimatedScaleWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedScale(
+      duration: duration,
+      onEnd: widget.callback,
+      scale: toggle ? 2.0 : 1.0,
+      child: child,
+    );
+  }
+}
+
+class _TestAnimatedRotationWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedRotation(
+      duration: duration,
+      onEnd: widget.callback,
+      turns: toggle ? 1.5 : 0.0,
       child: child,
     );
   }
