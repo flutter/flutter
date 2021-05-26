@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'base/file_system.dart';
 import 'project.dart';
 
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///
 /// Returns `null` if it cannot be found.
-String getCmakeExecutableName(CmakeBasedProject project) {
+String? getCmakeExecutableName(CmakeBasedProject project) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
   final RegExp nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
   for (final String line in project.cmakeFile.readAsLinesSync()) {
-    final RegExpMatch match = nameSetPattern.firstMatch(line);
+    final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
       return match.group(1);
     }
@@ -27,13 +25,13 @@ String getCmakeExecutableName(CmakeBasedProject project) {
 /// Extracts the `PACKAGE_GUID` from a project's CMake file.
 ///
 /// Returns `null` if it cannot be found.
-String getCmakePackageGuid(File cmakeFile) {
+String? getCmakePackageGuid(File cmakeFile) {
   if (!cmakeFile.existsSync()) {
     return null;
   }
   final RegExp nameSetPattern = RegExp(r'^\s*set\(PACKAGE_GUID\s*"(.*)"\s*\)\s*$');
   for (final String line in cmakeFile.readAsLinesSync()) {
-    final RegExpMatch match = nameSetPattern.firstMatch(line);
+    final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
       return match.group(1);
     }

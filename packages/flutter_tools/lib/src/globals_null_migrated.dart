@@ -6,6 +6,7 @@ import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/gradle_utils.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
@@ -28,8 +29,10 @@ import 'cache.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart';
+import 'macos/cocoapods.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'project.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
 
@@ -196,3 +199,15 @@ LocalFileSystem get localFileSystem => _instance ??= LocalFileSystem(
   Signals.defaultExitSignals,
   shutdownHooks,
 );
+
+/// Gradle utils in the current [AppContext].
+GradleUtils? get gradleUtils => context.get<GradleUtils>();
+
+CocoaPods? get cocoaPods => context.get<CocoaPods>();
+
+FlutterProjectFactory get projectFactory {
+  return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
+    logger: logger,
+    fileSystem: fs,
+  );
+}
