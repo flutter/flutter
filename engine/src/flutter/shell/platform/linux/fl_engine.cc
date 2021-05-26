@@ -639,6 +639,19 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
+void fl_engine_send_key_event(FlEngine* self,
+                              const FlutterKeyEvent* event,
+                              FlutterKeyEventCallback callback,
+                              void* user_data) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  self->embedder_api.SendKeyEvent(self->engine, event, callback, user_data);
+}
+
 void fl_engine_dispatch_semantics_action(FlEngine* self,
                                          uint64_t id,
                                          FlutterSemanticsAction action,

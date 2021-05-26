@@ -19,7 +19,7 @@ namespace flutter {
 // A delegate of |KeyboardKeyHandler| that handles events by sending the
 // raw information through the method channel.
 //
-// This class corresponds to the RawKeyboard API in the framework.
+// This class communicates with the RawKeyboard API in the framework.
 class KeyboardKeyChannelHandler
     : public KeyboardKeyHandler::KeyboardKeyHandlerDelegate {
  public:

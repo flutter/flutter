@@ -14,20 +14,6 @@ namespace flutter {
 
 namespace {
 
-static constexpr char kChannelName[] = "flutter/keyevent";
-
-static constexpr char kKeyCodeKey[] = "keyCode";
-static constexpr char kScanCodeKey[] = "scanCode";
-static constexpr char kCharacterCodePointKey[] = "characterCodePoint";
-static constexpr char kModifiersKey[] = "modifiers";
-static constexpr char kKeyMapKey[] = "keymap";
-static constexpr char kTypeKey[] = "type";
-static constexpr char kHandledKey[] = "handled";
-
-static constexpr char kWindowsKeyMap[] = "windows";
-static constexpr char kKeyUp[] = "keyup";
-static constexpr char kKeyDown[] = "keydown";
-
 // The maximum number of pending events to keep before
 // emitting a warning on the console about unhandled events.
 static constexpr int kMaxPendingEvents = 1000;
@@ -148,7 +134,6 @@ bool KeyboardKeyHandler::RemoveRedispatchedEvent(const PendingEvent& incoming) {
     }
   }
   return false;
-  ;
 }
 
 void KeyboardKeyHandler::ResolvePendingEvent(uint64_t sequence_id,

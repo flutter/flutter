@@ -13,7 +13,7 @@
 // to run multiple times (e.g., using gtest_repeat).
 //
 // |proc| should be the name of an entry in FlutterEngineProcTable, such as
-// "initialize". |mock_impl| should be a lamba that replaces its implementation,
+// "Initialize". |mock_impl| should be a lamba that replaces its implementation,
 // taking the same arguments and returning the same type.
 #define MOCK_ENGINE_PROC(proc, mock_impl)                                      \
   ([&]() {                                                                     \

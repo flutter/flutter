@@ -19,7 +19,7 @@ typedef void (^FlutterSendEmbedderKeyEvent)(const FlutterKeyEvent& /* event */,
  * A primary responder of |FlutterKeyboardManager| that handles events by
  * sending the converted events through the embedder API.
  *
- * This class corresponds to the HardwareKeyboard API in the framework.
+ * This class communicates with the HardwareKeyboard API in the framework.
  */
 @interface FlutterEmbedderKeyResponder : NSObject <FlutterKeyPrimaryResponder>
 

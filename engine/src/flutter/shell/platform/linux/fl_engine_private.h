@@ -164,6 +164,14 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         int64_t buttons);
 
 /**
+ * fl_engine_send_key_event:
+ */
+void fl_engine_send_key_event(FlEngine* engine,
+                              const FlutterKeyEvent* event,
+                              FlutterKeyEventCallback callback,
+                              void* user_data);
+
+/**
  * fl_engine_dispatch_semantics_action:
  * @engine: an #FlEngine.
  * @id: the semantics action identifier.

@@ -480,7 +480,7 @@ TEST(KeyboardKeyEmbedderHandlerTest, ModifierKeysByVirtualKey) {
   results.clear();
 }
 
-TEST(KeyboardKeyEmbedderHandlerTest, AbruptRepeatIsConvertedtoDown) {
+TEST(KeyboardKeyEmbedderHandlerTest, AbruptRepeatIsConvertedToDown) {
   TestKeystate key_state;
   std::vector<TestFlutterKeyEvent> results;
   TestFlutterKeyEvent* event;
