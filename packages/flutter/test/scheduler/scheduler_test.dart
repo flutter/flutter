@@ -255,9 +255,13 @@ void main() {
       vsync: const TestVSync(),
     );
     controller.forward();
+    expect(scheduler.handleEventLoopCallback(), isFalse);
+    scheduler.schedulingStrategy = defaultSchedulingStrategy;
 
-    // If the task is not scheduled round-robin, this code will block the test
-    await scheduler.scheduleTask(() => taskExecuted = true, Priority.idle);
+    // If the task is not scheduled round-robin, this code will block the test, test will be timeout
+    await runZoned(() async {
+      await scheduler.scheduleTask(() => taskExecuted = true, Priority.idle);
+    });
     expect(taskExecuted, isTrue);
   });
 }
