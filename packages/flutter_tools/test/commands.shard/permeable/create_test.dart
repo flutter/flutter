@@ -142,7 +142,7 @@ void main() {
       projectDir,
       <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
       <String>[
-      'analysis_options.yaml',
+        'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'flutter_project.iml',
@@ -169,7 +169,6 @@ void main() {
         'pubspec.yaml',
         'README.md',
       ],
-      runPubGet: true,
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{

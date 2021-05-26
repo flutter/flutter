@@ -416,11 +416,11 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderMerged(
-      List<String> names, String imageDirectoryName, Directory directory, Map<String, dynamic> context,
+      List<String> names, Directory directory, Map<String, Object> context,
       {bool overwrite = false}) async {
     final Template template = await Template.merged(
       names,
-      imageDirectoryName,
+      directory,
       fileSystem: globals.fs,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
@@ -438,8 +438,7 @@ abstract class CreateBase extends FlutterCommand {
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
-    <String>[templateName, 'app_shared'],
-      'app',
+      <String>[templateName, 'app_shared'],
       directory,
       templateContext,
       overwrite: overwrite,

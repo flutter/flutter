@@ -89,7 +89,7 @@ void main() {
       expect((await command.usageValues).commandCreateProjectType, 'app');
 
       await runner.run(<String>['create', '--no-pub', '--template=skeleton', 'testy']);
-      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'skeleton'));
+      expect((await command.usageValues).commandCreateProjectType, 'skeleton');
 
       await runner.run(<String>['create', '--no-pub', '--template=package', 'testy']);
       expect((await command.usageValues).commandCreateProjectType, 'package');

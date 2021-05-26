@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -56,13 +53,11 @@ class Template {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
-    required Set<Uri> templateManifest,
+    required Set<Uri>? templateManifest,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _templateRenderer = templateRenderer,
        _templateManifest = templateManifest ?? <Uri>{} {
-    _templateFilePaths = <String, String>{};
-
     for (final Directory sourceDirectory in templateSources) {
       if (!sourceDirectory.existsSync()) {
         throwToolExit('Template source directory does not exist: ${sourceDirectory.absolute.path}');
@@ -81,7 +76,8 @@ class Template {
         continue;
       }
 
-      final String relativePath = fileSystem.path.relative(entity.path, from: templateFiles[entity].absolute.path);
+      final String relativePath = fileSystem.path.relative(entity.path,
+          from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
@@ -110,7 +106,7 @@ class Template {
     );
   }
 
-  static Future<Template> merged(List<String> names, String imageDirectoryName, {
+  static Future<Template> merged(List<String> names, Directory directory, {
     required FileSystem fileSystem,
     required Set<Uri> templateManifest,
     required Logger logger,
@@ -258,7 +254,7 @@ class Template {
         return;
       }
 
-      final String finalDestinationPath = renderPath(relativeDestinationPath);
+      final String? finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null) {
         return;
       }

@@ -17,7 +17,7 @@ void main() {
 
     expect(() => Template(
       fileSystem.directory('doesNotExist'),
-      null,
+      fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       templateRenderer: FakeTemplateRenderer(),
@@ -29,8 +29,7 @@ void main() {
     final FileExceptionHandler handler = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Template template = Template(
-      fileSystem.directory('examples'),
-      fileSystem.currentDirectory,
+      fileSystem.directory('examples')..createSync(recursive: true),
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -56,7 +55,6 @@ void main() {
     sourceImage.writeAsStringSync("Ceci n'est pas une pipe");
 
     final Template template = Template(
-      templateDir,
       templateDir,
       imageSourceDir,
       fileSystem: fileSystem,
