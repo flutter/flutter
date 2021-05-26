@@ -186,7 +186,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
     if (!androidSdk.cmdlineToolsAvailable) {
-      messages.add(const ValidationMessage.error('cmdline-tools component is missing'));
+      messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
       return ValidationResult(ValidationType.missing, messages);
     }
 
