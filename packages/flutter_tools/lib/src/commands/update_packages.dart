@@ -68,11 +68,12 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'process': '">=4.0.0-nullsafety.4"',
   'process_runner': '">=4.0.0-nullsafety.5"',
   'url_launcher': '">=6.0.0-nullsafety.1"',
-  'video_player': '">=2.0.0-nullsafety.2"',
   // This is pinned to avoid the performance regression from a reverted feature
   // from https://github.com/dart-lang/shelf/issues/189 . This can be removed
   // when a new major version of shelf is published.
   'shelf': '1.1.4',
+  // Latest version does not resolve on our CI.
+  'video_player': '2.1.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
