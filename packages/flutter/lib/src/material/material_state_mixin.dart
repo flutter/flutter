@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
+import 'material_state.dart';
 
 /// Mixin for [State] classes that require knowledge of changing [MaterialState]
 /// values for their child widgets.
