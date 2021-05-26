@@ -63,10 +63,10 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
   "FLUTTER_ROOT=$escapedFlutterRoot"
   "PROJECT_DIR=$escapedProjectDir"
 ''');
-  for (final String key in environment.keys) {
-    final String value = _escapeBackslashes(environment[key]);
-    buffer.writeln('  "$key=$value"');
-  }
+  environment.forEach((String key, String value) {
+    final String configValue = _escapeBackslashes(value);
+    buffer.writeln('  "$key=$configValue"');
+  });
   buffer.writeln(')');
 
   project.generatedCmakeConfigFile

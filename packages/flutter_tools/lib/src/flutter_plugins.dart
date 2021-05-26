@@ -1093,7 +1093,8 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         continue;
       }
       // The plugin doesn't implement an interface, verify that it has a default implementation.
-      if (plugin.implementsPackage == null || plugin.implementsPackage.isEmpty) {
+      final String implementsPackage = plugin.implementsPackage;
+      if (implementsPackage == null || implementsPackage.isEmpty) {
         final String defaultImplementation = plugin.defaultPackagePlatforms[platform];
         if (defaultImplementation == null) {
           if (throwOnPluginPubspecError) {
@@ -1124,7 +1125,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           plugin.pluginDartClassPlatforms[platform] == 'none') {
         continue;
       }
-      final String resolutionKey = '$platform/${plugin.implementsPackage}';
+      final String resolutionKey = '$platform/$implementsPackage';
       if (directDependencyResolutions.containsKey(resolutionKey)) {
         final PluginInterfaceResolution currResolution = directDependencyResolutions[resolutionKey];
         if (currResolution != null && currResolution.plugin.isDirectDependency) {
@@ -1186,12 +1187,12 @@ Future<void> generateMainDartWithPluginRegistrant(
   String currentMainUri,
   File newMainDart,
   File mainFile, {
-  bool throwOnPluginPubspecError,
+  bool throwOnPluginPubspecError = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
-    throwOnPluginPubspecError: throwOnPluginPubspecError ?? false,
+    throwOnPluginPubspecError: throwOnPluginPubspecError,
   );
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
