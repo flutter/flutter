@@ -397,7 +397,7 @@ enum EnvironmentType {
   simulator,
 }
 
-String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
+String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? buildNumber, Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -444,7 +444,7 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bu
   return buildNumber;
 }
 
-String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName, Logger logger) {
+String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
