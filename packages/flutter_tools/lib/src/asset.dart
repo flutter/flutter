@@ -365,6 +365,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
       for (final _Asset variant in assetVariants[asset]) {
         final File variantFile = variant.lookupAssetFile(_fileSystem);
+        inputFiles.add(variantFile);
         assert(variantFile.existsSync());
         entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
       }
