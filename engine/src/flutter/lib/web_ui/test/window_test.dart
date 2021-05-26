@@ -82,7 +82,7 @@ void testMain() {
     ), useSingle: false);
     expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
 
-    Future<void> check<T>(String method, Map<String, Object?> arguments) async {
+    Future<void> check<T>(String method, Object? arguments) async {
       callback = Completer<void>();
       window.sendPlatformMessage(
         'flutter/navigation',
@@ -93,12 +93,37 @@ void testMain() {
       expect(window.browserHistory, isA<T>());
     }
 
+    // These may be initialized as `null`
+    // See https://github.com/flutter/flutter/issues/83158#issuecomment-847483010
+    await check<SingleEntryBrowserHistory>('selectSingleEntryHistory', null); // -> single
+    await check<MultiEntriesBrowserHistory>('selectMultiEntryHistory', null); // -> multi
     await check<SingleEntryBrowserHistory>('selectSingleEntryHistory', <String, dynamic>{}); // -> single
     await check<MultiEntriesBrowserHistory>('selectMultiEntryHistory', <String, dynamic>{}); // -> multi
     await check<SingleEntryBrowserHistory>('routeUpdated', <String, dynamic>{'routeName': '/bar'}); // -> single
     await check<SingleEntryBrowserHistory>('routeInformationUpdated', <String, dynamic>{'location': '/bar'}); // does not change mode
     await check<MultiEntriesBrowserHistory>('selectMultiEntryHistory', <String, dynamic>{}); // -> multi
     await check<MultiEntriesBrowserHistory>('routeInformationUpdated', <String, dynamic>{'location': '/bar'}); // does not change mode
+  });
+
+  test('handleNavigationMessage throws for route update methods called with null arguments',
+      () async {
+    expect(() async {
+      await window.handleNavigationMessage(
+        JSONMethodCodec().encodeMethodCall(MethodCall(
+          'routeUpdated',
+          null, // boom
+        ))
+      );
+    }, throwsAssertionError);
+
+    expect(() async {
+      await window.handleNavigationMessage(
+        JSONMethodCodec().encodeMethodCall(MethodCall(
+          'routeInformationUpdated',
+          null, // boom
+        ))
+      );
+    }, throwsAssertionError);
   });
 
   test('should not throw when using nav1 and nav2 together',
