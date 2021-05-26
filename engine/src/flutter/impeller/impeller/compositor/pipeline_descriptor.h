@@ -44,6 +44,8 @@ class PipelineDescriptor : public Comparable<PipelineDescriptor> {
       size_t index,
       ColorAttachmentDescriptor desc);
 
+  PipelineDescriptor& SetDepthStencilPixelFormat(PixelFormat format);
+
   MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor() const;
 
   // Comparable<PipelineDescriptor>
@@ -58,6 +60,7 @@ class PipelineDescriptor : public Comparable<PipelineDescriptor> {
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
   std::map<size_t, ColorAttachmentDescriptor> color_attachment_descriptors_;
   std::shared_ptr<VertexDescriptor> vertex_descriptor_;
+  PixelFormat depth_stencil_pixel_format_ = PixelFormat::kUnknown;
 };
 
 }  // namespace impeller
