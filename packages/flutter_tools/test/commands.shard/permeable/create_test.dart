@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
@@ -2661,8 +2661,11 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     return '$location: $lintName';
   }
   final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
-      .where((String line) => line.trim().isNotEmpty && !line.startsWith('Analyzing'))
-      .map(lineParser).toList();
+      .where((String line) {
+        return line.trim().isNotEmpty &&
+            !line.startsWith('Analyzing') &&
+            !line.contains('flutter pub get');
+      }).map(lineParser).toList();
   expect(errors, unorderedEquals(expectedFailures));
 }
 

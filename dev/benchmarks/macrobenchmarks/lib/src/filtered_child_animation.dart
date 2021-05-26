@@ -120,6 +120,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
         builder = (BuildContext context, Widget child) => Transform(
           transform: Matrix4.rotationZ(_controller.value * 2.0 * pi),
           alignment: Alignment.center,
+          filterQuality: FilterQuality.low,
           child: child,
         );
         break;

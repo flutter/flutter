@@ -41,7 +41,7 @@ analyzer:
   exclude:
     - "bin/cache/**"
       # Ignore protoc generated files
-    - "dev/tools/lib/proto/*"
+    - "dev/conductor/lib/proto/*"
 
 linter:
   rules:

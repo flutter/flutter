@@ -388,7 +388,7 @@ void main() {
 
     final int breakLine = (await flutter.getSourceLocation()).line;
     expect(breakLine, project.lineContaining(project.test, "throw 'LayoutBuilder.builder';"));
-  }, skip: 'TODO(goderbauer): Once https://github.com/dart-lang/sdk/issues/45710 is fixed, fix TODO in _LayoutBuilderElement._layout and enable this test');
+  });
 
   testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
     final TestProject project = TestProject(

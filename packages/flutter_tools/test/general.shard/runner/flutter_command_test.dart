@@ -509,6 +509,18 @@ void main() {
       expect(buildInfo.packagesPath, 'foo');
     });
 
+    testUsingContext('use fileSystemScheme to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemScheme, 'foo');
+    });
+
+    testUsingContext('use fileSystemRoots to generate BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemRoots: <String>['foo', 'bar']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.fileSystemRoots, <String>['foo', 'bar']);
+    });
+
     testUsingContext('dds options', () async {
       final FakeDdsCommand ddsCommand = FakeDdsCommand();
       final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
