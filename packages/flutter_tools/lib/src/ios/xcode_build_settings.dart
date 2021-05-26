@@ -109,7 +109,7 @@ void _updateGeneratedEnvironmentVariablesScript({
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
 String parsedBuildName({
   @required FlutterManifest manifest,
-  @required BuildInfo buildInfo,
+  BuildInfo buildInfo,
 }) {
   final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
   return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
@@ -118,7 +118,7 @@ String parsedBuildName({
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
 String parsedBuildNumber({
   @required FlutterManifest manifest,
-  @required BuildInfo buildInfo,
+  BuildInfo buildInfo,
 }) {
   String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
   final String buildNumber = validatedBuildNumberForPlatform(
@@ -173,8 +173,9 @@ List<String> _xcodeBuildSettingsLines({
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+  final Artifacts artifacts = globals.artifacts;
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 
