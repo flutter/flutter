@@ -20,7 +20,7 @@ namespace {}  // namespace
 // A delegate of |KeyboardKeyHandler| that handles events by sending
 // converted |FlutterKeyEvent|s through the embedder API.
 //
-// This class corresponds to the HardwareKeyboard API in the framework.
+// This class communicates with the HardwareKeyboard API in the framework.
 class KeyboardKeyEmbedderHandler
     : public KeyboardKeyHandler::KeyboardKeyHandlerDelegate {
  public:

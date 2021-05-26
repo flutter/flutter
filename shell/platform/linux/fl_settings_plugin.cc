@@ -31,6 +31,8 @@ struct _FlSettingsPlugin {
   FlBasicMessageChannel* channel;
 
   GSettings* interface_settings;
+
+  GArray* connections;
 };
 
 G_DEFINE_TYPE(FlSettingsPlugin, fl_settings_plugin, G_TYPE_OBJECT)
@@ -112,6 +114,11 @@ static void update_settings(FlSettingsPlugin* self) {
 static void fl_settings_plugin_dispose(GObject* object) {
   FlSettingsPlugin* self = FL_SETTINGS_PLUGIN(object);
 
+  for (guint i = 0; i < self->connections->len; i += 1) {
+    g_signal_handler_disconnect(self->interface_settings,
+                                g_array_index(self->connections, gulong, i));
+  }
+  g_array_unref(self->connections);
   g_clear_object(&self->channel);
   g_clear_object(&self->interface_settings);
 
@@ -133,6 +140,7 @@ FlSettingsPlugin* fl_settings_plugin_new(FlBinaryMessenger* messenger) {
   g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
   self->channel = fl_basic_message_channel_new(messenger, kChannelName,
                                                FL_MESSAGE_CODEC(codec));
+  self->connections = g_array_new(FALSE, FALSE, sizeof(gulong));
 
   return self;
 }
@@ -147,15 +155,19 @@ void fl_settings_plugin_start(FlSettingsPlugin* self) {
         g_settings_schema_source_lookup(source, kDesktopInterfaceSchema, FALSE);
     if (schema != nullptr) {
       self->interface_settings = g_settings_new_full(schema, nullptr, nullptr);
-      g_signal_connect_object(
-          self->interface_settings, "changed::text-scaling-factor",
-          G_CALLBACK(update_settings), self, G_CONNECT_SWAPPED);
-      g_signal_connect_object(self->interface_settings, "changed::clock-format",
-                              G_CALLBACK(update_settings), self,
-                              G_CONNECT_SWAPPED);
-      g_signal_connect_object(self->interface_settings, "changed::gtk-theme",
-                              G_CALLBACK(update_settings), self,
-                              G_CONNECT_SWAPPED);
+      gulong new_connections[] = {
+          g_signal_connect_object(
+              self->interface_settings, "changed::text-scaling-factor",
+              G_CALLBACK(update_settings), self, G_CONNECT_SWAPPED),
+          g_signal_connect_object(
+              self->interface_settings, "changed::clock-format",
+              G_CALLBACK(update_settings), self, G_CONNECT_SWAPPED),
+          g_signal_connect_object(
+              self->interface_settings, "changed::gtk-theme",
+              G_CALLBACK(update_settings), self, G_CONNECT_SWAPPED),
+      };
+      g_array_append_vals(self->connections, new_connections,
+                          sizeof(new_connections) / sizeof(gulong));
     }
   }
 

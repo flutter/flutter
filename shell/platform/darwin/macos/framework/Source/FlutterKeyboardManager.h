@@ -17,7 +17,7 @@
  * secondary responders.
  *
  * An event that is received by |handleEvent| is first dispatched to *all*
- * primary resopnders. Each primary responder responds *ascynchronously* with a
+ * primary responders. Each primary responder responds *ascynchronously* with a
  * boolean, indicating whether it handles the event.
  *
  * An event that is not handled by any primary responders is then passed to to
@@ -35,7 +35,7 @@
  * because in reality this class will only support 2 hardcoded ones (channel
  * and embedder), where the only purpose of supporting two is to support the
  * legacy API (channel) during the deprecation window, after which the channel
- * resopnder should be removed.
+ * responder should be removed.
  */
 @interface FlutterKeyboardManager : NSObject
 
@@ -50,7 +50,7 @@
 - (nonnull instancetype)initWithOwner:(nonnull NSResponder*)weakOwner;
 
 /**
- * Add a primary resopnder, which asynchronously decides whether to handle an
+ * Add a primary responder, which asynchronously decides whether to handle an
  * event.
  */
 - (void)addPrimaryResponder:(nonnull id<FlutterKeyPrimaryResponder>)responder;

@@ -74,12 +74,18 @@ source_set("flutter_linux_sources") {
              "fl_binary_messenger_private.h",
              "fl_dart_project_private.h",
              "fl_engine_private.h",
-             "fl_key_event_plugin_private.h",
+             "fl_keyboard_manager.h",
+             "fl_key_event.h",
+             "fl_key_responder.h",
+             "fl_key_channel_responder.h",
+             "fl_key_embedder_responder.h",
+             "fl_key_embedder_responder_private.h",
              "fl_method_call_private.h",
              "fl_method_channel_private.h",
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
              "fl_standard_message_codec_private.h",
+             "key_mapping.h",
            ]
 
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
@@ -97,7 +103,11 @@ source_set("flutter_linux_sources") {
     "fl_gl_area.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
-    "fl_key_event_plugin.cc",
+    "fl_key_channel_responder.cc",
+    "fl_key_embedder_responder.cc",
+    "fl_key_event.cc",
+    "fl_key_responder.cc",
+    "fl_keyboard_manager.cc",
     "fl_message_codec.cc",
     "fl_method_call.cc",
     "fl_method_channel.cc",
@@ -120,6 +130,7 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
+    "key_mapping.cc",
   ]
 
   # Set flag to stop headers being directly included (library users should not do this)
@@ -166,7 +177,9 @@ executable("flutter_linux_unittests") {
     "fl_event_channel_test.cc",
     "fl_json_message_codec_test.cc",
     "fl_json_method_codec_test.cc",
-    "fl_key_event_plugin_test.cc",
+    "fl_key_channel_responder_test.cc",
+    "fl_key_embedder_responder_test.cc",
+    "fl_keyboard_manager_test.cc",
     "fl_message_codec_test.cc",
     "fl_method_channel_test.cc",
     "fl_method_codec_test.cc",
