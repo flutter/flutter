@@ -25,13 +25,14 @@ std::size_t PipelineDescriptor::GetHash() const {
       fml::HashCombineSeed(seed, second->GetHash());
     }
   }
-  if (vertex_descriptor_) {
-    fml::HashCombineSeed(seed, vertex_descriptor_->GetHash());
-  }
   for (const auto& des : color_attachment_descriptors_) {
     fml::HashCombineSeed(seed, des.first);
     fml::HashCombineSeed(seed, des.second.Hash());
   }
+  if (vertex_descriptor_) {
+    fml::HashCombineSeed(seed, vertex_descriptor_->GetHash());
+  }
+  fml::HashCombineSeed(seed, depth_stencil_pixel_format_);
   return seed;
 }
 
@@ -39,8 +40,9 @@ std::size_t PipelineDescriptor::GetHash() const {
 bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
   return label_ == other.label_ && sample_count_ == other.sample_count_ &&
          DeepCompareMap(entrypoints_, other.entrypoints_) &&
+         color_attachment_descriptors_ == other.color_attachment_descriptors_ &&
          DeepComparePointer(vertex_descriptor_, other.vertex_descriptor_) &&
-         color_attachment_descriptors_ == other.color_attachment_descriptors_;
+         depth_stencil_pixel_format_ == other.depth_stencil_pixel_format_;
 }
 
 PipelineDescriptor& PipelineDescriptor::SetLabel(
@@ -82,6 +84,12 @@ PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptor(
   return *this;
 }
 
+PipelineDescriptor& PipelineDescriptor::SetDepthStencilPixelFormat(
+    PixelFormat format) {
+  depth_stencil_pixel_format_ = format;
+  return *this;
+}
+
 MTLRenderPipelineDescriptor*
 PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
   auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
@@ -105,6 +113,11 @@ PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
     descriptor.colorAttachments[item.first] =
         ToMTLRenderPipelineColorAttachmentDescriptor(item.second);
   }
+
+  descriptor.depthAttachmentPixelFormat =
+      ToMTLPixelFormat(depth_stencil_pixel_format_);
+  descriptor.stencilAttachmentPixelFormat =
+      ToMTLPixelFormat(depth_stencil_pixel_format_);
 
   return descriptor;
 }
