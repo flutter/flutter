@@ -113,8 +113,6 @@ template("fuchsia_archive") {
       rebase_path("//fuchsia/sdk/$host_os/tools/pm"),
       "--package-dir",
       rebase_path(far_base_dir),
-      "--signing-key",
-      rebase_path("//flutter/tools/fuchsia/development.key"),
       "--far-name",
       target_name,
       "--manifest-json-file",
