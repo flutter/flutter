@@ -33,7 +33,7 @@ import java.util.Map.Entry;
  *   <li>BigIntegers (see below)
  *   <li>Floats, Doubles
  *   <li>Strings
- *   <li>byte[], int[], long[], double[]
+ *   <li>byte[], int[], long[], float[], double[]
  *   <li>Lists of supported values
  *   <li>Maps with supported keys and values
  * </ul>
@@ -49,6 +49,7 @@ import java.util.Map.Entry;
  *   <li>byte[]: Uint8List
  *   <li>int[]: Int32List
  *   <li>long[]: Int64List
+ *   <li>float[]: Float32List
  *   <li>double[]: Float64List
  *   <li>List: List
  *   <li>Map: Map
@@ -104,6 +105,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   private static final byte DOUBLE_ARRAY = 11;
   private static final byte LIST = 12;
   private static final byte MAP = 13;
+  private static final byte FLOAT_ARRAY = 14;
 
   /**
    * Writes an int representing a size to the specified stream. Uses an expanding code of 1 to 5
@@ -171,6 +173,11 @@ public class StandardMessageCodec implements MessageCodec<Object> {
       stream.write((byte) (value >>> 8));
       stream.write((byte) value);
     }
+  }
+
+  /** Writes the specified double as 4 bytes to the specified stream */
+  protected static final void writeFloat(ByteArrayOutputStream stream, float value) {
+    writeInt(stream, Float.floatToIntBits(value));
   }
 
   /** Writes the specified double as 8 bytes to the specified stream. */
@@ -271,6 +278,14 @@ public class StandardMessageCodec implements MessageCodec<Object> {
       for (final Entry<?, ?> entry : map.entrySet()) {
         writeValue(stream, entry.getKey());
         writeValue(stream, entry.getValue());
+      }
+    } else if (value instanceof float[]) {
+      stream.write(FLOAT_ARRAY);
+      final float[] array = (float[]) value;
+      writeSize(stream, array.length);
+      writeAlignment(stream, 4);
+      for (final float f : array) {
+        writeFloat(stream, f);
       }
     } else {
       throw new IllegalArgumentException("Unsupported value: " + value);
@@ -410,6 +425,16 @@ public class StandardMessageCodec implements MessageCodec<Object> {
             map.put(readValue(buffer), readValue(buffer));
           }
           result = map;
+          break;
+        }
+      case FLOAT_ARRAY:
+        {
+          final int length = readSize(buffer);
+          final float[] array = new float[length];
+          readAlignment(buffer, 4);
+          buffer.asFloatBuffer().get(array);
+          result = array;
+          buffer.position(buffer.position() + 4 * length);
           break;
         }
       default:

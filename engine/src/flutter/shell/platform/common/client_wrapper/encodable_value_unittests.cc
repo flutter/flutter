@@ -217,6 +217,9 @@ TEST(EncodableValueTest, Comparison) {
       EncodableValue(
           EncodableMap{{EncodableValue(), EncodableValue(1.0)},
                        {EncodableValue("key"), EncodableValue("value")}}),
+      // FloatList
+      EncodableValue(std::vector<float>{0, 1}),
+      EncodableValue(std::vector<float>{0, 100}),
   };
 
   for (size_t i = 0; i < values.size(); ++i) {
