@@ -497,8 +497,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   bool _routeInformationReportingTaskScheduled = false;
 
-  String? _lastSeenLocation;
-
   void _scheduleRouteInformationReportingTask() {
     if (_routeInformationReportingTaskScheduled || widget.routeInformationProvider == null)
       return;
@@ -518,17 +516,22 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
           assert(false, '_reportRouteInformation must not be called with _IntentionToReportRouteInformation.none');
           return;
         case _IntentionToReportRouteInformation.ignore:
+          if (widget.routeInformationProvider!.value.location != routeInformation.location ||
+              widget.routeInformationProvider!.value.state != routeInformation.state) {
+            widget.routeInformationProvider!.routerUpdatesRouteInformation(routeInformation);
+          }
           break;
         case _IntentionToReportRouteInformation.maybe:
-          if (_lastSeenLocation != routeInformation.location) {
+          if (widget.routeInformationProvider!.value.location != routeInformation.location) {
             widget.routeInformationProvider!.routerReportsNewRouteInformation(routeInformation);
+          } else if (widget.routeInformationProvider!.value.state != routeInformation.state){
+            widget.routeInformationProvider!.routerUpdatesRouteInformation(routeInformation);
           }
           break;
         case _IntentionToReportRouteInformation.must:
           widget.routeInformationProvider!.routerReportsNewRouteInformation(routeInformation);
           break;
       }
-      _lastSeenLocation = routeInformation.location;
     }
     _currentIntentionToReport = _IntentionToReportRouteInformation.none;
   }
@@ -621,7 +624,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   void _processRouteInformation(RouteInformation information, ValueGetter<_DelegateRouteSetter<T>> delegateRouteSetter) {
     _currentRouteInformationParserTransaction = Object();
     _currentRouterDelegateTransaction = Object();
-    _lastSeenLocation = information.location;
     widget.routeInformationParser!
       .parseRouteInformation(information)
       .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
@@ -1311,6 +1313,23 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   /// The [routeInformation] is the new route information after the navigation
   /// event.
   void routerReportsNewRouteInformation(RouteInformation routeInformation) {}
+
+  /// A callback called when the [Router] widget detects [RouteInformation]
+  /// is updated by a non-navigation event.
+  ///
+  /// One example is [RouteInformation.state] changes without changing the
+  /// location. Another example is the use of [Router.neglect] that forces the
+  /// [Router] to recognize a state change as a result of non-navigation event.
+  /// In the above examples, the [Router] calls this method to notify the
+  /// [RouteInformationProvider].
+  ///
+  /// The subclasses can override this method to update theirs values or trigger
+  /// other side effects. For example, the [PlatformRouteInformationProvider]
+  /// overrides this method to report the route information back to the engine.
+  ///
+  /// The [routeInformation] is the updated route information after the
+  /// non-navigation event.
+  void routerUpdatesRouteInformation(RouteInformation routeInformation) {}
 }
 
 /// The route information provider that propagates the platform route information changes.
@@ -1338,6 +1357,17 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
     SystemNavigator.routeInformationUpdated(
       location: routeInformation.location!,
       state: routeInformation.state,
+    );
+    _value = routeInformation;
+  }
+
+  @override
+  void routerUpdatesRouteInformation(RouteInformation routeInformation) {
+    SystemNavigator.selectMultiEntryHistory();
+    SystemNavigator.routeInformationUpdated(
+      location: routeInformation.location!,
+      state: routeInformation.state,
+      replace: true
     );
     _value = routeInformation;
   }

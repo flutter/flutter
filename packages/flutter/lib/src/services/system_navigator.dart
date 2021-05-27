@@ -75,12 +75,14 @@ class SystemNavigator {
   static Future<void> routeInformationUpdated({
     required String location,
     Object? state,
+    bool replace = false,
   }) {
     return SystemChannels.navigation.invokeMethod<void>(
       'routeInformationUpdated',
       <String, dynamic>{
         'location': location,
         'state': state,
+        'replace': replace,
       },
     );
   }
